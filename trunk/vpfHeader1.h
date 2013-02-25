@@ -804,7 +804,15 @@ public:
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
   void ReservE(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
-  void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex);
+  void SortedInsert(const Object& o)
+  { this->InsertAtIndexShiftElementsUp(o,this->BSExpectedIndex(o));
+  }
+  void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex)
+  { this->AddOnTop(o);
+    for(int i=this->size-1; i>desiredIndex; i--)
+    { this->SwapTwoIndices(i,i-1);
+    }
+  }
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
@@ -871,15 +879,22 @@ public:
   { return this->GetIndex(o)!=-1;
   }
   // Perform a binary search, assuming the list is sorted
-  bool BSContains(const Object& o) const{
+  bool BSContains(const Object& o) const
+  { return this->BSGetIndex(o)!=-1;
+  }
+  int BSGetIndex(const Object& o) const
+  { int n = this->BSExpectedIndex(o);
+    return (this->TheObjects[n]==o) ? n : -1;
+  }
+  int BSExpectedIndex(const Object& o) const{
     int i = 0, j = this->size;
     while(true){
         int s=j-i;
+        int n = i+s/2;
         if(s<0)
-            return false;
-        int n=i+s/2;
+            return n;
         if(o==this->TheObjects[n])
-            return true;
+            return n;
         if(o>this->TheObjects[n]){
             if(i<n){
                 i=n;
@@ -1677,6 +1692,12 @@ public:
           this->elements[i][j]=theRingZero;
         else
           this->elements[i][j]=theRingUnit;
+  }
+  void MakeZeroMatrix(int theDimension, const Element& theRingZero=0)
+  { this->init(theDimension, theDimension);
+    for (int i=0; i<theDimension; i++)
+      for (int j=0; j<theDimension; j++)
+        this->elements[i][j] = theRingZero;
   }
   void ActOnMonomialAsDifferentialOperator(MonomialP& input, Polynomial<Rational>& output)
 ;
@@ -4796,8 +4817,9 @@ public:
   (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   ;
 
+  template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList,
+  (List<MonomialCollectionTemplate>& theList,
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
    ;
@@ -5016,22 +5038,22 @@ public:
 };
 
 template <class TemplateMonomial, class CoefficientType>
-class ElementAssociativeAlgebra: public MonomialCollection<TemplateMonomial, CoefficientType>
+class ElementMonomialAlgebra: public MonomialCollection<TemplateMonomial, CoefficientType>
 {
   public:
   void MultiplyBy
-  (const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other,
-   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
+  (const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other,
+   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
+   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
   ;
   void MultiplyBy
   (const TemplateMonomial& other, const CoefficientType& theCoeff,
-   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
+   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
    TemplateMonomial& bufferMon)const
   ;
-  void operator*=(const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other)
-  { ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> bufferPoly;
+  void operator*=(const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other)
+  { ElementMonomialAlgebra<TemplateMonomial, CoefficientType> bufferPoly;
     TemplateMonomial bufferMon;
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
@@ -5039,19 +5061,19 @@ class ElementAssociativeAlgebra: public MonomialCollection<TemplateMonomial, Coe
   { this->::MonomialCollection<TemplateMonomial, CoefficientType>::operator*= (other);
   }
   void RaiseToPower
-(int d, ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
+(int d, ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
 ;
   void RaiseToPower(int d)
   { if (d==1)
       return;
-    ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> theOne;
+    ElementMonomialAlgebra<TemplateMonomial, CoefficientType> theOne;
     theOne.MakeConsT(1);
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
 };
 
 template<class CoefficientType>
-class Polynomial: public ElementAssociativeAlgebra<MonomialP, CoefficientType>
+class Polynomial: public ElementMonomialAlgebra<MonomialP, CoefficientType>
 {
 public:
   friend std::iostream& operator << <CoefficientType>(std::iostream& output, const Polynomial<CoefficientType>& input);
@@ -5351,7 +5373,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     (*this)*=otherP;
   }
   void operator*=(const Polynomial<CoefficientType>& other)
-  { this->::ElementAssociativeAlgebra<MonomialP, CoefficientType>::operator*=(other);
+  { this->::ElementMonomialAlgebra<MonomialP, CoefficientType>::operator*=(other);
   }
   void operator/=(const Polynomial<CoefficientType>& other)
   { Polynomial<CoefficientType> tempMe=*this;
@@ -6170,10 +6192,10 @@ void Polynomial<Element>::Evaluate
 }
 
 template <class TemplateMonomial, class CoefficientType>
-inline void ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>::MultiplyBy
-(const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other,
- ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
- ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+inline void ElementMonomialAlgebra<TemplateMonomial, CoefficientType>::MultiplyBy
+(const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other,
+ ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
+ ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
  TemplateMonomial& bufferMon)const
 { if (other.IsEqualToZero())
   { output.MakeZero();
@@ -6451,8 +6473,9 @@ void Polynomial<Element>::TimesInteger(int a)
 }
 
 template <class TemplateMonomial, class CoefficientType>
+template <class TemplateMonomialCollection>
 void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList, bool *IvemadeARowSwitch,
+  (List<TemplateMonomialCollection>& theList, bool *IvemadeARowSwitch,
    HashedList<TemplateMonomial>* seedMonomials)
 { MemorySaving<HashedList<TemplateMonomial> > bufferMons;
   HashedList<TemplateMonomial>& allMons = seedMonomials==0 ? bufferMons.GetElement() : *seedMonomials;
@@ -6580,9 +6603,9 @@ SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
 }
 
 template <class TemplateMonomial, class CoefficientType>
-void ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
-(int d, ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
-{ ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> tempOne;
+void ElementMonomialAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
+(int d, ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
+{ ElementMonomialAlgebra<TemplateMonomial, CoefficientType> tempOne;
   tempOne.MakeConst(theRingUniT);
   output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);
@@ -8915,8 +8938,10 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   // and make it return 0 (or a pointer to a monomial order, should you
   //wish to use a custom one.
   typename List<TemplateMonomial>::OrderLeftGreaterThanRight
+// ALERT!! Some feature was disabled because I clobbered Dr. Milev's changes
+// because I forgot to svn diff prior to svn up and don't know how he made this
+// actually work.  So now I'm committing something that builds, but is broken.
   theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
-
   sortedMons.QuickSortDescending(theOrder);
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;

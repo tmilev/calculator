@@ -1437,14 +1437,6 @@ bool CommandList::isSeparatorFromTheLeftForDefinition(const std::string& input)
 }
 
 bool CommandList::isSeparatorFromTheRightForDefinition(const std::string& input)
-{ return input=="}" || input==")" || input==";";
-}
-
-bool CommandList::isSeparatorFromTheLeftForStatement(const std::string& input)
-{ return input=="{" || input=="(" || input==";" || input==" ";
-}
-
-bool CommandList::isSeparatorFromTheRightForStatement(const std::string& input)
 { return input=="}" || input==")" || input==";" || input=="EndProgram";
 }
 
@@ -1610,9 +1602,13 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
+      fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" &&
+      this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==":=:" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" &&
+      thirdToLastS==":=:" && secondToLastS=="Expression" &&
+      this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceEOEXByEX();
@@ -1669,13 +1665,16 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
-  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && secondToLastS=="Expression" && thirdToLastS==":=" && fourthToLastS=="Expression" && fifthToLastS=="if" && secondToLastS==":" && seventhToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
+  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && secondToLastS=="Expression" &&
+      thirdToLastS==":=" && fourthToLastS=="Expression" && fifthToLastS=="if" && secondToLastS==":" &&
+      seventhToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEXXEXEByEusingO(this->conDefineConditional());
   if (lastS==";")
   { this->NonBoundVariablesStack.LastObject()->Clear();
     this->BoundVariablesStack.LastObject()->Clear();
   }
-  if (this->isSeparatorFromTheLeftForStatement(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==";" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForStatement(lastS))
+  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" &&
+      thirdToLastS==";" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEEndCommandEXbyEX();
   if (secondToLastS==";" && lastS=="EndProgram")
     return this->DecreaseStackSetCharacterRangeS(2);
@@ -3531,7 +3530,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
-  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("Double");
@@ -3595,6 +3593,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //additional operations treated like regular expressions.
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
+  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();

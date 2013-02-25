@@ -445,7 +445,7 @@ bool CommandList::innerPlot2D
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
   //std::cout << input.ToString();
-  if (!input.IsSequenceNElementS(3))
+  if (!input.IsListNElements(4))
     return output.SetError
     ("Plotting coordinates takes three arguments: function, lower and upper bound. ", theCommands);
   const Expression& lowerE=input[2];

@@ -402,7 +402,7 @@ bool CommandList::innerDrawRootSystem
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   std::string errorString;
-  bool hasPreferredProjectionPlane= input.IsSequenceNElementS(3);
+  bool hasPreferredProjectionPlane= input.IsListNElements(4);
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully

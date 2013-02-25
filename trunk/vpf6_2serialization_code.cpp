@@ -5,11 +5,28 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp
 template <>
 bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
 (CommandList& theCommands, const Expression& input, Expression& outputContext)
-{ if (!input.IsSequenceNElementS(3))
+{ if (!input.IsListNElements(2))
+  { theCommands.Comments
+    << "<hr>Failed to get ChevalleyGenerator context: "
+    << "input is not a sequence of 2 elements, instead it has "
+    << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
     return false;
-  const Expression& theArguments=input[3];
+  }
+  const Expression& theDeserialized=input[1];
+  if (!theDeserialized.IsListNElements(2))
+  { theCommands.Comments
+    << "<hr>Failed to get ChevalleyGenerator context: "
+    << "deserialized input is not a sequence of 2 elements, instead it has "
+    << theDeserialized.children.size << " elements, i.e., is "
+    << theDeserialized.ToString() << "</hr>";
+    return false;
+  }
+  const Expression& theArguments=theDeserialized[2];
   if (!theArguments.IsSequenceNElementS(2))
+  { theCommands.Comments
+    << "Failed to get context: third argument is not a sequence of two elements. ";
     return false;
+  }
   DynkinType theType;
   if (!Serialization::DeSerializeMonCollection(theCommands, theArguments[1], theType))
     return false;
@@ -475,13 +492,17 @@ bool Serialization::innerSerializeFromObject
 
 bool Serialization::innerDeSerializeFromObject
 (CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
-{ if (!input.IsSequenceNElementS(2))
+{ MacroRegisterFunctionWithName("Serialization::innerDeSerializeFromObject");
+  if (!input.IsSequenceNElementS(2))
     return false;
   const Expression& theF=input[1];
   const Expression& theE=input[2];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
   if (!Serialization::DeSerializeMonCollection(theCommands, theF, eltF))
+  { theCommands.Comments
+    << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
     return false;
+  }
   if (!Serialization::DeSerializeMonCollection(theCommands, theE, eltE))
     return false;
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())

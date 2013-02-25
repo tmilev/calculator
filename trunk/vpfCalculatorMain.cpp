@@ -307,6 +307,8 @@ int main(int argc, char **argv)
 //  civilizedInput="plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)";
 //  civilizedInput="MakeCoxeterElement{}(B_3,2,1,1,1,1,2,2,1,2,1,2,1,2,1);";
 //  civilizedInput="Deserialize{}(Serialize{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))";
+  //civilizedInput="1/2";
+//  civilizedInput="MakeCharacter{}(B_3, 1);";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

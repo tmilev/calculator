@@ -645,6 +645,12 @@ bool Expression::AssignChild(int childIndexInMe, int childIndexInBoss)
   return true;
 }
 
+bool Expression::AddAtomOnTop(const std::string& theOperationString)
+{ this->CheckInitialization();
+  return this->AddAtomOnTop
+  (this->theBoss->AddOperationNoRepetitionOrReturnIndexFirst(theOperationString));
+}
+
 bool Expression::AssignChildAtomValue(int childIndex, int theAtom, CommandList& owner)
 { Expression tempE;
   tempE.MakeAtom(theAtom, owner);
@@ -1218,6 +1224,22 @@ bool CommandList::ReplaceOXbyEX(int inputFormat)
   return this->ReplaceOXbyEXusingO(theElt.controlIndex, inputFormat);
 }
 
+bool CommandList::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat)
+{ SyntacticElement& theSequenceElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& theFunctionElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
+  Expression newExpr;
+  newExpr.reset(*this);
+  newExpr.children.ReservE(theSequenceElt.theData.children.size);
+  newExpr.AddChildOnTop(theFunctionElt.theData);
+  if (theSequenceElt.theData.IsAtoM())
+    newExpr.AddChildOnTop(theSequenceElt.theData);
+  else
+    for (int i=1; i<theSequenceElt.theData.children.size; i++)
+      newExpr.AddChildOnTop(theSequenceElt.theData[i]);
+  theFunctionElt.theData=newExpr;
+  return this->DecreaseStackSetCharacterRangeS(4);
+}
+
 bool CommandList::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theElt.theData.format=inputFormat;
@@ -1605,9 +1627,14 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXXYBySequenceY(this->conSequence());
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
     return this->ReplaceXXYXBySequenceYX(this->conSequence());
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" &&
+      secondToLastS=="Sequence" && lastS==")")
+    return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" &&
+      secondToLastS=="Sequence" && lastS=="}")
+    return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (secondToLastS=="Sequence" && lastS!=",")
     return this->ReplaceOXbyEX();
-
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
@@ -1720,7 +1747,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
  Expression::FunctionAddress ConversionFun)
-{ if (!input.IsSequenceNElementS(3) && !input.IsSequenceNElementS(2))
+{ if (!input.IsListNElements(4) && !input.IsListNElements(3))
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
      SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
@@ -1739,7 +1766,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
     << middleE.ToString() << ".";
     return output.SetError(tempStream.str(), theCommands);
   }
-  if (input.IsSequenceNElementS(3))
+  if (input.IsListNElements(4))
   { Vector<Rational> parabolicSel;
     const Expression& rightE=input[3];
     if (!theCommands.GetVector<Rational>
@@ -3014,7 +3041,7 @@ bool CommandList::innerFunctionToMatrix
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerFunctionToMatrix");
   std::cout << input.ToString();
-  if (!input.IsSequenceNElementS(3))
+  if (!input.IsListNElements(4))
     return false;
   const Expression& leftE  =input[1];
   const Expression& middleE=input[2];
@@ -3055,7 +3082,7 @@ bool CommandList::innerFunctionToMatrix
 
 bool CommandList::innerGetChevGen
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsSequenceNElementS(2))
+{ if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
   std::string errorString;
@@ -3083,7 +3110,7 @@ bool CommandList::innerGetChevGen
 bool CommandList::innerGetCartanGen
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>Here I am with input: " << input.ToString();
-  if (!input.IsSequenceNElementS(2))
+  if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
   std::string errorString;
@@ -3143,7 +3170,7 @@ bool CommandList::fKLcoeffs
 bool CommandList::innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
-{ if (!input.IsSequenceNElementS(2))
+{ if (!input.IsListNElements(3))
     return output.SetError("innerWeylOrbit takes two arguments", theCommands);
   const Expression& theSSalgebraNode=input[1];
   const Expression& vectorNode=input[2];
@@ -3501,6 +3528,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
+  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("Double");
@@ -3564,7 +3592,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //additional operations treated like regular expressions.
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
@@ -3675,9 +3702,7 @@ bool CommandList::outerExtractBaseMultiplication
     //<- handle a*(b*anything)
     //on condition that a*b has an inner handler
     Expression tempExp, newExpr;
-    tempExp.reset(theCommands, 2);
-    tempExp.AssignChild(0, output[1]);
-    tempExp.AssignChild(1, output[2][1]);
+    tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
     if (theCommands.innerTimes(theCommands, tempExp, newExpr))
     { output.MakeProducT(theCommands, newExpr, output[2][2]);
       result=true;
@@ -3888,38 +3913,44 @@ bool CommandList::outerStandardFunction
         }
   if (!functionNameNode.IsAtoM())
     return false;
+//  std::cout << "<br>Evaluating: " << input.ToString();
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
-        //{ //std::cout << "input: " << input.ToString() << " output: " << output.ToString();
+        { if (theCommands.flagLogEvaluation)
+            theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
           return true;
-        //}
+        }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      Expression arguments;
       //if (functionNameNode.ToString()=="+")
       //{ bool tempbool=true;
       //   std::cout << "<br>Here i am!";
       //}
-      if (input.children.size==2)
-        arguments=input[1];
-      else
-      { arguments.reset(theCommands, input.children.size-1);
-        for (int i=1; i<input.children.size; i++)
-          arguments.AssignChild(i-1, input[i]);
-      }
-      if (innerFun.inputFitsMyInnerType(arguments))
-        if (innerFun.theFunction(theCommands, arguments, output))
-          return true;
+      if (input.children.size>2)
+      { //std::cout << "more than 2 children: " << input.Lispify();
+        if (innerFun.inputFitsMyInnerType(input))
+          if (innerFun.theFunction(theCommands, input, output))
+          { if (theCommands.flagLogEvaluation)
+              theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
+            return true;
+          }
+      } else
+        if (innerFun.inputFitsMyInnerType(input[1]))
+          if (innerFun.theFunction(theCommands, input[1], output))
+          { if (theCommands.flagLogEvaluation)
+              theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
+            return true;
+          }
     }
   return false;
 }
 
 bool CommandList::outerEqualEqual
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (input.IsSequenceNElementS(3))
+{ if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
   const Expression& right=input[2];
@@ -5154,11 +5185,11 @@ bool Function::inputFitsMyInnerType(const Expression& input)
     return false;
   if (this->theArgumentTypes.children.size!=2)
     return true;
-  if (input.children.size!=2)
+  if (input.children.size!=3)
     return false;
   return
-  input[0].IsListStartingWithAtom(this->theArgumentTypes[0].theData) &&
-  input[1].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData) &&
+  input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
 }
 
 std::string Function::GetString(CommandList& theBoss)

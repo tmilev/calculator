@@ -1972,7 +1972,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
   if (!theCommands.GetVectoR
-      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, &CommandList::innerPolynomial))
+      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial))
   { theCommands.Comments
     << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
     << theRank << " polynomials. The second argument you gave is "
@@ -3183,7 +3183,7 @@ bool CommandList::innerWeylOrbit
     return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.innerPolynomial))
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), Serialization::innerPolynomial))
     return output.SetError("Failed to extract highest weight", theCommands);
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (!useFundCoords)
@@ -5701,7 +5701,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.innerGetTypeHighestWeightParabolic<Polynomial<Rational> >
       (theCommands, input, output, theHWs[0], theParSel, theContext, theSSalgebra,
-       theCommands.innerPolynomial))
+       Serialization::innerPolynomial))
     return output.SetError
     ("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())

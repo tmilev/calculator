@@ -31,7 +31,7 @@ void CommandList::initPredefinedInnerFunctions()
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
    ;
   this->AddOperationInnerHandler
-  ("Store", this->innerSerialize, "",
+  ("Store", Serialization::innerStore, "",
    "Attempts to convert a built-in data type to an expression tree which \
    evaluates to the same value as the \
    built-in type, and prepends the tree with the Serialization atom. If the conversion is not implemented\
@@ -41,7 +41,7 @@ void CommandList::initPredefinedInnerFunctions()
    ", true)
    ;
   this->AddOperationInnerHandler
-  ("Load", this->innerDeSerialize, "",
+  ("Load", Serialization::innerLoad, "",
    "The operation opposite to serialization. ",
    "X:=SemisimpleLieAlgebra{}(A_1+A_2);\
    \nY:=Store{}( X);\
@@ -192,7 +192,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "getCartanGenerator{}(G_2, 1)");
 
   this->AddOperationInnerHandler
-  ("Polynomial", this->innerPolynomial, "",
+  ("Polynomial", Serialization::innerPolynomial, "",
    "Creates a polynomial expression. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z))");
   this->AddOperationInnerHandler
@@ -454,7 +454,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    the f_\alpha operator.",
    "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", false);
   this->AddOperationInnerHandler
-  ("InvertMatrixVerbose", this->fInvertMatrix, "",
+  ("InvertMatrixVerbose", this->innerInvertMatrix, "",
    "Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
    printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
    / calculus students. ",
@@ -581,11 +581,10 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
-   "LoadSltwoSubalgebra{}(Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -1)) \
-+3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -2)))\
-+2 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -3))), \
-   3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 3)))\
-+6 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 1)))\
+   "LoadSltwoSubalgebra{}( Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -1)) \
++3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -2))) \
++2 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -3))), 3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 3))) \
++6 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 1))) \
 +10/3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 2))))", true)
    ;
   this->AddOperationInnerHandler

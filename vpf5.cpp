@@ -2829,7 +2829,7 @@ bool CommandList::fLSPath
   return output.AssignValue(theLSpath, theCommands);
 }
 
-bool CommandList::fInvertMatrix
+bool CommandList::innerInvertMatrix
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> mat, outputMat, tempMat;
   if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
@@ -3138,7 +3138,7 @@ bool CommandList::fFactor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fFactor");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerPolynomial, input, output))
+  if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial, input, output))
     return false;
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValuE<Polynomial<Rational> >();

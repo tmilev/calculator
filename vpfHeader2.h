@@ -1279,13 +1279,37 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   template<class theType>
+  bool GetMatriXFromArguments
+  (const Expression& theExpression, Matrix<theType>& outputMat,
+   Expression* inputOutputStartingContext=0,
+   int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
+  { Expression tempE=theExpression;
+    if (tempE.IsLisT())
+      tempE.AssignChildAtomValue(0, this->opSequence(), *this);
+    return this->GetMatrix
+    (tempE, outputMat, inputOutputStartingContext, targetNumColsNonMandatory, conversionFunction);
+  }
+  template<class theType>
   bool GetMatrix
   (const Expression& theExpression, Matrix<theType>& outputMat,
    Expression* inputOutputStartingContext=0,
    int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
   ;
   template <class theType>
-  bool GetVector
+  bool GetVectorFromFunctionArguments
+  (const Expression& input, Vector<theType>& output,
+   Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
+   Expression::FunctionAddress conversionFunction=0)
+  { Expression tempE=input;
+    if (tempE.IsLisT())
+    { //std::cout << "<hr>tempE: " << tempE.Lispify();
+      tempE.AssignChildAtomValue(0, this->opSequence(), *this);
+      //std::cout << "<br>tempE after change: " << tempE.Lispify();
+    }
+    return this->GetVectoR(tempE, output, inputOutputStartingContext, targetDimNonMandatory, conversionFunction);
+  }
+  template <class theType>
+  bool GetVectoR
   (const Expression& input, Vector<theType>& output,
    Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
    Expression::FunctionAddress conversionFunction=0)
@@ -1382,7 +1406,7 @@ public:
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  bool fSplitFDpartB3overG2Init
+  bool innerSplitFDpartB3overG2Init
 (CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3Data, Expression& outputContext)
  ;
@@ -1881,7 +1905,7 @@ bool Serialization::DeSerializeMonCollection
 }
 
 template <class theType>
-bool CommandList::GetVector
+bool CommandList::GetVectoR
 (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext,
  int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("CommandList::GetVector");
@@ -1984,6 +2008,7 @@ bool CommandList::GetMatrix
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
   Expression theConverted;
+//  std::cout << "<br>extracting matrix from: " << theExpression.Lispify();
   if (!theExpression.IsSequenceNElementS())
   { if (targetNumColsNonMandatory>0)
       if (targetNumColsNonMandatory!=1)
@@ -2006,7 +2031,7 @@ bool CommandList::GetMatrix
   int numRows=theExpression.children.size-1;
   for (int i=0; i<numRows; i++)
   { const Expression& currentE=theExpression[i+1];
-    if (!this->GetVector
+    if (!this->GetVectoR
         (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
       return false;
     if (i==0)

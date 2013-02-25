@@ -257,7 +257,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
-   "g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
+   "g_{{a}}:=getChevalleyGenerator{} (G_2, a);\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
   this->AddOperationInnerHandler
   ("WeylDimFormula", this->fWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
@@ -286,7 +286,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
   ("hmmG2inB3", this->fEmbedG2inB3, "",
    "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in\
     a paper by McGovern.",
-   "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
+   "g_{{a}}:=getChevalleyGenerator{} (G_2, a); hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddOperationInnerHandler
   ("drawRootSystem", this->innerDrawRootSystem, "",
    "Draws the root system of a semisimple Lie algebra. Takes one or three arguments: \
@@ -341,13 +341,13 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is \
    not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
-   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
+   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))", false);
   this->AddOperationInnerHandler
   ("PrintB3G2branchingTable", this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
-   "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))");
+   "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))", false);
   this->AddOperationInnerHandler
   ("SplitFDTensorGenericGeneralizedVerma", this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
@@ -452,7 +452,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
-   "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))");
+   "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", false);
   this->AddOperationInnerHandler
   ("InvertMatrixVerbose", this->fInvertMatrix, "",
    "Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \

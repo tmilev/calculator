@@ -1702,10 +1702,13 @@ bool CommandList::fHWTAABF
       (leftExpression.GetContext(), rightExpression.GetContext(), finalContext))
     return output.SetError
     ("Failed to merge the contexts of the two UE elements ", theCommands);
-  SemisimpleLieAlgebra* constSSalg= leftExpression.GetAmbientSSAlgebraNonConstUseWithCaution();
+  int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
+  if (algebraIndex==-1)
+    return output.SetError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
+  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras[algebraIndex];
   Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVector<RationalFunctionOld>
-      (weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerPolynomial))
+  if (!theCommands.GetVectoR<RationalFunctionOld>
+      (weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerRationalFunction))
   { std::stringstream errorStream;
     errorStream << "Error: could not obtain highest weight from the third argument which is "
     << weightExpression.ToString();
@@ -1757,7 +1760,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
-  if (!theCommands.GetVector<CoefficientType>
+  if (!theCommands.GetVectoR<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
        ConversionFun))
   { std::stringstream tempStream;
@@ -1769,7 +1772,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
   if (input.IsListNElements(4))
   { Vector<Rational> parabolicSel;
     const Expression& rightE=input[3];
-    if (!theCommands.GetVector<Rational>
+    if (!theCommands.GetVectoR<Rational>
         (rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
     { std::stringstream tempStream;
       tempStream << "Failed to convert the third argument of HWV to a list of "
@@ -1969,7 +1972,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVector
+  if (!theCommands.GetVectoR
       (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, &CommandList::innerPolynomial))
   { theCommands.Comments
     << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
@@ -2817,9 +2820,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVector<RationalFunctionOld>
+  if (!theCommands.GetVectoR<RationalFunctionOld>
       (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank,
-       CommandList::innerPolynomial))
+       CommandList::innerRationalFunction))
   { theCommands.Comments
     << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
     << theRank << " polynomials. The second argument you gave is "
@@ -2827,7 +2830,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     return false;
   }
   Vector<Rational> theFDhw;
-  if (!theCommands.GetVector<Rational>(fdWeightNode, theFDhw, &emptyContext, theRank, 0))
+  if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, &emptyContext, theRank, 0))
   { theCommands.Comments
     << "Failed to convert the second argument of fSplitGenericGenVermaTensorFD to a list of "
     << theRank << " rationals. The second argument you gave is "
@@ -3181,7 +3184,7 @@ bool CommandList::innerWeylOrbit
     return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVector(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.innerPolynomial))
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.innerPolynomial))
     return output.SetError("Failed to extract highest weight", theCommands);
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (!useFundCoords)
@@ -4674,6 +4677,9 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<double>())
   { out << this->GetValuENonConstUseWithCaution<double>();
+    result=true;
+  } else if (this->IsOfType<LittelmannPath>())
+  { out << this->GetValuENonConstUseWithCaution<LittelmannPath>().ToString()  ;
     result=true;
   }
   output=out.str();

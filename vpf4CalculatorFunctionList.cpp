@@ -664,7 +664,24 @@ void CommandList::initPredefinedStandardOperations()
   ("+", this->innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
    "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opRational(),
+   "Adds double or rational to a double or rational approximately using the built-in cpp \
+   addition, returning double. ",
+   "DoubleValue{}(3.14159265358979323846)+1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opRational(), this->opDouble(),
+   "Adds double or rational to a double or rational approximately using the built-in cpp \
+   addition, returning double. ",
+   "DoubleValue{}(3.14159265358979323846)+1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opDouble(),
+   "Adds double or rational to a double or rational approximately using the built-in cpp \
+   addition, returning double. ",
+   "DoubleValue{}(3.14159265358979323846)+1"
+   , true);
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
@@ -742,7 +759,30 @@ void CommandList::initPredefinedStandardOperations()
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opRational(), this->opDouble(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opRational(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opDouble(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   , true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",
@@ -764,8 +804,25 @@ void CommandList::initPredefinedStandardOperations()
   ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
-
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerDoubleOrRatPowerDoubleOrRat, this->opRational(), this->opDouble(),
+   "Calls the built-in cpp functions to approximately raise a double to a power,\
+   provided either the base or the exponent is a double, and provided that \
+   the base is non-negative. ",
+   "f{}{{x}}:=x^3+p x+q; \
+   \nXcardano:=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerDoubleOrRatPowerDoubleOrRat, this->opDouble(), this->opRational(),
+   "Calls the built-in cpp functions to approximately raise a double to a power,\
+   provided either the base or the exponent is a double. If the base is negative and \
+   the exponent is rational with odd denominator, the exponent is evaluated to the corresponding\
+   real negative root. ",
+   "f{}{{x}}:=x^3+p x+q; \
+   \nXcardano:=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
+   \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", this->innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Tensor product of two generalized Verma modules. \

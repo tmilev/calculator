@@ -4762,7 +4762,7 @@ std::string Expression::ToString
     bool firstNeedsBrackets=
     (!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
       (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide())))
-    && !(*this)[1].IsOfType<Rational>();
+    && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
     bool secondNeedsBrackets=true;
     if ((*this)[2].IsOfType<Rational>())
       secondNeedsBrackets=(*this)[2].GetValuE<Rational>().IsNonPositive();

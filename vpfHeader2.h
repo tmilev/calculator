@@ -1612,6 +1612,9 @@ static bool innerDrawRootSystem
 static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerMultiplyDoubleOrRatByDoubleOrRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 static bool innerMultiplyCoxeterEltByCoxeterElt
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1655,6 +1658,15 @@ static bool innerAddPlotToPlot
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerRatPowerRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerDoubleOrRatPowerDoubleOrRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerDoubleOrRatTimesDoubleOrRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerDoubleOrRatPlusDoubleOrRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF

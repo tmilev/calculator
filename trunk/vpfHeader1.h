@@ -3090,6 +3090,11 @@ ParallelComputing::GlobalPointerCounter++;
   std::string ToString(FormatExpressions* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;
+  bool IsEven()const
+  { Rational tempRat=*this;
+    tempRat/=2;
+    return tempRat.IsInteger();
+  }
   inline bool IsEqualToOne()const
   { if (this->Extended==0)
       return (this->NumShort==1 && this->DenShort==1);

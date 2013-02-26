@@ -442,6 +442,75 @@ bool CommandList::innerRatPowerRat
   return output.AssignValue(base, theCommands);
 }
 
+bool CommandList::innerDoubleOrRatPowerDoubleOrRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+//  std::cout << "<br>attempting to exponentiate: " << input.ToString();
+  Rational base, exp;
+  double baseDouble, expDouble;
+  if(input[1].IsOfType(&base))
+    baseDouble=base.DoubleValue();
+  else if (!input[1].IsOfType(&baseDouble))
+    return false;
+  if(input[2].IsOfType(&exp))
+    expDouble=exp.DoubleValue();
+  else if (!input[2].IsOfType(&expDouble))
+    return false;
+  if (baseDouble<0)
+  { if(!input[2].IsOfType<Rational>())
+      return false;
+    if (exp.IsEven())
+      return false;
+    baseDouble*=-1;
+    return output.AssignValue(-pow (baseDouble, expDouble), theCommands);
+  }
+  if (baseDouble==0)
+    if (expDouble>0)
+      return output.AssignValue<double>(0, theCommands);
+  return output.AssignValue(pow(baseDouble, expDouble), theCommands);
+}
+
+bool CommandList::innerDoubleOrRatTimesDoubleOrRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  Rational leftR, rightR;
+  double leftD, rightD;
+  if(input[1].IsOfType(&leftR))
+    leftD=leftR.DoubleValue();
+  else if (!input[1].IsOfType(&leftD))
+    return false;
+  if(input[2].IsOfType(&rightR))
+    rightD=rightR.DoubleValue();
+  else if (!input[2].IsOfType(&rightD))
+    return false;
+  return output.AssignValue(leftD*rightD, theCommands);
+}
+
+bool CommandList::innerDoubleOrRatPlusDoubleOrRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  Rational leftR, rightR;
+  double leftD, rightD;
+  if(input[1].IsOfType(&leftR))
+    leftD=leftR.DoubleValue();
+  else if (!input[1].IsOfType(&leftD))
+    return false;
+  if(input[2].IsOfType(&rightR))
+    rightD=rightR.DoubleValue();
+  else if (!input[2].IsOfType(&rightD))
+    return false;
+  return output.AssignValue(leftD+rightD, theCommands);
+}
+
 bool CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg");

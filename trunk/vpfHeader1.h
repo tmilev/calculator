@@ -5811,7 +5811,12 @@ public:
     else
       return this->expressionType==this->typeRational && (this->ratValue==other);
   }
-  inline bool operator==(const RationalFunctionOld& other)const{return this->IsEqualTo(other);}
+  inline bool operator!=(int other)
+  { return !(this->operator==(other));
+  }
+  inline bool operator==(const RationalFunctionOld& other)const
+  { return this->IsEqualTo(other);
+  }
   void Simplify();
   void SimplifyLeadingCoefficientOnly();
   void operator+=(int theConstant)

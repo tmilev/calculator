@@ -3,6 +3,34 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "C++ object to calculator expression serialization/deserialization.");
 
 template <>
+bool Serialization::SerializeMon<ChevalleyGenerator>
+(CommandList& theCommands, const ChevalleyGenerator& input,
+ Expression& output, const Expression& theContext, bool& isNonConst)
+{ isNonConst=true;
+  Expression tempE, theArguments;
+  SemisimpleLieAlgebra& owner=*input.owneR;
+  theArguments.reset(theCommands);
+  tempE.MakeAtom(theCommands.opSequence(), theCommands);
+  theArguments.AddChildOnTop(tempE);
+  if (!Serialization::SerializeMonCollection
+      (theCommands, owner.theWeyl.theDynkinType, tempE, theContext))
+    return false;
+  theArguments.AddChildOnTop(tempE);
+  if (input.theGeneratorIndex>=owner.GetNumPosRoots() &&
+      input.theGeneratorIndex< owner.GetNumPosRoots()+owner.GetRank())
+  { output.MakeSerialization("getCartanGenerator", theCommands, 1);
+    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+    theArguments.AddChildOnTop(tempE);
+  } else
+  { output.MakeSerialization("getChevalleyGenerator", theCommands, 1);
+    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+    theArguments.AddChildOnTop(tempE);
+  }
+  output.AddChildOnTop(theArguments);
+  return true;
+}
+
+template <>
 bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
 (CommandList& theCommands, const Expression& input, Expression& outputContext)
 { if (!input.IsListNElements(3))
@@ -78,36 +106,61 @@ bool Serialization::DeSerializeMon
 }
 
 template <>
-bool Serialization::SerializeMon<ChevalleyGenerator>
-(CommandList& theCommands, const ChevalleyGenerator& input, const Expression& theContext,
- Expression& output, bool& isNonConst)
-{ isNonConst=true;
-  Expression tempE, theArguments;
-  SemisimpleLieAlgebra& owner=*input.owneR;
-  theArguments.reset(theCommands);
-  tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  theArguments.AddChildOnTop(tempE);
-  if (!Serialization::SerializeMonCollection(theCommands, owner.theWeyl.theDynkinType, theContext, tempE))
-    return false;
-  theArguments.AddChildOnTop(tempE);
-  if (input.theGeneratorIndex>=owner.GetNumPosRoots() &&
-      input.theGeneratorIndex< owner.GetNumPosRoots()+owner.GetRank())
-  { output.MakeSerialization("getCartanGenerator", theCommands, 1);
-    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-    theArguments.AddChildOnTop(tempE);
-  } else
-  { output.MakeSerialization("getChevalleyGenerator", theCommands, 1);
-    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-    theArguments.AddChildOnTop(tempE);
+bool Serialization::SerializeMon<MonomialUniversalEnveloping<RationalFunctionOld> >
+(CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+ Expression& output, const Expression& theContext, bool& isNonConst)
+{ return false;
+  output.reset(theCommands);
+  if (input.IsEqualToOne())
+  { isNonConst=false;
+    return true;
   }
-  output.AddChildOnTop(theArguments);
+  ChevalleyGenerator currentGen;
+  currentGen.owneR=input.owneR;
+  Expression baseE, exponentE, nextTermE;
+  currentGen.theGeneratorIndex=input.generatorsIndices[0];
+  bool tempNonConst;
+  if (!Serialization::SerializeMon
+      (theCommands, currentGen, baseE, theContext, tempNonConst))
+  { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
+    return false;
+  }
+  if (!input.Powers[0].IsEqualToOne())
+  { if (!Serialization::innerStoreObject
+        (theCommands, input.Powers[0], exponentE, theContext))
+    { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString()
+      << " with context " << theContext.ToString();
+      return false;
+    }
+    output.MakeXOX(theCommands, theCommands.opThePower(), baseE, exponentE);
+  } else
+    output=baseE;
+  for (int i=1; i<input.generatorsIndices.size; i++)
+  { currentGen.theGeneratorIndex=input.generatorsIndices[i];
+    if (!Serialization::SerializeMon
+        (theCommands, currentGen, baseE, theContext, tempNonConst))
+    { theCommands.Comments << "<hr>Failed to store " << currentGen.ToString() << ". ";
+      return false;
+    }
+    if (!input.Powers[0].IsEqualToOne())
+    { if (!Serialization::innerStoreObject
+          (theCommands, input.Powers[0], exponentE, theContext))
+      { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString()
+        << " with context " << theContext.ToString();
+        return false;
+      }
+      nextTermE.MakeXOX(theCommands, theCommands.opThePower(), baseE, exponentE);
+    } else
+      nextTermE=baseE;
+    output.MakeXOX(theCommands, theCommands.opTimes(), output, nextTermE);
+  }
   return true;
 }
 
 template <>
 bool Serialization::SerializeMon<MonomialP>
-(CommandList& theCommands, const MonomialP& input, const Expression& theContext,
- Expression& output, bool& isNonConst)
+(CommandList& theCommands, const MonomialP& input,
+  Expression& output, const Expression& theContext, bool& isNonConst)
 { MacroRegisterFunctionWithName("Serialization::SerializeMon_MonomialP");
   Expression exponentE, monE, tempE, letterE;
   isNonConst=false;
@@ -215,7 +268,8 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
 
 template <>
 bool Serialization::SerializeMon<DynkinSimpleType>
-(CommandList& theCommands, const DynkinSimpleType& input, const Expression& theContext, Expression& output, bool& isNonConst)
+(CommandList& theCommands, const DynkinSimpleType& input, Expression& output,
+ const Expression& theContext, bool& isNonConst)
 { MacroRegisterFunctionWithName("Serialization::DynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
@@ -429,7 +483,7 @@ bool Serialization::innerStoreSemisimpleLieAlgebra
     ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
      theCommands);
   SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
-  return Serialization::innerStoreFromObject(theCommands, owner, output);
+  return Serialization::innerStoreObject(theCommands, owner, output);
 }
 
 void Expression::MakeSerialization
@@ -443,9 +497,9 @@ void Expression::MakeSerialization
   this->AddChildOnTop(tempE);
 }
 
-bool Serialization::innerStoreFromObject
+bool Serialization::innerStoreObject
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreFromObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
 //  tempContext.ContextMakeContextSSLieAlgebrA
@@ -455,14 +509,14 @@ bool Serialization::innerStoreFromObject
   return true;
 }
 
-bool Serialization::innerStoreFromObject
+bool Serialization::innerStoreObject
 (CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreFromObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("LoadSltwoSubalgebra", theCommands);
   Expression tempE;
-  Serialization::innerStoreFromObject(theCommands, input.theF, tempE);
+  Serialization::innerStoreObject(theCommands, input.theF, tempE);
   output.AddChildOnTop(tempE);
-  Serialization::innerStoreFromObject(theCommands, input.theE, tempE);
+  Serialization::innerStoreObject(theCommands, input.theE, tempE);
   output.AddChildOnTop(tempE);
 
   /*List<int> highestWeights;
@@ -528,9 +582,9 @@ bool Serialization::innerLoadSltwoSubalgebra
   return output.AssignValue(tempSL2.ToString(), theCommands);
 }
 
-bool Serialization::innerStoreFromObject
+bool Serialization::innerStoreObject
 (CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreFromObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("LoadSlTwoSubalgebras", theCommands, 1);
   Expression theSequence, tempE;
   theSequence.reset(theCommands);
@@ -538,7 +592,7 @@ bool Serialization::innerStoreFromObject
   theSequence.children.ReservE(input.size+1);
   theSequence.AddChildOnTop(tempE);
   for (int i=0; i<input.size; i++)
-  { if (!Serialization::innerStoreFromObject(theCommands, input[i], tempE))
+  { if (!Serialization::innerStoreObject(theCommands, input[i], tempE))
       return false;
     theSequence.AddChildOnTop(tempE);
   }
@@ -546,9 +600,9 @@ bool Serialization::innerStoreFromObject
   return true;
 }
 
-bool Serialization::innerStoreFromObject
+bool Serialization::innerStoreObject
   (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreFromObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
   Expression emptyC, tempE;
   emptyC.MakeEmptyContext(theCommands);
@@ -578,17 +632,17 @@ bool Serialization::innerStoreSemisimpleSubalgebras
   if (!input.IsOfType<SemisimpleSubalgebras>())
     return false;
   SemisimpleSubalgebras& theSubalgebras=input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
-  return Serialization::innerStoreFromObject(theCommands, theSubalgebras, output);
+  return Serialization::innerStoreObject(theCommands, theSubalgebras, output);
 }
 
-bool Serialization::innerStoreFromObject
+bool Serialization::innerStoreObject
   (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 { output.MakeSerialization("LoadSemisimpleSubalgebras", theCommands);
   Expression tempE;
-  if (!Serialization::innerStoreFromObject(theCommands, *input.owneR, tempE))
+  if (!Serialization::innerStoreObject(theCommands, *input.owneR, tempE))
     return false;
   output.AddChildOnTop(tempE);
-  if (!Serialization::innerStoreFromObject(theCommands, input.theSl2s, tempE))
+  if (!Serialization::innerStoreObject(theCommands, input.theSl2s, tempE))
     return false;
   output.AddChildOnTop(tempE);
 /*  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
@@ -620,15 +674,15 @@ bool Serialization::innerStore
 
 bool Serialization::innerStoreUE
   (CommandList& theCommands, const Expression& input, Expression& output)
-{/* ElementUniversalEnveloping<RationalFunctionOld> theUE;
+{ ElementUniversalEnveloping<RationalFunctionOld> theUE;
   if (!input.IsOfType(&theUE))
     return output.SetError("To ask to store a non-elementUE as an elementUE is not allowed", theCommands);
   output.MakeSerialization("UE", theCommands, 1);
   Expression tempE;
   Expression theContext=input.GetContext();
-  if(!Serialization::SerializeMonCollection(theCommands, theUE, theContext, tempE))*/
+  if(!Serialization::SerializeMonCollection(theCommands, theUE, theContext, tempE))
     return false;
-//  return output.AddChildOnTop(tempE);
+  return output.AddChildOnTop(tempE);
 }
 
 bool Serialization::innerLoad

@@ -2385,6 +2385,9 @@ public:
   { output << theMon.ToString();
     return output;
   }
+  bool IsAConstant()const
+  { return this->IsEqualToOne();
+  }
   static const bool IsEqualToZero(){return false;}
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)

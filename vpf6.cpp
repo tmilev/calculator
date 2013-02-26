@@ -992,7 +992,13 @@ bool Expression::MakeEmptyContext(CommandList& owner)
 
 void Expression::MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
-{ this->reset(owner);
+{ if (&left==this || &right==this)
+  { Expression leftCopy=left;
+    Expression rightCopy=right;
+    this->MakeXOX(owner, theOp, leftCopy, rightCopy);
+    return;
+  }
+  this->reset(owner);
   this->theData=owner.opLisT();
   this->children.SetSize(3);
   this->AssignChildAtomValue(0, theOp, owner);

@@ -1301,16 +1301,20 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::AssignVectorNegRootSpacesCart
   ChevalleyGenerator tempGenerator;
   for (int i=0; i<input.size; i++)
     if (input[i]!=0)
-    { tempGenerator.MakeGenerator(*this->owneR, i);
+    { tempGenerator.MakeGenerator(owner, i);
       this->AddMonomial(tempGenerator, input[i]);
     }
 }
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
-{ output.MakeZero(this->GetOwner().GetNumGenerators());
+{ if (this->IsEqualToZero())
+  { output.MakeZero(0);
+    return;
+  }
+  output.MakeZero(this->GetOwner()->GetNumGenerators());
   for (int i=0; i<this->size; i++)
-    output[this->TheObjects[i].theGeneratorIndex]=this->theCoeffs[i];
+    output[(*this)[i].theGeneratorIndex]=this->theCoeffs[i];
 }
 
 void SemisimpleLieAlgebra::ComputeOneAutomorphism

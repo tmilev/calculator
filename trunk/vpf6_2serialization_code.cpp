@@ -90,8 +90,8 @@ bool Serialization::DeSerializeMon
     return false;
   }
   outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras[AlgIndex];
-  std::cout << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
-  << outputMon.owneR->GetNumGenerators();
+//  std::cout << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
+//  << outputMon.owneR->GetNumGenerators();
   if (theOperation=="getCartanGenerator")
     generatorIndex+=outputMon.owneR->GetNumPosRoots();
   else if (theOperation=="getChevalleyGenerator")
@@ -506,9 +506,11 @@ bool Serialization::innerStoreObject
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
-  tempContext.ContextMakeContextSSLieAlgebrA(
-  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
-   (*input.owneR), theCommands);
+  if (!input.IsEqualToZero())
+  { tempContext.ContextMakeContextSSLieAlgebrA
+    (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
+    (*input.GetOwner()), theCommands);
+  }
   Serialization::SerializeMonCollection(theCommands, input, output, tempContext);
   return true;
 }
@@ -567,22 +569,36 @@ bool Serialization::innerLoadFromObject
     return false;
   }
   if (!Serialization::DeSerializeMonCollection(theCommands, theE, eltE))
+  { theCommands.Comments
+    << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
     return false;
+  }
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
+  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. "
+    << "e and f are: " << eltE.ToString() << ", " << eltF.ToString() << ". ";
     return false;
-  if (eltE.owneR!=eltF.owneR)
+  }
+  if (eltE.GetOwner()!=eltF.GetOwner())
+  { theCommands.Comments
+    << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners."
+    << " More precisely, the owner of e is " << eltE.GetOwner()->ToString() << " and the owner of f is "
+    << eltF.GetOwner()->ToString();
     return false;
+  }
   output.theE=eltE;
   output.theF=eltF;
-  output.owneR=eltE.owneR;
+  output.owneR=eltE.GetOwner();
   return true;
 }
 
 bool Serialization::innerLoadSltwoSubalgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ slTwoSubalgebra tempSL2;
+{ MacroRegisterFunctionWithName("Serialization::innerLoadSltwoSubalgebra");
+  slTwoSubalgebra tempSL2;
   if (!Serialization::innerLoadFromObject(theCommands, input, tempSL2))
+  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra. ";
     return false;
+  }
   return output.AssignValue(tempSL2.ToString(), theCommands);
 }
 

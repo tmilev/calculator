@@ -7960,7 +7960,19 @@ template<class CoefficientType>
 class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, CoefficientType>
 {
 public:
-  SemisimpleLieAlgebra* owneR;
+  bool CheckConsistency()const
+  { if (this->size==0)
+      return true;
+    SemisimpleLieAlgebra* owner= (*this)[0].owneR;
+    for (int i=1; i<this->size; i++)
+      if (owner!=(*this)[i].owneR)
+      { std::cout << "This is a programming error: ElementSemisimpleLieAlgebra "
+        << " contains Chevalley generators with different owners. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    return true;
+  }
   bool NeedsBrackets()const;
   Vector<CoefficientType> GetCartanPart()const;
   void MakeGGenerator
@@ -7983,7 +7995,12 @@ public:
   bool GetCoordsInBasis
   (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
 ;
-  SemisimpleLieAlgebra& GetOwner()const;
+  SemisimpleLieAlgebra* GetOwner()const
+  { this->CheckConsistency();
+    if (this->size==0)
+      return 0;
+    return (*this)[0].owneR;
+  }
   bool GetCoordsInBasis
   (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)const
   { Vector<Rational> tempVect;
@@ -7996,9 +8013,6 @@ public:
   static void GetBasisFromSpanOfElements
   (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
     ;
-  SemisimpleLieAlgebra& GetOwner()
-  { return *this->owneR;
-  }
   void ActOnMe
   (const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner)
   ;
@@ -8032,8 +8046,7 @@ public:
   }
   template<class otherType>
   void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
-  { this->owneR=other.owneR;
-    this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::operator=(other);
+  { this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::operator=(other);
   }
 };
 

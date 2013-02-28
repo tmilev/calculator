@@ -8811,8 +8811,7 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::MakeGenerator
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::MakeZero(SemisimpleLieAlgebra& inputOwner)
-{ this->owneR=&inputOwner;
-  this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::MakeZero();
+{ this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::MakeZero();
 }
 
 template <class CoefficientType>
@@ -8844,17 +8843,6 @@ void SemisimpleLieAlgebra::LieBracket
 }
 
 template <class CoefficientType>
-SemisimpleLieAlgebra& ElementSemisimpleLieAlgebra<CoefficientType>::GetOwner()const
-{ if (this->owneR==0)
-  { std::cout << "This is a programming error: a semisimple "
-    << "Lie algebra element has not been initialized properly. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  return *this->owneR;
-}
-
-template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::ActOnMe
 (const ElementSemisimpleLieAlgebra<CoefficientType>& theElt,
  ElementSemisimpleLieAlgebra<CoefficientType>& output, SemisimpleLieAlgebra& owner)
@@ -8873,12 +8861,17 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::ActOnMe
 template <class CoefficientType>
 Vector<CoefficientType> ElementSemisimpleLieAlgebra<CoefficientType>::GetCartanPart()const
 { Vector<CoefficientType> result;
+  if (this->IsEqualToZero())
+  { result.MakeZero(0);
+    return result;
+  }
   ChevalleyGenerator tempGen;
-  int theRank=this->GetOwner().GetRank();
-  int numPosRoots=this->GetOwner().GetNumPosRoots();
+  SemisimpleLieAlgebra* owner=this->GetOwner();
+  int theRank=owner->GetRank();
+  int numPosRoots=owner->GetNumPosRoots();
   result.MakeZero(theRank);
   for (int i=0; i<theRank; i++)
-  { tempGen.MakeGenerator(*this->owneR, i+numPosRoots);
+  { tempGen.MakeGenerator(*owner, i+numPosRoots);
     int currentIndex=this->GetIndex(tempGen);
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];

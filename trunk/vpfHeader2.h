@@ -324,7 +324,7 @@ class Expression
   ;
   int GetNumCols()const
   ;
-  void MakeXOX
+  bool MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
   void AssignXOXToChild
@@ -1816,6 +1816,15 @@ static bool innerStoreObject
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
 ;
+static bool innerLoadFromObject
+(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output)
+;
+static bool innerLoadFromObject
+(CommandList& theCommands, const Expression& input, RationalFunctionOld& output)
+;
+static bool innerLoadRationalFunction
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
 static bool innerStoreSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1866,7 +1875,9 @@ bool Serialization::SerializeMonCollection
     bool isNonConst=true;
     if (!Serialization::SerializeMon<TemplateMonomial>
         (theCommands, currentMon, termE, theContext, isNonConst))
+    { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
+    }
     if (!isNonConst)
       termE.AssignValue(input.theCoeffs[i], theCommands);
     else

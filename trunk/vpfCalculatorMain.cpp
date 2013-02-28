@@ -310,6 +310,16 @@ int main(int argc, char **argv)
   //civilizedInput="1/2";
 //  civilizedInput="MakeCharacter{}(B_3, 1);";
   //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
+/*  civilizedInput="Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\
++Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\
++3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\
++6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\
++10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";
+civilizedInput=   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\\
++Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\\
++3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
++6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
++10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";*/
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

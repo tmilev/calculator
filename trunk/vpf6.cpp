@@ -990,13 +990,12 @@ bool Expression::MakeEmptyContext(CommandList& owner)
   return true;
 }
 
-void Expression::MakeXOX
+bool Expression::MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
 { if (&left==this || &right==this)
   { Expression leftCopy=left;
     Expression rightCopy=right;
-    this->MakeXOX(owner, theOp, leftCopy, rightCopy);
-    return;
+    return this->MakeXOX(owner, theOp, leftCopy, rightCopy);
   }
   this->reset(owner);
   this->theData=owner.opLisT();
@@ -1004,6 +1003,7 @@ void Expression::MakeXOX
   this->AssignChildAtomValue(0, theOp, owner);
   this->AssignChild(1, left);
   this->AssignChild(2, right);
+  return true;
 }
 
 bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
@@ -4534,8 +4534,10 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
 }
 
 int Expression::ContextGetIndexAmbientSSalg()const
-{ if (!this->IsContext() )
+{ //std::cout << "<hr>trying to get ambient algebra from " << this->ToString();
+  if (!this->IsContext() )
     return -1;
+//  std::cout << ". I have " << this->children.size << " children. ";
   for (int i=1; i<this->children.size; i++)
     if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 2))
       return (*this)[i][1].theData;

@@ -581,11 +581,11 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
-   "LoadSltwoSubalgebra{}( Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -1)) \
-+3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -2))) \
-+2 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -3))), 3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 3))) \
-+6 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 1))) \
-+10/3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 2))))", true)
+   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\\
++Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\\
++3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
++6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
++10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", true)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",

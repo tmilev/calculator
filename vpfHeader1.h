@@ -5795,9 +5795,17 @@ public:
       return this->ratValue.IsNegative();
     return false;
   }
-  void GetDenominator(Polynomial<Rational>& output)
+  void GetDenominator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
-    { case RationalFunctionOld::typeRationalFunction: output=this->Denominator.GetElement(); return;
+    { case RationalFunctionOld::typeRationalFunction:
+      if (this->Denominator.IsZeroPointer())
+      { std::cout << "This is a programming error: the rational function is supposed to be honest, "
+        << " but the denominator pointer is zero. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      output=this->Denominator.GetElementConst();
+      return;
       default: output.MakeConsT((Rational) 1); return;
     }
   }

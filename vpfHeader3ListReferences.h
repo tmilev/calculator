@@ -55,6 +55,12 @@ public:
     }
     return *this->theReferences[i];
   }
+  bool Contains(const Object& theObject)const
+  { for (int i=0; i<this->size; i++)
+      if ((*this)[i]==theObject)
+        return true;
+    return false;
+  }
   void AllocateElements(int newSize);
   void SetSize(int newSize)
   { this->AllocateElements(newSize);

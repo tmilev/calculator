@@ -7,63 +7,50 @@ bool Serialization::SerializeMon<ChevalleyGenerator>
 (CommandList& theCommands, const ChevalleyGenerator& input,
  Expression& output, const Expression& theContext, bool& isNonConst)
 { isNonConst=true;
-  Expression tempE, theArguments;
+  Expression theTypeE, genIndexE;
   SemisimpleLieAlgebra& owner=*input.owneR;
-  theArguments.reset(theCommands);
-  tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  theArguments.AddChildOnTop(tempE);
   if (!Serialization::SerializeMonCollection
-      (theCommands, owner.theWeyl.theDynkinType, tempE, theContext))
+      (theCommands, owner.theWeyl.theDynkinType, theTypeE, theContext))
     return false;
-  theArguments.AddChildOnTop(tempE);
   if (input.theGeneratorIndex>=owner.GetNumPosRoots() &&
       input.theGeneratorIndex< owner.GetNumPosRoots()+owner.GetRank())
   { output.MakeSerialization("getCartanGenerator", theCommands, 1);
-    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-    theArguments.AddChildOnTop(tempE);
+    genIndexE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   } else
   { output.MakeSerialization("getChevalleyGenerator", theCommands, 1);
-    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-    theArguments.AddChildOnTop(tempE);
+    genIndexE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
   }
-  output.AddChildOnTop(theArguments);
-  return true;
+  output.AddChildOnTop(theTypeE);
+  return output.AddChildOnTop(genIndexE);
 }
 
 template <>
 bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
 (CommandList& theCommands, const Expression& input, Expression& outputContext)
-{ if (!input.IsListNElements(3))
+{ if (!input.IsListNElements(4))
   { theCommands.Comments
     << "<hr>Failed to get ChevalleyGenerator context: "
-    << "input is not a sequence of 2 elements, instead it has "
+    << "input is not a sequence of 4 elements, instead it has "
     << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
     return false;
   }
-  const Expression& theDeserialized=input[2];
-  if (!theDeserialized.IsListNElements(3))
-  { theCommands.Comments
-    << "<hr>Failed to get ChevalleyGenerator context: "
-    << "deserialized input is not a list of 3 elements, instead it has "
-    << theDeserialized.children.size << " elements, i.e., is "
-    << theDeserialized.ToString() << "</hr>";
-    return false;
-  }
-  const Expression& theArguments=theDeserialized[2];
-  std::cout << "The deserialized : " << theDeserialized.ToString();
-  if (!theArguments.IsSequenceNElementS(2))
-  { theCommands.Comments
-    << "Failed to get context: third argument is not a sequence of two elements, instead it is "
-    << theArguments.ToString();
-    return false;
-  }
   DynkinType theType;
-  if (!Serialization::DeSerializeMonCollection(theCommands, theArguments[1], theType))
+  if (!Serialization::DeSerializeMonCollection(theCommands, input[2], theType))
+  { theCommands.Comments
+    << "<hr>Failed to load dynkin type from "
+    << input[2].ToString() << ".";
     return false;
-  SemisimpleLieAlgebra tempSubalgebra;
-  tempSubalgebra.theWeyl.MakeFromDynkinType(theType);
+  }
+  SemisimpleLieAlgebra tempAlgebra;
+  tempAlgebra.theWeyl.MakeFromDynkinType(theType);
+  bool feelsLikeTheVeryFirstTime=
+  theCommands.theObjectContainer.theLieAlgebras.Contains(tempAlgebra);
   int algebraIdentifier=
-  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSubalgebra);
+  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlgebra);
+  if (feelsLikeTheVeryFirstTime)
+  { theCommands.theObjectContainer.theLieAlgebras[algebraIdentifier].ComputeChevalleyConstantS
+    (theCommands.theGlobalVariableS);
+  }
   outputContext.ContextMakeContextSSLieAlgebrA(algebraIdentifier, theCommands);
   return true;
 }
@@ -81,26 +68,44 @@ bool Serialization::DeSerializeMon
  ChevalleyGenerator& outputMon)
 { int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
+  { theCommands.Comments << "<hr>Can't load Chevalley generator: "
+    << " failed extract ambient algebra index from context " << inputContext.ToString();
     return false;
-  if (!input.IsSequenceNElementS(3))
+  }
+  if (!input.IsListNElements(4))
+  { theCommands.Comments << "<hr>Can't load Chevalley generator: "
+    << " input is not a list of 4 elements, instead it has " << input.children.size
+    << " elements, i.e., is " << input.ToString();
     return false;
-  const Expression& theArguments=input[3];
-  if (!theArguments.IsSequenceNElementS(2))
-    return false;
-  const Expression& generatorIndexE=theArguments[2];
+  }
+  const Expression& generatorIndexE=input[3];
   int generatorIndex;
   if (!generatorIndexE.IsSmallInteger(&generatorIndex))
     return false;
   std::string theOperation;
-  if (!input[2].IsOperation(&theOperation))
+  if (!input[1].IsOperation(&theOperation))
+  { theCommands.Comments
+    << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is "
+    << input[1].ToString();
     return false;
+  }
   outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras[AlgIndex];
+  std::cout << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
+  << outputMon.owneR->GetNumGenerators();
   if (theOperation=="getCartanGenerator")
     generatorIndex+=outputMon.owneR->GetNumPosRoots();
   else if (theOperation=="getChevalleyGenerator")
     generatorIndex=outputMon.owneR->GetGeneratorFromDisplayIndex(generatorIndex);
-  if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
+  else
+  { theCommands.Comments << "<hr>Failed to load Chevalley generator: the generator name was  "
+    << theOperation << "; it must either be getCartanGenerator or getChevalleyGenerator.";
     return false;
+  }
+  if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
+  { theCommands.Comments << "<hr>Failed to load Chevalley generator: final generator index is "
+    << generatorIndex << ". ";
+    return false;
+  }
   outputMon.theGeneratorIndex=generatorIndex;
   return true;
 }
@@ -109,8 +114,7 @@ template <>
 bool Serialization::SerializeMon<MonomialUniversalEnveloping<RationalFunctionOld> >
 (CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
  Expression& output, const Expression& theContext, bool& isNonConst)
-{ return false;
-  output.reset(theCommands);
+{ output.reset(theCommands);
   if (input.IsEqualToOne())
   { isNonConst=false;
     return true;
@@ -502,10 +506,10 @@ bool Serialization::innerStoreObject
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
-//  tempContext.ContextMakeContextSSLieAlgebrA
-//  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
-//   (*input.owneR), theCommands);
-  Serialization::SerializeMonCollection(theCommands, input, tempContext, output);
+  tempContext.ContextMakeContextSSLieAlgebrA(
+  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
+   (*input.owneR), theCommands);
+  Serialization::SerializeMonCollection(theCommands, input, output, tempContext);
   return true;
 }
 
@@ -604,11 +608,12 @@ bool Serialization::innerStoreObject
   (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
+  std::cout << "<hr>" << output.ToString() << "<br>";
   Expression emptyC, tempE;
   emptyC.MakeEmptyContext(theCommands);
-  if (!Serialization::SerializeMonCollection
-      (theCommands, input.theWeyl.theDynkinType, emptyC, tempE))
+  if (!Serialization::SerializeMonCollection(theCommands, input.theWeyl.theDynkinType, tempE, emptyC))
     return false;
+  std::cout << "<br>The mon collection: " << tempE.ToString();
   output.AddChildOnTop(tempE);
   output.format=output.formatDefault;
   return true;
@@ -681,7 +686,9 @@ bool Serialization::innerStoreUE
   Expression tempE;
   Expression theContext=input.GetContext();
   if(!Serialization::SerializeMonCollection(theCommands, theUE, theContext, tempE))
+  { theCommands.Comments << "<hr>Failed to store " << theUE.ToString();
     return false;
+  }
   return output.AddChildOnTop(tempE);
 }
 
@@ -763,4 +770,42 @@ bool CommandList::innerElementUniversalEnvelopingAlgebra
 //  << output.GetContext().ToString();
   outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
   return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
+}
+
+bool Serialization::innerLoadRationalFunction
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ RationalFunctionOld theRF;
+  if (!input.IsOfType(&theRF))
+    return output.SetError
+    ("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
+  Expression contextE=input.GetContext();
+  return Serialization::innerStoreObject(theCommands, theRF, output, contextE);
+}
+
+bool Serialization::innerStoreObject
+(CommandList& theCommands, const RationalFunctionOld& input, Expression& output, const Expression& theContext)
+{ if (input.expressionType==input.typeRational)
+    return output.AssignValue(input.ratValue, theCommands);
+  Polynomial<Rational> theNumerator;
+  input.GetNumerator(theNumerator);
+  if (input.expressionType==input.typePoly)
+    return Serialization::SerializeMonCollection(theCommands, theNumerator, output, theContext);
+  if (input.expressionType!=input.typeRationalFunction)
+  { std::cout << "This is a programming error: I am processing a rational function which is not "
+    << " of type rational polynomial or honest rataional function. Something has gone very wrong. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Polynomial<Rational> theDenominator;
+  input.GetDenominator(theDenominator);
+  Expression denE, numE;
+  if (!Serialization::SerializeMonCollection(theCommands, theNumerator, numE, theContext ))
+  { theCommands.Comments << "<hr>Failed to serialize numerator of rational function. ";
+    return false;
+  }
+  if (!Serialization::SerializeMonCollection(theCommands, theDenominator, denE, theContext ))
+  { theCommands.Comments << "<hr>Failed to serialize denominator of rational function. ";
+    return false;
+  }
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }

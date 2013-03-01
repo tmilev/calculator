@@ -1254,6 +1254,9 @@ public:
   static bool outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerCollectMultiplicands
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool outerExtractBaseMultiplication
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;

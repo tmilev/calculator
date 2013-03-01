@@ -3722,6 +3722,33 @@ bool CommandList::outerExtractBaseMultiplication
   return result;
 }
 
+bool CommandList::innerCollectMultiplicands
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  Expression constPower, thePower;
+  const Expression* left= &input[1];
+  const Expression* right=&input[2];
+  if (*left==*right)
+  { constPower.AssignValue(2, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
+  }
+  for (int i=0; i<2; i++, MathRoutines::swap(left, right))
+    if (left->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    { if ((*left)[1]==(*right))
+      { constPower.AssignValue(1, theCommands);
+        thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], constPower);
+        return output.MakeXOX(theCommands, theCommands.opThePower(), *right, thePower);
+      }
+      if (right->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+        if ((*left)[1]==(*right)[1])
+        { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
+          return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+        }
+    }
+  return false;
+}
+
 bool CommandList::outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))

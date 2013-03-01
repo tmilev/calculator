@@ -1340,7 +1340,7 @@ public:
   static bool innerSuffixNotationForPostScript
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fIsInteger
+  static bool innerIsInteger
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fFreudenthalEval

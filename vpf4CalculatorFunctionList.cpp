@@ -126,7 +126,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    ;
 
   this->AddOperationInnerHandler
-("IsInteger", this->fIsInteger, "",
+("IsInteger", this->innerIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler

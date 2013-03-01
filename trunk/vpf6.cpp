@@ -913,9 +913,9 @@ void Expression::operator=(const Expression& other)
 }
 
 bool Expression::IsEqualToOne()const
-{ std::cout << "Function Expression::IsEqualToOne not implemented!!!!!"
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+{ int theInt;
+  if (this->IsSmallInteger(&theInt))
+    return theInt==1;
   return false;
 }
 
@@ -1507,8 +1507,8 @@ bool CommandList::ApplyOneRule()
   const std::string& fourthToLastS=this->controlSequences[fourthToLastE.controlIndex];
   const SyntacticElement& fifthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   const std::string& fifthToLastS=this->controlSequences[fifthToLastE.controlIndex];
-  //const SyntacticElement& sixthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
-  //const std::string& sixthToLastS=this->controlSequences[sixthToLastE.controlIndex];
+  const SyntacticElement& sixthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
+  const std::string& sixthToLastS=this->controlSequences[sixthToLastE.controlIndex];
   const SyntacticElement& seventhToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-7];
   const std::string& seventhToLastS=this->controlSequences[seventhToLastE.controlIndex];
   const SyntacticElement& eighthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-8];
@@ -1671,10 +1671,12 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
-  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && secondToLastS=="Expression" &&
-      thirdToLastS==":=" && fourthToLastS=="Expression" && fifthToLastS=="if" && secondToLastS==":" &&
-      seventhToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
-    return this->ReplaceEXXEXEByEusingO(this->conDefineConditional());
+  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) &&
+      seventhToLastS=="Expression" && sixthToLastS==":" &&
+      fifthToLastS=="if" && fourthToLastS=="Expression" &&
+      thirdToLastS==":=" && secondToLastS=="Expression" &&
+      this->isSeparatorFromTheRightForDefinition(lastS))
+    return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
   if (lastS==";")
   { this->NonBoundVariablesStack.LastObject()->Clear();
     this->BoundVariablesStack.LastObject()->Clear();
@@ -3439,9 +3441,11 @@ bool Expression::HasBoundVariables()const
   return false;
 }
 
-bool CommandList::fIsInteger
+bool CommandList::innerIsInteger
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (input.IsInteger())
+{ if (input.HasBoundVariables())
+    return false;
+  if (input.IsInteger())
     output.AssignValue(1, theCommands);
   else
     output.AssignValue(0, theCommands);

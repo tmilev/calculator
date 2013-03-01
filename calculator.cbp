@@ -45,6 +45,7 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="vpf.h.gch" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
@@ -58,9 +59,7 @@
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
-		<Unit filename="vpfCalculatorMain.cpp">
-			<Option target="Debug" />
-		</Unit>
+		<Unit filename="vpfCalculatorMain.cpp" />
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters.h" />
 		<Unit filename="vpfGraph.cpp" />

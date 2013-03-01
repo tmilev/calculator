@@ -718,6 +718,11 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
    "(a+b)*c; \n a*(b+c)", true);
+  this->AddOperationInnerHandler
+  ("*", this->innerCollectMultiplicands, "",
+   "Collects multiplicand exponents.",
+   "x*(x*y)*x*(x*x^3*x); ", true);
+
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",

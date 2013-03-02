@@ -320,6 +320,9 @@ civilizedInput=   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}
 +3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
 +6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
 +10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";*/
+  //civilizedInput="Melt{}(a);";
+  //civilizedInput="Melt{}(a;b);";
+//  civilizedInput="a; b";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -388,6 +388,7 @@ class Expression
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool HasBoundVariables()const;
+  bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
   { return
     this->theBoss==other.theBoss &&
@@ -475,23 +476,23 @@ class SyntacticElement
 {
   public:
   int controlIndex;
-  int IndexFirstChar;
-  int IndexLastCharPlusOne;
+//  int IndexFirstChar;
+//  int IndexLastCharPlusOne;
   std::string errorString;
   Expression theData;
   void operator=(const SyntacticElement& other)
   { this->controlIndex=other.controlIndex;
     this->theData=other.theData;
     this->errorString=other.errorString;
-    this->IndexFirstChar=other.IndexFirstChar;
-    this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
+//    this->IndexFirstChar=other.IndexFirstChar;
+//    this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
   }
   std::string ToString(CommandList& theBoss)const;
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->errorString="";
-    this->IndexFirstChar=-1;
-    this->IndexLastCharPlusOne=-1;
+//    this->IndexFirstChar=-1;
+//    this->IndexLastCharPlusOne=-1;
   }
   SyntacticElement(const SyntacticElement& other)
   { this->operator=(other);
@@ -620,21 +621,21 @@ public:
 //way they are applied when the calculator reduces an expression.
 //
 //Suppose the calculator is reducing Expression X.
-//1.Outer functions ("laws").
-//1.1.An outer function is called on X if the first child of X
-//    is an atom equal to the name of the outer function.
-//1.2.If the outer function returns true but its output is identically equal to the
-//    starting expression X, nothing is done (the action of the outer function is ignored).
-//1.3.If an outer function returns true and its output is different from X,
-//    X is replaced by this output.
-//2.Inner functions ("functions").
-//2.1.If the first child of X is an atom equal to the name of the inner function,
-//    we define Argument as follows.
-//2.1.1.If X has two children, Argument is set to the second child of X.
-//2.1.2.If X does not have two children, Argument is set to be equal to X.
-//2.2.The inner function is called on Argument.
-//2.3.If the inner function returns true, X is substituted with
-//    the output of the inner function, else nothing is done.
+//1. Outer functions ("laws").
+//1.1. An outer function is called on X if the first child of X
+//     is an atom equal to the name of the outer function.
+//1.2. If the outer function returns true but its output is identically equal to the
+//     starting expression X, nothing is done (the action of the outer function is ignored).
+//1.3. If an outer function returns true and its output is different from X,
+//     X is replaced by this output.
+//2. Inner functions ("functions").
+//2.1. If the first child of X is an atom equal to the name of the inner function,
+//     we define Argument as follows.
+//2.1.1. If X has two children, Argument is set to the second child of X.
+//2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
+//2.2. The inner function is called on Argument.
+//2.3. If the inner function returns true, X is substituted with
+//     the output of the inner function, else nothing is done.
 //
 //As explained above, the distinction between inner functions and outer functions
 //is only practical. The notions of inner and outer functions do not apply to user-defined
@@ -673,6 +674,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagLogEvaluation;
+  bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
@@ -751,8 +753,8 @@ public:
   { if (decrease<=0)
       return true;
     assert((*this->CurrentSyntacticStacK).size-decrease>0);
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1].IndexLastCharPlusOne=
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].IndexLastCharPlusOne;
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1].IndexLastCharPlusOne=
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
@@ -760,8 +762,8 @@ public:
   { if (decrease<=0)
       return true;
     assert((*this->CurrentSyntacticStacK).size-decrease>0);
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
+//    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=
     *this->CurrentSyntacticStacK->LastObject();
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
@@ -807,11 +809,17 @@ public:
   }
   bool ReplaceEXXEXEByEusingO(int theOp);
   bool ReplaceEXXEXEXByEXusingO(int theOp);
+  bool ReplaceEOXbyEX();
   bool ReplaceEEByEusingO(int theControlIndex);
   bool ReplaceEEXByEXusingO(int theControlIndex);
   bool ReplaceEEByE();
   bool ReplaceEXEXByEX(int formatOptions);
-  bool ReplaceEEndCommandEXbyEX();
+  bool ReplaceSsSsXdotsXbySsXdotsX(int numDots);
+  bool ReplaceEXdotsXbySsXdotsX(int numDots);
+  bool ReplaceEXdotsXBySs(int numDots)
+  { this->ReplaceEXdotsXbySsXdotsX(numDots);
+    return this->DecreaseStackSetCharacterRangeS(numDots);
+  }
   bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
@@ -847,11 +855,14 @@ public:
   ;
   bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
   ;
-  bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
+  bool ReplaceXYByConY(int theCon, int theFormat=Expression::formatDefault)
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=theCon;
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
-    this->DecreaseStackSetCharacterRangeS(1);
     return true;
+  }
+  bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
+  { this->ReplaceXYByConY(theCon, theFormat);
+    return this->DecreaseStackSetCharacterRangeS(1);
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault);
   bool ReplaceXByConCon(int con1, int con2, int format1=Expression::formatDefault, int format2=Expression::formatDefault);
@@ -889,7 +900,10 @@ public:
     return true;
   }
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault)
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=
+    this->conExpression();
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
     this->DecreaseStackSetCharacterRangeS(2);
     return true;
@@ -950,6 +964,9 @@ public:
   }
   int conLisT()
   { return this->controlSequences.GetIndexIMustContainTheObject("");
+  }
+  int conSequenceStatements()
+  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceStatements");
   }
   int conSequence()
   { return this->controlSequences.GetIndexIMustContainTheObject("Sequence");
@@ -1019,6 +1036,9 @@ public:
   }
   int opSequence()
   { return this->operations.GetIndexIMustContainTheObject("Sequence");
+  }
+  int opMelt()
+  { return this->operations.GetIndexIMustContainTheObject("Melt");
   }
   int opRational()
   { return this->operations.GetIndexIMustContainTheObject("Rational");
@@ -1260,6 +1280,10 @@ public:
   static bool outerExtractBaseMultiplication
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool outerMeltBrackets
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+
   static bool outerDistribute
 (CommandList& theCommands, const Expression& input, Expression& output,
   int AdditiveOp, int multiplicativeOp)

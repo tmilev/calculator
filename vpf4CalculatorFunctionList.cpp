@@ -647,6 +647,14 @@ void CommandList::initPredefinedStandardOperations()
   //or by making the corresponding handlers call each other as needed.
   //A combination of these two was indeed the original design approach, however what is used now
   //is more modular, conceptual, and easier to test: in short, the better engineering solution.
+  this->AddOperationOuterHandler
+  (";", this->outerMeltBrackets, "",
+   "Melts down a layer of parenthesis around a list of commands prepended with the Melt operation.\
+   \n More precisely,\
+   cycles through all immediate children of the expression. If the k^th child X is a list starting with Melt\
+   whose second child is EndStatement(;), then X is replaced with the third, fourth, ...\
+   child of X. ", "Melt{}(a,b); ", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",

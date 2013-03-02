@@ -627,8 +627,9 @@ const Expression& Expression::operator[](int n)const
 { this->CheckInitialization();
   int childIndex=this->children[n];
   if (childIndex<0)
-  { std::cout << "<hr>This is a programming error: the n-th child of "
-    << " the current expression has negative index in the expression container. "
+  { std::cout << "<hr>This is a programming error: the child of position " << n
+    << " out of " << this->children.size-1
+    << " is not contained in the expression container. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -1332,6 +1333,20 @@ bool CommandList::ReplaceEEByEusingO(int theControlIndex)
   return true;
 }
 
+bool CommandList::ReplaceEOXbyEX()
+{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& opElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  int theOp=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr.AssignChildAtomValue(0, theOp, *this);
+  newExpr.AssignChild(1, left.theData);
+  left.theData=newExpr;
+  this->DecreaseStackExceptLast(1);
+  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
 bool CommandList::ReplaceEEXByEXusingO(int theControlIndex)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -1392,7 +1407,7 @@ bool CommandList::ReplaceEOEXByEX(int formatOptions)
   newExpr.format=formatOptions;
   left.theData=newExpr;
   middle=*(*this->CurrentSyntacticStacK).LastObject();
-  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
+//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
   this->DecreaseStackExceptLast(2);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
@@ -1439,7 +1454,7 @@ bool CommandList::isSeparatorFromTheRightForMatrixRow(const std::string& input)
 }
 
 bool CommandList::isSeparatorFromTheLeftForDefinition(const std::string& input)
-{ return input=="{" || input=="(" || input==";" || input==" ";
+{ return input=="{" || input=="(" || input==";" || input=="SequenceStatements" || input==" ";
 }
 
 bool CommandList::isSeparatorFromTheRightForDefinition(const std::string& input)
@@ -1520,6 +1535,16 @@ bool CommandList::ApplyOneRule()
   if (secondToLastS=="%" && lastS=="LogParsing")
   { this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
     this->flagLogSyntaxRules=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="LogFull")
+  { std::cout
+    << "<hr>You are requesting a full log of the evaluation process. "
+    << "<br><b>WARNING requesting  a full log of the evaluation process is very slow, "
+    << " and might produce a HUGE printout. </b>"
+    << "<br><b>You have been warned. </b><hr>";
+    this->flagLogFullTreeCrunching=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -1681,11 +1706,23 @@ bool CommandList::ApplyOneRule()
   { this->NonBoundVariablesStack.LastObject()->Clear();
     this->BoundVariablesStack.LastObject()->Clear();
   }
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" &&
-      thirdToLastS==";" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
-    return this->ReplaceEEndCommandEXbyEX();
-  if (secondToLastS==";" && lastS=="EndProgram")
-    return this->DecreaseStackSetCharacterRangeS(2);
+  if (thirdToLastS=="SequenceStatements" && secondToLastS=="Expression" &&
+      (lastS==")" || lastS =="}"))
+    return this->ReplaceEXdotsXbySsXdotsX(1);
+  if (secondToLastS=="Expression" && lastS==";")
+    return this->ReplaceEXdotsXBySs(1);
+  if (secondToLastS=="Expression" && lastS=="EndProgram")
+    return this->ReplaceEXdotsXbySsXdotsX(1);
+  if ((thirdToLastS=="(" || thirdToLastS=="{" ) && secondToLastS=="SequenceStatements" &&
+      (lastS==")" || lastS== "}"))
+    return this->ReplaceXEXByE();
+  if (secondToLastS=="SequenceStatements" && lastS=="SequenceStatements")
+    return this->ReplaceSsSsXdotsXbySsXdotsX(0);
+  if (thirdToLastS=="SequenceStatements" && secondToLastS=="SequenceStatements" &&
+      (lastS=="EndProgram" || lastS ==")" || lastS=="}"))
+    return this->ReplaceSsSsXdotsXbySsXdotsX(1);
+  if (secondToLastS=="SequenceStatements" && lastS=="EndProgram")
+    return this->ReplaceXXByCon(this->conExpression());
   if (lastS=="EndProgram")
     return this->DecreaseStackSetCharacterRangeS(1);
   return false;
@@ -3484,6 +3521,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluation=false;
+  this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
   this->MaxLatexChars=2000;
@@ -3582,6 +3620,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("{");
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
+  this->controlSequences.AddOnTop("SequenceStatements");
   this->controlSequences.AddOnTop("MakeSequence");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
   this->controlSequences.AddOnTop("MatrixRow");
@@ -3598,12 +3637,14 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("%");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
+  this->controlSequences.AddOnTop("LogFull");
   this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("EndProgram");
 //additional operations treated like regular expressions.
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Serialization");
+  this->AddOperationNoRepetitionAllowed("Melt");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
@@ -4213,6 +4254,11 @@ bool CommandList::EvaluateExpression
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
   StackMaintainerRules theRuleStackMaintainer(this);
+  if (this->flagLogFullTreeCrunching)
+  { this->Comments << "<br>At recursion depth " << this->RecursionDeptH
+    << ": evaluating " << input.Lispify();
+  }
+
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDeptH
@@ -4937,12 +4983,15 @@ std::string Expression::ToString
       bool createTable=(startingExpression!=0);
       if (createTable)
         createTable=
-        (startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()) &&
-         startingExpression->children.size==this->children.size);
+        (startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()));
       if (createTable)
-      { out << "<hr> "
-        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-        ((*startingExpression)[i].ToString(theFormat));
+      { out << "<hr> ";
+        if (i<(*startingExpression).children.size)
+          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
+          ((*startingExpression)[i].ToString(theFormat));
+        else
+        { out << "No matching starting expression- possible use of the Melt keyword.";
+        }
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
@@ -5443,21 +5492,33 @@ bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
   return true;
 }
 
-bool CommandList::ReplaceEEndCommandEXbyEX()
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  if (left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
-    left.theData.AddChildOnTop(right.theData);
-  else
-  { Expression newExpr;
-    newExpr.reset(*this, 3);
-    newExpr.AssignChildAtomValue(0, this->opEndStatement(), *this);
-    newExpr.AssignChild(1, left.theData);
-    newExpr.AssignChild(2, right.theData);
-    newExpr.format=Expression::formatDefault;
-    left.theData=newExpr;
+bool CommandList::ReplaceEXdotsXbySsXdotsX(int numDots)
+{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
+  Expression newExpr;
+  newExpr.reset(*this);
+  newExpr.children.ReservE(2);
+  newExpr.AddAtomOnTop(this->opEndStatement());
+  newExpr.AddChildOnTop(left.theData);
+  left.theData=newExpr;
+  left.controlIndex=this->conSequenceStatements();
+//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
+bool CommandList::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
+{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
+  if (!left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
+  { std::cout << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression "
+    << " is not EndStatement." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
-  this->DecreaseStackExceptLast(2);
+  left.theData.children.ReservE(left.theData.children.size+ right.theData.children.size-1);
+  for (int i=1; i<right.theData.children.size; i++)
+    left.theData.AddChildOnTop(right.theData[i]);
+  left.theData.format=Expression::formatDefault;
+  left.controlIndex=this->conSequenceStatements();
+  (*this->CurrentSyntacticStacK).PopIndexShiftDown((*this->CurrentSyntacticStacK).size-numDots-1);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
@@ -5843,4 +5904,71 @@ bool CommandList::fElementSSAlgebra
   ElementUniversalEnveloping<RationalFunctionOld> tempUE;
   tempUE.AssignElementLieAlgebra(tempElt, ownerAlgebra, rfOne, rfZero);
   return output.AssignValue(tempUE, theCommands);
+}
+
+bool Expression::IsMeltable(int* numResultingChildren)const
+{ this->CheckInitialization();
+  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opMelt(), 2))
+    return false;
+  if (numResultingChildren!=0)
+  { if (!(*this)[1].IsListNElementsStartingWithAtom(this->theBoss->opEndStatement()))
+      *numResultingChildren=1;
+    else
+      *numResultingChildren=(*this)[1].children.size-1;
+  }
+  return true;
+}
+
+bool CommandList::outerMeltBrackets
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::outerMeltBrackets");
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  std::cout << "outerMeltBrackets meldet sich!";
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
+    return false;
+  std::cout << "<br>outerMeltBrackets meldet sich!";
+
+  int tempInt;
+  int ChildIncrease=0;
+  bool found=false;
+  for (int i=0; i<input.children.size; i++)
+  { const Expression& currentChild=input[i];
+    if (currentChild.IsMeltable(&tempInt))
+    { found=true;
+      ChildIncrease+=tempInt-1;
+    }
+  }
+  if (!found)
+    std::cout << "<br>not found!";
+
+  if (!found)
+    return false;
+  std::cout << "<br>ChildIncrease: " << ChildIncrease;
+  output.reset(theCommands, input.children.size+ChildIncrease);
+  output.AssignChildAtomValue(0, theCommands.opEndStatement(), theCommands);
+  int shift=0;
+  for (int i=1; i<input.children.size; i++)
+  { const Expression& currentChild=input[i];
+    if (!currentChild.IsMeltable())
+    { //output.AssignChild(i+shift, input.children[i]);
+      output.AssignChild(i+shift, input[i]);
+      continue;
+    }
+    std::cout << "<br>shift:" << shift;
+    if (!currentChild[1].IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
+    { //output.AssignChild(i+shift, currentChild.children[1]);
+      output.AssignChild(i+shift, currentChild[1]);
+      continue;
+    }
+//    std::cout << "got " << shift;
+    shift--;
+    for (int j=1; j<currentChild[1].children.size; j++)
+    { shift++;
+      //output.AssignChild(i+shift, currentChild[1].children[j]);
+      output.AssignChild(i+shift, currentChild[1][j]);
+    }
+  }
+  std::cout << output.ToString();
+
+  return true;
 }

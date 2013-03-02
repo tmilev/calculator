@@ -5923,10 +5923,10 @@ bool CommandList::outerMeltBrackets
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  std::cout << "outerMeltBrackets meldet sich!";
+  //std::cout << "outerMeltBrackets meldet sich!";
   if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
     return false;
-  std::cout << "<br>outerMeltBrackets meldet sich!";
+  //std::cout << "<br>outerMeltBrackets meldet sich!";
 
   int tempInt;
   int ChildIncrease=0;
@@ -5938,12 +5938,11 @@ bool CommandList::outerMeltBrackets
       ChildIncrease+=tempInt-1;
     }
   }
-  if (!found)
-    std::cout << "<br>not found!";
-
+//  if (!found)
+//    std::cout << "<br>not found!";
   if (!found)
     return false;
-  std::cout << "<br>ChildIncrease: " << ChildIncrease;
+//  std::cout << "<br>ChildIncrease: " << ChildIncrease;
   output.reset(theCommands, input.children.size+ChildIncrease);
   output.AssignChildAtomValue(0, theCommands.opEndStatement(), theCommands);
   int shift=0;
@@ -5954,7 +5953,7 @@ bool CommandList::outerMeltBrackets
       output.AssignChild(i+shift, input[i]);
       continue;
     }
-    std::cout << "<br>shift:" << shift;
+//    std::cout << "<br>shift:" << shift;
     if (!currentChild[1].IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
     { //output.AssignChild(i+shift, currentChild.children[1]);
       output.AssignChild(i+shift, currentChild[1]);
@@ -5968,7 +5967,7 @@ bool CommandList::outerMeltBrackets
       output.AssignChild(i+shift, currentChild[1][j]);
     }
   }
-  std::cout << output.ToString();
+//  std::cout << output.ToString();
 
   return true;
 }

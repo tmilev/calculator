@@ -64,7 +64,7 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
 }
 
 bool CommandList::innerCharacter(CommandList& theCommands, const Expression& input, Expression& output)
-{
+{ MacroRegisterFunctionWithName("CommandList::innerCharacter");
   SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully

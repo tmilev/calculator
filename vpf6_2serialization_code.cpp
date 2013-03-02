@@ -588,6 +588,13 @@ bool Serialization::innerLoadFromObject
   output.theE=eltE;
   output.theF=eltF;
   output.owneR=eltE.GetOwner();
+  SemisimpleSubalgebras tempSubalgebras;
+  tempSubalgebras.owneR=output.owneR;
+  int indexSubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSubalgebras);
+  SemisimpleSubalgebras& ownerSubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras[indexSubalgebras];
+  output.container=&ownerSubalgebras.theSl2s;
   return true;
 }
 

@@ -845,9 +845,11 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)
   this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
   this->ElementToHtmlCreateFormulaOutputReference
   ("$"+tempS+"$", out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
-  this->container->IndicesSl2decompositionFlas[indexInContainer]=
-  this->container->texFileNamesForPNG.size-1;
+  if (indexInContainer!=-1)
+  { this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
+    this->container->IndicesSl2decompositionFlas[indexInContainer]=
+    this->container->texFileNamesForPNG.size-1;
+  }
   out << "\nThe below list one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";

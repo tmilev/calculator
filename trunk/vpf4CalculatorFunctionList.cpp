@@ -133,7 +133,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
   ("SemisimpleLieAlgebra", this->innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
-    such as A_n or, alternatively, in the format A^k_n, \
+    A_n or, alternatively, in the format A^k_n, \
     where the capital letter stands for the type, \
     the lower index stands for the rank, and the upper index stands for \
     the length of the first co-root squared. \
@@ -219,7 +219,6 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Tries to convert to a matrix of ratinonals or matrix of rational functions and computes the determinant if\
    not too large. \
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
-
 /*  this->AddOperationInnerHandler
   ("Union", this->innerUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
@@ -651,8 +650,10 @@ void CommandList::initPredefinedStandardOperations()
   (";", this->outerMeltBrackets, "",
    "Melts down a layer of parenthesis around a list of commands prepended with the Melt operation.\
    \n More precisely,\
-   cycles through all immediate children of the expression. If the k^th child X is a list starting with Melt\
-   whose second child is EndStatement(;), then X is replaced with the third, fourth, ...\
+   cycles through all immediate children of the expression. \
+   \nIf the k^th child X is a list starting with Melt\
+   whose second child Y is a list starting with EndStatement(;), \
+   then X is replaced with the second, third, ... children of Y.\
    child of X. ", "Melt{}(a,b); ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes

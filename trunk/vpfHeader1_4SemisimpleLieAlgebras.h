@@ -144,7 +144,14 @@ public:
     this->listSystemCommandsLatex =other.listSystemCommandsLatex;
     this->listSystemCommandsDVIPNG =other.listSystemCommandsDVIPNG;
   }
-  void CheckForCorrectInitializationCrashIfNot()
+  bool operator==(const SltwoSubalgebras& other)const
+  { if (this->owner==0)
+      return other.owner==0;
+    if (other.owner==0)
+      return false;
+    return this->GetOwner()==other.GetOwner();
+  }
+  void CheckForCorrectInitializationCrashIfNot()const
   { if (this->owner==0)
     { std::cout << "<br>This is a programming error. "
       << " Object SltwoSubalgebras is not initialized, although it is supposed to be. "
@@ -152,10 +159,10 @@ public:
       assert(false);
     }
   }
-  WeylGroup& GetOwnerWeyl()
+  WeylGroup& GetOwnerWeyl()const
   { return this->GetOwner().theWeyl;
   }
-  SemisimpleLieAlgebra& GetOwner()
+  SemisimpleLieAlgebra& GetOwner()const
   { this->CheckForCorrectInitializationCrashIfNot();
     return *this->owner;
   }

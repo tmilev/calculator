@@ -4828,11 +4828,12 @@ public:
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
    ;
+  template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRowsDeleteZeroRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList,
+  (List<MonomialCollectionTemplate >& theList,
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
-  { MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
+  { MonomialCollectionTemplate::GaussianEliminationByRows
     (theList, IvemadeARowSwitch, seedMonomials);
     for (int j=theList.size-1; j>=0; j--)
       if (theList[j].IsEqualToZero())

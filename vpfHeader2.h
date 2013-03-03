@@ -548,6 +548,7 @@ public:
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
+  HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   ListReferences<CalculusFunctionPlot> thePlots;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
@@ -1058,6 +1059,9 @@ public:
   int opMatRat()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
   }
+  int opMatRF()
+  { return this->operations.GetIndexIMustContainTheObject("Matrix_RF");
+  }
   int opString()
   { return this->operations.GetIndexIMustContainTheObject("string");
   }
@@ -1263,6 +1267,9 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerMatrixRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerMatrixRationalFunction
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerMinus
@@ -1972,22 +1979,36 @@ bool CommandList::GetVectoR
   if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
+      { this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory
+        << " but the input " << input.ToString() << " can only be interpretted as a single element";
         return false;
+      }
     Expression theConverted=input;
-    if(!theConverted.SetContextAtLeastEqualTo(startContext))
-    { this->Comments << "<br>Failed to set context " << startContext.ToString()
-      << " onto " << theConverted.ToString();
-      return false;
-    }
     if (!input.IsOfType<theType>())
     { if (conversionFunction==0)
+      { this->Comments
+        << "<hr>GetVector failure: input is not of desired type and there is no conversion function. <hr>";
         return false;
+      }
       this->CallCalculatorFunction(conversionFunction, input, theConverted);
       if (!theConverted.IsOfType<theType>())
+      { this->Comments << "<hr> GetVector failure: I did call a conversion function on "
+        << theConverted.ToString() << " but the output was not of the desired type. ";
         return false;
+      }
+    }
+    Expression tempContext=theConverted.GetContext();
+    if (!tempContext.ContextMergeContexts(tempContext, startContext, startContext))
+    { this->Comments << "<hr>GetVector failure: failed to merge starting context with "
+      << " context obtained by using the conversion function, i.e., failed to merge "
+      << tempContext.ToString() << " with " << startContext.ToString() << ". <hr>";
+      return false;
     }
     if (!theConverted.SetContextAtLeastEqualTo(startContext))
+    { this->Comments << "<hr>GetVector failure: failed to set context  " << startContext.ToString()
+      << " onto  " << theConverted.ToString();
       return false;
+    }
     output.SetSize(1);
     output[0]=theConverted.GetValuE<theType>();
     startContext=theConverted.GetContext();
@@ -1995,25 +2016,28 @@ bool CommandList::GetVectoR
   }
   if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=input.children.size-1)
+    { this->Comments << "I am required to have " << targetDimNonMandatory << " columns but "
+      << "I have " << input.children.size-1 << "columns instead";
       return false;
+    }
   targetDimNonMandatory=input.children.size-1;
   Expression currentContext;
   List<Expression> convertedExpressions;
   convertedExpressions.SetSize(targetDimNonMandatory);
   //Conversion has several phases. I am not sure these phases are the best choice,
   //but they appear to handle every conversion I think should be assumed implicit.
-  //1. Set context of expressions to be at least equal to the starting context.
+  //1. Extract all contexts of all expressions and merge them into the starting context.
   //2. Check types of expressions, if bad call conversion function.
-  //3. Merge contexts of converted expressions into a common context.
+  //3. Merge the contexts obtained in 1.
   //4. Set contexts of converted expressions to the new common context.
 
-
-  //1. Set context of expressions to be at least equal to starting.
+  //1. Extract all contexts of all expressions and merge them into the starting context.
   for (int i=0; i<targetDimNonMandatory; i++)
   { convertedExpressions[i]=input[i+1];
-    if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
-    { this->Comments << "<br>Failed to set starting context " << startContext.ToString()
-      << " onto " << convertedExpressions[i].ToString();
+    currentContext=convertedExpressions[i].GetContext();
+    if (!currentContext.ContextMergeContexts(currentContext, startContext, startContext))
+    { this->Comments << "<hr>GetVector() failed: failed to merge contexts "
+      << currentContext.ToString() << " and " << startContext.ToString();
       return false;
     }
   }
@@ -2024,7 +2048,10 @@ bool CommandList::GetVectoR
         return false;
       if (!this->CallCalculatorFunction
           (conversionFunction, convertedExpressions[i], convertedExpressions[i]))
+      { this->Comments << "<hr>GetVector() failed: conversion function called on "
+        << convertedExpressions[i] << " did not return successfully.<hr> ";
         return false;
+      }
       if (!convertedExpressions[i].IsOfType<theType>())
       { this->Comments << "<br>Converting function evaluated on " << convertedExpressions[i].ToString()
         << " returned true, but the output of the function is not of the desired type. "
@@ -2046,7 +2073,10 @@ bool CommandList::GetVectoR
   { //std::cout << "<br>Setting context " << startContext.ToString()
     //<< " onto " << convertedExpressions[i].ToString() << ".";
     if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
+    { this->Comments << "<hr>Failed to set context  " << startContext.ToString()
+      << " in " << convertedExpressions[i].ToString() << "<hr>";
       return false;
+    }
     //std::cout << "<br>Context conversion successful with output "
     //<< convertedExpressions[i].ToString();
     output[i]=convertedExpressions[i].GetValuE<theType>();
@@ -2083,12 +2113,35 @@ bool CommandList::GetMatrix
     return true;
   }
   Vector<theType> currentRow;
+  Expression currentContext;
+  currentContext.MakeEmptyContext(*this);
+  if (!startContext.IsContext())
+    startContext.MakeEmptyContext(*this);
   int numRows=theExpression.children.size-1;
   for (int i=0; i<numRows; i++)
   { const Expression& currentE=theExpression[i+1];
     if (!this->GetVectoR
-        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
+        (currentE, currentRow, &currentContext, targetNumColsNonMandatory, conversionFunction))
+    { this->Comments << "<hr>Failed to GetVector() from expression "
+      << currentE.ToString() << " with context " << currentContext.ToString() << "<hr>";
       return false;
+    }
+    std::cout << "<hr>Merging " << currentContext.ToString() << " with " << startContext.ToString();
+    if (!currentContext.ContextMergeContexts(currentContext, startContext, startContext))
+    { this->Comments << "<hr>Failed to merge context "
+      << currentContext.ToString() << " with context " << startContext.ToString() << "<hr>";
+      return false;
+    }
+  }
+  std::cout << "<hr>The context from all rows is: " << startContext.ToString();
+  for (int i=0; i<numRows; i++)
+  { const Expression& currentE=theExpression[i+1];
+    if (!this->GetVectoR
+        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
+    { this->Comments << "<hr>Failed to GetVector() from expression " <<
+      currentE.ToString() << " with context " << startContext.ToString() << "<hr>";
+      return false;
+    }
     if (i==0)
     { targetNumColsNonMandatory=currentRow.size;
       outputMat.init(numRows, targetNumColsNonMandatory);

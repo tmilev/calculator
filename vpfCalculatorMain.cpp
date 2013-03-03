@@ -314,6 +314,8 @@ int main(int argc, char **argv)
   //civilizedInput="Melt{}(a);";
   //civilizedInput="Melt{}(a;b);";
 //  civilizedInput="a; b";
+//  civilizedInput=" ";
+//  civilizedInput="c:=(a:=b);c;a;";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

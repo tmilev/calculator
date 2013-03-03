@@ -362,6 +362,19 @@ bool CommandList::innerMatrixRational
   return output.AssignValue(outputMat, theCommands);
 }
 
+bool CommandList::innerMatrixRationalFunction
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ Matrix<RationalFunctionOld> outputMat;
+  Expression ContextE;
+  if (!theCommands.GetMatriXFromArguments
+      (input, outputMat, &ContextE, -1, CommandList::innerRationalFunction))
+  { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
+    return false;
+  }
+  std::cout << "<hr>And the context is: " << ContextE.ToString();
+  return output.AssignValueWithContext(outputMat, ContextE, theCommands);
+}
+
 bool CommandList::innerDrawPolarRfunctionTheta
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDrawPolarRfunctionTheta");

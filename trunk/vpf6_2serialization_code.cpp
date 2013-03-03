@@ -306,8 +306,7 @@ bool CommandList::innerExtractPMTDtreeContext
   if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
       input.IsListStartingWithAtom(theCommands. opPlus()) ||
       input.IsListStartingWithAtom(theCommands.opMinus()) )
-  { output.reset(theCommands, 1);
-    output.AssignChildAtomValue(0, theCommands.opContext(), theCommands);
+  { output.MakeEmptyContext(theCommands);
     Expression newContext, intermediateContext;
     for (int i=1; i<input.children.size; i++)
       if (theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
@@ -326,9 +325,14 @@ bool CommandList::innerExtractPMTDtreeContext
   { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
     return false;
   }
+  if (input.HasContext())
+  { output=input.GetContext();
+    return true;
+  }
   Expression theContext;
   input.GetContextForConversionIgnoreMyContext<dataType>(theContext);
   return Expression::ContextMergeContexts(theContext, input.GetContext(), output);
+  //std::cout << "<br>Context for conversion ignoring mine: " << theContext.ToString();
 }
 
 template <class dataType>
@@ -337,9 +341,12 @@ bool CommandList::outerExtractAndEvaluatePMTDtree
 { Expression contextE;
   if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
     return false;
-//  std::cout << "<br>Extracted context from " << input.ToString() << ": "
-//  << contextE.ToString();
-  return theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
+  std::cout << "<hr>Extracted context from " << input.ToString() << ": "
+  << contextE.ToString();
+  bool result= theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
+  std::cout << "<hr>.. and final output is: " << output.ToString()
+  << " with final context " << contextE.ToString();
+  return result;
 }
 
 template <class dataType>
@@ -360,7 +367,10 @@ bool CommandList::EvaluatePMTDtree
       input.IsListStartingWithAtom(this-> opPlus()) )
   { for (int i=1; i<input.children.size; i++)
     { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
+      { this->Comments << "<hr>Failed to evaluate pmtd tree from input "
+        << input[i].ToString() << " with context " << inputContext.ToString();
         return false;
+      }
 //      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
       if (input[0].IsAtoM(this->opTimes()))
       { if (i==1)
@@ -391,7 +401,10 @@ bool CommandList::EvaluatePMTDtree
   if (input.IsListNElementsStartingWithAtom(this->opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
     { if(!this->EvaluatePMTDtree<dataType>(inputContext, input[1], output))
+      { this->Comments << "<hr>Failed to evaluate pmtd tree from input "
+        << input[1].ToString() << " with context " << inputContext.ToString();
         return false;
+      }
       outputData=output.GetValuE<dataType>();
       outputData.RaiseToPower(thePower);
       return output.AssignValueWithContext(outputData, inputContext, *this);
@@ -401,7 +414,7 @@ bool CommandList::EvaluatePMTDtree
   if (!intermediate.SetContextAtLeastEqualTo(tempContext))
   { this->Comments << "Failed to set context " << tempContext.ToString()
     << " onto expression " << intermediate.ToString() << "."
-    << " <b>This could be a programmSetContextAtLeastEqualToing error.</b> ";
+    << " <b>This could be a programming error.</b> ";
     return false;
   }
   if (!intermediate.ConvertToType<dataType>(output))
@@ -730,8 +743,8 @@ bool Serialization::innerPolynomial
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomial");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
+  std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
+  std::cout << "<br>First elt input is:" << input[0].ToString();
   return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
   (theCommands, input, output);
 }
@@ -763,9 +776,11 @@ bool CommandList::innerRationalFunction
   //std::cout << "<br>First elt input is:" << input[0].ToString();
   bool result= theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
   (theCommands, input, output);
+  if (!result)
+    return false;
   if (!output.IsOfType<RationalFunctionOld>())
   { std::cout << "<br>This is a programming error: outerExtractAndEvaluatePMTDtree returned true "
-    << "from input" << input.ToString()
+    << "from input " << input.ToString()
     << " but the result is not of type RationalFunctionOld, instead it is "
     << output.ToString() << ". "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

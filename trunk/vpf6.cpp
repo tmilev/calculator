@@ -45,6 +45,12 @@ int Expression::GetTypeOperation<Matrix<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Matrix<RationalFunctionOld> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opMatRF();
+}
+
+template < >
 int Expression::GetTypeOperation<int>()const
 { this->CheckInitialization();
   return this->theBoss->opRational();
@@ -259,6 +265,15 @@ Matrix<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
+Matrix<RationalFunctionOld>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theMatRFs
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 CalculusFunctionPlot
 & inputValue)const
 { this->CheckInitialization();
@@ -441,6 +456,17 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
+Matrix<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<Matrix<RationalFunctionOld> >())
+  { std::cout << "This is a programming error: expression not of required type Matrix_RF. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theMatRFs[this->GetLastChild().theData];
+}
+
+template < >
 SemisimpleSubalgebras& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<SemisimpleSubalgebras>())
   { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
@@ -551,16 +577,26 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
     return true;
   }
   if (!this->HasContext())
+  { this->theBoss->Comments << "Failed to convert " << this->ToString()
+    << " to RF because the expression had no context. ";
     return false;
+  }
   Expression expressionRemovedContext=*this;
   expressionRemovedContext.RemoveContext();
-  std::cout << "<br>Converting to rational function: " << this->ToString()
-  << ", without context: " << expressionRemovedContext.ToString();
+  //std::cout << "<hr>Converting to rational function: " << this->ToString()
+  //<< ", without context: " << expressionRemovedContext.ToString() << "<br>";
+  //std::cout << "The stack trace, master: "
+  //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << "<hr>";
 
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
   int indexInPolyVars=myPolyVars.GetIndexChild(expressionRemovedContext);
   if (indexInPolyVars==-1)
+  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString()
+    << " to RF because my context " << this->GetContext()
+    << " did not contain have my context-stripped value "
+    << expressionRemovedContext.ToString() << ". <hr>";
     return false;
+  }
   RationalFunctionOld resultRF;
   resultRF.MakeOneLetterMoN(indexInPolyVars-1, 1, *this->theBoss->theGlobalVariableS);
   return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
@@ -603,6 +639,7 @@ bool Expression::GetContextForConversionIgnoreMyContext<Polynomial<Rational> >
   tempE.AssignChildAtomValue(0, this->theBoss->opPolynomialVariables(), *this->theBoss);
   tempE.AssignChild(1, *this);
   output.AssignChild(1, tempE);
+  std::cout << "<br>Output context without mine: " << output.ToString();
   return true;
 }
 
@@ -3592,6 +3629,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
   this->AddOperationBuiltInType("Matrix_Rational");
+  this->AddOperationBuiltInType("Matrix_RF");
   this->AddOperationBuiltInType("CalculusPlot");
   this->AddOperationBuiltInType("SemisimpleSubalgebras");
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
@@ -4254,11 +4292,13 @@ bool CommandList::EvaluateExpression
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
   StackMaintainerRules theRuleStackMaintainer(this);
-  if (this->flagLogFullTreeCrunching)
-  { this->Comments << "<br>At recursion depth " << this->RecursionDeptH
-    << ": evaluating " << input.Lispify();
+  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
+  { this->Comments << "<br>";
+    for (int i=0; i<this->RecursionDeptH; i++)
+      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
+    this->Comments << "Evaluating " << input.Lispify()
+    << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
-
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDeptH
@@ -4342,22 +4382,30 @@ bool CommandList::EvaluateExpression
 /////-------Evaluating children -------
     //bool foundError=false;
     for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
-    { const Expression& currentChild=output[i];
-      bool tempBool=true;
-      if (this->EvaluateExpression(currentChild, tempE, bufferPairs, tempBool))
+    { bool tempBool=true;
+//      bool debugBool=false;
+//      if (output[i].ToString()=="c");
+//        debugBool=true;
+      if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
         output.AssignChild(i, tempE);
       if (!tempBool)
         outputIsFree=false;
-      if (currentChild.IsError())
+      if (output[i].IsError())
       { this->flagAbortComputationASAP=true;
         break;
       }
+/*      if (this->RecursionDeptH==1)
+      { std::cout << "<hr>Considering whether "
+        << output[i].Lispify() << " is rule-stack-worthy.";
+        if (output.ToString()=="a:=b")
+          std::cout << "<hr>a:=b is here<hr>";
+      }*/
       if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
-        if (currentChild.IsListNElementsStartingWithAtom(this->opDefine()) ||
-            currentChild.IsListNElementsStartingWithAtom(this->opDefineConditional()))
-        { this->RuleStack.AddOnTop(currentChild);
+        if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) ||
+          output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
+        { this->RuleStack.AddOnTop(output[i]);
           this->RuleContextIdentifier++;
-          //std::cout << "Added to rule stack rule " << currentChild.ToString();
+         // std::cout << ".. added !!!!";
         }
     }
     if (this->flagAbortComputationASAP)
@@ -4390,6 +4438,13 @@ bool CommandList::EvaluateExpression
   this->ExpressionStack.RemoveIndexSwapWithLast(this->ExpressionStack.size-1);
   if (output.IsListStartingWithAtom(this->opBind()))
     outputIsFree=false;
+  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
+  { this->Comments << "<br>";
+    for (int i=0; i<this->RecursionDeptH; i++)
+      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
+    this->Comments << "to get: " << output.Lispify();
+  }
+
   return true;
 }
 
@@ -4518,7 +4573,9 @@ bool CommandList::ExtractExpressions
     {}
   }
   bool success=false;
-  if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
+  if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart)
+    errorLog << "Non-meaningful input detected (spacebar, enter characters only?).";
+  else if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
   { SyntacticElement& result=(*this->CurrentSyntacticStacK)[this->numEmptyTokensStart];
     if (result.errorString=="" && result.controlIndex==this->conExpression())
     { outputExpression=result.theData;
@@ -4764,6 +4821,14 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
   { out << this->GetValuENonConstUseWithCaution<LittelmannPath>().ToString()  ;
+    result=true;
+  } else if (this->IsOfType<Matrix<RationalFunctionOld> >())
+  { Expression contextE=this->GetContext();
+    FormatExpressions tempFormat;
+    contextE.ContextGetFormatExpressions(tempFormat);
+    tempFormat.flagUseHTML=false;
+    tempFormat.flagUseLatex=true;
+    out << this->GetValuENonConstUseWithCaution<Matrix<RationalFunctionOld> >().ToString(&tempFormat)  ;
     result=true;
   }
   output=out.str();

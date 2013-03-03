@@ -656,13 +656,16 @@ void CommandList::initPredefinedStandardOperations()
   //is more modular, conceptual, and easier to test: in short, the better engineering solution.
   this->AddOperationOuterHandler
   (";", this->outerMeltBrackets, "",
-   "Melts down a layer of parenthesis around a list of commands prepended with the Melt operation.\
+   "Melts down a layer of parenthesis around a list of commands \
+   prepended with the Melt operation.\
    \n More precisely,\
    cycles through all immediate children of the expression. \
-   \nIf the k^th child X is a list starting with Melt\
-   whose second child Y is a list starting with EndStatement(;), \
-   then X is replaced with the second, third, ... children of Y.\
-   child of X. ", "Melt{}(a;b); ", true);
+   \nIf the k^th child X is a list of two elements starting with Melt, \
+   then the operation does the following.\
+   If the second child Y of X is a list starting with EndStatement(;), \
+   then X is replaced with the second, third, ... children of Y. \
+   If Y is not a list starting with EndStatement, X is replaced with Y.\
+   ", "c:=(a:=b);\na;\nc;\na;\nd:=(e:=f; g:=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),

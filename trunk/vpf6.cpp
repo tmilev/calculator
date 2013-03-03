@@ -4291,7 +4291,6 @@ bool CommandList::EvaluateExpression
  bool& outputIsFree)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
-  StackMaintainerRules theRuleStackMaintainer(this);
   if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
@@ -4346,7 +4345,8 @@ bool CommandList::EvaluateExpression
   Expression tempE;
   tempE.reset(*this);
   while (ReductionOcurred && !this->flagAbortComputationASAP)
-  { ReductionOcurred=false;
+  { StackMaintainerRules theRuleStackMaintainer(this);
+    ReductionOcurred=false;
     counterNumTransformations++;
     //if (this->flagLogEvaluation && counterNumTransformations>1 )
     //{ this->Comments << "<br>input: " << input.ToString() << "->"
@@ -5992,7 +5992,6 @@ bool CommandList::outerMeltBrackets
   if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
     return false;
   //std::cout << "<br>outerMeltBrackets meldet sich!";
-
   int tempInt;
   int ChildIncrease=0;
   bool found=false;

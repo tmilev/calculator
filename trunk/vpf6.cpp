@@ -639,7 +639,7 @@ bool Expression::GetContextForConversionIgnoreMyContext<Polynomial<Rational> >
   tempE.AssignChildAtomValue(0, this->theBoss->opPolynomialVariables(), *this->theBoss);
   tempE.AssignChild(1, *this);
   output.AssignChild(1, tempE);
-  std::cout << "<br>Output context without mine: " << output.ToString();
+//  std::cout << "<br>Output context without mine: " << output.ToString();
   return true;
 }
 
@@ -5062,7 +5062,9 @@ std::string Expression::ToString
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValuE<std::string>();
-        else if ((*this)[i].IsOfType<CalculusFunctionPlot>() && isFinal)
+        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
+                  (*this)[i].IsOfType<SemisimpleSubalgebras>() )
+                 && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
           out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
@@ -5115,7 +5117,9 @@ std::string Expression::ToString
     outTrue << "<table>";
     outTrue << "<tr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
     outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
-    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
+    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: "
+    << "many thanks for your great work!</td></tr>";
+   // std::cout << this->Lispify();
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
     else
@@ -5126,7 +5130,8 @@ std::string Expression::ToString
            ) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";
+        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str())
+        << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();

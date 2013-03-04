@@ -34,10 +34,11 @@ void CommandList::initPredefinedInnerFunctions()
   ("Store", Serialization::innerStore, "",
    "Attempts to convert a built-in data type to an expression tree which \
    evaluates to the same value as the \
-   built-in type, and prepends the tree with the Serialization atom. If the conversion is not implemented\
+   built-in type, and prepends the tree with the Serialization atom. \
+   If the conversion is not implemented\
    the Store function evaluates to an error message.",
    "Y:=Polynomial{}((a+b)^2);\
-   \nX:=Store{}Y;\nDeserialize{}X\
+   \nX:=Store{}Y;\nLoad{}X\
    ", true)
    ;
   this->AddOperationInnerHandler
@@ -148,7 +149,8 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
     <b>Remark.</b> It is advisable to omit the upper index (i.e., use default values) \
     when computing with a single semisimple Lie algebra. \
     <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
-    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^1_4, G^2_2 in extended notation). \
+    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^1_4, \
+    G^2_2 in extended notation). \
     The roots are ordered in order the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
@@ -219,12 +221,14 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
   this->AddOperationInnerHandler
   ("FunctionToMatrix", this->innerFunctionToMatrix,"",
-   "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
+   "Creates a matrix from a function. The first argument gives the function, \
+   the second argument the number of rows, \
    the third- the number of columns.\
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=a/b;\n X; \\det {} X");
   this->AddOperationInnerHandler
   ("\\det", this->innerDeterminant, "",
-   "Tries to convert to a matrix of ratinonals or matrix of rational functions and computes the determinant if\
+   "Tries to convert to a matrix of ratinonals or matrix of rational \
+   functions and computes the determinant if\
    not too large. \
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
 /*  this->AddOperationInnerHandler
@@ -243,7 +247,8 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    The third argument parametrizes the parabolic subalgebra, e.g. (1,0,0) stands for a \
    parabolic subalgebra with first simple root crossed-out. The second argument is allowed to have \
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
-   "g_{{i}}:=getChevalleyGenerator{}(B_3, i);h_{{i}}:=getCartanGenerator{}(B_3, i);\n v_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0)) ;  v_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1} v_\\lambda");
+   "g_{{i}}:=getChevalleyGenerator{}(B_3, i);h_{{i}}:=getCartanGenerator{}(B_3, i);\
+   \nv_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0));\nv_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1}v_\\lambda");
   this->AddOperationInnerHandler
   ("printModule", this->innerPrintGenVermaModule, "",
    "Makes a report on a finite dimensional Lie algebra module, or more generally, on \
@@ -273,16 +278,20 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
   this->AddOperationInnerHandler
   ("animateLittelmannPaths", this->fAnimateLittelmannPaths, "",
-   "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. Presented first on the seminar in Charles University Prague. \
+   "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. \
+   Presented first on the seminar in Charles University Prague. \
    The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
    ",
    "animateLittelmannPaths{}(G_2, (2,0));");
   this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
    this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
-   "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
-   The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
-   fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
+   "Decomposes the inducing module of a generalized Verma module over the \
+   Levi part of a parabolic smaller than the inducing one.\
+   The first argument gives the type of the algebra. The second argument \
+   gives the highest weight of the module in \
+   fundamental coordinates. The third argument gives the parabolic \
+   subalgebra with respect to which we induce. \
    The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
   this->AddOperationInnerHandler
@@ -381,7 +390,8 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
   this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords", this->fWeylOrbitSimple, "",
    "Generates a Weyl orbit printout from simple coords.\
-    First argument = type. Second argument = weight in simple coords. The orbit size is cut off at max 1920 elements (type D_5).",
+    First argument = type. Second argument = weight in simple coords. \
+    The orbit size is cut off at max 1920 elements (type D_5).",
    "WeylOrbitSimpleCoords{}(B_2, (y, y));");
   this->AddOperationInnerHandler
   ("WeylOrbitFundCoords", this->fWeylOrbitFund, "",
@@ -424,7 +434,8 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    as well as the cosets \
    (given by minimal coset representatives) of the Weyl subgroup in question. \
    The input must have as many integers as there are simple roots in the ambient \
-   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding \
+   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), \
+   one should put a 1 in the corresponding \
    coordinate. \
    Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
    calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; \
@@ -582,7 +593,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
-   "Deserialize{}(Serialize {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
+   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
    ;
   this->AddOperationInnerHandler
   ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
@@ -590,15 +601,16 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    Loads an sl(2) subalgebra from expression. ",
    "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\\
 +Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\\
-+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
++3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), \
+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
 +6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
-+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", true)
++10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", false)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
-   "Deserialize{}(Serialize {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
+   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", false)
    ;
 
 //     this->AddOperationInnerHandler
@@ -790,7 +802,8 @@ void CommandList::initPredefinedStandardOperations()
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
    "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   \nDoubleValue{}((101)^{20});\
+   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opRational(),
@@ -798,7 +811,8 @@ void CommandList::initPredefinedStandardOperations()
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
    "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   \nDoubleValue{}((101)^{20});\
+   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opDouble(),
@@ -806,7 +820,8 @@ void CommandList::initPredefinedStandardOperations()
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
    "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((103/197)^{35})*DoubleValue{}((103/197)^{35})*DoubleValue{}((107/103)^{70})"
+   \nDoubleValue{}((101)^{20});\
+   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",

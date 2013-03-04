@@ -230,8 +230,11 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   Rational two=2;
   tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
   tempWeylnonScaled.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank);
+  this->theWeylNonEmbeddeD.theDynkinType+=tempWeyl.theDynkinType;
   this->theWeylNonEmbeddeD.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
+  this->theWeylNonEmbeddeDdefaultScale.theDynkinType+=(tempWeylnonScaled.theDynkinType);
   this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.DirectSumWith(tempWeylnonScaled.CartanSymmetric);
+
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;
   this->theHorbitIndices.SetSize(this->theHorbitIndices.size+1);

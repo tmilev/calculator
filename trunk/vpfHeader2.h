@@ -1833,7 +1833,8 @@ static bool innerStoreObject
 (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
 ;
 static bool innerStoreObject
-(CommandList& theCommands, const RationalFunctionOld& input, Expression& output, const Expression& theContext)
+(CommandList& theCommands, const RationalFunctionOld& input, Expression& output,
+ Expression* theContext)
 ;
 static bool innerStoreObject
 (CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
@@ -1845,7 +1846,13 @@ static bool innerStoreObject
 (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 ;
 static bool innerStoreObject
+(CommandList& theCommands, const CandidateSSSubalgebra& input, Expression& output)
+;
+static bool innerStoreObject
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
+;
+static bool innerStoreObject
+(CommandList& theCommands, const Rational& input, Expression& output, Expression* theContext=0)
 ;
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
@@ -1856,7 +1863,7 @@ static bool innerLoadFromObject
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, RationalFunctionOld& output)
 ;
-static bool innerLoadRationalFunction
+static bool innerStoreRationalFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerStoreSemisimpleSubalgebras
@@ -1871,17 +1878,35 @@ static bool innerLoadSltwoSubalgebras
 static bool innerLoadSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-template <class TemplateMonomial, typename CoefficientType>
-static bool SerializeMonCollection
-(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
- Expression& output, const Expression& theContext)
+static bool innerStoreObject
+(CommandList& theCommands, const ChevalleyGenerator& input, Expression& output,
+ Expression* theContext=0, bool* isNonConst=0)
 ;
-template <class TemplateMonomial>
-static bool SerializeMon
-(CommandList& theCommands, const TemplateMonomial& input, Expression& output,
- const Expression& theContext, bool& isNonConst)
+static bool innerStoreObject
+(CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+ Expression& output, Expression* theContext=0, bool* isNonConst=0)
 ;
+static bool innerStoreObject
+(CommandList& theCommands, const MonomialP& input,
+ Expression& output, Expression* theContext=0, bool* inputOutputNonConst=0)
+;
+static bool innerStoreObject
+(CommandList& theCommands, const DynkinSimpleType& input,
+ Expression& output, Expression* theContext=0, bool* inputOutputNonConst=0)
+;
+
+template <class TemplateList>
+static bool innerStoreObject
+(CommandList& theCommands, const TemplateList& input, Expression& output, Expression* theContext=0)
+;
+
 template <class TemplateMonomial, typename CoefficientType>
+static bool innerStoreMonCollection
+(CommandList& theCommands,
+ const MonomialCollection<TemplateMonomial, CoefficientType>& input, Expression& output,
+ Expression* theContext=0)
+ ;
+ template <class TemplateMonomial, typename CoefficientType>
 static bool DeSerializeMonCollection
 (CommandList& theCommands, const Expression& input,
  MonomialCollection<TemplateMonomial, CoefficientType>& output)
@@ -1896,10 +1921,26 @@ static bool DeSerializeMon
 ;
 };
 
+template <class TemplateList>
+bool Serialization::innerStoreObject
+(CommandList& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
+{ output.reset(theCommands);
+  output.children.ReservE(input.size+1);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSequence(), theCommands);
+  output.AddChildOnTop(tempE);
+  for (int i=0; i<input.size; i++)
+  { if (!Serialization::innerStoreObject(theCommands, input[i], tempE, theContext))
+      return false;
+    output.AddChildOnTop(tempE);
+  }
+  return true;
+}
+
 template <class TemplateMonomial, typename CoefficientType>
-bool Serialization::SerializeMonCollection
+bool Serialization::innerStoreMonCollection
 (CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
- Expression& output, const Expression& theContext)
+ Expression& output, Expression* theContext)
 { MacroRegisterFunctionWithName("Serialization::SerializeMonCollection");
   Expression termE, coeffE, tempE;
   if (input.IsEqualToZero())
@@ -1907,8 +1948,8 @@ bool Serialization::SerializeMonCollection
   for (int i=input.size-1; i>=0; i--)
   { TemplateMonomial& currentMon=input[i];
     bool isNonConst=true;
-    if (!Serialization::SerializeMon<TemplateMonomial>
-        (theCommands, currentMon, termE, theContext, isNonConst))
+    if (!Serialization::innerStoreObject
+        (theCommands, currentMon, termE, theContext, &isNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
     }
@@ -2151,5 +2192,4 @@ bool CommandList::GetMatrix
   }
   return true;
 }
-
 #endif

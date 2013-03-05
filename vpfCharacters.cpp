@@ -16,7 +16,7 @@ bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& 
 { SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, thePointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
     return output.SetError(errorString, theCommands);
   CoxeterGroup theGroup;
   theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
@@ -34,7 +34,7 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], thePointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
     return output.SetError(errorString, theCommands);
   List<int> theReflections;
   for(int i=2; i<input.children.size; i++){
@@ -68,7 +68,7 @@ bool CommandList::innerCharacter(CommandList& theCommands, const Expression& inp
   SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], thePointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
     return output.SetError(errorString, theCommands);
   CoxeterGroup theGroup;
   theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);

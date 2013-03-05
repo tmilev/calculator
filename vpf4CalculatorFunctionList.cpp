@@ -131,7 +131,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
-  ("SemisimpleLieAlgebra", this->innerSSLieAlgebra, "",
+  ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
     A_n or, alternatively, in the format A^k_n, \

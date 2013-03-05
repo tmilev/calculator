@@ -438,10 +438,17 @@ bool CommandList::EvaluatePMTDtree
   return true;
 }
 
-bool CommandList::innerSSLieAlgebra
+bool Serialization::innerSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
+  return Serialization::innerLoadFromObject(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
+}
+
+bool Serialization::innerLoadFromObject
+(CommandList& theCommands, const Expression& input, Expression& output,
+ SemisimpleLieAlgebra** outputPointer)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
+  MacroRegisterFunctionWithName("CommandList::innerLoadFromObject SemisimpleLieAlgebra");
   //std::cout << "<br>Now I'm here!";
   if (!Serialization::innerPolynomial(theCommands, input, output))
     return output.SetError
@@ -494,6 +501,8 @@ bool CommandList::innerSSLieAlgebra
   { indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
     theCommands.theObjectContainer.theLieAlgebras.AddOnTop(tempSSalgebra);
   }
+  if (outputPointer!=0)
+    *outputPointer=&theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
@@ -585,7 +594,7 @@ bool Serialization::innerStoreObject
 
 bool Serialization::innerLoadFromObject
 (CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
-{ MacroRegisterFunctionWithName("Serialization::innerLoadFromObject");
+{ MacroRegisterFunctionWithName("Serialization::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(3))
   { theCommands.Comments << "<hr>input of innerLoadFromObject has "
     << input.children.size << " children, 3 expected. ";
@@ -662,13 +671,13 @@ bool Serialization::innerStoreObject
   (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
-  std::cout << "<hr>" << output.ToString() << "<br>";
+//  std::cout << "<hr>" << output.ToString() << "<br>";
   Expression emptyC, tempE;
   emptyC.MakeEmptyContext(theCommands);
   if (!Serialization::innerStoreMonCollection
       (theCommands, input.theWeyl.theDynkinType, tempE, &emptyC))
     return false;
-  std::cout << "<br>The mon collection: " << tempE.ToString();
+//  std::cout << "<br>The mon collection: " << tempE.ToString();
   output.AddChildOnTop(tempE);
   output.format=output.formatDefault;
   return true;
@@ -692,7 +701,7 @@ bool Serialization::innerStoreSemisimpleSubalgebras
 
 bool Serialization::innerStoreObject
   (CommandList& theCommands, const CandidateSSSubalgebra& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreObject CandidateSSSubalgebra");
   output.MakeSerialization("LoadCandidateSubalgebra", theCommands);
   Expression emptyContext;
   emptyContext.MakeEmptyContext(theCommands);
@@ -714,11 +723,47 @@ bool Serialization::innerStoreObject
   return true;
 }
 
-bool Serialization::innerLoadSemisimpleSubalgebras
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerLoadSltwoSubalgebra");
+bool Serialization::innerLoadFromObject
+(CommandList& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra** outputPointer)
+{
+  return false;
+}
 
-  return true;
+bool Serialization::innerLoadSemisimpleSubalgebras
+  (CommandList& theCommands, const Expression& inpuT, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerLoadSemisimpleSubalgebras");
+  Expression input=inpuT;
+  Serialization::innerLoad(theCommands, inpuT, input);
+  if (input.children.size!= 3)
+  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
+    << input.children.size << " children instead.<hr>";
+    return false;
+  }
+  SemisimpleLieAlgebra* ownerSS;
+  if (!Serialization::innerLoadFromObject(theCommands, input[1], output, &ownerSS))
+  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple "
+    << " Lie algebra. ";
+    return false;
+  }
+  SemisimpleSubalgebras tempSAs;
+  tempSAs.owneR=ownerSS;
+  SemisimpleSubalgebras& theSAs=
+  theCommands.theObjectContainer.theSSsubalgebras
+  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)]
+  ;
+  Expression theCandidatesE=input[2];
+  theCandidatesE.Sequencefy();
+  theSAs.Hcandidates.ReservE(theCandidatesE.children.size-1);
+  Expression tempE;
+  for (int i=1; i<theCandidatesE.children.size-1; i++)
+  { CandidateSSSubalgebra* tempCandidate;
+    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, &tempCandidate))
+    { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
+      << " number " << i+1 << " subalgebra. <hr>";
+      return false;
+    }
+  }
+  return output.AssignValue(theSAs, theCommands);
 }
 
 bool Serialization::innerStoreObject
@@ -726,7 +771,7 @@ bool Serialization::innerStoreObject
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject");
   output.MakeSerialization("LoadSemisimpleSubalgebras", theCommands);
   Expression tempE, tempE2, candidateE;
-  if (!Serialization::innerStoreObject(theCommands, *input.owneR, tempE))
+  if (!Serialization::innerStoreMonCollection(theCommands, input.owneR->theWeyl.theDynkinType, tempE))
     return false;
   output.AddChildOnTop(tempE);
   tempE.reset(theCommands);

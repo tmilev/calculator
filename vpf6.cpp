@@ -1044,6 +1044,26 @@ bool Expression::MakeXOX
   return true;
 }
 
+bool Expression::MakeOX
+  (CommandList& owner, int theOp, const Expression& opArgument)
+{ if (&opArgument==this)
+  { Expression copyE=opArgument;
+    return this->MakeOX(owner, theOp, copyE);
+  }
+  this->reset(owner);
+  this->theData=owner.opLisT();
+  this->children.SetSize(2);
+  this->AssignChildAtomValue(0, theOp, owner);
+  return this->AssignChild(1, opArgument);
+}
+
+bool Expression::Sequencefy()
+{ this->CheckInitialization();
+  if (this->IsSequenceNElementS())
+    return true;
+  return this->MakeOX(*this->theBoss, this->theBoss->opSequence(), *this);
+}
+
 bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
 { SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-8];
   SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
@@ -1839,7 +1859,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
   const Expression& middleE=input[2];
   std::string errorString;
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
+      (Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   if (!theCommands.GetVectoR<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
@@ -2048,7 +2068,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   std::string errorString;
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
+      (Serialization::innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
@@ -2896,7 +2916,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
+      (Serialization::innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
@@ -3171,7 +3191,7 @@ bool CommandList::innerGetChevGen
   SemisimpleLieAlgebra* theSSalg;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
     output.SetError(errorString, theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
@@ -3199,7 +3219,7 @@ bool CommandList::innerGetCartanGen
   SemisimpleLieAlgebra* theSSalg;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
     output.SetError(errorString, theCommands);
   //std::cout << "<br>Here I am at next phase: " << input.ToString();
   int theIndex;
@@ -3228,7 +3248,7 @@ bool CommandList::fKLcoeffs
   std::string errorString;
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, theSSalgebra, &errorString))
+      (Serialization::innerSSLieAlgebra, input, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
@@ -3261,7 +3281,7 @@ bool CommandList::innerWeylOrbit
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
+      (Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
@@ -3365,7 +3385,7 @@ bool CommandList::innerPrintSSLieAlgebra
   SemisimpleLieAlgebra *tempSSpointer;
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, tempSSpointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input, tempSSpointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;

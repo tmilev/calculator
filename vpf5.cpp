@@ -160,7 +160,7 @@ bool CommandList::fWeylDimFormula
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   Vector<RationalFunctionOld> theWeight;
@@ -196,7 +196,7 @@ bool CommandList::fAnimateLittelmannPaths
   SemisimpleLieAlgebra* theSSowner=0;
   std::string errorMessage;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorMessage))
+      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorMessage))
     return output.SetError(errorMessage, theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
@@ -223,7 +223,7 @@ bool CommandList::innerRootSAsAndSltwos
   std::string errorString;
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, ownerSS, &errorString))
+      (Serialization::innerSSLieAlgebra, input, ownerSS, &errorString))
     return output.SetError(errorString, theCommands);
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
@@ -304,7 +304,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   SemisimpleLieAlgebra* ownerSSPointer=0;
   std::string errorString;
   if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, typeNode, ownerSSPointer, &errorString))
+      (Serialization::innerSSLieAlgebra, typeNode, ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
@@ -347,7 +347,7 @@ bool CommandList::fCasimir
   std::string errorString;
   SemisimpleLieAlgebra* theSSalg;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, theSSalg, &errorString))
+      (Serialization::innerSSLieAlgebra, input, theSSalg, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
@@ -377,7 +377,7 @@ bool CommandList::innerDrawWeightSupportWithMults
   SemisimpleLieAlgebra* theSSalgpointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, typeNode, theSSalgpointer, &errorString))
+      (Serialization::innerSSLieAlgebra, typeNode, theSSalgpointer, &errorString))
     return output.SetError(errorString, theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
@@ -406,7 +406,7 @@ bool CommandList::innerDrawRootSystem
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
+      (Serialization::innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -441,7 +441,7 @@ bool CommandList::innerDrawWeightSupport
   std::string errorString;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
+      (Serialization::innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
@@ -2394,7 +2394,7 @@ bool CommandList::fParabolicWeylGroups
   SemisimpleLieAlgebra* theSSPointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, theSSPointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input, theSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
@@ -2535,7 +2535,7 @@ bool CommandList::fPrintAllPartitions
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
@@ -2814,7 +2814,7 @@ bool CommandList::fLSPath
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
+      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;

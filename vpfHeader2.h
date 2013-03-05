@@ -327,6 +327,12 @@ class Expression
   bool MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
+  bool MakeOX
+  (CommandList& owner, int theOp, const Expression& opArgument)
+  ;
+  bool Sequencefy
+  ()
+  ;
   void AssignXOXToChild
   (int childIndex, CommandList& owner, int theOp, const Expression& left, const Expression& right)
   { Expression tempE;
@@ -1446,9 +1452,6 @@ public:
   static bool innerElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool innerSSLieAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
   static bool innerPrintSSLieAlgebraShort
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
@@ -1863,6 +1866,18 @@ static bool innerLoadFromObject
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, RationalFunctionOld& output)
 ;
+static bool innerLoadFromObject
+(CommandList& theCommands, const Expression& input, Expression& output,
+ SemisimpleLieAlgebra** outputPointer=0)
+;
+static bool innerLoadFromObject
+(CommandList& theCommands, const Expression& input, Expression& output,
+ CandidateSSSubalgebra** outputPointer=0)
+;
+static bool innerSSLieAlgebra
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
 static bool innerStoreRationalFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1876,7 +1891,7 @@ static bool innerLoadSltwoSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerLoadSemisimpleSubalgebras
-(CommandList& theCommands, const Expression& input, Expression& output)
+(CommandList& theCommands, const Expression& inpuT, Expression& output)
 ;
 static bool innerStoreObject
 (CommandList& theCommands, const ChevalleyGenerator& input, Expression& output,

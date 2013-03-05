@@ -152,7 +152,7 @@ bool CommandList::innerSSsubalgebras
   std::string errorString;
   SemisimpleLieAlgebra* ownerSSPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input, ownerSSPointer, &errorString))
+      (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
@@ -186,11 +186,11 @@ bool CommandList::innerEmbedSSalgInSSalg
   std::string errorString;
   SemisimpleLieAlgebra* theSmallSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, EsmallSA, theSmallSapointer, &errorString))
+      (Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra* thelargeSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, ElargeSA, thelargeSapointer, &errorString))
+      (Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;

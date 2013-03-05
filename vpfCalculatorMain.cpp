@@ -184,7 +184,7 @@ int main(int argc, char **argv)
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   //Change the below line to modify the computation time of the calculator.
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
 
 

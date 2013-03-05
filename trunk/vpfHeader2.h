@@ -680,7 +680,8 @@ public:
   bool flagNewContextNeeded;
 
   bool flagLogSyntaxRules;
-  bool flagLogEvaluation;
+  bool flagLogEvaluatioN;
+  bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
   ///////////////////////////////////////////////////////////////////////////
@@ -1284,7 +1285,25 @@ public:
   static bool outerEqualEqual
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool outerCombineFractions
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerCheckRule
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool outerAssociate
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerSubZeroDivAnythingWithZero
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerCancelMultiplicativeInverse
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerAssociateDivisionDivision
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerAssociateTimesDivision
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerCollectMultiplicands

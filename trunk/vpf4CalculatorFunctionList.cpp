@@ -678,6 +678,15 @@ void CommandList::initPredefinedStandardOperations()
    then X is replaced with the second, third, ... children of Y. \
    If Y is not a list starting with EndStatement, X is replaced with Y.\
    ", "c:=(a:=b);\na;\nc;\na;\nd:=(e:=f; g:=h);\nd;\ne;\nMelt{}d;\ne;\ng;  ", true);
+  this->AddOperationOuterHandler
+  (":=", this->outerCheckRule, "",
+   "Checks whether the rule is of the form A:=A, and substitutes the expression with an error if that \
+   is the case. This usually happens when a general rule is entered twice.\
+   In the following example, we try to redefine the associative rule\
+   of the calculator. This fails because the associative rule is already implemented:\
+   the left hand side of the below expression is substituted with a*(b*c), and thus the rule becomes\
+   a*(b*c):=a*(b*c), which clearly is infinite substitution.",
+   "%LogEvaluation\n({{a}}*{{b}})*{{c}}:=a*(b*c);  ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
@@ -687,6 +696,9 @@ void CommandList::initPredefinedStandardOperations()
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
+  this->AddOperationOuterHandler
+  ("+", this->outerCombineFractions, "",
+   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b ", "1+a-2a_1+1/2+a_1", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",
@@ -746,10 +758,6 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
    "Multiplies two polynomials. ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
-  this->AddOperationOuterHandler
-  ("*", this->outerDistributeTimes, "",
-   "Distributive law (left and right).",
-   "(a+b)*c; \n a*(b+c)", true);
   this->AddOperationInnerHandler
   ("*", this->innerCollectMultiplicands, "",
    "Collects multiplicand exponents.",
@@ -763,6 +771,18 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",
    "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)", true);
+  this->AddOperationOuterHandler
+  ("*", this->outerAssociateTimesDivision, "",
+   "Associative law w.r.t. division. ",
+   "a*(b/c); (a*b)/c-a*(b/c)", true);
+  this->AddOperationOuterHandler
+  ("*", this->innerCancelMultiplicativeInverse, "",
+   "Cancels multiplicative inverse. ",
+   "(a*b)/b; (a/b)*b", true);
+  this->AddOperationOuterHandler
+  ("*", this->outerDistributeTimes, "",
+   "Distributive law (left and right).",
+   "(a+b)*c; \n a*(b+c)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
@@ -827,6 +847,16 @@ void CommandList::initPredefinedStandardOperations()
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",
     "6/15+(a+b)/5; 6/4+3/0", true);
+  this->AddOperationOuterHandler
+  ("/", this->innerSubZeroDivAnythingWithZero, "",
+   "Provided that x is not equal to zero, substitutes 0/x with 0. ",
+   "0/b; ", true);
+  this->AddOperationOuterHandler
+  ("/", this->innerAssociateDivisionDivision, "",
+   "Substitutes (a/b)/c :=a/(c*b); a/(b/c):=a*c/b; .\
+   Note the order of multiplication in the rules: this operation is safe and correct for \
+   non-commutative rings as well.",
+   "(a/b)/c; a/(b/c);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",

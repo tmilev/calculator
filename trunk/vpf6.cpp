@@ -1606,7 +1606,7 @@ bool CommandList::ApplyOneRule()
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
-  { this->flagLogEvaluation=true;
+  { this->flagLogEvaluatioN=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -3577,7 +3577,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->NumErrors=0;
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
-  this->flagLogEvaluation=false;
+  this->flagLogEvaluatioN=false;
+  this->flagLogPatternMatching=false;
   this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
@@ -3852,6 +3853,92 @@ bool CommandList::innerCollectMultiplicands
   return false;
 }
 
+bool CommandList::outerCombineFractions
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+    return false;
+  const Expression* quotientE=0;
+  const Expression* summandE=0;
+  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { quotientE=&input[1];
+    summandE=&input[2];
+  } else if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { quotientE=&input[2];
+    summandE=& input[1];
+  } else
+    return false;
+  const Expression& quotientNumeratorE=(*quotientE)[1];
+  const Expression& quotientDenominatorE=(*quotientE)[2];
+  Expression outputSummandE, outputNumE;
+  outputSummandE.MakeXOX(theCommands, theCommands.opTimes(), *summandE, quotientDenominatorE);
+  outputNumE.MakeXOX(theCommands, theCommands.opPlus(), quotientNumeratorE, outputSummandE);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
+}
+
+bool CommandList::outerCheckRule
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDefine(), 3))
+    return false;
+  if (input[1]!=input[2])
+    return false;
+  std::stringstream out;
+  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself (" << input[2] << ")"
+  << " which is an infinite substitution cycle. ";
+  return output.SetError(out.str(), theCommands);
+}
+
+bool CommandList::innerSubZeroDivAnythingWithZero
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1].IsEqualToZero())
+    if (!input[2].IsEqualToZero())
+      return output.AssignValue(0, theCommands);
+  return false;
+}
+
+bool CommandList::innerCancelMultiplicativeInverse
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1][2]==input[2])
+  { output=input[1][1];
+    return true;
+  }
+  return false;
+}
+
+bool CommandList::innerAssociateDivisionDivision
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { Expression newRightE;
+    newRightE.MakeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
+    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
+  }
+  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { Expression newLeftE;
+    newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
+    return output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
+  }
+  return false;
+}
+
+bool CommandList::outerAssociateTimesDivision
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  Expression newLeftE;
+  newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
+  output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][2]);
+  return true;
+}
+
 bool CommandList::outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
@@ -3958,6 +4045,7 @@ bool CommandList::CollectSummands
 bool CommandList::outerPlus
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerPlus");
+//  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
   if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
     return false;
   MonomialCollection<Expression, Rational> theSum;
@@ -4057,9 +4145,7 @@ bool CommandList::outerStandardFunction
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
-        { if (theCommands.flagLogEvaluation)
-            theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
-          return true;
+        { return true;
         }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
@@ -4071,16 +4157,12 @@ bool CommandList::outerStandardFunction
       { //std::cout << "more than 2 children: " << input.Lispify();
         if (innerFun.inputFitsMyInnerType(input))
           if (innerFun.theFunction(theCommands, input, output))
-          { if (theCommands.flagLogEvaluation)
-              theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
-            return true;
+          { return true;
           }
       } else
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
-          { if (theCommands.flagLogEvaluation)
-              theCommands.Comments << "<hr>Substitution: " << input.Lispify() << " -> " << output.Lispify();
-            return true;
+          { return true;
           }
     }
   return false;
@@ -4364,6 +4446,7 @@ bool CommandList::EvaluateExpression
   int counterNumTransformations=0;
   Expression tempE;
   tempE.reset(*this);
+  std::string beforePatternMatch;
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
@@ -4433,6 +4516,9 @@ bool CommandList::EvaluateExpression
     //->/////-------Default operation handling-------
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
+      if (this->flagLogEvaluatioN)
+        this->Comments << "<hr>Substitution:<br>" << output.ToString()
+        << "  ->  " << tempE.ToString();
       output=tempE;
       continue;
     }
@@ -4447,9 +4533,14 @@ bool CommandList::EvaluateExpression
       bufferPairs.reset();
 //      std::cout << "<br>Checking whether "
 //      << output.ToString() << " matches " << currentPattern.ToString();
+      if (this->flagLogEvaluatioN)
+        beforePatternMatch=output.ToString();
       if(this->ProcessOneExpressionOnePatternOneSub
-         (currentPattern, output, bufferPairs, &this->Comments, this->flagLogEvaluation))
+         (currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
+        if (this->flagLogEvaluatioN)
+          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch
+          << "  ->  " << output.ToString();
         break;
       }
     }

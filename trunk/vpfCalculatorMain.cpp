@@ -317,6 +317,7 @@ int main(int argc, char **argv)
 //  civilizedInput=" ";
 //  civilizedInput="c:=(a:=b);c;a;";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

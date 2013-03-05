@@ -4,6 +4,18 @@
 ProjectInformationInstance ProjectInfoVpf9_4cpp
 (__FILE__, "Implementation of semisimple subalgebra routines. ");
 
+void WeylGroup::operator+=(const WeylGroup& other)
+{ if (this==&other)
+  { WeylGroup tempW;
+    tempW=*this;
+    *this+=tempW;
+    return;
+  }
+  DynkinType theType=this->theDynkinType;
+  theType+=other.theDynkinType;
+  this->MakeFromDynkinType(theType);
+}
+
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << "There are " << this->Hcandidates.size << " candidates total.\n<hr>\n ";
@@ -230,10 +242,8 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   Rational two=2;
   tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
   tempWeylnonScaled.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank);
-  this->theWeylNonEmbeddeD.theDynkinType+=tempWeyl.theDynkinType;
-  this->theWeylNonEmbeddeD.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
-  this->theWeylNonEmbeddeDdefaultScale.theDynkinType+=(tempWeylnonScaled.theDynkinType);
-  this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.DirectSumWith(tempWeylnonScaled.CartanSymmetric);
+  this->theWeylNonEmbeddeD+=tempWeyl;
+  this->theWeylNonEmbeddeDdefaultScale+=tempWeylnonScaled;
 
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;

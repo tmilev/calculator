@@ -1113,7 +1113,7 @@ template <class CoefficientType>
     (inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetHighestElementInOrbit
-  (Vector<Rational>  & inputOutput, ElementWeylGroup* outputWeylElt,
+  (Vector<Rational> & inputOutput, ElementWeylGroup* outputWeylElt,
    Vectors<Rational>& bufferEiBAsis,
    bool RhoAction, bool UseMinusRho,
    int* sign, bool* stabilizerFound)
@@ -1200,6 +1200,7 @@ template <class CoefficientType>
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   void operator=(const WeylGroup& other);
   bool operator==(const WeylGroup& other)const;
+  void operator+=(const WeylGroup& other);
 };
 
 template <class Element>

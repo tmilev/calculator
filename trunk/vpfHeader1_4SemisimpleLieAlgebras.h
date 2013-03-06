@@ -358,11 +358,21 @@ public:
     }
     return *this->owneR;
   }
-  SemisimpleSubalgebras(): owneR(0), theRecursionCounter(0)
-  { this->theSl2s.owner=0;
+  void initHookUpPointers(SemisimpleLieAlgebra& inputOwner)
+  { this->owneR=&inputOwner;
+    this->theSl2s.owner=&inputOwner;
   }
-  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner):owneR(&inputOwner), theRecursionCounter(0)
-  { this->theSl2s.owner=&inputOwner;
+  void reset()
+  { this->owneR=0;
+    this->theRecursionCounter=0;
+    this->theSl2s.owner=0;
+  }
+  SemisimpleSubalgebras()
+  { this->reset();
+  }
+  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner)
+  { this->reset();
+    this->initHookUpPointers(inputOwner);
   }
   std::string ToString(FormatExpressions* theFormat=0);
   void AddCandidatesSubalgebra

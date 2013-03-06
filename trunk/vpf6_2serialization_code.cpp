@@ -724,9 +724,15 @@ bool Serialization::innerStoreObject
 }
 
 bool Serialization::innerLoadFromObject
-(CommandList& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra** outputPointer)
-{
-  return false;
+(CommandList& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra)
+{ if (!input.IsListNElements(4))
+  { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 children, "
+    << " but got one with " << input.children.size << " children instead.<hr> ";
+    return false;
+  }
+
+  return output.SetError
+  ("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
 bool Serialization::innerLoadSemisimpleSubalgebras
@@ -756,13 +762,15 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.Hcandidates.ReservE(theCandidatesE.children.size-1);
   Expression tempE;
   for (int i=1; i<theCandidatesE.children.size-1; i++)
-  { CandidateSSSubalgebra* tempCandidate;
-    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, &tempCandidate))
+  { CandidateSSSubalgebra tempCandidate;
+    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
       << " number " << i+1 << " subalgebra. <hr>";
       return false;
     }
+    theSAs.Hcandidates.AddOnTop(tempCandidate);
   }
+  theSAs.initHookUpPointers(*ownerSS);
   return output.AssignValue(theSAs, theCommands);
 }
 

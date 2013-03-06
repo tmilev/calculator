@@ -1382,11 +1382,14 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
 }
 
 std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* theFormat)
-{ std::string tempS; std::stringstream out;
+{ MacroRegisterFunctionWithName("SltwoSubalgebras::ElementToStringNoGenerators");
+  std::string tempS; std::stringstream out;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple Vectors<Rational> w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a Vector<Rational> subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
+  //if (this->owner==0)
+
   bool usePNG=theFormat==0? false : theFormat->flagUsePNG;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;

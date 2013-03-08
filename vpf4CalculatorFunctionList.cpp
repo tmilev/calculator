@@ -9,19 +9,19 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeCoxeterElement", this->innerCoxeterElement, "",
    "Needs a group name and a list of generators",
-   "MakeCoxeterElement{}(A_2, 1);", true)
+   "MakeCoxeterElement{}(A_2, 1);", false)
    ;
 
   this->AddOperationInnerHandler
   ("MakeCharacter", this->innerCharacter, "",
    "Either gets the nth character, or accepts user input as a character",
-   "MakeCharacter{}(B_3, 1);", true)
+   "MakeCharacter{}(B_3, 1);", false)
    ;
 
   this->AddOperationInnerHandler
   ("MakeCoxeterGroup", this->innerCoxeterGroup, "",
    "Creates a coxeter Group",
-   "MakeCoxeterGroup{}(A_2);", true)
+   "MakeCoxeterGroup{}(A_2);", false)
    ;
 
   this->AddOperationHandler
@@ -95,10 +95,31 @@ void CommandList::initPredefinedInnerFunctions()
    "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true)
    ;
   this->AddOperationInnerHandler
-("PolyDivString", &this->innerPolynomialDivisionVerbose, "",
+("PolyDivStringGrLex", &this->innerPolynomialDivisionVerboseGrLex, "",
    "Prints a string representing division of \
-   a polynomial by a set of polynomials using the default monomial order (lexicographic). ",
-   "PolyDivString{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
+   "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   ;
+  this->AddOperationInnerHandler
+("PolyDivStringGrLexRev", &this->innerPolynomialDivisionVerboseGrLexRev, "",
+   "Prints a string representing division of \
+   a polynomial by a set of polynomials using total degree (graded) order with \
+   equal total degrees compared by lex order with reversed order of the letters, \
+   for example, x y^4> x^2 y^3 , x^11>y^10. ",
+   "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   ;
+  this->AddOperationInnerHandler
+("PolyDivStringLex", &this->innerPolynomialDivisionVerboseLex, "",
+   "Prints a string representing division of \
+   a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
+   "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   ;
+  this->AddOperationInnerHandler
+("PolyDivStringLexRev", &this->innerPolynomialDivisionVerboseLexRev, "",
+   "Prints a string representing division of \
+   a polynomial by a set of polynomials using the lex order with reversed order of variables, \
+   for example, y^2 > x^1000 y > x y. ",
+   "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
    ;
   this->AddOperationInnerHandler
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",

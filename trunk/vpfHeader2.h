@@ -1413,12 +1413,29 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
+  bool GetListPolysVariableLabelsInLex
+  (const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
+  ;
   static bool innerPolynomialDivisionRemainder
   (CommandList& theCommands, const Expression& input, Expression& output)
  ;
   static bool innerPolynomialDivisionVerbose
-  (CommandList& theCommands, const Expression& input, Expression& output)
+  (CommandList& theCommands, const Expression& input, Expression& output,
+ List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
  ;
+  static bool innerPolynomialDivisionVerboseGrLex
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerPolynomialDivisionVerboseGrLexRev
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerPolynomialDivisionVerboseLexRev
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerPolynomialDivisionVerboseLex
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+
   static bool fPrintAllPartitions
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -2091,8 +2108,9 @@ bool CommandList::GetVectoR
   }
   if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=input.children.size-1)
-    { this->Comments << "I am required to have " << targetDimNonMandatory << " columns but "
-      << "I have " << input.children.size-1 << "columns instead";
+    { this->Comments << "<hr>Failed to GetVector: the input is required to have "
+      << targetDimNonMandatory << " columns but "
+      << " it has " << input.children.size-1 << " columns instead. <hr>";
       return false;
     }
   targetDimNonMandatory=input.children.size-1;
@@ -2197,7 +2215,7 @@ bool CommandList::GetMatrix
   { const Expression& currentE=theExpression[i+1];
     if (!this->GetVectoR
         (currentE, currentRow, &currentContext, targetNumColsNonMandatory, conversionFunction))
-    { this->Comments << "<hr>Failed to GetVector() from expression "
+    { this->Comments << "<hr>Failed to GetVector() while extracting context from expression "
       << currentE.ToString() << " with context " << currentContext.ToString() << "<hr>";
       return false;
     }
@@ -2213,7 +2231,7 @@ bool CommandList::GetMatrix
   { const Expression& currentE=theExpression[i+1];
     if (!this->GetVectoR
         (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
-    { this->Comments << "<hr>Failed to GetVector() from expression " <<
+    { this->Comments << "<hr>Failed to GetVector() while converting expression " <<
       currentE.ToString() << " with context " << startContext.ToString() << "<hr>";
       return false;
     }

@@ -1498,6 +1498,12 @@ public:
   inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
+  inline void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortAscending(theOrder);
+  }
+  inline void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder);
+  }
 };
 
 //class used to avoid a gcc compiler bug.
@@ -4569,6 +4575,12 @@ public:
       return false;
     return left.IsGEQLexicographicLastVariableStrongest(right);
   }
+  static bool LeftGreaterThanLexicographicLastVariableWeakest
+  (const MonomialP& left, const MonomialP& right)
+  { if (left==(right))
+      return false;
+    return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
   static bool LeftIsGEQLexicographicLastVariableWeakest
   (const MonomialP& left, const MonomialP& right)
   { return left.IsGEQLexicographicLastVariableWeakest(right);
@@ -4578,6 +4590,16 @@ public:
   { if (left==right)
       return false;
     return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
+  }
+  static bool LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest
+  (const MonomialP& left, const MonomialP& right)
+  { if (left==right)
+      return false;
+    if (left.TotalDegree()>right.TotalDegree())
+      return true;
+    if (left.TotalDegree() <right.TotalDegree())
+      return false;
+    return left.IsGEQLexicographicLastVariableWeakest(right);
   }
   static bool LeftIsGEQTotalDegThenLexicographicLastVariableStrongest
   (const MonomialP& left, const MonomialP& right)
@@ -5578,6 +5600,7 @@ class GroebnerBasisComputation
   bool flagDoSortBasis;
   bool flagDoLogDivision;
   MemorySaving<List<Polynomial<Rational> > > intermediateRemainders;
+  MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
   MemorySaving<List<Rational> > intermediateCoeffs;
   MemorySaving<List<Polynomial<Rational> > > intermediateSubtractands;
@@ -5585,7 +5608,8 @@ class GroebnerBasisComputation
   MemorySaving<Polynomial<Rational> > startingPoly;
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   const std::string& extraStyle, FormatExpressions* theFormat=0)
+   const std::string& extraStyle, const std::string& extraHighlightStyle, FormatExpressions* theFormat=0,
+   List<MonomialP>* theHighLightedMons=0)
   ;
   std::string GetDivisionString(FormatExpressions* theFormat=0);
 

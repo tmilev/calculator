@@ -730,7 +730,23 @@ bool Serialization::innerLoadFromObject
     << " but got one with " << input.children.size << " children instead.<hr> ";
     return false;
   }
-
+  Expression tempE;
+  if (!Serialization::DeSerializeMonCollection
+      (theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
+  { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "
+    << input[2].ToString() << "<hr>";
+    return false;
+  }
+  outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
+  (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
+  //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
+  Matrix<Rational> theHs;
+  if (!theCommands.GetMatrix(input[3], theHs, 0, -1, 0))
+  { theCommands.Comments << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
+    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+    return false;
+  }
+  //Serialization::innerLoadFromObject(theCommands,
   return output.SetError
   ("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
@@ -761,15 +777,18 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theCandidatesE.Sequencefy();
   theSAs.Hcandidates.ReservE(theCandidatesE.children.size-1);
   Expression tempE;
-  for (int i=1; i<theCandidatesE.children.size-1; i++)
+  for (int i=1; i<theCandidatesE.children.size; i++)
   { CandidateSSSubalgebra tempCandidate;
     if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
-      << " number " << i+1 << " subalgebra. <hr>";
+      << " number " << i << " subalgebra. <hr>";
       return false;
     }
     theSAs.Hcandidates.AddOnTop(tempCandidate);
   }
+  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
+  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
+  std::cout << theCommands.theObjectContainer.ToString();
   theSAs.initHookUpPointers(*ownerSS);
   return output.AssignValue(theSAs, theCommands);
 }

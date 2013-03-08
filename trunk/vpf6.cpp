@@ -4821,7 +4821,12 @@ bool Expression::operator>(const Expression& other)const
   if (other.children.size>this->children.size)
     return false;
   if (this->children.size==0)
+  { std::string leftS, rightS;
+    if (this->IsOperation(&leftS))
+      if (other.IsOperation(&rightS))
+        return leftS>rightS;
     return this->theData>other.theData;
+  }
   return this->children>other.children;
 }
 
@@ -4840,8 +4845,8 @@ bool Expression::ToStringData
   { if (isFinal)
       out << this->GetValuE<std::string>();
     else
-    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
-      out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript)";
+      //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     }
     result=true;
   } else if (this->IsOfType<Rational>())
@@ -4854,8 +4859,11 @@ bool Expression::ToStringData
   } else if (this->IsOfType<Polynomial<Rational> >())
   { out << "Polynomial{}";
     Expression contextE=this->GetContext();
-    out << "(" << contextE.ToString(theFormat) << ", "
-    << this->GetValuE<Polynomial<Rational> >().ToString(theFormat) << ")";
+    FormatExpressions tempFormat;
+//    out << "(" << contextE.ToString(theFormat) << ", "
+    contextE.ContextGetFormatExpressions(tempFormat);
+    out << "Polynomial{}("
+    << this->GetValuE<Polynomial<Rational> >().ToString(&tempFormat) << ")";
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { out << "RationalFunction{}";
@@ -5531,6 +5539,15 @@ std::string ObjectContainer::ToString()
   { out << "Lie algebras created (" << this->theLieAlgebras.size << " total): ";
     for (int i=0; i<this->theLieAlgebras.size; i++)
     { out << this->theLieAlgebras[i].GetLieAlgebraName();
+      if (i!=this->theLieAlgebras.size-1)
+        out << ", ";
+    }
+  }
+  if (this->theSSsubalgebras.size>0)
+  { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theLieAlgebras.size << " total): ";
+    for (int i=0; i<this->theSSsubalgebras.size; i++)
+    { out << " Type " << this->theSSsubalgebras[i].owneR->GetLieAlgebraName()
+      << " with " << this->theSSsubalgebras[i].Hcandidates.size << " candidates";
       if (i!=this->theLieAlgebras.size-1)
         out << ", ";
     }

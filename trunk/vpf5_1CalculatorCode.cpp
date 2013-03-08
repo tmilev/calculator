@@ -28,15 +28,47 @@ bool CommandList::innerGCDOrLCM
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
+bool CommandList::GetListPolysVariableLabelsInLex
+(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
+{ Expression theContextStart(*this);
+  if (!this->GetVectorFromFunctionArguments
+      (input, output, &theContextStart, 0, Serialization::innerPolynomial))
+    return false;
+  if (output.size<2)
+    return false;
+  int numVars=theContextStart.ContextGetNumContextVariables();
+  HashedList<Expression> theVars;
+  theVars.SetExpectedSize(numVars);
+  for (int i=0; i<numVars; i++)
+    theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
+  theVars.QuickSortAscending();
+//  std::cout << "<hr>the vars: " << theVars.ToString();
+  PolynomialSubstitution<Rational> theSub;
+  theSub.SetSize(numVars);
+  for (int i=0; i<theSub.size; i++)
+    theSub[i].MakeMonomiaL(theVars.GetIndex(theContextStart.ContextGetContextVariable(i)), 1, 1, numVars);
+  outputContext.MakeEmptyContext(*this);
+  Expression PolyVarsE, tempE;
+  PolyVarsE.reset(*this);
+  PolyVarsE.children.ReservE(numVars+1);
+  tempE.MakeAtom(this->opPolynomialVariables(), *this);
+  PolyVarsE.AddChildOnTop(tempE);
+
+  for (int i=0; i<numVars; i++)
+  { PolyVarsE.AddChildOnTop(theVars[i]);
+    Polynomial<Rational>& currentP=output[i];
+    currentP.SubstitutioN(theSub);
+  }
+  return outputContext.AddChildOnTop(PolyVarsE);
+}
+
 bool CommandList::innerPolynomialDivisionRemainder
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
+  Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
-  Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
-  if (thePolys.size<2)
-    return output.SetError("Expression takes two or more arguments", theCommands);
   GroebnerBasisComputation theGB;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
@@ -44,8 +76,8 @@ bool CommandList::innerPolynomialDivisionRemainder
       return output.SetError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
-  std::cout << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
-  << theGB.theBasiS.ToString() << "<hr>";
+//  std::cout << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+//  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
   theGB.RemainderDivisionWithRespectToBasis
@@ -53,15 +85,38 @@ bool CommandList::innerPolynomialDivisionRemainder
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
-bool CommandList::innerPolynomialDivisionVerbose
+bool CommandList::innerPolynomialDivisionVerboseGrLex
 (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose
+  (theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+}
+
+bool CommandList::innerPolynomialDivisionVerboseGrLexRev
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose
+  (theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest);
+}
+
+bool CommandList::innerPolynomialDivisionVerboseLex
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose
+  (theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
+}
+
+bool CommandList::innerPolynomialDivisionVerboseLexRev
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose
+  (theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest);
+}
+
+bool CommandList::innerPolynomialDivisionVerbose
+(CommandList& theCommands, const Expression& input, Expression& output,
+ List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomialDivisionVerbose");
+  Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
-  Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
+  if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
-  if (thePolys.size<2)
-    return output.SetError("Expression takes two or more arguments", theCommands);
   GroebnerBasisComputation theGB;
   theGB.flagDoLogDivision=true;
   theGB.theBasiS.SetSize(thePolys.size-1);
@@ -70,11 +125,14 @@ bool CommandList::innerPolynomialDivisionVerbose
       return output.SetError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
-  Polynomial<Rational> outputRemainder;
+//  Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
+  theGB.theMonOrdeR= theMonOrder;
   theGB.RemainderDivisionWithRespectToBasis
-  (thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
-  return output.AssignValue(theGB.GetDivisionString(), theCommands);
+  (thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
 
 bool CommandList::fSolveSeparableBilinearSystem

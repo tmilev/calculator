@@ -64,6 +64,21 @@ void SemisimpleSubalgebras::AddCandidatesSubalgebra
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
+void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
+{ if (&output==this)
+  { DynkinType thisCopy=*this;
+    thisCopy.GetDynkinTypeWithDefaultLengths(output);
+    return;
+  }
+  output.MakeZero();
+  DynkinSimpleType tempType;
+  for (int i =0; i<this->size; i++)
+  { tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank);
+    tempType.lengthFirstCoRootSquared=tempType.GetDefaultCoRootLengthSquared(0);
+    output.AddMonomial(tempType, this->theCoeffs[i]);
+  }
+}
+
 DynkinSimpleType DynkinType::GetGreatestSimpleType()const
 { if (this->size==0)
   { std::cout << "This is a programming error: asking for the greatest simple type "
@@ -372,6 +387,9 @@ bool CandidateSSSubalgebra::ComputeSystem
   this->theHs.AssignListList(this->CartanSAsByComponent);
   this->theCoRoots.SetSize(this->theHs.size);
   int counter=-1;
+  DynkinType dynkinTypeDefaultLengths;
+  this->theWeylNonEmbeddeD.theDynkinType.GetDynkinTypeWithDefaultLengths(dynkinTypeDefaultLengths);
+  this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinType(dynkinTypeDefaultLengths);
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   for (int i=0; i<this->CartanSAsByComponent.size; i++)

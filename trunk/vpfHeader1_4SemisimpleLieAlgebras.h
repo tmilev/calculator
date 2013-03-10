@@ -218,7 +218,6 @@ public:
   List<Vectors<Rational> > CartanSAsByComponent;
   Vectors<Rational> theCoRoots;
   Vectors<Rational> theHs;
-  List<DynkinSimpleType> theTypes;
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
@@ -229,7 +228,6 @@ public:
   Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  DynkinType theTypeTotal;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
@@ -263,14 +261,13 @@ public:
   ;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
-    this->theTypes=other.theTypes;
     this->theCharFundamentalCoordsRelativeToCartan=other.theCharFundamentalCoordsRelativeToCartan;
     this->theCharFundCoords=other.theCharFundCoords;
     this->theWeylNonEmbeddeD=other.theWeylNonEmbeddeD;
     this->theWeylNonEmbeddeDdefaultScale=other.theWeylNonEmbeddeDdefaultScale;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
     this->indexInOwnersOfNonEmbeddedMe=other.indexInOwnersOfNonEmbeddedMe;
-    this->theTypeTotal=other.theTypeTotal;
+//    this->theTypeTotal=other.theTypeTotal;
     this->thePosGens=other.thePosGens;
     this->theNegGens=other.theNegGens;
     this->theHorbitIndices=other.theHorbitIndices;

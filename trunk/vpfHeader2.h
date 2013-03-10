@@ -2219,14 +2219,14 @@ bool CommandList::GetMatrix
       << currentE.ToString() << " with context " << currentContext.ToString() << "<hr>";
       return false;
     }
-    std::cout << "<hr>Merging " << currentContext.ToString() << " with " << startContext.ToString();
+//    std::cout << "<hr>Merging " << currentContext.ToString() << " with " << startContext.ToString();
     if (!currentContext.ContextMergeContexts(currentContext, startContext, startContext))
     { this->Comments << "<hr>Failed to merge context "
       << currentContext.ToString() << " with context " << startContext.ToString() << "<hr>";
       return false;
     }
   }
-  std::cout << "<hr>The context from all rows is: " << startContext.ToString();
+//  std::cout << "<hr>The context from all rows is: " << startContext.ToString();
   for (int i=0; i<numRows; i++)
   { const Expression& currentE=theExpression[i+1];
     if (!this->GetVectoR

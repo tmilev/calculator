@@ -17,7 +17,8 @@ void WeylGroup::operator+=(const WeylGroup& other)
 }
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
+  std::stringstream out;
   out << "There are " << this->Hcandidates.size << " candidates total.\n<hr>\n ";
   for (int i=0; i<this->Hcandidates.size; i++)
     out << this->Hcandidates[i].ToString(theFormat) << "\n<hr>\n ";
@@ -63,6 +64,19 @@ void SemisimpleSubalgebras::AddCandidatesSubalgebra
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
+DynkinSimpleType DynkinType::GetGreatestSimpleType()const
+{ if (this->size==0)
+  { std::cout << "This is a programming error: asking for the greatest simple type "
+    << " of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  DynkinSimpleType result=(*this)[0];
+  for (int i=1; i<this->size; i++)
+    if ((*this)[i]>result)
+      result=(*this)[i];
+  return result;
+}
+
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
 (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
 GlobalVariables* theGlobalVariables)
@@ -71,7 +85,7 @@ GlobalVariables* theGlobalVariables)
   RecursionDepthCounter theCounter(&this->theRecursionCounter);
   int numVectorsFound=baseCandidate.CartanSAsByComponent.LastObject()->size;
   CandidateSSSubalgebra newCandidate;
-  DynkinSimpleType& theNewTypE=*baseCandidate.theTypes.LastObject();
+  DynkinSimpleType theNewTypE=baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetGreatestSimpleType();
   ProgressReport theReport(theGlobalVariables);
   ProgressReport theReport0(theGlobalVariables);
   ProgressReport theReport1(theGlobalVariables);
@@ -116,7 +130,7 @@ GlobalVariables* theGlobalVariables)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStreamX;
       reportStreamX
-      << "Extending  " << baseCandidate.theTypeTotal.ToString() << ", "
+      << "Extending  " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
       << numVectorsFound << " out of "
       << theNewTypE.theRank << ", desired length squared= " << desiredLengthSquared << " ."
       << " Current length is " << this->theSl2s[i].LengthHsquared;
@@ -255,8 +269,7 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   this->theInvolvedNegGenerators.LastObject()->size=0;
   this->theInvolvedPosGenerators.SetSize(this->theInvolvedPosGenerators.size+1);
   this->theInvolvedPosGenerators.LastObject()->size=0;
-  this->theTypes.AddOnTop(theNewType);
-  this->theTypeTotal.AddMonomial(theNewType,1);
+  this->theWeylNonEmbeddeD.theDynkinType.AddMonomial(theNewType, 1);
 }
 
 bool CandidateSSSubalgebra::isGoodForTheTop
@@ -265,7 +278,7 @@ bool CandidateSSSubalgebra::isGoodForTheTop
   Rational theScalarProd;
   int counter=-1;
   int indexHnewInSmallType=this->CartanSAsByComponent.LastObject()->size;
-  DynkinSimpleType& currentType=*this->theTypes.LastObject();
+  DynkinSimpleType currentType=this->theWeylNonEmbeddeD.theDynkinType.GetGreatestSimpleType();
   int indexHnew=
   this->theWeylNonEmbeddeD.CartanSymmetric.NumRows-currentType.theRank+indexHnewInSmallType;
 
@@ -359,11 +372,13 @@ bool CandidateSSSubalgebra::ComputeSystem
   this->theHs.AssignListList(this->CartanSAsByComponent);
   this->theCoRoots.SetSize(this->theHs.size);
   int counter=-1;
+  List<DynkinSimpleType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     for (int j=0; j< this->CartanSAsByComponent[i].size; j++)
     { counter++;
       this->theCoRoots[counter]=
-      (this->theHs[counter]/this->theTypes[i].GetDefaultRootLengthSquared(j))*2;
+      (this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
     }
   this->theInvolvedNegGenerators.SetSize(this->theCoRoots.size);
   this->theInvolvedPosGenerators.SetSize(this->theCoRoots.size);
@@ -400,9 +415,22 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   ElementSemisimpleLieAlgebra<Polynomial<Rational> >
   lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
+  this->CheckInitialization();
+//  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   SemisimpleLieAlgebra& nonEmbeddedMe=
   this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknowns=0;
+  if (this->theHs.size==0)
+  { std::cout << "This is a programming error: the number of involved H's cannot be zero. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (this->theInvolvedNegGenerators.size!=this->theHs.size)
+  { std::cout << "This is a programming error: the number of involved negative generators, which is "
+    << this->theInvolvedNegGenerators.size << " is not equal to the subalgebra rank, which is "
+    << this->theHs.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
     this->totalNumUnknowns+=this->theInvolvedNegGenerators[i].size;
   if (this->theWeylNonEmbeddeD.RootSystem.size==0)
@@ -417,6 +445,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
+    std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
@@ -541,6 +570,8 @@ bool CandidateSSSubalgebra::ComputeChar
   this->theCharFundamentalCoordsRelativeToCartan.Reset();
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial
   (tempMon, this->GetAmbientSS().GetRank());
+  List<DynkinSimpleType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
   { int counter=-1;
     for (int i=0; i<this->CartanSAsByComponent.size; i++)
@@ -549,7 +580,7 @@ bool CandidateSSSubalgebra::ComputeChar
         tempMon.weightFundamentalCoords[counter]=
         this->GetAmbientWeyl().RootScalarCartanRoot
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
-        /this->theTypes[i].GetDefaultRootLengthSquared(j)*2
+        /theTypes[i].GetDefaultRootLengthSquared(j)*2
         ;
       }
     this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, 1);
@@ -617,12 +648,14 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     dimCentralizerBase=
     baseCandidate.theCharFundCoords.theCoeffs[baseCandidate.theCharFundCoords.GetIndex(tempMon)];
   Rational baseLength=-1;
-  if (baseCandidate.theTypes.size!=0)
-    if (theType.theRank==baseCandidate.theTypes.LastObject()->theRank
+  List<DynkinSimpleType> theTypes;
+  baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  if (theTypes.size!=0)
+    if (theType.theRank==theTypes.LastObject()->theRank
         &&
-        theType.theLetter==baseCandidate.theTypes.LastObject()->theLetter
+        theType.theLetter==theTypes.LastObject()->theLetter
         )
-      baseLength=baseCandidate.theTypes.LastObject()->lengthFirstCoRootSquared;
+      baseLength=theTypes.LastObject()->lengthFirstCoRootSquared;
   //if (this->GetSSowner().GetRank()-(+)
   std::stringstream consideringStream;
   consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
@@ -714,10 +747,12 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
     theProgressReport1.Report(out.str());
     //std::cout << "Exploring extensions of " << baseCandidate.ToString() << " by: ";
   }
-  if (baseCandidate.theTypes.size==0)
+  List<DynkinSimpleType> theTypes;
+  baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  if (theTypes.size==0)
     theType.MakeAone();
   else
-    theType=*baseCandidate.theTypes.LastObject();
+    theType=*theTypes.LastObject();
   for (; theType<myType; theType++, theType.lengthFirstCoRootSquared=-1)
     this->ExtendOneComponentOneTypeAllLengthsRecursive
       (baseCandidate, theType, propagateRecursion, theGlobalVariables);
@@ -1841,7 +1876,7 @@ void rootSubalgebra::ToString
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
-  out << this->theTypeTotal;
+  out << this->theWeylNonEmbeddeD.theDynkinType;
   out << ". ";
   if (this->flagSystemProvedToHaveNoSolution)
     out << " <b> Subalgebra candidate proved to be impossible! </b> ";
@@ -1853,8 +1888,10 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << this->theUnknownPosGens[i].ToString(theFormat);
   }
   out << "<br>";
+  List<DynkinSimpleType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
-  { out << "Component " << this->theTypes[i];
+  { out << "Component " << theTypes[i];
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
       out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << ", ";
   }

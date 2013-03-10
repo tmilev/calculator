@@ -861,8 +861,10 @@ class DynkinType: public MonomialCollection<DynkinSimpleType, Rational>
 {
 public:
   void GetLettersTypesMults
-  (List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults,
-   List<Rational>& outputFirstCoRootLengthsSquared)const;
+  (List<char>* outputLetters=0, List<int>* outputRanks=0, List<int>* outputMults=0,
+   List<Rational>* outputFirstCoRootLengthsSquared=0)const;
+  void GetTypesWithMults
+  (List<DynkinSimpleType>& output)const;
   bool IsOfSimpleType(char inputType, int inputRank)const
   { char currentType;
     int currentRank;
@@ -872,6 +874,7 @@ public:
   }
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const
   ;
+  DynkinSimpleType GetGreatestSimpleType()const;
   Rational GetSizeWeylByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
@@ -887,6 +890,7 @@ public:
     }
     return result;
   }
+  int GetNumSimpleComponents()const;
   Rational GetRank()const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;

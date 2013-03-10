@@ -874,6 +874,7 @@ public:
   }
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const
   ;
+  void GetDynkinTypeWithDefaultLengths(DynkinType& output);
   DynkinSimpleType GetGreatestSimpleType()const;
   Rational GetSizeWeylByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const

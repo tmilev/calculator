@@ -4832,7 +4832,8 @@ bool Expression::operator>(const Expression& other)const
 
 bool Expression::ToStringData
 (std::string& output, FormatExpressions* theFormat, Expression* startingExpression)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("Expression::ToStringData");
+  std::stringstream out;
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   if (this->IsAtoM())
@@ -4956,7 +4957,8 @@ bool Expression::ToStringData
 
 std::string Expression::ToString
 (FormatExpressions* theFormat, Expression* startingExpression)const
-{ if (this->theBoss!=0)
+{ MacroRegisterFunctionWithName("Expression::ToString");
+  if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
       return "(...)";
   } else

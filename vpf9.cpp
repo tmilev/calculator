@@ -3580,18 +3580,42 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
     }
 }
 
+void DynkinType::GetTypesWithMults
+(List<DynkinSimpleType>& output)const
+{ output.SetSize(0);
+  output.ReservE(this->GetNumSimpleComponents());
+  List<DynkinSimpleType> componentsSorted=(*this);
+  componentsSorted.QuickSortAscending();
+  for (int i=0; i<componentsSorted.size; i++)
+  { int theIndex= this->GetIndex(componentsSorted[i]);
+    for (int j=0; j<this->GetMult(theIndex); j++)
+      output.AddOnTop(componentsSorted[i]);
+  }
+}
+
 void DynkinType::GetLettersTypesMults
-(List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults,
-   List<Rational>& outputFirstCoRootLengthsSquared)const
-{ outputLetters.SetSize(0);
-  outputRanks.SetSize(0);
-  outputMults.SetSize(0);
-  outputFirstCoRootLengthsSquared.SetSize(0);
-  for (int i=0; i<this->size; i++)
-  { outputLetters.AddOnTop((*this)[i].theLetter);
-    outputRanks.AddOnTop((*this)[i].theRank);
-    outputFirstCoRootLengthsSquared.AddOnTop((*this)[i].lengthFirstCoRootSquared);
-    outputMults.AddOnTop(this->GetMult(i));
+(List<char>* outputLetters, List<int>* outputRanks, List<int>* outputMults,
+   List<Rational>* outputFirstCoRootLengthsSquared)const
+{ if (outputLetters!=0)
+    outputLetters->SetSize(0);
+  if (outputRanks!=0)
+    outputRanks->SetSize(0);
+  if (outputMults!=0)
+    outputMults->SetSize(0);
+  if (outputFirstCoRootLengthsSquared!=0)
+    outputFirstCoRootLengthsSquared->SetSize(0);
+  List<DynkinSimpleType> componentsSorted=(*this);
+  componentsSorted.QuickSortAscending();
+  for (int i=0; i<componentsSorted.size; i++)
+  { int theIndex= this->GetIndex(componentsSorted[i]);
+    if (outputLetters!=0)
+      outputLetters->AddOnTop((*this)[theIndex].theLetter);
+    if (outputRanks!=0)
+      outputRanks->AddOnTop((*this)[theIndex].theRank);
+    if (outputFirstCoRootLengthsSquared!=0)
+      outputFirstCoRootLengthsSquared->AddOnTop((*this)[theIndex].lengthFirstCoRootSquared);
+    if (outputMults!=0)
+      outputMults->AddOnTop(this->GetMult(theIndex));
   }
 }
 
@@ -3643,6 +3667,19 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
   if (outputLength!=0)
     *outputLength=theMon.lengthFirstCoRootSquared;
   return true;
+}
+
+int DynkinType::GetNumSimpleComponents()const
+{ Rational result=0;
+  for (int i=0; i<this->size; i++)
+    result+=this->theCoeffs[i];
+  int output;
+  if (!result.IsSmallInteger(&output))
+  { std::cout << "This is a programming error: Dynkin type has a number of simple components which is "
+    << " not a small integer. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return output;
 }
 
 Rational DynkinType::GetRank()const

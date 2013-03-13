@@ -1918,7 +1918,9 @@ public:
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
-  int GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta);
+  bool GetMaxQForWhichBetaMinusQAlphaIsARoot
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)
+  ;
   Rational GetConstant(const Vector<Rational> & root1, const Vector<Rational> & root2);
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToStringVermaMonomials(std::string& output);

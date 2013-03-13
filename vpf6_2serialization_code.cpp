@@ -725,13 +725,14 @@ bool Serialization::innerStoreObject
 
 bool Serialization::innerLoadFromObject
 (CommandList& theCommands, const Expression& input, Expression& output,
- CandidateSSSubalgebra& outputSubalgebra)
-{ if (!input.IsListNElements(4))
+ CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
+{ if (!input.IsListNElements(4) && !input.IsListNElements(5))
   { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to "
-    << " get a list of 4 children, "
+    << " get a list of 4 or 5 children, "
     << " but got one with " << input.children.size << " children instead.<hr> ";
     return false;
   }
+  outputSubalgebra.owner=&owner;
   Expression tempE;
   if (!Serialization::DeSerializeMonCollection
       (theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
@@ -742,8 +743,9 @@ bool Serialization::innerLoadFromObject
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
   (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
+  int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
-  if (!theCommands.GetMatrix(input[3], theHs, 0, -1, 0))
+  if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
   { theCommands.Comments
     << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
     << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
@@ -773,6 +775,65 @@ bool Serialization::innerLoadFromObject
       }
     }
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
+  outputSubalgebra.thePosGens.SetSize(0);
+  outputSubalgebra.theNegGens.SetSize(0);
+  if (input.children.size==5)
+  { Expression polyE;
+    Expression theGensE=input[4];
+    theGensE.Sequencefy();
+    ChevalleyGenerator theChevGen;
+    ElementSemisimpleLieAlgebra<Rational> curGen;
+    theChevGen.owneR=owner.owneR;
+    for (int i=1; i<theGensE.children.size; i++)
+    { const Expression& currentGenE=theGensE[i];
+      curGen.MakeZero(*owner.owneR);
+      if (!Serialization::innerPolynomial(theCommands, currentGenE, polyE))
+      { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
+        << " to polynomial.<hr>";
+        return false;
+      }
+      Polynomial<Rational> theP;
+      if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
+      { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
+        << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
+        return false;
+      }
+      Expression theContext=polyE.GetContext();
+      for (int j=0; j<theP.size; j++)
+      { MonomialP& currentMon=theP[j];
+        int theLetterIndex;
+        if (!currentMon.IsOneLetterFirstDegree(&theLetterIndex))
+        { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
+          << " to polynomial.<hr>";
+          return false;
+        }
+        Expression singleChevGenE=theContext.ContextGetContextVariable(theLetterIndex);
+        if (!singleChevGenE.IsListNElements(2))
+        { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
+          << " to polynomial.<hr>";
+          return false;
+        }
+        if (!singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+        { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
+          << " to Chevalley generator of " << owner.owneR->GetLieAlgebraName();
+          return false;
+        }
+        curGen.AddMonomial(theChevGen, theP.theCoeffs[j]);
+      }
+      if (i%2 ==0)
+        outputSubalgebra.theNegGens.AddOnTop(curGen);
+      else
+        outputSubalgebra.thePosGens.AddOnTop(curGen);
+    }
+  }
+  SemisimpleLieAlgebra tempSA;
+  tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
+  outputSubalgebra.indexInOwnersOfNonEmbeddedMe=
+  owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
+  owner.theSubalgebrasNonEmbedded[outputSubalgebra.indexInOwnersOfNonEmbeddedMe].theWeyl.ComputeRho(true);
+  outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
+  outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
+
   //Serialization::innerLoadFromObject(theCommands,
   return output.SetError
   ("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
@@ -800,48 +861,28 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theCommands.theObjectContainer.theSSsubalgebras
   [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)]
   ;
+  //FormatExpressions tempFormat;
+//  std::cout << ownerSS->ToString();
   Expression theCandidatesE=input[2];
   theCandidatesE.Sequencefy();
   theSAs.Hcandidates.ReservE(theCandidatesE.children.size-1);
   Expression tempE;
-  int theRank=ownerSS->GetRank();
   theSAs.Hcandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
+  theSAs.initHookUpPointers(*ownerSS);
   for (int i=1; i<theCandidatesE.children.size; i++)
   { CandidateSSSubalgebra tempCandidate;
-    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate))
+    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
       << " number " << i << " subalgebra. <hr>";
       return false;
     }
-    int oldNumHs=tempCandidate.theHs.size;
-    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
+//    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.Hcandidates.AddOnTop(tempCandidate);
-    CandidateSSSubalgebra& lastSAC= *theSAs.Hcandidates.LastObject();
-    if (lastSAC.theHs.size!=oldNumHs)
-    { std::cout << "This is a programming error: copying candidate subalgebras is corrputed. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    for (int i=0; i<lastSAC.theHs.size; i++)
-    { if (lastSAC.theHs[i].size!=theRank)
-      { theCommands.Comments << "<hr>Error loading candidate subalgebra: dimension of Cartan elements "
-        << "does not equal " << theRank << " as it should. <hr>";
-        return false;
-      }
-    }
-    lastSAC.owner=&theSAs;
-    SemisimpleLieAlgebra tempSA;
-    tempSA.theWeyl.MakeFromDynkinType(lastSAC.theWeylNonEmbeddeD.theDynkinType);
-    lastSAC.indexInOwnersOfNonEmbeddedMe=
-    theSAs.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
-    lastSAC.theWeylNonEmbeddeD.ComputeRho(true);
-    lastSAC.ComputeSystem(theCommands.theGlobalVariableS);
   }
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
 //  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
 //  std::cout << theCommands.theObjectContainer.ToString();
-  theSAs.initHookUpPointers(*ownerSS);
   return output.AssignValue(theSAs, theCommands);
 }
 

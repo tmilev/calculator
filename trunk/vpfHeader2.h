@@ -1908,7 +1908,7 @@ static bool innerLoadFromObject
 ;
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, Expression& output,
- CandidateSSSubalgebra& outputPointer)
+ CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner)
 ;
 static bool innerSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)

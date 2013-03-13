@@ -2490,7 +2490,9 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
               SecondIndexFirstPosChoice=SecondPosIndex;
 //              FirstIndexFirstNegChoice=FirstNegIndex;
 //              SecondIndexFirstNegChoice= SecondNegIndex;
-              this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex]=-(1+this->GetMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2));
+              int thePower;
+              this->GetMaxQForWhichBetaMinusQAlphaIsARoot(smallRoot1, smallRoot2, thePower);
+              this->ChevalleyConstants.elements[FirstNegIndex][SecondNegIndex]=-1-thePower;
               this->Computed.elements[FirstNegIndex][SecondNegIndex]=true;
             }
             else
@@ -2618,7 +2620,11 @@ void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int ind
   //this->ComputeDebugString();
   this->Computed.elements[indexJ][indexI]=true;
   assert(!(rootI+rootJ).IsEqualToZero());
-  int i=1+this->GetMaxQForWhichBetaMinusQAlphaIsARoot(this->theWeyl.RootSystem.TheObjects[indexMinusI], this->theWeyl.RootSystem.TheObjects[indexMinusJ]);
+  int thePower;
+  this->GetMaxQForWhichBetaMinusQAlphaIsARoot
+  (this->theWeyl.RootSystem.TheObjects[indexMinusI],
+   this->theWeyl.RootSystem.TheObjects[indexMinusJ], thePower);
+  int i=1+thePower;
   this->ChevalleyConstants.elements[indexMinusI][indexMinusJ].AssignInteger(-i*i);
   this->ChevalleyConstants.elements[indexMinusI][indexMinusJ].DivideBy(this->ChevalleyConstants.elements[indexI][indexJ]);
   this->Computed.elements[indexMinusI][indexMinusJ]=true;
@@ -2647,20 +2653,22 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
   this->ExploitSymmetryChevalleyConstants(k, i);
 }
 
-int SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta)
-{ int result=-1;
+bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)
+{ output=-1;
   Vector<Rational> tempRoot=beta;
   if (alpha.IsEqualToZero())
   { std::cout << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot"
     << " with zero value for alpha is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  bool foundRoot=false;
   while (this->theWeyl.IsARoot(tempRoot))
-  { result++;
+  { output++;
     tempRoot-=(alpha);
+    foundRoot=true;
   }
-  return result;
+  return foundRoot;
 }
 
 void SemisimpleLieAlgebra::ComputeOneChevalleyConstant

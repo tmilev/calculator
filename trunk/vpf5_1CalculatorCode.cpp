@@ -499,6 +499,9 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
   { resultStream << "\n\n%Function formula: " << this->theFunctionsCalculatorInput[i] << "\n\n";
     if (useHtml)
       resultStream << "<br>";
+    resultStream << "\\rput(1,3){$y=" << this->theFunctionsCalculatorInput[i] << "$}\n\n";
+    if (useHtml)
+      resultStream << "<br>\n";
     resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
     << this->lowerBounds[i].DoubleValue() << "}{"
     << this->upperBounds[i].DoubleValue() << "}{";

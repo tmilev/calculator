@@ -390,6 +390,7 @@ bool CandidateSSSubalgebra::ComputeSystem
   DynkinType dynkinTypeDefaultLengths;
   this->theWeylNonEmbeddeD.theDynkinType.GetDynkinTypeWithDefaultLengths(dynkinTypeDefaultLengths);
   this->theWeylNonEmbeddeDdefaultScale.MakeFromDynkinType(dynkinTypeDefaultLengths);
+  this->theWeylNonEmbeddeDdefaultScale.ComputeRho(true);
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
@@ -463,29 +464,41 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
-    std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
+    //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
     this->GetAmbientSS().LieBracket
     (this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
+    //std::cout << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
+    //<< this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
     lieBracketMinusGoalValue-=goalValue;
     this->AddToSystem(lieBracketMinusGoalValue);
     for (int j=0; j<this->theInvolvedPosGenerators.size; j++)
       if (i!=j)
       { this->GetAmbientSS().LieBracket
         (this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
+        //std::cout << "<hr>[" << this->theUnknownNegGens[i].ToString() << ", "
+        //<< this->theUnknownPosGens[j].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
         this->AddToSystem(lieBracketMinusGoalValue);
+
         Vector<Rational> posRoot1, posRoot2;
         posRoot1.MakeEi(this->theWeylNonEmbeddeD.GetDim(), i);
         posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
-        int q= nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot
-        (posRoot1, -posRoot2);
+        int q;
+        if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
+        { std::cout << "This is a programming error: the alpha-string along "
+          << posRoot1.ToString() << " through " << (-posRoot2).ToString()
+          << " does not contain any root, which is impossible. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
         for (int k=0; k<q+1; k++)
           this->GetAmbientSS().LieBracket
           (this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
+        //std::cout << "<hr>adjoint element, with power " << q+1 << ": " << lieBracketMinusGoalValue;
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
@@ -550,6 +563,7 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
 void CandidateSSSubalgebra::AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
 { Polynomial<Rational> thePoly;
+//  std::cout << "<hr>I must vanish: " << elementThatMustVanish.ToString();
   for (int i=0; i<elementThatMustVanish.size; i++)
   { thePoly=elementThatMustVanish.theCoeffs[i];
     thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
@@ -1942,7 +1956,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (this->owner!=0 && this->theHorbitIndices.size>0)
     if (this->theHorbitIndices[0].size>0)
       if (this->theUnknownPosGens.size>0)
-      { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[ this->theHorbitIndices[0][0]];
+      { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
         out << "<br>First positive generator seed realization.<br> "
         << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
         out << "<br>First negative generator seed realization.<br> "

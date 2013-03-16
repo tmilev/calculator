@@ -813,12 +813,32 @@ bool Serialization::innerLoadFromObject
           << " to polynomial.<hr>";
           return false;
         }
-        if (!singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+        std::string theLetter;
+        if (!singleChevGenE[0].IsOperation(&theLetter) ||
+            !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
         { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
           << " to Chevalley generator of " << owner.owneR->GetLieAlgebraName();
           return false;
         }
-        curGen.AddMonomial(theChevGen, theP.theCoeffs[j]);
+        bool isGood=true;
+        if (theLetter=="g")
+        { theChevGen.theGeneratorIndex=
+          owner.owneR->GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+          if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>=owner.owneR->GetNumGenerators())
+            isGood=false;
+        } else if (theLetter=="h")
+        { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.owneR->GetRank())
+            isGood=false;
+          else
+            theChevGen.theGeneratorIndex=theChevGen.theGeneratorIndex+owner.owneR->GetNumPosRoots()-1;
+        }
+        if (isGood)
+          curGen.AddMonomial(theChevGen, theP.theCoeffs[j]);
+        else
+        { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
+          << " to Chevalley generator of " << owner.owneR->GetLieAlgebraName();
+          return false;
+        }
       }
       if (i%2 ==0)
         outputSubalgebra.theNegGens.AddOnTop(curGen);

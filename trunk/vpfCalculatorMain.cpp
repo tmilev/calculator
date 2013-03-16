@@ -319,6 +319,7 @@ int main(int argc, char **argv)
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
 //  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
   //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6)))))";
+  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-1+g_-3, g_1+g_3, g_-2, g_2 ) ) ))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

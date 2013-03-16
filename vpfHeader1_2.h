@@ -1822,6 +1822,8 @@ public:
      );
   }
   SemisimpleLieAlgebra(){ }
+  template <class CoefficientType>
+  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputOutputGenerators);
   void ComputeMultTable(GlobalVariables& theGlobalVariables);
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);

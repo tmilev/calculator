@@ -220,6 +220,7 @@ public:
   Vectors<Rational> theHs;
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
+  List<ElementSemisimpleLieAlgebra<Rational> > theBasis;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
 
@@ -287,6 +288,7 @@ public:
     this->totalNumUnknowns=other.totalNumUnknowns;
     this->theUnknownNegGens=other.theUnknownNegGens;
     this->theUnknownPosGens=other.theUnknownPosGens;
+    this->theBasis=other.theBasis;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);

@@ -4851,10 +4851,17 @@ public:
    )
    ;
   template <class MonomialCollectionTemplate>
+  int GetRankOfSpanOfElements
+  (List<MonomialCollectionTemplate>& theList, HashedList<TemplateMonomial>* seedMonomials=0)
+  { List<MonomialCollectionTemplate> listCopy=theList;
+    bool tempB;
+    this->GaussianEliminationByRowsDeleteZeroRows(listCopy, &tempB, seedMonomials);
+    return listCopy.size;
+  }
+  template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRowsDeleteZeroRows
   (List<MonomialCollectionTemplate >& theList,
-   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
-   )
+   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0)
   { MonomialCollectionTemplate::GaussianEliminationByRows
     (theList, IvemadeARowSwitch, seedMonomials);
     for (int j=theList.size-1; j>=0; j--)

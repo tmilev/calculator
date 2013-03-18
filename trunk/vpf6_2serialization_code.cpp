@@ -754,8 +754,7 @@ bool Serialization::innerLoadFromObject
   //theHs.GetListRowsToVectors(outputSubalgebra.theHs);
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
   { theCommands.Comments << "<hr>Failed to load cartan elements: I expected "
-    << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements but got "
-    << outputSubalgebra.theHs.size << " elements instead. <hr>";
+    << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
     return false;
   }
   List<int> theRanks, theMults;

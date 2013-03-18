@@ -370,8 +370,14 @@ public:
 // the MS compiler refuses to compile the following (WTF?), hence the above line.
 //  static const double Pi=(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
-  inline static int parity(int n){if (n%2==0) return 1; else return -1; }
+  inline static int parity(int n)
+  { if (n%2==0)
+      return 1;
+    else
+      return -1;
+  }
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
+  static bool IsPrime(int theInt);
   template <class Element>
   static void RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit);
   template <typename CoefficientType>
@@ -5585,36 +5591,37 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
 //std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
 //std::iostream& operator>>(std::iostream& input, RationalFunctionOld& theRF);
 
+template<class CoefficientType>
 class GroebnerBasisComputation
 {
   public:
   List<MonomialP>::OrderLeftGreaterThanRight theMonOrdeR;
-  Polynomial<Rational> SoPolyBuf;
-  Polynomial<Rational> remainderDivision;
-  Polynomial<Rational> bufPoly;
-  Polynomial<Rational> bufPolyForGaussianElimination;
+  Polynomial<CoefficientType> SoPolyBuf;
+  Polynomial<CoefficientType> remainderDivision;
+  Polynomial<CoefficientType> bufPoly;
+  Polynomial<CoefficientType> bufPolyForGaussianElimination;
   MonomialP SoPolyLeftShift;
   MonomialP SoPolyRightShift;
   MonomialP bufferMoN1;
-  List<Polynomial<Rational> > theBasiS;
-  List<Polynomial<Rational> > basisCandidates;
+  List<Polynomial<CoefficientType> > theBasiS;
+  List<Polynomial<CoefficientType> > basisCandidates;
   List<MonomialP> leadingMons;
-  List<Rational> leadingCoeffs;
+  List<CoefficientType> leadingCoeffs;
   int NumberOfComputations;
   int MaxNumComputations;
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
-  MemorySaving<List<Polynomial<Rational> > > intermediateRemainders;
+  MemorySaving<List<Polynomial<CoefficientType> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
-  MemorySaving<List<Rational> > intermediateCoeffs;
-  MemorySaving<List<Polynomial<Rational> > > intermediateSubtractands;
+  MemorySaving<List<CoefficientType> > intermediateCoeffs;
+  MemorySaving<List<Polynomial<CoefficientType> > > intermediateSubtractands;
   MemorySaving<List<int> > intermediateSelectedDivisors;
-  MemorySaving<Polynomial<Rational> > startingPoly;
+  MemorySaving<Polynomial<CoefficientType> > startingPoly;
   std::string GetPolynomialStringSpacedMonomials
-  (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+  (const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
    const std::string& extraStyle, const std::string& extraHighlightStyle, FormatExpressions* theFormat=0,
    List<MonomialP>* theHighLightedMons=0)
   ;
@@ -5624,19 +5631,19 @@ class GroebnerBasisComputation
  (GlobalVariables* theGlobalVariables)
  ;
   bool TransformToReducedGroebnerBasis
-  (List<Polynomial<Rational> >& inputOutpuT,
+  (List<Polynomial<CoefficientType> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0)
    ;
   bool TransformToReducedGroebnerBasisImprovedAlgorithm
-  (List<Polynomial<Rational> >& inputOutpuT,
+  (List<Polynomial<CoefficientType> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis
 ()
   ;
   void RemainderDivisionWithRespectToBasis
-(Polynomial<Rational>& inputOutput,
- Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
+(Polynomial<CoefficientType>& inputOutput,
+ Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
  bool AddRemainderToBasis
@@ -5650,8 +5657,8 @@ class GroebnerBasisComputation
   ;
   void ConsistencyCheck();
 
-  void initForGroebnerComputation(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
-  void initForDivisionAlone(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForGroebnerComputation(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForDivisionAlone(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables);
 };
 
 class RationalFunctionOld
@@ -7657,7 +7664,7 @@ public:
   MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso1;
   MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso2;
   MemorySaving<rootSubalgebras> rootSAsGenerateAll;
-  MemorySaving<GroebnerBasisComputation> theGroebnerBasisComputation;
+  MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   MemorySaving<Cone> coneBuffer1NewSplit;
   MemorySaving<Cone> coneBuffer2NewSplit;
@@ -9166,5 +9173,706 @@ void Matrix<Element>::GaussianEliminationByRows
         outputSelection.AddSelectionAppendNewIndex(i);
     //mat.ComputeDebugString();
   }
+}
+
+template <class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasis
+  (List<Polynomial<CoefficientType> >& inputOutpuT,
+   GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
+  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
+  this->basisCandidates=inputOutpuT;
+  ProgressReport theReport(theGlobalVariables);
+ // std::string tempS;
+//  bool changed=true;
+  this->flagBasisGuaranteedToGenerateIdeal=false;
+  this->AddPolyAndReduceBasis(theGlobalVariables);
+  this->flagBasisGuaranteedToGenerateIdeal=true;
+  bool changed=true;
+  while (changed)
+  { changed=false;
+    for (int i=0; i<this->theBasiS.size; i++)
+      for (int j=i+1; j<this->theBasiS.size && i<this->theBasiS.size; j++)
+      { Polynomial<Rational>& currentLeft= this->theBasiS[i];
+        Polynomial<Rational>& currentRight= this->theBasiS[j];
+        int leftIndex=currentLeft.GetIndexMaxMonomial(this->theMonOrdeR);
+        int rightIndex=currentRight.GetIndexMaxMonomial(this->theMonOrdeR);
+        MonomialP& leftHighestMon=currentLeft[leftIndex];
+        MonomialP& rightHighestMon=currentRight[rightIndex];
+        int numVars=
+        MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+        this->SoPolyLeftShift.MakeOne(numVars);
+        this->SoPolyRightShift.MakeOne(numVars);
+        for (int k=0; k<numVars; k++)
+          if (leftHighestMon[k]>rightHighestMon[k])
+          { this->SoPolyRightShift[k]=leftHighestMon[k]-rightHighestMon[k];
+            this->SoPolyLeftShift[k]=0;
+          } else
+          { this->SoPolyLeftShift[k]=rightHighestMon[k]-leftHighestMon[k];
+            this->SoPolyRightShift[k]=0;
+          }
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
+        { std::stringstream out;
+          out << "Computing Sopoly of indices " << i +1 << " out of "
+          << this->theBasiS.size << " and "
+          << j+1 << " out of " << this->theBasiS.size;
+          theReport.Report(out.str());
+        }
+        this->bufPoly=currentLeft;
+        this->bufPoly.MultiplyBy(this->SoPolyLeftShift, currentRight.theCoeffs[rightIndex]);
+        this->SoPolyBuf=currentRight;
+        this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.theCoeffs[leftIndex]);
+        this->SoPolyBuf-=(this->bufPoly);
+        this->basisCandidates.AddOnTop(this->SoPolyBuf);
+        this->NumberOfComputations++;
+        if (this->MaxNumComputations>0)
+          if (this->NumberOfComputations>this->MaxNumComputations)
+            return false;
+//        if (this->AddPolyAndReduceBasis(theGlobalVariables))
+//        { i=0;
+//          j=-1;
+//          changed=true;
+//        }
+      }
+    this->flagBasisGuaranteedToGenerateIdeal=true;
+    changed=this->AddPolyAndReduceBasis(theGlobalVariables);
+    this->flagBasisGuaranteedToGenerateIdeal=true;
+    if (this->MaxNumComputations>0)
+      if (this->NumberOfComputations>this->MaxNumComputations)
+        return false;
+  }
+//  this->MakeMinimalBasis();
+  inputOutpuT=this->theBasiS;
+  return true;
+}
+
+template<class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::AddPolyAndReduceBasis
+ (GlobalVariables* theGlobalVariables)
+{ bool changed=false;
+  ProgressReport theReport(theGlobalVariables);
+  while (this->basisCandidates.size>0)
+  { bool addedNew=false;
+    while (this->basisCandidates.size>0)
+    { this->RemainderDivisionWithRespectToBasis
+      (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
+      this->basisCandidates.RemoveLastObject();
+      if(this->AddRemainderToBasis(theGlobalVariables))
+      { changed=true;
+        addedNew=true;
+      }
+      this->NumberOfComputations++;
+      if (this->MaxNumComputations>0)
+        if (this->NumberOfComputations>this->MaxNumComputations)
+        { if (!this->flagBasisGuaranteedToGenerateIdeal)
+            this->theBasiS.AddListOnTop(this->basisCandidates);
+          this->ConsistencyCheck();
+          return true;
+        }
+      if (theGlobalVariables!=0 && this->flagDoProgressReport)
+      { std::stringstream out;
+        out << "Reducing: " << theBasiS.size << " basis elements, "
+        << this->basisCandidates.size << " candidates. ";
+        theReport.Report(out.str());
+//          std::cout << "<br>" << out.str();
+      }
+    }
+    this->flagBasisGuaranteedToGenerateIdeal=true;
+
+    if (!addedNew)
+      break;
+    for (int i=0; i<this->theBasiS.size; i++)
+    { this->bufPolyForGaussianElimination=this->theBasiS[i];
+      if (theGlobalVariables!=0 && this->flagDoProgressReport)
+      { std::stringstream out;
+        out << "Verifying basis element " << i+1 << " out of "
+        << theBasiS.size << " basis elements, " << this->basisCandidates.size
+        << " candidates. ";
+        theReport.Report(out.str());
+//        std::cout << "<br>" << out.str();
+      }
+      this->NumberOfComputations++;
+      this->RemainderDivisionWithRespectToBasis
+      (this->bufPolyForGaussianElimination, &this->remainderDivision,
+      theGlobalVariables, i);
+      if (this->MaxNumComputations>0)
+        if (this->NumberOfComputations>this->MaxNumComputations)
+        { this->ConsistencyCheck();
+          return true;
+        }
+      if (!(this->remainderDivision==this->theBasiS[i]))
+      { this->flagBasisGuaranteedToGenerateIdeal=false;
+        this->basisCandidates.AddOnTop(this->remainderDivision);
+        this->leadingMons.RemoveIndexSwapWithLast(i);
+        this->leadingCoeffs.RemoveIndexSwapWithLast(i);
+        this->theBasiS.RemoveIndexSwapWithLast(i);
+        i--;
+        changed=true;
+      }
+    }
+  }
+  return changed;
+}
+
+template<class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::MakeMinimalBasis()
+{ MacroRegisterFunctionWithName("RationalFunctionOld::GroebnerBasisMakeMinimal");
+/*  std::cout << "<br><br> and the leading monomials are: ";
+  for (int i=0; i<LeadingCoeffs.size; i++)
+    std::cout << LeadingCoeffs[i].ToString() << ", ";*/
+  for (int i=0; i<this->theBasiS.size; i++)
+    for (int j=0; j<this->leadingMons.size; j++)
+      if (i!=j)
+        if (this->leadingMons[i].IsDivisibleBy(this->leadingMons[j]))
+        { /*std::cout << "<br>" << LeadingCoeffs[i].ToString() << " is divisible by "
+          << LeadingCoeffs[j].ToString();*/
+          this->leadingMons.RemoveIndexSwapWithLast(i);
+          this->theBasiS.RemoveIndexSwapWithLast(i);
+          i--;
+          break;
+        } //else
+        //{ std::cout << "<br>" << LeadingCoeffs[i].ToString() << " is NOT divisible by "
+        //  << LeadingCoeffs[j].ToString();
+        //
+/*  std::cout << "<br><br> final leading monomials are: ";
+  for (int i=0; i<LeadingCoeffs.size; i++)
+    std::cout <<"<br>" << LeadingCoeffs[i].ToString() << " of " << theBasis[i].ToString();
+*/
+}
+
+template<class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::CriterionCLOsh
+(HashedListSpecialized
+ <Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >&
+ thePairs, List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM)
+{ //page 107,  Cox, Little, O'Shea,
+  //Ideals, Varieties, algorithms
+  Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity >&
+  lastPair=*thePairs.LastObject();
+  Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity >
+  pairBeingTested1, pairBeingTested2;
+  for (int k=0; k<theLeadingMons.size; k++)
+    if (k!=lastPair.Object1 && k!=lastPair.Object2)
+      if (leadingTermLCM.IsDivisibleBy(theLeadingMons[k]))
+      { pairBeingTested1.Object1=MathRoutines::Minimum(lastPair.Object1, k);
+        pairBeingTested1.Object2=MathRoutines::Maximum(lastPair.Object1, k);
+        pairBeingTested2.Object1=MathRoutines::Minimum(lastPair.Object2, k);
+        pairBeingTested2.Object2=MathRoutines::Maximum(lastPair.Object2, k);
+        if (!thePairs.Contains(pairBeingTested1) && !thePairs.Contains(pairBeingTested2))
+          return true;
+      }
+  return false;
+}
+
+template<class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasisImprovedAlgorithm
+(List<Polynomial<CoefficientType> >& inputOutpuT,
+ GlobalVariables* theGlobalVariables, int upperComputationBound
+)
+{ MacroRegisterFunctionWithName
+  ("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
+   //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
+  //Ideals, Varieties, algorithms
+  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
+  this->theBasiS=inputOutpuT;
+  HashedListSpecialized<PairInts > indexPairs;
+//  Pair<int, int> currentPair;
+  indexPairs.SetExpectedSize(this->theBasiS.size*this->theBasiS.size);
+  this->leadingMons.SetExpectedSize(this->theBasiS.size*2);
+  for (int i=0; i<this->theBasiS.size; i++)
+  { for (int j=i+1; j<this->theBasiS.size; j++)
+      indexPairs.AddOnTop(PairInts (i,j));
+    this->theBasiS[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    int theIndex=this->theBasiS[i].GetIndexMaxMonomial(this->theMonOrdeR);
+    this->leadingMons.AddOnTop(this->theBasiS[i][theIndex]);
+    this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
+  }
+  if (this->theBasiS.size<=0)
+  { std::cout << "This is a programming error: "
+    << "transforming to Groebner basis not allowed for empty basis. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  MonomialP leftShift, rightShift, monLCM;
+  Polynomial<Rational> leftBuf, rightBuf, buffer1;
+  Polynomial<Rational>& outputRemainder=rightBuf; //to save some RAM
+  ProgressReport reportOuter(theGlobalVariables);
+  ProgressReport reportInner(theGlobalVariables);
+  while (indexPairs.size>0)
+  { PairInts& lastPair=*indexPairs.LastObject();
+    int currentPairIndex=indexPairs.size-1;
+    bool isGood=false;
+    Polynomial<Rational>& currentLeft = this->theBasiS[lastPair.Object1];
+    Polynomial<Rational>& currentRight= this->theBasiS[lastPair.Object2];
+    MonomialP& leftHighestMon= this->leadingMons[lastPair.Object1];
+    MonomialP& rightHighestMon=this->leadingMons[lastPair.Object2];
+    if (theGlobalVariables!=0 && this->flagDoProgressReport)
+    { std::stringstream out;
+      out
+      << "Basis size: " << this->theBasiS.size
+      << ".\n<br>Remaining cases current round: " << indexPairs.size;
+      reportOuter.Report(out.str());
+    }
+    int numVars=MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+    leftShift.MakeOne(numVars);
+    rightShift.MakeOne(numVars);
+    for (int k=0; k<numVars; k++)
+    { if (leftHighestMon[k]>0 && rightHighestMon[k]>0)
+        isGood=true;
+      if (leftHighestMon[k]>rightHighestMon[k])
+      { rightShift[k]=leftHighestMon[k]-rightHighestMon[k];
+        leftShift[k]=0;
+      } else
+      { leftShift[k]=rightHighestMon[k]-leftHighestMon[k] ;
+        rightShift[k]=0;
+      }
+    }
+    monLCM=leftHighestMon;
+    monLCM*=leftShift;
+    if (isGood)
+      if (!this->CriterionCLOsh(indexPairs, this->leadingMons, monLCM))
+      { leftBuf=currentLeft;
+        rightBuf=currentRight;
+        leftBuf.MultiplyBy(leftShift, this->leadingCoeffs[lastPair.Object2]);
+        rightBuf.MultiplyBy(rightShift, this->leadingCoeffs[lastPair.Object1]);
+        leftBuf-=rightBuf;
+//        std::cout << "<br>testing sopoly: "
+//        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
+//        ;
+        this->RemainderDivisionWithRespectToBasis
+        (leftBuf, &outputRemainder, theGlobalVariables)
+        ;
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
+        { std::stringstream out;
+          out
+          << "Basis size: " << this->theBasiS.size
+          << ".\n<br>Remaining cases current round: " << indexPairs.size;
+          reportOuter.Report(out.str());
+        }
+//        std::cout << "<br>and sopoly divided by "
+//        << theBasis.ToString(&theGlobalVariables->theDefaultFormat) << " is "
+//        << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+        if (!outputRemainder.IsEqualToZero())
+        { outputRemainder.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+          this->theBasiS.AddOnTop(outputRemainder);
+          int theIndexMaxMon=this->theBasiS.LastObject()->GetIndexMaxMonomial(this->theMonOrdeR);
+          this->leadingMons.AddOnTop((*this->theBasiS.LastObject())[theIndexMaxMon]);
+          this->leadingCoeffs.AddOnTop(this->theBasiS.LastObject()->theCoeffs[theIndexMaxMon]);
+          for (int i=0; i<this->theBasiS.size-1; i++)
+            indexPairs.AddOnTop(PairInts(i, this->theBasiS.size-1));
+        }
+      } //else
+        //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+        //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+        //<< " failed the closh criterium";
+    //else
+      //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+      //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+      //<< " failed the lcm criterium";
+    indexPairs.RemoveIndexSwapWithLast(currentPairIndex);
+  }
+  this->MakeMinimalBasis();
+  inputOutpuT=this->theBasiS;
+  return true;
+}
+
+template <class CoefficientType>
+std::string GroebnerBasisComputation<CoefficientType>::GetDivisionString(FormatExpressions* theFormat)
+{ std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+  if (theFormat!=0)
+    theFormat->thePolyMonOrder=this->theMonOrdeR;
+  HashedList<MonomialP> totalMonCollection;
+  std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
+  std::string underlineStyleHighlighted=
+  " style=\"textcolor=red; white-space: nowrap; border-bottom:1px solid black;\"";
+  std::string HighlightedStyle=
+  " style=\"textcolor=red; white-space: nowrap;\"";
+  totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement());
+  for (int i=0; i<theRemainders.size; i++)
+  { totalMonCollection.AddOnTopNoRepetition(theRemainders[i]);
+    totalMonCollection.AddOnTopNoRepetition(theSubtracands[i]);
+  }
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+  totalMonCollection.QuickSortDescending(this->theMonOrdeR);
+//  std::cout << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+  int numVars=0;
+  for (int i=0; i<totalMonCollection.size; i++)
+  { MonomialP& currentMon=totalMonCollection[i];
+    numVars=MathRoutines::Maximum(currentMon.GetMinNumVars(), numVars);
+  }
+  out << "The variables: ";
+  for (int i=0; i<numVars; i++)
+  { MonomialP tempMon;
+    tempMon.MakeEi(i, 1);
+    out << tempMon.ToString(theFormat);
+    if (i!=numVars-1)
+      out << ", ";
+  }
+  out << "<br>";
+  out << theRemainders.size  << " division steps total.<br>";
+  out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
+  out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
+  out << this->GetPolynomialStringSpacedMonomials
+  (this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, theFormat,
+   &this->remainderDivision) << "</td></tr>";
+  for (int i=0; i<this->theBasiS.size; i++)
+  { //if (i==this->theBasiS.size-1)
+//    else
+    out << "<tr>";
+    out << "<td style=\"border-right:1px solid black; border-bottom: 1px solid gray;\">" << this->theBasiS[i].ToString(theFormat);
+    out << "</td>";
+    out << "<td style=\"border-bottom:1px solid gray;\" colspan=\"" << totalMonCollection.size+1 << "\">";
+    out << "<table><tr>";
+    for (int j=0; j<theRemainders.size; j++)
+    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
+      { out << "<td></td>";
+        continue;
+      }
+      out << "<td>" << Polynomial<Rational>::GetBlendCoeffAndMon
+      (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j],
+       true, theFormat);
+      out << "</td>";
+    }
+    out << "</tr></table>";
+    out << "</td></tr>";
+  }
+  out << "<tr><td></td>";
+  out << this->GetPolynomialStringSpacedMonomials
+  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, theFormat,
+   &this->intermediateHighlightedMons.GetElement()[0] );
+  out << "</tr>";
+  for (int i=0; i<theRemainders.size; i++)
+  { out << "<tr><td>-</td></tr>";
+    out << "<tr><td></td>"  << this->GetPolynomialStringSpacedMonomials
+    (theSubtracands[i], totalMonCollection, underlineStyle,
+     underlineStyleHighlighted, theFormat)
+    << "</tr>";
+    out << "<tr><td></td>"
+    << this->GetPolynomialStringSpacedMonomials
+    (theRemainders[i], totalMonCollection, "", HighlightedStyle, theFormat,
+     &this->intermediateHighlightedMons.GetElement()[i+1])
+    << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
+template <class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::RemainderDivisionWithRespectToBasis
+(Polynomial<CoefficientType>& inputOutput,
+ Polynomial<CoefficientType>* outputRemainder, GlobalVariables* theGlobalVariables,
+ int basisIndexToIgnore
+ )
+{ //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
+  if (&inputOutput==outputRemainder ||
+      &inputOutput==&this->bufPoly || outputRemainder==&this->bufPoly)
+  { std::cout
+    << "This is a programming error: the input, the output  "
+    << " and the buffer member object must be pairwise distinct when carrying out "
+    << " multi-polynomial division. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  MemorySaving<Polynomial<Rational> > tempPoly;
+  if (outputRemainder==0)
+    outputRemainder=&tempPoly.GetElement();
+  ProgressReport theReportStart(theGlobalVariables);
+  ProgressReport theReport(theGlobalVariables);
+  if (theGlobalVariables!=0 && this->flagDoProgressReport)
+  { theReportStart.Report
+    ("Computing remainder  division");
+    //+     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
+  }
+  outputRemainder->MakeZero();
+  Polynomial<Rational>& currentRemainder=inputOutput;
+  if (this->flagDoLogDivision)
+    this->startingPoly.GetElement()=currentRemainder;
+  Rational leadingMonCoeff;
+  MonomialP& highestMonCurrentDivHighestMonOther=this->bufferMoN1;
+  int numIntermediateRemainders=0;
+  if (this->flagDoLogDivision)
+  { this->intermediateCoeffs.GetElement().size=0;
+    this->intermediateHighestMonDivHighestMon.GetElement().size=0;
+    this->intermediateRemainders.GetElement().size=0;
+    this->intermediateSubtractands.GetElement().size=0;
+    this->intermediateHighlightedMons.GetElement().SetSize(1);
+    this->intermediateHighlightedMons.GetElement().LastObject()->SetSize(0);
+  }
+  while (!currentRemainder.IsEqualToZero())
+  { bool divisionOcurred=false;
+    int i=0;
+    int indexLeadingMonRemainder= currentRemainder.GetIndexMaxMonomial(this->theMonOrdeR);
+    leadingMonCoeff=currentRemainder.theCoeffs[indexLeadingMonRemainder];
+    highestMonCurrentDivHighestMonOther=currentRemainder[indexLeadingMonRemainder];
+    while (i<this->theBasiS.size && !divisionOcurred)
+    { MonomialP& highestMonBasis=this->leadingMons[i];
+      bool shouldDivide=(i==basisIndexToIgnore)
+      ? false :highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
+      if (shouldDivide)
+      { numIntermediateRemainders++;
+        highestMonCurrentDivHighestMonOther/=highestMonBasis;
+        if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents())
+        { std::cout << "This is a programming error: the pivot monomial in the polynomial "
+          << " division algorithm has negative exponent(s). This is not allowed. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
+        if (this->flagDoLogDivision)
+        { this->intermediateHighestMonDivHighestMon.GetElement().
+          AddOnTop(highestMonCurrentDivHighestMonOther);
+          this->intermediateSelectedDivisors.GetElement().AddOnTop(i);
+          this->intermediateHighlightedMons.GetElement().SetSize
+          (this->intermediateHighlightedMons.GetElement().size+1);
+          this->intermediateHighlightedMons.GetElement().LastObject()->size=0;
+        }
+        this->bufPoly=this->theBasiS[i];
+        leadingMonCoeff/=this->leadingCoeffs[i];
+        if (this->flagDoLogDivision)
+          this->intermediateCoeffs.GetElement().AddOnTop(leadingMonCoeff);
+        this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
+        if (this->flagDoLogDivision)
+          this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
+        { std::stringstream out;
+          out
+          << "Total number of polynomial operations so far: " << this->NumberOfComputations;
+          if (this->MaxNumComputations>0)
+            out << ", with a limit of no more than " << this->MaxNumComputations << " operations.";
+          out
+          << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders
+          << "\n<br> Highest mon of current remainder: "
+          << currentRemainder[indexLeadingMonRemainder].ToString() << ". "
+          << "\n<br>Current index we are dividing by: " << i+1
+          << " out of " << this->theBasiS.size
+          << "\n<br>" << currentRemainder.size << " monomials in current remainder."
+          << "\n<br>" << outputRemainder->size << " monomials in output remainder."
+          ;
+          theReport.Report(out.str());
+          //std::cout << out.str();
+        }
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        { std::cout << "<br>Dividing "
+          << currentRemainder.ToString()
+          <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
+          << this->bufPoly.ToString() ;
+          Polynomial<Rational> currentRemainder1;
+          currentRemainder1=currentRemainder;
+          currentRemainder1-=this->bufPoly;
+          std::cout << " I must get: " << currentRemainder1.ToString();
+        }*/
+        //std::cout << " <hr>Subtracting " << this->bufPoly.ToString()
+        //<< " from " << currentRemainder.ToString();
+        currentRemainder-=this->bufPoly;
+        //std::cout << " to get " << currentRemainder.ToString();
+        if (this->flagDoLogDivision)
+          this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
+        divisionOcurred=true;
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
+          << "<br>Current divisor index: " << i+1;
+          if(this->NumberOfComputations>this->MaxNumComputations+1010)
+          { std::cout
+            << "<br>This may or may not be a programming error. While handling computation excess limit, "
+            << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+            << " I have no explanation for this issue right now, so I am crashing to let you know "
+            << " something is fishy. ";
+            std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
+        }*/
+        this->NumberOfComputations++;
+        //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+      } else
+        i++;
+    }
+    if (!divisionOcurred)
+    { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
+      if (this->flagDoLogDivision)
+        (*this->intermediateHighlightedMons.GetElement().LastObject()).
+        AddOnTop(highestMonCurrentDivHighestMonOther);
+      currentRemainder.PopMonomial(indexLeadingMonRemainder);
+      this->NumberOfComputations++;
+      /*if (this->NumberOfComputations>this->MaxNumComputations+1000)
+      { std::cout
+        << "This may or may not be a programming error. While handling computation excess limit, "
+        << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+        << " I have no explanation for this issue right now, so I am crashing to let you know "
+        << " something is fishy. ";
+        std::cout << "<br>Current remainder:<br> " << currentRemainder.ToString();
+
+        std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }*/
+      if (theGlobalVariables!=0 && this->flagDoProgressReport)
+      { std::stringstream out;
+        out << "Number of intermediate remainders: " << numIntermediateRemainders
+        << "\n<br> Highest mon of current remainder is no longer reducible. "
+        << "\n<br>" << currentRemainder.size << " monomials in current remainder."
+        << "\n<br>" << outputRemainder->size << " monomials in output remainder."
+        ;
+        theReport.Report(out.str());
+          //std::cout << out.str();
+      }
+    }
+  }
+//  std::cout << " <br>final remainder: "
+//  << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat)
+//  << "<hr>";
+}
+
+template <class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::AddRemainderToBasis
+ (GlobalVariables* theGlobalVariables)
+{ if (this->leadingMons.size!=this->theBasiS.size)
+  { std::cout << "This is a programming error: the number of leading monomials does not equal "
+    << " the number of polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
+  if (this->remainderDivision.IsEqualToZero())
+    return false;
+  this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+  int indexMaxMon=this->remainderDivision.GetIndexMaxMonomial(this->theMonOrdeR);
+  MonomialP& theNewLeadingMon=this->remainderDivision[indexMaxMon];
+  if (this->flagDoSortBasis)
+  { this->theBasiS.SetSize(this->theBasiS.size+1);
+    this->leadingMons.SetSize(this->theBasiS.size);
+    this->leadingCoeffs.SetSize(this->theBasiS.size);
+    for (int i=theBasiS.size-1; i>=0; i--)
+    { bool shouldAddHere=(i==0) ? true: this->remainderDivision.size>this->theBasiS[i-1].size;
+      if (shouldAddHere)
+      { this->theBasiS[i]=this->remainderDivision;
+        this->leadingMons[i]=theNewLeadingMon;
+        this->leadingCoeffs[i]=this->remainderDivision.theCoeffs[indexMaxMon];
+        break;
+      } else
+      { this->theBasiS[i]=this->theBasiS[i-1];
+        this->leadingMons[i]=this->leadingMons[i-1];
+        this->leadingCoeffs[i]=this->leadingCoeffs[i-1];
+      }
+    }
+  } else
+  { this->theBasiS.AddOnTop(this->remainderDivision);
+    this->leadingMons.AddOnTop(theNewLeadingMon);
+    this->leadingCoeffs.AddOnTop(this->remainderDivision.theCoeffs[indexMaxMon]);
+  }
+//  this->theBasiS.AddOnTop(this->remainderDivision);
+//  this->leadingMons.AddOnTop(theNewLeadingMon);
+//  this->leadingCoeffs.AddOnTop(this->remainderDivision.theCoeffs[indexMaxMon]);
+  return true;
+}
+
+template <class CoefficientType>
+GroebnerBasisComputation<CoefficientType>::GroebnerBasisComputation()
+{ this->theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  this->NumberOfComputations=0;
+  this->flagDoProgressReport=true;
+  this->flagDoSortBasis=true;
+  this->flagBasisGuaranteedToGenerateIdeal=false;
+  this->flagDoLogDivision=false;
+  this->MaxNumComputations=0;
+}
+
+template <class CoefficientType>
+void GroebnerBasisComputation <CoefficientType>::initForDivisionAlone
+(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
+  if (inputOutpuT.size<=0)
+  { std::cout << "This is a programming error: I cannot transform an "
+    << "empty list to a Groebner basis. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->theBasiS=inputOutpuT;
+  this->leadingMons.SetSize(inputOutpuT.size);
+  this->leadingCoeffs.SetSize(inputOutpuT.size);
+  for (int i=0; i<this->theBasiS.size; i++)
+  { Polynomial<Rational>& curPoly=theBasiS[i];
+    int theIndex=curPoly.GetIndexMaxMonomial(this->theMonOrdeR);
+    if (theIndex==-1)
+    { std::cout << "This is a programming error: initialization for polynomial division "
+      << " with respect to at least one zero polynomial. If this is a bad user input, "
+      << " it should be handled at an earlier level. "
+      << " Here is the current basis by which we need to divide. "
+      << this->theBasiS.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->leadingMons[i]=curPoly[theIndex];
+    this->leadingCoeffs[i]=curPoly.theCoeffs[theIndex];
+  }
+  this->NumberOfComputations=0;
+}
+
+template <class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::initForGroebnerComputation
+(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
+  if (inputOutpuT.size<=0)
+  { std::cout << "This is a programming error: I cannot transform an "
+    << "empty list to a Groebner basis. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->theBasiS.SetSize(0);
+  this->theBasiS.ReservE(inputOutpuT.size);
+  this->leadingMons.SetSize(0);
+  this->leadingMons.ReservE(inputOutpuT.size);
+  this->leadingCoeffs.SetSize(0);
+  this->leadingCoeffs.ReservE(inputOutpuT.size);
+  this->NumberOfComputations=0;
+}
+
+template<class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::ConsistencyCheck()
+{ if (this->NumberOfComputations>this->MaxNumComputations+1000)
+  { std::cout
+    << "This may or may not be a programming error. While handling computation excess limit, "
+    << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+    << " I have no explanation for this issue right now, so I am crashing to let you know "
+    << " something is fishy. ";
+    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
+template<class CoefficientType>
+std::string GroebnerBasisComputation<CoefficientType>::GetPolynomialStringSpacedMonomials
+(const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+ const std::string& extraStyle, const std::string& extraHighlightStyle,
+ FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
+{ std::stringstream out;
+  bool wasFirst=true;
+  bool isFirst;
+  int countMons=0;
+  for (int i=0; i<theMonomialOrder.size; i++)
+  { int theIndex= thePoly.GetIndex(theMonomialOrder[i]);
+    if (theIndex==-1)
+    { out << "<td" << extraStyle << ">" << "</td>";
+      continue;
+    }
+    countMons++;
+    isFirst=wasFirst;
+    wasFirst=false;
+    bool useHighlightStyle=false;
+    if (theHighLightedMons!=0)
+      if (theHighLightedMons->Contains(theMonomialOrder[i]))
+        useHighlightStyle=true;
+    out << "<td" << extraStyle << ">";
+    if (useHighlightStyle)
+      out << "<span style=\"color:red\">";
+    out << Polynomial<Rational>::GetBlendCoeffAndMon
+    (thePoly[theIndex], thePoly.theCoeffs[theIndex], !isFirst, theFormat);
+    if (useHighlightStyle)
+      out << "</span>";
+    out << "</td>";
+  }
+  if (countMons!=thePoly.size)
+    out << "<td><b>Oh no, this is f***ed up!</b></td>";
+  return out.str();
 }
 #endif

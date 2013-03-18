@@ -69,7 +69,7 @@ bool CommandList::innerPolynomialDivisionRemainder
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
-  GroebnerBasisComputation theGB;
+  GroebnerBasisComputation<Rational> theGB;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
   { if (thePolys[i].IsEqualToZero())
@@ -117,7 +117,7 @@ bool CommandList::innerPolynomialDivisionVerbose
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
-  GroebnerBasisComputation theGB;
+  GroebnerBasisComputation<Rational> theGB;
   theGB.flagDoLogDivision=true;
   theGB.theBasiS.SetSize(thePolys.size-1);
   for (int i=1; i<thePolys.size; i++)
@@ -276,9 +276,18 @@ bool CommandList::innerEmbedSSalgInSSalg
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
-bool CommandList::fGroebner
-(CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
-{ MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
+bool MathRoutines::IsPrime(int theInt)
+{ if (theInt<=1)
+    return false;
+  for (int i=2; i*i<=theInt; i+=2)
+    if (theInt% i==0)
+      return false;
+  return true;
+}
+
+bool CommandList::innerGroebner
+(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useModZp)
+{ MacroRegisterFunctionWithName("CommandList::innerGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   List<Polynomial<Rational> > outputGroebner, outputGroebner2;
@@ -297,27 +306,44 @@ bool CommandList::fGroebner
   int upperBoundComputations=(int) upperBound.DoubleValue();
   output=input;
   output.children.RemoveIndexShiftDown(1);
+  int theMod;
+  if (useModZp)
+  { if (!output[1].IsSmallInteger(&theMod))
+      return output.SetError("Error: failed to extract modulo from the second argument. ", theCommands);
+    if (!MathRoutines::IsPrime(theMod))
+      return output.SetError("Error: modulo not prime. ", theCommands);
+  }
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
       (output, inputVector, &theContext, -1, Serialization::innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theContext.VariableImages.QuickSortAscending();
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
-
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+  theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
+  if (useModZp)
+  { ElementZmodP tempElt;
+    tempElt.MakeMOne(theMod);
+    inputVectorZmodP.SetSize(inputVector.size);
+    for (int i=0; i<inputVector.size; i++)
+    { inputVectorZmodP[i].MakeZero();
+      for (int j=0; j<inputVector[i].size; j++)
+      { tempElt=inputVector[i].theCoeffs[j];
+        inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
+      }
+    }
+    GroebnerBasisComputation<ElementZmodP> theGroebnerComputationZmodP;
+
+  }
 //  int theNumVars=theContext.VariableImages.size;
   outputGroebner=inputVector;
   outputGroebner2=inputVector;
 //  std::cout << outputGroebner.ToString(&theFormat);
-  Polynomial<Rational> buffer1, buffer2, buffer3, buffer4;
-  MonomialP bufferMon1, bufferMon2;
-  theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
 
-  GroebnerBasisComputation theGroebnerComputation;
+  GroebnerBasisComputation<Rational> theGroebnerComputation;
   theGroebnerComputation.theMonOrdeR=
   useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest :
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;

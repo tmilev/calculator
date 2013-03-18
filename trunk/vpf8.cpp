@@ -2585,7 +2585,7 @@ void RationalFunctionOld::GetRelations
     currentPoly+=tempP;
 //  std::cout << currentPoly.ToString(false, tempFormat) << "<br>";
   }
-  GroebnerBasisComputation theComputation;
+  GroebnerBasisComputation<Rational> theComputation;
   theComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
   theComputation.TransformToReducedGroebnerBasis
   (theGroebnerBasis, &theGlobalVariables);

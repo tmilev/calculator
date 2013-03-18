@@ -299,7 +299,6 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   this->theInvolvedNegGenerators.LastObject()->size=0;
   this->theInvolvedPosGenerators.SetSize(this->theInvolvedPosGenerators.size+1);
   this->theInvolvedPosGenerators.LastObject()->size=0;
-  this->theWeylNonEmbeddeD.theDynkinType.AddMonomial(theNewType, 1);
 }
 
 bool CandidateSSSubalgebra::isGoodForTheTop
@@ -530,11 +529,14 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
 bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
+  this->CheckInitialization();
   this->flagSystemSolved=false;
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
-  GroebnerBasisComputation theComputation;
+  GroebnerBasisComputation<Rational> theComputation;
   theComputation.MaxNumComputations=10000;
+  if (!this->owner->flagAttemptToSolveSystems)
+    return false;
   this->flagSystemGroebnerBasisFound=
   theComputation.TransformToReducedGroebnerBasis
   (this->transformedSystem, theGlobalVariables);

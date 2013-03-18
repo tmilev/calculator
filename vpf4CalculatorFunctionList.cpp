@@ -532,7 +532,7 @@ x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
 x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 
   this->AddOperationInnerHandler
-  ("GroebnerLexUpperLimit", this->fGroebnerLex, "",
+  ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \
     lexicographic order. \
     The lexicographic order is inherited from the comparison of the underlying expressions.\
@@ -588,7 +588,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
    \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
   this->AddOperationInnerHandler
-  ("GroebnerGrLexUpperLimit", this->fGroebnerGrLex, "",
+  ("GroebnerGrLexUpperLimit", this->innerGroebnerGrLex, "",
    "Transforms to a reduced Groebner basis relative to the graded \
    lexicographic order. In the graded lexicographic order, monomials are first compared by\
    total degree, then by lexicographic order. \

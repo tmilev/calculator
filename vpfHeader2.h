@@ -1500,26 +1500,31 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
 
-template<class CoefficientType>
-bool innerGetTypeHighestWeightParabolic
-(CommandList& theCommands, const Expression& input, Expression& output,
- Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
- Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
- Expression::FunctionAddress ConversionFun)
+  template<class CoefficientType>
+  bool innerGetTypeHighestWeightParabolic
+  (CommandList& theCommands, const Expression& input, Expression& output,
+   Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
+   Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
+   Expression::FunctionAddress ConversionFun)
  ;
- static bool fGroebnerGrLex
-(CommandList& theCommands, const Expression& input, Expression& output)
- { return theCommands.fGroebner
-  (theCommands, input, output, true);
- }
- static bool fGroebnerLex
-(CommandList& theCommands, const Expression& input, Expression& output)
- { return theCommands.fGroebner
-  (theCommands, input, output, false);
- }
- static bool fGroebner
-(CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
- ;
+  static bool innerGroebnerGrLex
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerGroebner
+    (theCommands, input, output, true, false);
+  }
+  static bool innerGroebnerLex
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerGroebner
+    (theCommands, input, output, false, false);
+  }
+  static bool innerGroebnerModZpLex
+  (CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
+  { return theCommands.innerGroebner
+    (theCommands, input, output, false, true);
+  }
+  static bool innerGroebner
+  (CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useModZp)
+  ;
  static bool fParabolicWeylGroups
 (CommandList& theCommands, const Expression& input, Expression& output)
  ;

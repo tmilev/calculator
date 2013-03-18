@@ -328,6 +328,7 @@ public:
 
   List<CandidateSSSubalgebra> Hcandidates;
   int theRecursionCounter;
+  bool flagAttemptToSolveSystems;
   void operator=(const SemisimpleSubalgebras& other)
   { this->owneR=other.owneR;
     this->theSl2s=other.theSl2s;
@@ -336,6 +337,7 @@ public:
     this->theSl2sOfSubalgebras=other.theSl2sOfSubalgebras;
     this->Hcandidates=other.Hcandidates;
     this->theRecursionCounter=other.theRecursionCounter;
+    this->flagAttemptToSolveSystems=other.flagAttemptToSolveSystems;
   }
   bool operator==(const SemisimpleSubalgebras& other)
   { if (this->owneR==other.owneR)
@@ -365,6 +367,7 @@ public:
   { this->owneR=0;
     this->theRecursionCounter=0;
     this->theSl2s.owner=0;
+    this->flagAttemptToSolveSystems=false;
   }
   SemisimpleSubalgebras()
   { this->reset();

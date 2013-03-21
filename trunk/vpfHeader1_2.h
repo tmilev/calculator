@@ -780,6 +780,9 @@ class DynkinSimpleType
     this->lengthFirstCoRootSquared=2;
   }
   int GetRootSystemSize()const;
+  int GetRootSystemPlusRank()const
+  { return this->GetRootSystemSize()+this->theRank;
+  }
   int GetSSAlgDim()const
   { return this->GetRootSystemSize()+this->theRank;
   }
@@ -806,7 +809,7 @@ class DynkinSimpleType
   void GetEn(int n, Matrix<Rational>& output)const;
   void GetF4(Matrix<Rational>& output)const;
   void GetG2(Matrix<Rational>& output)const;
-
+  bool IsPossibleCoRootLength(const Rational& input)const;
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
@@ -891,8 +894,39 @@ public:
     }
     return result;
   }
+  bool IsPossibleCoRootLength(const Rational& input)const
+  { for (int i=0; i<this->size; i++)
+      if ((*this)[i].IsPossibleCoRootLength(input))
+        return true;
+    return false;
+  }
   int GetNumSimpleComponents()const;
-  Rational GetRank()const;
+  Rational GetRankRational()const;
+  int GetRank()const;
+  int GetRootSystemSize()const
+  { Rational result=0;
+    for (int i=0; i<this->size; i++)
+      result+=this->theCoeffs[i]*(*this)[i].GetRootSystemSize();
+    int intResult;
+    if (!result.IsSmallInteger(&intResult))
+    { std::cout << "This is a programming error: multiplicity of simple type is not a small integer. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return intResult;
+  }
+  int GetRootSystemPlusRank()const
+  { Rational result=0;
+    for (int i=0; i<this->size; i++)
+      result+=this->theCoeffs[i]*(*this)[i].GetRootSystemPlusRank();
+    int intResult;
+    if (!result.IsSmallInteger(&intResult))
+    { std::cout << "This is a programming error: multiplicity of simple type is not a small integer. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return intResult;
+  }
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;

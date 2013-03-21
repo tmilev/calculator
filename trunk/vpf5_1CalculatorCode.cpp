@@ -316,7 +316,6 @@ bool CommandList::innerGroebner
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
       (output, inputVector, &theContext, -1, Serialization::innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
-  //theContext.VariableImages.QuickSortAscending();
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
   for (int i=0; i<inputVector.size; i++)
@@ -336,7 +335,6 @@ bool CommandList::innerGroebner
       }
     }
     GroebnerBasisComputation<ElementZmodP> theGroebnerComputationZmodP;
-
   }
 //  int theNumVars=theContext.VariableImages.size;
   outputGroebner=inputVector;
@@ -353,9 +351,9 @@ bool CommandList::innerGroebner
   (outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "Letter/expression ordrer: ";
-  for (int i=0; i<theContext.GetNumContextVariables(); i++)
+  for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
   { out << theContext.ContextGetContextVariable(i).ToString();
-    if (i!=theContext.GetNumContextVariables()-1)
+    if (i!=theContext.ContextGetNumContextVariables()-1)
       out << ", ";
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
@@ -367,7 +365,7 @@ bool CommandList::innerGroebner
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with "
-    <<  outputGroebner.size << " elements, computed using algorithm 1, "
+    << outputGroebner.size << " elements, computed using algorithm 1, "
     << " using " << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> "

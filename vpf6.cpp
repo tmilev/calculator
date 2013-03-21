@@ -970,6 +970,7 @@ bool Expression::IsEqualToZero()const
 CommandList::CommandList()
 { this->theGlobalVariableS=0;
   this->numOutputFiles=0;
+  this->flagHideLHS=false;
 }
 
 std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
@@ -1612,6 +1613,11 @@ bool CommandList::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LatexLink")
   { this->flagProduceLatexLink=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="HideLHS")
+  { this->flagHideLHS=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
@@ -3698,6 +3704,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LogFull");
   this->controlSequences.AddOnTop("LatexLink");
+  this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("EndProgram");
 //additional operations treated like regular expressions.
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
@@ -4827,7 +4834,13 @@ bool Expression::operator>(const Expression& other)const
         return leftS>rightS;
     return this->theData>other.theData;
   }
-  return this->children>other.children;
+  for (int i=0; i<this->children.size; i++)
+  { if ((*this)[i]>other[i])
+      return true;
+    if (other[i]>(*this)[i])
+      return false;
+  }
+  return false;
 }
 
 bool Expression::ToStringData
@@ -4879,8 +4892,10 @@ bool Expression::ToStringData
     << ")";
     result=true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-  { out << "UEE{}(" //<< this->GetContext().ToString() << ", "
-    << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString()
+  { FormatExpressions tempFormat;
+    this->GetContext().ContextGetFormatExpressions(tempFormat);
+    out << "UEE{}(" //<< this->GetContext().ToString() << ", "
+    << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&tempFormat)
     << ")";
     result=true;
   } else if (this->IsOfType<Matrix<Rational> >())
@@ -5172,12 +5187,14 @@ std::string Expression::ToString
         (startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()));
       if (createTable)
       { out << "<hr> ";
-        if (i<(*startingExpression).children.size)
-          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-          ((*startingExpression)[i].ToString(theFormat));
-        else
-        { out << "No matching starting expression- possible use of the Melt keyword.";
-        }
+        if (!this->theBoss->flagHideLHS)
+        { if (i<(*startingExpression).children.size)
+            out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
+            ((*startingExpression)[i].ToString(theFormat));
+          else
+            out << "No matching starting expression- possible use of the Melt keyword.";
+        } else
+          out << "...";
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";

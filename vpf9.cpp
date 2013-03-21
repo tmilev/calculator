@@ -3682,10 +3682,22 @@ int DynkinType::GetNumSimpleComponents()const
   return output;
 }
 
-Rational DynkinType::GetRank()const
+Rational DynkinType::GetRankRational()const
 { Rational result=0;
   for (int i=0; i<this->size; i++)
     result+=this->theCoeffs[i]*(*this)[i].theRank;
+  return result;
+}
+
+int DynkinType::GetRank()const
+{ Rational tempRat = this->GetRankRational();
+  int result;
+  if (!tempRat.IsSmallInteger(&result))
+  { std::cout << "This is a programming error: attempting to get a small integer rank from a "
+    << " dynkin type whose rank is not a small integer, but is instead " << tempRat
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   return result;
 }
 

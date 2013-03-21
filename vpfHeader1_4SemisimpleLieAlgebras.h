@@ -363,12 +363,7 @@ public:
   { this->owneR=&inputOwner;
     this->theSl2s.owner=&inputOwner;
   }
-  void reset()
-  { this->owneR=0;
-    this->theRecursionCounter=0;
-    this->theSl2s.owner=0;
-    this->flagAttemptToSolveSystems=false;
-  }
+  void reset();
   SemisimpleSubalgebras()
   { this->reset();
   }

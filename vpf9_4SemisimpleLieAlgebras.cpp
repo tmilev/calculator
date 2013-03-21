@@ -34,10 +34,26 @@ void WeylGroup::operator+=(const WeylGroup& other)
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
   std::stringstream out;
-  out << "There are " << this->Hcandidates.size << " candidates total.\n<hr>\n ";
+  int candidatesRealized=0;
+  int candidatesNotRealizedNotProvenImpossible=0;
+  int candidatesProvenImpossible=0;
+  for (int i=0; i<this->Hcandidates.size; i++)
+  { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
+    if (currentSA.flagSystemProvedToHaveNoSolution)
+      candidatesProvenImpossible++;
+    if (currentSA.flagSystemSolved)
+      candidatesRealized++;
+  }
+  candidatesNotRealizedNotProvenImpossible=
+  this->Hcandidates.size-candidatesRealized- candidatesProvenImpossible;
+  out << candidatesRealized << " subalgebras realized.";
+  out << "<br>Total, there are " << this->Hcandidates.size << " = " << candidatesRealized
+  << " realized + " << candidatesProvenImpossible << " proven impossible + "
+  << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
   for (int i=0; i<this->Hcandidates.size; i++)
     out << this->Hcandidates[i].ToString(theFormat) << "\n<hr>\n ";
-  out << this->theSl2s.ToString(theFormat);
+  if (this->theSl2s.size!=0)
+    out << this->theSl2s.ToString(theFormat);
   return out.str();
 }
 
@@ -516,15 +532,21 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  this->flagSystemSolved=this->SolveSeparableQuadraticSystemRecursively
-  (theGlobalVariables);
+  this->SolveSeparableQuadraticSystemRecursively(theGlobalVariables);
   this->theBasis=this->theNegGens;
   this->theBasis.AddListOnTop(this->thePosGens);
   if (this->theBasis.size>0)
-  { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
-  }
-  return this->flagSystemSolved;
+    this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
+  return !this->flagSystemProvedToHaveNoSolution;
 }
+
+void SemisimpleSubalgebras::reset()
+{ this->owneR=0;
+  this->theRecursionCounter=0;
+  this->theSl2s.owner=0;
+  this->flagAttemptToSolveSystems=true;
+}
+
 
 bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
 (GlobalVariables* theGlobalVariables)
@@ -533,13 +555,21 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
   this->flagSystemSolved=false;
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
+  if (this->theNegGens.size!=0)
+  { this->flagSystemSolved=true;
+    return true;
+  }
   GroebnerBasisComputation<Rational> theComputation;
   theComputation.MaxNumComputations=10000;
   if (!this->owner->flagAttemptToSolveSystems)
-    return false;
+    return !this->flagSystemProvedToHaveNoSolution;
   this->flagSystemGroebnerBasisFound=
   theComputation.TransformToReducedGroebnerBasis
   (this->transformedSystem, theGlobalVariables);
+  if (theComputation.theBasiS.size==1)
+    if (theComputation.theBasiS[0].IsAConstant())
+      if (!theComputation.theBasiS[0].IsEqualToZero())
+        this->flagSystemProvedToHaveNoSolution=true;
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
@@ -705,10 +735,8 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   List<DynkinSimpleType> theTypes;
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   if (theTypes.size!=0)
-    if (theType.theRank==theTypes.LastObject()->theRank
-        &&
-        theType.theLetter==theTypes.LastObject()->theLetter
-        )
+    if (theType.theRank==theTypes.LastObject()->theRank &&
+        theType.theLetter==theTypes.LastObject()->theLetter)
       baseLength=theTypes.LastObject()->lengthFirstCoRootSquared;
   //if (this->GetSSowner().GetRank()-(+)
   std::stringstream consideringStream;
@@ -725,8 +753,16 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     theProgressReport1.Report(consideringStream.str());
     return;
   }
+  if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
+    for (int i=0; i<theTypes.size; i++)
+      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength
+          (theTypes[i].lengthFirstCoRootSquared))
+        return;
   for (int k=0; k<this->theSl2s.size; k++)
   { theType.lengthFirstCoRootSquared=this->theSl2s[k].LengthHsquared;
+    if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
+      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theType.lengthFirstCoRootSquared))
+        continue;
     if (theType.lengthFirstCoRootSquared<baseLength)
       continue;
     theCandidate=baseCandidate;
@@ -1678,7 +1714,10 @@ void SltwoSubalgebras::ElementToHtml
   }
   fileName= physicalPathSl2s;
   fileName.append("sl2s_nopng.html");
+  bool tempB=theFormat->flagUsePNG;
+  theFormat->flagUsePNG=false;
   tempS = this->ToString(theFormat);
+  theFormat->flagUsePNG=tempB;
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\""
   << htmlPathServerSl2s << "sl2s.html\"> "
@@ -1945,74 +1984,81 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (i!=this->thePosGens.size-1)
       out << ", ";
   }*/
-  out << "<br>Dimension of subalgebra generated by predefined or computed generators:"
-  << this->theBasis.size << "<br>The generators: ";
-  for (int i=0; i<this->theBasis.size; i++)
-  { out << this->theBasis[i].ToString(theFormat);
-    if (i!=this->theBasis.size-1)
-      out << ", ";
-  }
   if (this->flagSystemProvedToHaveNoSolution)
-    out << " <b> Subalgebra candidate proved to be impossible! </b> ";
-  if (!this->flagSystemSolved)
-    out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
-  out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:";
-  for (int i=0; i<this->theUnknownNegGens.size; i++)
-  { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
-    out << this->theUnknownPosGens[i].ToString(theFormat);
+  { out << " <b> Subalgebra candidate proved to be impossible! </b> ";
+    return out.str();
   }
-  out << "<br>";
-  List<DynkinSimpleType> theTypes;
-  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  for (int i=0; i<this->CartanSAsByComponent.size; i++)
-  { out << "Component " << theTypes[i];
-    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-      out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << ", ";
+  if (this->theBasis.size!=0)
+  { out << "<br>Dimension of subalgebra generated by predefined or computed generators:"
+    << this->theBasis.size << "<br>The generators: ";
+    for (int i=0; i<this->theBasis.size; i++)
+    { out << this->theBasis[i].ToString(theFormat);
+      if (i!=this->theBasis.size-1)
+        out << ", ";
+    }
   }
-  for (int i=0; i<this->theHs.size; i++)
-  { out << "h: " << this->theHs[i] << ", "
-    << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
-    << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
-  }
-  out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
-  if (this->PosRootsPerpendicularPrecedingWeights.size>0)
-    out << " Positive roots that commute with the weight subsystem: "
-    << this->PosRootsPerpendicularPrecedingWeights.ToString();
   out << "<br>Symmetric Cartan matrix scaled: "
   << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
-  out << "<br>Symmetric Cartan default scale: "
-  << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
-  out << "Character ambient Lie algebra: "
-  << this->theCharFundamentalCoordsRelativeToCartan.ToString();
   out << "<br>Decomposition ambient Lie algebra: "
   << this->theCharFundCoords.ToString();
-  out << "<br>A necessary system to realize the candidate subalgebra.  ";
-  FormatExpressions tempFormat=this->theCoeffLetters;
-  for (int i=0; i<this->theSystemToSolve.size; i++)
-    out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
-  out << "<br>The above system after transformation.  ";
-  for (int i=0; i<this->transformedSystem.size; i++)
-    out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
-  if (!this->flagSystemGroebnerBasisFound)
-    out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
-  if (this->owner!=0 && this->theHorbitIndices.size>0)
-    if (this->theHorbitIndices[0].size>0)
-      if (this->theUnknownPosGens.size>0)
-      { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
-        out << "<br>First positive generator seed realization.<br> "
-        << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
-        out << "<br>First negative generator seed realization.<br> "
-        << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
-      }
-  out << "<br><b>For the calculator: </b><br>GroebnerLexUpperLimit{}(";
-  for (int i=0; i<this->transformedSystem.size; i++)
-  { out << this->transformedSystem[i].ToString(&tempFormat)
-    //if (i!=this->transformedSystem.size-1)
-    << ", ";
-  }
-  out << " 10000)";
-  if (this->flagSystemSolved)
-  { out << "<br>Solution of above system: " << this->aSolution.ToString();
+  if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+  { if (!this->flagSystemSolved)
+      out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
+    out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:<br>(";
+    for (int i=0; i<this->theUnknownNegGens.size; i++)
+    { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
+      out << this->theUnknownPosGens[i].ToString(theFormat);
+      if (i!=this->theUnknownNegGens.size-1)
+        out << ", ";
+    }
+    out << ")<br>";
+    List<DynkinSimpleType> theTypes;
+    this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+    for (int i=0; i<this->CartanSAsByComponent.size; i++)
+    { out << "Component " << theTypes[i];
+      for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+        out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << ", ";
+    }
+    for (int i=0; i<this->theHs.size; i++)
+    { out << "h: " << this->theHs[i] << ", "
+      << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
+      << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
+    }
+    out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
+    if (this->PosRootsPerpendicularPrecedingWeights.size>0)
+      out << " Positive roots that commute with the weight subsystem: "
+      << this->PosRootsPerpendicularPrecedingWeights.ToString();
+    out << "<br>Symmetric Cartan default scale: "
+    << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
+    out << "Character ambient Lie algebra: "
+    << this->theCharFundamentalCoordsRelativeToCartan.ToString();
+    out << "<br>A necessary system to realize the candidate subalgebra.  ";
+    FormatExpressions tempFormat=this->theCoeffLetters;
+    for (int i=0; i<this->theSystemToSolve.size; i++)
+      out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
+    out << "<br>The above system after transformation.  ";
+    for (int i=0; i<this->transformedSystem.size; i++)
+      out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
+    if (!this->flagSystemGroebnerBasisFound)
+      out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
+    if (this->owner!=0 && this->theHorbitIndices.size>0)
+      if (this->theHorbitIndices[0].size>0)
+        if (this->theUnknownPosGens.size>0)
+        { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
+          out << "<br>First positive generator seed realization.<br> "
+          << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
+          out << "<br>First negative generator seed realization.<br> "
+          << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
+        }
+    out << "<br><b>For the calculator: </b><br>GroebnerLexUpperLimit{}(10000, ";
+    for (int i=0; i<this->transformedSystem.size; i++)
+    { out << this->transformedSystem[i].ToString(&tempFormat);
+      if (i!=this->transformedSystem.size-1)
+        out << ", ";
+    }
+    out << " )";
+    if (this->flagSystemSolved)
+      out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
   return out.str();
 }
@@ -2048,4 +2094,33 @@ bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolut
   if (outputSolution!=0)
     outputSolution->AssignMatDetectRowOrColumn(theSolution);
   return true;
+}
+
+bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
+{ if (this->theLetter=='C')
+  { if ((this->lengthFirstCoRootSquared/input)==2 ||
+        (this->lengthFirstCoRootSquared/input)==1)
+      return true;
+    return false;
+  }
+  if (this->theLetter=='F' || this->theLetter=='B' )
+  { if ((input/this->lengthFirstCoRootSquared)==2 ||
+        (input/this->lengthFirstCoRootSquared)==1)
+      return true;
+    return false;
+  }
+  if (this->theLetter=='G')
+  { //std::cout << "<br>Testing input co-root length " << input << " vs current co-root length: "
+    //<< this->lengthFirstCoRootSquared;
+    if ((this->lengthFirstCoRootSquared/input)==3 ||
+        (this->lengthFirstCoRootSquared/input)==1)
+      return true;
+    return false;
+  }
+  if (this->theLetter=='A' || this->theLetter=='D' || this->theLetter=='E')
+    return input==this->lengthFirstCoRootSquared;
+  std::cout << "This is a programmig error: non-initialized or otherwise faulty Dynkin simple type. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
+  return false;
 }

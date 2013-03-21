@@ -744,14 +744,25 @@ bool Serialization::innerLoadFromObject
   (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
+  int theSArank=outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetRank();
   Matrix<Rational> theHs;
-  if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
-  { theCommands.Comments
-    << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
-    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
-    return false;
+  if (theSArank>1)
+  { if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
+    { theCommands.Comments
+      << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
+      << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+      return false;
+    }
+  } else
+  { Vector<Rational> tempV;
+    if (!theCommands.GetVectoR(input[3], tempV, 0, theRank, 0))
+    { theCommands.Comments
+      << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
+      << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+      return false;
+    }
+    theHs.AssignVectorRow(tempV);
   }
-  //theHs.GetListRowsToVectors(outputSubalgebra.theHs);
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
   { theCommands.Comments << "<hr>Failed to load cartan elements: I expected "
     << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
@@ -851,7 +862,9 @@ bool Serialization::innerLoadFromObject
   owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded[outputSubalgebra.indexInOwnersOfNonEmbeddedMe].theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
+
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
+  outputSubalgebra.ComputeChar(theCommands.theGlobalVariableS);
 
   //Serialization::innerLoadFromObject(theCommands,
   return output.SetError

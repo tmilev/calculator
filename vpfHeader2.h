@@ -684,6 +684,7 @@ public:
   bool flagLogPatternMatching;
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
+  bool flagHideLHS;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;

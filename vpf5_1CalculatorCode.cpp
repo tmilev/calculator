@@ -6,6 +6,45 @@
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
+template <class CoefficientType>
+void SemisimpleLieAlgebra::GetCommonCentralizer
+(const List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputElementsToCentralize,
+ List<ElementSemisimpleLieAlgebra<CoefficientType> >& outputCentralizingElements)
+{ List<Matrix<Rational> > theAds;
+  Matrix<Rational> tempAd, commonAd;
+  theAds.ReservE(inputElementsToCentralize.size);
+  for (int i=0; i<inputElementsToCentralize.size; i++)
+  { this->GetAd(tempAd, inputElementsToCentralize[i]);
+    //tempAd.Transpose();
+    theAds.AddOnTop(tempAd);
+    commonAd.AppendMatrixToTheBottom(tempAd);
+  }
+  Vectors<Rational> outputV;
+  commonAd.FindZeroEigenSpace(outputV);
+//  std::cout << "<br>Common ad: " << commonAd.ToString();
+//  std::cout << "<br>Eigenvectors: " << outputV.ToString();
+  outputCentralizingElements.SetSize(outputV.size);
+  for (int i=0; i<outputV.size; i++)
+  { ElementSemisimpleLieAlgebra<Rational>& currentElt=outputCentralizingElements[i];
+    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
+  }
+}
+
+template <class CoefficientType>
+void SemisimpleLieAlgebra::GetAd
+(Matrix<CoefficientType>& output, ElementSemisimpleLieAlgebra<CoefficientType>& e)
+{ int NumGenerators=this->GetNumGenerators();
+  output.init(NumGenerators, NumGenerators);
+  output.NullifyAll();
+  ElementSemisimpleLieAlgebra<CoefficientType> theGen, theResult;
+  for (int i=0; i<NumGenerators; i++)
+  { theGen.MakeGenerator(i, *this);
+    this->LieBracket(e, theGen, theResult);
+    for (int j=0; j<theResult.size; j++)
+      output(theResult[j].theGeneratorIndex, i)=theResult.theCoeffs[j];
+  }
+}
+
 bool CommandList::innerGCDOrLCM
 (CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
@@ -282,6 +321,40 @@ bool MathRoutines::IsPrime(int theInt)
   for (int i=2; i*i<=theInt; i+=2)
     if (theInt% i==0)
       return false;
+  return true;
+}
+
+bool CommandList::innerAdCommonEigenSpaces
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
+  if (input.children.size<3)
+    return output.SetError
+    ("Function ad common eigenspaces needs at least 2 arguments \
+      - type and at least one element of UE.", theCommands);
+  SemisimpleLieAlgebra* ownerSS;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input[1], ownerSS, &errorString))
+    return output.SetError(errorString, theCommands);
+  List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
+  theOperators.ReservE(input.children.size-2);
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  for (int i=2; i<input.children.size; i++)
+  { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+        (theCommands, input[i], tempElt, *ownerSS))
+      return output.SetError("Failed to extract element of UE. ", theCommands);
+    theOperators.AddOnTop(tempElt);
+  }
+  ownerSS->GetCommonCentralizer(theOperators, outputElts);
+//  std::cout << "<br>The elts: " <<  theOperators.ToString();
+//  std::cout << "<br> The common ad: " << commonAd.ToString();
+  std::stringstream out;
+  out << "<br>EigenSpace basis (" << outputElts.size << " elements total): ";
+  for (int i=0; i<outputElts.size; i++)
+  { ElementSemisimpleLieAlgebra<Rational>& currentElt=outputElts[i];
+    out << "<br>" << currentElt.ToString();
+  }
+  output.AssignValue(out.str(), theCommands);
   return true;
 }
 

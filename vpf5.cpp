@@ -165,7 +165,7 @@ bool CommandList::fWeylDimFormula
 
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
-  std::cout << "<br>input[2] is: " << input[2].ToString();
+//  std::cout << "<br>input[2] is: " << input[2].ToString();
   if (!theCommands.GetVectoR<RationalFunctionOld>
       (input[2], theWeight, &newContext, theSSowner->GetRank(),
        theCommands.innerRationalFunction))

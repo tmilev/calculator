@@ -2763,60 +2763,6 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
   return false;
 }
 
-bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
-(Vector<Rational>& h, ElementSemisimpleLieAlgebra<Rational>& e,
- ElementSemisimpleLieAlgebra<Rational>& output,
- GlobalVariables& theGlobalVariables)
-{ Vector<Rational> Difference;
-  //format of the system
-  //let an element of the simple lie algebra be written so that the first
-  //theWeyl.RootSystem.size
-  //coordinates correspond to the Chevalley-Weyl generators in the
-  //canonical format (first negative spaces, then cartan, then positive).
-  //then ad(e) is a linear operator which has theWeyl.RootSystem.size+theDimension
-  //rows and columns.
-  //Then ad(e)ad(e)(f)=-2e, so this gives us a linear system for f.
-  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  Matrix<Rational> theSystem, targetElt;
-  int NumRoots=this->theWeyl.RootSystem.size;
-  int NumRows=NumRoots+theDimension;
-  theSystem.init(NumRows, NumRows);
-  targetElt.init(NumRows, 1);
-  targetElt.NullifyAll();
-  theSystem.NullifyAll();
-  this->GetAd(theSystem, e);
-  for (int i=0; i<h.size; i++)
-    targetElt.elements[i+this->GetNumPosRoots()][0]=h[i];
-  Matrix<Rational> result;
-  bool hasSolution =
-  theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, targetElt, result);
-  if (hasSolution)
-  { output.MakeZero(*this);
-    ChevalleyGenerator tempGen;
-    for (int i=0; i<this->theWeyl.RootSystem.size; i++)
-      if (result.elements[i][0]!=0)
-      { tempGen.MakeGenerator(*this, i);
-        output.AddMonomial(tempGen, result.elements[i][0]);
-      }
-  }
-  return hasSolution;
-}
-
-template <class CoefficientType>
-void SemisimpleLieAlgebra::GetAd
-(Matrix<CoefficientType>& output, ElementSemisimpleLieAlgebra<CoefficientType>& e)
-{ int NumGenerators=this->GetNumGenerators();
-  output.init(NumGenerators, NumGenerators);
-  output.NullifyAll();
-  ElementSemisimpleLieAlgebra<CoefficientType> theGen, theResult;
-  for (int i=0; i<NumGenerators; i++)
-  { theGen.MakeGenerator(i, *this);
-    this->LieBracket(e, theGen, theResult);
-    for (int j=0; j<theResult.size; j++)
-      output.elements[i][theResult[j].theGeneratorIndex]=theResult.theCoeffs[j];
-  }
-}
-
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;

@@ -365,9 +365,9 @@ int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
 { HashedList<Vector<CoefficientType> > weightsSimpleCoords;
   weightsSimpleCoords.SetExpectedSize(this->size);
   for (int i=0; i<this->size; i++)
-    weightsSimpleCoords.AddOnTop(
-    theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoords));
-  for (int i=0; weightsSimpleCoords.size; i++)
+    weightsSimpleCoords.AddOnTop
+    (theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoords));
+  for (int i=0; i<weightsSimpleCoords.size; i++)
   { bool isGood=true;
     for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
       if(weightsSimpleCoords.Contains((weightsSimpleCoords[i]+theWeyl.RootsOfBorel[j])))
@@ -2059,6 +2059,15 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << " )";
     if (this->flagSystemSolved)
       out << "<br>Solution of above system: " << this->aSolution.ToString();
+  } else
+  { List<ElementSemisimpleLieAlgebra<Rational> > highestVectors;
+    this->owner->owneR->GetCommonCentralizer(this->thePosGens, highestVectors);
+    out << "<br>Highest vectors of representations (total " << highestVectors.size << "): ";
+    for (int i=0; i<highestVectors.size; i++)
+    { out << highestVectors[i].ToString();
+      if (i!=highestVectors.size-1)
+        out << ", ";
+    }
   }
   return out.str();
 }

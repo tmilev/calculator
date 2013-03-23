@@ -303,6 +303,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
+  //civilizedInput=
+  //"g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; [5 g_{9},g_{-1}]";
 //  civilizedInput="PolyDivRemainder{}(x^3+6xy+5xy^2+y^3, x^2+y^2-1, x^3+y^3-xy) ;";
 //  civilizedInput="plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)";
 //  civilizedInput="MakeCoxeterElement{}(B_3,2,1,1,1,1,2,2,1,2,1,2,1,2,1);";
@@ -321,6 +323,11 @@ int main(int argc, char **argv)
   //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6)))))";
   //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-1+g_-3, g_1+g_3, g_-2, g_2 ) ) ))";
 //  civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-6+g_-7, g_6+g_7, g_-8, g_8 ) ) ))";
+  /*civilizedInput=
+  "%HideLHS Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\
+  (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
+(g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
+)))";*/
   if (civilizedInput=="PenkovProject")
   {civilizedInput= "\
 %HideLHS \n\
@@ -517,14 +524,13 @@ Serialization{}(LoadCandidateSubalgebra, (C)^{2}_{3}+(A)^{1}_{1}, ((1, 3/2, 2, 1
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{2}, ((3/2, 3, 4, 2), (-1/2, -3/2, -1, 0)),\n\
 (\n\
-g_{-20}+g_{-19}, g_{20}+g_{19}, g_{6}+g_{5}, g_{-6}+g_{-5}\n\
+g_{-19}+g_{-20}, g_{20}+g_{19}, g_{6}+g_{5}, g_{-5}+g_{-6}\n\
 )\n\
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{2}, ((3/2, 3, 4, 2), (0, -3/2, -2, -1)),\n\
 (\n\
-g_{-22}+g_{-14}+g_{-20}, g_{14}+g_{22}+g_{20},\n\
--5 (g_{9})+3 (g_{13})+5 (g_{16})+4 (g_{10}), \\\\\n\
--1/5 (g_{-9})-1/5 (g_{-2})+1/4 (g_{-10})+3/20 (g_{-6})\n\
+g_{-21}+g_{-19}+g_{-20}, g_{19}+g_{20}- (g_{17})- (g_{14}), \\\\\n\
+g_{9}+g_{16}- (g_{6})-2 (g_{2}), g_{-16}+g_{-6}+2 (g_{-9})- (g_{-2})\n\
 )\n\
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}, ((1, 2, 3, 2), (0, 0, 0, -1)),\n\

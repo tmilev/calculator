@@ -1862,6 +1862,11 @@ public:
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
   }
+  template <class CoefficientType>
+  void GetCommonCentralizer
+  (const List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputElementsToCentralize,
+   List<ElementSemisimpleLieAlgebra<CoefficientType> >& outputCentralizingElements)
+   ;
   void GetChevalleyGeneratorAsLieBracketsSimpleGens
   (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
    Rational& outputMultiplyLieBracketsToGetGenerator)
@@ -1975,9 +1980,6 @@ public:
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent
   (ElementSemisimpleLieAlgebra<Rational>& e,
-   ElementSemisimpleLieAlgebra<Rational>& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEF
-  (Vector<Rational>& h, ElementSemisimpleLieAlgebra<Rational>& e,
    ElementSemisimpleLieAlgebra<Rational>& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEFWRTSubalgebra
   (Vectors<Rational>& RootsWithCharacteristic2,
@@ -2470,7 +2472,7 @@ public:
   static inline unsigned int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
   { return input.HashFunction();
   }
-  void GetDegree(Polynomial<Rational> & output)
+  void GetDegree(CoefficientType& output)
   { if (this->Powers.size==0)
     { output.MakeZero();
       return;
@@ -5668,25 +5670,22 @@ void ElementUniversalEnveloping<CoefficientType>::MakeOneGeneratorCoeffOne
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::ConvertToLieAlgebraElementIfPossible
 (ElementSemisimpleLieAlgebra<Rational>& output)const
-{ output.MakeZero(*this->owner);
+{ output.MakeZero(*this->owneR);
 //  SemisimpleLieAlgebra& theOwner=this->owners->TheObjects[this->indexInOwners];
 //  int numPosRoots=theOwner.theWeyl.RootsOfBorel.size;
-  Rational tempRat=0;
-  Polynomial<Rational>  tempP;
+  Rational theConst=0;
+  CoefficientType theExponent;
   ChevalleyGenerator tempChevalley;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<CoefficientType>& tempMon= this->TheObjects[i];
-    tempMon.GetDegree(tempP);
-    if (!tempP.IsEqualToOne())
+    tempMon.GetDegree(theExponent);
+    if (!theExponent.IsEqualToOne())
       return false;
-    if (this->theCoeffs[i].TotalDegree()>0)
+    Rational theConst;
+    if (!this->theCoeffs[i].IsConstant(&theConst))
       return false;
-    if (this->theCoeffs[i].size>0)
-      tempRat=this->theCoeffs[i].theCoeffs[0];
-    else
-      tempRat=0;
-    tempChevalley.MakeGenerator(*this->owner, tempMon.generatorsIndices[0]);
-    output.AddMonomial(tempChevalley, tempRat);
+    tempChevalley.MakeGenerator(*this->owneR, tempMon.generatorsIndices[0]);
+    output.AddMonomial(tempChevalley, theConst);
   }
   return true;
 }
@@ -8854,7 +8853,7 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::MakeGenerator
 }
 
 template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::MakeZero(SemisimpleLieAlgebra& inputOwner)
+void ElementSemisimpleLieAlgebra<CoefficientType>::MakeZero(const SemisimpleLieAlgebra& inputOwner)
 { this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::MakeZero();
 }
 

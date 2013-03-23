@@ -788,67 +788,14 @@ bool Serialization::innerLoadFromObject
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
   if (input.children.size==5)
-  { Expression polyE;
-    Expression theGensE=input[4];
+  { Expression theGensE=input[4];
     theGensE.Sequencefy();
-    ChevalleyGenerator theChevGen;
     ElementSemisimpleLieAlgebra<Rational> curGen;
-    theChevGen.owneR=owner.owneR;
     for (int i=1; i<theGensE.children.size; i++)
-    { const Expression& currentGenE=theGensE[i];
-      curGen.MakeZero(*owner.owneR);
-      if (!Serialization::innerPolynomial(theCommands, currentGenE, polyE))
-      { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
-        << " to polynomial.<hr>";
+    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+          (theCommands, theGensE[i], curGen, *owner.owneR))
+      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element";
         return false;
-      }
-      Polynomial<Rational> theP;
-      if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
-      { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
-        << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
-        return false;
-      }
-      Expression theContext=polyE.GetContext();
-      for (int j=0; j<theP.size; j++)
-      { MonomialP& currentMon=theP[j];
-        int theLetterIndex;
-        if (!currentMon.IsOneLetterFirstDegree(&theLetterIndex))
-        { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
-          << " to polynomial.<hr>";
-          return false;
-        }
-        Expression singleChevGenE=theContext.ContextGetContextVariable(theLetterIndex);
-        if (!singleChevGenE.IsListNElements(2))
-        { theCommands.Comments << "<hr>Failed to convert " << currentGenE.ToString()
-          << " to polynomial.<hr>";
-          return false;
-        }
-        std::string theLetter;
-        if (!singleChevGenE[0].IsOperation(&theLetter) ||
-            !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
-        { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
-          << " to Chevalley generator of " << owner.owneR->GetLieAlgebraName();
-          return false;
-        }
-        bool isGood=true;
-        if (theLetter=="g")
-        { theChevGen.theGeneratorIndex=
-          owner.owneR->GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
-          if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>=owner.owneR->GetNumGenerators())
-            isGood=false;
-        } else if (theLetter=="h")
-        { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.owneR->GetRank())
-            isGood=false;
-          else
-            theChevGen.theGeneratorIndex=theChevGen.theGeneratorIndex+owner.owneR->GetNumPosRoots()-1;
-        }
-        if (isGood)
-          curGen.AddMonomial(theChevGen, theP.theCoeffs[j]);
-        else
-        { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
-          << " to Chevalley generator of " << owner.owneR->GetLieAlgebraName();
-          return false;
-        }
       }
       if (i%2 ==0)
         outputSubalgebra.theNegGens.AddOnTop(curGen);
@@ -864,7 +811,10 @@ bool Serialization::innerLoadFromObject
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
 
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
-  outputSubalgebra.ComputeChar(theCommands.theGlobalVariableS);
+  if (!outputSubalgebra.ComputeChar(theCommands.theGlobalVariableS))
+  { outputSubalgebra.theCharFundCoords.MakeZero(*owner.owneR);
+    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(*owner.owneR);
+  }
 
   //Serialization::innerLoadFromObject(theCommands,
   return output.SetError
@@ -983,6 +933,129 @@ bool Serialization::innerLoad
   output=input;
   output.children.PopIndexShiftDown(0);
   return true;
+}
+
+bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output,
+ SemisimpleLieAlgebra& owner)
+{ Expression genE;
+  ElementUniversalEnveloping<RationalFunctionOld> curGenUErf;
+  if (!Serialization::innerUE(theCommands, input, genE, owner))
+  { theCommands.Comments << "<hr> Failed to load element UE from " << input.ToString() << ". ";
+    return false;
+  }
+  if (genE.IsError())
+  { theCommands.Comments << "<hr>Failed to load generator with error message " << genE.ToString();
+    return false;
+  }
+  curGenUErf=genE.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> > ();
+  if (!curGenUErf.ConvertToLieAlgebraElementIfPossible(output))
+  { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString()
+    << " to an honest Lie algebra element. ";
+    return false;
+  }
+  return true;
+}
+
+bool Serialization::innerUE
+  (CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
+{ ChevalleyGenerator theChevGen;
+  theChevGen.owneR=&owner;
+  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  ElementUniversalEnveloping<RationalFunctionOld> currentSummand;
+  ElementUniversalEnveloping<RationalFunctionOld> currentMultiplicand;
+  MonomialP currentMultiplicandRFpartMon;
+  Polynomial<Rational> currentPMultiplicand;
+  RationalFunctionOld currentMultiplicandRFpart;
+  outputUE.MakeZero(owner);
+  Expression polyE;
+  if (!Serialization::innerPolynomial(theCommands, input, polyE))
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
+    << " to polynomial.<hr>";
+    return false;
+  }
+  Polynomial<Rational> theP;
+  if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
+    << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
+    return false;
+  }
+  Expression theContext=polyE.GetContext();
+  Expression outputPolyVars;
+  outputPolyVars.reset(theCommands, 1);
+  outputPolyVars.AssignChildAtomValue(0, theCommands.opPolynomialVariables(), theCommands);
+  for (int j=0; j<theP.size; j++)
+  { MonomialP& currentMon=theP[j];
+    currentSummand.MakeConst(theP.theCoeffs[j], owner);
+    currentMultiplicandRFpartMon.MakeOne();
+    for (int i=0; i<currentMon.GetMinNumVars(); i++)
+    { int thePower;
+      if (!currentMon[i].IsSmallInteger(&thePower))
+      { theCommands.Comments << "<hr>Failed to convert one of the exponents appearing in "
+        << input.ToString() << " to  a small integer polynomial.<hr>";
+        return false;
+      }
+      if (thePower==0)
+        continue;
+      Expression singleChevGenE=theContext.ContextGetContextVariable(i);
+      if (!singleChevGenE.IsListNElements(2))
+      { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
+        << " to polynomial.<hr>";
+        return false;
+      }
+      std::string theLetter;
+      if (!singleChevGenE[0].IsOperation(&theLetter) ||
+          !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
+        << " to Chevalley generator of " << owner.GetLieAlgebraName();
+        return false;
+      }
+      bool isGood=true;
+      bool isHonestElementUE=true;
+      if (theLetter=="g")
+      { theChevGen.theGeneratorIndex=
+        owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+        if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>=owner.GetNumGenerators())
+          isGood=false;
+      } else if (theLetter=="h")
+      { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.GetRank())
+          isGood=false;
+        else
+          theChevGen.theGeneratorIndex=theChevGen.theGeneratorIndex+owner.GetNumPosRoots()-1;
+      } else
+        isHonestElementUE=false;
+      if (!isGood)
+      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
+        << " to Chevalley generator of " << owner.GetLieAlgebraName();
+        return false;
+      }
+      if (isHonestElementUE)
+      { currentMultiplicand.MakeOneGenerator(theChevGen.theGeneratorIndex, owner, 1);
+        currentMultiplicand.RaiseToPower(thePower);
+        currentSummand*=currentMultiplicand;
+      } else
+      { int varIndex=outputPolyVars.GetIndexChild(singleChevGenE);
+        if (varIndex==-1)
+        { outputPolyVars.AddChildOnTop(singleChevGenE);
+          varIndex=outputPolyVars.children.size-1;
+        } else
+          varIndex--;
+        currentMultiplicandRFpartMon[varIndex]=thePower;
+      }
+    }
+    currentPMultiplicand.MakeZero();
+    currentPMultiplicand.AddMonomial(currentMultiplicandRFpartMon, 1);
+    currentMultiplicandRFpart=currentPMultiplicand;
+    currentSummand*=currentMultiplicandRFpart;
+    outputUE+=currentSummand;
+  }
+//  std::cout << "<hr>outputUE: " << outputUE.ToString();
+  Expression outputContext;
+  outputContext.MakeEmptyContext(theCommands);
+  outputContext.AddChildOnTop(outputPolyVars);
+  outputContext.ContextSetSSLieAlgebrA
+  (theCommands.theObjectContainer.theLieAlgebras.GetIndex(owner), theCommands);
+  return output.AssignValueWithContext(outputUE, outputContext, theCommands);
 }
 
 bool Serialization::innerPolynomial

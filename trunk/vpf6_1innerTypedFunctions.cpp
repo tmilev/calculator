@@ -272,30 +272,30 @@ bool CommandList::innerAddUEToAny
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyUEByAny
+bool CommandList::innerMultiplyAnyByUE
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyUEByAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  output=input[1];
-  if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    return false;
+  Expression leftCopy=input[1];
   Expression rightCopy=input[2];
-  ElementUniversalEnveloping<RationalFunctionOld>* right;
+  if (!rightCopy.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+    return false;
+  ElementUniversalEnveloping<RationalFunctionOld>* left;
   std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
+  if (!leftCopy.MergeContexts(leftCopy, rightCopy))
     return false;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerElementUniversalEnvelopingAlgebra, rightCopy, right, &errorString))
+      (theCommands.innerElementUniversalEnvelopingAlgebra, leftCopy, left, &errorString))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld> result
-  =output.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
-  result*=*right;
+  ElementUniversalEnveloping<RationalFunctionOld> result=*left;
+  result*=
+  rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
 //  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);
 }
 
 bool CommandList::innerMultiplyLRObyLRO

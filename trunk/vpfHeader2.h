@@ -1643,6 +1643,9 @@ static bool innerDrawRootSystem
   static bool innerHWV
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerAdCommonEigenSpaces
+  (CommandList& theCommands, const Expression& input, Expression& output
+  );
   static bool fWriteGenVermaModAsDiffOperatorUpToLevel
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1751,7 +1754,7 @@ static bool innerDoubleOrRatPlusDoubleOrRat
 static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerMultiplyUEByAny
+static bool innerMultiplyAnyByUE
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
@@ -1864,6 +1867,13 @@ public:
 ;
   static bool innerPolynomial
   (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerUE
+  (CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
+  ;
+  static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+  (CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output,
+   SemisimpleLieAlgebra& owner)
   ;
 static bool innerStoreUE
 (CommandList& theCommands, const Expression& input, Expression& output)

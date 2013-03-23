@@ -57,6 +57,12 @@ void CommandList::initPredefinedInnerFunctions()
    "Double value of a rational number.",
    "DoubleValue{}(3/7)", true)
    ;
+  this->AddOperationInnerHandler
+("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
+   "Computes common eigenspace of the adjoint action of semisimple Lie algebra elemets inside the \
+   semisimple Lie algebra. ",
+   "AdCommonEigenspace{}(F_4, -5 (g_{9})+3 (g_{13})+5 (g_{16})+4 (g_{10}), g_{14}+g_{22}+g_{20})")
+   ;
 
   this->AddOperationInnerHandler
 ("gcdPoly", &this->fGCD, "",
@@ -736,6 +742,12 @@ void CommandList::initPredefinedStandardOperations()
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
+   "Adds a rational function to a rational function. ",
+   "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
+   , true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opRational(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
@@ -747,6 +759,13 @@ void CommandList::initPredefinedStandardOperations()
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
+   "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
+   " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}})\n\
+   [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
+   , true);
+
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
@@ -804,6 +823,16 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
    "(a+b)*c; \n a*(b+c)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
+   "Multiplies rational number by an element universal enveloping algebra.",
+   "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
+[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
+   "Multiplies rational number by a rational function",
+   "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \

@@ -1593,7 +1593,12 @@ public:
     *this=tempMat;
   }
   void AppendMatrixOnTheRight(const Matrix<Element>& standsOnTheRight)
-  { if (standsOnTheRight.NumRows<this->NumRows)
+  { if (&standsOnTheRight==this)
+    { Matrix<Element> copyThis=*this;
+      this->AppendMatrixOnTheRight(copyThis);
+      return;
+    }
+    if (standsOnTheRight.NumRows<this->NumRows)
     { Element theZero;
       theZero=0;
       Matrix<Element> standsOnTheRightNew=standsOnTheRight;
@@ -1611,6 +1616,33 @@ public:
     for (int i=0; i<this->NumRows; i++)
       for (int j=oldNumCols; j<this->NumCols; j++)
         this->elements[i][j]=standsOnTheRight.elements[i][j-oldNumCols];
+  }
+  void AppendMatrixToTheBottom(const Matrix<Element>& standsBelow)
+  { if (&standsBelow==this)
+    { Matrix<Element> copyThis=*this;
+      this->AppendMatrixToTheBottom(copyThis);
+      return;
+    }
+    if (standsBelow.NumCols<this->NumCols)
+    { Element theZero;
+      theZero=0;
+      Matrix<Element> standsBelowNew=standsBelow;
+      standsBelowNew.Resize(standsBelow.NumRows, this->NumCols, true, &theZero);
+      this->AppendMatrixOnTheRight(standsBelowNew);
+      return;
+    }
+    if (this->NumCols<standsBelow.NumCols)
+    { Element theZero;
+      theZero=0;
+      this->Resize(this->NumRows, standsBelow.NumCols, true, &theZero);
+    }
+    //So far, we have guaranteed that this and &stadsBelow have the same number of columns and
+    // are different objects.
+    int oldNumRows=this->NumRows;
+    this->Resize(this->NumRows+standsBelow.NumRows, this->NumCols, true);
+    for (int i=oldNumRows; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        this->elements[i][j]=standsBelow(i-oldNumRows, j);
   }
   void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
   void ActMultiplyVectorRowOnTheRight(Vector<Element>& theRoot,  const Element& TheRingZero)const{ Vector<Element> output; this->ActMultiplyVectorRowOnTheRight(theRoot, output, TheRingZero); theRoot=output; }
@@ -5916,7 +5948,7 @@ public:
   void MakeOne(GlobalVariables* theContext)
   { this->MakeConsT(1, theContext);
   }
-  void MakeZero(GlobalVariables* theContext)
+  void MakeZero(GlobalVariables* theContext=0)
   { this->expressionType=this->typeRational;
     this->ratValue.MakeZero();
     if (theContext!=0)
@@ -5928,6 +5960,13 @@ public:
   void MakeConsT(const Rational& theCoeff, GlobalVariables* theContext)
   { this->MakeZero(theContext);
     this->ratValue=theCoeff;
+  }
+  bool IsConstant(Rational* whichConstant)const
+  { if (this->expressionType!=this->typeRational)
+      return false;
+    if (whichConstant!=0)
+      *whichConstant=this->ratValue;
+    return true;
   }
   bool IsInteger()const {return this->expressionType==this->typeRational && this->ratValue.IsInteger();}
   bool IsSmallInteger(int* whichInteger=0)const
@@ -8074,7 +8113,7 @@ public:
   }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   void MakeZero
-  (SemisimpleLieAlgebra& inputOwner)
+  (const SemisimpleLieAlgebra& inputOwner)
   ;
   unsigned int HashFunction()const
   { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0]

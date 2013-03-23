@@ -4191,13 +4191,14 @@ bool CommandList::outerEqualEqual
 
 bool CommandList::outerLieBracket
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CommandList::outerLieBracket");
+  if (!input.IsListNElements(3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
   if (leftE.IsOfType<Rational>() && rightE.IsOfType<Rational>())
     return output.AssignValue(0, theCommands);
-  if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() ||
+  if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() &&
       rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
   { Expression leftCopy=leftE;
     Expression rightCopy=rightE;

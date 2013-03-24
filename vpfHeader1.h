@@ -389,7 +389,14 @@ public:
       return b;
   }
   template <typename T>
-  inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; }
+  inline static void swap(T& a, T& b)
+  { if (&a==&b)
+      return;
+    T temp;
+    temp=a;
+    a=b;
+    b=temp;
+  }
   template <class Element>
   inline static Element Minimum(const Element& a, const Element& b)
   { if (a>b)
@@ -842,6 +849,15 @@ public:
   }
   void RemoveIndexSwapWithLast(int index);
   void RemoveLastObject();
+  void RemoveObjectsShiftDown(const List<Object>& theList)
+  { int currentIndex=0;
+    for (int i=0; i<this->size; i++)
+      if (!theList.Contains((*this)[i]))
+      { theList.SwapTwoIndices(i, currentIndex);
+        currentIndex++;
+      }
+    this->SetSize(currentIndex);
+  }
   // the below function is named a bit awkwardly because otherwise there is a risk of confusion
   // with the RemoveIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
@@ -883,6 +899,12 @@ public:
   int GetIndex(const Object& o) const;
   bool Contains(const Object& o)const
   { return this->GetIndex(o)!=-1;
+  }
+  bool ContainsAtLeastOneCopyOfEach(const List<Object>& other)const
+  { for (int i=0; i<other.size; i++)
+      if (!this->Contains(other[i]))
+        return false;
+    return true;
   }
   // Perform a binary search, assuming the list is sorted
   bool BSContains(const Object& o) const

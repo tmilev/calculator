@@ -234,15 +234,18 @@ public:
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   List<Polynomial<Rational> > theSystemToSolve;
   List<Polynomial<Rational> > transformedSystem;
-  FormatExpressions theCoeffLetters;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
+  int indexCentralizer;
+  List<int> indicesDirectSummandSuperAlgebra;
+  FormatExpressions theCoeffLetters;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   int totalNumUnknowns;
-  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false),
-  flagSystemProvedToHaveNoSolution(false), flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
+  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexCentralizer(-1),
+  flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
+  flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
   {}
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -289,6 +292,8 @@ public:
     this->theUnknownNegGens=other.theUnknownNegGens;
     this->theUnknownPosGens=other.theUnknownPosGens;
     this->theBasis=other.theBasis;
+    this->indexCentralizer=other.indexCentralizer;
+    this->indicesDirectSummandSuperAlgebra=other.indicesDirectSummandSuperAlgebra;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -374,6 +379,9 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void AddCandidatesSubalgebra
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  ;
+  void HookUpCentralizers
+  ( )
   ;
   void FindAllEmbeddings
   (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)

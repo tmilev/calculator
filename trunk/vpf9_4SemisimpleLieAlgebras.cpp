@@ -1971,6 +1971,26 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   out << this->theWeylNonEmbeddeD.theDynkinType;
   out << ". ";
+  if (this->indicesDirectSummandSuperAlgebra.size>0)
+  { out << "Contained as a direct summand of ";
+    for (int i=0; i<this->indicesDirectSummandSuperAlgebra.size; i++)
+    { out << this->owner->Hcandidates[this->indicesDirectSummandSuperAlgebra[i]]
+      .theWeylNonEmbeddeD.theDynkinType.ToString();
+      if (i!=this->indicesDirectSummandSuperAlgebra.size-1)
+        out << ", ";
+    }
+  }
+  List<DynkinSimpleType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  out <<"<br>Elements Cartan by components: ";
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+  { out << theTypes[i] << ": ";
+    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+    { out << this->CartanSAsByComponent[i][j].ToString();
+      if (j!=this->CartanSAsByComponent[i].size-1)
+        out << ", ";
+    }
+  }
 //  out << "<br>Predefined or computed simple generators follow. ";
 /*  out << "<br>Negative generators: ";
   for (int i=0; i<this->theNegGens.size; i++)
@@ -2012,13 +2032,6 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         out << ", ";
     }
     out << ")<br>";
-    List<DynkinSimpleType> theTypes;
-    this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-    for (int i=0; i<this->CartanSAsByComponent.size; i++)
-    { out << "Component " << theTypes[i];
-      for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-        out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << ", ";
-    }
     for (int i=0; i<this->theHs.size; i++)
     { out << "h: " << this->theHs[i] << ", "
       << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
@@ -2070,6 +2083,21 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
   }
   return out.str();
+}
+
+void SemisimpleSubalgebras::HookUpCentralizers()
+{ for (int i=0; i<this->Hcandidates.size; i++)
+  { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
+    currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
+    currentSA.indexCentralizer=-1;
+    for (int j=0; j<this->Hcandidates.size; j++)
+    { if (i==j)
+        continue;
+      CandidateSSSubalgebra& otherSA=this->Hcandidates[j];
+      if (otherSA.CartanSAsByComponent.ContainsAtLeastOneCopyOfEach(currentSA.CartanSAsByComponent))
+        currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
+    }
+  }
 }
 
 bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolution)

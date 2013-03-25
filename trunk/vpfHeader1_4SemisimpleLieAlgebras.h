@@ -247,6 +247,11 @@ public:
   flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
   flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
   {}
+  void GetHsByType
+  (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
+  ;
+  bool IsDirectSummandOf(CandidateSSSubalgebra& other);
+
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;

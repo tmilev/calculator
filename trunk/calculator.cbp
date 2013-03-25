@@ -46,6 +46,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="vpf.h.gch" />
+		<Unit filename="vpf1_5SubsetsSelections.h" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />

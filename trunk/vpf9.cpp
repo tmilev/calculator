@@ -472,6 +472,12 @@ int MathRoutines::KToTheNth(int k, int n)
   return result;
 }
 
+void MathRoutines::KToTheNth(int k, int n, LargeInt& output)
+{ output=1;
+  for(int i=0; i<n; i++)
+    output*=k;
+}
+
 int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
 { int ChoiceIndex=0;
   int denominator=1;
@@ -3466,7 +3472,7 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
   currentCardinality-=this->Multiplicities.TheObjects[firstNonZeroMult];
   this->Multiplicities.TheObjects[firstNonZeroMult]=0;
   for(int i=firstNonZeroMult-1; i>=0; i--)
-  { if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
+    if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicity)
     { this->Multiplicities.TheObjects[i]++;
       currentCardinality++;
       break;
@@ -3474,7 +3480,6 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
     { this->Multiplicities.TheObjects[i]=0;
       currentCardinality-=this->MaxMultiplicity;
     }
-  }
   for (int i=this->Multiplicities.size-1; currentCardinality<Cardinality; i--)
   { assert(this->Multiplicities.TheObjects[i]==0);
     if (Cardinality-currentCardinality>=this->MaxMultiplicity)
@@ -3489,6 +3494,17 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
 int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)
 { //this function needs a complete rewrite;
   return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1, cardinality);
+}
+
+LargeInt SelectionWithMaxMultiplicity::GetNumTotalCombinations()const
+{ LargeInt result;
+  MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size, result);
+  return result;
+}
+
+bool SelectionWithMaxMultiplicity::IncrementReturnFalseIfBackToBeginning()
+{ this->IncrementSubset();
+  return this->elements.size==0;
 }
 
 void SelectionWithMaxMultiplicity::IncrementSubset()

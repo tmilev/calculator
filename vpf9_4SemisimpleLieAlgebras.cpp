@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpf1_5SubsetsSelections.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp
 (__FILE__, "Implementation of semisimple subalgebra routines. ");
 
@@ -2085,6 +2086,83 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
+void CandidateSSSubalgebra::GetHsByType
+(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetHsByType");
+  List<DynkinSimpleType> allTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(allTypes);
+  outputHsByType.SetSize(0);
+  outputTypeList.SetSize(0);
+  if (allTypes.size!=this->CartanSAsByComponent.size)
+  { std::cout
+    << "This is a programming error: allTypes.size must equal this->CartanSAsByComponent.size. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  for (int i=0; i<allTypes.size; i++)
+  { bool shouldOpenNewType=true;
+    if (i!=0)
+      shouldOpenNewType=!(allTypes[i]==allTypes[i-1]);
+    if (shouldOpenNewType)
+    { outputHsByType.SetSize(outputHsByType.size+1);
+      outputHsByType.LastObject()->SetSize(0);
+      outputTypeList.AddOnTop(allTypes[i]);
+    }
+    outputHsByType.LastObject()->AddOnTop(this->CartanSAsByComponent[i]);
+  }
+}
+
+bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
+{ DynkinType theDifference;
+  theDifference= other.theWeylNonEmbeddeD.theDynkinType;
+  theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
+  for (int i=0; i<theDifference.size; i++)
+    if (theDifference.theCoeffs[i]<0)
+      return false;
+  Incrementable<SelectionFixedRank> selectedTypes;
+  Incrementable<SelectionWithMaxMultiplicity> selectedOuterAutos;
+  List<DynkinSimpleType> isoTypes;
+  SelectionFixedRank currentTypeSelection;
+  SelectionWithMaxMultiplicity outerIsoSelector;
+  List<List<Vectors<Rational> > > theHsByType;
+  this->GetHsByType(theHsByType, isoTypes);
+  for (int i=0; i<isoTypes.size; i++)
+  { Rational ratMult=this->theWeylNonEmbeddeD.theDynkinType.GetMonomialCoefficient(isoTypes[i]);
+    int intMult;
+    if (!ratMult.IsSmallInteger(&intMult))
+      return false;
+    currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsByType[i].size);
+    if (isoTypes[i].theLetter=='A' && isoTypes[i].theRank>1)
+      outerIsoSelector.initMaxMultiplicity(intMult, 1);
+    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank==4)
+      outerIsoSelector.initMaxMultiplicity(intMult, 5);
+    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank>4)
+      outerIsoSelector.initMaxMultiplicity(intMult, 1);
+    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank==6)
+      outerIsoSelector.initMaxMultiplicity(intMult, 1);
+    else
+      outerIsoSelector.initMaxMultiplicity(intMult, 0);
+    selectedTypes.theElements.AddOnTop(currentTypeSelection);
+    selectedOuterAutos.theElements.AddOnTop(outerIsoSelector);
+  }
+  Rational numCyclesFromTypes=selectedTypes.GetNumTotalCombinations();
+  Rational numCyclesFromOuterIsos=selectedOuterAutos.GetNumTotalCombinations();
+  int intNumCyclesFromTypes, intNumCyclesFromOuterIsos;
+  if (!numCyclesFromTypes.IsSmallInteger(&intNumCyclesFromTypes) ||
+      !numCyclesFromOuterIsos.IsSmallInteger(&intNumCyclesFromOuterIsos))
+  { std::cout
+    << "Computation is too large: I am crashing to let you know that the program cannot handle "
+    << " such a large number of outer automorphisms"
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  for (; selectedTypes.IncrementReturnFalseIfBackToBeginning(); )
+    for (; selectedOuterAutos.IncrementReturnFalseIfBackToBeginning(); )
+    {
+    }
+  return false;
+}
+
 void SemisimpleSubalgebras::HookUpCentralizers()
 { for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
@@ -2094,7 +2172,7 @@ void SemisimpleSubalgebras::HookUpCentralizers()
     { if (i==j)
         continue;
       CandidateSSSubalgebra& otherSA=this->Hcandidates[j];
-      if (otherSA.CartanSAsByComponent.ContainsAtLeastOneCopyOfEach(currentSA.CartanSAsByComponent))
+      if (currentSA.IsDirectSummandOf(otherSA))
         currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
     }
   }

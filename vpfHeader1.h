@@ -370,6 +370,7 @@ public:
 // the MS compiler refuses to compile the following (WTF?), hence the above line.
 //  static const double Pi=(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
+  static void KToTheNth(int k, int n, LargeInt& output);
   inline static int parity(int n)
   { if (n%2==0)
       return 1;
@@ -2285,11 +2286,17 @@ public:
   int MaxMultiplicity;
   void initMaxMultiplicity(int NumElements, int MaxMult);
   int NumCombinationsOfCardinality(int cardinality);
-  int NumSelectionsTotal(){return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);}
+  LargeInt GetNumTotalCombinations()const;
+  int NumSelectionsTotal()
+  { return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
+  }
+  bool IncrementReturnFalseIfBackToBeginning();
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
   bool HasMultiplicitiesZeroAndOneOnly();
-  int MaxCardinalityWithMultiplicities(){return this->MaxMultiplicity*this->Multiplicities.size; }
+  int MaxCardinalityWithMultiplicities()
+  { return this->MaxMultiplicity*this->Multiplicities.size;
+  }
   int CardinalitySelectionWithMultiplicities();
 };
 
@@ -4937,6 +4944,12 @@ public:
   }
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   { this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
+  }
+  CoefficientType GetMonomialCoefficient(const TemplateMonomial& inputMon)
+  { int theIndex=this->GetIndex(inputMon);
+    if (theIndex==-1)
+      return 0;
+    return this->theCoeffs[theIndex];
   }
   int TotalDegree();
   void checkConsistency()const
@@ -9936,4 +9949,5 @@ std::string GroebnerBasisComputation<CoefficientType>::GetPolynomialStringSpaced
     out << "<td><b>Oh no, this is f***ed up!</b></td>";
   return out.str();
 }
+
 #endif

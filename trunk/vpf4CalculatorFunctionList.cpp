@@ -725,7 +725,8 @@ void CommandList::initPredefinedStandardOperations()
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
   this->AddOperationOuterHandler
   ("+", this->outerCombineFractions, "",
-   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b ", "1+a-2a_1+1/2+a_1", true);
+   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b ",
+   "f{}{{x}}:=(2x+3)/(2x+1);\ng{}{{y}}:=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",

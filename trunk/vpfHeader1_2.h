@@ -831,6 +831,8 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
+  void GetAutomorphismActingOnVectorROWSwhichStandOnTheRight
+  (Matrix<Rational>& output, int AutoIndex)const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;

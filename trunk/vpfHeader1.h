@@ -1659,7 +1659,7 @@ public:
       theZero=0;
       this->Resize(this->NumRows, standsBelow.NumCols, true, &theZero);
     }
-    //So far, we have guaranteed that this and &stadsBelow have the same number of columns and
+    //So far, we have guaranteed that this and &standsBelow have the same number of columns and
     // are different objects.
     int oldNumRows=this->NumRows;
     this->Resize(this->NumRows+standsBelow.NumRows, this->NumCols, true);
@@ -1668,17 +1668,44 @@ public:
         this->elements[i][j]=standsBelow(i-oldNumRows, j);
   }
   void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
-  void ActMultiplyVectorRowOnTheRight(Vector<Element>& theRoot,  const Element& TheRingZero)const{ Vector<Element> output; this->ActMultiplyVectorRowOnTheRight(theRoot, output, TheRingZero); theRoot=output; }
-  void ActMultiplyVectorRowOnTheRight(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
-  { assert(&input!=&output);
-    assert(this->NumRows==input.size);
+  void ActOnVectorROWSOnTheLeft(List<Vector<Element> >& standOnTheRightAsVectorRow)const
+  { List<Vector<Element> > output;
+    this->ActOnVectorROWSOnTheLeft(standOnTheRightAsVectorRow, output);
+    standOnTheRightAsVectorRow=output;
+  }
+  void ActOnVectorROWSOnTheLeft
+  (List<Vector<Element> >& standOnTheRightAsVectorRow, List<Vector<Element> >& output)const
+  { if (this->NumCols!=standOnTheRightAsVectorRow.size)
+    { std::cout << "This is a programming error: attempting to multiply a matrix,"
+      << " standing on the left, with "
+      << this->NumCols << " columns, by a matrix, standing on the right, with "
+      << standOnTheRightAsVectorRow.size << " rows. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    output.SetSize(this->NumRows);
+    for (int i=0; i<this->NumRows; i++)
+    { output[i].MakeZero(standOnTheRightAsVectorRow[0].size);
+      for (int j=0; j<this->NumCols; j++)
+        output[i]+= standOnTheRightAsVectorRow[j]*(*this)(i,j);
+    }
+  }
+  void ActMultiplyVectorRowOnTheRight(Vector<Element>& standsOnTheLeft, const Element& TheRingZero=0)const
+  { Vector<Element> output;
+    this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output, TheRingZero);
+    standsOnTheLeft=output;
+  }
+  void ActMultiplyVectorRowOnTheRight
+  (const Vector<Element>& standsOnTheLeft, Vector<Element>& output, const Element& TheRingZero=0)const
+  { assert(&standsOnTheLeft!=&output);
+    assert(this->NumRows==standsOnTheLeft.size);
     output.MakeZero(this->NumCols, TheRingZero);
     Element tempElt;
     for (int i=0; i<this->NumCols; i++)
       for (int j=0; j<this->NumRows; j++)
       { tempElt=this->elements[j][i];
-        tempElt*=input.TheObjects[j];
-        output.TheObjects[i]+=tempElt;
+        tempElt*=standsOnTheLeft[j];
+        output[i]+=tempElt;
       }
   }
   void GetNSquaredVectorForm(Vector<Element>& output)

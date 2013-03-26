@@ -111,6 +111,72 @@ void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
   }
 }
 
+void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const
+{ MacroRegisterFunctionWithName("DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight");
+  if (AutoIndex==0 || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='G' ||
+      this->theLetter=='F' ||
+      (this->theRank==1) ||
+      (this->theLetter=='E' && this->theRank!=6))
+  { output.MakeIdMatrix(this->theRank);
+    return;
+  }
+  output.init(this->theRank, this->theRank);
+  output.NullifyAll();
+  if (this->theLetter=='A' && this->theRank!=1)
+    for (int i=0; i<this->theRank; i++)
+      output(i, this->theRank-i-1)=1;
+  if (this->theLetter=='D')
+  { if (this->theRank==4)
+    { //Here be D_4 triality.
+      //The automorphism group of Dynkin Diagram D_4 is S3
+      //The triple node is always fixed:
+      output(1,1)=1;
+      if (AutoIndex==1)
+      { //permutation (12), AutoIndex=1
+        output(0,2)=1; output(2,0)=1; output(3,3)=1;
+      } else if (AutoIndex==2)
+      { //permutation (23), AutoIndex=2
+        output(0,0)=1; output(2,3)=1; output(3,2)=1;
+      } else if (AutoIndex==3)
+      { //permutation (12)(23)=(123), AutoIndex=3
+        output(0,2)=1; output(2,3)=1; output(3,0)=1;
+      } else if (AutoIndex==4)
+      { //permutation (23)(12)=(132), AutoIndex=4
+        output(0,3)=1; output(2,0)=1; output(3,2)=1;
+      } else if (AutoIndex==5)
+      { //permutation (12)(23)(12)=(13), AutoIndex=5
+        output(0,3)=1; output(2,2)=1; output(3,0)=1;
+      } else
+      { std::cout << "This is a programming error: requesting triality automorphism with "
+        << "index not in the range 0-5. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    } else
+    { output.MakeIdMatrix(this->theRank);
+      output(this->theRank-1, this->theRank-1)=0;
+      output(this->theRank-2, this->theRank-2)=0;
+      output(this->theRank-1, this->theRank-2)=1;
+      output(this->theRank-2, this->theRank-1)=1;
+    }
+  }
+  if (this->theLetter=='E' && this->theRank==6)
+  { //We gotta flip the Dynkin diagram of E_6. Note that the extra 1-length sticking root comes second and
+    //and the triple node comes fourth.
+    //Therefore, we must swap the 1st root with the 6th and the third root
+    //with the 5th. Conventions, conventions... no way around 'em!
+     output(1,1)=1; output(3,3)=1;
+     output(0,5)=1; output(5,0)=1;
+     output(2,4)=1; output(4,2)=1;
+  }
+  Rational tempRat=output.GetDeterminant();
+  if (tempRat!=1 && tempRat!=-1)
+  { std::cout << "This is a programming error: the determinant of the automorphism matrix of the Dynkin "
+    << "graph must be +/-1, it is instead " << tempRat << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
+    assert(false);
+  }
+}
+
 DynkinSimpleType DynkinType::GetGreatestSimpleType()const
 { if (this->size==0)
   { std::cout << "This is a programming error: asking for the greatest simple type "
@@ -208,8 +274,7 @@ GlobalVariables* theGlobalVariables)
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
-    }
-    else
+    } else
     { theOrbit=startingVector;
       ElementWeylGroup theId;
       theOrbitGenerators.Clear();
@@ -547,7 +612,6 @@ void SemisimpleSubalgebras::reset()
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
 }
-
 
 bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
 (GlobalVariables* theGlobalVariables)
@@ -1988,7 +2052,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   { out << theTypes[i] << ": ";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString();
-      if (j!=this->CartanSAsByComponent[i].size-1)
+      if (j!=this->CartanSAsByComponent[i].size-1 && i!=this->CartanSAsByComponent.size-1)
         out << ", ";
     }
   }
@@ -2112,6 +2176,31 @@ void CandidateSSSubalgebra::GetHsByType
   }
 }
 
+bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)
+{ List<Vector<Rational> > raisedInput=input;
+  WeylGroup& ambientWeyl=this->GetAmbientWeyl();
+  for (int i=0; i<raisedInput.size; i++)
+  { bool found=true;
+    while (found)
+    { found=false;
+      for (int j=0; j<ambientWeyl.RootsOfBorel.size; j++)
+        if (ambientWeyl.RootScalarCartanRoot(ambientWeyl.RootsOfBorel[j], raisedInput[i])<0)
+        { bool isGood=true;
+          for (int k=0; k<i; k++)
+            if (ambientWeyl.RootScalarCartanRoot(ambientWeyl.RootsOfBorel[j], raisedInput[k])<0)
+            { isGood=false;
+              break;
+            }
+          if (isGood)
+          { ambientWeyl.ReflectBetaWRTAlpha(ambientWeyl.RootsOfBorel[j], raisedInput[i], false, raisedInput[i]);
+            found=true;
+          }
+        }
+    }
+  }
+  return raisedInput==this->theHs;
+}
+
 bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
 { DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
@@ -2156,9 +2245,25 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  List<Vector<Rational> > conjugationCandidates;
+  Vectors<Rational> currentComponent;
+  Matrix<Rational> currentOuterAuto;
   for (; selectedTypes.IncrementReturnFalseIfBackToBeginning(); )
     for (; selectedOuterAutos.IncrementReturnFalseIfBackToBeginning(); )
-    {
+    { conjugationCandidates.SetSize(0);
+      for (int i=0; i<selectedTypes.theElements.size; i++)
+      { Selection& currentSel=selectedTypes.theElements[i].theSelection;
+        SelectionWithMaxMultiplicity& currentOuterSelector= selectedOuterAutos.theElements[i];
+        for (int j=0; j<currentSel.CardinalitySelection; j++)
+        { currentComponent= theHsByType[i][currentSel.elements[j]];
+          isoTypes[i].GetAutomorphismActingOnVectorROWSwhichStandOnTheRight
+          (currentOuterAuto, currentOuterSelector.Multiplicities[j]);
+          currentOuterAuto.ActOnVectorROWSOnTheLeft(currentComponent);
+          conjugationCandidates.AddListOnTop(currentComponent);
+        }
+      }
+      if (this->HasConjugateHsTo(conjugationCandidates))
+        return true;
     }
   return false;
 }

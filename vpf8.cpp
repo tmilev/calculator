@@ -1289,12 +1289,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
   {//type D or E
-    //in type D first comes the triple node, then the long string, then the one-Vector<Rational> strings
+    //in type D first comes the triple node, then the long string, then the one-root strings
     // the long string is oriented with the end that is connected to the triple node having
     //smaller index
-    //in type E similarly the longest string comes first oriented with the Vector<Rational> that is linked to the triple node having smaller index
+    //in type E similarly the longest string comes first oriented with the root that is
+    //linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
-    // and last the one-Vector<Rational> string
+    // and last the one-root string
     Vector<Rational> tripleNode;
     int tripleNodeindex=this->indicesThreeNodes[indexComponent];
     tripleNode=(currentComponent[tripleNodeindex]);

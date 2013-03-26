@@ -250,6 +250,7 @@ public:
   void GetHsByType
   (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
   ;
+  bool HasConjugateHsTo(List<Vector<Rational> >& other);
   bool IsDirectSummandOf(CandidateSSSubalgebra& other);
 
   void GetGenericPosGenLinearCombination

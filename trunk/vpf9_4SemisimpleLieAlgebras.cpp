@@ -2269,7 +2269,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers()
-{ for (int i=0; i<this->Hcandidates.size; i++)
+{ std::cout << "Here i am jh!";
+  for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
     currentSA.indexCentralizer=-1;

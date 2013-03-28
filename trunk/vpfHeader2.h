@@ -1623,7 +1623,7 @@ public:
  Vector<RationalFunctionOld>& highestWeightFundCoords,
  Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose=true)
  ;
- bool fWriteGenVermaModAsDiffOperatorInner
+ bool innerWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
   Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
   Selection& selInducing, SemisimpleLieAlgebra* owner)
@@ -1742,6 +1742,10 @@ static bool innerAddPlotToPlot
 static bool innerRatPowerRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerElementUEPowerRatOrPolyOrRF
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
 static bool innerDoubleOrRatPowerDoubleOrRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

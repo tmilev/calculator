@@ -4,7 +4,6 @@
 ProjectInformationInstance ProjectInfoVpf6_1cpp
 (__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
 
-
 bool CommandList::innerAddRatToRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAddRatToRat");
@@ -80,6 +79,7 @@ bool CommandList::innerMultiplyAnyByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyAnyByEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
   { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
@@ -93,12 +93,12 @@ bool CommandList::innerMultiplyAnyByEltTensor
   static bool theGhostHasAppeared=false;
   output=input[2];
   Expression leftCopy=input[1];
-//  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
-  { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
+  { std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
     return false;
   }
-  //std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   ElementUniversalEnveloping<RationalFunctionOld>* leftUE;
   std::string errorString;
 //  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
@@ -117,7 +117,9 @@ bool CommandList::innerMultiplyAnyByEltTensor
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
   SemisimpleLieAlgebra& theSSalg=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
-//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
+  std::cout << "<br>Multiplying "
+  << leftCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString()
+  << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
       (*leftUE, outputElt, theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
   { //std::cout << "<br>failed to multiply on the left";
@@ -440,6 +442,42 @@ bool CommandList::innerRatPowerRat
     return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
+}
+
+bool CommandList::innerElementUEPowerRatOrPolyOrRF
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerElementUEPowerRatOrPolyOrRF");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  RationalFunctionOld theExponent;
+  Expression copyExponent=input[2];
+  Expression copyBase=input[1];
+  if (!copyExponent.MergeContexts(copyExponent, copyBase))
+    return false;
+  if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > (&theUE))
+    return false;
+  if (!theUE.IsAPowerOfASingleGenerator())
+  { int tempPower;
+    if (!copyExponent.IsSmallInteger(&tempPower))
+      return false;
+    theUE.RaiseToPower(tempPower);
+    return output.AssignValueWithContext(theUE, copyExponent.GetContext(), theCommands);
+  }
+  if (copyExponent.IsOfType<Rational>())
+    theExponent=copyExponent.GetValuE<Rational>();
+  else if (copyExponent.IsOfType<Polynomial<Rational> >())
+    theExponent=copyExponent.GetValuE<Polynomial<Rational> >();
+  else if (!copyExponent.IsOfType<RationalFunctionOld>(&theExponent))
+    return false;
+  MonomialUniversalEnveloping<RationalFunctionOld> theMon;
+  theMon=theUE[0];
+  theMon.Powers[0]*= theExponent;
+  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  outputUE.MakeZero(*theUE.owneR);
+  outputUE.AddMonomial(theMon, 1);
+  return output.AssignValueWithContext(outputUE, copyExponent.GetContext(), theCommands);
 }
 
 bool CommandList::innerDoubleOrRatPowerDoubleOrRat

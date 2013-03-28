@@ -797,6 +797,12 @@ class DynkinSimpleType
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
+    if (inputLetter=='G')
+      inputRank=2;
+    if (inputLetter=='F')
+      inputRank=4;
+    if (inputLetter=='E' && inputRank>8)
+      inputRank=8;
     this->theRank=inputRank;
     this->theLetter=inputLetter;
     this->lengthFirstCoRootSquared=inputLengthFirstCorRootSquared;
@@ -4731,7 +4737,6 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::MakeZero(SemisimpleLieA
   this->owner=&theOwner;
 }
 
-
 template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::Simplify
 (ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext,
@@ -4895,12 +4900,12 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
   //simplified order is descending order
   while (IndexlowestNonSimplified<output.size)
   { bool reductionOccurred=false;
-    if (output.TheObjects[IndexlowestNonSimplified].Coefficient.IsEqualToZero())
+    if (output[IndexlowestNonSimplified].Coefficient.IsEqualToZero())
       reductionOccurred=true;
     else
-      for (int i=0; i<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
-        if (output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i]>output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1])
-        { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute
+      for (int i=0; i<output[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
+        if (output[IndexlowestNonSimplified].generatorsIndices[i]>output[IndexlowestNonSimplified].generatorsIndices[i+1])
+        { if (output[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute
               (i, tempMon, theContext, theRingZero))
           { output.AddMonomialNoCleanUpZeroCoeff(tempMon);
 //            tempMon.ComputeDebugString();
@@ -6289,7 +6294,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
   for (int i=0; i<theUE.size; i++)
   { if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
     { ElementSumGeneralizedVermas<CoefficientType> tempOutput;
-//      std::cout << "<hr>emergency mode!";
+      std::cout << "<hr>emergency mode!";
       for (int j=0; j<this->size; j++)
       { MonomialTensorGeneralizedVermas<CoefficientType> currentMon=this->TheObjects[j];
         if (currentMon.theMons.size!=1)
@@ -6312,7 +6317,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 //      buffer.theCoeffs[k].checkConsistency();
     }
     buffer*=theUE.theCoeffs[i];
-//    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
+    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
     output+=buffer;
   }
   return true;
@@ -6432,26 +6437,28 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
   ProgressReport theReport(&theGlobalVariables);
   for (int j=0; j<theUE.size; j++)
   { currentMon.theMonCoeffOne=theUE[j];
-//    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
+    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
     currentMon.theMonCoeffOne*=this->theMonCoeffOne;
-//    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
+    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
     currentMon.owneR=this->owneR;
     currentMon.indexFDVector=this->indexFDVector;
     currentMon.owneR=this->owneR;
-//    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
-//    << " times " << theUE[j].ToString() << " on " << this->ToString();
+    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
+    << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
+    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
     theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
     reportStream << " done.";
+    std::cout << " done.";
     theReport.Report(reportStream.str());
-    //    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
+    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
-//    std::cout << " equals: " << buffer.ToString();
+    std::cout << " equals: " << buffer.ToString();
   }
-//  std::cout << "<br>result: " << this->ToString();
+  std::cout << "<br>result: " << this->ToString();
 }
 
 template <class CoefficientType>
@@ -6492,36 +6499,36 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     basisMon.MakeConst(*this->owneR);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, theRingUnit);
-//    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
-//    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
+    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
+    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
 //    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
     return;
   }
-//  std::cout << "<br>Not a monomial basis of fd part";
+  std::cout << "<br>Not a monomial basis of fd part";
 //  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-  //std::cout << "<br>";
-  //for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
-  //{ std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
-  //}
+  std::cout << "<br>";
+  for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
+  { std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
+  }
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().owneR);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
-//  std::cout << " <br>the monomial:" << this->ToString();
+  std::cout << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-//  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
+  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
   MatrixTensor<CoefficientType> tempMat1, tempMat2;
-//  std::cout << theMod.ToString();
+  //std::cout << theMod.ToString();
   //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
   ProgressReport theReport(&theGlobalVariables);
   CoefficientType theCF;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
-    //std::cout << "<br> Processing monomial " << currentMon.ToString();
+    std::cout << "<br> Processing monomial " << currentMon.ToString();
     tempMat1.MakeIdSpecial();
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { std::stringstream reportStream;
@@ -6544,7 +6551,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       reportStream << "done!";
       theReport.Report(reportStream.str());
     }
-//    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
+    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
     for (int i=0; i<tempMat1.size; i++)
     { int otherIndex=-1;
@@ -6555,17 +6562,18 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       if (otherIndex!=-1)
       { newMon.theMonCoeffOne=currentMon;
         newMon.indexFDVector=otherIndex;
-//        std::cout << "<br>adding to " << outputAccum.ToString() << " the monomial " << newMon.ToString() << " with coefficient "
-//        << tempMat1.elements[i][this->indexFDVector].ToString() << " to obtain ";
         theCF=theUEelt.theCoeffs[l];
         theCF*=tempMat1.theCoeffs[i];
+        std::cout << "<br>adding to " << output.ToString()
+        << " the monomial " << newMon.ToString() << " with coefficient "
+        << theCF.ToString() << " to obtain ";
         output.AddMonomial(newMon, theCF);
-//        std::cout << outputAccum.ToString();
+        std::cout << output.ToString();
       }
     }
   }
-//  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
-//  std::cout << "<br> Final output: " << output.ToString();
+  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
+  std::cout << "<br> Final output: " << output.ToString();
   theMod.GetOwner().OrderSSLieAlgebraStandard();
 }
 
@@ -8131,7 +8139,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
       }
     if(!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
-//    std::cout << "-<br>(" << (*this+outpuT).ToString(&tempFormat) << ")<br>(this should simplify to zero).";
+    std::cout << "-<br>(" << (*this+outpuT).ToString() << ")<br>(this should simplify to zero).";
   }
   *this=outpuT;
 }
@@ -8147,10 +8155,14 @@ bool MonomialUniversalEnveloping<CoefficientType>::CommutingAnBtoBAnPlusLowerOrd
 template <class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::CommutingABntoBnAPlusLowerOrderAllowed
 (CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex)
-{ if (!theLeftPower.IsSmallInteger())
+{ int leftPower, rightPower;
+  if (!theLeftPower.IsSmallInteger(&leftPower))
     return false;
-  if(theRightPower.IsSmallInteger())
-    return true;
+  if (leftPower<0)
+    return false;
+  if(theRightPower.IsSmallInteger(&rightPower))
+    if (rightPower>=0)
+      return true;
   int numPosRoots=this->GetOwner().theWeyl.RootsOfBorel.size;
   int theDimension= this->GetOwner().theWeyl.CartanSymmetric.NumRows;
   if(rightGeneratorIndex>= numPosRoots && rightGeneratorIndex<numPosRoots+theDimension)

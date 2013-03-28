@@ -2132,7 +2132,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.fWriteGenVermaModAsDiffOperatorInner
+  return theCommands.innerWriteGenVermaModAsDiffOperatorInner
   (theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
 }
 
@@ -2243,7 +2243,6 @@ template <class CoefficientType>
 class quasiDiffOp : public MonomialCollection<quasiDiffMon, CoefficientType>
 {
 public:
-  static void prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output);
   std::string ToString(FormatExpressions* theFormat=0)const
   ;
   void GenerateBasisLieAlgebra
@@ -2404,18 +2403,6 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
 }
 
 template <class CoefficientType>
-void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output)
-{ output.polyAlphabeT.SetSize((inputNumWeylVars+theShift)*2);
-  for (int i=0; i<inputNumWeylVars; i++)
-  { std::stringstream tempStream, tempStream2;
-    tempStream2 << "x_{" << i+1 << "}";
-    output.polyAlphabeT[theShift+i]=tempStream2.str();
-    tempStream << "\\partial" << "_{" << i+1 << "}";
-    output.polyAlphabeT[2*theShift+i+inputNumWeylVars]=tempStream.str();
-  }
-}
-
-template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
 (MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName
@@ -2555,10 +2542,10 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   return true;
 }
 
-bool CommandList::fWriteGenVermaModAsDiffOperatorInner
+bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
   Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing, SemisimpleLieAlgebra* owner)
-{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorInner");
+{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
   if (theHws.size==0)
@@ -2627,8 +2614,6 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
-      quasiDiffOp<Polynomial<Rational> >::prepareFormatFromShiftAndNumWeylVars
-      (hwContext.GetNumContextVariables(), elementsNegativeNilrad.size, theWeylFormat);
 
 //      std::cout << "theWeylFormat: ";
 //      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
@@ -3332,7 +3317,7 @@ bool CommandList::innerWeylOrbit
     std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
     Vector<Polynomial<Rational> > epsVect=outputOrbit[i];
     epsCoordMat.ActOnVectorColumn(epsVect);
-    std::string orbitEltStringEpsilonCoords=epsVect.ToStringEpsilonFormat();
+    std::string orbitEltStringEpsilonCoords=epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
@@ -3340,7 +3325,8 @@ bool CommandList::innerWeylOrbit
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords) << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
@@ -4872,13 +4858,12 @@ bool Expression::ToStringData
       out << ")";
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
-  { out << "Polynomial{}";
+  { out << "Polynomial{}(";
     Expression contextE=this->GetContext();
     FormatExpressions tempFormat;
 //    out << "(" << contextE.ToString(theFormat) << ", "
     contextE.ContextGetFormatExpressions(tempFormat);
-    out << "Polynomial{}("
-    << this->GetValuE<Polynomial<Rational> >().ToString(&tempFormat) << ")";
+    out << this->GetValuE<Polynomial<Rational> >().ToString(&tempFormat) << ")";
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { out << "RationalFunction{}";
@@ -4907,11 +4892,11 @@ bool Expression::ToStringData
     << this->GetValuE<Matrix<Rational> > ().ToString(&tempFormat) << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { if (this->HasContext())
-      out << "ETGVM{}(" << (*this)[1].ToString() << ", ";
-    out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();
-    if (this->HasContext())
-      out << ")";
+  { FormatExpressions tempFormat;
+    this->GetContext().ContextGetFormatExpressions(tempFormat);
+    out << "ETGVM{}(";
+    out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&tempFormat);
+    out << ")";
     result=true;
   } else if (this->IsOfType<CalculusFunctionPlot>())
   { if (isFinal)
@@ -6027,7 +6012,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.fWriteGenVermaModAsDiffOperatorInner
+  return theCommands.innerWriteGenVermaModAsDiffOperatorInner
   (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra);
 }
 

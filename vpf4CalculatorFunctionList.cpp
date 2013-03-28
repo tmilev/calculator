@@ -743,6 +743,17 @@ void CommandList::initPredefinedStandardOperations()
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
+   "Adds a rational to a polynomial. ",
+   "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opRational(),
+   "Adds a polynomial to a rational. ",
+   "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
+   , true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
@@ -933,6 +944,30 @@ void CommandList::initPredefinedStandardOperations()
    "f{}{{x}}:=x^3+p x+q; \
    \nXcardano:=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
+   "Raises element of universal enveloping to integer power. \
+   If the exponent is non-positive integer but the element of the UE is \
+   a single generator with coefficient 1, the exponent will be carried out formally. ",
+   "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
+    \n (g_1+g_2)^2+ g_1^{1/2}",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
+   "Provided that an element of Universal Enveloping algebra is \
+   a single generator (raised to arbitrary formal polynomial power) with coefficient 1,\
+   raises (formally) the element of the UE to arbitrary polynomial power. ",
+   "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
+    \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
+   "Provided that an element of Universal Enveloping algebra is \
+   a single generator (raised to arbitrary formal RF power) with coefficient 1,\
+   raises (formally) the element of the UE to arbitrary RF power. ",
+   "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
+    \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", this->innerDoubleOrRatPowerDoubleOrRat, this->opDouble(), this->opRational(),

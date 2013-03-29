@@ -1081,6 +1081,10 @@ public:
   (Vector<CoefficientType>& theWeight, int* sign=0, bool* stabilizerFound=0,
    ElementWeylGroup* raisingElt=0)
   ;
+  template <class CoefficientType>
+  void RaiseToMaximallyDominant
+  (List<Vector<CoefficientType> >& theWeight)const
+  ;
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 ;
@@ -1208,7 +1212,7 @@ template <class CoefficientType>
   void SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const Vector<Rational> & input, const Vector<Rational> & theH){ return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero(); }
   template<class CoefficientType>
-  void ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output);
+  void ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)const;
   bool IsRegular(Vector<Rational> & input, int* indexFirstPerpendicularRoot);
   template <class leftType, class rightType>
   void RootScalarCartanRoot
@@ -6927,7 +6931,7 @@ void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(Vector<CoefficientType>&
 }
 
 template <class CoefficientType>
-void WeylGroup::ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)
+void WeylGroup::ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)const
 { CoefficientType bufferCoeff, alphaShift, lengthA;
   Vector<CoefficientType> result;
   result=(Beta);

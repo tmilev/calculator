@@ -3497,14 +3497,16 @@ int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality
 }
 
 LargeInt SelectionWithMaxMultiplicity::GetNumTotalCombinations()const
-{ LargeInt result;
-  MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size, result);
+{ //if (this->MaxMultiplicity==0)
+  //  return 1;
+  LargeInt result;
+  MathRoutines::KToTheNth(this->MaxMultiplicity+1, this->Multiplicities.size, result);
   return result;
 }
 
 bool SelectionWithMaxMultiplicity::IncrementReturnFalseIfBackToBeginning()
 { this->IncrementSubset();
-  return this->elements.size==0;
+  return this->elements.size!=0;
 }
 
 void SelectionWithMaxMultiplicity::IncrementSubset()

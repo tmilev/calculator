@@ -2176,38 +2176,59 @@ void CandidateSSSubalgebra::GetHsByType
   }
 }
 
-bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)
-{ List<Vector<Rational> > raisedInput=input;
-  WeylGroup& ambientWeyl=this->GetAmbientWeyl();
-  for (int i=0; i<raisedInput.size; i++)
+template <class CoefficientType>
+void WeylGroup::RaiseToMaximallyDominant
+  (List<Vector<CoefficientType> >& theWeights)const
+{ for (int i=0; i<theWeights.size; i++)
   { bool found=true;
     while (found)
     { found=false;
-      for (int j=0; j<ambientWeyl.RootsOfBorel.size; j++)
-        if (ambientWeyl.RootScalarCartanRoot(ambientWeyl.RootsOfBorel[j], raisedInput[i])<0)
+      for (int j=0; j<this->RootsOfBorel.size; j++)
+        if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i])<0)
         { bool isGood=true;
           for (int k=0; k<i; k++)
-            if (ambientWeyl.RootScalarCartanRoot(ambientWeyl.RootsOfBorel[j], raisedInput[k])<0)
+            if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k])<0)
             { isGood=false;
               break;
             }
           if (isGood)
-          { ambientWeyl.ReflectBetaWRTAlpha(ambientWeyl.RootsOfBorel[j], raisedInput[i], false, raisedInput[i]);
+          { this->ReflectBetaWRTAlpha(this->RootsOfBorel[j], theWeights[i], false, theWeights[i]);
             found=true;
           }
         }
     }
   }
-  return raisedInput==this->theHs;
+}
+
+bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)
+{ //std::cout << "<br>Checking whether " << this->theHs.ToString()
+  //<< " are conjugated to " << input.ToString();
+  if (input.size!=this->theHs.size)
+    return false;
+  List<Vector<Rational> > raisedInput=input;
+  List<Vector<Rational> > myVectors=this->theHs;
+  WeylGroup& ambientWeyl=this->GetAmbientWeyl();
+  ambientWeyl.RaiseToMaximallyDominant(raisedInput);
+  ambientWeyl.RaiseToMaximallyDominant(myVectors);
+  //std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
+  //<< myVectors.ToString();
+  return myVectors==raisedInput;
 }
 
 bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
-{ DynkinType theDifference;
+{ if (other.flagSystemProvedToHaveNoSolution)
+    return false;
+ // std::cout << " <br>Testing whether "
+  //<< this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is a direct summand of "
+  //<< other.theWeylNonEmbeddeD.theDynkinType.ToString() << "...";
+  DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
   for (int i=0; i<theDifference.size; i++)
     if (theDifference.theCoeffs[i]<0)
+    { //std::cout << " it's not because types don't match.";
       return false;
+    }
   Incrementable<SelectionFixedRank> selectedTypes;
   Incrementable<SelectionWithMaxMultiplicity> selectedOuterAutos;
   List<DynkinSimpleType> isoTypes;
@@ -2248,9 +2269,15 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   Matrix<Rational> currentOuterAuto;
-  for (; selectedTypes.IncrementReturnFalseIfBackToBeginning(); )
-    for (; selectedOuterAutos.IncrementReturnFalseIfBackToBeginning(); )
-    { conjugationCandidates.SetSize(0);
+  //std::cout << "Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
+  //<< " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
+  //<< " outer autos.";
+  int counter=0;
+  do
+    do
+    { counter++;
+      //std::cout << "Checking combination " << counter;
+      conjugationCandidates.SetSize(0);
       for (int i=0; i<selectedTypes.theElements.size; i++)
       { Selection& currentSel=selectedTypes.theElements[i].theSelection;
         SelectionWithMaxMultiplicity& currentOuterSelector= selectedOuterAutos.theElements[i];
@@ -2265,11 +2292,13 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
       if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
     }
+    while(selectedOuterAutos.IncrementReturnFalseIfBackToBeginning());
+  while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
   return false;
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers()
-{ std::cout << "Here i am jh!";
+{ std::cout << "Ere I am, J.H. ... the ghost in the machine!";
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
@@ -2279,7 +2308,10 @@ void SemisimpleSubalgebras::HookUpCentralizers()
         continue;
       CandidateSSSubalgebra& otherSA=this->Hcandidates[j];
       if (currentSA.IsDirectSummandOf(otherSA))
-        currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
+      { currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
+        //std::cout << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
+        //<< " is a direct summand of " << otherSA.ToString();
+      }
     }
   }
 }

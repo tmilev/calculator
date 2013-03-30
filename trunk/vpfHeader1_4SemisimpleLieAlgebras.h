@@ -231,19 +231,21 @@ public:
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
+  List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsModules;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
+  Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<Rational> > theSystemToSolve;
   List<Polynomial<Rational> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
-  int indexCentralizer;
+  int indexMaxSSContainer;
   List<int> indicesDirectSummandSuperAlgebra;
   FormatExpressions theCoeffLetters;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   int totalNumUnknowns;
-  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexCentralizer(-1),
+  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexMaxSSContainer(-1),
   flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
   flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
   {}
@@ -251,7 +253,7 @@ public:
   (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
   ;
   bool HasConjugateHsTo(List<Vector<Rational> >& other);
-  bool IsDirectSummandOf(CandidateSSSubalgebra& other);
+  bool IsDirectSummandOf(CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
 
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -298,8 +300,10 @@ public:
     this->theUnknownNegGens=other.theUnknownNegGens;
     this->theUnknownPosGens=other.theUnknownPosGens;
     this->theBasis=other.theBasis;
-    this->indexCentralizer=other.indexCentralizer;
+    this->indexMaxSSContainer=other.indexMaxSSContainer;
     this->indicesDirectSummandSuperAlgebra=other.indicesDirectSummandSuperAlgebra;
+    this->highestVectorsModules=other.highestVectorsModules;
+    this->CartanOfCentralizer=other.CartanOfCentralizer;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -310,6 +314,7 @@ public:
   bool CheckInitialization()const;
   SemisimpleLieAlgebra& GetAmbientSS();
   WeylGroup& GetAmbientWeyl();
+  void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   bool ComputeSystem
 (GlobalVariables* theGlobalVariables)
  ;

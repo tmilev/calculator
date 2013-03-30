@@ -602,7 +602,10 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   this->theBasis=this->theNegGens;
   this->theBasis.AddListOnTop(this->thePosGens);
   if (this->theBasis.size>0)
-    this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
+  { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
+    this->owner->owneR->GetCommonCentralizer(this->thePosGens, this->highestVectorsModules);
+    this->ComputeCartanOfCentralizer(theGlobalVariables);
+  }
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
@@ -2037,7 +2040,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << this->theWeylNonEmbeddeD.theDynkinType;
   out << ". ";
   if (this->indicesDirectSummandSuperAlgebra.size>0)
-  { out << "Contained as a direct summand of ";
+  { out << "Contained as an immediate (no in-betweens) direct summand of: ";
     for (int i=0; i<this->indicesDirectSummandSuperAlgebra.size; i++)
     { out << this->owner->Hcandidates[this->indicesDirectSummandSuperAlgebra[i]]
       .theWeylNonEmbeddeD.theDynkinType.ToString();
@@ -2045,16 +2048,35 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         out << ", ";
     }
   }
+
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  out <<"<br>Elements Cartan by components: ";
+  out << "<br>Elements Cartan by components: ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { out << theTypes[i] << ": ";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString();
-      if (j!=this->CartanSAsByComponent[i].size-1 && i!=this->CartanSAsByComponent.size-1)
+      if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
         out << ", ";
     }
+  }
+  MonomialChar<Rational> theZeroWeight;
+  theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
+  Rational centralizerCartanSize=this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
+  if (centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
+  { if (this->indexMaxSSContainer!=-1)
+    { DynkinType centralizerType =
+      this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
+      centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+      out << "<br>Centralizer type: " << centralizerType.ToString();
+      centralizerCartanSize-=centralizerType.GetRootSystemSize();
+    }
+    if (centralizerCartanSize!=this->CartanOfCentralizer.size)
+    { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
+      << "Cartan of the centralizer, instead I got: </b> ";
+    } else
+      out << "<br>Basis of Cartan of centralizer: ";
+    out << this->CartanOfCentralizer.ToString();
   }
 //  out << "<br>Predefined or computed simple generators follow. ";
 /*  out << "<br>Negative generators: ";
@@ -2138,12 +2160,10 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (this->flagSystemSolved)
       out << "<br>Solution of above system: " << this->aSolution.ToString();
   } else
-  { List<ElementSemisimpleLieAlgebra<Rational> > highestVectors;
-    this->owner->owneR->GetCommonCentralizer(this->thePosGens, highestVectors);
-    out << "<br>Highest vectors of representations (total " << highestVectors.size << "): ";
-    for (int i=0; i<highestVectors.size; i++)
-    { out << highestVectors[i].ToString();
-      if (i!=highestVectors.size-1)
+  { out << "<br>Highest vectors of representations (total " << this->highestVectorsModules.size << "): ";
+    for (int i=0; i<this->highestVectorsModules.size; i++)
+    { out << this->highestVectorsModules[i].ToString();
+      if (i!=this->highestVectorsModules.size-1)
         out << ", ";
     }
   }
@@ -2215,7 +2235,7 @@ bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)
   return myVectors==raisedInput;
 }
 
-bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
+bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
 { if (other.flagSystemProvedToHaveNoSolution)
     return false;
  // std::cout << " <br>Testing whether "
@@ -2224,6 +2244,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other)
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
+  if (theDifference.IsEqualToZero())
+    return false;
   for (int i=0; i<theDifference.size; i++)
     if (theDifference.theCoeffs[i]<0)
     { //std::cout << " it's not because types don't match.";
@@ -2302,13 +2324,18 @@ void SemisimpleSubalgebras::HookUpCentralizers()
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
-    currentSA.indexCentralizer=-1;
+    currentSA.indexMaxSSContainer=-1;
     for (int j=0; j<this->Hcandidates.size; j++)
     { if (i==j)
         continue;
       CandidateSSSubalgebra& otherSA=this->Hcandidates[j];
-      if (currentSA.IsDirectSummandOf(otherSA))
+      if (currentSA.IsDirectSummandOf(otherSA, true))
       { currentSA.indicesDirectSummandSuperAlgebra.AddOnTop(j);
+        if (currentSA.indexMaxSSContainer==-1)
+          currentSA.indexMaxSSContainer=j;
+        if (this->Hcandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
+            <otherSA.theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+          currentSA.indexMaxSSContainer=j;
         //std::cout << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
         //<< " is a direct summand of " << otherSA.ToString();
       }
@@ -2376,4 +2403,29 @@ bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
   << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   assert(false);
   return false;
+}
+
+void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables)
+{ Vectors<Rational> theHWs;
+  Vectors<Rational> theCartan;
+  theHWs.SetSize(this->highestVectorsModules.size);
+  for (int i=0; i<this->highestVectorsModules.size; i++)
+  { ElementSemisimpleLieAlgebra<Rational>& currentElt=this->highestVectorsModules[i];
+    currentElt.ElementToVectorNegativeRootSpacesFirst(theHWs[i]);
+  }
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  Vector<Rational> tempV;
+  theCartan.SetSize(this->GetAmbientSS().GetRank());
+  for (int i=0; i<this->GetAmbientSS().GetRank(); i++)
+  { tempV.MakeEi(this->GetAmbientSS().GetRank(), i);
+    tempElt.MakeHgenerator(tempV, this->GetAmbientSS());
+    tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
+  }
+  Vectors<Rational> outputCartanCentralizer;
+  theHWs.IntersectTwoLinSpaces(theHWs, theCartan, outputCartanCentralizer, *theGlobalVariables);
+  this->CartanOfCentralizer.SetSize(outputCartanCentralizer.size);
+  for (int i=0; i<this->CartanOfCentralizer.size; i++)
+  { tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owneR);
+    this->CartanOfCentralizer[i]=tempElt.GetCartanPart();
+  }
 }

@@ -4972,7 +4972,7 @@ public:
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   { this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
   }
-  CoefficientType GetMonomialCoefficient(const TemplateMonomial& inputMon)
+  CoefficientType GetMonomialCoefficient(const TemplateMonomial& inputMon)const
   { int theIndex=this->GetIndex(inputMon);
     if (theIndex==-1)
       return 0;

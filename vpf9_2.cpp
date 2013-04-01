@@ -207,6 +207,8 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
   FormatExpressions tempFormat;
   std::stringstream out;
   int NumVariables=this->GetMinNumVars();
+ // std::cout << "<br>Num variables of monomial: " << NumVariables;
+
   tempFormat.polyAlphabeT.SetSize(NumVariables);
   for (int i=0; i<NumVariables; i++)
   { std::stringstream tempStream;

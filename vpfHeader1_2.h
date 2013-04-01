@@ -8143,7 +8143,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
       }
     if(!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
-    std::cout << "-<br>(" << (*this+outpuT).ToString() << ")<br>(this should simplify to zero).";
+//    std::cout << "-<br>(" << (*this+outpuT).ToString() << ")<br>(this should simplify to zero).";
   }
   *this=outpuT;
 }

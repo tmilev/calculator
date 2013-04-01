@@ -2407,11 +2407,13 @@ bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
 (MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName
   ("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
-  int varShift=this->GetMinNumVars();
+//  int varShift=this->GetMinNumVars();
+//  std::cout << "<br>varShift for Euler operator: " << varShift;
   int powerMonCoeff=0;
   ElementWeylAlgebra currentMonContribution;
   outputDO.MakeOne();
-  //std::cout << "<br>Getting Euler part contribution of " << theCoeff.ToString();
+//  std::cout << "<br>Getting Euler part contribution of " << theCoeff.ToString()
+//  <<  " with min num vars equal to " << theCoeff.GetMinNumVars();
   for (int i=0; i<theCoeff.GetMinNumVars(); i++)
   { if (!theCoeff[i].IsSmallInteger(&powerMonCoeff))
     { std::cout << "This is a programming error. "
@@ -2420,13 +2422,14 @@ bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    currentMonContribution.Makexidj(i+varShift, i+varShift, 0);
+    currentMonContribution.Makexidj(i, i, 0);
     currentMonContribution.RaiseToPower(powerMonCoeff);
     outputDO*=currentMonContribution;
     //std::cout << "<br>Accounted index " << i+1 << "  out of " << theCoeff.GetMinNumVars()
     //<< ", power is " << powerMonCoeff << ", current output DO has "
     //<< outputDO.size << " monomials.";
   }
+//  std::cout << ".. Final euler: "  << outputDO.ToString();
   return true;
 }
 
@@ -2455,7 +2458,6 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   MatrixTensor<RationalFunctionOld> tempMat1;
 
   int varShift=this->GetMinNumVars();
-
 //  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
   ElementWeylAlgebra weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
@@ -2495,6 +2497,9 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
       ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
       (currentShift, j+varShift, oneIndexContribution,
       negativeExponentDenominatorContribution, theGlobalVariables);
+//      std::cout << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
+//      << negativeExponentDenominatorContribution.ToString() << " divided by "
+//      << oneIndexContribution.ToString();
       exponentContribution*=oneIndexContribution;
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
       if (!tempP1.IsEqualToZero())
@@ -2514,6 +2519,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
       if (!this->GetActionEulerOperatorPart
          (theCoeff[l], eulerOperatorContribution, theGlobalVariables))
         return false;
+//      std::cout << "<br>Euler operator contribution: " << eulerOperatorContribution.ToString();
       weylPartSummand=exponentContribution;
       weylPartSummand*=eulerOperatorContribution;
       weylPartSummand*=theCoeff.theCoeffs[l];
@@ -2606,7 +2612,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
     if (!theMod.MakeFromHW
-        (theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true) )
+        (theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
       return output.SetError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
@@ -2614,15 +2620,18 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
+      //std::cout << "<br>highest weight: " << tempV.ToString();
+      //std::cout << "<br>generic elt: " <<  genericElt.ToString();
 
-//      std::cout << "theWeylFormat: ";
+      //std::cout << "<br>theWeylFormat: ";
 //      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
 //        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
       theUEformat.polyAlphabeT.SetSize
-      (hwContext.GetNumContextVariables()+ elementsNegativeNilrad.size);
-      for (int k=hwContext.GetNumContextVariables(); k<theUEformat.polyAlphabeT.size; k++)
+      (hwContext.ContextGetNumContextVariables()+ elementsNegativeNilrad.size);
+      //std::cout << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
+      for (int k=hwContext.ContextGetNumContextVariables(); k<theUEformat.polyAlphabeT.size; k++)
       { std::stringstream tmpStream;
-        tmpStream << "a_{" << k-hwContext.GetNumContextVariables()+1 << "}";
+        tmpStream << "a_{" << k-hwContext.ContextGetNumContextVariables()+1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
       }
 //      std::cout << "<br>theUEformat: ";
@@ -2697,8 +2706,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
-//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
- //   std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
+    //theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
+    //std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
     //std::cout << "<br>The qdos: ";
     //for (int j=0; j<theQDOs.size; j++)
     //  std::cout << "<br>" << theQDOs[j].ToString();
@@ -6009,8 +6018,10 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
     ("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;
-  FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
+//std::cout << "<br>theContext:" << theContext.ToString();
+//std::cout << ", numvars: " << theContext.ContextGetNumContextVariables();
+//  FormatExpressions theFormat;
+//  theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
   (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra);

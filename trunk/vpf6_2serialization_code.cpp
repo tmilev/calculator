@@ -796,7 +796,7 @@ bool Serialization::innerLoadFromObject
       { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element";
         return false;
       }
-      if (i%2 ==0)
+      if (i%2 ==1)
         outputSubalgebra.theNegGens.AddOnTop(curGen);
       else
         outputSubalgebra.thePosGens.AddOnTop(curGen);

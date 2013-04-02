@@ -4809,6 +4809,7 @@ public:
   std::string chevalleyHgeneratorLetter;
   std::string fundamentalWeightLetter;
   std::string polyDefaultLetter;
+  std::string WeylAlgebraDefaultLetter;
   std::string CustomPlusSign;
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
@@ -4817,6 +4818,7 @@ public:
   std::string physicalPath;
   std::string htmlPathServer;
   List<std::string> polyAlphabeT;
+  List<std::string> weylAlgebraLetters;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
   std::string GetChevalleyGletter(int index)const;
@@ -4854,6 +4856,7 @@ public:
     this->physicalPath=other.physicalPath;
     this->htmlPathServer=other.htmlPathServer;
     this->polyAlphabeT=other.polyAlphabeT;
+    this->weylAlgebraLetters=other.weylAlgebraLetters;
     this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
     this->NumAmpersandsPerNewLineForLaTeX=other.NumAmpersandsPerNewLineForLaTeX;
     this->MaxRecursionDepthPerExpression=other.MaxRecursionDepthPerExpression;

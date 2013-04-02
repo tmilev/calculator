@@ -16,6 +16,7 @@ class Character{
 
     Character(){}
 
+    void MakeZero();
     coefficient IP(const Character &other) const;
     coefficient norm() const;
     Character<coefficient> operator*(const Character<coefficient> &other) const;
@@ -79,6 +80,7 @@ class CoxeterGroup
     Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
     HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;
     void ComputeRhoOrbit();
+    Matrix<Rational> SimpleReflectionMatrix(int i) const;
     Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
     Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
     CoxeterElement GetCoxeterElement(int i);
@@ -322,6 +324,12 @@ Character<coefficient> Character<coefficient>::ReducedWithChars(const List<Chara
   return X;
 }
 
+template <typename coefficient>
+void Character<coefficient>::MakeZero()
+{ this->data.SetSize(this->G->ccCount);
+  for(int i=0; i<this->G->ccCount; i++)
+    this->data[i] = 0;
+}
 
 template <typename coefficient>
 coefficient& Character<coefficient>::operator[](int i) const

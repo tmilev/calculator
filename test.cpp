@@ -9,6 +9,223 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+// ActionSpace has all const operations because it is a lightweight wrapper
+// of a list of matrices and a list of vectors
+template <typename coefficient>
+class ActionSpace
+{ public:
+  CoxeterGroup *G;
+  List<Vector<coefficient> > basis;
+  List<Matrix<coefficient> > gens;
+
+  ActionSpace(){};
+
+  ActionSpace<coefficient> operator*(const ActionSpace<coefficient>& other) const;
+
+  Character<coefficient> GetCharacter() const;
+  coefficient GetNumberOfComponents() const;
+  Matrix<coefficient> ClassFunctionMatrix(Character<coefficient> cf) const;
+  List<ActionSpace<coefficient> > Decomposition() const;
+  ActionSpace<coefficient> Reduced() const;
+};
+
+template <typename coefficient>
+ActionSpace<coefficient> ActionSpace<coefficient>::operator*(const ActionSpace<coefficient>& other) const
+{ int Vd = this->basis[0].size;
+  int Wd = other.basis[0].size;
+  int Ud = Vd*Wd;
+  List<Vector<coefficient> > Ub;
+  for(int vi=0; vi<this->basis.size; vi++)
+  { for(int wi=0; wi<other.basis.size; wi++)
+    { Vector<coefficient> u;
+      u.SetSize(Ud);
+      for(int i=0; i<Vd; i++)
+        for(int j=0; j<Wd; j++)
+          u[i*Wd+j] = this->basis[vi][i] * other.basis[wi][j];
+      Ub.AddOnTop(u);
+    }
+  }
+  List<Matrix<coefficient> > Ug;
+  for(int i=0; i<this->gens.size; i++)
+  { Matrix<coefficient> M;
+    M.AssignTensorProduct(this->gens[i],other.gens[i]);
+    Ug.AddOnTop(M);
+  }
+  ActionSpace U;
+  U.basis = Ub;
+  U.gens = Ug;
+  U.G = this->G;
+  return U;
+}
+
+template <typename coefficient>
+Matrix<coefficient> ActionSpace<coefficient>::ClassFunctionMatrix(Character<coefficient> cf) const
+{ Matrix<coefficient> M;
+  M.MakeZeroMatrix(this->gens[0].NumRows);
+  for(int cci=0; cci<this->G->ccCount; cci++)
+  { if(cf[cci] == 0)
+      continue;
+    for(int icci=0; icci<this->G->conjugacyClasses[cci].size; icci++)
+    { Matrix<coefficient> Mi;
+      Mi.MakeIdMatrix(this->gens[0].NumCols);
+      //Mi *= cf[cci];
+      CoxeterElement g = this->G->GetCoxeterElement(this->G->conjugacyClasses[cci][icci]);
+      for(int gi=g.reflections.size-1; ; gi--)
+      { if(gi < 0)
+          break;
+        Mi.MultiplyOnTheRight(gens[g.reflections[gi]]);
+      }
+      //std::cout << Mi.ToString(&testformat) << std::endl;
+      Mi *= cf[cci];
+      M += Mi;
+    }
+  }
+  return M;
+}
+
+template <typename coefficient>
+ActionSpace<coefficient> ActionSpace<coefficient>::Reduced() const
+{ int d = this->basis.size;
+  Matrix<coefficient> GM;
+  GM.init(d, d);
+  for(int i=0; i<d; i++)
+    for(int j=0; j<d; j++)
+      GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
+  GM.Invert();
+  List<Matrix<coefficient> > newgens;
+  for(int geni=0; geni<this->gens.size; geni++)
+  { Matrix<coefficient> M;
+    M.init(d, d);
+    for(int i=0; i<d; i++)
+      for(int j=0; j<d; j++)
+        M.elements[i][j] = this->basis[i].ScalarEuclidean(this->gens[geni]*this->basis[j]);
+    M.MultiplyOnTheLeft(GM);
+    newgens.AddOnTop(M);
+  }
+  ActionSpace<coefficient> out;
+  out.G = this->G;
+  out.gens = newgens;
+  List<Vector<Rational> > outbasis;
+  for(int i=0; i<d; i++) // this should go in its own function at some point
+  { Vector<coefficient> v;
+    v.MakeEi(d,i);
+    outbasis.AddOnTop(v);
+  }
+  out.basis = outbasis;
+  return out;
+}
+
+template <typename coefficient>
+List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
+{ List<ActionSpace<coefficient> > out;
+  if(GetNumberOfComponents() == 1)
+  { out.AddOnTop(*this);
+    return out;
+  }
+  List<List<Vector<coefficient> > > spaces;
+  spaces.AddOnTop(basis);
+  List<bool> is_component;
+  is_component.AddOnTop(false);
+  int dim_components = 0;
+  for(int cfi=0; cfi<G->ccCount; cfi++)
+  { if(dim_components == basis.size)
+      break;
+    Character<coefficient> cf;
+    cf.G = G;
+    cf.MakeZero();
+    cf[cfi] = 1;
+    std::cout << "getting matrix" << cf << std::endl;
+    Matrix<coefficient> A = ClassFunctionMatrix(cf);
+    std::cout << A.ToString(&testformat) << std::endl;
+    std::cout << "getting eigenspaces" << std::endl;
+    List<List<Vector<coefficient> > > es = eigenspaces(A);
+    for(int i=0; i<es.size; i++)
+    { if(dim_components == basis.size)
+        break;
+      int spaces_to_check = spaces.size;
+      for(int j=0; j<spaces_to_check; j++)
+      { if(is_component[j])
+          continue;
+        List<Vector<coefficient> > middle = intersection(es[i],spaces[j]);
+        if(!((0<middle.size)&&(middle.size<spaces[j].size)))
+          continue;
+        std::cout << "eigenspace " << i << " intersects with space " << j << std::endl;
+        List<Vector<coefficient> > right = relative_complement(spaces[j],middle);
+        spaces[j] = middle;
+        spaces.AddOnTop(right);
+        ActionSpace<coefficient> midr;
+        midr.G = G;
+        midr.gens = gens;
+        midr.basis = middle;
+        if(midr.GetNumberOfComponents() == 1)
+        { is_component[j] = true;
+          dim_components += middle.size;
+        }
+        ActionSpace<coefficient> rightr;
+        rightr.G = G;
+        rightr.gens = gens;
+        rightr.basis = right;
+        if(rightr.GetNumberOfComponents() == 1)
+        { is_component.AddOnTop(true);
+          dim_components += right.size;
+        } else
+        { is_component.AddOnTop(false);
+        }
+      }
+    }
+  }
+  std::cout << "spaces.size " << spaces.size << std::endl;
+  for(int i=0; i<spaces.size; i++)
+  { ActionSpace<coefficient> s;
+    s.G = this->G;
+    s.gens = this->gens;
+    s.basis = spaces[i];
+    out.AddOnTop(s);
+  }
+  std::cout << "decomposition might be complete, found " << out.size << " components" << std::endl;
+  return out;
+}
+
+template <typename coefficient>
+Character<coefficient> ActionSpace<coefficient>::GetCharacter() const
+{ Character<coefficient> X;
+  X.G = G;
+  X.data.SetSize(G->ccCount);
+  for(int cci=0; cci < G->ccCount; cci++)
+  { CoxeterElement g;
+    g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
+    Matrix<coefficient> M;
+    M.MakeIdMatrix(gens[0].NumRows);
+    for(int gi=0; gi<g.reflections.size; gi++)
+      M.MultiplyOnTheRight(gens[g.reflections[gi]]);
+    X.data[cci] = M.GetTrace();
+  }
+  return X;
+}
+
+template <typename coefficient>
+coefficient ActionSpace<coefficient>::GetNumberOfComponents() const
+{ Character<coefficient> X;
+  X = GetCharacter();
+  return X.norm();
+}
+
+
+// /home/user/vectorpartition-code/test.cpp:103:26: error: there are no arguments to ‘MakeBasis’ that depend on a template parameter, so a declaration of ‘MakeBasis’ must be available [-fpermissive]
+// /home/user/vectorpartition-code/test.cpp:103:26: note: (if you use ‘-fpermissive’, G++ will accept your code, but allowing the use of an undeclared name is deprecated)
+// template <typename coefficient>
+List<Vector<Rational> > MakeBasis(int d)
+{ List<Vector<Rational> > out;
+  for(int i=0; i<d; i++)
+  { Vector<Rational> v;
+    v.MakeEi(d,i);
+    out.AddOnTop(v);
+  }
+  return out;
+}
+
+
+
 /*
 template <typename vector>
 class LinearSpace
@@ -25,6 +242,201 @@ void AddToSpace(const vector &v)
 }
 */
 
+/* this is garbage
+template <typename coefficient>
+class polynom1al
+{
+  public:
+  List<coefficient> data;
+
+
+  void AddMonomial(coefficient c, int i)
+  { while(this->data.size < i+1)
+    { this->data.AddOnTop(0);
+    }
+    this->data[i] += c;
+  }
+
+
+  // if only cxx had lisp macros...
+  polynom1al<coefficient> operator+(const polynom1al &right) const
+  { polynom1al<coefficient> out;
+    out.data.SetSize((right.data.size>this->data.size)?right.data.size:this->data.size);
+    int i=0;
+    for(; i<this->data.size && i<right.data.size; i++)
+      out.data[i] = this->data[i] + right.data[i];
+    for(; i<this->data.size; i++)
+      out.data[i] = this->data[i];
+    for(; i<right.data.size; i++)
+      out.data[i] = right->data[i];
+    return out;
+  }
+  polynom1al<coefficient> operator-(const polynom1al &right) const
+  { polynom1al<coefficient> out;
+    out.data.SetSize((right.data.size>this->data.size)?right.data.size:this->data.size);
+    int i=0;
+    for(; i<this->data.size && i<right.data.size; i++)
+      out.data[i] = this->data[i] - right.data[i];
+    for(; i<this->data.size; i++)
+      out.data[i] = this->data[i];
+    for(; i<right.data.size; i++)
+      out.data[i] = -right->data[i];
+    return out;
+  }
+
+  polynom1al<coefficient> operator*(const polynom1al &right) const
+  { polynom1al<coefficient> out;
+    out.data.SetSize(tmp.data.size*right.data.size)
+    for(int i=0; i<this->data.size; i++)
+      for(int j=0; j<right.data.size; j++)
+        out.data[i*j] = this->data[i]*right.data[j];
+    return out;
+  }
+  void operator*=(const polynom1al &right)
+  { polynom1al<coefficient> tmp = *this;
+    this->data.SetSize(tmp.data.size*right.data.size)
+    for(int i=0; i<tmp.data.size; i++)
+      for(int j=0; j<right.data.size; j++)
+        this->data[i*j] = tmp.data[i]*right.data[j];
+  }
+
+  void Invert()
+  { for(int i=0; i<this->data.size; i++)
+      this->data[i].Invert();
+  }
+
+  bool IsEqualToZero()
+  { return this->data.size == 0;
+  }
+
+
+
+  polynom1al(){}
+  polynom1al(int c){this->data.AddOnTop(c);}
+
+
+  void operator=(int right)
+  { this->data.SetSize(1);
+    this->data[0] = right;
+
+  }
+  void operator=(coefficient right)
+  { this->data.SetSize(1);
+    this->data[0] = right;
+  }
+
+
+};
+
+template <typename coefficient>
+std::ostream& operator<<(std::ostream& out, const polynom1al<coefficient>& p)
+{ out << p.data;
+  return out;
+}*/
+
+template <typename coefficient>
+bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
+{ if(v.IsEqualToZero())
+  { if(V.size == 0)
+      return false;
+    return true;
+  }
+  int i=0;
+  while(true)
+  { int vi = v.GetIndexFirstNonZeroCoordinate();
+    while(true)
+    { if(i==V.size)
+        return false;
+      int vii = V[i].GetIndexFirstNonZeroCoordinate();
+      if(vii > vi)
+        return false;
+      if(vii == vi)
+        break;
+      i++;
+    }
+    v -= V[i] * v[vi]/V[i][vi];
+    if(v.IsEqualToZero())
+      return true;
+  }
+}
+
+template<typename coefficient>
+List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W)
+{ if((V.size==0) or (W.size==0))
+  { List<Vector<coefficient> > out;
+    return out;
+  }
+  int d = V[0].size;
+
+  Matrix<coefficient> MV;
+  MV.init(V.size, d);
+  for(int i=0; i<V.size; i++)
+    for(int j=0; j<d; j++)
+      MV.elements[i][j] = V[i][j];
+  List<Vector<coefficient> > Vperp = DestructiveKernel(MV);
+
+  Matrix<coefficient> MW;
+  MW.init(W.size, d);
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<d; j++)
+      MW.elements[i][j] = W[i][j];
+  List<Vector<coefficient> > Wperp = DestructiveKernel(MW);
+
+  Matrix<coefficient> M;
+  M.init(Vperp.size+Wperp.size,d);
+  int i=0;
+  for(; i<Vperp.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[i][j] = Vperp[i][j];
+  for(; i<Vperp.size+Wperp.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[i][j] = Wperp[i-Vperp.size][j];
+  return DestructiveKernel(M);
+}
+
+template <typename coefficient>
+List<Vector<coefficient> > relative_complement(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &WW)
+{ List<Vector<coefficient> > W = intersection(V,WW);
+  if(W.size==0)
+    return V;
+  int d = W[0].size;
+  Matrix<coefficient> GM;
+  GM.init(W.size, W.size);
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<W.size; j++)
+      GM.elements[i][j] = W[i].ScalarEuclidean(W[j]);
+  GM.Invert();
+  Matrix<coefficient> VM;
+  VM.init(W.size,V.size);
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<V.size; j++)
+      VM.elements[i][j] = W[i].ScalarEuclidean(V[j]);
+  VM.MultiplyOnTheLeft(GM);
+  Matrix<coefficient> outm;
+  outm.init(V.size, d);
+  for(int i=0; i<V.size; i++)
+  { for(int j=0; j<d; j++)
+    { coefficient r = V[i][j];
+      outm.elements[i][j] = r;
+      for(int k=0; k<W.size; k++)
+        outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
+    }
+  }
+  Matrix<coefficient> tmp;
+  Selection s;
+  outm.GaussianEliminationByRows(outm,tmp,s);
+  List<Vector<coefficient> > out;
+  for(int i=0; i<outm.NumRows; i++)
+  { Vector<coefficient> v;
+    v.SetSize(d);
+    for(int j=0; j<d; j++)
+      v[j] = outm.elements[i][j];
+    if(v.IsEqualToZero())
+      return out;
+    out.AddOnTop(v);
+  }
+  return out;
+}
 
 // we're going to guess at integers
 template <typename coefficient>
@@ -61,10 +473,12 @@ List<int> factorpoly(List<coefficient> p, int maxfac)
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> M)
+List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M)
 { Matrix<coefficient> MM; // idk what this does
   Selection s;
+//  std::cout << "DestructiveKernel: GaussianEliminationByRows" << std::endl;
   M.GaussianEliminationByRows(M,MM,s);
+//  std::cout << "DestructiveKernel: calculating kernel space" << std::endl;
   List<Vector<coefficient> > V;
   for(int i=0;i<s.selected.size;i++)
   { if(!s.selected[i])
@@ -79,14 +493,62 @@ List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> M)
       }
     V.AddOnTop(v);
   }
+//  std::cout << "DestructiveKernel: done" << std::endl;
   return V;
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient> M, coefficient l)
+List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient> &M, const coefficient &l)
 { for(int i=0; i<M.NumCols; i++)
-  M.elements[i][i] -= l;
+    M.elements[i][i] -= l;
   return DestructiveKernel(M);
+}
+
+template <typename coefficient>
+List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
+{ M.Transpose();
+  Matrix<coefficient> dummy1;
+  Selection dummy2;
+  M.GaussianEliminationByRows(M,dummy1,dummy2);
+  List<Vector<coefficient> > out;
+  bool zerov;
+  for(int i=0; i<M.NumRows; i++)
+  { Vector<coefficient> v;
+    v.MakeZero(M.NumCols); // initializing is not necessary
+    zerov = true;
+    for(int j=0; j<M.NumCols; j++)
+    { v[j] = M.elements[i][j];
+      if(zerov && M.elements[i][j]!=0)
+        zerov = false;
+    }
+    if(zerov)
+      return out;
+    out.AddOnTop(v);
+  }
+}
+
+// guess at integers
+List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0)
+{ int n = M.NumCols;
+  List<List<Vector<Rational> > > spaces;
+  int found = 0;
+//  for(int i=0; found < n; i++){
+//    if((i!=0) && (checkDivisorsOf%i!=0))
+//      continue;
+  for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
+  { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
+    std::cout << "checking " << i << " found " << found << std::endl;
+    Matrix<Rational> M2 = M;
+    Rational r = i;
+    List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
+    if(V.size > 0){
+      found += V.size;
+      spaces.AddOnTop(V);
+      if(found == M.NumCols)
+        break;
+    }
+  }
+  return spaces;
 }
 
 template <typename coefficient>
@@ -102,19 +564,66 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
       for(int k=0; k<v.size; k++)
         M.elements[i][j] += B[i][k] * B[j][k];
   }
-//  std::cout << "w " << w << std::endl;
-//  std::cout << "M\n" << M.ToString(&testformat) << std::endl;
   M.Invert();
-//  std::cout << "M⁻¹\n" << M.ToString(&testformat) << std::endl;
   Vector<coefficient> v2 = M*w;
   Vector<coefficient> v3;
   v3.MakeZero(v.size);
   for(int i=0;i<B.size;i++)
     v3 += B[i] * v2[i];
   if(!(v3 == v))
-  { std::cout << "v did not belong to B " << v-v3 << "left over" << std::endl;
+  { Vector<coefficient> out;
+    return out;
   }
   return v2;
+}
+
+template <typename coefficient>
+Vector<coefficient> ActOnGroupRing(const CoxeterGroup& G, int g, const Vector<coefficient> &v)
+{ Vector<coefficient> out;
+  out.MakeZero(G.N);
+  for(int i=0; i<G.N; i++)
+    if(v[i] != 0)
+      out[G.MultiplyElements(g,i)] = v[i];
+  return out;
+}
+
+// this function name is a lie
+template <typename coefficient>
+bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
+{ // pre-initial test: V isn't empty
+  if(V.size == 0)
+    return false;
+  // initial test: dimension of V is a square
+  int n = sqrt(V.size);
+  if(n*n != V.size)
+    return false;
+  // more expensive test: character of V has unit norm
+  Character<coefficient> X;
+  X.G = &G;
+  X.data.SetSize(G.ccCount);
+  for(int i=0; i<G.ccCount; i++)
+  { int g = G.conjugacyClasses[i][0];
+    coefficient tr = 0;
+    for(int j=0; j<V.size; j++)
+    { Vector<coefficient> v = ActOnGroupRing(G,g,V[j]);
+      v = PutInBasis(v,V);
+      tr += v[j];
+    }
+    X.data[i] = tr;
+  }
+  // (4, -1, -1/2, 1/2, -1, 1/4, 1/4, 1, 1/2, -7/2)[1] haha yeah right
+  if(X.norm() != n)
+    return false;
+  // okay now do the really hard test
+  Matrix<coefficient> M = GetMatrix(X);
+  List<List<Vector<coefficient> > > spaces = eigenspaces(M);
+  if(spaces.size != 2)
+    return false;
+  if(spaces[1].size != V.size)
+    return false;
+  if(intersection(spaces[1],V).size != V.size)
+    return false;
+  return true;
 }
 
 Matrix<Rational> MatrixInBasis(const Character<Rational> &X, const List<Vector<Rational> > &B)
@@ -134,7 +643,6 @@ Matrix<Rational> MatrixInBasis(const Character<Rational> &X, const List<Vector<R
       }
     }
   }
-  std::cout << rows << std::endl;
   Matrix<Rational> M;
   M.init(rows.size, rows.size);
   for(int i=0; i<rows.size; i++)
@@ -166,7 +674,7 @@ Matrix<coefficient> GetMatrix(const Character<coefficient>& X)
   { for(int i2=0; i2<X.G->ccSizes[i1]; i2++)
     { int i=X.G->conjugacyClasses[i1][i2];
       for(int j=0; j<X.G->N; j++)
-      { M.elements[X.G->MultiplyElements(i,j)][j] = X.data[i1]/X.G->N;
+      { M.elements[X.G->MultiplyElements(i,j)][j] = X.data[i1];
       }
     }
   }
@@ -445,6 +953,7 @@ int main(void){
   Xstdp.GaussianEliminationByRowsDeleteZeroRows(l);
   std::cout << l.size << std::endl;
 */
+/*
   Matrix<Rational> ct;
   ct.init(G.ccCount,G.ccCount);
   for(int i=0; i<G.ccCount; i++)
@@ -453,6 +962,7 @@ int main(void){
       ct.elements[i][j] /= G.N;
       ct.elements[i][j] *= G.ccSizes[j];
     }
+  */
   /*
   Vectors<Rational> powers;
   Vectors<Rational> powers2;
@@ -515,6 +1025,7 @@ int main(void){
   std::cout << Kernel(A) << std::endl;
   std::cout << Eigenspace(A,one) << std::endl;
 */
+/*
   Matrix<Rational> A;
   Rational one = 1;
   A.init(6,6);
@@ -533,7 +1044,8 @@ int main(void){
   GlobalVariables g;
   A.FindZeroEigenSpacE(ll,one,negone,zero,g);
   std::cout << ll << std::endl;
-
+*/
+/*
   Matrix<Rational> XP;
   for(int i=0; i<G.ccCount; i++)
   {
@@ -542,7 +1054,8 @@ int main(void){
   std::cout << G.characterTable[i] << std::endl;
   std::cout << DestructiveEigenspace(XP,one) << std::endl;
   }
-
+*/
+/*
   Rational three = 3;
   List<Rational> p;
   p.AddOnTop(one); p.AddOnTop(three); p.AddOnTop(three); p.AddOnTop(one);
@@ -607,6 +1120,37 @@ int main(void){
   }
   std::cout << M.ToString(&testformat) << std::endl;
 
+
+
+  List<List<Vector<Rational> > > spaces;
+  M = GetMatrix(G.characterTable[2]);
+  B = DestructiveColumnSpace(M);
+  spaces.AddOnTop(B);
+  List<Character<Rational> > Xs;
+  Xs.AddOnTop(G.characterTable[2]);
+  std::cout << spaces << std::endl;
+  { int i=1;
+    Xs.AddOnTop(Xs[i-1]*Xs[i-1]);
+    M = GetMatrix(Xs[i]);
+//    List<Rational> p = charpoly(M);
+//    std::cout << p << std::endl;
+//    List<int> ls = factorpoly(p,Xs[i].data[0].floorIfSmall());
+//    std::cout << ls << std::endl;
+    B = DestructiveColumnSpace(M);
+    std::cout << B << std::endl;
+  }
+*/
+/*
+
+  Matrix<Rational> a;
+  Matrix<Rational> b;
+  a.init(2,2);
+  b.init(2,2);
+  a(0,0) = -1; a(0,1) = -1; a(1,0) =  1; a(1,1) =  0;
+  b(0,0) =  1; b(0,1) =  0; b(1,0) = -1; b(1,1) = -1;
+  M.AssignTensorProduct(b,b);
+  std::cout << M.ToString(&testformat) << std::endl;
+*/
 /*
     std::cout << "this orbit has " << G.rhoOrbit.size << std::endl;
     std::cout << G.rhoOrbit << std::endl;
@@ -653,6 +1197,168 @@ int main(void){
 
     ]
 */
+/*    std::cout << "polynom1al" << std::endl;
+    polynom1al<Rational> zeropoly;
+    Matrix<polynom1al<Rational> > MP;
+    MP.MakeZeroMatrix(G.N, zeropoly);
+    for(int i1=0; i1<G.ccCount; i1++)
+    { for(int i2=0; i2<G.ccSizes[i1]; i2++)
+      { int i=G.conjugacyClasses[i1][i2];
+        for(int j=0; j<G.N; j++)
+        { M.elements[G.MultiplyElements(i,j)][j] = G.characterTable[2].data[i1]/G.N;
+        }
+      }
+    }
+    for(int i=0; i<G.N; i++)
+    { MP.elements[i][i].AddMonomial(-1,1);
+    }
+
+    polynom1al<Rational> cp;
+
+    cp = MP.GetDeterminant();
+
+    std::cout << cp << std::endl;
+*/
+//    List<bool> isod;
+//    isod.AddOnTop(false);
+//    int isodd = 0;
+/*    List<Vector<Rational> > bigspace;
+    List<List<Vector<Rational> > > spaces;
+    for(int i=0; i<G.N; i++)
+    {Vector<Rational> v;
+      v.MakeEi(G.N,i);
+      bigspace.AddOnTop(v);
+    }
+    spaces.AddOnTop(bigspace);
+    Rational one = 1;
+    Rational zero = 0;
+    for(int ci=0; ci<G.ccCount; ci++)
+    { Character<Rational> X;
+      X.G = &G;
+      for(int ii=0; ii<G.ccCount; ii++)
+      { if(ii==ci)
+          X.data.AddOnTop(one);
+          continue;
+        X.data.AddOnTop(zero);
+      }
+
+    }
+    */
+/*    Character<Rational> Xs = G.characterTable[2];
+    Character<Rational> Xcs = G.characterTable[1]*G.characterTable[2];
+    List<List<Character<Rational> > > chars;
+    List<Character<Rational> > charsi;
+    charsi.AddOnTop(G.characterTable[0]);
+    chars.AddOnTop(charsi);
+    HashedList<Character<Rational> > usedchars;
+    int ci = 0;
+    int cj = 0;
+    while(true)
+    { if(!usedchars.Contains(chars[ci][cj]))
+      { usedchars.AddOnTop(chars[ci][cj]);
+        std::cout << "matrix for " << ci << " " << cj << " " << chars[ci][cj] << std::endl;
+        Matrix<Rational> MM = GetMatrix(chars[ci][cj]);
+        std::cout << "eigenspaces" << std::endl;
+        List<List<Vector<Rational> > > es = eigenspaces(MM,G.N);
+        std::cout << "splitting spaces" << std::endl;
+        for(int i=0; i<es.size; i++)
+        { int spaces_to_check = spaces.size;
+          for(int j=0; j<spaces_to_check; j++)
+          { //if(isod[j])
+            //  continue;
+            if(spaces[j].size < 9)
+              continue;
+            std::cout << "intersect eigenspace " << i << " with space " << j << std::endl;
+            List<Vector<Rational> > middle = intersection(es[i], spaces[j]);
+            std::cout << "result is " << middle.size << "dimensional" << std::endl;
+            if(0 < middle.size and middle.size < spaces[j].size)
+            { std::cout << "finding relative complement" << std::endl;
+              List<Vector<Rational> > right = relative_complement(spaces[j],es[i]);
+              std::cout << "relative complement is " << right.size << "dimensional" << std::endl;
+              spaces[j] = middle;
+              //if(is_isotypic_component(G,middle))
+              //{ isod[j] = true;
+              //  isodd += middle.size;
+              //  std::cout << "intersection was an isotypic component" << std::endl;
+              //}
+              spaces.AddOnTop(right);
+              //if(is_isotypic_component(G,right))
+              //{ isod.AddOnTop(true);
+              //  isodd += right.size;
+              //  std::cout << "complement was an isotypic component" << std::endl;
+              //} else
+              //{ isod.AddOnTop(false);
+              //}
+              std::cout << "moving on" << std::endl;
+            }
+          }
+        }
+//        if(isodd >= G.N)
+//          break;
+        if(spaces.size == G.ccCount)
+          break;
+      }
+      std::cout << "finding next character" << std::endl;
+      if(ci!=0)
+      { ci--;
+        cj++;
+        chars[ci].AddOnTop(chars[ci][cj-1]*Xcs);
+      } else
+      { ci=cj+1;
+        cj=0;
+        List<Character<Rational> > cil;
+        cil.AddOnTop(chars[ci-1][0]*Xs);
+        chars.AddOnTop(cil);
+      }
+    }
+    std::cout << "spaces" << std::endl;
+    std::cout << spaces.size << std::endl;
+    for(int i=0; i<spaces.size; i++)
+      std::cout << spaces[i].size << " ";
+    std::cout << std::endl;
+    //std::cout << isod << std::endl;
+    //std::cout << isodd << std::endl;
+*/
+/*    int i=0; j=0;
+    while(spaces.size > 0)
+    {
+
+    }
+*/
+    List<Matrix<Rational> > gens;
+    for(int i=0; i<G.nGens; i++)
+    { Matrix<Rational> geni = G.SimpleReflectionMatrix(i);
+      std::cout << geni.ToString(&testformat) << std::endl;
+      std::cout << geni.GetDeterminant() << geni.GetTrace() << std::endl;
+      gens.AddOnTop(geni);
+    }
+
+    ActionSpace<Rational> V2;
+    V2.G = &G;
+    V2.gens = gens;
+    List<Vector<Rational> > v2b = MakeBasis(G.nGens);
+    V2.basis = v2b;
+    std::cout << V2.GetCharacter() << std::endl;
+    ActionSpace<Rational> V2x2 = V2*V2;
+    std::cout << V2x2.GetCharacter() << std::endl;
+    for(int i=0; i<G.nGens; i++)
+    { std::cout << V2x2.gens[i].ToString(&testformat);
+      std::cout << V2x2.gens[i].GetDeterminant() << ' ' << V2x2.gens[i].GetTrace() << std::endl;
+    }
+    std::cout << "class function matrices" << std::endl;
+    for(int cfi=0; cfi<G.ccCount; cfi++)
+    { Character<Rational> cf;
+      cf.G = &G;
+      cf.MakeZero();
+      cf[cfi] = 1;
+      std::cout << cfi << std::endl;
+      std::cout << V2x2.ClassFunctionMatrix(cf).ToString(&testformat) << std::endl;
+    }
+    List<ActionSpace<Rational> > Vs;
+    Vs = V2x2.Decomposition();
+    for(int i=0; i<Vs.size; i++)
+      std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
+
     std::string s;
     std::cin >> s;
     return 0;

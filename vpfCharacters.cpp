@@ -195,8 +195,16 @@ Vector<Rational> CoxeterGroup::ApplyList(const List<int> &l, const Vector<Ration
     return v;
 }
 
-Vector<Rational> CoxeterGroup::ComposeTodorsVector(const List<int> &l) const{
-    return CoxeterGroup::ApplyList(l,rho);
+Vector<Rational> CoxeterGroup::ComposeTodorsVector(const List<int> &l) const
+{   return CoxeterGroup::ApplyList(l,rho);
+}
+
+Matrix<Rational> CoxeterGroup::SimpleReflectionMatrix(int i) const
+{ Matrix<Rational> out;
+  out.MakeIdMatrix(nGens);
+  for(int j=0; j<nGens; j++)
+    out.elements[i][j] -= CartanSymmetric.elements[i][j] / CartanSymmetric.elements[i][i] *2;
+  return out;
 }
 
 Vector<Rational> CoxeterGroup::SimpleConjugation(int i, const Vector<Rational> &vv) const{

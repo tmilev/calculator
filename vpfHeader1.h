@@ -1920,6 +1920,9 @@ void NonPivotPointsToEigenVector
   //this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
+  // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
+  // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
+  void AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T);
   void AssignVectorsToRows(Vectors<Element>& input)
   { int numCols=-1;
     if (input.size>0)
@@ -2501,6 +2504,18 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
   for(int i=0; i<m2.NumRows; i++)
     for(int j=0; j<m2.NumCols; j++)
       this->elements[i+m1.NumRows][j+m1.NumCols]=m2.elements[i][j];
+}
+
+template<typename Element>
+void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T)
+{ assert(this!=&S && this!=&T);
+  this->Resize(S.NumRows*T.NumRows, S.NumCols*T.NumCols, false);
+  int sr = S.NumRows; int sc = S.NumCols;
+  for(int iv = 0; iv<S.NumRows; iv++)
+    for(int iw = 0; iw<T.NumRows; iw++)
+      for(int jv = 0; jv<S.NumCols; jv++)
+        for(int jw = 0; jw <T.NumCols; jw++)
+          this->elements[iv*sr+iw][jv*sc+jw] = S.elements[iv][jv] * T.elements[iw][jw];
 }
 
 template<typename Element>

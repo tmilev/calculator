@@ -232,6 +232,9 @@ public:
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsModules;
+  List<Vector<Rational> > highestWeightsModules;
+  List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsCentralizinglySplitModules;
+  List<Vector<Rational> > highestWeightsCentralizinglySplitModules;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<Rational> > theSystemToSolve;
@@ -304,6 +307,9 @@ public:
     this->indicesDirectSummandSuperAlgebra=other.indicesDirectSummandSuperAlgebra;
     this->highestVectorsModules=other.highestVectorsModules;
     this->CartanOfCentralizer=other.CartanOfCentralizer;
+    this->highestWeightsModules=other.highestWeightsModules;
+    this->highestVectorsCentralizinglySplitModules=other.highestVectorsCentralizinglySplitModules;
+    this->highestWeightsCentralizinglySplitModules=other.highestWeightsCentralizinglySplitModules;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -315,6 +321,7 @@ public:
   SemisimpleLieAlgebra& GetAmbientSS();
   WeylGroup& GetAmbientWeyl();
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
+  void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
   bool ComputeSystem
 (GlobalVariables* theGlobalVariables)
  ;

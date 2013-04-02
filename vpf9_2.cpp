@@ -204,22 +204,13 @@ void ElementWeylAlgebra::RaiseToPower(int thePower)
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
 { if (this->IsAConstant())
     return "1";
-  FormatExpressions tempFormat;
   std::stringstream out;
-  int NumVariables=this->GetMinNumVars();
- // std::cout << "<br>Num variables of monomial: " << NumVariables;
-
-  tempFormat.polyAlphabeT.SetSize(NumVariables);
-  for (int i=0; i<NumVariables; i++)
-  { std::stringstream tempStream;
-    tempStream << "\\partial";
-    if (theFormat==0)
-      tempStream << "_{" << i+1 << "}";
-    else if (theFormat->GetPolyLetter(i)[0]!='x')
-      tempStream << "_{" << theFormat->GetPolyLetter(i) << "}";
-    else
-      tempStream << "_{" << i+1 << "}";
-    tempFormat.polyAlphabeT[i]=tempStream.str();
+  FormatExpressions tempFormat;
+  if (theFormat==0)
+    tempFormat.polyDefaultLetter="\\partial";
+  else
+  { tempFormat.polyDefaultLetter=theFormat->WeylAlgebraDefaultLetter;
+    tempFormat.polyAlphabeT=theFormat->weylAlgebraLetters;
   }
   std::string firstS=this->polynomialPart.ToString(theFormat);
   std::string secondS=this->differentialPart.ToString(&tempFormat);

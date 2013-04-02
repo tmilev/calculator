@@ -2608,6 +2608,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   List<ModuleSSalgebra<RationalFunctionOld > > theMods;
   theMods.SetSize(theHws.size);
   Vector<RationalFunctionOld> tempV;
+  int numStartingVars=hwContext.ContextGetNumContextVariables();
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
@@ -2626,13 +2627,30 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       //std::cout << "<br>theWeylFormat: ";
 //      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
 //        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
+      theWeylFormat.polyAlphabeT.SetSize
+      (numStartingVars+ elementsNegativeNilrad.size);
+      theWeylFormat.weylAlgebraLetters.SetSize
+      (numStartingVars+ elementsNegativeNilrad.size);
       theUEformat.polyAlphabeT.SetSize
-      (hwContext.ContextGetNumContextVariables()+ elementsNegativeNilrad.size);
+      (numStartingVars+ elementsNegativeNilrad.size);
+      for (int k=0; k<numStartingVars; k++)
+        theWeylFormat.weylAlgebraLetters[k]="error";
       //std::cout << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
-      for (int k=hwContext.ContextGetNumContextVariables(); k<theUEformat.polyAlphabeT.size; k++)
-      { std::stringstream tmpStream;
+      for (int k=numStartingVars; k<theUEformat.polyAlphabeT.size; k++)
+      { std::stringstream tmpStream, tempstream2, tempstream3, tmpStream4;
         tmpStream << "a_{" << k-hwContext.ContextGetNumContextVariables()+1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
+        tempstream2 << "x_{" << k-numStartingVars+1 << "}";
+        tempstream3 << "x_" << k-numStartingVars+1;
+        tmpStream4 << "\\partial_{" << k-numStartingVars+1 << "}";
+        if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) ||
+            theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
+          return output.SetError
+          ("Error: the variable "+ tempstream2.str()+
+           " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ",
+           theCommands);
+        theWeylFormat.polyAlphabeT[k]=tempstream2.str();
+        theWeylFormat.weylAlgebraLetters[k]=tmpStream4.str();
       }
 //      std::cout << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)

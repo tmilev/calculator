@@ -9,6 +9,55 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+template <typename coefficient>
+class SpaceTree
+{ public:
+  List<Vector<coefficient> > space;
+  List<SpaceTree<coefficient> > subspaces;
+
+  void PlaceInTree(const List<Vector<coefficient> >& V);
+  void GetLeaves(List<List<Vector<coefficient> > >& leaves) const;
+  void DisplayTree() const;
+};
+
+template <typename coefficient>
+void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
+{ for(int i=0; i<subspaces.size; i++)
+  { List<Vector<coefficient> > U = intersection(V,subspaces[i].space);
+    if(U.size == 0)
+      continue;
+    if(U.size == subspaces[i].space.size)
+      return;
+    subspaces[i].PlaceInTree(U);
+  }
+  List<Vector<coefficient> > W;
+  for(int i=0; i<subspaces.size; i++)
+    W = getunion(W,subspaces[i].space);
+  if(intersection(W,V).size != V.size)
+  { SpaceTree<coefficient> vst;
+    vst.space = V;
+    subspaces.AddOnTop(vst);
+  }
+}
+
+template <typename coefficient>
+void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves) const
+{ if(subspaces.size > 0)
+    for(int i=0; i<subspaces.size; i++)
+      subspaces[i].GetLeaves(leaves);
+  else
+    leaves.AddOnTop(space);
+}
+
+template <typename coefficient>
+void SpaceTree<coefficient>::DisplayTree() const
+{ std::cout << '[' << space.size << ',';
+  for(int i=0; i<subspaces.size; i++)
+    subspaces[i].DisplayTree();
+  std::cout << ']';
+}
+
+
 // ActionSpace has all const operations because it is a lightweight wrapper
 // of a list of matrices and a list of vectors
 template <typename coefficient>
@@ -117,6 +166,45 @@ ActionSpace<coefficient> ActionSpace<coefficient>::Reduced() const
 
 template <typename coefficient>
 List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
+{ SpaceTree<Rational> st;
+  st.space = basis;
+  for(int cfi=0; cfi<G->ccCount; cfi++)
+  { Character<coefficient> cf;
+    cf.G = G;
+    cf.MakeZero();
+    cf[cfi] = 1;
+    std::cout << "getting matrix " << cf << std::endl;
+    Matrix<coefficient> A = ClassFunctionMatrix(cf);
+    List<List<Vector<coefficient> > > es = eigenspaces(A);
+    std::cout << "eigenspaces were ";
+    for(int i=0; i<es.size; i++)
+      std::cout << es[i].size << " ";
+    std::cout << std::endl;
+    for(int i=0; i<es.size; i++)
+      st.PlaceInTree(es[i]);
+    std::cout << "tree is ";
+    st.DisplayTree();
+    std::cout << std::endl;
+  }
+  List<List<Vector<coefficient> > > leaves;
+  st.GetLeaves(leaves);
+  std::cout << "leaves are ";
+  for(int i=0; i<leaves.size; i++)
+    std::cout << leaves[i].size << " ";
+  std::cout << std::endl;
+  List<ActionSpace<coefficient> > out;
+  for(int i=0; i<leaves.size; i++)
+  { ActionSpace<coefficient> outeme;
+    outeme.G = G;
+    outeme.gens = gens;
+    outeme.basis = leaves[i];
+    out.AddOnTop(outeme.Reduced());
+  }
+  return out;
+}
+
+/*template <typename coefficient>
+List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
 { List<ActionSpace<coefficient> > out;
   if(GetNumberOfComponents() == 1)
   { out.AddOnTop(*this);
@@ -184,7 +272,7 @@ List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
   }
   std::cout << "decomposition might be complete, found " << out.size << " components" << std::endl;
   return out;
-}
+}*/
 
 template <typename coefficient>
 Character<coefficient> ActionSpace<coefficient>::GetCharacter() const
@@ -210,7 +298,6 @@ coefficient ActionSpace<coefficient>::GetNumberOfComponents() const
   return X.norm();
 }
 
-
 // /home/user/vectorpartition-code/test.cpp:103:26: error: there are no arguments to ‘MakeBasis’ that depend on a template parameter, so a declaration of ‘MakeBasis’ must be available [-fpermissive]
 // /home/user/vectorpartition-code/test.cpp:103:26: note: (if you use ‘-fpermissive’, G++ will accept your code, but allowing the use of an undeclared name is deprecated)
 // template <typename coefficient>
@@ -224,8 +311,59 @@ List<Vector<Rational> > MakeBasis(int d)
   return out;
 }
 
+ActionSpace<Rational> StandardRepresentation(CoxeterGroup& G)
+{ List<Matrix<Rational> > gens;
+  for(int i=0; i<G.nGens; i++)
+  { Matrix<Rational> geni = G.SimpleReflectionMatrix(i);
+    gens.AddOnTop(geni);
+  }
+  ActionSpace<Rational> out;
+  out.G = &G;
+  out.gens = gens;
+  List<Vector<Rational> > outb = MakeBasis(G.nGens);
+  out.basis = outb;
+  return out;
+}
 
-
+List<ActionSpace<Rational> > ComputeIrreducibleRepresentations(CoxeterGroup& G)
+{ List<ActionSpace<Rational> > irreps;
+  ActionSpace<Rational> sr = StandardRepresentation(G);
+  irreps.AddOnTop(sr);
+  List<Character<Rational> > chartable;
+  chartable.AddOnTop(sr.GetCharacter());
+  std::cout << sr.GetCharacter() << std::endl;
+  List<ActionSpace<Rational> > newspaces;
+  newspaces.AddOnTop(sr);
+  while(newspaces.size > 0)
+  { ActionSpace<Rational> nspace = newspaces.PopLastObject();
+    for(int irri = 0; irri < irreps.size; irri++)
+    { ActionSpace<Rational> tspace = nspace * irreps[irri];
+      std::cout << "Decomposing " << tspace.GetCharacter() << std::endl;
+      List<ActionSpace<Rational> > spaces = tspace.Decomposition();
+      for(int spi = 0; spi < spaces.size; spi++)
+      { if(spaces[spi].GetNumberOfComponents() == 1)
+        { if(!chartable.Contains(spaces[spi].GetCharacter()))
+          { chartable.AddOnTop(spaces[spi].GetCharacter());
+            irreps.AddOnTop(spaces[spi]);
+            newspaces.AddOnTop(spaces[spi]);
+            std::cout << "we have " << irreps.size << " irreps" << std::endl;
+          }
+        }
+      }
+      if(irreps.size == G.ccCount)
+        break;
+    }
+    if(irreps.size == G.ccCount)
+      break;
+  }
+//  chartable.QuickSortAscending();
+  for(int i=0; i<chartable.size; i++)
+  { std::cout << chartable[i] << '\n';
+    for(int j=0; j<irreps[i].gens.size; j++)
+      std::cout << irreps[i].gens[j].ToString(&testformat) << '\n';
+  }
+  return irreps;
+}
 /*
 template <typename vector>
 class LinearSpace
@@ -358,6 +496,35 @@ bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
     if(v.IsEqualToZero())
       return true;
   }
+}
+
+template<typename coefficient>
+List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W)
+{ if(V.size == 0)
+    return W;
+  int d = V[0].size;
+  Matrix<coefficient> M;
+  M.init(V.size+W.size,d);
+  for(int i=0; i<V.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[i][j] = V[i][j];
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[V.size+i][j] = W[i][j];
+  Matrix<coefficient> one;
+  Selection two;
+  M.GaussianEliminationByRows(M,one,two);
+  List<Vector<coefficient> > out;
+  for(int i=0; i<M.NumRows; i++)
+  { Vector<coefficient> v;
+    v.SetSize(d);
+    for(int j=0; j<d; j++)
+      v[j] = M.elements[i][j];
+    if(v.IsEqualToZero())
+      break;
+    out.AddOnTop(v);
+  }
+  return out;
 }
 
 template<typename coefficient>
@@ -882,7 +1049,7 @@ int main(void){
 
 
   DynkinType D;
-  D.MakeSimpleType('B',3);
+  D.MakeSimpleType('F',4);
   Matrix<Rational> M;
   D.GetCartanSymmetric(M);
   std::cout << M << std::endl;
@@ -892,7 +1059,7 @@ int main(void){
   G.ComputeInitialCharacters();
   for(int i=0;i<G.characterTable.size;i++)
   std::cout << G.characterTable[i] << std::endl;
-
+/*
   for(int i=0;i<G.ccCount;i++){
     int n = G.conjugacyClasses[i][0];
     Matrix<Rational> M = G.TodorsVectorToMatrix(G.rhoOrbit[n]);
@@ -912,6 +1079,7 @@ int main(void){
   }
 
   std::cout << G.characterTable << std::endl;
+*/
 /*
   GroupRingElement<Rational> XeP;
   XeP.MakeFromCharacter(G.characterTable[0]);
@@ -1325,20 +1493,8 @@ int main(void){
 
     }
 */
-    List<Matrix<Rational> > gens;
-    for(int i=0; i<G.nGens; i++)
-    { Matrix<Rational> geni = G.SimpleReflectionMatrix(i);
-      std::cout << geni.ToString(&testformat) << std::endl;
-      std::cout << geni.GetDeterminant() << geni.GetTrace() << std::endl;
-      gens.AddOnTop(geni);
-    }
 
-    ActionSpace<Rational> V2;
-    V2.G = &G;
-    V2.gens = gens;
-    List<Vector<Rational> > v2b = MakeBasis(G.nGens);
-    V2.basis = v2b;
-    std::cout << V2.GetCharacter() << std::endl;
+/*    std::cout << V2.GetCharacter() << std::endl;
     ActionSpace<Rational> V2x2 = V2*V2;
     std::cout << V2x2.GetCharacter() << std::endl;
     for(int i=0; i<G.nGens; i++)
@@ -1358,6 +1514,9 @@ int main(void){
     Vs = V2x2.Decomposition();
     for(int i=0; i<Vs.size; i++)
       std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
+  */
+
+    List<ActionSpace<Rational> > irreps = ComputeIrreducibleRepresentations(G);
 
     std::string s;
     std::cin >> s;

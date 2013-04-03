@@ -2510,7 +2510,7 @@ template<typename Element>
 void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T)
 { assert(this!=&S && this!=&T);
   this->Resize(S.NumRows*T.NumRows, S.NumCols*T.NumCols, false);
-  int sr = S.NumRows; int sc = S.NumCols;
+  int sr = T.NumRows; int sc = T.NumCols;
   for(int iv = 0; iv<S.NumRows; iv++)
     for(int iw = 0; iw<T.NumRows; iw++)
       for(int jv = 0; jv<S.NumCols; jv++)

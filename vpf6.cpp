@@ -129,9 +129,9 @@ int Expression::GetTypeOperation<CoxeterElement>()const
 }
 
 template < >
-int Expression::GetTypeOperation<Character<Rational> >()const
+int Expression::GetTypeOperation<ClassFunction<Rational> >()const
 { this->CheckInitialization();
-  return this->theBoss->opCharacter();
+  return this->theBoss->opClassFunction();
 }
 
 //Expression::GetTypeOperation specializations end.
@@ -301,10 +301,10 @@ CoxeterElement
 
 template < >
 int Expression::AddObjectReturnIndex(const
-Character<Rational>
+ClassFunction<Rational>
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theCharacters
+  return this->theBoss->theObjectContainer.theClassFunctions
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 //Expression::AddObjectReturnIndex specializations end
@@ -511,14 +511,14 @@ CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-Character<Rational>& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<Character<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type Character. "
+ClassFunction<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<ClassFunction<Rational> >())
+  { std::cout << "This is a programming error: expression not of required type ClassFunction. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theCharacters[this->GetLastChild().theData];
+  return this->theBoss->theObjectContainer.theClassFunctions[this->GetLastChild().theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3676,7 +3676,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("WeylGroup");
   this->AddOperationBuiltInType("CoxeterGroup");
   this->AddOperationBuiltInType("CoxeterElement");
-  this->AddOperationBuiltInType("Character");
+  this->AddOperationBuiltInType("ClassFunction");
 
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
@@ -4949,8 +4949,8 @@ bool Expression::ToStringData
     tempFormat.flagUseHTML=false;
     out << theElt.ToString(&tempFormat);
     result=true;
-  } else if (this->IsOfType<Character<Rational> >())
-  { Character<Rational>& theElt=this->GetValuENonConstUseWithCaution<Character<Rational> >();
+  } else if (this->IsOfType<ClassFunction<Rational> >())
+  { ClassFunction<Rational>& theElt=this->GetValuENonConstUseWithCaution<ClassFunction<Rational> >();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;

@@ -63,8 +63,8 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   return output.AssignValue(theElt, theCommands);
 }
 
-bool CommandList::innerCharacter(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerCharacter");
+bool CommandList::innerClassFunction(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerClassFunction");
   SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -100,12 +100,12 @@ bool CommandList::innerCharacter(CommandList& theCommands, const Expression& inp
       }
       X.AddOnTop(tmp);
     }
-    Character<Rational> theChar;
+    ClassFunction<Rational> theChar;
     theChar.G = &theGroup;
     theChar.data = X;
     return output.AssignValue(theChar, theCommands);
   }
-  return output.SetError("Characters may be selected by index or entered by hand.", theCommands);
+  return output.SetError("Class functions may be selected by character index or entered by hand.", theCommands);
 }
 
 //--------------Implementing some features of some finite Coxeter groups
@@ -312,17 +312,17 @@ void CoxeterGroup::ComputeSquares(){
 }
 
 /*
-List<Character<Rational> >& ClearCharsList(const List<Character> cchars)
+List<Character<Rational> >& ClearCharsList(const List<ClassFunction> cchars)
 {
-  List<Character> chars;
+  List<ClassFunction> chars;
   for(int i=0;i<cchars.size;i++)
     chars.AddOnTop(cchars[i]);
-  List<Character> newChars;
+  List<ClassFunction> newChars;
 
 
   bool outerChanged = false;
   bool innerChanged = false;
-  Character X,X2;
+  ClassFunction X,X2;
   for(int charindex = 0; charindex<chars.size; charindex++)
   {
   X = chars[charindex];
@@ -359,14 +359,14 @@ void CoxeterGroup::ComputeInitialCharacters(){
   if(squares.size == 0)
     ComputeSquares();
 
-  Character<Rational> Xe;
+  ClassFunction<Rational> Xe;
   Xe.G = this;
   Xe.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
     Xe.data.AddOnTop(1);
   characterTable.AddOnTop(Xe);
 
-  Character<Rational> Xsgn;
+  ClassFunction<Rational> Xsgn;
   Xsgn.G = this;
   Xsgn.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
@@ -374,7 +374,7 @@ void CoxeterGroup::ComputeInitialCharacters(){
   characterTable.AddOnTop(Xsgn);
 
     // may not actually belong in the character table
-  Character<Rational> Xstd;
+  ClassFunction<Rational> Xstd;
   Xstd.G = this;
   Xstd.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
@@ -385,10 +385,10 @@ void CoxeterGroup::ComputeInitialCharacters(){
 /*
   List<Character> allChars;
   allChars.AddListOnTop(characterTable);
-  Character X,Y;
+  ClassFunction X,Y;
   int n;
 
-  List<Character> products;
+  List<ClassFunction> products;
   for(int loopvar=1;loopvar<50;loopvar++)
   { for(int i=0; i<allChars.size; i++)
     { for(int j=0; j<allChars.size; j++)
@@ -419,7 +419,7 @@ void CoxeterGroup::ComputeInitialCharacters(){
 
   }*/
 
-/*  List<Character> powers;
+/*  List<ClassFunction> powers;
   powers.AddOnTop(Xstd);
   for(int loopvar=1;loopvar<50;loopvar++)
   {

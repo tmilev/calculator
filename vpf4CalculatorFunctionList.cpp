@@ -13,8 +13,8 @@ void CommandList::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("MakeCharacter", this->innerCharacter, "",
-   "Either gets the nth character, or accepts user input as a character",
+  ("MakeClassFunction", this->innerClassFunction, "",
+   "Either gets the nth character, or accepts user input as a class function",
    "MakeCharacter{}(B_3, 1);", false)
    ;
 

@@ -9,32 +9,32 @@ class CoxeterGroup;
 class CoxeterElement;
 
 template<typename coefficient>
-class Character{
+class ClassFunction{
     public:
     CoxeterGroup *G;
     List<coefficient> data;
 
-    Character(){}
+    ClassFunction(){}
 
     void MakeZero();
-    coefficient IP(const Character &other) const;
+    coefficient IP(const ClassFunction &other) const;
     coefficient norm() const;
-    Character<coefficient> operator*(const Character<coefficient> &other) const;
-    Character<coefficient> Sym2() const;
-    Character<coefficient> Alt2() const;
-    Character<coefficient> operator+(const Character<coefficient> &other) const;
-    Character<coefficient> operator-(const Character<coefficient> &other) const;
-    Character<coefficient> ReducedWithChars(const List<Character<coefficient> > chars = 0);
+    ClassFunction<coefficient> operator*(const ClassFunction<coefficient> &other) const;
+    ClassFunction<coefficient> Sym2() const;
+    ClassFunction<coefficient> Alt2() const;
+    ClassFunction<coefficient> operator+(const ClassFunction<coefficient> &other) const;
+    ClassFunction<coefficient> operator-(const ClassFunction<coefficient> &other) const;
+    ClassFunction<coefficient> ReducedWithChars(const List<ClassFunction<coefficient> > chars = 0);
     coefficient& operator[](int i) const;
-    void operator=(const Character<coefficient>& X);
+    void operator=(const ClassFunction<coefficient>& X);
     std::string ToString(FormatExpressions* theFormat) const;
     std::string ToString() const;
-    static unsigned int HashFunction(const Character<coefficient>& input);
-    bool operator==(const Character<coefficient>& other) const;
+    static unsigned int HashFunction(const ClassFunction<coefficient>& input);
+    bool operator==(const ClassFunction<coefficient>& other) const;
 };
 
 template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const Character<coefficient> X);
+std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
 
 class CoxeterGroup
 { public:
@@ -52,7 +52,7 @@ class CoxeterGroup
     List<int> ccSizes;
     List<List<int> > conjugacyClasses;
     List<int> squares;
-    List<Character<Rational> > characterTable;
+    List<ClassFunction<Rational> > characterTable;
 
   // these are specific to this type of finite group
     Matrix<Rational> CartanSymmetric;
@@ -138,7 +138,7 @@ class GroupRingElement
   GroupRingElement(){}
   void MakeEi(CoxeterGroup* G, int i);
   void MakeFromClassFunction(CoxeterGroup* G, const List<coefficient>& l);
-  void MakeFromCharacter(const Character<coefficient>& l);
+  void MakeFromClassFunction(const ClassFunction<coefficient>& l);
   GroupRingElement operator+(const GroupRingElement& right) const;
   GroupRingElement operator-(const GroupRingElement& right) const;
   GroupRingElement operator*(const GroupRingElement& right) const;
@@ -186,7 +186,7 @@ void GroupRingElement<coefficient>::MakeEi(CoxeterGroup *GG, int i)
 }
 
 template <typename coefficient>
-void GroupRingElement<coefficient>::MakeFromCharacter(const Character<coefficient>& l)
+void GroupRingElement<coefficient>::MakeFromClassFunction(const ClassFunction<coefficient>& l)
 { MakeFromClassFunction(l.G,l.data);
 }
 
@@ -212,7 +212,7 @@ std::ostream& operator<<(std::ostream& out, const GroupRingElement<coefficient> 
 //--------------------------------Characters----------------------------
 //This will be incorrect if it's ever extended to a complex type
 template<typename coefficient>
-coefficient Character<coefficient>::IP(const Character<coefficient> &other) const{
+coefficient ClassFunction<coefficient>::IP(const ClassFunction<coefficient> &other) const{
     coefficient acc = 0;
     for(int i=0;i<G->ccCount;i++)
         acc +=  this->data[i] * other[i] * G->ccSizes[i];
@@ -220,14 +220,14 @@ coefficient Character<coefficient>::IP(const Character<coefficient> &other) cons
 }
 
 template<typename coefficient>
-coefficient Character<coefficient>::norm() const {
+coefficient ClassFunction<coefficient>::norm() const {
     return this->IP(*this);
 }
 
 // The next three functions are practically identical
 template<typename coefficient>
-Character<coefficient> Character<coefficient>::operator*(const Character<coefficient> &other) const{
-    Character<coefficient> l;
+ClassFunction<coefficient> ClassFunction<coefficient>::operator*(const ClassFunction<coefficient> &other) const{
+    ClassFunction<coefficient> l;
     l.G = G;
     l.data.SetExpectedSize(G->ccCount);
     for(int i=0; i<G->ccCount; i++)
@@ -236,8 +236,8 @@ Character<coefficient> Character<coefficient>::operator*(const Character<coeffic
 }
 
 template<typename coefficient>
-Character<coefficient> Character<coefficient>::Sym2() const{
-    Character<coefficient> l;
+ClassFunction<coefficient> ClassFunction<coefficient>::Sym2() const{
+    ClassFunction<coefficient> l;
     l.G = G;
     l.data.SetExpectedSize(G->ccCount);
     for(int i=0; i<G->ccCount; i++){
@@ -247,8 +247,8 @@ Character<coefficient> Character<coefficient>::Sym2() const{
 }
 
 template<typename coefficient>
-Character<coefficient> Character<coefficient>::Alt2() const{
-    Character<coefficient> l;
+ClassFunction<coefficient> ClassFunction<coefficient>::Alt2() const{
+    ClassFunction<coefficient> l;
     l.G = G;
     l.data.SetExpectedSize(G->ccCount);
     for(int i=0; i<G->ccCount; i++){
@@ -258,8 +258,8 @@ Character<coefficient> Character<coefficient>::Alt2() const{
 }
 
 template<typename coefficient>
-Character<coefficient> Character<coefficient>::operator+(const Character<coefficient> &other) const{
-    Character<coefficient> l;
+ClassFunction<coefficient> ClassFunction<coefficient>::operator+(const ClassFunction<coefficient> &other) const{
+    ClassFunction<coefficient> l;
     l.G = G;
     l.data.SetExpectedSize(G->ccCount);
     for(int i=0; i<G->ccCount; i++){
@@ -269,8 +269,8 @@ Character<coefficient> Character<coefficient>::operator+(const Character<coeffic
 }
 
 template<typename coefficient>
-Character<coefficient> Character<coefficient>::operator-(const Character &other) const{
-    Character<coefficient> l;
+ClassFunction<coefficient> ClassFunction<coefficient>::operator-(const ClassFunction &other) const{
+    ClassFunction<coefficient> l;
     l.G = G;
     l.data.SetExpectedSize(G->ccCount);
     for(int i=0; i<G->ccCount; i++){
@@ -280,18 +280,18 @@ Character<coefficient> Character<coefficient>::operator-(const Character &other)
 }
 
 template <typename coefficient>
-Character<coefficient> Character<coefficient>::ReducedWithChars(const List<Character<coefficient> > cchars)
-{ Character<coefficient> X = *this;
+ClassFunction<coefficient> ClassFunction<coefficient>::ReducedWithChars(const List<ClassFunction<coefficient> > cchars)
+{ ClassFunction<coefficient> X = *this;
   if(X.norm() == 0)
     return X;
-  List<Character<coefficient> > chars;
+  List<ClassFunction<coefficient> > chars;
   if(cchars == 0)
     chars = this->G->characterTable;
   else
     chars = cchars;
   bool outerChanged = false;
   bool innerChanged = false;
-  Character X2;
+  ClassFunction X2;
   int n;
   do
   { for(int i=0; i<chars.size; i++)
@@ -325,19 +325,19 @@ Character<coefficient> Character<coefficient>::ReducedWithChars(const List<Chara
 }
 
 template <typename coefficient>
-void Character<coefficient>::MakeZero()
+void ClassFunction<coefficient>::MakeZero()
 { this->data.SetSize(this->G->ccCount);
   for(int i=0; i<this->G->ccCount; i++)
     this->data[i] = 0;
 }
 
 template <typename coefficient>
-coefficient& Character<coefficient>::operator[](int i) const
+coefficient& ClassFunction<coefficient>::operator[](int i) const
 { return this->data[i];
 }
 
 template <typename coefficient>
-std::string Character<coefficient>::ToString(FormatExpressions* theFormat) const
+std::string ClassFunction<coefficient>::ToString(FormatExpressions* theFormat) const
 { //if (this->G==0)
   //  return "(not initialized)";
   // Check disabled because it shouldn't happen and doesn't work
@@ -355,19 +355,19 @@ std::string Character<coefficient>::ToString(FormatExpressions* theFormat) const
 }
 
 template <typename coefficient>
-std::string Character<coefficient>::ToString() const
+std::string ClassFunction<coefficient>::ToString() const
 { return ToString(0);
 }
 
 template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const Character<coefficient> X)
+std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X)
 { out << X.ToString();
   return out;
 }
 
  //   static unsigned int HashFunction(const Character& input);
 template <typename coefficient>
-unsigned int Character<coefficient>::HashFunction(const Character<coefficient>& input)
+unsigned int ClassFunction<coefficient>::HashFunction(const ClassFunction<coefficient>& input)
 {
   unsigned int acc;
   int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
@@ -378,14 +378,14 @@ unsigned int Character<coefficient>::HashFunction(const Character<coefficient>& 
 }
 
 template <typename coefficient>
-void Character<coefficient>::operator=(const Character<coefficient>& X)
+void ClassFunction<coefficient>::operator=(const ClassFunction<coefficient>& X)
 { this->G = X.G;
   this->data = X.data;
 }
 
 // this should probably check if G is the same, but idk how to make that happen
 template <typename coefficient>
-bool Character<coefficient>::operator==(const Character<coefficient>& other)const
+bool ClassFunction<coefficient>::operator==(const ClassFunction<coefficient>& other)const
 { if(this->data == other.data)
     return true;
   return false;

@@ -71,9 +71,9 @@ class ActionSpace
 
   ActionSpace<coefficient> operator*(const ActionSpace<coefficient>& other) const;
 
-  Character<coefficient> GetCharacter() const;
+  ClassFunction<coefficient> GetCharacter() const;
   coefficient GetNumberOfComponents() const;
-  Matrix<coefficient> ClassFunctionMatrix(Character<coefficient> cf) const;
+  Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf) const;
   List<ActionSpace<coefficient> > Decomposition() const;
   ActionSpace<coefficient> Reduced() const;
 };
@@ -108,7 +108,7 @@ ActionSpace<coefficient> ActionSpace<coefficient>::operator*(const ActionSpace<c
 }
 
 template <typename coefficient>
-Matrix<coefficient> ActionSpace<coefficient>::ClassFunctionMatrix(Character<coefficient> cf) const
+Matrix<coefficient> ActionSpace<coefficient>::ClassFunctionMatrix(ClassFunction<coefficient> cf) const
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(this->gens[0].NumRows);
   for(int cci=0; cci<this->G->ccCount; cci++)
@@ -169,7 +169,7 @@ List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
 { SpaceTree<Rational> st;
   st.space = basis;
   for(int cfi=0; cfi<G->ccCount; cfi++)
-  { Character<coefficient> cf;
+  { ClassFunction<coefficient> cf;
     cf.G = G;
     cf.MakeZero();
     cf[cfi] = 1;
@@ -218,7 +218,7 @@ List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
   for(int cfi=0; cfi<G->ccCount; cfi++)
   { if(dim_components == basis.size)
       break;
-    Character<coefficient> cf;
+    ClassFunction<coefficient> cf;
     cf.G = G;
     cf.MakeZero();
     cf[cfi] = 1;
@@ -275,8 +275,8 @@ List<ActionSpace<coefficient> > ActionSpace<coefficient>::Decomposition() const
 }*/
 
 template <typename coefficient>
-Character<coefficient> ActionSpace<coefficient>::GetCharacter() const
-{ Character<coefficient> X;
+ClassFunction<coefficient> ActionSpace<coefficient>::GetCharacter() const
+{ ClassFunction<coefficient> X;
   X.G = G;
   X.data.SetSize(G->ccCount);
   for(int cci=0; cci < G->ccCount; cci++)
@@ -293,7 +293,7 @@ Character<coefficient> ActionSpace<coefficient>::GetCharacter() const
 
 template <typename coefficient>
 coefficient ActionSpace<coefficient>::GetNumberOfComponents() const
-{ Character<coefficient> X;
+{ ClassFunction<coefficient> X;
   X = GetCharacter();
   return X.norm();
 }
@@ -329,7 +329,7 @@ List<ActionSpace<Rational> > ComputeIrreducibleRepresentations(CoxeterGroup& G)
 { List<ActionSpace<Rational> > irreps;
   ActionSpace<Rational> sr = StandardRepresentation(G);
   irreps.AddOnTop(sr);
-  List<Character<Rational> > chartable;
+  List<ClassFunction<Rational> > chartable;
   chartable.AddOnTop(sr.GetCharacter());
   std::cout << sr.GetCharacter() << std::endl;
   List<ActionSpace<Rational> > newspaces;
@@ -379,8 +379,7 @@ void AddToSpace(const vector &v)
 {
 }
 */
-
-/* this is garbage
+/*
 template <typename coefficient>
 class polynom1al
 {
@@ -409,6 +408,7 @@ class polynom1al
       out.data[i] = right->data[i];
     return out;
   }
+
   polynom1al<coefficient> operator-(const polynom1al &right) const
   { polynom1al<coefficient> out;
     out.data.SetSize((right.data.size>this->data.size)?right.data.size:this->data.size);
@@ -424,7 +424,7 @@ class polynom1al
 
   polynom1al<coefficient> operator*(const polynom1al &right) const
   { polynom1al<coefficient> out;
-    out.data.SetSize(tmp.data.size*right.data.size)
+    out.data.SetSize(tmp.data.size*right.data.size);
     for(int i=0; i<this->data.size; i++)
       for(int j=0; j<right.data.size; j++)
         out.data[i*j] = this->data[i]*right.data[j];
@@ -448,6 +448,10 @@ class polynom1al
   }
 
 
+  static List<polynom1al<coefficient> > LagrangeInterpolants(List<int> points)
+  {
+
+  }
 
   polynom1al(){}
   polynom1al(int c){this->data.AddOnTop(c);}
@@ -463,14 +467,14 @@ class polynom1al
     this->data[0] = right;
   }
 
-
 };
 
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const polynom1al<coefficient>& p)
 { out << p.data;
   return out;
-}*/
+}
+*/
 
 template <typename coefficient>
 bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
@@ -765,7 +769,7 @@ bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit norm
-  Character<coefficient> X;
+  ClassFunction<coefficient> X;
   X.G = &G;
   X.data.SetSize(G.ccCount);
   for(int i=0; i<G.ccCount; i++)
@@ -793,7 +797,7 @@ bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
   return true;
 }
 
-Matrix<Rational> MatrixInBasis(const Character<Rational> &X, const List<Vector<Rational> > &B)
+Matrix<Rational> MatrixInBasis(const ClassFunction<Rational> &X, const List<Vector<Rational> > &B)
 { List<Vector<Rational> > rows;
   for(int i=0;i<B.size;i++)
   { Vector<Rational> v;
@@ -821,7 +825,7 @@ Matrix<Rational> MatrixInBasis(const Character<Rational> &X, const List<Vector<R
 }
 
 
-ElementMonomialAlgebra<CoxeterElement, Rational> FromCharacter(const Character<Rational>& X)
+ElementMonomialAlgebra<CoxeterElement, Rational> FromClassFunction(const ClassFunction<Rational>& X)
 { ElementMonomialAlgebra<CoxeterElement, Rational> out;
   for(int i=0; i<X.G->ccCount; i++)
   { for(int j=0; j<X.G->ccSizes[i]; j++)
@@ -834,7 +838,7 @@ ElementMonomialAlgebra<CoxeterElement, Rational> FromCharacter(const Character<R
 
 
 template <typename coefficient>
-Matrix<coefficient> GetMatrix(const Character<coefficient>& X)
+Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -1070,7 +1074,7 @@ int main(void){
 
   G.characterTable.size = 0;
   for(int i=0; i<10; i++){
-    Character<Rational> X;
+    ClassFunction<Rational> X;
     X.G = &G;
     for(int j=0; j<10; j++){
       X.data.AddOnTop(chartable[i][j]);
@@ -1082,7 +1086,7 @@ int main(void){
 */
 /*
   GroupRingElement<Rational> XeP;
-  XeP.MakeFromCharacter(G.characterTable[0]);
+  XeP.MakeFromClassFunction(G.characterTable[0]);
   std::cout << XeP.data << std::endl;
 
   GroupRingElement<Rational> E;
@@ -1091,7 +1095,7 @@ int main(void){
   std::cout << XeP*E << std::endl;
 
   GroupRingElement<Rational> XstdP;
-  XstdP.MakeFromCharacter(G.characterTable[2]);
+  XstdP.MakeFromClassFunction(G.characterTable[2]);
   std::cout << XstdP << std::endl;
 
   std::cout << "\nhi there\n";
@@ -1107,7 +1111,7 @@ int main(void){
   std::cout << XstdP*E << std::endl;
   std::cout << GetMatrix(G.characterTable[2])*E.data << std::endl;
 
-  ElementMonomialAlgebra<CoxeterElement, Rational> Xstdp = FromCharacter(G.characterTable[2]);
+  ElementMonomialAlgebra<CoxeterElement, Rational> Xstdp = FromClassFunction(G.characterTable[2]);
   std::cout << Xstdp << std::endl;
   std::cout << "here they are" << std::endl;
   List<ElementMonomialAlgebra<CoxeterElement, Rational> > l;
@@ -1151,12 +1155,12 @@ int main(void){
   std::cout << powers2.GetDim() << std::endl;
   std::cout << powers.GetDim() << std::endl;
 
-  Character<Rational> X;
+  ClassFunction<Rational> X;
   X.G = &G;
   X.data = powers[5];
   std::cout << X << std::endl;
 
-  List<Character<Rational> > tstct;
+  List<ClassFunction<Rational> > tstct;
   for(int i=0;i<G.ccCount;i++)
     std::cout << X.IP(G.characterTable[i]) << std::endl;
 
@@ -1164,7 +1168,7 @@ int main(void){
   XP = GetMatrix(G.characterTable[2]);
   GroupRingElement<Rational> XPP;
   Vector<Rational> vv;
-  XPP.MakeFromCharacter(G.characterTable[2]);
+  XPP.MakeFromClassFunction(G.characterTable[2]);
   GroupRingElement<Rational> vP;
   for(int i=0; i<G.N; i++)
   { vv.MakeEi(G.N,i);
@@ -1294,7 +1298,7 @@ int main(void){
   M = GetMatrix(G.characterTable[2]);
   B = DestructiveColumnSpace(M);
   spaces.AddOnTop(B);
-  List<Character<Rational> > Xs;
+  List<ClassFunction<Rational> > Xs;
   Xs.AddOnTop(G.characterTable[2]);
   std::cout << spaces << std::endl;
   { int i=1;
@@ -1343,7 +1347,7 @@ int main(void){
     std::cout << G.characterTable[0].norm() << G.characterTable[1].norm() << G.characterTable[2].norm() << std::endl;
 
 //    ElementMonomialAlgebra<FiniteGroupElement, Rational> a;
-    Character X = G.characterTable[2] - G.characterTable[0];
+    ClassFunction X = G.characterTable[2] - G.characterTable[0];
     std::cout << X << X.norm() << std::endl;
 
     List<Vector<Rational> > l;
@@ -1401,7 +1405,7 @@ int main(void){
     Rational one = 1;
     Rational zero = 0;
     for(int ci=0; ci<G.ccCount; ci++)
-    { Character<Rational> X;
+    { ClassFunction<Rational> X;
       X.G = &G;
       for(int ii=0; ii<G.ccCount; ii++)
       { if(ii==ci)
@@ -1412,13 +1416,13 @@ int main(void){
 
     }
     */
-/*    Character<Rational> Xs = G.characterTable[2];
-    Character<Rational> Xcs = G.characterTable[1]*G.characterTable[2];
-    List<List<Character<Rational> > > chars;
-    List<Character<Rational> > charsi;
+/*    ClassFunction<Rational> Xs = G.characterTable[2];
+    ClassFunction<Rational> Xcs = G.characterTable[1]*G.characterTable[2];
+    List<List<ClassFunction<Rational> > > chars;
+    List<ClassFunction<Rational> > charsi;
     charsi.AddOnTop(G.characterTable[0]);
     chars.AddOnTop(charsi);
-    HashedList<Character<Rational> > usedchars;
+    HashedList<ClassFunction<Rational> > usedchars;
     int ci = 0;
     int cj = 0;
     while(true)
@@ -1474,7 +1478,7 @@ int main(void){
       } else
       { ci=cj+1;
         cj=0;
-        List<Character<Rational> > cil;
+        List<ClassFunction<Rational> > cil;
         cil.AddOnTop(chars[ci-1][0]*Xs);
         chars.AddOnTop(cil);
       }
@@ -1503,7 +1507,7 @@ int main(void){
     }
     std::cout << "class function matrices" << std::endl;
     for(int cfi=0; cfi<G.ccCount; cfi++)
-    { Character<Rational> cf;
+    { ClassFunction<Rational> cf;
       cf.G = &G;
       cf.MakeZero();
       cf[cfi] = 1;

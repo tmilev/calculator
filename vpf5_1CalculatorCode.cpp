@@ -10,13 +10,10 @@ template <class CoefficientType>
 void SemisimpleLieAlgebra::GetCommonCentralizer
 (const List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputElementsToCentralize,
  List<ElementSemisimpleLieAlgebra<CoefficientType> >& outputCentralizingElements)
-{ List<Matrix<Rational> > theAds;
-  Matrix<Rational> tempAd, commonAd;
-  theAds.ReservE(inputElementsToCentralize.size);
+{ Matrix<Rational> tempAd, commonAd;
   for (int i=0; i<inputElementsToCentralize.size; i++)
   { this->GetAd(tempAd, inputElementsToCentralize[i]);
     //tempAd.Transpose();
-    theAds.AddOnTop(tempAd);
     commonAd.AppendMatrixToTheBottom(tempAd);
   }
   Vectors<Rational> outputV;

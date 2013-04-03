@@ -328,10 +328,20 @@ int main(int argc, char **argv)
   (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
 (g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
 )))";*/
-//civilizedInput="g_{{i}}:= getChevalleyGenerator{}(G_1, i); h_{{i}}:=getCartanGenerator{}(G_1, i) ; \
-//x:=Polynomial{} \\lambda;\
-//v:= hwv{}(G_2, (x, 0));\
-//g_{-1}^{x +1}   v";
+if(civilizedInput=="PenkovProjectTest")
+{ civilizedInput="%HideLHS \
+Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
+( \
+Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
+(3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
+) \
+), \
+Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
+(g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
+g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
+) \
+))";
+}
 
   if (civilizedInput=="PenkovProject")
   {civilizedInput= "\

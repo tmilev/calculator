@@ -610,22 +610,102 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
+void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly
+(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWs)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly");
+  outputHWs.Clear();
+  Vector<Rational> currentWeight, currentRootSpace;
+  for (int i=0; i<this->highestVectorsModules.size; i++)
+  { ElementSemisimpleLieAlgebra<Rational>& currentVector=this->highestVectorsModules[i];
+    for (int j=0; j<currentVector.size; j++)
+    { currentRootSpace=
+      this->GetAmbientSS().GetWeightOfGenerator(currentVector[j].theGeneratorIndex);
+      currentWeight.SetSize(this->theHs.size+ this->CartanOfCentralizer.size);
+      for (int k=0; k<this->theHs.size; k++)
+        currentWeight[k]=
+        this->GetAmbientWeyl().RootScalarCartanRoot(currentRootSpace, this->theHs[k]);
+      for (int k=0; k<this->CartanOfCentralizer.size; k++)
+        currentWeight[k+this->theHs.size]=
+        this->GetAmbientWeyl().RootScalarCartanRoot(currentRootSpace, this->CartanOfCentralizer[k]);
+      outputHWs.AddOnTopNoRepetition(currentWeight);
+    }
+  }
+  outputHWs.QuickSortAscending();
+}
+
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition");
-  this->highestWeightsModules.SetSize(this->highestVectorsModules.size);
-  for (int i=0; i<this->highestVectorsModules.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& currentVector=this->highestVectorsModules[i];
-    Vector<Rational> currentRootSpace=
-    this->GetAmbientSS().GetWeightOfGenerator(currentVector[0].theGeneratorIndex);
-    Vector<Rational>& currentWeight= this->highestWeightsModules[i];
-    currentWeight.SetSize(this->theHs.size);
-    for (int j=0; j<this->theHs.size; j++)
-      currentWeight[j]=
-      this->GetAmbientWeyl().RootScalarCartanRoot(currentRootSpace, this->theHs[j])*2/
-      this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
-  }
+  HashedList<Vector<Rational> > theWeightsCartanRestricted;
+  this->ComputeCentralizinglySplitModuleDecompositionWeightsOnly
+  (theGlobalVariables, theWeightsCartanRestricted);
+  this->ComputeCentralizinglySplitModuleDecompositionHWVsOnly
+  (theGlobalVariables, theWeightsCartanRestricted);
+  this->ComputeCentralizinglySplitModuleDecompositionLastPart(theGlobalVariables);
+}
 
+void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPart
+(GlobalVariables* theGlobalVariables)
+{ this->highestWeightsCartanCentralizerSplitModules.SetSize(this->highestVectorsModules.size);
+  this->highestWeightsModules.SetSize(this->highestVectorsModules.size);
+  for (int i=0; i< this->highestVectorsModules.size; i++)
+  { Vector<Rational> currentRoot=this->GetAmbientSS().GetWeightOfGenerator
+    (this->highestVectorsModules[i][0].theGeneratorIndex);
+    Vector<Rational>& currentHWrelative=this->highestWeightsModules[i];
+    Vector<Rational>& currentHWCentralizerRelative=
+    this->highestWeightsCartanCentralizerSplitModules[i];
+    currentHWrelative.SetSize(this->theHs.size);
+    currentHWCentralizerRelative.SetSize(this->theHs.size+this->CartanOfCentralizer.size);
+    for (int j=0; j<this->theHs.size; j++)
+    { currentHWrelative[j]= this->GetAmbientWeyl().RootScalarCartanRoot(currentRoot, this->theHs[j])*2/
+      this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
+      currentHWCentralizerRelative[j]=currentHWrelative[j];
+    }
+    for (int j=0; j<this->CartanOfCentralizer.size; j++)
+    { currentHWCentralizerRelative[j+this->theHs.size]=
+      this->GetAmbientWeyl().RootScalarCartanRoot(currentRoot, this->CartanOfCentralizer[j]);
+    }
+  }
+}
+
+void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly
+(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly");
+  List<Matrix<Rational> > theAdsOfHs;
+  Matrix<Rational> tempAd, temp, commonAd, adIncludingCartanActions;
+  for (int i=0; i<this->thePosGens.size; i++)
+  { this->GetAmbientSS().GetAd(tempAd, this->thePosGens[i]);
+    commonAd.AppendMatrixToTheBottom(tempAd);
+  }
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  Vectors<Rational> allHs;
+  allHs.AddListOnTop(this->theHs);
+  allHs.AddListOnTop(this->CartanOfCentralizer);
+  theAdsOfHs.SetSize(allHs.size);
+  for (int j=0; j<allHs.size; j++)
+  { tempElt.MakeHgenerator(allHs[j], this->GetAmbientSS());
+    this->GetAmbientSS().GetAd(theAdsOfHs[j], tempElt);
+  }
+  Vectors<Rational> outputV;
+  this->highestVectorsModules.size=0;
+  for (int i=0; i<inputHws.size; i++)
+  { adIncludingCartanActions=commonAd;
+    for (int j=0; j<allHs.size; j++)
+    { tempAd=theAdsOfHs[j];
+      temp.MakeIdMatrix(this->GetAmbientSS().GetNumGenerators());
+      temp*=inputHws[i][j];
+      tempAd-=temp;
+      adIncludingCartanActions.AppendMatrixToTheBottom(tempAd);
+    }
+    adIncludingCartanActions.FindZeroEigenSpace(outputV);
+    //  std::cout << "<br>Common ad: " << commonAd.ToString();
+    //  std::cout << "<br>Eigenvectors: " << outputV.ToString();
+    for (int j=0; j<outputV.size; j++)
+    { outputV[j].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+      tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->GetAmbientSS());
+      this->highestVectorsModules.AddOnTop(tempElt);
+    }
+  }
 }
 
 void SemisimpleSubalgebras::reset()
@@ -2082,6 +2162,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   MonomialChar<Rational> theZeroWeight;
   theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
   Rational centralizerCartanSize=this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
+  bool CentralizerIsWellChosen= (centralizerCartanSize==0 )? true: false;
   if (centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
   { if (this->indexMaxSSContainer!=-1)
     { DynkinType centralizerType =
@@ -2090,7 +2171,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << "<br>Centralizer type: " << centralizerType.ToString();
       centralizerCartanSize-=centralizerType.GetRootSystemSize();
     }
-    if (centralizerCartanSize!=this->CartanOfCentralizer.size)
+    CentralizerIsWellChosen=(centralizerCartanSize==this->CartanOfCentralizer.size );
+    if (!CentralizerIsWellChosen)
     { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
       << "Cartan of the centralizer, instead I got: </b> ";
     } else
@@ -2184,15 +2266,29 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << " )";
     if (this->flagSystemSolved)
       out << "<br>Solution of above system: " << this->aSolution.ToString();
-  } else
+  }
+  if (this->flagSystemSolved)
   { out << "<table border=\"1px solid black\"><tr><td>Highest vectors of representations (total "
-    << this->highestVectorsModules.size << ") </td>";
+    << this->highestVectorsModules.size << ") ";
+    if (CentralizerIsWellChosen)
+      out << "; the vectors are Cartan-centralizer-split";
+    out << "</td>";
     for (int i=0; i<this->highestVectorsModules.size; i++)
       out << "<td>" << this->highestVectorsModules[i].ToString() << "</td>";
     out << "</tr><tr><td>weight</td>";
     for (int i=0; i<this->highestWeightsModules.size; i++)
       out << "<td>" << this->highestWeightsModules[i].ToStringLetterFormat("\\omega") << "</td>";
-    out << "</tr></table>";
+    out << "</tr>";
+    if (CentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
+    { out << "<tr><td>weights relative to Cartan of centralizer+Cartan of semisimple part."
+      << "</td>";
+      for (int i=0; i<this->highestWeightsCartanCentralizerSplitModules.size; i++)
+        out << "<td>"
+        << this->highestWeightsCartanCentralizerSplitModules[i].ToStringLetterFormat("\\omega")
+        << "</td>";
+      out << "</tr>";
+    }
+    out << "</table>";
   }
   return out.str();
 }
@@ -2454,5 +2550,6 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   for (int i=0; i<this->CartanOfCentralizer.size; i++)
   { tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owneR);
     this->CartanOfCentralizer[i]=tempElt.GetCartanPart();
+    this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   }
 }

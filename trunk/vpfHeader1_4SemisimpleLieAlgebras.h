@@ -231,10 +231,10 @@ public:
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
+  //The highest weights are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsModules;
+  List<Vector<Rational> > highestWeightsCartanCentralizerSplitModules;
   List<Vector<Rational> > highestWeightsModules;
-  List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsCentralizinglySplitModules;
-  List<Vector<Rational> > highestWeightsCentralizinglySplitModules;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<Rational> > theSystemToSolve;
@@ -308,8 +308,7 @@ public:
     this->highestVectorsModules=other.highestVectorsModules;
     this->CartanOfCentralizer=other.CartanOfCentralizer;
     this->highestWeightsModules=other.highestWeightsModules;
-    this->highestVectorsCentralizinglySplitModules=other.highestVectorsCentralizinglySplitModules;
-    this->highestWeightsCentralizinglySplitModules=other.highestWeightsCentralizinglySplitModules;
+    this->highestWeightsCartanCentralizerSplitModules=other.highestWeightsCartanCentralizerSplitModules;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -322,6 +321,14 @@ public:
   WeylGroup& GetAmbientWeyl();
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
+  void ComputeCentralizinglySplitModuleDecompositionLastPart(GlobalVariables* theGlobalVariables);
+  void ComputeCentralizinglySplitModuleDecompositionHWVsOnly
+  (GlobalVariables* theGlobalVariables,
+   HashedList<Vector<Rational> >& inputHws)
+   ;
+  void ComputeCentralizinglySplitModuleDecompositionWeightsOnly
+  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWs)
+  ;
   bool ComputeSystem
 (GlobalVariables* theGlobalVariables)
  ;

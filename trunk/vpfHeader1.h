@@ -1573,6 +1573,9 @@ public:
   int NumRows; int ActualNumRows;
   int NumCols; int ActualNumCols;
   Element** elements;
+  static bool flagComputingDebugInfo;
+  static bool flagAnErrorHasOccurredTimeToPanic;
+
   void init(int r, int c);
   void ReleaseMemory();
   void Resize(int r, int c, bool PreserveValues) {this->Resize(r, c, PreserveValues, 0);}
@@ -1599,8 +1602,6 @@ public:
   ~Matrix()
   { this->ReleaseMemory();
   }
-  static bool flagComputingDebugInfo;
-  static bool flagAnErrorHasOccurredTimeToPanic;
   void Transpose()
   { if (this->NumCols==this->NumRows)
     { for (int i=0; i<this->NumRows; i++)
@@ -9127,9 +9128,6 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   // and make it return 0 (or a pointer to a monomial order, should you
   //wish to use a custom one.
   typename List<TemplateMonomial>::OrderLeftGreaterThanRight
-// ALERT!! Some feature was disabled because I clobbered Dr. Milev's changes
-// because I forgot to svn diff prior to svn up and don't know how he made this
-// actually work.  So now I'm committing something that builds, but is broken.
   theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
   sortedMons.QuickSortDescending(theOrder);
 //  out << "(hash: " << this->HashFunction() << ")";

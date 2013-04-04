@@ -3010,9 +3010,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   { this->::MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>::MakeZero();
     this->owner=0;
   }
-  void MakeZero(SemisimpleLieAlgebra& inputOwner)
+  void MakeZero(SemisimpleLieAlgebra* inputOwner=0)
   { this->Reset();
-    this->owner=&inputOwner;
+    this->owner=inputOwner;
   }
   bool IsEqualToZero()
   { return this->size==0;
@@ -3028,7 +3028,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   }
 
   void MakeFromWeight
-(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra& inputOwner)
+(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
    ;
   bool SplitCharOverRedSubalg
 (std::string* Report, charSSAlgMod& output, branchingData& inputData,
@@ -7497,7 +7497,7 @@ std::string charSSAlgMod<CoefficientType>::MultiplyBy(const charSSAlgMod& other,
   }
   this->SetExpectedSize(other.size+this->size);
   charSSAlgMod result, summand;
-  result.MakeZero(*this->owner);
+  result.MakeZero(this->owner);
   std::string potentialError;
   CoefficientType theCF;
   for (int i=0; i<this->size; i++)
@@ -7561,7 +7561,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   MacroRegisterFunctionWithName("MonomialChar_CoefficientType::TensorAndDecompose");
   std::stringstream errorLog;
   std::string tempS;
-  output.MakeZero(owner);
+  output.MakeZero(&owner);
   WeylGroup& theWeyl=owner.theWeyl;
   Vector<Rational> leftHWFundCoords;
   leftHWFundCoords=this->weightFundamentalCoords;
@@ -8594,7 +8594,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   (this->theHWFDpartFundamentalCoordS);
   this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental
   (this->theHWFundamentalCoordsBaseField);
-  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, *this->owneR);
+  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, this->owneR);
 
  // std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
  // std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
@@ -8953,7 +8953,7 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
 
 template <class CoefficientType>
 void charSSAlgMod<CoefficientType>::MakeFromWeight
-(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra& inputOwner)
+(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
 { this->MakeZero(inputOwner);
   if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
   { std::cout << "This is a programming error: attempting to create a character "

@@ -210,6 +210,21 @@ class PolynomialSystem : public List<Polynomial<Rational> >
 
 class SemisimpleSubalgebras;
 
+class FernandoKacNilradicalCandidate
+{
+  public:
+  int indexOwnerCandidate;
+  SemisimpleSubalgebras* owner;
+  Selection NilradSel;
+
+  FernandoKacNilradicalCandidate(): indexOwnerCandidate(-1), owner(0){}
+  void operator=(const FernandoKacNilradicalCandidate& other)
+  { this->indexOwnerCandidate=other.indexOwnerCandidate;
+    this->owner=other.owner;
+    this->NilradSel=other.NilradSel;
+  }
+};
+
 class CandidateSSSubalgebra
 {
 public:
@@ -248,6 +263,11 @@ public:
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   int totalNumUnknowns;
+  MemorySaving<List<FernandoKacNilradicalCandidate> > FKNilradicalCandidates;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByType;
+  List<List<List<int> > > NilradicalPairingTable;
+  charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
+
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexMaxSSContainer(-1),
   flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
   flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
@@ -261,6 +281,7 @@ public:
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
+
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
@@ -309,6 +330,11 @@ public:
     this->CartanOfCentralizer=other.CartanOfCentralizer;
     this->highestWeightsModules=other.highestWeightsModules;
     this->highestWeightsCartanCentralizerSplitModules=other.highestWeightsCartanCentralizerSplitModules;
+    this->FKNilradicalCandidates=other.FKNilradicalCandidates;
+    this->highestVectorsGrouppedByType=other.highestVectorsGrouppedByType;
+    this->NilradicalPairingTable=other.NilradicalPairingTable;
+    this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
+
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);

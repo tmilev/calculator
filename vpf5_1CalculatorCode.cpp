@@ -721,7 +721,7 @@ bool CommandList::innerCharacterSSLieAlgFD
     ("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   charSSAlgMod<Rational> theElt;
   theElt.MakeFromWeight
-  (ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), *ownerSSLiealg);
+  (ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
   return output.AssignValue(theElt, theCommands);
 
 }

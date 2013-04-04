@@ -811,8 +811,8 @@ bool Serialization::innerLoadFromObject
 
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
   if (!outputSubalgebra.ComputeChar(theCommands.theGlobalVariableS))
-  { outputSubalgebra.theCharFundCoords.MakeZero(*owner.owneR);
-    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(*owner.owneR);
+  { outputSubalgebra.theCharFundCoords.MakeZero(owner.owneR);
+    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
   }
 
   //Serialization::innerLoadFromObject(theCommands,

@@ -666,6 +666,7 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPar
       this->GetAmbientWeyl().RootScalarCartanRoot(currentRoot, this->CartanOfCentralizer[j]);
     }
   }
+  this->theCharOverCartanPlusCartanCentralizer.MakeZero(0);
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly
@@ -840,7 +841,7 @@ bool CandidateSSSubalgebra::ComputeChar
   accumChar=this->theCharFundamentalCoordsRelativeToCartan;
 
   this->theCharFundCoords.MakeZero
-  (this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe])
+  (&this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe])
   ;
   while (accumChar.size>0)
   { int currentIndex=
@@ -858,7 +859,7 @@ bool CandidateSSSubalgebra::ComputeChar
       if (accumChar[currentIndex].weightFundamentalCoords[i]<0)
         return false;
     freudenthalChar.MakeZero
-    (this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe]);
+    (&this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe]);
     freudenthalChar.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     this->theCharFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;

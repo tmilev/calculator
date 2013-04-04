@@ -1972,7 +1972,7 @@ bool CommandList::fDecomposeCharGenVerma
   invertedParSel.InvertSelection();
   charSSAlgMod<RationalFunctionOld> theChar, currentChar;
   MonomialChar<RationalFunctionOld> theMon;
-  theChar.MakeZero(*theSSlieAlg);
+  theChar.MakeZero(theSSlieAlg);
   FormatExpressions formatChars;
   formatChars.FDrepLetter="L";
   formatChars.fundamentalWeightLetter="\\omega";
@@ -1988,7 +1988,7 @@ bool CommandList::fDecomposeCharGenVerma
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    currentChar.MakeZero(*theSSlieAlg);
+    currentChar.MakeZero(theSSlieAlg);
     for (int j=0; j< theKLpolys.theKLcoeffs[indexInWeyl].size; j++)
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero())
       { currentHW=theHWsimpCoords;
@@ -2909,7 +2909,7 @@ bool CommandList::innerHWVCommon
 
 template <class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
-{ output.MakeZero(*this->owneR);
+{ output.MakeZero(this->owneR);
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
   MonomialChar<CoefficientType> tempMon;
@@ -3010,7 +3010,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   //int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
-  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, *theSSalgebra);
+  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra);
   ReflectionSubgroupWeylGroup tempSG;
   List<ElementUniversalEnveloping<RationalFunctionOld> > theLeviEigenVectors;
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
@@ -3042,7 +3042,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   tempFormat.CustomPlusSign="";
   tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter="\\bar{h}";
-  theFDLeviSplitShifteD.MakeZero(*theSSalgebra);
+  theFDLeviSplitShifteD.MakeZero(theSSalgebra);
   MonomialChar<RationalFunctionOld> tempMon;
   ElementUniversalEnveloping<RationalFunctionOld> currentChar;
   for (int i=0; i<theLeviEigenVectors.size; i++)
@@ -6082,7 +6082,7 @@ bool CommandList::fFreudenthalEval
     return output.SetError("Failed to extract highest weight. ", theCommands);
   charSSAlgMod<Rational> startingChar, resultChar ;
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight(hwSimple, *theSSalg);
+  startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly
       (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))

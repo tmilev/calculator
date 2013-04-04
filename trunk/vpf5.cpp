@@ -391,7 +391,7 @@ bool CommandList::innerDrawWeightSupportWithMults
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, *theSSalgpointer);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theSSalgpointer);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeWithMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
@@ -456,7 +456,7 @@ bool CommandList::innerDrawWeightSupport
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod<Rational> theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, *theAlgPointer);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theAlgPointer);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
@@ -1443,7 +1443,7 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
   charSSAlgMod<RationalFunctionOld> startingChar;
   startingChar.MakeFromWeight
   (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
-   (theG2B3Data.theWeightFundCoords), theG2B3Data.theHmm.theRange());
+   (theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
   startingChar.SplitCharOverRedSubalg
   (&report, tempChar, theG2B3Data, *theCommands.theGlobalVariableS);
   out << report;
@@ -1866,7 +1866,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
   for (int k=0; k<theHWs.size; k++)
   { theCharacter.MakeFromWeight
     (theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
-     theg2b3data.theHmm.theRange());
+     &theg2b3data.theHmm.theRange());
     theCharacter.SplitCharOverRedSubalg(0, outputChar, theg2b3data, *theCommands.theGlobalVariableS);
     theg2b3data.theFormat.fundamentalWeightLetter= "\\omega";
     out << "<tr><td> " << theCharacter.ToString(&theg2b3data.theFormat) << "</td> ";
@@ -2089,8 +2089,8 @@ bool CommandList::fSplitFDpartB3overG2inner
   (theG2B3Data.outputWeightsFundCoordS);
   theG2B3Data.theAmbientChar.MakeFromWeight
   (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
-   (theG2B3Data.theWeightFundCoords), theG2B3Data.theHmm.theRange());
-  theG2B3Data.theSmallCharFDpart.MakeZero(theG2B3Data.theHmm.theDomain());
+   (theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
+  theG2B3Data.theSmallCharFDpart.MakeZero(&theG2B3Data.theHmm.theDomain());
   charSSAlgMod<RationalFunctionOld> tempMon;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
@@ -2102,7 +2102,7 @@ bool CommandList::fSplitFDpartB3overG2inner
     currentG2DualWeight[1]=theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot
     (currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]);//<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
-    tempMon.MakeFromWeight(currentG2Weight, theG2B3Data.theHmm.theDomain());
+    tempMon.MakeFromWeight(currentG2Weight, &theG2B3Data.theHmm.theDomain());
     theG2B3Data.theSmallCharFDpart+=tempMon;
   }
   ElementUniversalEnveloping<RationalFunctionOld> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
@@ -2257,12 +2257,12 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
   theFormat.flagUseLatex=true;
   theFormat.CustomPlusSign="\\oplus ";
   theFormat.fundamentalWeightLetter="\\omega";
-  output.MakeZero(theSmallAlgebra);
+  output.MakeZero(&theSmallAlgebra);
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(remainingCharDominantLevI.ToString(&theFormat));
   //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   //(remainingCharDominantLevI.ToString());
-  remainingCharProjected.MakeZero(theSmallAlgebra);
+  remainingCharProjected.MakeZero(&theSmallAlgebra);
   Vector<CoefficientType> fundCoordsSmaller, theProjection, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
   for (int i=0; i<remainingCharDominantLevI.size; i++)

@@ -1255,6 +1255,9 @@ public:
   static bool outerPlus
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool outerPower
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool CollectSummands
 (CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
   ;
@@ -1643,6 +1646,10 @@ static bool innerDrawRootSystem
   static bool innerHWV
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerNot
+  (CommandList& theCommands, const Expression& input, Expression& output
+  );
+
   static bool innerAdCommonEigenSpaces
   (CommandList& theCommands, const Expression& input, Expression& output
   );

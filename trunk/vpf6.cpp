@@ -3554,6 +3554,16 @@ bool Expression::HasBoundVariables()const
   return false;
 }
 
+bool CommandList::innerNot
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ int theInt;
+  if (!input.IsSmallInteger(&theInt))
+    return false;
+  if (theInt==0)
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
+}
+
 bool CommandList::innerIsInteger
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
@@ -3650,7 +3660,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
   this->AddOperationNoRepetitionAllowed("==");
-  this->AddOperationNoRepetitionAllowed("Bind");
   this->AddOperationNoRepetitionAllowed("\\cup");
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
@@ -3724,6 +3733,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Serialization");
   this->AddOperationNoRepetitionAllowed("Melt");
+  this->AddOperationNoRepetitionAllowed("Bind");
+
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
@@ -4060,6 +4071,17 @@ bool CommandList::CollectSummands
     outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
   return true;
+}
+
+bool CommandList::outerPower
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  if (input[2].IsEqualToOne())
+  { output=input[1];
+    return true;
+  }
+  return false;
 }
 
 bool CommandList::outerPlus

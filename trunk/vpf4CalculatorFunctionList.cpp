@@ -158,6 +158,12 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
+("Not", this->innerNot, "",
+ " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
+ If the argument is not a small integer, does nothing. ",
+ "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
+
+  this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
@@ -932,6 +938,11 @@ void CommandList::initPredefinedStandardOperations()
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
+  this->AddOperationOuterHandler
+  ("^", this->outerPower, "",
+   "Realizes the tranformation a^1:=a. ",
+   "x^1+x^2", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",

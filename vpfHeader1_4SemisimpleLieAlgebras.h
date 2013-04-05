@@ -265,6 +265,7 @@ public:
   int totalNumUnknowns;
   MemorySaving<List<FernandoKacNilradicalCandidate> > FKNilradicalCandidates;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByType;
+  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByType;
   List<List<List<int> > > NilradicalPairingTable;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
 
@@ -334,8 +335,12 @@ public:
     this->highestVectorsGrouppedByType=other.highestVectorsGrouppedByType;
     this->NilradicalPairingTable=other.NilradicalPairingTable;
     this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
-
+    this->modulesGrouppedByType=other.modulesGrouppedByType;
   }
+  void ExtendToModule
+(List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
+  ;
+  void ComputePairingTable(GlobalVariables* theGlobalVariables);
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);

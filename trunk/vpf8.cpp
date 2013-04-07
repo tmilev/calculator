@@ -1873,7 +1873,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
   direction.MakeEi(theDimProjectivized, 0);
-  if (!this->theProjectivizedCone.Vertices.LinSpanContainsRoot(direction))
+  if (!this->theProjectivizedCone.Vertices.LinSpanContainsVector(direction))
   { this->FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
       (theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel,
        theGlobalVariables);
@@ -2430,7 +2430,7 @@ bool Cone::CreateFromNormalS
     for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel)<theDim; i++)
     { Vector<Rational> tempRoot;
       tempRoot.MakeEi(theDim, i);
-      if(!this->Normals.LinSpanContainsRoot(tempRoot, tempMat, tempSel))
+      if(!this->Normals.LinSpanContainsVector(tempRoot, tempMat, tempSel))
       { numAddedFakeWalls++;
         this->Normals.AddOnTop(tempRoot);
       }

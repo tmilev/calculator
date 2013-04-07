@@ -1732,7 +1732,7 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables
     { this->theRange().LieBracket
       (this->imagesAllChevalleyGenerators[i], this->imagesAllChevalleyGenerators[j], tempElt);
       tempElt.ElementToVectorNegativeRootSpacesFirst(tempRoot);
-      if(!tempRoots.LinSpanContainsRoot(tempRoot))
+      if(!tempRoots.LinSpanContainsVector(tempRoot))
         return false;
     }
   return true;

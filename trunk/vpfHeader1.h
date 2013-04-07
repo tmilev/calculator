@@ -4179,7 +4179,7 @@ class Vectors: public List<Vector<CoefficientType> >
       for (int j=0; j<tempNumCols; j++)
         output.elements[i][j]=this->TheObjects[i][j];
   }
-  bool LinSpanContainsRoot
+  bool LinSpanContainsVector
   (const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
   ;
   void MakeEiBasis(int theDimension, const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
@@ -4187,10 +4187,10 @@ class Vectors: public List<Vector<CoefficientType> >
     for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeEi(theDimension, i, theRingUnit, theRingZero);
   }
-  bool LinSpanContainsRoot(const Vector<CoefficientType>& input)const
+  bool LinSpanContainsVector(const Vector<CoefficientType>& input)const
   { Matrix<CoefficientType> buffer;
     Selection bufferSelection;
-    return this->LinSpanContainsRoot(input, buffer, bufferSelection);
+    return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
   void SelectABasis
   (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices, GlobalVariables& theGlobalVariables)const
@@ -4964,11 +4964,25 @@ public:
    )
    ;
   template <class MonomialCollectionTemplate>
-  int GetRankOfSpanOfElements
+  static bool LinSpanContains
+  (List<MonomialCollectionTemplate>& theList, MonomialCollectionTemplate& input,
+   HashedList<TemplateMonomial>* seedMonomials=0)
+  { List<MonomialCollectionTemplate> listCopy=theList;
+    MonomialCollection<TemplateMonomial, CoefficientType>::
+    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    int startSpanSize=listCopy.size;
+    listCopy.AddOnTop(input);
+    MonomialCollection<TemplateMonomial, CoefficientType>::
+    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    return listCopy.size==startSpanSize;
+  }
+
+  template <class MonomialCollectionTemplate>
+  static int GetRankOfSpanOfElements
   (List<MonomialCollectionTemplate>& theList, HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
-    bool tempB;
-    this->GaussianEliminationByRowsDeleteZeroRows(listCopy, &tempB, seedMonomials);
+    MonomialCollection<TemplateMonomial, CoefficientType>::
+    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
   template <class MonomialCollectionTemplate>
@@ -7466,7 +7480,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 }
 
 template <class CoefficientType>
-bool Vectors<CoefficientType>::LinSpanContainsRoot(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
+bool Vectors<CoefficientType>::LinSpanContainsVector(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
 { Vectors<CoefficientType> tempVectors;
   tempVectors=(*this);
   tempVectors.AddOnTop(input);

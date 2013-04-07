@@ -328,6 +328,7 @@ int main(int argc, char **argv)
   (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
 (g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
 )))";*/
+//  civilizedInput="PenkovProjectTest";
 if(civilizedInput=="PenkovProjectTest")
 { civilizedInput="%HideLHS \
 Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
@@ -541,12 +542,12 @@ g_{9}+g_{16}- (g_{6})-2 (g_{2}), g_{-16}+g_{-6}+2 (g_{-9})- (g_{-2})\n\
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}, ((1, 2, 3, 2), (0, 0, 0, -1)),\n\
 (\n\
-g_{-21},  g_{21}, g_{-4},  g_{4}\n\
+g_{-21},  g_{21}, g_{4},  g_{-4}\n\
 )\n\
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{2}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0)),\n\
 (\n\
-g_{-24}, g_24, g_-1, g_1\n\
+g_{-24}, g_24, g_1, g_-1\n\
 )\n\
 ), \\\\\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}+(A)^{1}_{2}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, 0, 1, 1), (0, 0, 0, -1)),\n\

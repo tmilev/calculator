@@ -278,6 +278,9 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
     if (theWeylLetter=='F')
       firstCoRootSquaredLength=1;
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
+  if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
+  { std::cout << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get: " << outputMon.ToString();
+  }
   return true;
 }
 
@@ -739,6 +742,10 @@ bool Serialization::innerLoadFromObject
     << input[2].ToString() << "<hr>";
     return false;
   }
+//  std::cout << "<br> input[2]: " << input[2].ToString();
+//  if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
+//    std::cout << "<br> loading " << input[2].ToString() << " to get "
+//    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
   (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();

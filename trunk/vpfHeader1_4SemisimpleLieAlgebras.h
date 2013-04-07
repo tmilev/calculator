@@ -264,8 +264,9 @@ public:
   bool flagSystemGroebnerBasisFound;
   int totalNumUnknowns;
   MemorySaving<List<FernandoKacNilradicalCandidate> > FKNilradicalCandidates;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByType;
-  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByType;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByWeight;
+  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
   List<List<List<int> > > NilradicalPairingTable;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
 
@@ -332,15 +333,20 @@ public:
     this->highestWeightsModules=other.highestWeightsModules;
     this->highestWeightsCartanCentralizerSplitModules=other.highestWeightsCartanCentralizerSplitModules;
     this->FKNilradicalCandidates=other.FKNilradicalCandidates;
-    this->highestVectorsGrouppedByType=other.highestVectorsGrouppedByType;
+    this->highestVectorsGrouppedByWeight=other.highestVectorsGrouppedByWeight;
     this->NilradicalPairingTable=other.NilradicalPairingTable;
     this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
-    this->modulesGrouppedByType=other.modulesGrouppedByType;
+    this->modulesGrouppedByWeight=other.modulesGrouppedByWeight;
+    this->modulesGrouppedByPrimalType=other.modulesGrouppedByPrimalType;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
+  void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
+  void ComputeSinglePair
+(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
+;
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);

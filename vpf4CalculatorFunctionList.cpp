@@ -563,7 +563,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     c_1* f_2 *lcm (x^\\gamma_1, x^\\gamma_2)/x^\\gamma_2. \
     Here lcm stands for least common multiple of monomials, defined in the obvious way. \
     <br>\n1. Allocate two buckets of polynomials - one \"main\" bucket and\
-    additional bucket. At any given momonet in the algorithm, \
+    additional bucket. At any given moment in the algorithm, \
     the union of main bucket and the additional bucket should give a basis of the ideal.  \
     <br>\n2. Move all input elements into the additional bucket.\
     <br>\n3. Call the <b>reduce additional bucket</b> subroutine. In the c++ implementation\
@@ -582,7 +582,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     <br>\n2.1.2 Divide currentElement by the elements of the main bucket, and \
     record the resulting remainder element in currentRemainder.\
     Here we use the multivariate \
-    polynomial divis ion algorithm, page 62 of Cox, Little, O'Shea, \
+    polynomial division algorithm, page 62 of Cox, Little, O'Shea, \
     \"Ideals, Varieties, Algorithms\".\
     <br>\n2.1.3 If currentRemainder is non-zero, add it to the main bucket \
     and set changedMainBucket to be true. \
@@ -595,7 +595,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     Note that this operation modifies the main bucket: each element of the main bucket must be\
     traversed exactly once by the current cycle, but the division is carried with \
     the modified state of the main bucket. \
-    <br>\n3. Return changedMainBucket. \
+    <br>\n3. Return changedMainBucket.  <br><b>End of algorithm description.</b>\
    ",
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
    \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
@@ -938,10 +938,10 @@ void CommandList::initPredefinedStandardOperations()
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
-  this->AddOperationOuterHandler
-  ("^", this->outerPower, "",
-   "Realizes the tranformation a^1:=a. ",
-   "x^1+x^2", true);
+//  this->AddOperationOuterHandler
+//  ("^", this->outerPower, "",
+//   "Realizes the tranformation a^1:=a. ",
+//  "x^1+x^2", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),

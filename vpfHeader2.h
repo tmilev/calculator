@@ -2081,6 +2081,9 @@ bool Serialization::DeSerializeMonCollection
       return false;
     }
     output.AddMonomial(tempM, theSum.theCoeffs[i]);
+//    if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
+//    { std::cout << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get monomial: " << tempM.ToString();
+//    }
   }
   return true;
 }

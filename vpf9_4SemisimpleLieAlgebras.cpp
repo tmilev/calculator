@@ -627,21 +627,61 @@ void CandidateSSSubalgebra::ExtendToModule
     }
 }
 
+void CandidateSSSubalgebra::ComputePairingTablePreparation
+(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTablePreparation");
+  int totalDim=0;
+  for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
+    for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
+    { this->ExtendToModule(this->modulesGrouppedByWeight[i][j], theGlobalVariables);
+      totalDim+=this->modulesGrouppedByWeight[i][j].size;
+    }
+  if (totalDim!=this->GetAmbientSS().GetNumGenerators())
+  { std::cout << "<br><b>Something went very wrong with candidate "
+    << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ": dimensions DONT FIT!!! More precisely, "
+    << "I am getting total module dimension sum  " << totalDim << " instead of "
+    << this->GetAmbientSS().GetNumGenerators()
+    << ".</b>";
+  }
+  this->modulesGrouppedByPrimalType.SetSize(this->modulesGrouppedByWeight.size);
+  for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
+  { this->modulesGrouppedByPrimalType[i].SetSize(0);
+    for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
+      this->modulesGrouppedByPrimalType[i].AddListOnTop(this->modulesGrouppedByWeight[i][j]);
+  }
+}
+
+void CandidateSSSubalgebra::ComputeSinglePair
+(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSinglePair");
+  output.SetSize(0);
+  List<ElementSemisimpleLieAlgebra<Rational> >& leftModule=this->modulesGrouppedByPrimalType[leftIndex];
+  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->modulesGrouppedByPrimalType[rightIndex];
+  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+  for (int i=0; i<leftModule.size; i++)
+    for (int j=0; j<rightModule.size; j++)
+    { this->GetAmbientSS().LieBracket(leftModule[i], rightModule[j], theLieBracket);
+      for (int k=0; k<this->modulesGrouppedByPrimalType.size; k++)
+        if (theLieBracket.LinSpanContains(this->modulesGrouppedByPrimalType[k], theLieBracket))
+        { output.AddOnTopNoRepetition(k);
+          break;
+        }
+    }
+}
+
 void CandidateSSSubalgebra::ComputePairingTable
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTable");
-  int totalDim=0;
-  for (int i=0; i<this->modulesGrouppedByType.size; i++)
-    for (int j=0; j<this->modulesGrouppedByType[i].size; j++)
-    { this->ExtendToModule(this->modulesGrouppedByType[i][j], theGlobalVariables);
-      totalDim+=this->modulesGrouppedByType[i][j].size;
+  this->ComputePairingTablePreparation(theGlobalVariables);
+  this->NilradicalPairingTable.SetSize(this->modulesGrouppedByPrimalType.size);
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    this->NilradicalPairingTable[i].SetSize(this->modulesGrouppedByPrimalType.size);
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    for (int j=i; j<this->NilradicalPairingTable[i].size; j++)
+    { this->ComputeSinglePair(i, j, this->NilradicalPairingTable[i][j], theGlobalVariables);
+      if (j>i)
+        this->NilradicalPairingTable[j][i]=this->NilradicalPairingTable[i][j];
     }
-  if (totalDim!=this->GetAmbientSS().GetNumGenerators())
-  { std::cout << "<b>Something went very wrong: dimensions DONT FIT!!!</b>";
-  }
-  for (int i=0; i<this->highestVectorsGrouppedByType.size; i++)
-  {
-  }
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly
@@ -706,18 +746,18 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPar
     this->theCharOverCartanPlusCartanCentralizer.AddMonomial(theWeight, 1);
   }
 
-  this->highestVectorsGrouppedByType.SetSize(this->theCharOverCartanPlusCartanCentralizer.size);
-  this->modulesGrouppedByType.SetSize(this->theCharOverCartanPlusCartanCentralizer.size);
+  this->highestVectorsGrouppedByWeight.SetSize(this->theCharOverCartanPlusCartanCentralizer.size);
+  this->modulesGrouppedByWeight.SetSize(this->theCharOverCartanPlusCartanCentralizer.size);
   for (int i=0; i<this->theCharOverCartanPlusCartanCentralizer.size; i++)
-  { this->highestVectorsGrouppedByType[i].SetSize(0);
-    this->modulesGrouppedByType[i].SetSize(0);
+  { this->highestVectorsGrouppedByWeight[i].SetSize(0);
+    this->modulesGrouppedByWeight[i].SetSize(0);
   }
   for (int i=0; i<this->highestVectorsModules.size; i++)
   { theWeight.weightFundamentalCoords=this->highestWeightsCartanCentralizerSplitModules[i];
     int theModuleIndex=this->theCharOverCartanPlusCartanCentralizer.GetIndex(theWeight);
-    this->highestVectorsGrouppedByType[theModuleIndex].AddOnTop(this->highestVectorsModules[i]);
-    this->modulesGrouppedByType[theModuleIndex].SetSize(this->modulesGrouppedByType[theModuleIndex].size+1);
-    this->modulesGrouppedByType[theModuleIndex].LastObject()->AddOnTop(this->highestVectorsModules[i]);
+    this->highestVectorsGrouppedByWeight[theModuleIndex].AddOnTop(this->highestVectorsModules[i]);
+    this->modulesGrouppedByWeight[theModuleIndex].SetSize(this->modulesGrouppedByWeight[theModuleIndex].size+1);
+    this->modulesGrouppedByWeight[theModuleIndex].LastObject()->AddOnTop(this->highestVectorsModules[i]);
   }
 
 }
@@ -2324,7 +2364,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
   if (this->flagSystemSolved)
-  { out << "<br>In the table below, in the second and third row, we indicate the highest weight "
+  { out << "<br>In the table below we indicate the highest weight "
     << "vectors of the decomposition of "
     << " the ambient Lie algebra as a module over the semisimple part. The second row indicates "
     << " weights of the highest weight vectors relative to the Cartan of the semisimple subalgebra. ";
@@ -2367,16 +2407,17 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
     out << "</table>";
   }
-  if (this->modulesGrouppedByType.size>0)
-  { out << "Module decomposition over semisimple part. ";
+  if (this->modulesGrouppedByWeight.size>0)
+  { out << "Module decomposition over primal subalgebra. ";
     out << "<table border=\"1\"><tr>";
     for (int i=0; i<this->theCharOverCartanPlusCartanCentralizer.size; i++)
-      out << "<td>" << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</td>";
+      out << "<td>" << "V_{" << i+1 << "}="
+      << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</td>";
     out << "</tr><tr>";
-    for (int i=0; i<this->modulesGrouppedByType.size; i++)
+    for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
     { out << "<td><table border=\"1\"><tr>";
-      for (int j=0; j<this->modulesGrouppedByType[i].size; j++)
-      { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->modulesGrouppedByType[i][j];
+      for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
+      { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->modulesGrouppedByWeight[i][j];
         out << "<td>";
         for (int k=0; k<currentModule.size; k++)
         { out << currentModule[k].ToString();
@@ -2385,9 +2426,46 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         }
         out << "</td>";
       }
+//      out << "<td>|||</td><td>Union of the isotypic components:<br>";
+//      for (int j=0; j<this->modulesGrouppedByPrimalType[i].size; j++)
+//      { out << this->modulesGrouppedByPrimalType[i][j].ToString() << "<br>";
+//      }
+//      out << "</td>";
       out << "</tr></table></td>";
     }
+    out << "</tr></table>";
+  }
+  if (this->NilradicalPairingTable.size>0)
+  { out << "<br>Below is the pairing table of the modules, defined as follows."
+    << " Let g' be the subalgebra obtained by extending the current semisimple subalgebra "
+    << " with the Cartan of the centralizer (following Penkov, Serganova, Zuckermann,  we call "
+    << " a subalgebra g' arising in this fashion ``primal''). "
+    << " Let A, B, C be "
+    << " isotypic components in the decomposition of the ambient Lie algebra over g'."
+    << " We say that A and B pair to C if there exist elements a in A and b in B such that  0\\neq [a,b]\\in C. "
+    << " Note that, in general, A and B may pair to multiple modules C', C'', etc. We "
+    << " note that if A and B pair to C then clearly C is isomorphic to some component in "
+    << " the decomposition of A\\otimes B over g'. <br> We recall that V_{1}, V_{2}, ... are abbreviated notation "
+    << " for the primal subalgebra modules indicated in the table above. ";
+    out << "<br><table><tr>";
+    for (int i=0; i<this->NilradicalPairingTable.size; i++)
+      out << "<td>" << "V_{" << i+1 << "}="
+      << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</td>";
     out << "</tr>";
+    for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    { out << "<tr><td> " << "V_{" << i+1 << "}</td>";
+      for (int j=0; j<this->NilradicalPairingTable.size; j++)
+      { out << "<td>";
+        for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
+        { out << "V_{" << this->NilradicalPairingTable[j][i][k]+1 << "}";
+          if (k!=this->NilradicalPairingTable[i][j].size-1)
+            out << ", ";
+        }
+        out << "</td>";
+      }
+      out << "</tr>";
+    }
+    out << "</table>";
   }
   return out.str();
 }

@@ -661,11 +661,12 @@ void CandidateSSSubalgebra::ComputeSinglePair
   for (int i=0; i<leftModule.size; i++)
     for (int j=0; j<rightModule.size; j++)
     { this->GetAmbientSS().LieBracket(leftModule[i], rightModule[j], theLieBracket);
-      for (int k=0; k<this->modulesGrouppedByPrimalType.size; k++)
-        if (theLieBracket.LinSpanContains(this->modulesGrouppedByPrimalType[k], theLieBracket))
-        { output.AddOnTopNoRepetition(k);
-          break;
-        }
+      if (!theLieBracket.IsEqualToZero())
+        for (int k=0; k<this->modulesGrouppedByPrimalType.size; k++)
+          if (theLieBracket.LinSpanContains(this->modulesGrouppedByPrimalType[k], theLieBracket))
+          { output.AddOnTopNoRepetition(k);
+            break;
+          }
     }
 }
 
@@ -2447,13 +2448,13 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << " note that if A and B pair to C then clearly C is isomorphic to some component in "
     << " the decomposition of A\\otimes B over g'. <br> We recall that V_{1}, V_{2}, ... are abbreviated notation "
     << " for the primal subalgebra modules indicated in the table above. ";
-    out << "<br><table><tr>";
+    out << "<br><table><tr><td>Modules</td>";
     for (int i=0; i<this->NilradicalPairingTable.size; i++)
-      out << "<td>" << "V_{" << i+1 << "}="
-      << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</td>";
+      out << "<td><b>" << "V_{" << i+1 << "}="
+      << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</b></td>";
     out << "</tr>";
     for (int i=0; i<this->NilradicalPairingTable.size; i++)
-    { out << "<tr><td> " << "V_{" << i+1 << "}</td>";
+    { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
       for (int j=0; j<this->NilradicalPairingTable.size; j++)
       { out << "<td>";
         for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)

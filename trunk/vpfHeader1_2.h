@@ -4259,6 +4259,31 @@ void List<Object>::QuickSortAscendingOrder
 }
 
 template <class Object>
+template <class compareClass>
+bool List<Object>::QuickSortAscendingCustom
+(int BottomIndex, int TopIndex, compareClass& theCompareror)
+{ if (TopIndex<=BottomIndex)
+    return true;
+  int HighIndex = TopIndex;
+  for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
+    if (theCompareror.Compare
+        (this->TheObjects[LowIndex],(this->TheObjects[BottomIndex])))
+    { this->SwapTwoIndices(LowIndex, HighIndex);
+      LowIndex--;
+      HighIndex--;
+    }
+  if (theCompareror.Compare(this->TheObjects[HighIndex],this->TheObjects[BottomIndex]))
+    HighIndex--;
+  this->SwapTwoIndices(BottomIndex, HighIndex);
+  if (!this->QuickSortAscendingCustom(BottomIndex, HighIndex-1, theCompareror))
+    return false;
+  if (!this->QuickSortAscendingCustom(HighIndex+1, TopIndex, theCompareror))
+    return false;
+  return true;
+}
+
+
+template <class Object>
 void List<Object>::AddListOnTop(const List<Object>& theList)
 { int oldsize= this->size;
   int otherSize=theList.size;

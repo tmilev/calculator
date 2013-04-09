@@ -766,6 +766,9 @@ private:
   //that is why the function is private.
   void QuickSortAscendingOrder
   (int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder);
+  template <class compareClass>
+  bool QuickSortAscendingCustom
+  (int BottomIndex, int TopIndex, compareClass& theCompareror);
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly()
   { this->TheObjects=0;
@@ -876,6 +879,12 @@ public:
     this->RemoveIndexShiftDown(index);
     return result;
   }
+  //The following function returns false if the comparison operator failed!!!!
+  template <class compareClass>
+  bool QuickSortAscendingCustom(compareClass& theCompareror)
+  { return this->QuickSortAscendingOrderCustom(0, this->size-1, theCompareror);
+  }
+
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)

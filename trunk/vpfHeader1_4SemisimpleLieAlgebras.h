@@ -268,6 +268,8 @@ public:
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
   List<List<List<int> > > NilradicalPairingTable;
+  List<List<int> > OppositeModules;
+  HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
 
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexMaxSSContainer(-1),
@@ -338,6 +340,7 @@ public:
     this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
     this->modulesGrouppedByWeight=other.modulesGrouppedByWeight;
     this->modulesGrouppedByPrimalType=other.modulesGrouppedByPrimalType;
+    this->modulesWithZeroWeights=other.modulesWithZeroWeights;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
@@ -396,6 +399,7 @@ public:
   List<CandidateSSSubalgebra> Hcandidates;
   int theRecursionCounter;
   bool flagAttemptToSolveSystems;
+  bool flagDoComputePairingTable;
   void operator=(const SemisimpleSubalgebras& other)
   { this->owneR=other.owneR;
     this->theSl2s=other.theSl2s;

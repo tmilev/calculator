@@ -356,7 +356,8 @@ bool CommandList::innerAdCommonEigenSpaces
 }
 
 bool CommandList::innerGroebner
-(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useModZp)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useGr,
+   bool useRevLex, bool useModZp)
 { MacroRegisterFunctionWithName("CommandList::innerGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
@@ -412,9 +413,20 @@ bool CommandList::innerGroebner
 //  std::cout << outputGroebner.ToString(&theFormat);
 
   GroebnerBasisComputation<Rational> theGroebnerComputation;
-  theGroebnerComputation.theMonOrdeR=
-  useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest :
-  MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  if (useGr)
+  { if (!useRevLex)
+      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
+    else
+    { std::cout << "This is not programmed yet! Crashing to let you know. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  } else
+  { if (!useRevLex)
+      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+    else
+      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  }
   theGroebnerComputation.MaxNumComputations=upperBoundComputations;
   bool success=
   theGroebnerComputation.TransformToReducedGroebnerBasis

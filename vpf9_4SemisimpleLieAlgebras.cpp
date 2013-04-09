@@ -683,6 +683,22 @@ void CandidateSSSubalgebra::ComputePairingTable
       if (j>i)
         this->NilradicalPairingTable[j][i]=this->NilradicalPairingTable[i][j];
     }
+  this->modulesWithZeroWeights.Clear();
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+  { List<ElementSemisimpleLieAlgebra<Rational> >& currentMod=
+    this->modulesGrouppedByPrimalType[i];
+    for (int j=0; j<currentMod.size; j++)
+      if (this->GetAmbientSS().GetWeightOfGenerator(currentMod[j][0].theGeneratorIndex).IsEqualToZero())
+      { this->modulesWithZeroWeights.AddOnTop(i);
+        break;
+      }
+  }
+  this->OppositeModules.SetSize(this->NilradicalPairingTable.size);
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    for (int j=0; j<this->NilradicalPairingTable[j].size; j++)
+      for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
+        if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
+          this->OppositeModules[i].AddOnTop(j);
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly
@@ -717,7 +733,8 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition
   this->ComputeCentralizinglySplitModuleDecompositionHWVsOnly
   (theGlobalVariables, theWeightsCartanRestricted);
   this->ComputeCentralizinglySplitModuleDecompositionLastPart(theGlobalVariables);
-  this->ComputePairingTable(theGlobalVariables);
+  if (this->owner->flagDoComputePairingTable)
+    this->ComputePairingTable(theGlobalVariables);
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPart
@@ -808,6 +825,7 @@ void SemisimpleSubalgebras::reset()
   this->theRecursionCounter=0;
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
+  this->flagDoComputePairingTable=true;
 }
 
 bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
@@ -2384,7 +2402,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       << " fundamental weights), our Centralizer weights are simply given by the constant by which the "
       << " k^th basis element of the Cartan of the centralizer "
       << " acts on the highest weight vector. "
-      << "Here, the basis of the Cartan of the centralizer is as chosen above. ";
+      << " Here, the basis of the Cartan of the centralizer is as chosen above. ";
     }
     out << "<table border=\"1px solid black\"><tr><td>Highest vectors of representations (total "
     << this->highestVectorsModules.size << ") ";
@@ -2448,6 +2466,13 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << " note that if A and B pair to C then clearly C is isomorphic to some component in "
     << " the decomposition of A\\otimes B over g'. <br> We recall that V_{1}, V_{2}, ... are abbreviated notation "
     << " for the primal subalgebra modules indicated in the table above. ";
+
+    out << "<br>Modules that have a zero weight (" << this->modulesWithZeroWeights.size << " total): ";
+    for (int i=0; i<this->modulesWithZeroWeights.size; i++)
+    { out << this->modulesWithZeroWeights[i];
+      if (i!=this->modulesWithZeroWeights.size-1)
+        out << ", ";
+    }
     out << "<br><table><tr><td>Modules</td>";
     for (int i=0; i<this->NilradicalPairingTable.size; i++)
       out << "<td><b>" << "V_{" << i+1 << "}="

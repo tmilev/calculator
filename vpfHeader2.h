@@ -1403,6 +1403,9 @@ public:
   static bool innerIsInteger
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerIsRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool fFreudenthalEval
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1514,20 +1517,26 @@ public:
   static bool innerGroebnerGrLex
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGroebner
-    (theCommands, input, output, true, false);
+    (theCommands, input, output, true);
   }
   static bool innerGroebnerLex
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGroebner
-    (theCommands, input, output, false, false);
+    (theCommands, input, output, false);
+  }
+  static bool innerGroebnerRevLex
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerGroebner
+    (theCommands, input, output, false, true);
   }
   static bool innerGroebnerModZpLex
   (CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
   { return theCommands.innerGroebner
-    (theCommands, input, output, false, true);
+    (theCommands, input, output, false, false, true);
   }
   static bool innerGroebner
-  (CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useModZp)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool useGr,
+   bool useRevLex=false, bool useModZp=false)
   ;
  static bool fParabolicWeylGroups
 (CommandList& theCommands, const Expression& input, Expression& output)

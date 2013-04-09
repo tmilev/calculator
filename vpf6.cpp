@@ -3575,6 +3575,17 @@ bool CommandList::innerIsInteger
   return true;
 }
 
+bool CommandList::innerIsRational
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (input.HasBoundVariables())
+    return false;
+  if (input.IsOfType<Rational>())
+    output.AssignValue(1, theCommands);
+  else
+    output.AssignValue(0, theCommands);
+  return true;
+}
+
 bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 (const Expression& input, List<Expression>& output, int theOp)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);

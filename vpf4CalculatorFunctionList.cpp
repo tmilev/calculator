@@ -157,6 +157,10 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
 ("IsInteger", this->innerIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
+   this->AddOperationInnerHandler
+("IsRational", this->innerIsRational, "",
+ " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
+ "IsRational{}a;IsRational{}-1;\nf{}{{a}}:=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
   this->AddOperationInnerHandler
 ("Not", this->innerNot, "",
  " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
@@ -599,6 +603,12 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    ",
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
    \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
+    this->AddOperationInnerHandler
+  ("GroebnerRevLexUpperLimit", this->innerGroebnerRevLex, "",
+   "Same as GroebnerLexUpperLimit but uses reverse order on the variables (z<x).",
+   "GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
+   \nGroebnerRevLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
+
   this->AddOperationInnerHandler
   ("GroebnerGrLexUpperLimit", this->innerGroebnerGrLex, "",
    "Transforms to a reduced Groebner basis relative to the graded \

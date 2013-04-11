@@ -15,6 +15,153 @@ struct DivisionResult
    ElementEuclideanDomain remainder;
 };
 
+
+template <typename coefficient>
+class Basis
+{
+  public:
+  Matrix<coefficient> basis;
+  Matrix<coefficient> gramMatrix;
+
+  void AddVector();
+  void ComputeGramMatrix();
+  Vector<coefficient> PutInBasis(const Vector<coefficient>& v) const;
+};
+
+template <typename coefficient>
+class VectorSpace
+{
+public:
+   int degree;
+   int rank;
+   Matrix<coefficient> fastbasis;
+   Basis<coefficient> basis;
+
+   VectorSpace(){degree=-1;basis=NULL;}
+   void MakeFullRank(int dim);
+   // true if it wasn't already there
+   bool AddVector(const Vector<coefficient> &v);
+   bool AddVectorDestructively(Vector<coefficient> &v);
+   bool AddVectorToBasis(const Vector<coefficient> &v);
+   bool Contains(const Vector<coefficient>& v) const;
+   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
+   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
+   VectorSpace<coefficient> OrthogonalComplement() const;
+};
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
+{ Vector<coefficient> tmp = v;
+  return AddVectorDestructively(tmp);
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
+{ if(fastbasis.NumRows == 0)
+  { fastbasis.MakeZeroMatrix(v.size);
+    degree = v.size;
+    if(v.IsEqualToZero())
+    { rank = 0;
+      return false;
+    }
+    for(int i=0; i<v.size; i++)
+      fastbasis[0][i] = v[i];
+    rank = 1;
+    return true;
+  }
+  int jj=0;
+  for(int i=0; i<fastbasis.NumRows; i++)
+  { while((jj<v.size)&&(v[jj] == 0))
+      jj++;
+    if(jj==v.size)
+      return false;
+    int j = i;
+    for(;(j<fastbasis.NumCols)&&(fastbasis[i][j] == 0); j++);
+    if(jj<j)
+    { // memmove()
+      for(int bi=degree-1; bi>i; bi--)
+        for(int bj=0; bj<fastbasis.NumCols; bj++)
+          fastbasis.elements[bi][bj] = fastbasis.elements[bi-1][bj];
+      for(int bj=0; bj<fastbasis.NumCols; bj++)
+        fastbasis.elements[i][bj] = v[bj];
+      Matrix<coefficient> one;
+      Selection two;
+      fastbasis.GaussianEliminationByRows(fastbasis, one, two);
+      rank++;
+      return true;
+    }
+    if(jj>j)
+      continue;
+    coefficient x = -v[jj]/fastbasis[i][j];
+    for(int jjj=jj; jjj<v.size; jjj++)
+      v[jjj] += x*fastbasis[i][jjj];
+  }
+  if(v.IsEqualToZero())
+    return false;
+  //realloc()
+  Matrix<coefficient> tmp = fastbasis;
+  fastbasis.init(fastbasis.NumRows+1,fastbasis.NumCols);
+  for(int i=0; i<tmp.NumRows; i++)
+    for(int j=0; j<tmp.NumCols; j++)
+      fastbasis.elements[i][j] = tmp.elements[i][j];
+  for(int j=0; j<fastbasis.NumCols; j++)
+    fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
+  rank++;
+  return true;
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
+{ if(AddVector(v))
+  { for(int i=0; i<degree; i++)
+      basis.basis[rank-1][i] = v[i];
+    return true;
+  }
+  return false;
+}
+
+
+
+template <typename coefficient>
+void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
+{ int d = basis.size;
+  out.init(d, d);
+  for(int i=0; i<d; i++)
+    for(int j=0; j<d; j++)
+      out.elements[i][j] = basis[i].ScalarEuclidean(in*basis[j]);
+  out.MultiplyOnTheLeft(gramMatrix);
+}
+
+template <typename coefficient>
+void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, const Matrix<coefficient>& BM)
+{ int d = BM.NumRows;
+  Matrix<coefficient> M = BM;
+  Matrix<coefficient> inT = in;
+  inT.Transpose();
+  M.MultiplyOnTheRight(inT);
+  out.MakeZeroMatrix(d);
+  for(int i=0; i<d; i++)
+  { int jj = 0;
+    for(int j=0; j<d; j++)
+    {while((jj < M.NumCols) and (M.elements[i][jj] == 0))
+      jj++;
+     if(jj == M.NumCols){
+      out.elements[i][j] = 0;
+      continue;
+     }
+     if(BM.elements[j][jj] == 0){
+      out.elements[i][j] = 0;
+      continue;
+     }
+     out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
+     for(int k=jj; k<M.NumCols; k++)
+       M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
+    }
+  }
+//  std::cout << "MatrixInBasisFast" << std::endl;
+//  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
+}
+
 template <typename coefficient>
 class TrixTree
 { public:
@@ -115,6 +262,7 @@ public:
    Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
    List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
    CoxeterRepresentation<coefficient> Reduced() const;
+   VectorSpace<coefficient> FindDecentBasis() const;
 };
 
 template <typename coefficient>
@@ -186,57 +334,20 @@ Matrix<coefficient> CoxeterRepresentation<coefficient>::ClassFunctionMatrix(Clas
 }
 
 
-template <typename coefficient>
-void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
-{ int d = basis.size;
-  out.init(d, d);
-  for(int i=0; i<d; i++)
-    for(int j=0; j<d; j++)
-      out.elements[i][j] = basis[i].ScalarEuclidean(in*basis[j]);
-  out.MultiplyOnTheLeft(gramMatrix);
-}
 
-template <typename coefficient>
-void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, const Matrix<coefficient>& BM)
-{ int d = BM.NumRows;
-  Matrix<coefficient> M = BM;
-  Matrix<coefficient> inT = in;
-  inT.Transpose();
-  M.MultiplyOnTheRight(inT);
-  out.MakeZeroMatrix(d);
-  for(int i=0; i<d; i++)
-  { int jj = 0;
-    for(int j=0; j<d; j++)
-    {while((jj < M.NumCols) and (M.elements[i][jj] == 0))
-      jj++;
-     if(jj == M.NumCols){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     if(BM.elements[j][jj] == 0){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-     for(int k=jj; k<M.NumCols; k++)
-       M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
-    }
-  }
-//  std::cout << "MatrixInBasisFast" << std::endl;
-//  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
-}
 
 template <typename coefficient>
 CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced() const
 {  int d = basis.size;
-  /*
+
    Matrix<coefficient> GM;
    GM.init(d, d);
    for(int i=0; i<d; i++)
       for(int j=0; j<d; j++)
          GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
    GM.Invert();
-   */
+
+ /*
    Matrix<coefficient> BM;
    BM.init(d,basis[0].size);
    for(int i=0; i<d; i++)
@@ -245,11 +356,13 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced()
    Matrix<coefficient> one;
    Selection two;
    BM.GaussianEliminationByRows(BM,one,two);
+*/
 
    CoxeterRepresentation<coefficient> out;
    out.gens.SetSize(gens.size);
    for(int i=0; i<gens.size; i++)
-     MatrixInBasisFast(out.gens[i], gens[i], BM);
+//     MatrixInBasisFast(out.gens[i], gens[i], BM);
+     MatrixInBasis(out.gens[i],gens[i],basis,GM);
 
    out.G = G;
    for(int i=0; i<d; i++) // this should go in its own function at some point
@@ -262,12 +375,37 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced()
    { out.classFunctionMatrices.SetSize(G->ccCount);
      for(int i=0; i<classFunctionMatrices.size; i++)
       { if(classFunctionMatrices[i].NumRows > 0)
-        { MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
+        { //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
+          MatrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
         }
       }
 
    }
    return out;
+}
+
+template <typename coefficient>
+VectorSpace<coefficient> CoxeterRepresentation<coefficient>::FindDecentBasis() const
+{ VectorSpace<coefficient>  V;
+  int d = gens[0].NumCols;
+  for(int geni=0; geni<gens.size; geni++)
+  { List<Vector<coefficient> > ess = eigenspaces(gens[geni]);
+    for(int essi=0; essi<ess.size; essi++)
+    { for(int esi=0; esi<ess[essi].size; esi++)
+      { // the best laid coding practices of mice and men oft go astray
+        if(!V.AddVectorToBasis(ess[essi][esi]))
+          return V;
+      }
+    }
+  }
+  // This should not be possible
+  for(int i=0; i<d; i++)
+  { Vector<coefficient> v;
+    v.MakeEi(d,i);
+    if(!V.AddVectorToBasis(v))
+      return V;
+  }
+  // if it gets here, it deserves to crash
 }
 
 template <typename coefficient>
@@ -514,35 +652,6 @@ List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(Coxeter
    return irreps;
 }
 
-template <typename coefficient>
-class Basis
-{
-  public:
-  Matrix<coefficient> basis;
-  Matrix<coefficient> gramMatrix;
-
-  void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& v) const;
-};
-
-template <typename coefficient>
-class VectorSpace
-{
-public:
-   int degree;
-   Matrix<coefficient> data;
-   Basis<coefficient> *basis;
-
-   VectorSpace(){degree=-1;basis=NULL;}
-   void MakeFullRank(int dim);
-   void AddVector(const Vector<coefficient> v);
-   bool Contains(const Vector<coefficient>& v) const;
-   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement() const;
-};
-
-
 
 
  // From Dr. Milev's Rational class
@@ -632,9 +741,15 @@ public:
    List<coefficient> GetRoots() const;
    void DoKronecker() const;
 //  static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
+   coefficient operator[](int i) const;
    bool operator<(const UDPolynomial<coefficient>& right) const;
    bool operator==(int other) const;
 };
+
+template <typename coefficient>
+coefficient UDPolynomial<coefficient>::operator[](int i) const
+{ return data[i];
+}
 
 template <typename coefficient>
 coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
@@ -813,15 +928,27 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
   return out;
 }
 
-
+//incorrect, for now
 template <typename coefficient>
 UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
-{ int n = M.ncols();
+{ int n = M.NumCols;
   VectorSpace<coefficient> vs;
-  Vector<coefficient> v;
-  v.MakeEi;
+  Vector<coefficient> v,w;
+  v.MakeEi(n,0);
   vs.AddVectorToBasis(v);
-
+  for(int i=0; i<n; i++)
+  { w = M*v;
+    vs.AddVectorToBasis(w);
+    if(vs.Rank() == i)
+      break;
+    v = w;
+  }
+  Vector<coefficient> p = vs.basis.PutInBasis(w);
+  UDPolynomial<coefficient> out;
+  out.data.SetSize(p.size);
+  for(int i=0; i<p.size; i++)
+    out[i] = p[i];
+  return out;
 }
 
 
@@ -1964,6 +2091,17 @@ int main(void)
        for(int i=0; i<Vs.size; i++)
          std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
      */
+     /*
+     Matrix<Rational> A;
+     A.init(6,6);
+     A(0,0) = 2; A(0,1) =-1; A(0,2) =-1; A(0,3) = 0; A(0,4) = 0; A(0,5) = 0;
+     A(1,0) =-1; A(1,1) = 2; A(1,2) =-1; A(1,3) = 0; A(1,4) = 0; A(1,5) = 0;
+     A(2,0) =-1; A(2,1) =-1; A(2,2) = 2; A(2,3) = 0; A(2,4) = 0; A(2,5) = 0;
+     A(3,0) = 0; A(3,1) = 0; A(3,2) = 0; A(3,3) = 2; A(3,4) =-1; A(3,5) =-1;
+     A(4,0) = 0; A(4,1) = 0; A(4,2) = 0; A(4,3) =-1; A(4,4) = 2; A(4,5) =-1;
+     A(5,0) = 0; A(5,1) = 0; A(5,2) = 0; A(5,3) =-1; A(5,4) =-1; A(5,5) = 2;
+     std::cout << MinPoly(A) << std::endl;
+*/
 
    List<CoxeterRepresentation<Rational> > irreps = ComputeIrreducibleRepresentations(G);
 

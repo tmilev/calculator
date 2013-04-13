@@ -3773,11 +3773,11 @@ static void ProjectOntoHyperPlane
   bool GetCoordsInBasiS
   (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
-  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)const
    ;
   bool GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
- const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)const
   { Vectors<CoefficientType> buffer;
     Matrix<CoefficientType> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
@@ -7654,7 +7654,7 @@ template <class CoefficientType>
 bool Vector<CoefficientType>::GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);

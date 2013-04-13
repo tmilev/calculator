@@ -22,11 +22,57 @@ class Basis
   public:
   Matrix<coefficient> basis;
   Matrix<coefficient> gramMatrix;
+  bool haveGramMatrix;
 
-  void AddVector();
+  void AddVector(const Vector<coefficient>& v);
   void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& v) const;
+  Vector<coefficient> PutInBasis(const Vector<coefficient>& v);
+  Matrix<coefficient> PutInBasis(const Matrix<coefficient>& M);
 };
+
+template <typename coefficient>
+void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
+{ if(basis.NumCols == 0)
+  { basis.init(v.size,v.size);
+    basis.NumRows = 0;
+  }
+  if(basis.NumRows == basis.NumCols)
+  { std::cout << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols << std::endl;
+    assert(false);
+  }
+  haveGramMatrix = false;
+  for(int i = 0; i<v.size; i++)
+      basis.elements[basis.NumRows][i] = v[i];
+  basis.NumRows++;
+}
+
+template <typename coefficient>
+void Basis<coefficient>::ComputeGramMatrix()
+{ int r = basis.NumRows;
+  int d = basis.NumCols;
+  gramMatrix.MakeZeroMatrix(r);
+  for(int i=0; i<r; i++)
+    for(int j=0; j<r; j++)
+      for(int k=0; k<d; k++)
+        gramMatrix.elements[i][j] += basis.elements[i][k] * basis.elements[j][k];
+   gramMatrix.Invert();
+   haveGramMatrix = true;
+}
+
+template <typename coefficient>
+Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& v)
+{ if(!haveGramMatrix)
+    ComputeGramMatrix();
+  return gramMatrix*(basis*v);
+}
+
+template <typename coefficient>
+Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in)
+{ if(!haveGramMatrix)
+    ComputeGramMatrix();
+  return gramMatrix*(basis*in);
+}
+
 
 template <typename coefficient>
 class VectorSpace
@@ -37,7 +83,7 @@ public:
    Matrix<coefficient> fastbasis;
    Basis<coefficient> basis;
 
-   VectorSpace(){degree=-1;basis=NULL;}
+   VectorSpace(){degree=-1;rank=0;}
    void MakeFullRank(int dim);
    // true if it wasn't already there
    bool AddVector(const Vector<coefficient> &v);
@@ -65,7 +111,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       return false;
     }
     for(int i=0; i<v.size; i++)
-      fastbasis[0][i] = v[i];
+      fastbasis.elements[0][i] = v[i];
     rank = 1;
     return true;
   }
@@ -76,7 +122,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     if(jj==v.size)
       return false;
     int j = i;
-    for(;(j<fastbasis.NumCols)&&(fastbasis[i][j] == 0); j++);
+    for(;(j<fastbasis.NumCols)&&(fastbasis.elements[i][j] == 0); j++);
     if(jj<j)
     { // memmove()
       for(int bi=degree-1; bi>i; bi--)
@@ -92,9 +138,9 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     }
     if(jj>j)
       continue;
-    coefficient x = -v[jj]/fastbasis[i][j];
+    coefficient x = -v[jj]/fastbasis.elements[i][j];
     for(int jjj=jj; jjj<v.size; jjj++)
-      v[jjj] += x*fastbasis[i][jjj];
+      v[jjj] += x*fastbasis.elements[i][jjj];
   }
   if(v.IsEqualToZero())
     return false;
@@ -113,8 +159,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
 { if(AddVector(v))
-  { for(int i=0; i<degree; i++)
-      basis.basis[rank-1][i] = v[i];
+  { basis.AddVector(v);
     return true;
   }
   return false;
@@ -658,7 +703,7 @@ List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(Coxeter
 template <typename integral>
 integral gcd(integral a, integral b)
 {  integral temp;
-   while(b!=0)
+   while(!(b==0))
    {  temp= a % b;
       a=b;
       b=temp;
@@ -668,7 +713,9 @@ integral gcd(integral a, integral b)
 
 template <typename integral>
 integral lcm(integral a, integral b)
-{  return (a*b)/gcd(a,b);
+{ std::cout << "lcm" << a << ',' << b << std::endl;
+  std::cout << (a*b)/gcd(a,b) << std::endl;
+  return (a*b)/gcd(a,b);
 }
 
 // trial division is pretty good.  the factors of 2 were cleared earlier
@@ -741,13 +788,13 @@ public:
    List<coefficient> GetRoots() const;
    void DoKronecker() const;
 //  static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
-   coefficient operator[](int i) const;
+   coefficient& operator[](int i) const;
    bool operator<(const UDPolynomial<coefficient>& right) const;
    bool operator==(int other) const;
 };
 
 template <typename coefficient>
-coefficient UDPolynomial<coefficient>::operator[](int i) const
+coefficient& UDPolynomial<coefficient>::operator[](int i) const
 { return data[i];
 }
 
@@ -781,19 +828,23 @@ void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& righ
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
-{  int t = min(right.data.size, data.size);
-   for(int i=0; i<t; i++)
-      data[i] -= right.data[i];
+{  // int t = min(right.data.size, data.size); // wtf lol
+  int t = right.data.size;
+  if(data.size < t)
+    t = data.size;
 
-   if(right.data.size > data.size)
-   {  int n = data.size;
-      data.SetSize(right.data.size);
-      for(int i=n; i<right.data.size; i++)
-         data[i] = -right.data[i];
-   }
-   else
-      while((data.size != 0) and (data[data.size-1] != 0))
-         data.size--;
+  for(int i=0; i<t; i++)
+    data[i] -= right.data[i];
+
+  if(right.data.size > data.size)
+  {  int n = data.size;
+     data.SetSize(right.data.size);
+     for(int i=n; i<right.data.size; i++)
+       data[i] = -right.data[i];
+  }
+  else
+    while((data.size != 0) and (data[data.size-1] == 0))
+      data.size--;
 }
 
 template <typename coefficient>
@@ -804,7 +855,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomia
       out.data[i] = 0;
    for(int i=0; i<data.size; i++)
       for(int j=0; j<right.data.size; j++)
-         out[data.size+right.data.size-2+i+j] += data[i]*right.data[j];
+         out.data[i+j] += data[i]*right.data[j];
    return out;
 }
 
@@ -812,9 +863,12 @@ template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
 {  UDPolynomial<coefficient> out;
    out.data.SetSize(data.size+n);
+   for(int i=0; i<n; i++)
+     out.data[i] = 0;
    // not memcpy()
    for(int i=0; i<data.size; i++)
       out.data[i+n] = data[i];
+
    return out;
 }
 
@@ -831,12 +885,14 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
    if(data.size < divisor.data.size)
       return out;
    int r = data.size - divisor.data.size + 1;
-   out.quotient.SetSize(r);
+   out.quotient.data.SetSize(r);
    for(int i=r-1; i!=-1; i--)
-   {  if(out.remainder.size - divisor.data.size != i)
-         out.quotient[i] = 0;
+   {  if(out.remainder.data.size - divisor.data.size != i)
+      { out.quotient[i] = 0;
+        continue;
+      }
       UDPolynomial<coefficient> p = divisor.TimesXn(i);
-      out.quotient[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
+      out.quotient.data[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
       p *= out.quotient[i];
       out.remainder -= p;
    }
@@ -932,23 +988,29 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
 template <typename coefficient>
 UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
 { int n = M.NumCols;
-  VectorSpace<coefficient> vs;
-  Vector<coefficient> v,w;
-  v.MakeEi(n,0);
-  vs.AddVectorToBasis(v);
-  for(int i=0; i<n; i++)
-  { w = M*v;
-    vs.AddVectorToBasis(w);
-    if(vs.Rank() == i)
-      break;
-    v = w;
+  UDPolynomial<coefficient> real_out;
+  real_out.data.SetSize(1);
+  real_out.data[0] = 1;
+  for(int col = 0; col < n; col++)
+  { VectorSpace<coefficient> vs;
+    Vector<coefficient> v,w;
+    v.MakeEi(n,0);
+    vs.AddVectorToBasis(v);
+    for(int i=0; i<n; i++)
+    { w = M*v;
+      if(!vs.AddVectorToBasis(w))
+        break;
+      v = w;
+    }
+    Vector<coefficient> p = vs.basis.PutInBasis(w);
+    UDPolynomial<coefficient> out;
+    out.data.SetSize(p.size+1);
+    for(int i=0; i<p.size; i++)
+      out.data[i] = p[i];
+    out.data[p.size] = 1;
+    real_out = lcm(real_out,out);
   }
-  Vector<coefficient> p = vs.basis.PutInBasis(w);
-  UDPolynomial<coefficient> out;
-  out.data.SetSize(p.size);
-  for(int i=0; i<p.size; i++)
-    out[i] = p[i];
-  return out;
+  return real_out;
 }
 
 
@@ -1623,7 +1685,7 @@ int main(void)
        std::cout << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << std::endl;
    */
 
-
+   /*
    DynkinType D;
    D.MakeSimpleType('F',4);
    Matrix<Rational> M;
@@ -1635,6 +1697,7 @@ int main(void)
    G.ComputeInitialCharacters();
    for(int i=0; i<G.characterTable.size; i++)
       std::cout << G.characterTable[i] << std::endl;
+   */
    /*
      for(int i=0;i<G.ccCount;i++){
        int n = G.conjugacyClasses[i][0];
@@ -2091,7 +2154,7 @@ int main(void)
        for(int i=0; i<Vs.size; i++)
          std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
      */
-     /*
+
      Matrix<Rational> A;
      A.init(6,6);
      A(0,0) = 2; A(0,1) =-1; A(0,2) =-1; A(0,3) = 0; A(0,4) = 0; A(0,5) = 0;
@@ -2100,10 +2163,13 @@ int main(void)
      A(3,0) = 0; A(3,1) = 0; A(3,2) = 0; A(3,3) = 2; A(3,4) =-1; A(3,5) =-1;
      A(4,0) = 0; A(4,1) = 0; A(4,2) = 0; A(4,3) =-1; A(4,4) = 2; A(4,5) =-1;
      A(5,0) = 0; A(5,1) = 0; A(5,2) = 0; A(5,3) =-1; A(5,4) =-1; A(5,5) = 2;
-     std::cout << MinPoly(A) << std::endl;
-*/
+     std::cout << "polynomial test" << std::endl;
+     UDPolynomial<Rational> p = MinPoly(A);
+     std::cout << p.data.size << std::endl;
+     std::cout << p << std::endl;
 
-   List<CoxeterRepresentation<Rational> > irreps = ComputeIrreducibleRepresentations(G);
+
+   //List<CoxeterRepresentation<Rational> > irreps = ComputeIrreducibleRepresentations(G);
 
    std::string s;
    std::cin >> s;

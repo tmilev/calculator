@@ -12,112 +12,6 @@ typename List<CoxeterElement>::OrderLeftGreaterThanRight FormatExpressions::GetM
 { return 0;
 }
 
-bool CommandList::innerWeylGroupConjugacyClasses(CommandList& theCommands, const Expression& input, Expression& output)
-{ SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  CoxeterGroup tmpG;
-  tmpG.MakeFrom(thePointer->theWeyl.theDynkinType);
-  output.AssignValue(tmpG, theCommands);
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
-  if (theGroup.CartanSymmetric.NumRows>4)
-    return output.AssignValue<std::string>
-    ("I have been instructed not to do this for Weyl groups of rank greater \
-     than 4 because of the size of the computation.", theCommands);
-  theGroup.ComputeConjugacyClasses();
-  return true;
-}
-
-bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
-{ //if (!input.IsSequenceNElementS(2))
-  //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
-  if(input.children.size<2){
-    return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
-  }
-  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
-  //input[1] and input[2];
-  SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  List<int> theReflections;
-  for(int i=2; i<input.children.size; i++){
-    int tmp;
-    if (!input[i].IsSmallInteger(& tmp))
-      return false;
-    theReflections.AddOnTop(tmp-1);
-  }
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  CoxeterElement theElt;
-  int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
-  //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
-  //<< indexOfOwnerGroupInObjectContainer;
-
-  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-  //std::cout << "<br>theElt.owner: " << theElt.owner;
-//  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
-  for(int i=0; i<theReflections.size; i++){
-    if (theReflections[i] >= thePointer->GetRank() || theReflections[i] < 0)
-      return output.SetError("Bad reflection index", theCommands);
-  }
-//  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
-  theElt.reflections=(theReflections);
-  theElt.canonicalize();
-  return output.AssignValue(theElt, theCommands);
-}
-
-bool CommandList::innerClassFunction(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerClassFunction");
-  SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  CoxeterElement theElt;
-  int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
-  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-
-  theGroup.ComputeInitialCharacters();
-  if(input.IsListNElements(3))
-  { int theIndex;
-    if(!input[2].IsSmallInteger(&theIndex))
-      return output.SetError("Character index must be an integer", theCommands);
-    if(theIndex < 0 || theIndex > theGroup.ccCount)
-      return output.SetError("Character index must be between 0 and the number of conjugacy classes", theCommands);
-    if(theIndex >= theGroup.characterTable.size)
-      return output.SetError("Unfortunately, tom doesn't know how to calculate that one.  sorry.", theCommands);
-    return output.AssignValue(theGroup.characterTable[theIndex], theCommands);
-  }
-
-  if(input.IsListNElements(theGroup.ccCount+1+1))
-  { int n = theGroup.ccCount;
-    List<int> X;
-    for(int i=0; i<n; i++)
-    { int tmp;
-      if (!input[i].IsSmallInteger(& tmp))
-      { theCommands.Comments
-        << "<hr>While computing innerClassFunction, got user input: " << input[i].ToString()
-        << " which is not a small integer - possible user typo?";
-        return false;
-      }
-      X.AddOnTop(tmp);
-    }
-    ClassFunction<Rational> theChar;
-    theChar.G = &theGroup;
-    theChar.data = X;
-    return output.AssignValue(theChar, theCommands);
-  }
-  return output.SetError("Class functions may be selected by character index or entered by hand.", theCommands);
-}
-
 //--------------Implementing some features of some finite Coxeter groups
 std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
@@ -346,49 +240,6 @@ void CoxeterGroup::ComputeSquares(){
     squares = l;
 }
 
-/*
-List<Character<Rational> >& ClearCharsList(const List<ClassFunction> cchars)
-{
-  List<ClassFunction> chars;
-  for(int i=0;i<cchars.size;i++)
-    chars.AddOnTop(cchars[i]);
-  List<ClassFunction> newChars;
-
-
-  bool outerChanged = false;
-  bool innerChanged = false;
-  ClassFunction X,X2;
-  for(int charindex = 0; charindex<chars.size; charindex++)
-  {
-  X = chars[charindex];
-  do
-  { for(int i=0; i<chars.size; i++)
-    { if(i == charindex)
-        continue;
-      do
-      { innerChanged = false;
-        X2 = X - chars[i];
-        if(X2[0]>=0 && X2.norm() < X.norm())
-        { X = X2;
-//          if(X.norm() == 0)
-//            return X;
-          innerChanged = true;
-//          if(X[0]<0) // negative virtual character alert
-//            for(int i=0; i<X.data.size; i++)
-//              X.data[i] = -X.data[i];
-        }
-      } while(innerChanged);
-    }
-  } while(outerChanged);
-  chars[charindex] = X;
-  }
-}
-*/
-
-class ElementGroupRing: public MonomialCollection<CoxeterElement, Rational>
-{
-  public:
-};
 
 void CoxeterGroup::ComputeInitialCharacters(){
   if(squares.size == 0)
@@ -586,48 +437,50 @@ std::string CoxeterElement::ToString(FormatExpressions* theFormat)const
 }
 
 
-// this is one reason test.cpp isn't even compiled into the actual calculator
-FormatExpressions testformat;
-
-template <typename ElementEuclideanDomain>
-struct DivisionResult
-{  ElementEuclideanDomain quotient;
-   ElementEuclideanDomain remainder;
-};
-
 
 template <typename coefficient>
-class Basis
-{
-  public:
-  Matrix<coefficient> basis;
-  Matrix<coefficient> gramMatrix;
-
-  void AddVector();
-  void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& v) const;
-};
+void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
+{ if(basis.NumCols == 0)
+  { basis.init(v.size,v.size);
+    basis.NumRows = 0;
+  }
+  if(basis.NumRows == basis.NumCols)
+  { std::cout << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols << std::endl;
+    assert(false);
+  }
+  haveGramMatrix = false;
+  for(int i = 0; i<v.size; i++)
+      basis.elements[basis.NumRows][i] = v[i];
+  basis.NumRows++;
+}
 
 template <typename coefficient>
-class VectorSpace
-{
-public:
-   int degree;
-   int rank;
-   Matrix<coefficient> fastbasis;
-   Basis<coefficient> basis;
+void Basis<coefficient>::ComputeGramMatrix()
+{ int r = basis.NumRows;
+  int d = basis.NumCols;
+  gramMatrix.MakeZeroMatrix(r);
+  for(int i=0; i<r; i++)
+    for(int j=0; j<r; j++)
+      for(int k=0; k<d; k++)
+        gramMatrix.elements[i][j] += basis.elements[i][k] * basis.elements[j][k];
+   gramMatrix.Invert();
+   haveGramMatrix = true;
+}
 
-   VectorSpace(){degree=-1;basis=NULL;}
-   void MakeFullRank(int dim);
-   // true if it wasn't already there
-   bool AddVector(const Vector<coefficient> &v);
-   bool AddVectorDestructively(Vector<coefficient> &v);
-   bool AddVectorToBasis(const Vector<coefficient> &v);
-   bool Contains(const Vector<coefficient>& v) const;
-   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement() const;
-};
+template <typename coefficient>
+Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& v)
+{ if(!haveGramMatrix)
+    ComputeGramMatrix();
+  return gramMatrix*(basis*v);
+}
+
+template <typename coefficient>
+Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in)
+{ if(!haveGramMatrix)
+    ComputeGramMatrix();
+  return gramMatrix*(basis*in);
+}
+
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
@@ -645,7 +498,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       return false;
     }
     for(int i=0; i<v.size; i++)
-      fastbasis[0][i] = v[i];
+      fastbasis.elements[0][i] = v[i];
     rank = 1;
     return true;
   }
@@ -656,7 +509,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     if(jj==v.size)
       return false;
     int j = i;
-    for(;(j<fastbasis.NumCols)&&(fastbasis[i][j] == 0); j++);
+    for(;(j<fastbasis.NumCols)&&(fastbasis.elements[i][j] == 0); j++);
     if(jj<j)
     { // memmove()
       for(int bi=degree-1; bi>i; bi--)
@@ -672,9 +525,9 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     }
     if(jj>j)
       continue;
-    coefficient x = -v[jj]/fastbasis[i][j];
+    coefficient x = -v[jj]/fastbasis.elements[i][j];
     for(int jjj=jj; jjj<v.size; jjj++)
-      v[jjj] += x*fastbasis[i][jjj];
+      v[jjj] += x*fastbasis.elements[i][jjj];
   }
   if(v.IsEqualToZero())
     return false;
@@ -693,8 +546,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
 { if(AddVector(v))
-  { for(int i=0; i<degree; i++)
-      basis.basis[rank-1][i] = v[i];
+  { basis.AddVector(v);
     return true;
   }
   return false;
@@ -742,16 +594,7 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
 //  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
 }
 
-template <typename coefficient>
-class TrixTree
-{ public:
-  Matrix<coefficient> M;
-  // Would be nice to make this a pointer
-  // and malloc() it to an appropriate size
-  List<TrixTree<coefficient> > others;
 
-  Matrix<coefficient> GetElement(CoxeterElement &g, const List<Matrix<coefficient> > &gens);
-};
 
 // g gets eaten up by this algorithm lol
 template <typename coefficient>
@@ -818,32 +661,7 @@ void SpaceTree<coefficient>::DisplayTree() const
 }
 
 
-// CoxeterRepresentation has all const operations because it is a lightweight wrapper
-// of a list of matrices and a list of vectors
-// well, not anymore :)
-template <typename coefficient>
-class CoxeterRepresentation
-{
-public:
-   CoxeterGroup *G;
-   List<Vector<coefficient> > basis;
-   List<Matrix<coefficient> > gens;
 
-   ClassFunction<coefficient> character;
-   List<Matrix<coefficient> > classFunctionMatrices;
-   TrixTree<coefficient> elements;
-
-   CoxeterRepresentation() {};
-
-   CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
-
-   ClassFunction<coefficient> GetCharacter();
-   coefficient GetNumberOfComponents();
-   Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
-   List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
-   CoxeterRepresentation<coefficient> Reduced() const;
-   VectorSpace<coefficient> FindDecentBasis() const;
-};
 
 template <typename coefficient>
 CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*(const CoxeterRepresentation<coefficient>& other) const
@@ -1152,33 +970,32 @@ coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
    return X.norm();
 }
 
-CoxeterRepresentation<Rational> StandardRepresentation(CoxeterGroup& G)
+CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
 {  List<Matrix<Rational> > gens;
-   for(int i=0; i<G.nGens; i++)
-   {  Matrix<Rational> geni = G.SimpleReflectionMatrix(i);
+   for(int i=0; i<this->nGens; i++)
+   {  Matrix<Rational> geni = this->SimpleReflectionMatrix(i);
       gens.AddOnTop(geni);
    }
    CoxeterRepresentation<Rational> out;
-   out.G = &G;
+   out.G = this;
    out.gens = gens;
    Vectors<Rational> outb;
-   outb.MakeEiBasis(G.nGens);
+   outb.MakeEiBasis(this->nGens);
    out.basis = outb;
    return out;
 }
 
-List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(CoxeterGroup& G)
-{  List<CoxeterRepresentation<Rational> > irreps;
-   CoxeterRepresentation<Rational> sr = StandardRepresentation(G);
+void CoxeterGroup::ComputeIrreducibleRepresentations()
+{  CoxeterRepresentation<Rational> sr = this->StandardRepresentation();
    ClassFunction<Rational> cfmgen;
-   cfmgen.G = &G;
-   cfmgen.data.SetSize(G.ccCount);
-   for(int i=0; i<G.ccCount; i++)
+   cfmgen.G = this;
+   cfmgen.data.SetSize(this->ccCount);
+   for(int i=0; i<this->ccCount; i++)
      cfmgen.data[i] = 1;
    sr.ClassFunctionMatrix(cfmgen);
-   irreps.AddOnTop(sr);
-   List<ClassFunction<Rational> > chartable;
-   chartable.AddOnTop(sr.GetCharacter());
+   this->irreps.AddOnTop(sr);
+   this->characterTable.SetSize(0);
+   characterTable.AddOnTop(sr.GetCharacter());
    std::cout << sr.GetCharacter() << std::endl;
    List<CoxeterRepresentation<Rational> > newspaces;
    newspaces.AddOnTop(sr);
@@ -1187,34 +1004,33 @@ List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(Coxeter
       for(int irri = 0; irri < irreps.size; irri++)
       {  CoxeterRepresentation<Rational> tspace = nspace * irreps[irri];
          std::cout << "Decomposing " << tspace.GetCharacter() << std::endl;
-         List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition(chartable,irreps);
+         List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition(characterTable,irreps);
          for(int spi = 0; spi < spaces.size; spi++)
          {  if(spaces[spi].GetNumberOfComponents() == 1)
-            {  if(!chartable.Contains(spaces[spi].GetCharacter()))
-               {  chartable.AddOnTop(spaces[spi].GetCharacter());
+            {  if(!characterTable.Contains(spaces[spi].GetCharacter()))
+               {  characterTable.AddOnTop(spaces[spi].GetCharacter());
                   irreps.AddOnTop(spaces[spi]);
                   newspaces.AddOnTop(spaces[spi]);
                   std::cout << "we have " << irreps.size << " irreps" << std::endl;
                }
             }
          }
-         if(irreps.size == G.ccCount)
+         if(irreps.size == ccCount)
             break;
       }
-      if(irreps.size == G.ccCount)
+      if(irreps.size == ccCount)
          break;
    }
 //  chartable.QuickSortAscending();
-   for(int i=0; i<chartable.size; i++)
-   {  std::cout << chartable[i] << '\n';
+   for(int i=0; i<characterTable.size; i++)
+   {  std::cout << characterTable[i] << '\n';
       for(int j=0; j<irreps[i].gens.size; j++)
-         std::cout << irreps[i].gens[j].ToString(&testformat) << '\n';
+         std::cout << irreps[i].gens[j].ToString(0) << '\n';
    }
-   for(int i=0; i<chartable.size; i++)
-   { std::cout << chartable[i] << '\n';
+   for(int i=0; i<characterTable.size; i++)
+   { std::cout << characterTable[i] << '\n';
    }
-   std::cout << chartable.size << std::endl;
-   return irreps;
+   std::cout << characterTable.size << std::endl;
 }
 
 
@@ -1222,7 +1038,7 @@ List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(Coxeter
 template <typename integral>
 integral gcd(integral a, integral b)
 {  integral temp;
-   while(b!=0)
+   while(!(b==0))
    {  temp= a % b;
       a=b;
       b=temp;
@@ -1232,7 +1048,9 @@ integral gcd(integral a, integral b)
 
 template <typename integral>
 integral lcm(integral a, integral b)
-{  return (a*b)/gcd(a,b);
+{ std::cout << "lcm" << a << ',' << b << std::endl;
+  std::cout << (a*b)/gcd(a,b) << std::endl;
+  return (a*b)/gcd(a,b);
 }
 
 // trial division is pretty good.  the factors of 2 were cleared earlier
@@ -1305,13 +1123,13 @@ public:
    List<coefficient> GetRoots() const;
    void DoKronecker() const;
 //  static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
-   coefficient operator[](int i) const;
+   coefficient& operator[](int i) const;
    bool operator<(const UDPolynomial<coefficient>& right) const;
    bool operator==(int other) const;
 };
 
 template <typename coefficient>
-coefficient UDPolynomial<coefficient>::operator[](int i) const
+coefficient& UDPolynomial<coefficient>::operator[](int i) const
 { return data[i];
 }
 
@@ -1345,19 +1163,23 @@ void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& righ
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
-{  int t = min(right.data.size, data.size);
-   for(int i=0; i<t; i++)
-      data[i] -= right.data[i];
+{  // int t = min(right.data.size, data.size); // wtf lol
+  int t = right.data.size;
+  if(data.size < t)
+    t = data.size;
 
-   if(right.data.size > data.size)
-   {  int n = data.size;
-      data.SetSize(right.data.size);
-      for(int i=n; i<right.data.size; i++)
-         data[i] = -right.data[i];
-   }
-   else
-      while((data.size != 0) and (data[data.size-1] != 0))
-         data.size--;
+  for(int i=0; i<t; i++)
+    data[i] -= right.data[i];
+
+  if(right.data.size > data.size)
+  {  int n = data.size;
+     data.SetSize(right.data.size);
+     for(int i=n; i<right.data.size; i++)
+       data[i] = -right.data[i];
+  }
+  else
+    while((data.size != 0) and (data[data.size-1] == 0))
+      data.size--;
 }
 
 template <typename coefficient>
@@ -1368,7 +1190,7 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomia
       out.data[i] = 0;
    for(int i=0; i<data.size; i++)
       for(int j=0; j<right.data.size; j++)
-         out[data.size+right.data.size-2+i+j] += data[i]*right.data[j];
+         out.data[i+j] += data[i]*right.data[j];
    return out;
 }
 
@@ -1376,9 +1198,12 @@ template <typename coefficient>
 UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
 {  UDPolynomial<coefficient> out;
    out.data.SetSize(data.size+n);
+   for(int i=0; i<n; i++)
+     out.data[i] = 0;
    // not memcpy()
    for(int i=0; i<data.size; i++)
       out.data[i+n] = data[i];
+
    return out;
 }
 
@@ -1395,10 +1220,12 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
    if(data.size < divisor.data.size)
       return out;
    int r = data.size - divisor.data.size + 1;
-   out.quotient.SetSize(r);
+   out.quotient.data.SetSize(r);
    for(int i=r-1; i!=-1; i--)
-   {  if(out.remainder.size - divisor.data.size != i)
-         out.quotient[i] = 0;
+   {  if(out.remainder.data.size - divisor.data.size != i)
+      { out.quotient[i] = 0;
+        continue;
+      }
       UDPolynomial<coefficient> p = divisor.TimesXn(i);
       out.quotient[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
       p *= out.quotient[i];
@@ -1496,25 +1323,30 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
 template <typename coefficient>
 UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
 { int n = M.NumCols;
-  VectorSpace<coefficient> vs;
-  Vector<coefficient> v,w;
-  v.MakeEi(n,0);
-  vs.AddVectorToBasis(v);
-  for(int i=0; i<n; i++)
-  { w = M*v;
-    vs.AddVectorToBasis(w);
-    if(vs.Rank() == i)
-      break;
-    v = w;
+  UDPolynomial<coefficient> real_out;
+  real_out.data.SetSize(1);
+  real_out.data[0] = 1;
+  for(int col = 0; col < n; col++)
+  { VectorSpace<coefficient> vs;
+    Vector<coefficient> v,w;
+    v.MakeEi(n,0);
+    vs.AddVectorToBasis(v);
+    for(int i=0; i<n; i++)
+    { w = M*v;
+      if(!vs.AddVectorToBasis(w))
+        break;
+      v = w;
+    }
+    Vector<coefficient> p = vs.basis.PutInBasis(w);
+    UDPolynomial<coefficient> out;
+    out.data.SetSize(p.size+1);
+    for(int i=0; i<p.size; i++)
+      out.data[i] = p[i];
+    out.data[p.size] = 1;
+    real_out = lcm(real_out,out);
   }
-  Vector<coefficient> p = vs.basis.PutInBasis(w);
-  UDPolynomial<coefficient> out;
-  out.data.SetSize(p.size);
-  for(int i=0; i<p.size; i++)
-    out[i] = p[i];
-  return out;
+  return real_out;
 }
-
 
 
 
@@ -1836,6 +1668,7 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
    }
 }
 
+
 // guess at integers
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0)
 {  int n = M.NumCols;
@@ -1844,17 +1677,18 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
 //  for(int i=0; found < n; i++){
 //    if((i!=0) && (checkDivisorsOf%i!=0))
 //      continue;
+   UDPolynomial<Rational> p = MinPoly(M);
    for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
    {  int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
       std::cout << "checking " << i << " found " << found << std::endl;
-      Matrix<Rational> M2 = M;
       Rational r = i;
-      List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
-      if(V.size > 0)
-      {  found += V.size;
-         spaces.AddOnTop(V);
-         if(found == M.NumCols)
-            break;
+      if(p(r) == 0)
+      { Matrix<Rational> M2 = M;
+        List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
+        found += V.size;
+        spaces.AddOnTop(V);
+        if(found == M.NumCols)
+          break;
       }
    }
    return spaces;
@@ -1990,102 +1824,6 @@ Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
    return M;
 }
 
-int skipcount(int n, const List<int>& l)
-{  int o = 0;
-   for(int i=0; i<l.size; i++)
-   {  if(l[i] == n)
-         return -1;
-      if(l[i]<n)
-      {  o++;
-      }
-   }
-   return n-o;
-}
-
-int popcnt(int i) // from the internet
-{  i = i - ((i >> 1) & 0x55555555);
-   i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
-   return ((((i + (i >> 4)) & 0xF0F0F0F) * 0x1010101) & 0xffffffff) >> 24;
-}
-
-List<List<int> > powersetgrade(int G, const List<int>& l)
-{  List<List<int> > out;
-   for(int i=0; i<1<<l.size; i++)
-   {  if(popcnt(i)==G)
-      {  List<int> outi;
-         for(int j=0; j<l.size; j++)
-         {  if(i&(1<<j))
-               outi.AddOnTop(j);
-         }
-         out.AddOnTop(outi);
-      }
-   }
-   return out;
-}
-
-template<typename Element>
-Element minor_det(const Matrix<Element>& M, const List<int>& l)
-{  Matrix<Element> MM;
-   MM.init(M.NumRows-l.size,M.NumCols-l.size);
-   for(int i=0; i<M.NumRows; i++)
-   {  int ii = skipcount(i,l);
-      if(ii == -1)
-         continue;
-      for(int j=0; j<M.NumCols; j++)
-      {  int jj = skipcount(j,l);
-         if(jj == -1)
-            continue;
-         MM.elements[ii][jj] = M.elements[i][j];
-      }
-   }
-//  Element x;
-//  MM.ComputeDeterminantOverwriteMatrix(&x);
-//  return x;
-   return MM.GetDeterminant();
-}
-
-template<typename Element>
-List<Element> charpoly(const Matrix<Element>& M)
-{  List<Element> p;
-   p.SetSize(M.NumRows+1);
-   List<int> rowids;
-   for(int i=0; i<M.NumRows; i++)
-      rowids.AddOnTop(i);
-   for(int i=0; i<M.NumRows; i++)
-   {  Element acc = 0;
-      List<List<int> > ps = powersetgrade(i,rowids);
-      for(int si=0; si < ps.size; si++)
-         acc += minor_det(M,ps[si]);
-      if(i%2==0)
-         acc = -acc;
-      p[M.NumRows-i] = acc;
-   }
-   p[0] = ((M.NumRows%2)==0)? -1 : 1;
-
-   return p;
-}
-
-/*Rational Matrix<Rational>::GetTrace(){
-    Rational acc = 0;
-    for(int i=0; i<this.NumCols; i++){
-        acc += this.elements[i][j];
-    }
-    return acc;
-}*/
-
-int chartable[10][10] =
-{  {1,  1,  1,  1,  1,  1,  1,  1,  1,  1},
-   {1, -1, -1,  1,  1, -1,  1,  1, -1, -1},
-   {3,  1,  1, -1,  1,  0,  0, -1, -1, -3},
-   {3, -1, -1, -1,  1,  0,  0, -1,  1,  3},
-   {2,  0, -2,  0,  0,  1, -1,  2,  0, -2},
-   {2,  0,  2,  0,  0, -1, -1,  2,  0,  2},
-   {1,  1, -1, -1, -1, -1,  1,  1,  1, -1},
-   {1, -1,  1, -1, -1,  1,  1,  1, -1,  1},
-   {3, -1,  1,  1, -1,  0,  0, -1,  1, -3},
-   {3,  1, -1,  1, -1,  0,  0, -1, -1,  3}
-};
-
 bool VerifyChartable(const CoxeterGroup &G, bool printresults = false)
 {  bool okay = true;
    if(printresults)
@@ -2121,7 +1859,116 @@ bool CommandList::innerWeylGroupIrrepsAndCharTable
   std::stringstream out;
   for(int i=0; i<theGroup.characterTable.size; i++)
     out << theGroup.characterTable[i] << "<br>";
-  List<CoxeterRepresentation<Rational> > irreps = ComputeIrreducibleRepresentations(theGroup);
+  theGroup.ComputeIrreducibleRepresentations();
   out << theGroup.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CommandList::innerWeylGroupConjugacyClasses(CommandList& theCommands, const
+ Expression& input, Expression& output)
+{ SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  CoxeterGroup tmpG;
+  tmpG.MakeFrom(thePointer->theWeyl.theDynkinType);
+  output.AssignValue(tmpG, theCommands);
+  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
+  if (theGroup.CartanSymmetric.NumRows>4)
+    return output.AssignValue<std::string>
+    ("I have been instructed not to do this for Weyl groups of rank greater \
+     than 4 because of the size of the computation.", theCommands);
+  theGroup.ComputeConjugacyClasses();
+  return true;
+}
+
+bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
+& input, Expression& output)
+{ //if (!input.IsSequenceNElementS(2))
+  //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
+  if(input.children.size<2){
+    return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
+  }
+  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
+  //input[1] and input[2];
+  SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  List<int> theReflections;
+  for(int i=2; i<input.children.size; i++){
+    int tmp;
+    if (!input[i].IsSmallInteger(& tmp))
+      return false;
+    theReflections.AddOnTop(tmp-1);
+  }
+  CoxeterGroup theGroup;
+  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
+  CoxeterElement theElt;
+  int indexOfOwnerGroupInObjectContainer=
+  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
+  //<< indexOfOwnerGroupInObjectContainer;
+
+  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+  //std::cout << "<br>theElt.owner: " << theElt.owner;
+//  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
+  for(int i=0; i<theReflections.size; i++){
+    if (theReflections[i] >= thePointer->GetRank() || theReflections[i] < 0)
+      return output.SetError("Bad reflection index", theCommands);
+  }
+//  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
+  theElt.reflections=(theReflections);
+  theElt.canonicalize();
+  return output.AssignValue(theElt, theCommands);
+}
+
+bool CommandList::innerClassFunction(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerClassFunction");
+  SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  CoxeterGroup theGroup;
+  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
+  CoxeterElement theElt;
+  int indexOfOwnerGroupInObjectContainer=
+  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+
+  theGroup.ComputeInitialCharacters();
+  if(input.IsListNElements(3))
+  { int theIndex;
+    if(!input[2].IsSmallInteger(&theIndex))
+      return output.SetError("Character index must be an integer", theCommands);
+    if(theIndex < 0 || theIndex > theGroup.ccCount)
+      return output.SetError("Character index must be between 0 and the number of conjugacy classes", theCommands);
+    if(theIndex >= theGroup.characterTable.size)
+      return output.SetError("Unfortunately, tom doesn't know how to calculate that one.  sorry.", theCommands);
+    return output.AssignValue(theGroup.characterTable[theIndex], theCommands);
+  }
+
+  if(input.IsListNElements(theGroup.ccCount+1+1))
+  { int n = theGroup.ccCount;
+    List<int> X;
+    for(int i=0; i<n; i++)
+    { int tmp;
+      if (!input[i].IsSmallInteger(& tmp))
+      { theCommands.Comments
+        << "<hr>While computing innerClassFunction, got user input: " << input[i].ToString()
+        << " which is not a small integer - possible user typo?";
+        return false;
+      }
+      X.AddOnTop(tmp);
+    }
+    ClassFunction<Rational> theChar;
+    theChar.G = &theGroup;
+    theChar.data = X;
+    return output.AssignValue(theChar, theCommands);
+  }
+  return output.SetError("Class functions may be selected by character index or entered by hand.", theCommands);
+}
+

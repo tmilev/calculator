@@ -20,7 +20,7 @@ void CommandList::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClasses", this->innerWeylGroupConjugacyClasses, "",
-   "Creates a coxeter Group",
+   "Creates a Weyl group",
    "WeylGroupConjugacyClasses{}(A_2);", true)
    ;
 

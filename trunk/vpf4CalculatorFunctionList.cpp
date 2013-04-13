@@ -134,7 +134,7 @@ void CommandList::initPredefinedInnerFunctions()
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
 this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta, "",
-   "Draws polar curve given in polar coordinates in the form \
+   "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
    lower bounds of the angle. \
@@ -142,7 +142,7 @@ this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta,
    "drawPolar{}(1+sin {} t, 0, 6.283)")
    ;
 this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
-   "Makes a 2d plot of a function given in the form \
+   "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
    Trigonometry functions must be entered in the usual calculator format, i.e., in the form \
@@ -510,9 +510,8 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", false);
   this->AddOperationInnerHandler
   ("InvertMatrixVerbose", this->innerInvertMatrix, "",
-   "Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
-   printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
-   / calculus students. ",
+   "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
+   printout of all Gaussian elimantion steps. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
   this->AddOperationInnerHandler
   ("SolveNseparableQuasiLinearSystem", this->fSolveSeparableBilinearSystem, "",

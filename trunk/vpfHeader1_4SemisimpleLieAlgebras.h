@@ -210,21 +210,6 @@ class PolynomialSystem : public List<Polynomial<Rational> >
 
 class SemisimpleSubalgebras;
 
-class FernandoKacNilradicalCandidate
-{
-  public:
-  int indexOwnerCandidate;
-  SemisimpleSubalgebras* owner;
-  Selection NilradSel;
-
-  FernandoKacNilradicalCandidate(): indexOwnerCandidate(-1), owner(0){}
-  void operator=(const FernandoKacNilradicalCandidate& other)
-  { this->indexOwnerCandidate=other.indexOwnerCandidate;
-    this->owner=other.owner;
-    this->NilradSel=other.NilradSel;
-  }
-};
-
 class CandidateSSSubalgebra
 {
 public:
@@ -262,15 +247,19 @@ public:
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
+  bool flagDoLogNilradicalGeneration;
+  int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknowns;
-  MemorySaving<List<FernandoKacNilradicalCandidate> > FKNilradicalCandidates;
+  HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByWeight;
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
   List<List<List<int> > > NilradicalPairingTable;
+  List<int> candidateSubalgebraModules;
   List<List<int> > OppositeModules;
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
+  std::string nilradicalGenerationLog;
 
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexMaxSSContainer(-1),
   flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
@@ -289,6 +278,7 @@ public:
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
+  bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void GetGenericLinearCombination
   (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
    ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -298,6 +288,19 @@ public:
 ;
   void AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
+  ;
+  void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
+;
+  std::string ToStringNilradicalSelection(const List<int>& theSelection);
+  void EnumerateNilradicalsRecursively
+  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0)
+  ;
+  void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
+  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables,
+   std::stringstream* logStream)
+  ;
+  bool IsPossibleNilradicalCarryOutSelectionImplications
+  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0)
   ;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
@@ -334,13 +337,18 @@ public:
     this->CartanOfCentralizer=other.CartanOfCentralizer;
     this->highestWeightsModules=other.highestWeightsModules;
     this->highestWeightsCartanCentralizerSplitModules=other.highestWeightsCartanCentralizerSplitModules;
-    this->FKNilradicalCandidates=other.FKNilradicalCandidates;
     this->highestVectorsGrouppedByWeight=other.highestVectorsGrouppedByWeight;
     this->NilradicalPairingTable=other.NilradicalPairingTable;
     this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
     this->modulesGrouppedByWeight=other.modulesGrouppedByWeight;
     this->modulesGrouppedByPrimalType=other.modulesGrouppedByPrimalType;
     this->modulesWithZeroWeights=other.modulesWithZeroWeights;
+    this->OppositeModules=other.OppositeModules;
+    this->FKNilradicalCandidates=other.FKNilradicalCandidates;
+    this->flagDoLogNilradicalGeneration=other.flagDoLogNilradicalGeneration;
+    this->nilradicalGenerationLog=other.nilradicalGenerationLog;
+    this->RecursionDepthCounterForNilradicalGeneration=other.RecursionDepthCounterForNilradicalGeneration;
+    this->candidateSubalgebraModules=other.candidateSubalgebraModules;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)

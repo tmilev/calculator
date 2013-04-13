@@ -431,6 +431,8 @@ public:
   inline static unsigned int IntUnsignIdentity(const int& input)
   { return (unsigned) input;
   }
+  inline static unsigned int ListIntsHash(const List<int>& input)
+  ;
   static unsigned int hashString(const std::string& x)
   { int numCycles=x.size();
     if (numCycles>SomeRandomPrimesSize)
@@ -959,14 +961,15 @@ public:
   int SizeWithoutObjects();
   inline Object* LastObject()const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
-  int HashFunction()const
+
+  unsigned int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
     int result=0;
     for (int i=0; i<numCycles; i++)
       result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
     return result;
   }
-  static inline int HashFunction(const List<Object>& input)
+  static inline unsigned int HashFunction(const List<Object>& input)
   { return input.HashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output)const;
@@ -2313,6 +2316,12 @@ public:
   std::string ToString(){std::string tempS; this->ToString(tempS); return tempS;}
   List<int> elements;
   List<int> Multiplicities;
+  static unsigned int HashFunction(const SelectionWithMultiplicities& input)
+  { unsigned int result=0;
+    for (int i=0; i<input.elements.size; i++)
+      result+=input.Multiplicities[input.elements[i]]*SomeRandomPrimes[input.elements[i]];
+    return result;
+  }
   int CardinalitySelectionWithoutMultiplicities();
   void initWithMultiplicities(int NumElements);
   void ComputeElements();
@@ -2338,6 +2347,10 @@ public:
   { return this->MaxMultiplicity*this->Multiplicities.size;
   }
   int CardinalitySelectionWithMultiplicities();
+  static unsigned int HashFunction(const SelectionWithMaxMultiplicity& input)
+  { return input.MaxMultiplicity*SomeRandomPrimes[0]+
+    input.::SelectionWithMultiplicities::HashFunction(input);
+  }
 };
 
 class SelectionWithDifferentMaxMultiplicities : public SelectionWithMultiplicities
@@ -3874,20 +3887,16 @@ static void ProjectOntoHyperPlane
   void operator=(const std::string& input)
   { this->AssignString(input);
   }
-  void operator=(const Vector<CoefficientType>& other)
-  { if (&other==this)
+  template <class otherType>
+  void operator=(const Vector<otherType>& other)
+  { if (this==(Vector<CoefficientType>*)&other)
       return;
     this->SetSize(other.size);
     for(int i=0; i<other.size; i++)
       this->TheObjects[i]=other[i];
   }
   template <class otherType>
-  void operator=(const Vector<otherType>& other)
-  { this->SetSize(other.size);
-    for(int i=0; i<other.size; i++)
-      this->TheObjects[i]=other[i];
-  }
-  void operator=(const List<CoefficientType>& other)
+  void operator=(const List<otherType>& other)
   { this->SetSize(other.size);
     for(int i=0; i<other.size; i++)
       this->TheObjects[i]=other[i];
@@ -4972,6 +4981,23 @@ public:
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
    ;
+  template <class MonomialCollectionTemplate>
+  static int GetRankIntersectionVectorSpaces
+  (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
+   HashedList<TemplateMonomial>* seedMonomials=0)
+  { List<MonomialCollectionTemplate> listCopy=vectorSpace1;
+    listCopy.AddListOnTop(vectorSpace2);
+    return vectorSpace1.size+vectorSpace2.size-
+    MonomialCollection<TemplateMonomial, CoefficientType>::GetRankOfSpanOfElements
+    (listCopy, seedMonomials);
+  }
+  template <class MonomialCollectionTemplate>
+  static bool VectorSpacesIntersectionIsNonTrivial
+  (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
+   HashedList<TemplateMonomial>* seedMonomials=0)
+  { return 0!=MonomialCollection<TemplateMonomial, CoefficientType>::GetRankIntersectionVectorSpaces
+    (vectorSpace1, vectorSpace2, seedMonomials);
+  }
   template <class MonomialCollectionTemplate>
   static bool LinSpanContains
   (List<MonomialCollectionTemplate>& theList, MonomialCollectionTemplate& input,
@@ -10014,6 +10040,13 @@ std::string GroebnerBasisComputation<CoefficientType>::GetPolynomialStringSpaced
   if (countMons!=thePoly.size)
     out << "<td><b>Oh no, this is f***ed up!</b></td>";
   return out.str();
+}
+
+unsigned int MathRoutines::ListIntsHash(const List<int>& input)
+{ unsigned int result=0;
+  for (int i =0; i<input.size; i++)
+    result+=SomeRandomPrimes[i]*input[i];
+  return result;
 }
 
 #endif

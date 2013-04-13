@@ -649,6 +649,11 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
       this->modulesGrouppedByPrimalType[i].AddListOnTop(this->modulesGrouppedByWeight[i][j]);
   }
+  this->candidateSubalgebraModules.SetSize(0);
+  for (int i=0; i<this->modulesGrouppedByPrimalType.size; i++)
+    if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial
+        (this->theBasis, this->modulesGrouppedByPrimalType[i]))
+      this->candidateSubalgebraModules.AddOnTop(i);
 }
 
 void CandidateSSSubalgebra::ComputeSinglePair
@@ -693,12 +698,138 @@ void CandidateSSSubalgebra::ComputePairingTable
         break;
       }
   }
+//  std::cout << "Nilradical pairing table size: " << this->NilradicalPairingTable.size;
   this->OppositeModules.SetSize(this->NilradicalPairingTable.size);
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-    for (int j=0; j<this->NilradicalPairingTable[j].size; j++)
+    for (int j=0; j<this->NilradicalPairingTable[i].size; j++)
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
         if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
           this->OppositeModules[i].AddOnTop(j);
+}
+
+void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
+{ List<int> theSel;
+  this->RecursionDepthCounterForNilradicalGeneration=0;
+  //0 stands for not selected, 1 for selected, 2 stands for unknown.
+  theSel.initFillInObject(this->NilradicalPairingTable.size, 2);
+  std::stringstream out;
+  this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
+  this->nilradicalGenerationLog=out.str();
+  //std::cout << out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection)
+{ Vector<Rational> undecided, included, excluded, tempV;
+  included.MakeZero(this->NilradicalPairingTable.size);
+  undecided.MakeZero(this->NilradicalPairingTable.size);
+  excluded.MakeZero(this->NilradicalPairingTable.size);
+  for (int i=0; i<theSelection.size; i++)
+  { tempV.MakeEi(this->NilradicalPairingTable.size, i);
+    if (theSelection[i]==0)
+      excluded+=tempV;
+    else if(theSelection[i]==1)
+      included+=tempV;
+    else
+      undecided+=tempV;
+  }
+  std::stringstream out;
+  out << "included modules: " << included.ToStringLetterFormat("V")
+  << ", excluded modules: " << excluded.ToStringLetterFormat("V")
+  << ", undecided modulues: " << undecided.ToStringLetterFormat("V");
+  return out.str();
+}
+
+bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
+(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream)
+{ if (this->FKNilradicalCandidates.size>100)
+  { if (logStream!=0)
+    { std::string tempS=logStream->str();
+      if (tempS.size()>2)
+        if (tempS[tempS.size()-1]!='.' || tempS[tempS.size()-2]!='.')
+          *logStream << "<br>... number of nilradicals found exceeds 100, I will no longer log "
+          << " the computations ...";
+    }
+    logStream=0;
+  }
+  if (logStream!=0)
+    *logStream << "<br>********Considering selection " << this->ToStringNilradicalSelection(theSelection)
+    << "********";
+  HashedList<int, MathRoutines::IntUnsignIdentity> selectedIndices;
+  for (int i=0; i<theSelection.size; i++)
+    if (theSelection[i]==1)
+      selectedIndices.AddOnTop(i);
+  MemorySaving<List<int> > oldSelection;
+  if (logStream!=0)
+    oldSelection.GetElement()=theSelection;
+  this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices, theGlobalVariables, logStream);
+  for (int i=0; i<theSelection.size; i++)
+    if (theSelection[i]==0 && selectedIndices.Contains(i))
+    { if (logStream!=0)
+      { *logStream << " <br>The selection " << this->ToStringNilradicalSelection(theSelection)
+        << " is contradictory, as the only way to extend it to a subalgebra (i.e., closed under Lie bracket)"
+        << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
+        << " we have already decided to exclude that module in one of our preceding choices. ";
+      }
+      return false;
+    }
+  for (int i=0; i<selectedIndices.size; i++)
+    theSelection[selectedIndices[i]]=1;
+  if (logStream!=0)
+    if (oldSelection.GetElement()!=theSelection)
+    { *logStream << "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
+      << this->ToStringNilradicalSelection(oldSelection.GetElement()) << " to the following. "
+      << this->ToStringNilradicalSelection(theSelection);
+    }
+  for (int i=0; i<selectedIndices.size; i++)
+    for (int j=0; j<this->OppositeModules[selectedIndices[i]].size; j++)
+    { if (theSelection[this->OppositeModules[selectedIndices[i]][j]]==1)
+      { if (logStream!=0)
+        { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
+          << " contains opposite modules and is therefore not allowed. ";
+        }
+        return false;
+      }
+      theSelection[this->OppositeModules[selectedIndices[i]][j]]=0;
+    }
+  return true;
+}
+
+void CandidateSSSubalgebra::ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
+(HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables,
+ std::stringstream* logStream)
+{ for (int i=0; i<inputOutput.size; i++)
+    for (int j=0; j<inputOutput.size; j++)
+      for (int k=0; k<this->NilradicalPairingTable[inputOutput[i] ][inputOutput[j]].size; k++)
+        inputOutput.AddOnTopNoRepetition(this->NilradicalPairingTable[inputOutput[i] ][inputOutput[j]][k]);
+}
+
+void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
+(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream)
+{ RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
+  if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size+1)
+  { std::cout << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot "
+    << "exceed the number of nilradicals! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (!this->IsPossibleNilradicalCarryOutSelectionImplications(theSelection, theGlobalVariables, logStream))
+    return;
+  List<int> newSelection;
+  bool found=false;
+  for (int i=0; i<theSelection.size; i++)
+    if (theSelection[i]==2)
+    { found=true;
+      newSelection=theSelection;
+      newSelection[i]=0;
+      this->EnumerateNilradicalsRecursively(newSelection, theGlobalVariables, logStream);
+      newSelection=theSelection;
+      newSelection[i]=1;
+      this->EnumerateNilradicalsRecursively(newSelection, theGlobalVariables, logStream);
+      break;
+      //newSelection
+    }
+  if (found)
+    return;
+  this->FKNilradicalCandidates.AddOnTop(theSelection);
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly
@@ -734,7 +865,9 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition
   (theGlobalVariables, theWeightsCartanRestricted);
   this->ComputeCentralizinglySplitModuleDecompositionLastPart(theGlobalVariables);
   if (this->owner->flagDoComputePairingTable)
-    this->ComputePairingTable(theGlobalVariables);
+  { this->ComputePairingTable(theGlobalVariables);
+    this->EnumerateAllNilradicals(theGlobalVariables);
+  }
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPart
@@ -777,7 +910,6 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPar
     this->modulesGrouppedByWeight[theModuleIndex].SetSize(this->modulesGrouppedByWeight[theModuleIndex].size+1);
     this->modulesGrouppedByWeight[theModuleIndex].LastObject()->AddOnTop(this->highestVectorsModules[i]);
   }
-
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly
@@ -2427,7 +2559,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "</table>";
   }
   if (this->modulesGrouppedByWeight.size>0)
-  { out << "Module decomposition over primal subalgebra. ";
+  { out << "Module decomposition over primal subalgebra(total "
+    << this->modulesGrouppedByWeight.size << "). ";
     out << "<table border=\"1\"><tr>";
     for (int i=0; i<this->theCharOverCartanPlusCartanCentralizer.size; i++)
       out << "<td>" << "V_{" << i+1 << "}="
@@ -2466,13 +2599,35 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << " note that if A and B pair to C then clearly C is isomorphic to some component in "
     << " the decomposition of A\\otimes B over g'. <br> We recall that V_{1}, V_{2}, ... are abbreviated notation "
     << " for the primal subalgebra modules indicated in the table above. ";
-
     out << "<br>Modules that have a zero weight (" << this->modulesWithZeroWeights.size << " total): ";
     for (int i=0; i<this->modulesWithZeroWeights.size; i++)
-    { out << this->modulesWithZeroWeights[i];
+    { out << this->modulesWithZeroWeights[i]+1;
       if (i!=this->modulesWithZeroWeights.size-1)
         out << ", ";
     }
+    out << "<br>Non-compatible (a.k.a. ``opposite'') modules:<br>"
+    << " <table border=\"1\"><tr>";
+    for (int i=0; i< this->OppositeModules.size; i++)
+      out << "<td>V_{" << i+1 << "}" << "</td>";
+    out << "</tr><tr>";
+    for (int i=0; i< this->OppositeModules.size; i++)
+    { out << "<td>";
+      for (int j=0; j<this->OppositeModules[i].size; j++)
+      { out << "V_{" << this->OppositeModules[i][j]+1 << "}";
+        if (j!=this->OppositeModules[i].size-1)
+          out << ", ";
+      }
+      out << "</td>";
+    }
+    out << "</tr></table>";
+    out << "<br>Modules corresponding to the semisimple subalgebra: ";
+    Vector<Rational> theSAvector, tempV;
+    theSAvector.MakeZero(this->NilradicalPairingTable.size);
+    for (int i=0; i<this->candidateSubalgebraModules.size; i++)
+    { tempV.MakeEi(this->NilradicalPairingTable.size, this->candidateSubalgebraModules[i]);
+      theSAvector+=tempV;
+    }
+    out << theSAvector.ToStringLetterFormat("V");
     out << "<br><table><tr><td>Modules</td>";
     for (int i=0; i<this->NilradicalPairingTable.size; i++)
       out << "<td><b>" << "V_{" << i+1 << "}="
@@ -2492,6 +2647,19 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << "</tr>";
     }
     out << "</table>";
+    out << "<br>Number of nilradical candidates: " << this->FKNilradicalCandidates.size;
+    if (this->FKNilradicalCandidates.size>0)
+    { for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+      { out << "<br>Subalgebra " << i+1 << ": ";
+        Vector<Rational> currentNilrad;
+        currentNilrad=this->FKNilradicalCandidates[i];
+        out << currentNilrad.ToStringLetterFormat("V");
+      }
+      if (this->nilradicalGenerationLog!="")
+      { out << "<br>Nilradical generation log:"
+        << this->nilradicalGenerationLog;
+      }
+    }
   }
   return out.str();
 }

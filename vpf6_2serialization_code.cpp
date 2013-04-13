@@ -858,6 +858,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.Hcandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
+  if (theCandidatesE.children.size>10)
+    theSAs.flagDoComputePairingTable=false;
   for (int i=1; i<theCandidatesE.children.size; i++)
   { CandidateSSSubalgebra tempCandidate;
     if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))

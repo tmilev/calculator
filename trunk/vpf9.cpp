@@ -823,6 +823,7 @@ FormatExpressions::FormatExpressions()
   this->flagExpressionNewLineAllowed=true;
   this->flagIncludeLieAlgebraNonTechnicalNames=false;
   this->flagIncludeLieAlgebraTypes=true;
+  this->flagUseReflectionNotation=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

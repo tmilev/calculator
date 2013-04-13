@@ -9,19 +9,19 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeCoxeterElement", this->innerCoxeterElement, "",
    "Needs a group name and a list of generators",
-   "MakeCoxeterElement{}(A_2, 1);", false)
+   "MakeCoxeterElement{}(A_2, 1);", true)
    ;
 
   this->AddOperationInnerHandler
   ("MakeClassFunction", this->innerClassFunction, "",
    "Either gets the nth character, or accepts user input as a class function",
-   "MakeCharacter{}(B_3, 1);", false)
+   "MakeCharacter{}(B_3, 1);", true)
    ;
 
   this->AddOperationInnerHandler
-  ("MakeCoxeterGroup", this->innerCoxeterGroup, "",
+  ("WeylGroupConjugacyClasses", this->innerWeylGroupConjugacyClasses, "",
    "Creates a coxeter Group",
-   "MakeCoxeterGroup{}(A_2);", false)
+   "WeylGroupConjugacyClasses{}(A_2);", true)
    ;
 
   this->AddOperationHandler

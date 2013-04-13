@@ -1687,7 +1687,7 @@ static bool innerDrawRootSystem
   { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
-  static bool innerCoxeterGroup
+  static bool innerWeylGroupConjugacyClasses
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerCoxeterElement

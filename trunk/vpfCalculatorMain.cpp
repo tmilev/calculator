@@ -303,6 +303,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
+//  civilizedInput="MakeCoxeterElement{}(A_2, 1,2);";
   //civilizedInput=
   //"g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; [5 g_{9},g_{-1}]";
 //  civilizedInput="PolyDivRemainder{}(x^3+6xy+5xy^2+y^3, x^2+y^2-1, x^3+y^3-xy) ;";

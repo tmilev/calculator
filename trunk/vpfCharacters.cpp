@@ -1341,7 +1341,7 @@ UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
     UDPolynomial<coefficient> out;
     out.data.SetSize(p.size+1);
     for(int i=0; i<p.size; i++)
-      out.data[i] = p[i];
+      out.data[i] = -p[i];
     out.data[p.size] = 1;
     real_out = lcm(real_out,out);
   }

@@ -4973,6 +4973,7 @@ bool Expression::ToStringData
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
+    tempFormat.flagUseReflectionNotation=true;
     out << theGroup.ToString(&tempFormat);
     result=true;
   } else if (this->IsOfType<CoxeterElement>())
@@ -4980,6 +4981,7 @@ bool Expression::ToStringData
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
+    tempFormat.flagUseReflectionNotation=true;
     out << theElt.ToString(&tempFormat);
     result=true;
   } else if (this->IsOfType<ClassFunction<Rational> >())
@@ -4987,6 +4989,7 @@ bool Expression::ToStringData
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
+    tempFormat.flagUseReflectionNotation=true;
     out << theElt.ToString(&tempFormat);
     result=true;
   } else if (this->IsOfType<charSSAlgMod<Rational> >())
@@ -5247,7 +5250,9 @@ std::string Expression::ToString
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValuE<std::string>();
         else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
-                  (*this)[i].IsOfType<SemisimpleSubalgebras>() )
+                  (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
+                  (*this)[i].IsOfType<CoxeterGroup>()
+                  )
                  && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
@@ -5310,7 +5315,8 @@ std::string Expression::ToString
     { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
       if ((this->IsOfType<std::string>() ||
            this->IsOfType<CalculusFunctionPlot>() ||
-           this->IsOfType<SemisimpleSubalgebras>()
+           this->IsOfType<SemisimpleSubalgebras>() ||
+           this->IsOfType<CoxeterGroup>()
            ) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else

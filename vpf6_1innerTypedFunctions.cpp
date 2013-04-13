@@ -28,13 +28,26 @@ bool CommandList::innerMultiplyRatByRat
 
 bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
+{ MacroRegisterFunctionWithName("CommandList::innerMultiplyCoxeterEltByCoxeterElt");
   if (!input.IsListNElements(3))
     return false;
+  //std::cout << "<br>Here i am!";
+  //std::cout << "Multiplying: " << input[1].ToString() << " by " << input[2].ToString();
   CoxeterElement leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
+  //std::cout << "<br>leftR= " << leftR.ToString();
+  //std::cout << "<br>rightR=" << rightR.ToString();
+  //for (int i=0; i<theCommands.theObjectContainer.theCoxeterElements.size; i++)
+  //{ std::cout << "<br>Coxeter element " << i+1 << ": "
+  //  << theCommands.theObjectContainer.theCoxeterElements[i].ToString();
+  //}
+  if (leftR.owner!=rightR.owner)
+  { theCommands.Comments << "<hr>Attempting to multiply elements of different groups, possible user typo?";
+    return false;
+  }
   leftR*=rightR;
+  //std::cout << "<br>final output: " << leftR.ToString();
   return output.AssignValue(leftR, theCommands);
 }
 

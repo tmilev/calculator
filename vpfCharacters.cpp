@@ -12,15 +12,22 @@ typename List<CoxeterElement>::OrderLeftGreaterThanRight FormatExpressions::GetM
 { return 0;
 }
 
-bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerWeylGroupConjugacyClasses(CommandList& theCommands, const Expression& input, Expression& output)
 { SemisimpleLieAlgebra* thePointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
     return output.SetError(errorString, theCommands);
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  return output.AssignValue(theGroup, theCommands);
+  CoxeterGroup tmpG;
+  tmpG.MakeFrom(thePointer->theWeyl.theDynkinType);
+  output.AssignValue(tmpG, theCommands);
+  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
+  if (theGroup.CartanSymmetric.NumRows>4)
+    return output.AssignValue<std::string>
+    ("I have been instructed not to do this for Weyl groups of rank greater \
+     than 4 because of the size of the computation.", theCommands);
+  theGroup.ComputeConjugacyClasses();
+  return true;
 }
 
 bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
@@ -40,25 +47,26 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   for(int i=2; i<input.children.size; i++){
     int tmp;
     if (!input[i].IsSmallInteger(& tmp))
-    { std::cout << "something is rotten here! " << input[i].ToString() << " is not a small integer??";
       return false;
-    }
-    theReflections.AddOnTop(tmp);
+    theReflections.AddOnTop(tmp-1);
   }
   CoxeterGroup theGroup;
   theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
   CoxeterElement theElt;
   int indexOfOwnerGroupInObjectContainer=
   theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
+  //<< indexOfOwnerGroupInObjectContainer;
+
   theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-    //I have no idea
+  //std::cout << "<br>theElt.owner: " << theElt.owner;
 //  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
   for(int i=0; i<theReflections.size; i++){
-    if (theReflections[i] > thePointer->GetRank() || theReflections[i] < 0)
+    if (theReflections[i] >= thePointer->GetRank() || theReflections[i] < 0)
       return output.SetError("Bad reflection index", theCommands);
   }
-  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
-  theElt.reflections.AddListOnTop(theReflections);
+//  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
+  theElt.reflections=(theReflections);
   theElt.canonicalize();
   return output.AssignValue(theElt, theCommands);
 }
@@ -109,13 +117,25 @@ bool CommandList::innerClassFunction(CommandList& theCommands, const Expression&
 }
 
 //--------------Implementing some features of some finite Coxeter groups
+std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+//  out << "this: " << this
+  CoxeterElement tempElt;
+  out << "Symmetric Cartan matrix: ";
+  out << CGI::GetHtmlMathSpanPure(this->CartanSymmetric.ToString(theFormat));
+  out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size << "): \n";
+  //for (int i=0; i<this->conjugacyClasses.size; i++)
+  //{ tempElt.reflections=this->conjugacyClasses[i];
+  //  out << "<br>" << tempElt.ToString(theFormat);
+  //}
+  return out.str();
+}
+
 void CoxeterGroup::MakeFrom(const DynkinType& D){
-    std::cout << "MakeFrom called" << std::endl;
-    Matrix<Rational> M;
-    D.GetCartanSymmetric(M);
-    this->CartanSymmetric = M;
-    this->nGens = M.NumCols;
-    int n = M.NumCols;
+//    std::cout << "MakeFrom called" << std::endl;
+    D.GetCartanSymmetric(this->CartanSymmetric);
+    this->nGens = this->CartanSymmetric.NumCols;
+    int n = this->CartanSymmetric.NumCols;
     HashedList<Vector<Rational> > roots;
 
     Vector<Rational> v;
@@ -140,7 +160,7 @@ void CoxeterGroup::MakeFrom(const DynkinType& D){
         }
     }
     this->rho = derp/2;
-    std::cout << this->rho << std::endl;
+//    std::cout << this->rho << std::endl;
 }
 
 HashedList<Vector<Rational> > CoxeterGroup::GetOrbit(const Vector<Rational> &vv) const{
@@ -189,8 +209,10 @@ Vector<Rational> CoxeterGroup::ApplyList(const List<int> &l, const Vector<Ration
     for(int i = l.size-1; i>=0; i--){
         Rational x=0;
         for(int j=0; j<nGens; j++)
-            x += v[j] * CartanSymmetric.elements[l[i]][j];
-        v[l[i]] -= x * 2 / CartanSymmetric.elements[l[i]][l[i]];
+            x += v[j] * CartanSymmetric(l[i],j);
+            //CartanSymmetric(i,j) is slower than CartanSymmetric.elements[i][j] but includes
+            // index checking.
+        v[l[i]] -= x * 2 / CartanSymmetric(l[i], l[i]);
     }
     return v;
 }
@@ -508,25 +530,30 @@ void CoxeterElement::operator=(const CoxeterElement& other)
 
 bool CoxeterElement::operator==(const CoxeterElement& other)const
 { // this is all stuffed on one line because the auto keyword is only in cxx11
-return owner->ComposeTodorsVector(reflections) == owner->ComposeTodorsVector(other.reflections);
+  if (this->owner!=other.owner)
+    return false;
+  return owner->ComposeTodorsVector(reflections) == owner->ComposeTodorsVector(other.reflections);
 }
 
 unsigned int CoxeterElement::HashFunction(const CoxeterElement& input)
-{// return input.reflections.HashFunction(); <- doesn't actually work
-  unsigned int acc = 0;
-  int N = (input.reflections.size < SomeRandomPrimesSize) ? input.reflections.size : SomeRandomPrimesSize;
-  for(int i=0; i<N; i++){
-    acc += input.reflections[i]*SomeRandomPrimes[i];
-  }
-  return acc;
+{ //input.reflections.HashFunction() doesn't work at the moment (int::HashFunciton does not exist)
+  return MathRoutines::ListIntsHash(input.reflections);
 }
 
-
 std::string CoxeterElement::ToString(FormatExpressions* theFormat)const
-{ if (this->owner==0)
-    return "(not initialized)";
-//  std::cout << "<b>CoxeterElement::toString not implemented</b>";
+{ //if (this->owner==0)
+  //  return "(not initialized)";
+  bool useReflectionNotation=theFormat==0? false : theFormat->flagUseReflectionNotation;
   std::stringstream out;
+  if (useReflectionNotation)
+  { out << "{";
+    if (this->reflections.size==0)
+      out << "id";
+    for (int i=0; i<this->reflections.size; i++)
+      out << "s_{" << this->reflections[i]+1 << "}";//      << "^{" << this->owner << "}";
+    out << "}";
+    return out.str();
+  }
   out << "(";
   for(int i=0;i<reflections.size;i++){
     out << reflections[i];
@@ -534,8 +561,6 @@ std::string CoxeterElement::ToString(FormatExpressions* theFormat)const
       out << ", ";
   }
   out << ")";
-//  out << "coxeter element owner: ";
-//  out << owner->ToString(theFormat);
   return out.str();
 }
 

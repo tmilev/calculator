@@ -4873,6 +4873,7 @@ public:
   bool flagExpressionNewLineAllowed;
   bool flagIncludeLieAlgebraNonTechnicalNames;
   bool flagIncludeLieAlgebraTypes;
+  bool flagUseReflectionNotation;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>
@@ -4907,6 +4908,9 @@ public:
     this->thePolyMonOrder=other.thePolyMonOrder;
     this->flagExpressionIsFinal=other.flagExpressionIsFinal;
     this->flagExpressionNewLineAllowed=other.flagExpressionNewLineAllowed;
+    this->flagIncludeLieAlgebraNonTechnicalNames=other.flagIncludeLieAlgebraNonTechnicalNames;
+    this->flagIncludeLieAlgebraTypes=other.flagIncludeLieAlgebraTypes;
+    this->flagUseReflectionNotation=other.flagUseReflectionNotation;
   }
   FormatExpressions();
 };

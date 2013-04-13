@@ -60,11 +60,7 @@ class CoxeterGroup
     HashedList<Vector<Rational> > rootSystem;
     Vector<Rational> rho;
     HashedList<Vector<Rational> > rhoOrbit;
-    std::string ToString(FormatExpressions* theFormat=0)const
-    { std::stringstream out;
-      out << "this: " << this << this->CartanSymmetric.ToString(theFormat);
-      return out.str();
-    }
+    std::string ToString(FormatExpressions* theFormat=0)const;
     bool operator==(const CoxeterGroup& other)const
     { return this->CartanSymmetric==other.CartanSymmetric;
     }
@@ -75,7 +71,12 @@ class CoxeterGroup
       this->rhoOrbit=other.rhoOrbit;
       this->conjugacyClasses=other.conjugacyClasses;
       this->nGens=other.nGens;
-      std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
+      this->N=other.N;
+      this->ccCount=other.ccCount;
+      this->ccSizes=other.ccSizes;
+      this->squares=other.squares;
+      this->characterTable=other.characterTable;
+//      std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
     }
     Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
     HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;

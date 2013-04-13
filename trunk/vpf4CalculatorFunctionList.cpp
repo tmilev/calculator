@@ -20,8 +20,13 @@ void CommandList::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClasses", this->innerWeylGroupConjugacyClasses, "",
-   "Creates a Weyl group",
+   "For a Weyl group of rank 4 or less, computes the conjugacy classes of a Weyl group.",
    "WeylGroupConjugacyClasses{}(A_2);", true)
+   ;
+  this->AddOperationInnerHandler
+  ("WeylGroupIrrepsAndCharTable", this->innerWeylGroupIrrepsAndCharTable, "",
+   "Computes the irreducible representations and the character table of a Weyl group.",
+   "WeylGroupIrrepsAndCharTable{}(b_3);", true)
    ;
 
   this->AddOperationHandler

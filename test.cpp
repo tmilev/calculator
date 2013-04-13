@@ -378,9 +378,6 @@ Matrix<coefficient> CoxeterRepresentation<coefficient>::ClassFunctionMatrix(Clas
    return M;
 }
 
-
-
-
 template <typename coefficient>
 CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced() const
 {  int d = basis.size;
@@ -620,19 +617,6 @@ coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
    return X.norm();
 }
 
-// /home/user/vectorpartition-code/test.cpp:103:26: error: there are no arguments to ‘MakeBasis’ that depend on a template parameter, so a declaration of ‘MakeBasis’ must be available [-fpermissive]
-// /home/user/vectorpartition-code/test.cpp:103:26: note: (if you use ‘-fpermissive’, G++ will accept your code, but allowing the use of an undeclared name is deprecated)
-// template <typename coefficient>
-List<Vector<Rational> > MakeBasis(int d)
-{  List<Vector<Rational> > out;
-   for(int i=0; i<d; i++)
-   {  Vector<Rational> v;
-      v.MakeEi(d,i);
-      out.AddOnTop(v);
-   }
-   return out;
-}
-
 CoxeterRepresentation<Rational> StandardRepresentation(CoxeterGroup& G)
 {  List<Matrix<Rational> > gens;
    for(int i=0; i<G.nGens; i++)
@@ -642,7 +626,8 @@ CoxeterRepresentation<Rational> StandardRepresentation(CoxeterGroup& G)
    CoxeterRepresentation<Rational> out;
    out.G = &G;
    out.gens = gens;
-   List<Vector<Rational> > outb = MakeBasis(G.nGens);
+   Vectors<Rational> outb;
+   outb.MakeEiBasis(G.nGens);
    out.basis = outb;
    return out;
 }
@@ -1608,7 +1593,6 @@ bool VerifyChartable(const CoxeterGroup &G, bool printresults = false)
    return okay;
 }
 
-
 int main(void)
 {  testformat.flagUseHTML = false;
    testformat.flagUseLatex = false;
@@ -2175,4 +2159,3 @@ int main(void)
    std::cin >> s;
    return 0;
 }
-

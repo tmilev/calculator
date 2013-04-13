@@ -1696,7 +1696,9 @@ static bool innerDrawRootSystem
   static bool innerWeylGroupIrrepsAndCharTable
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-
+  static bool innerMinPolyMatrix
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerClassFunction
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

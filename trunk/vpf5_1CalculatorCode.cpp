@@ -519,11 +519,15 @@ bool CommandList::innerDeterminant
 bool CommandList::innerMatrixRational
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> outputMat;
+  if (input.IsOfType<Matrix<Rational> >())
+  { output=input;
+    return true;
+  }
   if (!theCommands.GetMatriXFromArguments(input, outputMat, 0, -1, 0))
   { theCommands.Comments << "<br>Failed to get matrix of rationals. ";
     return false;
   }
-  return output.AssignValue(outputMat, theCommands);
+  return output.AssignValue<Matrix<Rational> >(outputMat, theCommands);
 }
 
 bool CommandList::innerMatrixRationalFunction

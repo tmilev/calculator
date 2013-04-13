@@ -28,7 +28,11 @@ void CommandList::initPredefinedInnerFunctions()
    "Computes the irreducible representations and the character table of a Weyl group.",
    "WeylGroupIrrepsAndCharTable{}(b_3);", true)
    ;
-
+  this->AddOperationInnerHandler
+  ("MinPoly", this->innerMinPolyMatrix, "",
+   "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
+   "MinPoly{}((0,1), (-1,0));", true)
+   ;
   this->AddOperationHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. \

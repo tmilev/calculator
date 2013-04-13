@@ -468,10 +468,18 @@ void Basis<coefficient>::ComputeGramMatrix()
 }
 
 template <typename coefficient>
-Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& v)
-{ if(!haveGramMatrix)
-    ComputeGramMatrix();
-  return gramMatrix*(basis*v);
+Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& input)
+{ if (true)
+  { Vectors<Rational> theBasisVectorForm;
+    this->basis.GetListRowsToVectors(theBasisVectorForm);
+    Vector<coefficient> output;
+    input.GetCoordsInBasiS(theBasisVectorForm, output);
+    return output;
+  } else
+  { if(!haveGramMatrix)
+      ComputeGramMatrix();
+    return gramMatrix*(basis*input);
+  }
 }
 
 template <typename coefficient>
@@ -480,7 +488,6 @@ Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in
     ComputeGramMatrix();
   return gramMatrix*(basis*in);
 }
-
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
@@ -1055,9 +1062,13 @@ integral gcd(integral a, integral b)
 
 template <typename integral>
 integral lcm(integral a, integral b)
-{ std::cout << "lcm" << a << ',' << b << std::endl;
-  std::cout << (a*b)/gcd(a,b) << std::endl;
-  return (a*b)/gcd(a,b);
+{ std::cout << "<br>\nlcm(" << a << ',' << b << ")=" << std::endl;
+  integral result;
+  result=a;
+  result/=gcd(a,b);
+  result*=b;
+  std::cout << result << std::endl;
+  return result;
 }
 
 // trial division is pretty good.  the factors of 2 were cleared earlier
@@ -1100,15 +1111,17 @@ int ithfactor(int i, List<int> f)
    return acc;
 }
 
-
 // Univariate dense polynomials.
 template <typename coefficient>
 class UDPolynomial
 {
 public:
    // "So the last shall be first, and the first last" -- Matthew 20:12
-   List<coefficient> data;
-
+  List<coefficient> data;
+  UDPolynomial(){}
+  UDPolynomial(const UDPolynomial<coefficient>& other)
+  { this->data=other.data;
+  }
 //  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
    void operator+=(const UDPolynomial<coefficient>& right);
 //  UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
@@ -1116,6 +1129,9 @@ public:
    UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
 //  UDPolynomial<coefficient> operator*(const coefficient& right) const;
    void operator*=(const coefficient& right);
+   void operator*=(const UDPolynomial<coefficient>& other)
+   { *this=(*this)*other;
+   }
    UDPolynomial<coefficient> TimesXn(int n) const;
 // Quick divisibility test
 // bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
@@ -1123,6 +1139,9 @@ public:
    UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
    UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
    void operator/=(const coefficient& right);
+   void operator/=(const UDPolynomial<coefficient>& right)
+   { *this=(*this/right);
+   }
    coefficient operator()(const coefficient& x) const;
    void ClearDenominators();
    void FormalDerivative();
@@ -1133,6 +1152,10 @@ public:
    coefficient& operator[](int i) const;
    bool operator<(const UDPolynomial<coefficient>& right) const;
    bool operator==(int other) const;
+   void operator=(const UDPolynomial<coefficient>& right)
+   { this->data=right.data;
+   }
+   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
 template <typename coefficient>
@@ -1308,38 +1331,26 @@ void UDPolynomial<coefficient>::SquareFree()
 
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
-{ if(p.data.size == 0)
-    out << 0;
-  else
-  { for(int i=p.data.size-1; i!=0; i--)
-    { if(p.data[i] == 0)
-        continue;
-      if(i!=p.data.size-1)
-        out << " + ";
-      out << p.data[i];
-      if(i>1)
-        out << "x^" << i;
-      else if(i==1)
-        out << "x";
-    }
-  }
-  return out;
+{ FormatExpressions tempFormat;
+  tempFormat.polyAlphabeT.SetSize(1);
+  tempFormat.polyAlphabeT[0]="q";
+  return out << p.ToString(&tempFormat);
 }
 
 //incorrect, for now
 template <typename coefficient>
-UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
-{ int n = M.NumCols;
+UDPolynomial<coefficient> MinPoly(const Matrix<coefficient>& input)
+{ int n = input.NumCols;
   UDPolynomial<coefficient> real_out;
   real_out.data.SetSize(1);
   real_out.data[0] = 1;
   for(int col = 0; col < n; col++)
   { VectorSpace<coefficient> vs;
     Vector<coefficient> v,w;
-    v.MakeEi(n,0);
+    v.MakeEi(n,col);
     vs.AddVectorToBasis(v);
     for(int i=0; i<n; i++)
-    { w = M*v;
+    { w = input*v;
       if(!vs.AddVectorToBasis(w))
         break;
       v = w;
@@ -1354,8 +1365,6 @@ UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
   }
   return real_out;
 }
-
-
 
 /*
 template <typename coefficient>
@@ -1979,3 +1988,34 @@ bool CommandList::innerClassFunction(CommandList& theCommands, const Expression&
   return output.SetError("Class functions may be selected by character index or entered by hand.", theCommands);
 }
 
+bool CommandList::innerMinPolyMatrix
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!theCommands.innerMatrixRational(theCommands, input, output))
+    return false;
+  Matrix<Rational> theMat;
+  if (!output.IsOfType<Matrix<Rational> >(&theMat))
+  { theCommands.Comments << "<hr> Successfully called innerMatrixRational onto input " << input.ToString()
+    << " to get " << output.ToString()
+    << " but the return type was not a matrix of rationals. ";
+    return true;
+  }
+  if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
+    return output.SetError("Error: matrix is not square!", theCommands);
+  FormatExpressions tempF;
+  tempF.polyAlphabeT.SetSize(1);
+  tempF.polyAlphabeT[0]="q";
+  UDPolynomial<Rational> theMinPoly = MinPoly(theMat);
+  return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
+}
+
+template <class coefficient>
+std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat)const
+{ Polynomial<coefficient> tempP;
+  tempP.MakeZero();
+  MonomialP tempM;
+  for (int i=0; i<this->data.size; i++)
+  { tempM.MakeEi(0, i, 1);
+    tempP.AddMonomial(tempM, this->data[i]);
+  }
+  return tempP.ToString(theFormat);
+}

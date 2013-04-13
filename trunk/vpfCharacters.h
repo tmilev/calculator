@@ -416,19 +416,18 @@ bool ClassFunction<coefficient>::operator>(const ClassFunction<coefficient>& rig
   return false;
 }
 
-
-
 template <typename coefficient>
 class Basis
 {
   public:
+  //vectors are vector rows
   Matrix<coefficient> basis;
   Matrix<coefficient> gramMatrix;
   bool haveGramMatrix;
 
   void AddVector(const Vector<coefficient>& v);
   void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& v);
+  Vector<coefficient> PutInBasis(const Vector<coefficient>& input);
   Matrix<coefficient> PutInBasis(const Matrix<coefficient>& M);
 };
 

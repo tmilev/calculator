@@ -9,91 +9,13 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
-template <typename ElementEuclideanDomain>
-struct DivisionResult
-{  ElementEuclideanDomain quotient;
-   ElementEuclideanDomain remainder;
-};
 
 
-template <typename coefficient>
-class Basis
-{
-  public:
-  Matrix<coefficient> basis;
-  Matrix<coefficient> gramMatrix;
-  bool haveGramMatrix;
-
-  void AddVector(const Vector<coefficient>& v);
-  void ComputeGramMatrix();
-  Vector<coefficient> PutInBasis(const Vector<coefficient>& v);
-  Matrix<coefficient> PutInBasis(const Matrix<coefficient>& M);
-};
-
-template <typename coefficient>
-void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
-{ if(basis.NumCols == 0)
-  { basis.init(v.size,v.size);
-    basis.NumRows = 0;
-  }
-  if(basis.NumRows == basis.NumCols)
-  { std::cout << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols << std::endl;
-    assert(false);
-  }
-  haveGramMatrix = false;
-  for(int i = 0; i<v.size; i++)
-      basis.elements[basis.NumRows][i] = v[i];
-  basis.NumRows++;
-}
-
-template <typename coefficient>
-void Basis<coefficient>::ComputeGramMatrix()
-{ int r = basis.NumRows;
-  int d = basis.NumCols;
-  gramMatrix.MakeZeroMatrix(r);
-  for(int i=0; i<r; i++)
-    for(int j=0; j<r; j++)
-      for(int k=0; k<d; k++)
-        gramMatrix.elements[i][j] += basis.elements[i][k] * basis.elements[j][k];
-   gramMatrix.Invert();
-   haveGramMatrix = true;
-}
-
-template <typename coefficient>
-Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& v)
-{ if(!haveGramMatrix)
-    ComputeGramMatrix();
-  return gramMatrix*(basis*v);
-}
-
-template <typename coefficient>
-Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in)
-{ if(!haveGramMatrix)
-    ComputeGramMatrix();
-  return gramMatrix*(basis*in);
-}
 
 
-template <typename coefficient>
-class VectorSpace
-{
-public:
-   int degree;
-   int rank;
-   Matrix<coefficient> fastbasis;
-   Basis<coefficient> basis;
 
-   VectorSpace(){degree=-1;rank=0;}
-   void MakeFullRank(int dim);
-   // true if it wasn't already there
-   bool AddVector(const Vector<coefficient> &v);
-   bool AddVectorDestructively(Vector<coefficient> &v);
-   bool AddVectorToBasis(const Vector<coefficient> &v);
-   bool Contains(const Vector<coefficient>& v) const;
-   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement() const;
-};
+
+
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
@@ -207,16 +129,7 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
 //  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
 }
 
-template <typename coefficient>
-class TrixTree
-{ public:
-  Matrix<coefficient> M;
-  // Would be nice to make this a pointer
-  // and malloc() it to an appropriate size
-  List<TrixTree<coefficient> > others;
 
-  Matrix<coefficient> GetElement(CoxeterElement &g, const List<Matrix<coefficient> > &gens);
-};
 
 // g gets eaten up by this algorithm lol
 template <typename coefficient>
@@ -283,32 +196,7 @@ void SpaceTree<coefficient>::DisplayTree() const
 }
 
 
-// CoxeterRepresentation has all const operations because it is a lightweight wrapper
-// of a list of matrices and a list of vectors
-// well, not anymore :)
-template <typename coefficient>
-class CoxeterRepresentation
-{
-public:
-   CoxeterGroup *G;
-   List<Vector<coefficient> > basis;
-   List<Matrix<coefficient> > gens;
 
-   ClassFunction<coefficient> character;
-   List<Matrix<coefficient> > classFunctionMatrices;
-   TrixTree<coefficient> elements;
-
-   CoxeterRepresentation() {};
-
-   CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
-
-   ClassFunction<coefficient> GetCharacter();
-   coefficient GetNumberOfComponents();
-   Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
-   List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
-   CoxeterRepresentation<coefficient> Reduced() const;
-   VectorSpace<coefficient> FindDecentBasis() const;
-};
 
 template <typename coefficient>
 CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*(const CoxeterRepresentation<coefficient>& other) const
@@ -617,72 +505,6 @@ coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
    return X.norm();
 }
 
-CoxeterRepresentation<Rational> StandardRepresentation(CoxeterGroup& G)
-{  List<Matrix<Rational> > gens;
-   for(int i=0; i<G.nGens; i++)
-   {  Matrix<Rational> geni = G.SimpleReflectionMatrix(i);
-      gens.AddOnTop(geni);
-   }
-   CoxeterRepresentation<Rational> out;
-   out.G = &G;
-   out.gens = gens;
-   Vectors<Rational> outb;
-   outb.MakeEiBasis(G.nGens);
-   out.basis = outb;
-   return out;
-}
-
-List<CoxeterRepresentation<Rational> > ComputeIrreducibleRepresentations(CoxeterGroup& G)
-{  List<CoxeterRepresentation<Rational> > irreps;
-   CoxeterRepresentation<Rational> sr = StandardRepresentation(G);
-   ClassFunction<Rational> cfmgen;
-   cfmgen.G = &G;
-   cfmgen.data.SetSize(G.ccCount);
-   for(int i=0; i<G.ccCount; i++)
-     cfmgen.data[i] = 1;
-   sr.ClassFunctionMatrix(cfmgen);
-   irreps.AddOnTop(sr);
-   List<ClassFunction<Rational> > chartable;
-   chartable.AddOnTop(sr.GetCharacter());
-   std::cout << sr.GetCharacter() << std::endl;
-   List<CoxeterRepresentation<Rational> > newspaces;
-   newspaces.AddOnTop(sr);
-   while(newspaces.size > 0)
-   {  CoxeterRepresentation<Rational> nspace = newspaces.PopLastObject();
-      for(int irri = 0; irri < irreps.size; irri++)
-      {  CoxeterRepresentation<Rational> tspace = nspace * irreps[irri];
-         std::cout << "Decomposing " << tspace.GetCharacter() << std::endl;
-         List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition(chartable,irreps);
-         for(int spi = 0; spi < spaces.size; spi++)
-         {  if(spaces[spi].GetNumberOfComponents() == 1)
-            {  if(!chartable.Contains(spaces[spi].GetCharacter()))
-               {  chartable.AddOnTop(spaces[spi].GetCharacter());
-                  irreps.AddOnTop(spaces[spi]);
-                  newspaces.AddOnTop(spaces[spi]);
-                  std::cout << "we have " << irreps.size << " irreps" << std::endl;
-               }
-            }
-         }
-         if(irreps.size == G.ccCount)
-            break;
-      }
-      if(irreps.size == G.ccCount)
-         break;
-   }
-//  chartable.QuickSortAscending();
-   for(int i=0; i<chartable.size; i++)
-   {  std::cout << chartable[i] << '\n';
-      for(int j=0; j<irreps[i].gens.size; j++)
-         std::cout << irreps[i].gens[j].ToString(&testformat) << '\n';
-   }
-   for(int i=0; i<chartable.size; i++)
-   { std::cout << chartable[i] << '\n';
-   }
-   std::cout << chartable.size << std::endl;
-   return irreps;
-}
-
-
 
  // From Dr. Milev's Rational class
 template <typename integral>
@@ -696,52 +518,10 @@ integral gcd(integral a, integral b)
    return a;
 }
 
-template <typename integral>
-integral lcm(integral a, integral b)
-{ std::cout << "lcm" << a << ',' << b << std::endl;
-  std::cout << (a*b)/gcd(a,b) << std::endl;
-  return (a*b)/gcd(a,b);
-}
-
-// trial division is pretty good.  the factors of 2 were cleared earlier
-// by masking. dividing by 3 a few times earlier and only checking
-// 1 and 5 mod 6 would require more complicated iteration that +=2
-void factor_integer_l(int n, List<int> f)
-{  for(int i=2; i<sqrt(n); i+=2)
-   {  if(n%i==0)
-      {  f.AddOnTop(i);
-         factor_integer_l(n/i,f);
-         return;
-      }
-   }
-}
-
-/* It might be a good idea to give an error for attempts to factor 0 */
-List<int> factor_integer(int n)
-{  List<int> f;
-   if(n==0)
-      return f;
-   if(n<0)
-      n = -n;
-   if(n==1)
-      return f;
-   while((n&1) == 0)
-   {  f.AddOnTop(2);
-      n = n>>1;
-   }
-   factor_integer_l(n,f);
-   return f;
-}
 
 
 
-int ithfactor(int i, List<int> f)
-{  int acc = 1;
-   for(int j=0; j<f.size; j++)
-      if(i&i<<j)
-         acc = acc * f[j];
-   return acc;
-}
+
 
 
 // Univariate dense polynomials.
@@ -877,7 +657,7 @@ struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::Div
         continue;
       }
       UDPolynomial<coefficient> p = divisor.TimesXn(i);
-      out.quotient.data[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
+      out.quotient[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
       p *= out.quotient[i];
       out.remainder -= p;
    }
@@ -969,34 +749,7 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
   return out;
 }
 
-//incorrect, for now
-template <typename coefficient>
-UDPolynomial<coefficient> MinPoly(Matrix<coefficient> M)
-{ int n = M.NumCols;
-  UDPolynomial<coefficient> real_out;
-  real_out.data.SetSize(1);
-  real_out.data[0] = 1;
-  for(int col = 0; col < n; col++)
-  { VectorSpace<coefficient> vs;
-    Vector<coefficient> v,w;
-    v.MakeEi(n,0);
-    vs.AddVectorToBasis(v);
-    for(int i=0; i<n; i++)
-    { w = M*v;
-      if(!vs.AddVectorToBasis(w))
-        break;
-      v = w;
-    }
-    Vector<coefficient> p = vs.basis.PutInBasis(w);
-    UDPolynomial<coefficient> out;
-    out.data.SetSize(p.size+1);
-    for(int i=0; i<p.size; i++)
-      out.data[i] = p[i];
-    out.data[p.size] = 1;
-    real_out = lcm(real_out,out);
-  }
-  return real_out;
-}
+
 
 
 
@@ -1319,29 +1072,6 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
    }
 }
 
-// guess at integers
-List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0)
-{  int n = M.NumCols;
-   List<List<Vector<Rational> > > spaces;
-   int found = 0;
-//  for(int i=0; found < n; i++){
-//    if((i!=0) && (checkDivisorsOf%i!=0))
-//      continue;
-   for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
-   {  int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
-      std::cout << "checking " << i << " found " << found << std::endl;
-      Matrix<Rational> M2 = M;
-      Rational r = i;
-      List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
-      if(V.size > 0)
-      {  found += V.size;
-         spaces.AddOnTop(V);
-         if(found == M.NumCols)
-            break;
-      }
-   }
-   return spaces;
-}
 
 template <typename coefficient>
 Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<coefficient> > &B)
@@ -1418,44 +1148,6 @@ bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
    return true;
 }
 
-Matrix<Rational> MatrixInBasis(const ClassFunction<Rational> &X, const List<Vector<Rational> > &B)
-{  List<Vector<Rational> > rows;
-   for(int i=0; i<B.size; i++)
-   {  Vector<Rational> v;
-      v.MakeZero(B[0].size);
-      rows.AddOnTop(v);
-   }
-   for(int i1 =0; i1<X.G->ccCount; i1++)
-   {  for(int i2=0; i2<X.G->conjugacyClasses[i1].size; i2++)
-      {  for(int j=0; j<X.G->N; j++)
-         {  for(int k=0; k<B.size; k++)
-            {  int l = X.G->MultiplyElements(X.G->conjugacyClasses[i1][i2],j);
-               rows[k][l] = X.data[i1]*B[k][j];
-            }
-         }
-      }
-   }
-   Matrix<Rational> M;
-   M.init(rows.size, rows.size);
-   for(int i=0; i<rows.size; i++)
-   {  Vector<Rational> v = PutInBasis(rows[i],B);
-      for(int j=0; j<rows.size; j++)
-         M.elements[i][j] = v[j];
-   }
-   return M;
-}
-
-
-ElementMonomialAlgebra<CoxeterElement, Rational> FromClassFunction(const ClassFunction<Rational>& X)
-{  ElementMonomialAlgebra<CoxeterElement, Rational> out;
-   for(int i=0; i<X.G->ccCount; i++)
-   {  for(int j=0; j<X.G->ccSizes[i]; j++)
-      {  CoxeterElement tmp = X.G->GetCoxeterElement(X.G->conjugacyClasses[i][j]);
-         out.AddMonomial(tmp,X.data[i]);
-      }
-   }
-   return out;
-}
 
 
 template <typename coefficient>
@@ -1569,30 +1261,6 @@ int chartable[10][10] =
    {3,  1, -1,  1, -1,  0,  0, -1, -1,  3}
 };
 
-bool VerifyChartable(const CoxeterGroup &G, bool printresults = false)
-{  bool okay = true;
-   if(printresults)
-      std::cout << "one" << '\n';
-   for(int i=0; i<G.ccCount; i++)
-   {  if(printresults)
-         std::cout << G.characterTable[i].norm() << std::endl;
-      if(G.characterTable[i].norm() != 1)
-         okay = false;
-   }
-   if(printresults)
-      std::cout << "zero" << '\n';
-   for(int i=0; i<G.ccCount; i++)
-      for(int j=0; j<G.ccCount; j++)
-      {  if(j==i)
-            continue;
-         if(G.characterTable[i].IP(G.characterTable[j]) != 0)
-            okay = false;
-         if(printresults)
-            std::cout << G.characterTable[i].IP(G.characterTable[j]) << std::endl;
-      }
-   return okay;
-}
-
 int main(void)
 {  testformat.flagUseHTML = false;
    testformat.flagUseLatex = false;
@@ -1669,7 +1337,7 @@ int main(void)
        std::cout << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << std::endl;
    */
 
-   /*
+
    DynkinType D;
    D.MakeSimpleType('F',4);
    Matrix<Rational> M;
@@ -1681,7 +1349,7 @@ int main(void)
    G.ComputeInitialCharacters();
    for(int i=0; i<G.characterTable.size; i++)
       std::cout << G.characterTable[i] << std::endl;
-   */
+
    /*
      for(int i=0;i<G.ccCount;i++){
        int n = G.conjugacyClasses[i][0];
@@ -2139,7 +1807,7 @@ int main(void)
          std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
      */
 
-     Matrix<Rational> A;
+     /*Matrix<Rational> A;
      A.init(6,6);
      A(0,0) = 2; A(0,1) =-1; A(0,2) =-1; A(0,3) = 0; A(0,4) = 0; A(0,5) = 0;
      A(1,0) =-1; A(1,1) = 2; A(1,2) =-1; A(1,3) = 0; A(1,4) = 0; A(1,5) = 0;
@@ -2151,9 +1819,9 @@ int main(void)
      UDPolynomial<Rational> p = MinPoly(A);
      std::cout << p.data.size << std::endl;
      std::cout << p << std::endl;
+*/
 
-
-   //List<CoxeterRepresentation<Rational> > irreps = ComputeIrreducibleRepresentations(G);
+   G.ComputeIrreducibleRepresentations();
 
    std::string s;
    std::cin >> s;

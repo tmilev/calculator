@@ -5,8 +5,17 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersHEader
 (__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
+template <typename ElementEuclideanDomain>
+struct DivisionResult
+{  ElementEuclideanDomain quotient;
+   ElementEuclideanDomain remainder;
+};
+
 class CoxeterGroup;
 class CoxeterElement;
+
+template <typename coefficient>
+class CoxeterRepresentation;
 
 template<typename coefficient>
 class ClassFunction{
@@ -53,6 +62,7 @@ class CoxeterGroup
     List<List<int> > conjugacyClasses;
     List<int> squares;
     List<ClassFunction<Rational> > characterTable;
+    List<CoxeterRepresentation<Rational> > irreps;
 
   // these are specific to this type of finite group
     Matrix<Rational> CartanSymmetric;
@@ -93,9 +103,11 @@ class CoxeterGroup
     Vector<Rational> SimpleConjugation(int i, const Vector<Rational> &v) const;
     int MultiplyElements(int i, int j) const;
     int operator()(int i, int j) const;
+    CoxeterRepresentation<Rational> StandardRepresentation();
     void ComputeConjugacyClasses();
     void ComputeSquares();
     void ComputeInitialCharacters();
+    void ComputeIrreducibleRepresentations();
 };
 
 class CoxeterElement{
@@ -394,5 +406,85 @@ bool ClassFunction<coefficient>::operator==(const ClassFunction<coefficient>& ot
     return true;
   return false;
 }
+
+
+
+
+
+
+template <typename coefficient>
+class Basis
+{
+  public:
+  Matrix<coefficient> basis;
+  Matrix<coefficient> gramMatrix;
+  bool haveGramMatrix;
+
+  void AddVector(const Vector<coefficient>& v);
+  void ComputeGramMatrix();
+  Vector<coefficient> PutInBasis(const Vector<coefficient>& v);
+  Matrix<coefficient> PutInBasis(const Matrix<coefficient>& M);
+};
+
+template <typename coefficient>
+class VectorSpace
+{
+public:
+   int degree;
+   int rank;
+   Matrix<coefficient> fastbasis;
+   Basis<coefficient> basis;
+
+   VectorSpace(){degree=-1;rank=0;}
+   void MakeFullRank(int dim);
+   // true if it wasn't already there
+   bool AddVector(const Vector<coefficient> &v);
+   bool AddVectorDestructively(Vector<coefficient> &v);
+   bool AddVectorToBasis(const Vector<coefficient> &v);
+   bool Contains(const Vector<coefficient>& v) const;
+   VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
+   VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
+   VectorSpace<coefficient> OrthogonalComplement() const;
+};
+
+
+template <typename coefficient>
+class TrixTree
+{ public:
+  Matrix<coefficient> M;
+  // Would be nice to make this a pointer
+  // and malloc() it to an appropriate size
+  List<TrixTree<coefficient> > others;
+
+  Matrix<coefficient> GetElement(CoxeterElement &g, const List<Matrix<coefficient> > &gens);
+};
+
+// CoxeterRepresentation has all const operations because it is a lightweight wrapper
+// of a list of matrices and a list of vectors
+// well, not anymore :)
+template <typename coefficient>
+class CoxeterRepresentation
+{
+public:
+   CoxeterGroup *G;
+   List<Vector<coefficient> > basis;
+   List<Matrix<coefficient> > gens;
+
+   ClassFunction<coefficient> character;
+   List<Matrix<coefficient> > classFunctionMatrices;
+   TrixTree<coefficient> elements;
+
+   CoxeterRepresentation() {};
+
+   CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
+
+   ClassFunction<coefficient> GetCharacter();
+   coefficient GetNumberOfComponents();
+   Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
+   List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
+   CoxeterRepresentation<coefficient> Reduced() const;
+   VectorSpace<coefficient> FindDecentBasis() const;
+};
+
 
 #endif

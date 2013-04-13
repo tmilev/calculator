@@ -103,7 +103,9 @@ bool CommandList::innerClassFunction(CommandList& theCommands, const Expression&
     for(int i=0; i<n; i++)
     { int tmp;
       if (!input[i].IsSmallInteger(& tmp))
-      { std::cout << "something is rotten here! " << input[i].ToString() << " is not a small integer??";
+      { theCommands.Comments
+        << "<hr>While computing innerClassFunction, got user input: " << input[i].ToString()
+        << " which is not a small integer - possible user typo?";
         return false;
       }
       X.AddOnTop(tmp);
@@ -120,14 +122,27 @@ bool CommandList::innerClassFunction(CommandList& theCommands, const Expression&
 std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
 //  out << "this: " << this
-  CoxeterElement tempElt;
   out << "Symmetric Cartan matrix: ";
   out << CGI::GetHtmlMathSpanPure(this->CartanSymmetric.ToString(theFormat));
-  out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size << "): \n";
-  //for (int i=0; i<this->conjugacyClasses.size; i++)
-  //{ tempElt.reflections=this->conjugacyClasses[i];
-  //  out << "<br>" << tempElt.ToString(theFormat);
-  //}
+  out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size
+  << ").\n";
+  CoxeterElement tempElt;
+  for (int i=0; i<this->conjugacyClasses.size; i++)
+  { out << "<hr>Conjugacy class " << i+1 << " contains " << this->conjugacyClasses[i].size
+    << " elements indexed by (the indexing order respects the Bruhat order): <br>";
+    for (int j=0; j<this->conjugacyClasses[i].size; j++)
+    { out << this->conjugacyClasses[i][j]+1;
+      if (j!=this->conjugacyClasses[i].size-1)
+        out << ", ";
+    }
+    out << "<br> elements of the class written in reflection notation: ";
+    for (int j=0; j<this->conjugacyClasses[i].size; j++)
+    { tempElt= this->GetCoxeterElement(this->conjugacyClasses[i][j]);
+      out << tempElt.ToString(theFormat);
+      if (j!=this->conjugacyClasses[i].size-1)
+        out << ", ";
+    }
+  }
   return out.str();
 }
 
@@ -155,7 +170,7 @@ void CoxeterGroup::MakeFrom(const DynkinType& D){
                 break;
             }
         if(usethis == true){
-            std::cout << roots[i] << std::endl;
+//            std::cout << roots[i] << std::endl;
             derp += roots[i];
         }
     }
@@ -291,8 +306,6 @@ int CoxeterGroup::MultiplyElements(int i, int j) const
 int CoxeterGroup::operator()(int i, int j) const
 { return MultiplyElements(i,j);
 }
-
-
 
 void CoxeterGroup::ComputeConjugacyClasses(){
     if(rhoOrbit.size == 0)
@@ -507,8 +520,16 @@ Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v
     return w;
 }
 
-CoxeterElement CoxeterGroup::GetCoxeterElement(int i)
-{ return CoxeterElement(this, this->DecomposeTodorsVector(rhoOrbit[i]));
+CoxeterElement CoxeterGroup::GetCoxeterElement(int i)const
+{ MacroRegisterFunctionWithName("CoxeterGroup::GetCoxeterElement");
+  if (this->rhoOrbit.size<=i || i<0)
+  { std::cout << "This is a programming error: group element indexed by " << i
+    << " but the rho-orbit of the group has only " << this->rhoOrbit.size
+    << " elements. The programmer either gave a bad index, or did not compute the rho orbit. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return CoxeterElement(this, this->DecomposeTodorsVector(rhoOrbit[i]));
 }
 
 //-------------------------------CoxeterElement--------------------------

@@ -60,8 +60,8 @@ class CoxeterGroup
     HashedList<Vector<Rational> > rootSystem;
     Vector<Rational> rho;
     HashedList<Vector<Rational> > rhoOrbit;
-    std::string ToString(FormatExpressions* theFormat=0)const;
-    bool operator==(const CoxeterGroup& other)const
+    std::string ToString(FormatExpressions* theFormat=0) const;
+    bool operator==(const CoxeterGroup& other) const
     { return this->CartanSymmetric==other.CartanSymmetric;
     }
     void operator=(const CoxeterGroup& other)
@@ -84,8 +84,9 @@ class CoxeterGroup
     Matrix<Rational> SimpleReflectionMatrix(int i) const;
     Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
     Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
-    CoxeterElement GetCoxeterElement(int i);
+    CoxeterElement GetCoxeterElement(int i) const;
     // note: the list is backwards
+
     List<int> DecomposeTodorsVector(const Vector<Rational> &v) const;
     Vector<Rational> ComposeTodorsVector(const List<int> &l) const;
     Vector<Rational> ApplyList(const List<int> &l, const Vector<Rational> &v) const;
@@ -105,18 +106,18 @@ class CoxeterElement{
   }
 
   List<int> reflections;
-  CoxeterGroup* owner;
+  const CoxeterGroup* owner;
   CoxeterElement():owner(0){}
-  CoxeterElement(CoxeterGroup* owner, List<int> reflections){
-    this->owner = owner; this->reflections = reflections;
+  CoxeterElement(const CoxeterGroup* owner, const List<int>& inputReflections){
+    this->owner = owner; this->reflections = inputReflections;
   }
   void canonicalize();
   static unsigned int HashFunction(const CoxeterElement& input);
-  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat=0) const;
   void operator*=(const CoxeterElement& other);
   void operator=(const CoxeterElement& other);
   bool operator==(const CoxeterElement& other) const;
-  bool operator>(const CoxeterElement& other)const
+  bool operator>(const CoxeterElement& other) const
   { if(this->owner!=other.owner)
     { std::cout << "This may or may not be a programming error: comparing elements of different coxeter groups. "
       << "Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -125,7 +126,9 @@ class CoxeterElement{
     return this->reflections>other.reflections;
   }
 
-  static inline const bool IsEqualToZero(){return false;}
+  static inline const bool IsEqualToZero()
+  { return false;
+  }
 
 };
 

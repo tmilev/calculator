@@ -40,6 +40,7 @@ class ClassFunction{
     std::string ToString() const;
     static unsigned int HashFunction(const ClassFunction<coefficient>& input);
     bool operator==(const ClassFunction<coefficient>& other) const;
+    bool operator>(const ClassFunction<coefficient>& right) const;
 };
 
 template <typename coefficient>
@@ -407,8 +408,13 @@ bool ClassFunction<coefficient>::operator==(const ClassFunction<coefficient>& ot
   return false;
 }
 
-
-
+template <typename coefficient>
+bool ClassFunction<coefficient>::operator>(const ClassFunction<coefficient>& right) const
+{ for(int i=0; i<this->data.size; i++)
+    if(!(this->data[i] == right.data[i]))
+      return this->data[i] > right.data[i];
+  return false;
+}
 
 
 
@@ -484,6 +490,7 @@ public:
    List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
    CoxeterRepresentation<coefficient> Reduced() const;
    VectorSpace<coefficient> FindDecentBasis() const;
+   bool operator>(CoxeterRepresentation<coefficient>& right);
 };
 
 

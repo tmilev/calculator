@@ -970,6 +970,11 @@ coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
    return X.norm();
 }
 
+template <typename coefficient>
+bool CoxeterRepresentation<coefficient>::operator>(CoxeterRepresentation<coefficient>& right)
+{ return GetCharacter() > right.GetCharacter();
+}
+
 CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
 {  List<Matrix<Rational> > gens;
    for(int i=0; i<this->nGens; i++)
@@ -1018,6 +1023,8 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
          if(irreps.size == ccCount)
             break;
       }
+      irreps.QuickSortAscending();
+      characterTable.QuickSortAscending();
       if(irreps.size == ccCount)
          break;
    }

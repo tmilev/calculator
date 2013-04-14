@@ -1,4 +1,4 @@
-#include "vpf.h"
+#include "vpfHeader1_2.h"
 #include "vpfCharacters.h"
 #include "vpfGraph.h"
 
@@ -20,6 +20,16 @@ std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
   out << CGI::GetHtmlMathSpanPure(this->CartanSymmetric.ToString(theFormat));
   out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size
   << ").\n";
+  if (this->irreps.size>0)
+  { out << this->irreps.size << "out of "
+    << this->conjugacyClasses.size
+    << " irreducible finite dimensional representations "
+    << " were computed. ";
+    for (int i=0; i<this->irreps.size; i++)
+    { out << "<br>Representation V_{" << i+1 << "}<br>";
+      out << this->irreps[i].ToString(theFormat);
+    }
+  }
   CoxeterElement tempElt;
   for (int i=0; i<this->conjugacyClasses.size; i++)
   { out << "<hr>Conjugacy class " << i+1 << " contains " << this->conjugacyClasses[i].size
@@ -1047,30 +1057,6 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
    std::cout << characterTable.size << std::endl;
 }
 
-
-
-template <typename integral>
-integral gcd(integral a, integral b)
-{  integral temp;
-   while(!(b==0))
-   {  temp= a % b;
-      a=b;
-      b=temp;
-   }
-   return a;
-}
-
-template <typename integral>
-integral lcm(integral a, integral b)
-{ std::cout << "<br>\nlcm(" << a << ',' << b << ")=" << std::endl;
-  integral result;
-  result=a;
-  result/=gcd(a,b);
-  result*=b;
-  std::cout << result << std::endl;
-  return result;
-}
-
 // trial division is pretty good.  the factors of 2 were cleared earlier
 // by masking. dividing by 3 a few times earlier and only checking
 // 1 and 5 mod 6 would require more complicated iteration that +=2
@@ -1101,146 +1087,12 @@ List<int> factor_integer(int n)
    return f;
 }
 
-
-
 int ithfactor(int i, List<int> f)
 {  int acc = 1;
    for(int j=0; j<f.size; j++)
       if(i&i<<j)
          acc = acc * f[j];
    return acc;
-}
-
-// Univariate dense polynomials.
-template <typename coefficient>
-class UDPolynomial
-{
-public:
-   // "So the last shall be first, and the first last" -- Matthew 20:12
-  List<coefficient> data;
-  UDPolynomial(){}
-  UDPolynomial(const UDPolynomial<coefficient>& other)
-  { this->data=other.data;
-  }
-//  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
-   void operator+=(const UDPolynomial<coefficient>& right);
-//  UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
-   void operator-=(const UDPolynomial<coefficient>& right);
-   UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
-//  UDPolynomial<coefficient> operator*(const coefficient& right) const;
-   void operator*=(const coefficient& right);
-   void operator*=(const UDPolynomial<coefficient>& other)
-   { *this=(*this)*other;
-   }
-   UDPolynomial<coefficient> TimesXn(int n) const;
-// Quick divisibility test
-// bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
-   struct DivisionResult<UDPolynomial<coefficient> > DivideBy(const UDPolynomial<coefficient>& right) const;
-   UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
-   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
-   void operator/=(const coefficient& right);
-   void operator/=(const UDPolynomial<coefficient>& right)
-   { *this=(*this/right);
-   }
-   coefficient operator()(const coefficient& x) const;
-   void ClearDenominators();
-   void FormalDerivative();
-   void SquareFree();
-   List<coefficient> GetRoots() const;
-   void DoKronecker() const;
-//  static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
-   coefficient& operator[](int i) const;
-   bool operator<(const UDPolynomial<coefficient>& right) const;
-   bool operator==(int other) const;
-   void operator=(const UDPolynomial<coefficient>& right)
-   { this->data=right.data;
-   }
-   std::string ToString(FormatExpressions* theFormat=0)const;
-};
-
-template <typename coefficient>
-coefficient& UDPolynomial<coefficient>::operator[](int i) const
-{ return data[i];
-}
-
-template <typename coefficient>
-coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
-{  coefficient acc = 0;
-   coefficient y = 1;
-   for(int i=0; i<data.size; i++)
-   {  acc += y*data[i];
-      y *= x;
-   }
-   return acc;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right)
-{  int t = min(right.data.size, data.size);
-   for(int i=0; i<t; i++)
-      data[i] += right.data[i];
-
-   if(right.data.size > data.size)
-   {  int n = data.size;
-      data.SetSize(right.data.size);
-      for(int i=n; i<right.data.size; i++)
-         data[i] = right.data[i];
-   }
-   else
-      while((data.size != 0) and (data[data.size-1] != 0))
-         data.size--;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
-{  // int t = min(right.data.size, data.size); // wtf lol
-  int t = right.data.size;
-  if(data.size < t)
-    t = data.size;
-
-  for(int i=0; i<t; i++)
-    data[i] -= right.data[i];
-
-  if(right.data.size > data.size)
-  {  int n = data.size;
-     data.SetSize(right.data.size);
-     for(int i=n; i<right.data.size; i++)
-       data[i] = -right.data[i];
-  }
-  else
-    while((data.size != 0) and (data[data.size-1] == 0))
-      data.size--;
-}
-
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomial<coefficient>& right) const
-{  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+right.data.size-1);
-   for(int i=0; i<out.data.size; i++)
-      out.data[i] = 0;
-   for(int i=0; i<data.size; i++)
-      for(int j=0; j<right.data.size; j++)
-         out.data[i+j] += data[i]*right.data[j];
-   return out;
-}
-
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
-{  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+n);
-   for(int i=0; i<n; i++)
-     out.data[i] = 0;
-   // not memcpy()
-   for(int i=0; i<data.size; i++)
-      out.data[i+n] = data[i];
-
-   return out;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator*=(const coefficient& right)
-{  for(int i=0; i<data.size; i++)
-      data[i] *= right;
 }
 
 template <typename coefficient>
@@ -1335,35 +1187,6 @@ std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
   tempFormat.polyAlphabeT.SetSize(1);
   tempFormat.polyAlphabeT[0]="q";
   return out << p.ToString(&tempFormat);
-}
-
-//incorrect, for now
-template <typename coefficient>
-UDPolynomial<coefficient> MinPoly(const Matrix<coefficient>& input)
-{ int n = input.NumCols;
-  UDPolynomial<coefficient> real_out;
-  real_out.data.SetSize(1);
-  real_out.data[0] = 1;
-  for(int col = 0; col < n; col++)
-  { VectorSpace<coefficient> vs;
-    Vector<coefficient> v,w;
-    v.MakeEi(n,col);
-    vs.AddVectorToBasis(v);
-    for(int i=0; i<n; i++)
-    { w = input*v;
-      if(!vs.AddVectorToBasis(w))
-        break;
-      v = w;
-    }
-    Vector<coefficient> p = vs.basis.PutInBasis(w);
-    UDPolynomial<coefficient> out;
-    out.data.SetSize(p.size+1);
-    for(int i=0; i<p.size; i++)
-      out.data[i] = -p[i];
-    out.data[p.size] = 1;
-    real_out = lcm(real_out,out);
-  }
-  return real_out;
 }
 
 /*
@@ -1684,30 +1507,30 @@ List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
    }
 }
 
-
 // guess at integers
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0)
-{  int n = M.NumCols;
-   List<List<Vector<Rational> > > spaces;
-   int found = 0;
-//  for(int i=0; found < n; i++){
-//    if((i!=0) && (checkDivisorsOf%i!=0))
-//      continue;
-   UDPolynomial<Rational> p = MinPoly(M);
-   for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
-   {  int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
-      std::cout << "checking " << i << " found " << found << std::endl;
-      Rational r = i;
-      if(p(r) == 0)
-      { Matrix<Rational> M2 = M;
-        List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
-        found += V.size;
-        spaces.AddOnTop(V);
-        if(found == M.NumCols)
-          break;
-      }
-   }
-   return spaces;
+{ int n = M.NumCols;
+  List<List<Vector<Rational> > > spaces;
+  int found = 0;
+// for(int i=0; found < n; i++){
+//   if((i!=0) && (checkDivisorsOf%i!=0))
+//     continue;
+  UDPolynomial<Rational> p;
+  p.AssignMinPoly(M);
+  for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
+  { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
+    std::cout << "checking " << i << " found " << found << std::endl;
+    Rational r = i;
+    if(p(r) == 0)
+    { Matrix<Rational> M2 = M;
+      List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
+      found += V.size;
+      spaces.AddOnTop(V);
+      if(found == M.NumCols)
+        break;
+    }
+  }
+  return spaces;
 }
 
 template <typename coefficient>
@@ -1864,158 +1687,15 @@ bool VerifyChartable(const CoxeterGroup &G, bool printresults = false)
    return okay;
 }
 
-bool CommandList::innerWeylGroupIrrepsAndCharTable
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!theCommands.innerWeylGroupConjugacyClasses(theCommands, input, output))
-    return false;
-  if (!output.IsOfType<CoxeterGroup>())
-    return true;
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
-  theGroup.ComputeInitialCharacters();
-  std::stringstream out;
-  for(int i=0; i<theGroup.characterTable.size; i++)
-    out << theGroup.characterTable[i] << "<br>";
-  theGroup.ComputeIrreducibleRepresentations();
-  out << theGroup.ToString();
-  return output.AssignValue(out.str(), theCommands);
-}
-
-bool CommandList::innerWeylGroupConjugacyClasses(CommandList& theCommands, const
- Expression& input, Expression& output)
-{ SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  CoxeterGroup tmpG;
-  tmpG.MakeFrom(thePointer->theWeyl.theDynkinType);
-  output.AssignValue(tmpG, theCommands);
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
-  if (theGroup.CartanSymmetric.NumRows>4)
-    return output.AssignValue<std::string>
-    ("I have been instructed not to do this for Weyl groups of rank greater \
-     than 4 because of the size of the computation.", theCommands);
-  theGroup.ComputeConjugacyClasses();
-  return true;
-}
-
-bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
-& input, Expression& output)
-{ //if (!input.IsSequenceNElementS(2))
-  //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
-  if(input.children.size<2){
-    return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
+template <typename coefficient>
+std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "Character: " << this->character.ToString(theFormat);
+  out << "<br>The simple generators (" << this->gens.size << " total):";
+  for (int i=0; i<this->gens.size; i++)
+  { out << CGI::GetHtmlMathSpanPure(this->gens[i].ToString(theFormat));
+    if (i!=this->gens.size-1)
+      out << ", ";
   }
-  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
-  //input[1] and input[2];
-  SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  List<int> theReflections;
-  for(int i=2; i<input.children.size; i++){
-    int tmp;
-    if (!input[i].IsSmallInteger(& tmp))
-      return false;
-    theReflections.AddOnTop(tmp-1);
-  }
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  CoxeterElement theElt;
-  int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
-  //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
-  //<< indexOfOwnerGroupInObjectContainer;
-
-  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-  //std::cout << "<br>theElt.owner: " << theElt.owner;
-//  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
-  for(int i=0; i<theReflections.size; i++){
-    if (theReflections[i] >= thePointer->GetRank() || theReflections[i] < 0)
-      return output.SetError("Bad reflection index", theCommands);
-  }
-//  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
-  theElt.reflections=(theReflections);
-  theElt.canonicalize();
-  return output.AssignValue(theElt, theCommands);
-}
-
-bool CommandList::innerClassFunction(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerClassFunction");
-  SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  CoxeterElement theElt;
-  int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
-  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-
-  theGroup.ComputeInitialCharacters();
-  if(input.IsListNElements(3))
-  { int theIndex;
-    if(!input[2].IsSmallInteger(&theIndex))
-      return output.SetError("Character index must be an integer", theCommands);
-    if(theIndex < 0 || theIndex > theGroup.ccCount)
-      return output.SetError("Character index must be between 0 and the number of conjugacy classes", theCommands);
-    if(theIndex >= theGroup.characterTable.size)
-      return output.SetError("Unfortunately, tom doesn't know how to calculate that one.  sorry.", theCommands);
-    return output.AssignValue(theGroup.characterTable[theIndex], theCommands);
-  }
-
-  if(input.IsListNElements(theGroup.ccCount+1+1))
-  { int n = theGroup.ccCount;
-    List<int> X;
-    for(int i=0; i<n; i++)
-    { int tmp;
-      if (!input[i].IsSmallInteger(& tmp))
-      { theCommands.Comments
-        << "<hr>While computing innerClassFunction, got user input: " << input[i].ToString()
-        << " which is not a small integer - possible user typo?";
-        return false;
-      }
-      X.AddOnTop(tmp);
-    }
-    ClassFunction<Rational> theChar;
-    theChar.G = &theGroup;
-    theChar.data = X;
-    return output.AssignValue(theChar, theCommands);
-  }
-  return output.SetError("Class functions may be selected by character index or entered by hand.", theCommands);
-}
-
-bool CommandList::innerMinPolyMatrix
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!theCommands.innerMatrixRational(theCommands, input, output))
-    return false;
-  Matrix<Rational> theMat;
-  if (!output.IsOfType<Matrix<Rational> >(&theMat))
-  { theCommands.Comments << "<hr> Successfully called innerMatrixRational onto input " << input.ToString()
-    << " to get " << output.ToString()
-    << " but the return type was not a matrix of rationals. ";
-    return true;
-  }
-  if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
-    return output.SetError("Error: matrix is not square!", theCommands);
-  FormatExpressions tempF;
-  tempF.polyAlphabeT.SetSize(1);
-  tempF.polyAlphabeT[0]="q";
-  UDPolynomial<Rational> theMinPoly = MinPoly(theMat);
-  return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
-}
-
-template <class coefficient>
-std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat)const
-{ Polynomial<coefficient> tempP;
-  tempP.MakeZero();
-  MonomialP tempM;
-  for (int i=0; i<this->data.size; i++)
-  { tempM.MakeEi(0, i, 1);
-    tempP.AddMonomial(tempM, this->data[i]);
-  }
-  return tempP.ToString(theFormat);
+  return out.str();
 }

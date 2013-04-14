@@ -342,6 +342,26 @@ public:
     return p;
   }
   static int lcm(int a, int b);
+  template <typename integral>
+  static integral gcd(integral a, integral b)
+  { integral temp;
+    while(!(b==0))
+    { temp= a % b;
+      a=b;
+      b=temp;
+    }
+    return a;
+  }
+  template <typename integral>
+  static integral lcm(integral a, integral b)
+  { //std::cout << "<br>\nlcm(" << a << ',' << b << ")=" << std::endl;
+    integral result;
+    result=a;
+    result/=MathRoutines::gcd(a,b);
+    result*=b;
+    //std::cout << result << std::endl;
+    return result;
+  }
   static int TwoToTheNth(int n);
   static bool isADigit(const std::string& input, int& whichDigit)
   { if (input.size()!=1)
@@ -3320,17 +3340,17 @@ ParallelComputing::GlobalPointerCounter++;
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
   ~Rational(){this->FreeExtended();}
   //the below must be called only with positive arguments!
-  static int gcd(int a, int b)
+  static inline int gcd(int a, int b)
   { MacroIncrementCounter(Rational::TotalSmallGCDcalls);
-    int temp;
-    while(b>0)
-    { temp= a % b;
-      a=b;
-      b=temp;
-    }
-    return a;
+    return MathRoutines::gcd(a, b);
   }
-  static int gcdSigned(int a, int b){if (a<0) {a*=-1; } if (b<0){b*=-1; } return Rational::gcd(a, b); }
+  static int gcdSigned(int a, int b)
+  { if (a<0)
+      a*=-1;
+    if (b<0)
+      b*=-1;
+    return Rational::gcd(a, b);
+  }
   inline bool CheckForElementSanity(){ return this->Extended==0;}
   inline bool checkConsistency(){ return this->ConsistencyCheck();}
   inline bool ConsistencyCheck()
@@ -4942,6 +4962,9 @@ public:
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   bool NeedsBrackets()const{return this->size>1;}
   std::string ToString(FormatExpressions* theFormat=0)const;
+  //BIG FAT WARNING
+  //the hash function of Monomial collection must return the same value for
+  // monomial collections whose monomials are permuted!
   static unsigned int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
   { unsigned int result=0;
     for (int i=0; i<input.size; i++)

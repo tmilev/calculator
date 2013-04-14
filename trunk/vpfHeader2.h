@@ -4,13 +4,16 @@
 #define vpfHeader2_h_already_included
 
 //the following  include contains all the c++ math routines used in the calculator.
+#include "vpfHeader1_2.h"
+#include "vpfCharacters.h"
+#include "vpfGraph.h"
 #include "vpfHeader1_3.h"
 #include "vpfHeader3ListReferences.h"
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
-#include "vpfCharacters.h"
-#include "vpfGraph.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
+
+class CoxeterElement;
 
 class Expression
 { void reset()
@@ -535,7 +538,6 @@ class ObjectContainer
   //by various predefined function handlers.
 public:
   HashedListReferences<CoxeterElement> theCoxeterElements;
-  HashedListReferences<ClassFunction<Rational> > theClassFunctions;
   ListReferences<CoxeterGroup> theCoxeterGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
@@ -555,6 +557,7 @@ public:
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
+  HashedListReferences<CoxeterRepresentation<Rational> > theWeylGroupIrreps;
   ListReferences<CalculusFunctionPlot> thePlots;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
@@ -1550,22 +1553,6 @@ public:
   static bool innerEmbedSSalgInSSalg
 (CommandList& theCommands, const Expression& input, Expression& output)
  ;
-  static bool innerWeylOrbit
-(CommandList& theCommands, const Expression& input, Expression& output,
- bool useFundCoords, bool useRho)
- ;
-  static bool fWeylOrbitFund
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerWeylOrbit(theCommands, input, output, true, false);
-}
-  static bool fWeylOrbitSimple
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerWeylOrbit(theCommands, input, output, false, false);
-}
-  static bool fWeylOrbitFundRho
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerWeylOrbit(theCommands, input, output, true, true);
-}
 //  static bool innerSSLieAlgebra
 //  (CommandList& theCommands, const Expression& input, Expression& output)
 //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
@@ -1687,19 +1674,7 @@ static bool innerDrawRootSystem
   { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
-  static bool innerWeylGroupConjugacyClasses
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool innerCoxeterElement
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool innerWeylGroupIrrepsAndCharTable
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
   static bool innerMinPolyMatrix
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool innerClassFunction
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerCharacterSSLieAlgFD

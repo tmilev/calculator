@@ -1,6 +1,7 @@
-#ifndef vpfCharacterHeader
-#define vpfCharacterHeader
-#include "vpf.h"
+#ifndef vpfCharacterHeader_alreadyIncluded
+#define vpfCharacterHeader_alreadyIncluded
+#include "vpfHeader1.h"
+#include "vpfHeader1_2.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersHEader
 (__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
@@ -23,7 +24,11 @@ class ClassFunction{
     CoxeterGroup *G;
     List<coefficient> data;
 
-    ClassFunction(){}
+    ClassFunction():G(0){} //the syntax :G(0) initializes the pointer G with 0.
+    //although there may be a minor speed penalty
+    //(I such a speed penalty is system dependent and possibly
+    //even hardware dependent),
+    //it is worth it to initialize all pointers with 0.
 
     void MakeZero();
     coefficient IP(const ClassFunction &other) const;
@@ -35,10 +40,15 @@ class ClassFunction{
     ClassFunction<coefficient> operator-(const ClassFunction<coefficient> &other) const;
     ClassFunction<coefficient> ReducedWithChars(const List<ClassFunction<coefficient> > chars = 0);
     coefficient& operator[](int i) const;
-    void operator=(const ClassFunction<coefficient>& X);
-    std::string ToString(FormatExpressions* theFormat) const;
-    std::string ToString() const;
+    void operator=(const ClassFunction<coefficient>& X)
+    { this->G = X.G;
+      this->data = X.data;
+    }
+    std::string ToString(FormatExpressions* theFormat=0) const;
     static unsigned int HashFunction(const ClassFunction<coefficient>& input);
+    inline unsigned int HashFunction()const
+    { return this->HashFunction(*this);
+    }
     bool operator==(const ClassFunction<coefficient>& other) const;
     bool operator>(const ClassFunction<coefficient>& right) const;
 };
@@ -48,6 +58,21 @@ std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
 
 class CoxeterGroup
 { public:
+  // these are things any finite group should have
+  int N;
+  int ccCount;
+  List<int> ccSizes;
+  List<List<int> > conjugacyClasses;
+  List<int> squares;
+  List<ClassFunction<Rational> > characterTable;
+  List<CoxeterRepresentation<Rational> > irreps;
+  // these are specific to this type of finite group
+  Matrix<Rational> CartanSymmetric;
+  int nGens;
+  HashedList<Vector<Rational> > rootSystem;
+  Vector<Rational> rho;
+  HashedList<Vector<Rational> > rhoOrbit;
+  std::string ToString(FormatExpressions* theFormat=0) const;
   CoxeterGroup()
   { this->nGens=-1;
   }
@@ -55,60 +80,49 @@ class CoxeterGroup
   { this->MakeFrom(D);
   }
   void MakeFrom(const DynkinType& D);
+  bool operator==(const CoxeterGroup& other) const
+  { return this->CartanSymmetric==other.CartanSymmetric;
+  }
+  void operator=(const CoxeterGroup& other)
+  { this->CartanSymmetric=other.CartanSymmetric;
+    this->rootSystem=other.rootSystem;
+    this->rho = other.rho;
+    this->rhoOrbit=other.rhoOrbit;
+    this->conjugacyClasses=other.conjugacyClasses;
+    this->nGens=other.nGens;
+    this->N=other.N;
+    this->ccCount=other.ccCount;
+    this->ccSizes=other.ccSizes;
+    this->squares=other.squares;
+    this->characterTable=other.characterTable;
+//     std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
+  }
+  static unsigned int HashFunction(const CoxeterGroup& input)
+  { return input.CartanSymmetric.HashFunction();
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
+  HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;
+  void ComputeRhoOrbit();
+  Matrix<Rational> SimpleReflectionMatrix(int i) const;
+  Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
+  Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
+  CoxeterElement GetCoxeterElement(int i) const;
+  // note: the list is backwards
 
-  // these are things any finite group should have
-    int N;
-    int ccCount;
-    List<int> ccSizes;
-    List<List<int> > conjugacyClasses;
-    List<int> squares;
-    List<ClassFunction<Rational> > characterTable;
-    List<CoxeterRepresentation<Rational> > irreps;
-
-  // these are specific to this type of finite group
-    Matrix<Rational> CartanSymmetric;
-    int nGens;
-    HashedList<Vector<Rational> > rootSystem;
-    Vector<Rational> rho;
-    HashedList<Vector<Rational> > rhoOrbit;
-    std::string ToString(FormatExpressions* theFormat=0) const;
-    bool operator==(const CoxeterGroup& other) const
-    { return this->CartanSymmetric==other.CartanSymmetric;
-    }
-    void operator=(const CoxeterGroup& other)
-    { this->CartanSymmetric=other.CartanSymmetric;
-      this->rootSystem=other.rootSystem;
-      this->rho = other.rho;
-      this->rhoOrbit=other.rhoOrbit;
-      this->conjugacyClasses=other.conjugacyClasses;
-      this->nGens=other.nGens;
-      this->N=other.N;
-      this->ccCount=other.ccCount;
-      this->ccSizes=other.ccSizes;
-      this->squares=other.squares;
-      this->characterTable=other.characterTable;
-//      std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
-    }
-    Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
-    HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;
-    void ComputeRhoOrbit();
-    Matrix<Rational> SimpleReflectionMatrix(int i) const;
-    Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
-    Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
-    CoxeterElement GetCoxeterElement(int i) const;
-    // note: the list is backwards
-
-    List<int> DecomposeTodorsVector(const Vector<Rational> &v) const;
-    Vector<Rational> ComposeTodorsVector(const List<int> &l) const;
-    Vector<Rational> ApplyList(const List<int> &l, const Vector<Rational> &v) const;
-    Vector<Rational> SimpleConjugation(int i, const Vector<Rational> &v) const;
-    int MultiplyElements(int i, int j) const;
-    int operator()(int i, int j) const;
-    CoxeterRepresentation<Rational> StandardRepresentation();
-    void ComputeConjugacyClasses();
-    void ComputeSquares();
-    void ComputeInitialCharacters();
-    void ComputeIrreducibleRepresentations();
+  List<int> DecomposeTodorsVector(const Vector<Rational> &v) const;
+  Vector<Rational> ComposeTodorsVector(const List<int> &l) const;
+  Vector<Rational> ApplyList(const List<int> &l, const Vector<Rational> &v) const;
+  Vector<Rational> SimpleConjugation(int i, const Vector<Rational> &v) const;
+  int MultiplyElements(int i, int j) const;
+  int operator()(int i, int j) const;
+  CoxeterRepresentation<Rational> StandardRepresentation();
+  void ComputeConjugacyClasses();
+  void ComputeSquares();
+  void ComputeInitialCharacters();
+  void ComputeIrreducibleRepresentations();
 };
 
 class CoxeterElement{
@@ -355,25 +369,19 @@ coefficient& ClassFunction<coefficient>::operator[](int i) const
 
 template <typename coefficient>
 std::string ClassFunction<coefficient>::ToString(FormatExpressions* theFormat) const
-{ //if (this->G==0)
-  //  return "(not initialized)";
-  // Check disabled because it shouldn't happen and doesn't work
+{ if (this->G==0)
+    return "(not initialized)";
   std::stringstream out;
   out << "(";
-  for(int i=0;i<data.size;i++){
-    out << data[i];
-    if(i<data.size-1)
+  for(int i=0;i<this->data.size;i++){
+    out << this->data[i];
+    if(i<this->data.size-1)
       out << ", ";
   }
   out << ")[";
-  out << norm();
+  out << this->norm();
   out << "]";
   return out.str();
-}
-
-template <typename coefficient>
-std::string ClassFunction<coefficient>::ToString() const
-{ return ToString(0);
 }
 
 template <typename coefficient>
@@ -392,12 +400,6 @@ unsigned int ClassFunction<coefficient>::HashFunction(const ClassFunction<coeffi
     acc = input.data[i].HashFunction()*SomeRandomPrimes[i];
   }
   return acc;
-}
-
-template <typename coefficient>
-void ClassFunction<coefficient>::operator=(const ClassFunction<coefficient>& X)
-{ this->G = X.G;
-  this->data = X.data;
 }
 
 // this should probably check if G is the same, but idk how to make that happen
@@ -471,26 +473,206 @@ template <typename coefficient>
 class CoxeterRepresentation
 {
 public:
-   CoxeterGroup *G;
-   List<Vector<coefficient> > basis;
-   List<Matrix<coefficient> > gens;
+  CoxeterGroup *G;
+  List<Vector<coefficient> > basis;
+  List<Matrix<coefficient> > gens;
 
-   ClassFunction<coefficient> character;
-   List<Matrix<coefficient> > classFunctionMatrices;
-   TrixTree<coefficient> elements;
+  ClassFunction<coefficient> character;
+  List<Matrix<coefficient> > classFunctionMatrices;
+  TrixTree<coefficient> elements;
 
-   CoxeterRepresentation() {};
+  CoxeterRepresentation():G(0){}
 
-   CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
-
-   ClassFunction<coefficient> GetCharacter();
-   coefficient GetNumberOfComponents();
-   Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
-   List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
-   CoxeterRepresentation<coefficient> Reduced() const;
-   VectorSpace<coefficient> FindDecentBasis() const;
-   bool operator>(CoxeterRepresentation<coefficient>& right);
+  CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const CoxeterRepresentation& input)
+  { if (input.G==0)
+      return 0;
+    return SomeRandomPrimes[0]*input.G->HashFunction()+SomeRandomPrimes[1]*input.character.HashFunction();
+  }
+  ClassFunction<coefficient> GetCharacter();
+  coefficient GetNumberOfComponents();
+  bool CheckRepresentationConsistency();
+  Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
+  List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
+  CoxeterRepresentation<coefficient> Reduced() const;
+  VectorSpace<coefficient> FindDecentBasis() const;
+  bool operator>(CoxeterRepresentation<coefficient>& right);
+  std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
+
+// Univariate dense polynomials.
+template <typename coefficient>
+class UDPolynomial
+{
+public:
+   // "So the last shall be first, and the first last" -- Matthew 20:12
+  List<coefficient> data;
+  UDPolynomial(){}
+  UDPolynomial(const UDPolynomial<coefficient>& other)
+  { this->data=other.data;
+  }
+//  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
+  void operator+=(const UDPolynomial<coefficient>& right);
+//  UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
+  void operator-=(const UDPolynomial<coefficient>& right);
+  UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
+//  UDPolynomial<coefficient> operator*(const coefficient& right) const;
+  void operator*=(const coefficient& right);
+  void operator*=(const UDPolynomial<coefficient>& other)
+  { *this=(*this)*other;
+  }
+  UDPolynomial<coefficient> TimesXn(int n) const;
+// Quick divisibility test
+// bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
+  struct DivisionResult<UDPolynomial<coefficient> > DivideBy(const UDPolynomial<coefficient>& right) const;
+  UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
+  UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
+  void operator/=(const coefficient& right);
+  void operator/=(const UDPolynomial<coefficient>& right)
+  { *this=(*this/right);
+  }
+  coefficient operator()(const coefficient& x) const;
+  void ClearDenominators();
+  void FormalDerivative();
+  void SquareFree();
+  List<coefficient> GetRoots() const;
+  void DoKronecker() const;
+// static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
+  coefficient& operator[](int i) const;
+  bool operator<(const UDPolynomial<coefficient>& right) const;
+  bool operator==(int other) const;
+  void operator=(const UDPolynomial<coefficient>& right)
+  { this->data=right.data;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  void AssignMinPoly(const Matrix<coefficient>& input);
+};
+
+template <typename coefficient>
+void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
+{ int n = input.NumCols;
+  this->data.SetSize(1);
+  this->data[0] = 1;
+  for(int col = 0; col < n; col++)
+  { VectorSpace<coefficient> vs;
+    Vector<coefficient> v,w;
+    v.MakeEi(n,col);
+    vs.AddVectorToBasis(v);
+    for(int i=0; i<n; i++)
+    { w = input*v;
+      if(!vs.AddVectorToBasis(w))
+        break;
+      v = w;
+    }
+    Vector<coefficient> p = vs.basis.PutInBasis(w);
+    UDPolynomial<coefficient> out;
+    out.data.SetSize(p.size+1);
+    for(int i=0; i<p.size; i++)
+      out.data[i] = -p[i];
+    out.data[p.size] = 1;
+    *this = MathRoutines::lcm (*this, out);
+  }
+}
+
+template <typename coefficient>
+coefficient& UDPolynomial<coefficient>::operator[](int i) const
+{ return data[i];
+}
+
+template <typename coefficient>
+coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
+{  coefficient acc = 0;
+   coefficient y = 1;
+   for(int i=0; i<data.size; i++)
+   {  acc += y*data[i];
+      y *= x;
+   }
+   return acc;
+}
+
+template <typename coefficient>
+void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right)
+{  int t = min(right.data.size, data.size);
+   for(int i=0; i<t; i++)
+      data[i] += right.data[i];
+
+   if(right.data.size > data.size)
+   {  int n = data.size;
+      data.SetSize(right.data.size);
+      for(int i=n; i<right.data.size; i++)
+         data[i] = right.data[i];
+   }
+   else
+      while((data.size != 0) and (data[data.size-1] != 0))
+         data.size--;
+}
+
+template <typename coefficient>
+void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
+{  // int t = min(right.data.size, data.size); // wtf lol
+  int t = right.data.size;
+  if(data.size < t)
+    t = data.size;
+
+  for(int i=0; i<t; i++)
+    data[i] -= right.data[i];
+
+  if(right.data.size > data.size)
+  {  int n = data.size;
+     data.SetSize(right.data.size);
+     for(int i=n; i<right.data.size; i++)
+       data[i] = -right.data[i];
+  }
+  else
+    while((data.size != 0) and (data[data.size-1] == 0))
+      data.size--;
+}
+
+template <typename coefficient>
+UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomial<coefficient>& right) const
+{  UDPolynomial<coefficient> out;
+   out.data.SetSize(data.size+right.data.size-1);
+   for(int i=0; i<out.data.size; i++)
+      out.data[i] = 0;
+   for(int i=0; i<data.size; i++)
+      for(int j=0; j<right.data.size; j++)
+         out.data[i+j] += data[i]*right.data[j];
+   return out;
+}
+
+template <typename coefficient>
+UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
+{  UDPolynomial<coefficient> out;
+   out.data.SetSize(data.size+n);
+   for(int i=0; i<n; i++)
+     out.data[i] = 0;
+   // not memcpy()
+   for(int i=0; i<data.size; i++)
+      out.data[i+n] = data[i];
+
+   return out;
+}
+
+template <typename coefficient>
+void UDPolynomial<coefficient>::operator*=(const coefficient& right)
+{  for(int i=0; i<data.size; i++)
+      data[i] *= right;
+}
+
+template <class coefficient>
+std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat)const
+{ Polynomial<coefficient> tempP;
+  tempP.MakeZero();
+  MonomialP tempM;
+  for (int i=0; i<this->data.size; i++)
+  { tempM.MakeEi(0, i, 1);
+    tempP.AddMonomial(tempM, this->data[i]);
+  }
+  return tempP.ToString(theFormat);
+}
 
 #endif

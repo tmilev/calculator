@@ -1,33 +1,46 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
+#include "vpfCharacters_CalculatorInterface.h"
+
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
 void CommandList::initPredefinedInnerFunctions()
 {
   this->AddOperationInnerHandler
-  ("MakeCoxeterElement", this->innerCoxeterElement, "",
+  ("MakeWeylGroupElement", WeylGroupCalculatorFunctions::innerCoxeterElement, "",
    "Needs a group name and a list of generators",
-   "MakeCoxeterElement{}(A_2, 1);", true)
+   "s_{{i}}:=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true)
    ;
 
   this->AddOperationInnerHandler
-  ("MakeClassFunction", this->innerClassFunction, "",
-   "Either gets the nth character, or accepts user input as a class function",
-   "MakeCharacter{}(B_3, 1);", true)
-   ;
-
-  this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClasses", this->innerWeylGroupConjugacyClasses, "",
+  ("WeylGroupConjugacyClasses", WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses, "",
    "For a Weyl group of rank 4 or less, computes the conjugacy classes of a Weyl group.",
    "WeylGroupConjugacyClasses{}(A_2);", true)
    ;
   this->AddOperationInnerHandler
-  ("WeylGroupIrrepsAndCharTable", this->innerWeylGroupIrrepsAndCharTable, "",
+  ("WeylGroupIrrepsAndCharTable", WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable, "",
    "Computes the irreducible representations and the character table of a Weyl group.",
    "WeylGroupIrrepsAndCharTable{}(b_3);", true)
    ;
+    this->AddOperationInnerHandler
+  ("WeylOrbitSimpleCoords",  WeylGroupCalculatorFunctions::innerWeylGroupOrbitSimple, "",
+   "Generates a Weyl orbit printout from simple coords.\
+    First argument = type. Second argument = weight in simple coords. \
+    The orbit size is cut off at max 1920 elements (type D_5).",
+   "WeylOrbitSimpleCoords{}(B_2, (y, y));");
+  this->AddOperationInnerHandler
+  ("WeylOrbitFundCoords", WeylGroupCalculatorFunctions::innerWeylGroupOrbitFund, "",
+   "Generates a Weyl orbit printout from fundamental coords.\
+    First argument = type. Second argument = weight in fundamental coords. ",
+   "WeylOrbitFundCoords{}(B_2, (y, 0));");
+  this->AddOperationInnerHandler
+  ("WeylOrbitFundRho", WeylGroupCalculatorFunctions::innerWeylGroupOrbitFundRho, "",
+   "Generates a Weyl orbit printout from fundamental coords.\
+    First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
+   "WeylOrbitFundRho{}(B_2, (y, 0) )");
+
   this->AddOperationInnerHandler
   ("MinPoly", this->innerMinPolyMatrix, "",
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
@@ -433,22 +446,6 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    parabolic subalgebra selection. \
    The first argument gives the type of the Lie algebra. ",
    "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ");
-  this->AddOperationInnerHandler
-  ("WeylOrbitSimpleCoords", this->fWeylOrbitSimple, "",
-   "Generates a Weyl orbit printout from simple coords.\
-    First argument = type. Second argument = weight in simple coords. \
-    The orbit size is cut off at max 1920 elements (type D_5).",
-   "WeylOrbitSimpleCoords{}(B_2, (y, y));");
-  this->AddOperationInnerHandler
-  ("WeylOrbitFundCoords", this->fWeylOrbitFund, "",
-   "Generates a Weyl orbit printout from fundamental coords.\
-    First argument = type. Second argument = weight in fundamental coords. ",
-   "WeylOrbitFundCoords{}(B_2, (y, 0));");
-  this->AddOperationInnerHandler
-  ("WeylOrbitFundRho", this->fWeylOrbitFundRho, "",
-   "Generates a Weyl orbit printout from fundamental coords.\
-    First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
-   "WeylOrbitFundRho{}(B_2, (y, 0) )");
   this->AddOperationInnerHandler
   ("KLcoeffs", this->fKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \

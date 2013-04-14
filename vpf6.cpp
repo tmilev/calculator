@@ -299,14 +299,6 @@ CoxeterElement
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
-template < >
-int Expression::AddObjectReturnIndex(const
-ClassFunction<Rational>
-& inputValue)const
-{ this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theClassFunctions
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
-}
 //Expression::AddObjectReturnIndex specializations end
 
 //start Expression::GetValuENonConstUseWithCaution specializations.
@@ -508,17 +500,6 @@ CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theCoxeterElements[this->GetLastChild().theData];
-}
-
-template < >
-ClassFunction<Rational>& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<ClassFunction<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type ClassFunction. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  return this->theBoss->theObjectContainer.theClassFunctions[this->GetLastChild().theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3289,114 +3270,6 @@ bool CommandList::fKLcoeffs
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerWeylOrbit
-(CommandList& theCommands, const Expression& input, Expression& output,
- bool useFundCoords, bool useRho)
-{ if (!input.IsListNElements(3))
-    return output.SetError("innerWeylOrbit takes two arguments", theCommands);
-  const Expression& theSSalgebraNode=input[1];
-  const Expression& vectorNode=input[2];
-  SemisimpleLieAlgebra* theSSalgebra;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
-  Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
-  Expression theContext;
-  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), Serialization::innerPolynomial))
-    return output.SetError("Failed to extract highest weight", theCommands);
-  WeylGroup& theWeyl=theSSalgebra->theWeyl;
-  if (!useFundCoords)
-  { theHWsimpleCoords=theHWfundCoords;
-    theHWfundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
-  } else
-    theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundCoords);
-  std::stringstream out, latexReport;
-  Vectors<Polynomial<Rational> > theHWs;
-  FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
-//  theFormat.fundamentalWeightLetter="\\psi";
-  theHWs.AddOnTop(theHWsimpleCoords);
-  HashedList<Vector<Polynomial<Rational> > > outputOrbit;
-  WeylGroup orbitGeneratingSet;
-  Polynomial<Rational> theExp;
-  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921))
-    out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
-    << " elements only.";
-  else
-    out << "The orbit has " << outputOrbit.size << " elements.";
-  latexReport
-  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& "
-  << "Hw minus wt. \\\\\n<br>";
-  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> "
-  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
-  if (useRho)
-    out << "<td>Corresponding b-singular vector candidate</td>";
-  out << "</tr>";
-  MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
-  LargeInt tempInt;
-  bool useMathTag=outputOrbit.size<150;
-  Matrix<Rational> epsCoordMat;
-  theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
-  for (int i=0; i<outputOrbit.size; i++)
-  { theFormat.simpleRootLetter="\\alpha";
-    theFormat.fundamentalWeightLetter="\\psi";
-    std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
-    Vector<Polynomial<Rational> > epsVect=outputOrbit[i];
-    epsCoordMat.ActOnVectorColumn(epsVect);
-    std::string orbitEltStringEpsilonCoords=epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
-    std::string weightEltString=
-    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
-    (theFormat.fundamentalWeightLetter, &theFormat);
-    out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
-    << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
-    << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
-    << "</td>";
-    latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
-    << orbitEltStringEpsilonCoords
-    << "$ & $"
-    <<  weightEltString << "$ & $"
-    << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
-    << "$\\\\\n<br>"
-    ;
-    if (useRho)
-    { currentWeight=theHWsimpleCoords;
-      standardElt.MakeConst(*theSSalgebra);
-      bool isGood=true;
-      for (int j=0; j<orbitGeneratingSet[i].size; j++)
-      { int simpleIndex=orbitGeneratingSet[i][j];
-        theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
-        theWeyl.SimpleReflection(simpleIndex, currentWeight, useRho, false);
-        theExp*=2;
-        theExp/=theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex];
-        if (useRho)
-          theExp+=1;
-        if (theExp.IsInteger(&tempInt))
-          if (tempInt<0)
-          { isGood=false;
-            break;
-          }
-        standardElt.MultiplyByGeneratorPowerOnTheLeft
-        (theSSalgebra->GetNumPosRoots() -simpleIndex-1, theExp);
-      }
-      out << "<td>";
-      if (isGood)
-        out << CGI::GetHtmlMathSpanPure(standardElt.ToString(&theFormat));
-      else
-        out << "-";
-      out << "</td>";
-    }
-    out << "</tr>";
-  }
-  latexReport << "\\end{longtable}";
-  out << "</table>" << "<br> " << latexReport.str();
-  return output.AssignValue(out.str(), theCommands);
-}
-
 bool CommandList::innerPrintSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 { MacroRegisterFunctionWithName("CommandList::innerPrintSSLieAlgebra");
@@ -4978,14 +4851,6 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<CoxeterElement>())
   { CoxeterElement& theElt=this->GetValuENonConstUseWithCaution<CoxeterElement>();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseReflectionNotation=true;
-    out << theElt.ToString(&tempFormat);
-    result=true;
-  } else if (this->IsOfType<ClassFunction<Rational> >())
-  { ClassFunction<Rational>& theElt=this->GetValuENonConstUseWithCaution<ClassFunction<Rational> >();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;

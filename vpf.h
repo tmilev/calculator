@@ -64,6 +64,7 @@
 #include "vpfHeader1_2.h"
 #include "vpfHeader1_3.h"
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpfCharacters.h"
 #include "vpfHeader2.h"
 //static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

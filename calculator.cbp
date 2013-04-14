@@ -45,7 +45,6 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="vpf.h.gch" />
 		<Unit filename="vpf1_5SubsetsSelections.h" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
@@ -65,6 +64,8 @@
 		</Unit>
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters.h" />
+		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />
+		<Unit filename="vpfCharacters_CalculatorInterface.h" />
 		<Unit filename="vpfGraph.cpp" />
 		<Unit filename="vpfGraph.h" />
 		<Unit filename="vpfHeader1.h" />

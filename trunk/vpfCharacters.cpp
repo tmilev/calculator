@@ -250,7 +250,6 @@ void CoxeterGroup::ComputeSquares(){
     squares = l;
 }
 
-
 void CoxeterGroup::ComputeInitialCharacters(){
   if(squares.size == 0)
     ComputeSquares();
@@ -681,9 +680,6 @@ void SpaceTree<coefficient>::DisplayTree() const
    std::cout << ']';
 }
 
-
-
-
 template <typename coefficient>
 CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*(const CoxeterRepresentation<coefficient>& other) const
 { CoxeterRepresentation<coefficient> U;
@@ -714,10 +710,8 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*
         U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
      }
    }*/
-
-
-   U.G = G;
-   return U;
+  U.G = G;
+  return U;
 }
 
 template <typename coefficient>
@@ -830,9 +824,9 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   List<CoxeterRepresentation<coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if(GetNumberOfComponents() == 1)
-  { if(ct.GetIndex(character) == -1)
+  { if(ct.GetIndex(this->character) == -1)
     { std::cout << "new irrep found, have " << ct.size << std::endl;
-      ct.AddOnTop(character);
+      ct.AddOnTop(this->character);
       gr.AddOnTop(*this);
     }
     out.AddOnTop(*this);
@@ -841,7 +835,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   List<Vector<coefficient> > Vb = basis;
   List<Vector<coefficient> > tempVectors;
   for(int i=0; i<ct.size; i++)
-    if(character.IP(ct[i])!=0)
+    if(this->character.IP(ct[i])!=0)
     { std::cout << "contains irrep " << i << std::endl;
       ClassFunctionMatrix(ct[i], splittingOperatorMatrix);
       DestructiveKernel(splittingOperatorMatrix, splittingMatrixKernel);
@@ -972,21 +966,20 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
 
 template <typename coefficient>
 ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()
-{  if(character.data.size)
-     return character;
-
-   character.G = G;
-   character.data.SetSize(G->ccCount);
-   for(int cci=0; cci < G->ccCount; cci++)
-   {  CoxeterElement g;
-      g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
-      Matrix<coefficient> M;
-      M.MakeIdMatrix(gens[0].NumRows);
-      for(int gi=0; gi<g.reflections.size; gi++)
-         M.MultiplyOnTheRight(gens[g.reflections[gi]]);
-      character.data[cci] = M.GetTrace();
-   }
-   return character;
+{ if(this->character.data.size)
+    return this->character;
+  this->character.G = G;
+  this->character.data.SetSize(G->ccCount);
+  for(int cci=0; cci < G->ccCount; cci++)
+  { CoxeterElement g;
+    g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
+    Matrix<coefficient> M;
+    M.MakeIdMatrix(gens[0].NumRows);
+    for(int gi=0; gi<g.reflections.size; gi++)
+        M.MultiplyOnTheRight(gens[g.reflections[gi]]);
+    this->character.data[cci] = M.GetTrace();
+  }
+  return this->character;
 }
 
 template <typename coefficient>
@@ -1011,6 +1004,7 @@ CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
   out.G = this;
   out.gens = gens;
   out.basis.MakeEiBasis(this->nGens);
+  out.GetCharacter();
   return out;
 }
 
@@ -1387,10 +1381,10 @@ void intersection
   int i=0;
   for(; i<Vperp.size; i++)
     for(int j=0; j<d; j++)
-        M.elements[i][j] = Vperp[i][j];
+      M.elements[i][j] = Vperp[i][j];
   for(; i<Vperp.size+Wperp.size; i++)
     for(int j=0; j<d; j++)
-        M.elements[i][j] = Wperp[i-Vperp.size][j];
+      M.elements[i][j] = Wperp[i-Vperp.size][j];
   return DestructiveKernel(M, output);
 }
 

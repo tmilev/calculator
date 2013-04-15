@@ -172,6 +172,18 @@ bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
 { return false;
 }
 
+bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
+      (theCommands, input, output))
+    return false;
+  if (!output.IsOfType<CoxeterGroup>())
+    return false;
+  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
+  //std::cout << theGroup.ToString();
+  return output.AssignValue(theGroup.StandardRepresentation(), theCommands);
+}
+
 bool WeylGroupCalculatorFunctions::innerCoxeterElement
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //if (!input.IsSequenceNElementS(2))

@@ -1070,6 +1070,9 @@ public:
   int opMatRat()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
   }
+  int opWeylGroupIrrep()
+  { return this->operations.GetIndexIMustContainTheObject("WeylGroupIrrep");
+  }
   int opMatRF()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_RF");
   }

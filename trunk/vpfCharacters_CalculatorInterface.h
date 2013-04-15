@@ -28,6 +28,9 @@ public:
   static bool innerWeylGroupIrrepsAndCharTable
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerWeylGroupNaturalRep
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerDecomposeProductWeylIrreps
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

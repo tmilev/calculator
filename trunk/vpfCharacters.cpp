@@ -642,22 +642,26 @@ public:
 
 template <typename coefficient>
 void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
-{  for(int i=0; i<subspaces.size; i++)
-   {  List<Vector<coefficient> > U = intersection(V,subspaces[i].space);
-      if(U.size == 0)
-         continue;
-      if(U.size == subspaces[i].space.size)
-         return;
-      subspaces[i].PlaceInTree(U);
-   }
-   List<Vector<coefficient> > W;
-   for(int i=0; i<subspaces.size; i++)
-      W = getunion(W,subspaces[i].space);
-   if(intersection(W,V).size != V.size)
-   {  SpaceTree<coefficient> vst;
-      vst.space = V;
-      subspaces.AddOnTop(vst);
-   }
+{ List<Vector<coefficient> > U;
+  for(int i=0; i<subspaces.size; i++)
+  { intersection(V, subspaces[i].space, U);
+    if(U.size == 0)
+      continue;
+    if(U.size == subspaces[i].space.size)
+      return;
+    subspaces[i].PlaceInTree(U);
+  }
+  List<Vector<coefficient> > W, tempVspace;
+  for(int i=0; i<subspaces.size; i++)
+  { getunion(W, subspaces[i].space, tempVspace);
+    W=tempVspace;
+  }
+  intersection(W, V, tempVspace);
+  if(tempVspace.size != V.size)
+  { SpaceTree<coefficient> vst;
+    vst.space = V;
+    subspaces.AddOnTop(vst);
+  }
 }
 
 template <typename coefficient>
@@ -717,35 +721,34 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*
 }
 
 template <typename coefficient>
-Matrix<coefficient> CoxeterRepresentation<coefficient>::ClassFunctionMatrix(ClassFunction<coefficient> cf)
-{  Matrix<coefficient> M;
-   M.MakeZeroMatrix(this->gens[0].NumRows);
-   if(classFunctionMatrices.size == 0)
+void CoxeterRepresentation<coefficient>::ClassFunctionMatrix
+(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat)
+{ outputMat.MakeZeroMatrix(this->gens[0].NumRows);
+  if(classFunctionMatrices.size == 0)
     classFunctionMatrices.SetSize(G->ccCount);
-   for(int cci=0; cci<this->G->ccCount; cci++)
-   {  if(cf[cci] == 0)
-         continue;
-      if(classFunctionMatrices[cci].NumCols == 0)
-      { std::cout << "Generating class function matrix " << cci << " with dimension " << gens[0].NumCols << "(cc has " << G->conjugacyClasses[cci].size << ")" << std::endl;
-        classFunctionMatrices[cci].MakeZeroMatrix(gens[0].NumCols);
-        for(int icci=0; icci<this->G->conjugacyClasses[cci].size; icci++)
-        { //Matrix<coefficient> Mi;
-          //Mi.MakeIdMatrix(this->gens[0].NumCols);
-          CoxeterElement g = G->GetCoxeterElement(G->conjugacyClasses[cci][icci]);
-          classFunctionMatrices[cci] += elements.GetElement(g,gens);
-          //for(int gi=g.reflections.size-1; ; gi--)
-          //{  if(gi < 0)
-          //      break;
-          //    Mi.MultiplyOnTheRight(gens[g.reflections[gi]]);
-          //}
-          //classFunctionMatrices[cci] += Mi;
-        }
+  for(int cci=0; cci<this->G->ccCount; cci++)
+  { if(inputCF[cci] == 0)
+      continue;
+    if(classFunctionMatrices[cci].NumCols == 0)
+    { std::cout << "Generating class function matrix " << cci << " with dimension " << gens[0].NumCols << "(cc has " << G->conjugacyClasses[cci].size << ")" << std::endl;
+      classFunctionMatrices[cci].MakeZeroMatrix(gens[0].NumCols);
+      for(int icci=0; icci<this->G->conjugacyClasses[cci].size; icci++)
+      { //Matrix<coefficient> Mi;
+        //Mi.MakeIdMatrix(this->gens[0].NumCols);
+        CoxeterElement g = G->GetCoxeterElement(G->conjugacyClasses[cci][icci]);
+        classFunctionMatrices[cci] += elements.GetElement(g,gens);
+        //for(int gi=g.reflections.size-1; ; gi--)
+        //{  if(gi < 0)
+        //      break;
+        //    Mi.MultiplyOnTheRight(gens[g.reflections[gi]]);
+        //}
+        //classFunctionMatrices[cci] += Mi;
       }
-      for(int i=0; i<M.NumRows; i++)
-        for(int j=0; j<M.NumCols; j++)
-          M.elements[i][j] += classFunctionMatrices[cci].elements[i][j] * cf[cci];
-   }
-   return M;
+    }
+    for(int i=0; i<outputMat.NumRows; i++)
+      for(int j=0; j<outputMat.NumCols; j++)
+        outputMat.elements[i][j]+= classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
+  }
 }
 
 template <typename coefficient>
@@ -821,46 +824,52 @@ VectorSpace<coefficient> CoxeterRepresentation<coefficient>::FindDecentBasis() c
 }
 
 template <typename coefficient>
-List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
-{  List<CoxeterRepresentation<coefficient> > out;
-   if(GetNumberOfComponents() == 1)
-   { if(ct.GetIndex(character) == -1)
-     { std::cout << "new irrep found, have " << ct.size << std::endl;
-       ct.AddOnTop(character);
-       gr.AddOnTop(*this);
-     }
-     out.AddOnTop(*this);
-     return out;
-   }
-   List<Vector<coefficient> > Vb = basis;
-   for(int i=0; i<ct.size; i++)
-   { if(character.IP(ct[i])!=0)
-     { std::cout << "contains irrep " << i << std::endl;
-       Matrix<coefficient> M = ClassFunctionMatrix(ct[i]);
-       Vb = intersection(Vb,DestructiveKernel(M));
-     }
-   }
-   if((Vb.size < basis.size) && (Vb.size > 0))
-   { CoxeterRepresentation<coefficient> V;
-     V.G = G;
-     V.gens = gens;
-     V.classFunctionMatrices = classFunctionMatrices;
-     V.basis = Vb;
-     V = V.Reduced();
-     std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
-     return V.Decomposition(ct,gr);
-   }
-   if(Vb.size == 0)
+List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition
+(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
+{ Matrix<coefficient> splittingOperatorMatrix;
+  List<CoxeterRepresentation<coefficient> > out;
+  List<Vector<Rational> > splittingMatrixKernel;
+  if(GetNumberOfComponents() == 1)
+  { if(ct.GetIndex(character) == -1)
+    { std::cout << "new irrep found, have " << ct.size << std::endl;
+      ct.AddOnTop(character);
+      gr.AddOnTop(*this);
+    }
+    out.AddOnTop(*this);
     return out;
-   SpaceTree<Rational> st;
-   st.space = basis;
-   for(int cfi=0; cfi<G->ccCount; cfi++)
-   {  ClassFunction<coefficient> cf;
+  }
+  List<Vector<coefficient> > Vb = basis;
+  List<Vector<coefficient> > tempVectors;
+  for(int i=0; i<ct.size; i++)
+    if(character.IP(ct[i])!=0)
+    { std::cout << "contains irrep " << i << std::endl;
+      ClassFunctionMatrix(ct[i], splittingOperatorMatrix);
+      DestructiveKernel(splittingOperatorMatrix, splittingMatrixKernel);
+      intersection(Vb, splittingMatrixKernel, tempVectors);
+      Vb=tempVectors;
+    }
+  if((Vb.size < basis.size) && (Vb.size > 0))
+  { CoxeterRepresentation<coefficient> V;
+    V.G = G;
+    V.gens = gens;
+    V.classFunctionMatrices = classFunctionMatrices;
+    V.basis = Vb;
+    V = V.Reduced();
+    std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
+    return V.Decomposition(ct,gr);
+  }
+  if(Vb.size == 0)
+  return out;
+  SpaceTree<Rational> st;
+  st.space = basis;
+  for(int cfi=0; cfi<G->ccCount; cfi++)
+  {  ClassFunction<coefficient> cf;
       cf.G = G;
       cf.MakeZero();
       cf[cfi] = 1;
       std::cout << "getting matrix " << cf << std::endl;
-      Matrix<coefficient> A = ClassFunctionMatrix(cf);
+      Matrix<coefficient> A;
+      ClassFunctionMatrix(cf, A);
       List<List<Vector<coefficient> > > es = eigenspaces(A);
       std::cout << "eigenspaces were ";
       for(int i=0; i<es.size; i++)
@@ -871,23 +880,23 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
       std::cout << "tree is ";
       st.DisplayTree();
       std::cout << std::endl;
-   }
-   List<List<Vector<coefficient> > > leaves;
-   st.GetLeaves(leaves);
-   std::cout << "leaves are ";
-   for(int i=0; i<leaves.size; i++)
-      std::cout << leaves[i].size << " ";
-   std::cout << std::endl;
+  }
+  List<List<Vector<coefficient> > > leaves;
+  st.GetLeaves(leaves);
+  std::cout << "leaves are ";
+  for(int i=0; i<leaves.size; i++)
+    std::cout << leaves[i].size << " ";
+  std::cout << std::endl;
 
-   for(int i=0; i<leaves.size; i++)
-   {  CoxeterRepresentation<coefficient> outeme;
-      outeme.G = G;
-      outeme.gens = gens;
-      outeme.classFunctionMatrices = classFunctionMatrices;
-      outeme.basis = leaves[i];
-      out.AddOnTop(outeme.Reduced());
-   }
-   return out;
+  for(int i=0; i<leaves.size; i++)
+  { CoxeterRepresentation<coefficient> outeme;
+    outeme.G = G;
+    outeme.gens = gens;
+    outeme.classFunctionMatrices = classFunctionMatrices;
+    outeme.basis = leaves[i];
+    out.AddOnTop(outeme.Reduced());
+  }
+  return out;
 }
 
 /*template <typename coefficient>
@@ -993,28 +1002,27 @@ bool CoxeterRepresentation<coefficient>::operator>(CoxeterRepresentation<coeffic
 }
 
 CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
-{  List<Matrix<Rational> > gens;
-   for(int i=0; i<this->nGens; i++)
-   {  Matrix<Rational> geni = this->SimpleReflectionMatrix(i);
-      gens.AddOnTop(geni);
-   }
-   CoxeterRepresentation<Rational> out;
-   out.G = this;
-   out.gens = gens;
-   Vectors<Rational> outb;
-   outb.MakeEiBasis(this->nGens);
-   out.basis = outb;
-   return out;
+{ List<Matrix<Rational> > gens;
+  for(int i=0; i<this->nGens; i++)
+  { Matrix<Rational> geni = this->SimpleReflectionMatrix(i);
+    gens.AddOnTop(geni);
+  }
+  CoxeterRepresentation<Rational> out;
+  out.G = this;
+  out.gens = gens;
+  out.basis.MakeEiBasis(this->nGens);
+  return out;
 }
 
 void CoxeterGroup::ComputeIrreducibleRepresentations()
 {  CoxeterRepresentation<Rational> sr = this->StandardRepresentation();
    ClassFunction<Rational> cfmgen;
+   Matrix<Rational> tempMat;
    cfmgen.G = this;
    cfmgen.data.SetSize(this->ccCount);
    for(int i=0; i<this->ccCount; i++)
      cfmgen.data[i] = 1;
-   sr.ClassFunctionMatrix(cfmgen);
+   sr.ClassFunctionMatrix(cfmgen, tempMat);
    this->irreps.AddOnTop(sr);
    this->characterTable.SetSize(0);
    characterTable.AddOnTop(sr.GetCharacter());
@@ -1312,66 +1320,78 @@ bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
 }
 
 template<typename coefficient>
-List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W)
-{  if(V.size == 0)
-      return W;
-   int d = V[0].size;
-   Matrix<coefficient> M;
-   M.init(V.size+W.size,d);
-   for(int i=0; i<V.size; i++)
-      for(int j=0; j<d; j++)
-         M.elements[i][j] = V[i][j];
-   for(int i=0; i<W.size; i++)
-      for(int j=0; j<d; j++)
-         M.elements[V.size+i][j] = W[i][j];
-   Matrix<coefficient> one;
-   Selection two;
-   M.GaussianEliminationByRows(M,one,two);
-   List<Vector<coefficient> > out;
-   for(int i=0; i<M.NumRows; i++)
-   {  Vector<coefficient> v;
-      v.SetSize(d);
-      for(int j=0; j<d; j++)
-         v[j] = M.elements[i][j];
-      if(v.IsEqualToZero())
-         break;
-      out.AddOnTop(v);
-   }
-   return out;
+void getunion
+(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
+{ if (&output== &V || &output==&W)
+  { List<Vector<coefficient> > newOutput;
+    getunion(V, W, newOutput);
+    output=newOutput;
+    return;
+  }
+  if(V.size == 0)
+  { output=W;
+    return;
+  }
+  int d = V[0].size;
+  Matrix<coefficient> M;
+  M.init(V.size+W.size,d);
+  for(int i=0; i<V.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[i][j] = V[i][j];
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<d; j++)
+      M.elements[V.size+i][j] = W[i][j];
+  Matrix<coefficient> one;
+  Selection two;
+  M.GaussianEliminationByRows(M,one,two);
+  output.SetSize(0);
+  Vector<coefficient> v;
+  for(int i=0; i<M.NumRows; i++)
+  { v.SetSize(d);
+    for(int j=0; j<d; j++)
+      v[j] = M.elements[i][j];
+    if(v.IsEqualToZero())
+      break;
+    output.AddOnTop(v);
+  }
 }
 
 template<typename coefficient>
-List<Vector<coefficient> > intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W)
-{  if((V.size==0) or (W.size==0))
-   {  List<Vector<coefficient> > out;
-      return out;
-   }
-   int d = V[0].size;
+void intersection
+(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W,
+ List<Vector<coefficient> >& output)
+{ if((V.size==0) or (W.size==0))
+  { output.SetSize(0);
+    return;
+  }
+  int d = V[0].size;
 
-   Matrix<coefficient> MV;
-   MV.init(V.size, d);
-   for(int i=0; i<V.size; i++)
-      for(int j=0; j<d; j++)
-         MV.elements[i][j] = V[i][j];
-   List<Vector<coefficient> > Vperp = DestructiveKernel(MV);
+  Matrix<coefficient> MV;
+  MV.init(V.size, d);
+  for(int i=0; i<V.size; i++)
+    for(int j=0; j<d; j++)
+      MV.elements[i][j] = V[i][j];
+  List<Vector<coefficient> > Vperp;
+  DestructiveKernel(MV, Vperp);
 
-   Matrix<coefficient> MW;
-   MW.init(W.size, d);
-   for(int i=0; i<W.size; i++)
-      for(int j=0; j<d; j++)
-         MW.elements[i][j] = W[i][j];
-   List<Vector<coefficient> > Wperp = DestructiveKernel(MW);
+  Matrix<coefficient> MW;
+  MW.init(W.size, d);
+  for(int i=0; i<W.size; i++)
+    for(int j=0; j<d; j++)
+      MW.elements[i][j] = W[i][j];
+  List<Vector<coefficient> > Wperp;
+  DestructiveKernel(MW, Wperp);
 
-   Matrix<coefficient> M;
-   M.init(Vperp.size+Wperp.size,d);
-   int i=0;
-   for(; i<Vperp.size; i++)
-      for(int j=0; j<d; j++)
-         M.elements[i][j] = Vperp[i][j];
-   for(; i<Vperp.size+Wperp.size; i++)
-      for(int j=0; j<d; j++)
-         M.elements[i][j] = Wperp[i-Vperp.size][j];
-   return DestructiveKernel(M);
+  Matrix<coefficient> M;
+  M.init(Vperp.size+Wperp.size,d);
+  int i=0;
+  for(; i<Vperp.size; i++)
+    for(int j=0; j<d; j++)
+        M.elements[i][j] = Vperp[i][j];
+  for(; i<Vperp.size+Wperp.size; i++)
+    for(int j=0; j<d; j++)
+        M.elements[i][j] = Wperp[i-Vperp.size][j];
+  return DestructiveKernel(M, output);
 }
 
 template <typename coefficient>
@@ -1453,35 +1473,35 @@ List<int> factorpoly(List<coefficient> p, int maxfac)
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M)
-{  Matrix<coefficient> MM; // idk what this does
-   Selection s;
+void DestructiveKernel(Matrix<coefficient> &M, List<Vector<coefficient> >& outputKernel)
+{ Matrix<coefficient> MM;
+  Selection s;
 //  std::cout << "DestructiveKernel: GaussianEliminationByRows" << std::endl;
-   M.GaussianEliminationByRows(M,MM,s);
+  M.GaussianEliminationByRows(M, MM, s);
 //  std::cout << "DestructiveKernel: calculating kernel space" << std::endl;
-   List<Vector<coefficient> > V;
-   for(int i=0; i<s.selected.size; i++)
-   {  if(!s.selected[i])
-         continue;
-      Vector<coefficient> v;
-      v.MakeEi(M.NumCols,i);
-      int rowmap = 0;
-      for(int j=0; j<M.NumCols; j++)
-         if(!s.selected[j])
-         {  v[j] = -M.elements[rowmap][i];
-            rowmap++;
-         }
-      V.AddOnTop(v);
-   }
+  outputKernel.SetSize(0);
+  Vector<coefficient> v;
+  for(int i=0; i<s.selected.size; i++)
+  { if(!s.selected[i])
+      continue;
+    v.MakeEi(M.NumCols,i);
+    int rowmap = 0;
+    for(int j=0; j<M.NumCols; j++)
+      if(!s.selected[j])
+      { v[j] = -M.elements[rowmap][i];
+        rowmap++;
+      }
+    outputKernel.AddOnTop(v);
+  }
 //  std::cout << "DestructiveKernel: done" << std::endl;
-   return V;
 }
 
 template <typename coefficient>
-List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient> &M, const coefficient &l)
-{  for(int i=0; i<M.NumCols; i++)
-      M.elements[i][i] -= l;
-   return DestructiveKernel(M);
+void DestructiveEigenspace
+(Matrix<coefficient> &M, const coefficient &l, List<Vector<coefficient> >& outputEigenspace)
+{ for(int i=0; i<M.NumCols; i++)
+    M.elements[i][i] -= l;
+  DestructiveKernel(M, outputEigenspace);
 }
 
 template <typename coefficient>
@@ -1523,7 +1543,8 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
     Rational r = i;
     if(p(r) == 0)
     { Matrix<Rational> M2 = M;
-      List<Vector<Rational> > V = DestructiveEigenspace(M2,r);
+      List<Vector<Rational> > V;
+      DestructiveEigenspace(M2, r, V);
       found += V.size;
       spaces.AddOnTop(V);
       if(found == M.NumCols)

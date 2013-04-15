@@ -123,6 +123,12 @@ int Expression::GetTypeOperation<CoxeterGroup>()const
 }
 
 template < >
+int Expression::GetTypeOperation<CoxeterRepresentation<Rational> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opWeylGroupIrrep();
+}
+
+template < >
 int Expression::GetTypeOperation<CoxeterElement>()const
 { this->CheckInitialization();
   return this->theBoss->opCoxeterElement();
@@ -287,6 +293,15 @@ CoxeterGroup
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theCoxeterGroups
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+CoxeterRepresentation<Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theWeylGroupIrreps
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -489,6 +504,17 @@ CoxeterGroup& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theCoxeterGroups[this->GetLastChild().theData];
+}
+
+template < >
+CoxeterRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<CoxeterRepresentation<Rational> >())
+  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theWeylGroupIrreps[this->GetLastChild().theData];
 }
 
 template < >
@@ -3570,6 +3596,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("CoxeterGroup");
   this->AddOperationBuiltInType("CoxeterElement");
   this->AddOperationBuiltInType("ClassFunction");
+  this->AddOperationBuiltInType("WeylGroupIrrep");
 
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
@@ -4857,6 +4884,15 @@ bool Expression::ToStringData
     tempFormat.flagUseReflectionNotation=true;
     out << theElt.ToString(&tempFormat);
     result=true;
+  } else if (this->IsOfType<CoxeterRepresentation<Rational> >())
+  { CoxeterRepresentation<Rational>& theElt=
+    this->GetValuENonConstUseWithCaution<CoxeterRepresentation<Rational> >();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    tempFormat.flagUseReflectionNotation=true;
+    out << theElt.ToString(&tempFormat);
+    result=true;
   } else if (this->IsOfType<charSSAlgMod<Rational> >())
   { charSSAlgMod<Rational> theElt=this->GetValuENonConstUseWithCaution<charSSAlgMod<Rational> >();
     out << theElt.ToString();
@@ -5116,7 +5152,8 @@ std::string Expression::ToString
           out << (*this)[i].GetValuE<std::string>();
         else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
                   (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
-                  (*this)[i].IsOfType<CoxeterGroup>()
+                  (*this)[i].IsOfType<CoxeterGroup>() ||
+                  (*this)[i].IsOfType<CoxeterRepresentation<Rational> >()
                   )
                  && isFinal)
           out << (*this)[i].ToString(theFormat);

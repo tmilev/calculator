@@ -474,7 +474,7 @@ class CoxeterRepresentation
 {
 public:
   CoxeterGroup *G;
-  List<Vector<coefficient> > basis;
+  Vectors<coefficient> basis;
   List<Matrix<coefficient> > gens;
 
   ClassFunction<coefficient> character;
@@ -492,10 +492,13 @@ public:
       return 0;
     return SomeRandomPrimes[0]*input.G->HashFunction()+SomeRandomPrimes[1]*input.character.HashFunction();
   }
+  bool operator==(const CoxeterRepresentation<coefficient>& other)const
+  { return this->G==other.G && this->character==other.character;
+  }
   ClassFunction<coefficient> GetCharacter();
   coefficient GetNumberOfComponents();
   bool CheckRepresentationConsistency();
-  Matrix<coefficient> ClassFunctionMatrix(ClassFunction<coefficient> cf);
+  void ClassFunctionMatrix(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat);
   List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
   CoxeterRepresentation<coefficient> Reduced() const;
   VectorSpace<coefficient> FindDecentBasis() const;

@@ -40,11 +40,16 @@ void CommandList::initPredefinedInnerFunctions()
    "Generates a Weyl orbit printout from fundamental coords.\
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
+  this->AddOperationInnerHandler
+  ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
+   "Gets the natural representation of the Weyl group.",
+   "WeylGroupNaturalRep{}(B_3)", true)
+   ;
 
   this->AddOperationInnerHandler
   ("MinPoly", this->innerMinPolyMatrix, "",
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
-   "MinPoly{}((0,1), (-1,0));", true)
+   "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true)
    ;
   this->AddOperationHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",

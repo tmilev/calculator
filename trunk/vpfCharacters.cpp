@@ -970,13 +970,13 @@ ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()
     return this->character;
   this->character.G = G;
   this->character.data.SetSize(G->ccCount);
+  Matrix<coefficient> M;
   for(int cci=0; cci < G->ccCount; cci++)
   { CoxeterElement g;
     g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
-    Matrix<coefficient> M;
     M.MakeIdMatrix(gens[0].NumRows);
     for(int gi=0; gi<g.reflections.size; gi++)
-        M.MultiplyOnTheRight(gens[g.reflections[gi]]);
+      M.MultiplyOnTheRight(gens[g.reflections[gi]]);
     this->character.data[cci] = M.GetTrace();
   }
   return this->character;

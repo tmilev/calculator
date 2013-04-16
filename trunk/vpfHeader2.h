@@ -1628,7 +1628,9 @@ public:
  bool innerWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
   Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
-  Selection& selInducing, SemisimpleLieAlgebra* owner)
+  Selection& selInducing, SemisimpleLieAlgebra* owner,
+  std::string* xLetter=0, std::string* partialLetter=0,
+  std::string* exponentVariableLetter=0)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic
@@ -1655,7 +1657,7 @@ static bool innerDrawRootSystem
   static bool fWriteGenVermaModAsDiffOperatorUpToLevel
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fWriteGenVermaModAsDiffOperators
+  static bool innerWriteGenVermaModAsDiffOperators
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fEmbedG2inB3

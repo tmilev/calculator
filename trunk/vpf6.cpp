@@ -2175,7 +2175,7 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
-    varShift=this->GetNumVars();
+    varShift=this->GetMinNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
   { tempRF.MakeOneLetterMoN(i+varShift, 1, theGlobalVariables);
@@ -2557,7 +2557,9 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 
 bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
-  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing, SemisimpleLieAlgebra* owner)
+  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing,
+  SemisimpleLieAlgebra* owner, std::string* xLetter, std::string* partialLetter,
+  std::string* exponentVariableLetter)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
@@ -2580,7 +2582,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   theUEformat.chevalleyGgeneratorLetter="g";
   theUEformat.chevalleyHgeneratorLetter="h";
   hwContext.ContextGetFormatExpressions(theUEformat);
-  theUEformat.polyDefaultLetter="a";
+  theUEformat.polyDefaultLetter= exponentVariableLetter==0  ? "a" : *exponentVariableLetter;
   theUEformat.MaxLineLength=178;
   theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
   theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
@@ -2606,7 +2608,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       theGeneratorsItry.AddOnTop(theGenerator);
     }*/
   out << "<table border=\"1\">";
-  latexReport << "\\begin{longtable}{rll}";
+  latexReport << "\\begin{longtable}{rll";
   for (int i =0; i<theGeneratorsItry.size; i++)
     latexReport << "l";
   latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
@@ -2616,6 +2618,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   theMods.SetSize(theHws.size);
   Vector<RationalFunctionOld> tempV;
   int numStartingVars=hwContext.ContextGetNumContextVariables();
+  //std::cout << "<br>num starting vars:" << numStartingVars;
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
@@ -2643,13 +2646,16 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       for (int k=0; k<numStartingVars; k++)
         theWeylFormat.weylAlgebraLetters[k]="error";
       //std::cout << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
+      std::string theFinalXletter= (xLetter==0) ? "x": *xLetter;
+      std::string theFinalPartialLetter=(partialLetter==0) ? "\\partial" : *partialLetter;
       for (int k=numStartingVars; k<theUEformat.polyAlphabeT.size; k++)
-      { std::stringstream tmpStream, tempstream2, tempstream3, tmpStream4;
-        tmpStream << "a_{" << k-hwContext.ContextGetNumContextVariables()+1 << "}";
+      { std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
+        tmpStream << theUEformat.polyDefaultLetter << "_{"
+        << k-hwContext.ContextGetNumContextVariables()+1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
-        tempstream2 << "x_{" << k-numStartingVars+1 << "}";
-        tempstream3 << "x_" << k-numStartingVars+1;
-        tmpStream4 << "\\partial_{" << k-numStartingVars+1 << "}";
+        tempstream2 << theFinalXletter << "_{" << k-numStartingVars+1 << "}";
+        tempstream3 << theFinalXletter << "_" << k-numStartingVars+1;
+        tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars+1 << "}";
         if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) ||
             theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
           return output.SetError
@@ -2657,12 +2663,12 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
            " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ",
            theCommands);
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
-        theWeylFormat.weylAlgebraLetters[k]=tmpStream4.str();
+        theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
       }
 //      std::cout << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
 //        std::cout << theUEformat.polyAlphabeT[k] << ", ";
-      out << "<tr><td>Generic element U(n_-):</td><td>"
+      out << "<tr><td>General monomial in U(n_-):</td><td>"
       << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size
       << "}{c}{Element acting}\\\\<br>\n ";
@@ -5961,29 +5967,43 @@ void CommandList::initDefaultFolderAndFileNames
 
 }
 
-bool CommandList::fWriteGenVermaModAsDiffOperators
+bool CommandList::innerWriteGenVermaModAsDiffOperators
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperators");
+{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.SetSize(1);
   Expression theContext;
   Selection theParSel;
   SemisimpleLieAlgebra* theSSalgebra;
+  Expression truncatedInput=input;
+  if (truncatedInput.children.size>4)
+    truncatedInput.children.SetSize(4);
   if (!theCommands.innerGetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, input, output, theHWs[0], theParSel, theContext, theSSalgebra,
+      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra,
        Serialization::innerPolynomial))
     return output.SetError
     ("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;
+  std::string letterString="x";
+  std::string partialString="\\partial";
+  std::string exponentLetterString="a";
+  if (input.children.size>4)
+    letterString=input[4].ToString();
+  if (input.children.size>5)
+    partialString=input[5].ToString();
+  if (input.children.size>6)
+    exponentLetterString=input[6].ToString();
+
 //std::cout << "<br>theContext:" << theContext.ToString();
 //std::cout << ", numvars: " << theContext.ContextGetNumContextVariables();
 //  FormatExpressions theFormat;
 //  theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra);
+  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, &letterString,
+   &partialString, &exponentLetterString);
 }
 
 bool CommandList::fFreudenthalEval

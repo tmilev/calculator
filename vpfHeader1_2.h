@@ -3500,7 +3500,11 @@ public:
   int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
       return -1;
-    return this->theHWFundamentalCoordsBaseField[0].GetMinNumVars();
+    int result=0;
+    for (int i=0; i<this->theHWFundamentalCoordsBaseField.size; i++)
+      result=MathRoutines::Maximum
+      (result, this->theHWFundamentalCoordsBaseField[i].GetMinNumVars());
+    return result;
   }
   int GetDim()const
   { return this->theGeneratingWordsNonReduced.size;

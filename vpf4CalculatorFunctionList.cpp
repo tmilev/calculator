@@ -22,7 +22,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupIrrepsAndCharTable", WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable, "",
    "Computes the irreducible representations and the character table of a Weyl group.",
-   "WeylGroupIrrepsAndCharTable{}(b_3);", true)
+   "WeylGroupIrrepsAndCharTable{}(b_3);", false)
    ;
     this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords",  WeylGroupCalculatorFunctions::innerWeylGroupOrbitSimple, "",
@@ -43,7 +43,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
    "Gets the natural representation of the Weyl group.",
-   "WeylGroupNaturalRep{}(B_3)", true)
+   "WeylGroupNaturalRep{}(B_3)", false)
    ;
 
   this->AddOperationInnerHandler
@@ -443,14 +443,30 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    The second argument gives the weight level to which the computation should be carried out",
    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, x_3)); ");
   this->AddOperationInnerHandler
-  ("EmbedSSalgebraInWeylAlgebra", this->fWriteGenVermaModAsDiffOperators, "",
+  ("EmbedSSalgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
    "Experimental, please don't use. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The second argument gives the highest weight. \
    The third argument gives the\
    parabolic subalgebra selection. \
    The first argument gives the type of the Lie algebra. ",
-   "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ");
+   "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ", false);
+  this->AddOperationInnerHandler
+  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
+   "Constructs a parabolically induced map from a semisimple Lie algebra \
+   to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
+   generalized Verma module and writes it using differential operators with matrix coefficients. \
+   The first argument gives the type of the semisimple Lie algebra, the second argument \
+   gives the highest weight in fundamental coordinates. The third argument gives the\
+   parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
+   crossed-out roots. In all non crossed-out root positions, \
+   the coordinates of the highest weight \
+   vector must be small integers (because the highest\
+   weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
+   subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
+   can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
+   accepts further optional arguments, customizing the notation of the final printout.",
+   "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true);
   this->AddOperationInnerHandler
   ("KLcoeffs", this->fKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \

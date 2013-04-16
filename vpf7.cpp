@@ -1015,7 +1015,7 @@ std::string ProjectInformation::ToString()
 std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput
 (const std::string& address, const std::string& display)
 { std::stringstream out;
-  out << "\\href{http://cartan.math.umb.edu/vpf/cgi-bin/calculator?";
+  out << "\\href{http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?";
   for (unsigned i=0; i<address.size(); i++)
   { //if (input[i]=='&')
      // out << "\\&";

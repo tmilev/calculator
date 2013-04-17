@@ -60,8 +60,6 @@ bool partFractions::flagMakingProgressReport=true;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
-template< >
-bool Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
 unsigned int Rational::TotalLargeAdditions=0;
@@ -5742,14 +5740,14 @@ bool rootSubalgebra::ConeConditionHolds
 (GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
  Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
 { if (Vectors<Rational>::ConesIntersect
-      (theGlobalVariables, NilradicalRoots, Ksingular, this->GetOwnerSSalg().GetRank()))
+      (NilradicalRoots, Ksingular, 0, &theGlobalVariables))
   { if (doExtractRelations)
       this->ExtractRelations
       (theGlobalVariables.matConeCondition1.GetElement(), theGlobalVariables.matConeCondition3.GetElement(),
        NilradicalRoots, owner, indexInOwner, theGlobalVariables, Ksingular);
     return false;
-  } else
-    return true;
+  }
+  return true;
 }
 
 template<class CoefficientType>

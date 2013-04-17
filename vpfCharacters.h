@@ -454,7 +454,6 @@ public:
    VectorSpace<coefficient> OrthogonalComplement() const;
 };
 
-
 template <typename coefficient>
 class TrixTree
 { public:

@@ -1606,7 +1606,6 @@ public:
   int NumCols; int ActualNumCols;
   Element** elements;
   static bool flagComputingDebugInfo;
-  static bool flagAnErrorHasOccurredTimeToPanic;
 
   void init(int r, int c);
   void ReleaseMemory();
@@ -2140,12 +2139,13 @@ void NonPivotPointsToEigenVector
   static bool SystemLinearInequalitiesHasSolution
   (Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-  (Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputSolution, GlobalVariables& theGlobalVariables)
+  (Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution=0,
+   GlobalVariables* theGlobalVariables=0)
   ;
   static void ComputePotentialChangeGradient(Matrix<Element>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
   static void GetMaxMovementAndLeavingVariableRow
   (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables,
-   Matrix<Element>& tempMatA, Matrix<Element>& matX, Selection& BaseVariables)
+   Matrix<Element>& tempMatA, Vector<Element>& inputVectorX, Selection& BaseVariables)
    ;
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
@@ -2243,9 +2243,6 @@ ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols
   this->ActualNumRows=0;
   this->ActualNumCols=0;
 }
-
-template <class Element>
-bool Matrix<Element>::flagAnErrorHasOccurredTimeToPanic=false;
 
 class Selection
 {
@@ -3450,7 +3447,7 @@ std::ostream& operator<<
 }
 
 template <class CoefficientType>
-class Vector: public ListLight<CoefficientType>
+class Vector: public List<CoefficientType>
 { friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& input);
   friend std::ostream& operator<< <CoefficientType>(std::ostream& output, const Vector<CoefficientType>& theVector)
 ;
@@ -3893,7 +3890,7 @@ static void ProjectOntoHyperPlane
     { if (input[startIndex]==')' || input[startIndex]==',')
       { tempRat.AssignString(tempS);
         tempS="";
-        this->AddObjectOnTopLight(tempRat);
+        this->AddOnTop(tempRat);
       } else
       { //tempS.resize(tempS.size()+1);WeylDimFormula
         //tempS[tempS.size()-1]=input[startIndex];
@@ -4237,12 +4234,13 @@ class Vectors: public List<Vector<CoefficientType> >
   (Matrix<CoefficientType>* buffer=0, Selection* bufferSelection=0)const
 ;
 static bool ConesIntersect
-(GlobalVariables& theGlobalVariables, List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- int theDimension)
+(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
+ Vector<Rational>* outputCommonVector=0, GlobalVariables* theGlobalVariables=0)
  ;
 bool GetNormalSeparatingCones
-(GlobalVariables& theGlobalVariables, int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
-  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal)
+(int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
+  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
+  GlobalVariables* theGlobalVariables=0)
 ;
   void average(Vector<CoefficientType>& output, int theDimension)
   { this->sum(output, theDimension);
@@ -7805,6 +7803,7 @@ public:
   MemorySaving<Matrix<Rational> > matConeCondition1;
   MemorySaving<Matrix<Rational> > matConeCondition2;
   MemorySaving<Matrix<Rational> > matConeCondition3;
+  MemorySaving<Vector<Rational> > vectConeCondition3;
   MemorySaving<Matrix<Rational> > matComputeEpsCoordsWRTk;
   MemorySaving<Matrix<Rational> > matSimplexAlgorithm1;
   MemorySaving<Matrix<Rational> > matSimplexAlgorithm2;
@@ -8607,11 +8606,18 @@ void Polynomial<CoefficientType> ::MakePolyFromDirectionAndNormal
 
 template <class CoefficientType>
 bool Vectors<CoefficientType>::GetNormalSeparatingCones
-(GlobalVariables& theGlobalVariables, int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
-  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal)
-{ Matrix<Rational>& matA= theGlobalVariables.matConeCondition1.GetElement();
-  Matrix<Rational>& matb= theGlobalVariables.matConeCondition2.GetElement();
-  Matrix<Rational>& matX= theGlobalVariables.matConeCondition3.GetElement();
+(int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
+  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
+  GlobalVariables* theGlobalVariables)
+{ MemorySaving<Matrix<Rational> > tempA;
+  MemorySaving<Matrix<Rational> > tempB;
+  MemorySaving<Vector<Rational> > tempX;
+  Matrix<Rational>& matA=
+  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
+  Matrix<Rational>& matb=
+  theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
+  Vector<Rational>& matX=
+  theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
   if (coneStrictlyPositiveCoeffs.size==0)
     return true;
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
@@ -8640,13 +8646,14 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  bool result=Matrix<Rational> ::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, matX, theGlobalVariables);
+  bool result=Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+  (matA, matb, &matX, theGlobalVariables);
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
   outputNormal.MakeZero(theDimension);
   for (int i=0; i<theDimension; i++)
-    outputNormal.TheObjects[i]=matX.elements[i][0]-matX.elements[i+theDimension][0];
+    outputNormal[i]=matX[i]-matX[i+theDimension];
   if (result)
   { Rational tempRat;
     for(int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
@@ -8664,26 +8671,29 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
 
 template <class CoefficientType>
 bool Vectors<CoefficientType>::ConesIntersect
-(GlobalVariables& theGlobalVariables, List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- int theDimension)
-{ Matrix<Rational>& matA= theGlobalVariables.matConeCondition1.GetElement();
-  Matrix<Rational>& matb= theGlobalVariables.matConeCondition2.GetElement();
-  Matrix<Rational>& matX= theGlobalVariables.matConeCondition3.GetElement();
+(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
+ Vector<Rational>* outputLinearCombo, GlobalVariables* theGlobalVariables)
+{ MemorySaving<Matrix<Rational> > tempA, tempB;
+  Matrix<Rational>& matA=
+  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
+  Matrix<Rational>& matb=
+  theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
   if (StrictCone.size==0)
     return false;
+  int theDimension= StrictCone[0].size;
   int numCols= StrictCone.size + NonStrictCone.size;
   matA.init((int)theDimension+1, (int)numCols);
   matb.init((int)theDimension+1, 1);
   matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
   for (int i=0; i<StrictCone.size; i++)
   { for (int k=0; k<theDimension; k++)
-      matA.elements[k][i].Assign(StrictCone.TheObjects[i].TheObjects[k]);
+      matA.elements[k][i].Assign(StrictCone[i][k]);
     matA.elements[theDimension][i].MakeOne();
   }
   for (int i=0; i<NonStrictCone.size; i++)
   { int currentCol=i+StrictCone.size;
     for (int k=0; k<theDimension; k++)
-    { matA.elements[k][currentCol].Assign(NonStrictCone.TheObjects[i].TheObjects[k]);
+    { matA.elements[k][currentCol].Assign(NonStrictCone[i][k]);
       matA.elements[k][currentCol].Minus();
     }
     matA.elements[theDimension][currentCol].MakeZero();
@@ -8691,13 +8701,18 @@ bool Vectors<CoefficientType>::ConesIntersect
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  return Matrix<Rational> ::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, matX, theGlobalVariables);
+  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+      (matA, matb, outputLinearCombo, theGlobalVariables))
+    return false;
+  if (outputLinearCombo!=0)
+  {
+  }
+  return true;
 }
 
 template<class CoefficientType>
 void Matrix<CoefficientType>::ComputePotentialChangeGradient
-(Matrix<CoefficientType> & matA, Selection& BaseVariables,
- int NumTrueVariables, int ColumnIndex,
+(Matrix<CoefficientType>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex,
  Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
 { hasAPotentialLeavingVariable = false;
   outputChangeGradient.MakeZero();
@@ -8713,7 +8728,7 @@ void Matrix<CoefficientType>::ComputePotentialChangeGradient
 template<class Element>
 void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
   (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables,
-   Matrix<Element>& tempMatA, Matrix<Element>& matX, Selection& BaseVariables)
+   Matrix<Element>& tempMatA, Vector<Element>& inputVectorX, Selection& BaseVariables)
 { LeavingVariableRow=-1;
   maxMovement.MakeZero();
   for(int i=0; i<tempMatA.NumRows; i++)
@@ -8721,7 +8736,7 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
     tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
     if (tempRat.IsPositive())
     { tempRat.Invert();
-      tempRat.MultiplyBy(matX.elements[BaseVariables.elements[i]][0]);
+      tempRat.MultiplyBy(inputVectorX[BaseVariables.elements[i]]);
       if (maxMovement.IsGreaterThan(tempRat)|| (LeavingVariableRow==-1 ))
       { maxMovement.Assign(tempRat);
         LeavingVariableRow=i;
@@ -8740,16 +8755,23 @@ void Matrix<Element>::AssignRootsToRowsOfMatrix(const Vectors<Rational>& input)
 
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-(Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputSolution, GlobalVariables& theGlobalVariables)
+(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution,
+ GlobalVariables* theGlobalVariables)
 //this function return true if Ax=b>=0 has a solution with x>=0 and records a solution x at outputPoint
 //else returns false, where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
-{ Matrix<Rational> & tempMatA=theGlobalVariables.matSimplexAlgorithm1.GetElement();
-  Matrix<Rational> & matX=theGlobalVariables.matSimplexAlgorithm2.GetElement();
-  Matrix<Rational> & tempDebugMat=theGlobalVariables.matSimplexAlgorithm3.GetElement();
-  //Matrix<Rational> & tempMatb=theGlobalVariables.matSimplexAlgorithm3;
-  Selection& BaseVariables = theGlobalVariables.selSimplexAlg2.GetElement();
-  Rational GlobalGoal; GlobalGoal.MakeZero();
+{ MemorySaving<Matrix<Rational> > tempA;
+  MemorySaving<Vector<Rational> > tempX;
+  Matrix<Rational>& tempMatA=
+  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matSimplexAlgorithm1.GetElement();
+  Vector<Rational>& matX=
+  theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+
+  MemorySaving<Selection> tempSel;
+  Selection& BaseVariables =
+  theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
+  Rational GlobalGoal;
+  GlobalGoal.MakeZero();
   assert (matA.NumRows== matb.NumRows);
   for (int j=0; j<matb.NumRows; j++)
   { GlobalGoal+=(matb.elements[j][0]);
@@ -8760,23 +8782,23 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   int NumTrueVariables=matA.NumCols;
   //tempMatb.Assign(matb);
   tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
-  matX.init(tempMatA.NumCols, 1);
-  HashedList<Selection>& VisitedVertices = theGlobalVariables.hashedSelSimplexAlg.GetElement();
+  MemorySaving<HashedList<Selection> > tempSelList;
+  HashedList<Selection>& VisitedVertices =
+  theGlobalVariables==0 ? tempSelList.GetElement() : theGlobalVariables->hashedSelSimplexAlg.GetElement();
   VisitedVertices.Clear();
   BaseVariables.init(tempMatA.NumCols);
-  tempMatA.NullifyAll();  matX.NullifyAll();
+  tempMatA.NullifyAll();
+  matX.MakeZero(tempMatA.NumCols);
   for (int j=0; j<matA.NumCols; j++)
     for (int i=0; i<matA.NumRows; i++)
       tempMatA.elements[i][j].Assign(matA.elements[i][j]);
   for (int j=0; j<matA.NumRows; j++)
   { tempMatA.elements[j][j+NumTrueVariables].MakeOne();
-    matX.elements[j+NumTrueVariables][0].Assign(matb.elements[j][0]);
+    matX[j+NumTrueVariables]=(matb.elements[j][0]);
     BaseVariables.AddSelectionAppendNewIndex(j+NumTrueVariables);
   }
-  if (Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic)
-  { tempDebugMat=(tempMatA);
-  }
-  Rational  PotentialChangeGradient, ChangeGradient; //Change, PotentialChange;
+  Rational PotentialChangeGradient;
+  Rational ChangeGradient; //Change, PotentialChange;
   int EnteringVariable=0;
   bool WeHaveNotEnteredACycle=true;
 //  int ProblemCounter=0;
@@ -8788,18 +8810,19 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     //tempMatA.ComputeDebugString(); matX.ComputeDebugString();
     EnteringVariable=-1; ChangeGradient.MakeZero();
     for (int i=0; i<tempMatA.NumCols; i++)
-    { if (!BaseVariables.selected[i])
+      if (!BaseVariables.selected[i])
       { Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
-        Matrix<Rational> ::ComputePotentialChangeGradient(  tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
+        Matrix<Rational> ::ComputePotentialChangeGradient
+        (tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
         if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
         { EnteringVariable= i;
           ChangeGradient.Assign(PotentialChangeGradient);
         }
       }
-    }
     if (EnteringVariable!=-1)
     { int LeavingVariableRow;  Rational MaxMovement;
-      Matrix<Rational> ::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
+      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow
+      (MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
       assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
@@ -8813,12 +8836,11 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       //  tempMatA.ComputeDebugString();
       tempTotalChange.Assign(MaxMovement);
       tempTotalChange.MultiplyBy(ChangeGradient);
-      matX.elements[EnteringVariable][0]+=(MaxMovement);
+      matX[EnteringVariable]+=(MaxMovement);
       if (!tempTotalChange.IsEqualToZero())
       { VisitedVertices.Clear();
         GlobalGoal.Subtract(tempTotalChange);
-      }
-      else
+      } else
       { //BaseVariables.ComputeDebugString();
         int tempI= VisitedVertices.GetIndex(BaseVariables);
         if (tempI==-1)
@@ -8832,17 +8854,17 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       { if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
         { tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.MultiplyBy(MaxMovement);
-          matX.elements[BaseVariables.elements[i]][0].Subtract(tempRat);
+          matX[BaseVariables.elements[i]]-=tempRat;
           tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
           tempRat.Minus();
           tempMatA.AddTwoRows(LeavingVariableRow, i, 0, tempRat);
         }
         if (i==LeavingVariableRow)
-          matX.elements[BaseVariables.elements[i]][0].MakeZero();
+          matX[BaseVariables.elements[i]]=0;
         //tempMatA.ComputeDebugString();
         //matX.ComputeDebugString();
       }
-      assert(matX.elements[BaseVariables.elements[LeavingVariableRow]][0].IsEqualToZero());
+      assert(matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero());
       BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
       BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
       BaseVariables.selected[EnteringVariable]= true;
@@ -8880,12 +8902,14 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //      out <<"+";
 //  }
 //  tempS=out.str();
-  for(int i=NumTrueVariables; i<matX.NumRows; i++)
-    if (matX.elements[i][0].IsPositive())
+  for(int i=NumTrueVariables; i<matX.size; i++)
+    if (matX[i].IsPositive())
       return false;
-  outputSolution.Resize(NumTrueVariables, 1, false);
-  for (int i=0; i<NumTrueVariables; i++)
-    outputSolution.elements[i][0].Assign(matX.elements[i][0]);
+  if (outputSolution!=0)
+  { outputSolution->SetSize(NumTrueVariables);
+    for (int i=0; i<NumTrueVariables; i++)
+      (*outputSolution)[i]=matX[i];
+  }
   return true;
 }
 

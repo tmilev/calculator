@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfCharacters_CalculatorInterface.h"
-
+#include "vpf6_1innerTypedFunctions.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
@@ -57,6 +57,13 @@ void CommandList::initPredefinedInnerFunctions()
    First argument gives type, second argument gives highest weight in fundamental coordinates.",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
    ;
+  this->AddOperationHandler
+  ("ConesIntersection", this->innerConesIntersect, "",
+   "Takes as input two sequences of vectors, generates cones over Q, and intersects them using the simplex\
+   algorithm. The output is a string report of the operation.",
+   "ConesIntersection{}(((1, 2, 3 ), (1, 3, 2)), ((3,1,1), (-2,2, 2)))", true)
+   ;
+
   this->AddOperationInnerHandler
   ("Store", Serialization::innerStore, "",
    "Attempts to convert a built-in data type to an expression tree which \
@@ -758,7 +765,7 @@ void CommandList::initPredefinedStandardOperations()
    "%LogEvaluation\n({{a}}*{{b}})*{{c}}:=a*(b*c);  ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
+  ("+", CommandListInnerTypedFunctions:: innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",
    "2+3", true);
   this->AddOperationOuterHandler
@@ -770,51 +777,51 @@ void CommandList::initPredefinedStandardOperations()
    "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b ",
    "f{}{{x}}:=(2x+3)/(2x+1);\ng{}{{y}}:=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
+  ("+", CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Adds two elements of tensor products of generalized Verma modules. ",
    "v:=hwv{}(G_2, (1,0),(0,0));\
    \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
+  ("+", CommandListInnerTypedFunctions::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
    "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opRational(),
+  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opRational(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",
    "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opRational(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opRational(),
    "Adds a polynomial to a rational. ",
    "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
    , true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
    , true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opRational(), this->opDouble(),
+  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opRational(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opDouble(),
+  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
+  ("+", CommandListInnerTypedFunctions::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
    " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}})\n\
    [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
@@ -826,30 +833,30 @@ void CommandList::initPredefinedStandardOperations()
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
+  ("*", CommandListInnerTypedFunctions:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
    "2*3", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
    "Multiplies two coxeter elements if possible. ",
    "x:=MakeCoxeterElement{}(A_2, 1); x*x", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
    "Multiplies two semisimple Lie algebra finite dimensinal characters and decomposes using the \
    Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, \
    page 142, exercise 9. ",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
    "Multiplies polynomial by a rational (polynomial comes first). ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opRational(), this->opPoly(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opRational(), this->opPoly(),
    "Multiplies rational by a polynomial (rational comes first). ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
    "Multiplies two polynomials. ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationInnerHandler
@@ -878,17 +885,17 @@ void CommandList::initPredefinedStandardOperations()
    "Distributive law (left and right).",
    "(a+b)*c; \n a*(b+c)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
    "Multiplies rational number by an element universal enveloping algebra.",
    "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
 [g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
    "Multiplies rational number by a rational function",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -896,7 +903,7 @@ void CommandList::initPredefinedStandardOperations()
    \nv:=hwv{}(G_2, (1,0),(0,0));\
    \n2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyAnyByEltTensor, this->opPoly(), this->opElementTensorGVM(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor, this->opPoly(), this->opElementTensorGVM(),
    "Handles multiplying polynomial by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -905,7 +912,7 @@ void CommandList::initPredefinedStandardOperations()
    \nv:=hwv{}(G_2, (z,1),(1,0));\
    \n(2*z) v;\n", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
    "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -913,7 +920,7 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n1/z v", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyAnyByEltTensor, this->opElementUEoverRF(), this->opElementTensorGVM(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor, this->opElementUEoverRF(), this->opElementTensorGVM(),
    "Handles acting by element Universal enveloping on an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -921,7 +928,7 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opRational(), this->opDouble(),
+  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opRational(), this->opDouble(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
@@ -930,7 +937,7 @@ void CommandList::initPredefinedStandardOperations()
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opRational(),
+  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opRational(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
@@ -939,13 +946,21 @@ void CommandList::initPredefinedStandardOperations()
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opDouble(),
+  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opDouble(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
    "DoubleValue{}(1/3)*3; \
    \nDoubleValue{}((101)^{20});\
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
+   , true);
+     this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRationalBySequence, this->opRational(), this->opSequence(),
+   "Carries out multiplication between a rational number on left \
+   and sequence on the right. Corresponds to multiplying a vector by a scalar \
+   (however please note a sequence does not necessarily consist of elements of a ring, so the latter \
+    interpretation might not be applicable).",
+   "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
@@ -962,15 +977,15 @@ void CommandList::initPredefinedStandardOperations()
    non-commutative rings as well.",
    "(a/b)/c; a/(b/c);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
+  ("/", CommandListInnerTypedFunctions::innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
    "4/6; 2/0;", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
+  ("/", CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
    "Divides rational by polynomial (to get a rational function).",
    "z:=Polynomial{}(x^2+y^2);\n1/z", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
+  ("/", CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
@@ -980,11 +995,11 @@ void CommandList::initPredefinedStandardOperations()
 //  "x^1+x^2", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerRatPowerRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerDoubleOrRatPowerDoubleOrRat, this->opRational(), this->opDouble(),
+  ("^", CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
    provided either the base or the exponent is a double, and provided that \
    the base is non-negative. ",
@@ -993,7 +1008,7 @@ void CommandList::initPredefinedStandardOperations()
    \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
    "Raises element of universal enveloping to integer power. \
    If the exponent is non-positive integer but the element of the UE is \
    a single generator with coefficient 1, the exponent will be carried out formally. ",
@@ -1001,7 +1016,7 @@ void CommandList::initPredefinedStandardOperations()
     \n (g_1+g_2)^2+ g_1^{1/2}",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
+  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal polynomial power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary polynomial power. ",
@@ -1009,7 +1024,7 @@ void CommandList::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
+  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",
@@ -1017,7 +1032,7 @@ void CommandList::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", this->innerDoubleOrRatPowerDoubleOrRat, this->opDouble(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat, this->opDouble(), this->opRational(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
    provided either the base or the exponent is a double. If the base is negative and \
    the exponent is rational with odd denominator, the exponent is evaluated to the corresponding\
@@ -1027,7 +1042,7 @@ void CommandList::initPredefinedStandardOperations()
    \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("\\otimes", this->innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
+  ("\\otimes", CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Tensor product of two generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",

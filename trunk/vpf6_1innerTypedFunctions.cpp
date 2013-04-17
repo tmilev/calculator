@@ -1,12 +1,13 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
+#include "vpf6_1innerTypedFunctions.h"
 ProjectInformationInstance ProjectInfoVpf6_1cpp
 (__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
 
-bool CommandList::innerAddRatToRat
+bool CommandListInnerTypedFunctions::innerAddRatToRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddRatToRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatToRat");
   if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
@@ -15,9 +16,9 @@ bool CommandList::innerAddRatToRat
   return output.AssignValue(leftR+rightR, theCommands);
 }
 
-bool CommandList::innerMultiplyRatByRat
+bool CommandListInnerTypedFunctions::innerMultiplyRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatByRat");
   if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
@@ -26,9 +27,9 @@ bool CommandList::innerMultiplyRatByRat
   return output.AssignValue(leftR*rightR, theCommands);
 }
 
-bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
+bool CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyCoxeterEltByCoxeterElt");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt");
   if (!input.IsListNElements(3))
     return false;
   //std::cout << "<br>Here i am!";
@@ -51,9 +52,9 @@ bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
   return output.AssignValue(leftR, theCommands);
 }
 
-bool CommandList::innerDivideRatByRat
+bool CommandListInnerTypedFunctions::innerDivideRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDivideRatByRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideRatByRat");
   if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
@@ -64,9 +65,9 @@ bool CommandList::innerDivideRatByRat
   return output.AssignValue(leftR/rightR, theCommands);
 }
 
-bool CommandList::innerTensorEltTensorByEltTensor
+bool CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerTensorEltTensorByEltTensor");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -88,9 +89,9 @@ bool CommandList::innerTensorEltTensorByEltTensor
   return output.AssignValueWithContext(resultTensor, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyAnyByEltTensor
+bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyAnyByEltTensor");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -141,9 +142,9 @@ bool CommandList::innerMultiplyAnyByEltTensor
   return output.AssignValueWithContext(outputElt , output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -167,9 +168,9 @@ bool CommandList::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerAddRatOrPolyOrRFToRatOrPolyOrRF
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -193,9 +194,9 @@ bool CommandList::innerAddRatOrPolyOrRFToRatOrPolyOrRF
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerDivideRFOrPolyOrRatByRFOrPoly
+bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDivideRFOrPolyOrRatByRFOrPoly");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -234,9 +235,9 @@ bool CommandList::innerDivideRFOrPolyOrRatByRFOrPoly
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyRatOrPolyByRatOrPoly
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatOrPolyByRatOrPoly");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -261,9 +262,9 @@ bool CommandList::innerMultiplyRatOrPolyByRatOrPoly
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerAddUEToAny
+bool CommandListInnerTypedFunctions::innerAddUEToAny
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddUEToAny");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddUEToAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -287,9 +288,9 @@ bool CommandList::innerAddUEToAny
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyAnyByUE
+bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyUEByAny");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyUEByAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -313,9 +314,9 @@ bool CommandList::innerMultiplyAnyByUE
   return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyLRObyLRO
+bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyLRObyLRO");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyLRObyLRO");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -340,9 +341,9 @@ bool CommandList::innerMultiplyLRObyLRO
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerMultiplyLRObyLSPath
+bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyLRObyLSPath");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -372,9 +373,9 @@ bool CommandList::innerMultiplyLRObyLSPath
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerAddEltTensorToEltTensor
+bool CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddEltTensorToEltTensor");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
 //  std::cout << "<br>adding element gvm and element gvm. ";
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -394,9 +395,9 @@ bool CommandList::innerAddEltTensorToEltTensor
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerAddRatOrPolyToRatOrPoly
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddRatOrPolyToRatOrPoly");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -421,9 +422,9 @@ bool CommandList::innerAddRatOrPolyToRatOrPoly
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
 
-bool CommandList::innerAddPlotToPlot
+bool CommandListInnerTypedFunctions::innerAddPlotToPlot
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAddPlotToPlot");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddPlotToPlot");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -437,9 +438,9 @@ bool CommandList::innerAddPlotToPlot
   return output.AssignValue(leftPlot, theCommands);
 }
 
-bool CommandList::innerRatPowerRat
+bool CommandListInnerTypedFunctions::innerRatPowerRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -457,9 +458,9 @@ bool CommandList::innerRatPowerRat
   return output.AssignValue(base, theCommands);
 }
 
-bool CommandList::innerElementUEPowerRatOrPolyOrRF
+bool CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerElementUEPowerRatOrPolyOrRF");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -493,9 +494,9 @@ bool CommandList::innerElementUEPowerRatOrPolyOrRF
   return output.AssignValueWithContext(outputUE, copyExponent.GetContext(), theCommands);
 }
 
-bool CommandList::innerDoubleOrRatPowerDoubleOrRat
+bool CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -524,9 +525,9 @@ bool CommandList::innerDoubleOrRatPowerDoubleOrRat
   return output.AssignValue(pow(baseDouble, expDouble), theCommands);
 }
 
-bool CommandList::innerDoubleOrRatTimesDoubleOrRat
+bool CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -543,9 +544,9 @@ bool CommandList::innerDoubleOrRatTimesDoubleOrRat
   return output.AssignValue(leftD*rightD, theCommands);
 }
 
-bool CommandList::innerDoubleOrRatPlusDoubleOrRat
+bool CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -562,9 +563,9 @@ bool CommandList::innerDoubleOrRatPlusDoubleOrRat
   return output.AssignValue(leftD+rightD, theCommands);
 }
 
-bool CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg
+bool CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -587,4 +588,27 @@ bool CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg
     return false;
   }
   return output.AssignValue(leftC, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");
+  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  if (!input.IsListNElements(3))
+    return false;
+  //std::cout << "<br>trouble be double!";
+  if (!input[1].IsOfType<Rational>())
+    return false;
+  //std::cout << "<br>trouble be triple!";
+  if (!input[2].IsSequenceNElementS())
+    return false;
+  output.reset(theCommands);
+  output.children.ReservE(input[2].children.size);
+  output.AddAtomOnTop(theCommands.opSequence());
+  Expression tempProduct;
+  for (int i=1; i<input[2].children.size; i++)
+  { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
+    output.AddChildOnTop(tempProduct);
+  }
+  return true;
 }

@@ -739,5 +739,50 @@ bool CommandList::innerCharacterSSLieAlgFD
   theElt.MakeFromWeight
   (ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
   return output.AssignValue(theElt, theCommands);
+}
 
+bool CommandList::innerConesIntersect
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerConesIntersect");
+  if (!input.IsListNElements(3))
+  { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1
+    << " instead. ";
+    return false;
+  }
+  Matrix<Rational> coneNonStrictMatForm;
+  Matrix<Rational> coneStrictMathForm;
+  Vectors<Rational> coneNonStrictGens;
+  Vectors<Rational> coneStrictGens;
+  if (!theCommands.GetMatrix(input[1], coneNonStrictMatForm))
+  { theCommands.Comments << "Failed to extract matrix from the first argument, " << input[1].ToString();
+    return false;
+  }
+  if (!theCommands.GetMatrix(input[2], coneStrictMathForm))
+  { theCommands.Comments << "Failed to extract matrix from the second argument, " << input[2].ToString();
+    return false;
+  }
+  std::stringstream out;
+  if (coneNonStrictMatForm.NumCols!=coneStrictMathForm.NumCols)
+  { out << "I got as input vectors of different dimensions, "
+    << coneNonStrictMatForm.NumCols << " and " << coneStrictMathForm.NumCols
+    << " which is not allowed. ";
+    return output.SetError(out.str(), theCommands);
+  }
+  coneNonStrictMatForm.GetListRowsToVectors(coneNonStrictGens);
+  coneStrictMathForm.GetListRowsToVectors(coneStrictGens);
+  out << "<br>Input cone 1: ";
+  for (int i=0; i<coneNonStrictGens.size; i++)
+    out << "<br>v_{" << i+1 << "}:=" << coneNonStrictGens[i].ToString();
+  for (int i=0; i<coneStrictGens.size; i++)
+    out << "<br>v_{" << coneNonStrictGens.size+ i+1 << "}:=" << coneStrictGens[i].ToString();
+  Vector<Rational> outputIntersection;
+  bool conesDoIntersect=
+  coneNonStrictGens.ConesIntersect
+  (coneNonStrictGens, coneStrictGens, &outputIntersection, theCommands.theGlobalVariableS);
+  if (conesDoIntersect)
+    out << "<br>Cones intersect, here is one intersection: 0= "
+    << outputIntersection.ToStringLetterFormat("v");
+  else
+    out << "<br>Cones have empty intersection.";
+  return output.AssignValue(out.str(), theCommands);
 }

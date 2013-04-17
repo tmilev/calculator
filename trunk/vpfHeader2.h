@@ -1512,7 +1512,9 @@ public:
   static bool innerPrintSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
-
+  static bool innerConesIntersect
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   template<class CoefficientType>
   bool innerGetTypeHighestWeightParabolic
   (CommandList& theCommands, const Expression& input, Expression& output,
@@ -1688,86 +1690,8 @@ static bool innerDrawRootSystem
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool innerAddRatToRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-
-static bool innerMultiplyRatByRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyDoubleOrRatByDoubleOrRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyCoxeterEltByCoxeterElt
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyCharacterByCharacter
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyCharSSLieAlgByCharSSLieAlg
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerDivideRatByRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
 static bool innerDouble
   (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerDivideRFOrPolyOrRatByRFOrPoly
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyRatOrPolyByRatOrPoly
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerAddUEToAny
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyLRObyLRO
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyLRObyLSPath
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerAddEltTensorToEltTensor
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerAddRatOrPolyToRatOrPoly
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerAddPlotToPlot
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerRatPowerRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerElementUEPowerRatOrPolyOrRF
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-
-static bool innerDoubleOrRatPowerDoubleOrRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerDoubleOrRatTimesDoubleOrRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerDoubleOrRatPlusDoubleOrRat
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyAnyByUE
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-
-static bool innerTensorEltTensorByEltTensor
-(CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool innerMultiplyAnyByEltTensor
-(CommandList& theCommands, const Expression& input, Expression& output)
 ;
   void AddEmptyHeadedCommand();
   CommandList();

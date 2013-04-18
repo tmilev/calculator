@@ -61,7 +61,8 @@ void CommandList::initPredefinedInnerFunctions()
   ("ConesIntersection", this->innerConesIntersect, "",
    "Takes as input two sequences of vectors, generates cones over Q, and intersects them using the simplex\
    algorithm. The output is a string report of the operation.",
-   "ConesIntersection{}(((1, 2, 3 ), (1, 3, 2)), ((3,1,1), (-2,2, 2)))", true)
+   "v_1:=(1, 2, 3 ); v_2:=(1, 3, 2); v_3:=(3,1,1); v_4:=(-2,2, 2);\
+   \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true)
    ;
 
   this->AddOperationInnerHandler
@@ -826,6 +827,12 @@ void CommandList::initPredefinedStandardOperations()
    " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}})\n\
    [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
    , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddSequenceToSequence, this->opSequence(), this->opSequence(),
+   "Adds two sequences (termwise), provided the sequences have the same number of entries. \
+   In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
+   "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
+   , true);
 
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
@@ -954,7 +961,7 @@ void CommandList::initPredefinedStandardOperations()
    \nDoubleValue{}((101)^{20});\
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
-     this->AddOperationBinaryInnerHandlerWithTypes
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRationalBySequence, this->opRational(), this->opSequence(),
    "Carries out multiplication between a rational number on left \
    and sequence on the right. Corresponds to multiplying a vector by a scalar \

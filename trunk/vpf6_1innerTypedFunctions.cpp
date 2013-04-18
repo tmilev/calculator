@@ -612,3 +612,43 @@ bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence
   }
   return true;
 }
+
+bool CommandListInnerTypedFunctions::innerMultiplySequenceByRational
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");
+  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  if (!input.IsListNElements(3))
+    return false;
+  Expression tempE=input;
+  tempE.children.SwapTwoIndices(1,2);
+  return CommandListInnerTypedFunctions::innerMultiplyRationalBySequence(theCommands, tempE, output);
+}
+
+bool CommandListInnerTypedFunctions::innerAddSequenceToSequence
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");
+  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  if (!input.IsListNElements(3))
+    return false;
+  //std::cout << "<br>trouble be double!";
+  if (!input[1].IsSequenceNElementS())
+    return false;
+  //std::cout << "<br>trouble be triple!";
+  if (!input[2].IsSequenceNElementS())
+    return false;
+  if (input[2].children.size!=input[1].children.size)
+  { theCommands.Comments << "<hr>Attempting to add a sequence of length "
+    << input[1].children.size-1 << "  to a sequence of length "
+    << input[2].children.size-1 << ", possible user error?";
+    return false;
+  }
+  output.reset(theCommands);
+  output.children.ReservE(input[1].children.size);
+  output.AddAtomOnTop(theCommands.opSequence());
+  Expression tempSum;
+  for (int i=1; i<input[2].children.size; i++)
+  { tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
+    output.AddChildOnTop(tempSum);
+  }
+  return true;
+}

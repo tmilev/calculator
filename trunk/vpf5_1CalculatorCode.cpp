@@ -779,14 +779,12 @@ bool CommandList::innerConesIntersect
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect=
   coneNonStrictGens.ConesIntersect
-  (coneStrictGens, coneNonStrictGens, &outputIntersection, theCommands.theGlobalVariableS);
+  (coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal, theCommands.theGlobalVariableS);
   if (conesDoIntersect)
     out << "<br>Cones intersect, here is one intersection: 0= "
     << outputIntersection.ToStringLetterFormat("v");
   else
   { out << "<br>Cones have empty intersection.";
-    coneNonStrictGens.GetNormalSeparatingCones
-    (coneStrictGens, coneNonStrictGens, outputSeparatingNormal, theCommands.theGlobalVariableS);
     out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString()
     << ". Indeed, ";
     for (int i=0; i<coneNonStrictGens.size; i++)

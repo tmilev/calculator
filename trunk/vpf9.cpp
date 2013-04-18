@@ -5740,7 +5740,7 @@ bool rootSubalgebra::ConeConditionHolds
 (GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
  Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
 { if (Vectors<Rational>::ConesIntersect
-      (NilradicalRoots, Ksingular, 0, &theGlobalVariables))
+      (NilradicalRoots, Ksingular, 0, 0, &theGlobalVariables))
   { if (doExtractRelations)
       this->ExtractRelations
       (theGlobalVariables.matConeCondition1.GetElement(), theGlobalVariables.matConeCondition3.GetElement(),

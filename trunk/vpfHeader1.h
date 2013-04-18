@@ -4235,9 +4235,10 @@ class Vectors: public List<Vector<CoefficientType> >
 ;
 static bool ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- Vector<Rational>* outputLinearCombo=0, GlobalVariables* theGlobalVariables=0)
+ Vector<Rational>* outputLinearCombo=0, Vector<Rational>* outputSplittingNormal=0,
+ GlobalVariables* theGlobalVariables=0)
  ;
-bool GetNormalSeparatingCones
+static bool GetNormalSeparatingCones
 (List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
   List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
   GlobalVariables* theGlobalVariables=0)
@@ -8673,7 +8674,8 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
 template <class CoefficientType>
 bool Vectors<CoefficientType>::ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- Vector<Rational>* outputLinearCombo, GlobalVariables* theGlobalVariables)
+ Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal,
+ GlobalVariables* theGlobalVariables)
 { MemorySaving<Matrix<Rational> > tempA, tempB;
   Matrix<Rational>& matA=
   theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
@@ -8704,7 +8706,21 @@ bool Vectors<CoefficientType>::ConesIntersect
   //matX.ComputeDebugString();
   if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
       (matA, matb, outputLinearCombo, theGlobalVariables))
+  { if (outputSplittingNormal!=0)
+    { bool tempBool=Vectors<CoefficientType>::GetNormalSeparatingCones
+      (StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
+      if (!tempBool)
+      { std::cout << "This is an algorithmic/mathematical (hence also programming) error: "
+        << "I get that two cones do not intersect, yet there exists no plane separating them. "
+        << "Something is wrong with the implementation of the simplex algorithm. "
+        << "The input which manifested the problem was: <br>StrictCone: <br>" << StrictCone.ToString()
+        << "<br>Non-strict cone: <br>" << NonStrictCone.ToString()
+        << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
     return false;
+  }
   if (outputLinearCombo!=0)
     for (int i=StrictCone.size; i<outputLinearCombo->size; i++)
       (*outputLinearCombo)[i]*=-1;

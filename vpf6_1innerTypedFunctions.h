@@ -48,6 +48,12 @@ static bool innerAddSequenceToSequence
 static bool innerMultiplyRationalBySequence
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerMultiplySequenceByRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplySequenceBySequence
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerAddRatToRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

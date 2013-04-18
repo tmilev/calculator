@@ -4235,10 +4235,10 @@ class Vectors: public List<Vector<CoefficientType> >
 ;
 static bool ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- Vector<Rational>* outputCommonVector=0, GlobalVariables* theGlobalVariables=0)
+ Vector<Rational>* outputLinearCombo=0, GlobalVariables* theGlobalVariables=0)
  ;
 bool GetNormalSeparatingCones
-(int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
+(List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
   List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
   GlobalVariables* theGlobalVariables=0)
 ;
@@ -8606,7 +8606,7 @@ void Polynomial<CoefficientType> ::MakePolyFromDirectionAndNormal
 
 template <class CoefficientType>
 bool Vectors<CoefficientType>::GetNormalSeparatingCones
-(int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
+(List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
   List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
   GlobalVariables* theGlobalVariables)
 { MemorySaving<Matrix<Rational> > tempA;
@@ -8618,6 +8618,7 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
   theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
   Vector<Rational>& matX=
   theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+  int theDimension=coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size==0)
     return true;
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
@@ -8705,8 +8706,8 @@ bool Vectors<CoefficientType>::ConesIntersect
       (matA, matb, outputLinearCombo, theGlobalVariables))
     return false;
   if (outputLinearCombo!=0)
-  {
-  }
+    for (int i=StrictCone.size; i<outputLinearCombo->size; i++)
+      (*outputLinearCombo)[i]*=-1;
   return true;
 }
 

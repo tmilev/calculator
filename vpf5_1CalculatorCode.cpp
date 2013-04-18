@@ -750,39 +750,51 @@ bool CommandList::innerConesIntersect
     return false;
   }
   Matrix<Rational> coneNonStrictMatForm;
-  Matrix<Rational> coneStrictMathForm;
+  Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
   if (!theCommands.GetMatrix(input[1], coneNonStrictMatForm))
   { theCommands.Comments << "Failed to extract matrix from the first argument, " << input[1].ToString();
     return false;
   }
-  if (!theCommands.GetMatrix(input[2], coneStrictMathForm))
+  if (!theCommands.GetMatrix(input[2], coneStrictMatForm))
   { theCommands.Comments << "Failed to extract matrix from the second argument, " << input[2].ToString();
     return false;
   }
   std::stringstream out;
-  if (coneNonStrictMatForm.NumCols!=coneStrictMathForm.NumCols)
+  if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
   { out << "I got as input vectors of different dimensions, "
-    << coneNonStrictMatForm.NumCols << " and " << coneStrictMathForm.NumCols
+    << coneNonStrictMatForm.NumCols << " and " << coneStrictMatForm.NumCols
     << " which is not allowed. ";
     return output.SetError(out.str(), theCommands);
   }
   coneNonStrictMatForm.GetListRowsToVectors(coneNonStrictGens);
-  coneStrictMathForm.GetListRowsToVectors(coneStrictGens);
+  coneStrictMatForm.GetListRowsToVectors(coneStrictGens);
   out << "<br>Input cone 1: ";
   for (int i=0; i<coneNonStrictGens.size; i++)
-    out << "<br>v_{" << i+1 << "}:=" << coneNonStrictGens[i].ToString();
+    out << "<br>v_{" << i+1 << "}:=" << coneNonStrictGens[i].ToString() << ";";
+  out << "<br>Input cone 2: ";
   for (int i=0; i<coneStrictGens.size; i++)
-    out << "<br>v_{" << coneNonStrictGens.size+ i+1 << "}:=" << coneStrictGens[i].ToString();
-  Vector<Rational> outputIntersection;
+    out << "<br>v_{" << coneNonStrictGens.size+ i+1 << "}:=" << coneStrictGens[i].ToString() << ";";
+  Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect=
   coneNonStrictGens.ConesIntersect
-  (coneNonStrictGens, coneStrictGens, &outputIntersection, theCommands.theGlobalVariableS);
+  (coneStrictGens, coneNonStrictGens, &outputIntersection, theCommands.theGlobalVariableS);
   if (conesDoIntersect)
     out << "<br>Cones intersect, here is one intersection: 0= "
     << outputIntersection.ToStringLetterFormat("v");
   else
-    out << "<br>Cones have empty intersection.";
+  { out << "<br>Cones have empty intersection.";
+    coneNonStrictGens.GetNormalSeparatingCones
+    (coneStrictGens, coneNonStrictGens, outputSeparatingNormal, theCommands.theGlobalVariableS);
+    out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString()
+    << ". Indeed, ";
+    for (int i=0; i<coneNonStrictGens.size; i++)
+      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = "
+      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
+    for (int i=0; i<coneStrictGens.size; i++)
+      out << "<br>\\langle v_{" << i+1 + coneNonStrictGens.size << "}, n\\rangle = "
+      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+  }
   return output.AssignValue(out.str(), theCommands);
 }

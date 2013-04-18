@@ -4169,8 +4169,8 @@ class affineHyperplane
 {
 public:
   std::string DebugString;
-  Vector<Rational>  affinePoint;
-  Vector<Rational>  normal;
+  Vector<Rational> affinePoint;
+  Vector<Rational> normal;
   void ToString(std::string& output);
   void ComputeDebugString(){this->ToString(this->DebugString); }
   //void InduceFromFacet(Facet& input);

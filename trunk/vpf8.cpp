@@ -4784,7 +4784,7 @@ std::string ConeLatticeAndShift::ToString(FormatExpressions& theFormat)
 std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
-  Vector<Rational> tempRoot;
+  Vector<Rational> tempRoot, tempRoot2;
   int numRoots=this->theWeyl.RootSystem.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   ElementSemisimpleLieAlgebra<Rational> tempElt1, tempElt2, tempElt3;
@@ -4824,10 +4824,9 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   { tempRoot=this->GetWeightOfGenerator(i);
     theTableLateXStream << tempRoot.ToString() << "&";
     theHtmlStream << "<tr><td>" << tempRoot.ToString() << "</td>";
-    theTableLateXStream
-    << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
-    theHtmlStream
-    << "<td>" << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("e") << "</td>";
+    this->theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
+    theTableLateXStream << tempRoot2.ToStringLetterFormat("\\varepsilon") << "&";
+    theHtmlStream << "<td>" << tempRoot2.ToStringLetterFormat("e") << "</td>";
     tempElt1.MakeGenerator(i, *this);
     tempS=tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;

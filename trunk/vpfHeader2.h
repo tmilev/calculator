@@ -423,6 +423,7 @@ class Function
   bool flagIsInner;
   bool flagMayActOnBoundVars;
   bool flagIamVisible;
+  bool flagIsExperimental;
   Expression::FunctionAddress theFunction;
 
   std::string GetString(CommandList& theBoss);
@@ -434,6 +435,7 @@ class Function
     this->flagIsInner=other.flagIsInner;
     this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
     this->flagIamVisible=other.flagIamVisible;
+    this->flagIsExperimental=other.flagIsExperimental;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentTypes==other.theArgumentTypes &&
@@ -451,15 +453,16 @@ class Function
   Function
   (const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes,
    const std::string& description, const std::string& inputExample, bool inputflagIsInner,
-   bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
+   bool inputIsVisible=true, bool inputIsExperimental=false, bool inputflagMayActOnBoundVars=false)
   { this->theFunction=functionPointer;
     this->theDescription=description;
     this->theExample=inputExample;
     if (inputArgTypes!=0)
       this->theArgumentTypes=*inputArgTypes;
     this->flagIsInner=inputflagIsInner;
-    this->flagIamVisible=inputflagNameIsVisible;
+    this->flagIamVisible=inputIsVisible;
     this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
+    this->flagIsExperimental=inputIsExperimental;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -1709,31 +1712,31 @@ static bool innerDouble
   (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
-   bool visible=true)
+   bool visible=true, bool experimental=false)
    ;
   void AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
-    bool isInner, bool visible=true)
+    bool isInner, bool visible=true, bool experimental=false)
 ;
   void AddOperationInnerHandler
   (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
-   bool visible=true)
+   bool visible=true, bool experimental=false)
   { this->AddOperationHandler
     (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
-     opExample, true, visible);
+     opExample, true, visible, experimental);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
-   bool visible=true)
+   bool visible=true, bool experimental=false)
   { this->AddOperationHandler
     (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
-     opExample, false, visible);
+     opExample, false, visible, experimental);
   }
 
 

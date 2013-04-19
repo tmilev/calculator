@@ -3332,13 +3332,14 @@ bool CommandList::innerPrintSSLieAlgebra
     out << "Ready for LaTeX consumption version of the first three columns: ";
     out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
     << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
-    Vector<Rational> tempRoot;
+    Vector<Rational> tempRoot, tempRoot2;
     ElementSemisimpleLieAlgebra<Rational> tempElt1;
     for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
     { tempElt1.MakeGenerator(i, theSSalgebra);
       tempRoot=theSSalgebra.GetWeightOfGenerator(i);
+      theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot, tempRoot2);
       out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
-      out << "&$" << theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "$";
+      out << "&$" << tempRoot2.ToStringLetterFormat("\\varepsilon") << "$";
       out << "\\\\\n";
     }
     out << "\\end{longtable}" << "<hr>";
@@ -3393,26 +3394,43 @@ bool CommandList::innerPrintSSLieAlgebra
   }
   out << "</table>";
   out << "<hr>Simple basis in epsilon coordinates: <table>";
-    simpleBasis.MakeEiBasis(theWeyl.GetDim());
-    theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
-    for (int i=0; i< simplebasisEpsCoords.size; i++)
-    { out << "<tr><td>"
-      << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
-      << CGI::
-      GetHtmlMathFromLatexFormulA
-      (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
-      << "</td></tr>";
-    }
-    out << "</table>";
-    out << "Note on root system convention. Except for F_4, "
-    << "our epsilon notation follows the convention "
-    << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
-    << " <br> For F_4, we follow "
-    << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
-    << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
-    << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-    << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
-    << "of computations, <br>and for reducing sizes of the printouts.";
+  simpleBasis.MakeEiBasis(theWeyl.GetDim());
+  theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
+  for (int i=0; i< simplebasisEpsCoords.size; i++)
+  { out << "<tr><td>"
+    << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
+    << CGI::
+    GetHtmlMathFromLatexFormulA
+    (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
+    << "</td></tr>";
+  }
+  out << "</table>";
+  Matrix<Rational> tempM, tempM2;
+  theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
+  tempM2=tempM;
+  tempM2.Transpose();
+  tempM2.MultiplyOnTheRight(tempM);
+  if (!(tempM2==theWeyl.CartanSymmetric))
+  { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the "
+    << "vectors are incorrect. Please fix function DynkinType::GetEpsilonMatrix. "
+    << "The matrix of the epsilon coordinates is "
+    << tempM.ToString()
+    << ", the Symmetric Cartan matrix is "
+    << theWeyl.CartanSymmetric.ToString() << ", and the  "
+    << "transpose of the epsilon matrix times the epsilon matrix:  "
+    << tempM2.ToString() << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  out << "Note on root system convention. Except for F_4, "
+  << "our epsilon notation follows the convention "
+  << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
+  << " <br> For F_4, we follow "
+  << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
+  << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
+  << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+  << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
+  << "of computations, <br>and for reducing sizes of the printouts.";
   if (Verbose)
   { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
     << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
@@ -5365,7 +5383,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
-   bool visible)
+   bool visible, bool experimental)
 { int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
   { this->operations.AddOnTop(theOpName);
@@ -5374,7 +5392,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   Function innerFunction
-  (innerHandler, 0, opDescription, opExample, true, visible)
+  (innerHandler, 0, opDescription, opExample, true, visible, experimental, true)
   ;
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AssignChildAtomValue(0, leftType, *this);
@@ -5387,7 +5405,7 @@ void CommandList::AddOperationHandler
   (const std::string& theOpName, Expression::FunctionAddress handler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
-   bool isInner, bool visible)
+   bool isInner, bool visible, bool isExperimental)
 { int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
   { this->operations.AddOnTop(theOpName);
@@ -5401,9 +5419,12 @@ void CommandList::AddOperationHandler
     assert(false);
   }
   Function theFun
-  (handler, 0, opDescription, opExample, isInner, visible)
+  (handler, 0, opDescription, opExample, isInner, visible, isExperimental)
   ;
-  this->FunctionHandlers[indexOp].ReservE(15);
+  if (theOpName=="*" || theOpName=="+" || theOpName=="/")
+    this->FunctionHandlers[indexOp].ReservE(35);
+  else
+    this->FunctionHandlers[indexOp].ReservE(5);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
@@ -5454,8 +5475,10 @@ bool Function::inputFitsMyInnerType(const Expression& input)
 }
 
 std::string Function::GetString(CommandList& theBoss)
-{ std::stringstream out2;
-  if (this->flagIamVisible)
+{ if (!this->flagIamVisible)
+    return "";
+  std::stringstream out2;
+  if (!this->flagIsExperimental)
   { std::stringstream out;
     out << this->theDescription;
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";

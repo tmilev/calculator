@@ -1103,14 +1103,8 @@ public:
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
-  void GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational> & input, Vector<Rational> & output);
-  void GetEpsilonCoords(const Vector<Rational> & input, Vector<Rational> & output);
-  void GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output);
-  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)
-  { Vector<Rational> tempRoot;
-    this->GetEpsilonCoords(input, tempRoot);
-    return tempRoot;
-  }
+  void GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output);
+  void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
@@ -1473,7 +1467,6 @@ public:
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs);
   void RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, Vectors<Rational>& theRoots, bool useLatex, rootSubalgebra& owner);
-  void GetEpsilonCoords(Vectors<Rational>& input, Vectors<Rational>& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables);
   int ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
   int RootsToScalarProductString(Vectors<Rational>& inputLeft, Vectors<Rational>& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
   void ComputeConnectedComponents(Vectors<Rational>& input, rootSubalgebra& owner, List<List<int> >& output);

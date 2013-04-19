@@ -11,18 +11,18 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeWeylGroupElement", WeylGroupCalculatorFunctions::innerCoxeterElement, "",
    "Needs a group name and a list of generators",
-   "s_{{i}}:=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true)
+   "s_{{i}}:=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
    ;
 
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClasses", WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses, "",
    "For a Weyl group of rank 4 or less, computes the conjugacy classes of a Weyl group.",
-   "WeylGroupConjugacyClasses{}(A_2);", true)
+   "WeylGroupConjugacyClasses{}(A_2);", true, false)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupIrrepsAndCharTable", WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable, "",
    "Computes the irreducible representations and the character table of a Weyl group.",
-   "WeylGroupIrrepsAndCharTable{}(b_3);", false)
+   "WeylGroupIrrepsAndCharTable{}(b_3);", true, true)
    ;
     this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords",  WeylGroupCalculatorFunctions::innerWeylGroupOrbitSimple, "",
@@ -43,26 +43,26 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
    "Gets the natural representation of the Weyl group.",
-   "WeylGroupNaturalRep{}(B_3)", false)
+   "WeylGroupNaturalRep{}(B_3)", true, true)
    ;
 
   this->AddOperationInnerHandler
   ("MinPoly", this->innerMinPolyMatrix, "",
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
-   "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true)
+   "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true, false)
    ;
   this->AddOperationHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. \
    First argument gives type, second argument gives highest weight in fundamental coordinates.",
-   "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
+   "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true, false)
    ;
   this->AddOperationHandler
   ("ConesIntersection", this->innerConesIntersect, "",
    "Takes as input two sequences of vectors, generates cones over Q, and intersects them using the simplex\
    algorithm. The output is a string report of the operation.",
    "v_1:=(1, 2, 3 ); v_2:=(1, 3, 2); v_3:=(3,1,1); v_4:=(-2,2, 2);\
-   \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true)
+   \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true, false)
    ;
 
   this->AddOperationInnerHandler
@@ -74,7 +74,7 @@ void CommandList::initPredefinedInnerFunctions()
    the Store function evaluates to an error message.",
    "Y:=Polynomial{}((a+b)^2);\
    \nX:=Store{}Y;\nLoad{}X\
-   ", true)
+   ", true, false)
    ;
   this->AddOperationInnerHandler
   ("Load", Serialization::innerLoad, "",
@@ -85,12 +85,12 @@ void CommandList::initPredefinedInnerFunctions()
    \nZ:=Polynomial{}((a+b)^2);\
    \nW:=Store{}Z;\
    Load{}W\
-   ", true)
+   ", true, false)
    ;
   this->AddOperationInnerHandler
   ("DoubleValue", this->innerDouble, "",
    "Double value of a rational number.",
-   "DoubleValue{}(3/7)", true)
+   "DoubleValue{}(3/7)", true, false)
    ;
   this->AddOperationInnerHandler
 ("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
@@ -133,13 +133,13 @@ void CommandList::initPredefinedInnerFunctions()
 ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
-   "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true)
+   "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true, false)
    ;
   this->AddOperationInnerHandler
 ("PolyDivStringGrLex", &this->innerPolynomialDivisionVerboseGrLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
-   "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
 ("PolyDivStringGrLexRev", &this->innerPolynomialDivisionVerboseGrLexRev, "",
@@ -147,20 +147,20 @@ void CommandList::initPredefinedInnerFunctions()
    a polynomial by a set of polynomials using total degree (graded) order with \
    equal total degrees compared by lex order with reversed order of the letters, \
    for example, x y^4> x^2 y^3 , x^11>y^10. ",
-   "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
 ("PolyDivStringLex", &this->innerPolynomialDivisionVerboseLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
-   "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
 ("PolyDivStringLexRev", &this->innerPolynomialDivisionVerboseLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order with reversed order of variables, \
    for example, y^2 > x^1000 y > x y. ",
-   "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
+   "PolyDivStringLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
@@ -429,13 +429,13 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is \
    not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
-   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))", false);
+   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))", true, true);
   this->AddOperationInnerHandler
   ("PrintB3G2branchingTable", this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
-   "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))", false);
+   "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))", true, true);
   this->AddOperationInnerHandler
   ("SplitFDTensorGenericGeneralizedVerma", this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
@@ -458,7 +458,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    The third argument gives the\
    parabolic subalgebra selection. \
    The first argument gives the type of the Lie algebra. ",
-   "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ", false);
+   "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ", false, false);
   this->AddOperationInnerHandler
   ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
@@ -474,7 +474,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
    can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
    accepts further optional arguments, customizing the notation of the final printout.",
-   "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true);
+   "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
   this->AddOperationInnerHandler
   ("KLcoeffs", this->fKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \
@@ -542,7 +542,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
-   "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", false);
+   "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", true, true);
   this->AddOperationInnerHandler
   ("InvertMatrixVerbose", this->innerInvertMatrix, "",
    "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
@@ -579,7 +579,7 @@ x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,\
 x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
 x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
 x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
+x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false, true);
 
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
@@ -660,17 +660,17 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   ("experimentalPrintSemisimpleSubalgebras", this->innerSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebras{}(A_2)", true);
+   "experimentalPrintSemisimpleSubalgebras{}(A_2)", true, false);
   this->AddOperationInnerHandler
   ("experimentalEmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints all embeddings of the first subalgebra into the second. ",
-   "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true);
+   "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
-   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
+   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, false)
    ;
   this->AddOperationInnerHandler
   ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
@@ -681,13 +681,13 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 +3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), \
 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
 +6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
-+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", false)
++10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
-   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", false)
+   "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, true)
    ;
 
 //     this->AddOperationInnerHandler
@@ -712,14 +712,14 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     and finds the set of all possible divisors of the value of poly at the k points.\
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
-   "FactorOneVarPolyOverRationals{}{x^2-4}", false);
+   "FactorOneVarPolyOverRationals{}{x^2-4}", true, true);
   this->AddOperationInnerHandler
   ("Freudenthal", this->fFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
    module of a highest weight given in fundamental coordinates. The first argument gives \
    the semisimple Lie algebra type, the second argument gives the highest weight in \
    fundamental coordinates. ",
-   "Freudenthal{}(B_3, (2,2,2))", true)
+   "Freudenthal{}(B_3, (2,2,2))", true, false)
    ;
 
 //  this->AddOperationInnerHandler

@@ -3914,129 +3914,62 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     output.NullifyAll();
     for (int i=0; i<WeylRank-1; i++)
     { output.elements[i][i]=1;
-      output.elements[i][i+1]=-1;
+      output.elements[i+1][i]=-1;
     }
-    output.elements[0][0]=2;
-    output.elements[WeylRank-1][WeylRank-1]=1;
+    output.elements[WeylRank-1][WeylRank-1]=2;
   }
   if (WeylLetter=='D')
-  { //the triple node comes first, then the long string, then the two int strings.
-    // the long string is oriented with the end that is connected to the triple node having
-    //smaller index
-    output.init(WeylRank, WeylRank);
+  { output.init(WeylRank, WeylRank);
     output.NullifyAll();
-    for (int i=0; i<WeylRank-2; i++)
-    { output.elements[i][WeylRank-3-i]=1;
-      if (i!=0)
-        output.elements[i][WeylRank-2-i]=-1;
-    //  output.ComputeDebugString();
+    for (int i=0; i<WeylRank-1; i++)
+    { output.elements[i][i]=1;
+      output.elements[i+1][i]=-1;
     }
-    output.elements[WeylRank-2][0]=-1;
-    output.elements[WeylRank-2][WeylRank-2]=1;
+    output.elements[WeylRank-1][WeylRank-1]=1;
     output.elements[WeylRank-2][WeylRank-1]=1;
-    output.elements[WeylRank-1][WeylRank-2]=1;
-    output.elements[WeylRank-1][WeylRank-1]=-1;
   }
   Rational RHalf(1,2);
   Rational RMHalf(-1,2);
-  if (WeylLetter=='E' && WeylRank==8)
-  { //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
-    //first comes the triple node, then the strip of length 4, then the strip of length 2 and finally the strip of lenght 1
-    //as in D, all strips are oriented with the node linked to the triple node first
-    output.init(WeylRank, WeylRank);
+  if (WeylLetter=='E')
+  { //Epsilon convention taken with slight modification from
+    //Humpreys, Introduction to Lie algebras and representation theory, page 65
+    //first comes first root, then the sticky part, then string with the rest of the roots.
+    output.init(8, WeylRank);
     output.NullifyAll();
-    //\eps_1 coefficient:
-    output.elements[0][5]=-1;
-    output.elements[0][6]=RHalf;
-    output.elements[0][7]=1;
-    //\eps_2 coefficient:
-    output.elements[1][0]=-1;
-    output.elements[1][5]=1;
-    output.elements[1][6]=RMHalf;
-    output.elements[1][7]=1;
-    //\eps_3 coefficient:
-    output.elements[2][0]=1;
-    output.elements[2][1]=-1;
-    output.elements[2][6]=RMHalf;
-    //\eps_4 coefficient:
-    output.elements[3][1]=1;
-    output.elements[3][2]=-1;
-    output.elements[3][6]=RMHalf;
-    //\eps_5 coefficient:
-    output.elements[4][2]=1;
-    output.elements[4][3]=-1;
-    output.elements[4][6]=RMHalf;
-    //\eps_6 coefficient:
-    output.elements[5][3]=1;
-    output.elements[5][4]=-1;
-    output.elements[5][6]=RMHalf;
-    //\eps_7 coefficient:
-    output.elements[6][4]=1;
-    output.elements[6][6]=RMHalf;
-    //\eps_8 coefficient:
-    output.elements[7][6]=RHalf;
-  }
-  if (WeylLetter=='E' && WeylRank==7)
-  { output.init(8, 7);
-    output.NullifyAll();
-    //\eps_1 coefficient:
-    output.elements[0][4]=-1;
-    output.elements[0][5]=RHalf;
-    output.elements[0][6]=1;
-    //\eps_2 coefficient:
-    output.elements[1][0]=-1;
-    output.elements[1][4]=1;
-    output.elements[1][5]=RMHalf;
-    output.elements[1][6]=1;
-    //\eps_3 coefficient:
-    output.elements[2][0]=1;
-    output.elements[2][1]=-1;
-    output.elements[2][5]=RMHalf;
-    //\eps_4 coefficient:
-    output.elements[3][1]=1;
-    output.elements[3][2]=-1;
-    output.elements[3][5]=RMHalf;
-    //\eps_5 coefficient:
-    output.elements[4][2]=1;
-    output.elements[4][3]=-1;
-    output.elements[4][5]=RMHalf;
-    //\eps_6 coefficient:
-    output.elements[5][3]=1;
-    output.elements[5][5]=RMHalf;
-    //\eps_7 coefficient:
-    output.elements[6][5]=RMHalf;
-    //\eps_8 coefficient:
-    output.elements[7][5]=RHalf;
-  }
-  if (WeylLetter=='E' && WeylRank==6)
-  { output.init(8, 6);
-    output.NullifyAll();
-    //\eps_1 coefficient:
-    output.elements[0][3]=-1;
-    output.elements[0][4]=RHalf;
-    output.elements[0][5]=1;
-    //\eps_2 coefficient:
-    output.elements[1][0]=-1;
-    output.elements[1][3]=1;
-    output.elements[1][4]=RMHalf;
-    output.elements[1][5]=1;
-    //\eps_3 coefficient:
-    output.elements[2][0]=1;
-    output.elements[2][1]=-1;
-    output.elements[2][4]=RMHalf;
-    //\eps_4 coefficient:
-    output.elements[3][1]=1;
-    output.elements[3][2]=-1;
-    output.elements[3][4]=RMHalf;
-    //\eps_5 coefficient:
-    output.elements[4][2]=1;
-    output.elements[4][4]=RMHalf;
-    //\eps_6 coefficient:
-    output.elements[5][4]=RMHalf;
-    //\eps_7 coefficient:
-    output.elements[6][4]=RMHalf;
-    //\eps_8 coefficient:
-    output.elements[7][4]=RHalf;
+    //first simple root: -1/2e_1-1/2e_8+1/2e_2+1/2e_3+1/2e_4+1/2e_5+1/2e_6+1/2e_7
+    output(0,0)=RMHalf;
+    output(1,0)=RHalf;
+    output(2,0)=RHalf;
+    output(3,0)=RHalf;
+    output(4,0)=RHalf;
+    output(5,0)=RHalf;
+    output(6,0)=RHalf;
+    output(7,0)=RMHalf;
+    //2nd simple root: -e_1-e_2 (that is the sticky piece of the Dynkin diagram)
+    output(0,1)=-1;
+    output(1,1)=-1;
+    //3rd simple root: e_1-e_2
+    output(0,2)=1;
+    output(1,2)=-1;
+    //4th simple root: e_2-e_3
+    output(1,3)=1;
+    output(2,3)=-1;
+    //5th simple root: e_3-e_4
+    output(2,4)=1;
+    output(3,4)=-1;
+    //6th simple root: e_4-e_5
+    output(3,5)=1;
+    output(4,5)=-1;
+    if (WeylRank>6)
+    {//7th simple root: e_5-e_6
+      output(4,6)=1;
+      output(5,6)=-1;
+    }
+    if(WeylRank>7)
+    {//8th simple root: e_6-e_7
+      output(5,7)=1;
+      output(6,7)=-1;
+    }
   }
   if (WeylLetter=='F')
   { //convention different from Humpreys, Introduction to Lie algebras and representation
@@ -4457,21 +4390,6 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
 }
 
-void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
-}
-
-void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  Vectors<Rational> tempInput, tempOutput;
-  tempInput.AddOnTop(input);
-  tempRoots.MakeEiBasis(this->GetDim());
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
-  output=tempOutput.TheObjects[0];
-}
-
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra
 (Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
 { Matrix<Rational>& basisChange = this->buffer1NotCopied.GetElement();
@@ -4510,24 +4428,24 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
 }
 
 void WeylGroup::GetEpsilonCoords
-(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational>& input,
- Vector<Rational>& output)
-{ bool needsComputation=this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer();
-  Matrix<Rational>& tempMat=this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement();
-  if (needsComputation)
-    DynkinSimpleType::GetEpsilonMatrix(WeylLetter, WeylRank, tempMat);
-//  tempMat.ComputeDebugString();
-  Vector<Rational> result;
-  result.MakeZero(tempMat.NumRows);
-  Rational tempRat;
-  for (int i=0; i<tempMat.NumRows; i++)
-    for (int j=0; j<input.size; j++)
-    { tempRat=(tempMat.elements[i][j]);
-      tempRat*=(input[j]);
-      result[i]+=(tempRat);
-    }
-//  result.ComputeDebugString();
-  output=(result);
+(const List<Vector<Rational> >& input, Vectors<Rational>& output)
+{ if (&input==&output)
+  { List<Vector<Rational> > newInput=input;
+    this->GetEpsilonCoords(newInput, output);
+    return;
+  }
+  output.SetSize(input.size);
+  for (int i=0; i<input.size; i++)
+    this->GetEpsilonCoords(input[i], output[i]);
+}
+
+void WeylGroup::GetEpsilonCoords
+(const Vector<Rational>& input, Vector<Rational>& output)
+{ if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer())
+    this->theDynkinType.GetEpsilonMatrix
+    (this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
+  output=input;
+  this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
 }
 
 bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input)

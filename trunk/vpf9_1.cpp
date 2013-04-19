@@ -1831,8 +1831,8 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   tempRoots=(tempSubgroup.RootSubsystem);
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);
   for (int i=0; i<owner.HighestWeightsGmodK.size; i++)
-    if (!owner.NilradicalKmods.selected[i] && tempRoots.Contains(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
-      genSingHW.AddOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
+    if (!owner.NilradicalKmods.selected[i] && tempRoots.Contains(owner.HighestWeightsGmodK[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
+      genSingHW.AddOnTop(owner.HighestWeightsGmodK[i]);
   if (owner.ConeConditionHolds(theGlobalVariables, owners, indexInOwner, NilradicalIntersection, genSingHW, false))
     return false;
   if (!owner.AttemptTheTripleTrickWRTSubalgebra(*this, genSingHW, NilradicalIntersection, theGlobalVariables))
@@ -1871,21 +1871,6 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, Vectors<Rational>& N
   this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
   //this->FixRightHandSide(owner, NilradicalRoots);
   this->ComputeDiagramRelAndK(owner);
-}
-
-void coneRelation::GetEpsilonCoords(Vectors<Rational>& input, Vectors<Rational>& output, WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)
-{ output.SetSize(input.size);
-  Vectors<Rational>& tempRoots=theGlobalVariables.rootsGetEpsilonCoords.GetElement();
-  Vector<Rational> tempRoot;
-  if (this->theDiagram.SimpleComponentTypes.size==0)
-    return;
-  int WeylRank=this->theDiagram.RankTotal();
-  char WeylLetter=this->theDiagram.ToString().at(0);
-  for(int i=0; i<input.size; i++)
-  { tempRoots.AssignListList(this->theDiagram.SimpleBasesConnectedComponents);
-    input.TheObjects[i].GetCoordsInBasiS(tempRoots, tempRoot);
-    theWeyl.GetEpsilonCoords(WeylLetter, WeylRank, tempRoots, tempRoot, output.TheObjects[i]);
-  }
 }
 
 void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots)
@@ -2384,8 +2369,8 @@ void coneRelations::ToString
     if (this->flagIncludeCoordinateRepresentation)
     { lineCounter+=2;
       out << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
-      this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.GetOwnerWeyl(), theGlobalVariables);
-      this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas, tempBetas, owners.GetOwnerWeyl(), theGlobalVariables);
+      //(*this)[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.GetOwnerWeyl(), theGlobalVariables);
+      //this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas, tempBetas, owners.GetOwnerWeyl(), theGlobalVariables);
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].AlphaCoeffs, tempAlphas, true);
       out << "\\multicolumn{5}{c}{" << tempS;
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].BetaCoeffs, tempBetas, true);

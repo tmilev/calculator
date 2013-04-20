@@ -650,10 +650,17 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
       this->modulesGrouppedByPrimalType[i].AddListOnTop(this->modulesGrouppedByWeight[i][j]);
   }
   this->candidateSubalgebraModules.SetSize(0);
+  this->primalSubalgebraModules.SetSize(0);
   for (int i=0; i<this->modulesGrouppedByPrimalType.size; i++)
     if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial
         (this->theBasis, this->modulesGrouppedByPrimalType[i]))
-      this->candidateSubalgebraModules.AddOnTop(i);
+    { this->candidateSubalgebraModules.AddOnTop(i);
+      this->primalSubalgebraModules.AddOnTop(i);
+    }
+  for (int i=0; i<this->modulesGrouppedByPrimalType.size; i++)
+    if (this->modulesGrouppedByPrimalType[i].size==1 &&
+        this->modulesGrouppedByPrimalType[i][0].IsElementCartan())
+      this->primalSubalgebraModules.AddOnTop(i);
 }
 
 void CandidateSSSubalgebra::ComputeSinglePair
@@ -704,17 +711,55 @@ void CandidateSSSubalgebra::ComputePairingTable
     for (int j=0; j<this->NilradicalPairingTable[i].size; j++)
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
         if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
-          this->OppositeModules[i].AddOnTop(j);
+          if (!(this->primalSubalgebraModules.Contains(i) &&
+                this->primalSubalgebraModules.Contains(j)))
+            this->OppositeModules[i].AddOnTopNoRepetition(j);
+}
+
+void CandidateSSSubalgebra::GetTheTwoCones
+  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetTheTwoCones");
+  List<int>& currentFKNilradicalCandidates= this->FKNilradicalCandidates[inputFKIndex];
+  outputNilradicalWeights.SetSize(0);
+  outputNonFKhws.SetSize(0);
+  Vector<Rational> tempV;
+  for (int i=0; i<currentFKNilradicalCandidates.size; i++)
+    if (!this->primalSubalgebraModules.Contains(i))
+    { if (currentFKNilradicalCandidates[i]==0)
+        outputNonFKhws.AddOnTop(this->highestWeightsCartanCentralizerSplitModules[i]);
+      else if (currentFKNilradicalCandidates[i]==1)
+        for (int j=0; j<this->modulesGrouppedByPrimalType[i].size; j++)
+        { ElementSemisimpleLieAlgebra<Rational>& curEl=this->modulesGrouppedByPrimalType[i][j];
+          this->GetPrimalWeightProjectionFundCoords
+          (this->GetAmbientSS().GetWeightOfGenerator(curEl[0].theGeneratorIndex), tempV);
+          outputNilradicalWeights.AddOnTop(tempV);
+        }
+    }
 }
 
 void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
-{ List<int> theSel;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateAllNilradicals");
+  List<int> theSel;
   this->RecursionDepthCounterForNilradicalGeneration=0;
   //0 stands for not selected, 1 for selected, 2 stands for unknown.
   theSel.initFillInObject(this->NilradicalPairingTable.size, 2);
+  for(int i=0; i<this->primalSubalgebraModules.size; i++)
+    theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
-  this->nilradicalGenerationLog=out.str();
+  this->NilradicalConesIntersect.SetSize(this->FKNilradicalCandidates.size);
+  Vector<Rational> emptyVector;
+  this->ConeIntersections.initFillInObject(this->FKNilradicalCandidates.size, emptyVector);
+  this->ConeSeparatingNormals.initFillInObject(this->FKNilradicalCandidates.size, emptyVector);
+  this->theNilradicalWeights.SetSize(this->FKNilradicalCandidates.size);
+  this->theNonFKhws.SetSize(this->FKNilradicalCandidates.size);
+  for (int i=0; i<this->NilradicalConesIntersect.size; i++)
+  { this->GetTheTwoCones(i, this->theNilradicalWeights[i], this->theNonFKhws[i]);
+    this->NilradicalConesIntersect[i]=this->theNilradicalWeights[i].ConesIntersect
+    (this->theNilradicalWeights[i], this->theNonFKhws[i], &this->ConeIntersections[i],
+     &this->ConeSeparatingNormals[i], theGlobalVariables);
+  }
+//  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
 }
 
@@ -833,9 +878,9 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly
-(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWs)
+(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeightsOnly");
-  outputHWs.Clear();
+  outputHWsDualCoords.Clear();
   Vector<Rational> currentWeight, currentRootSpace;
   for (int i=0; i<this->highestVectorsModules.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentVector=this->highestVectorsModules[i];
@@ -849,25 +894,46 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionWeights
       for (int k=0; k<this->CartanOfCentralizer.size; k++)
         currentWeight[k+this->theHs.size]=
         this->GetAmbientWeyl().RootScalarCartanRoot(currentRootSpace, this->CartanOfCentralizer[k]);
-      outputHWs.AddOnTopNoRepetition(currentWeight);
+      outputHWsDualCoords.AddOnTopNoRepetition(currentWeight);
     }
   }
-  outputHWs.QuickSortAscending();
+  outputHWsDualCoords.QuickSortAscending();
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition");
-  HashedList<Vector<Rational> > theWeightsCartanRestricted;
+  HashedList<Vector<Rational> > theWeightsCartanRestrictedDualCoords;
   this->ComputeCentralizinglySplitModuleDecompositionWeightsOnly
-  (theGlobalVariables, theWeightsCartanRestricted);
+  (theGlobalVariables, theWeightsCartanRestrictedDualCoords);
   this->ComputeCentralizinglySplitModuleDecompositionHWVsOnly
-  (theGlobalVariables, theWeightsCartanRestricted);
+  (theGlobalVariables, theWeightsCartanRestrictedDualCoords);
   this->ComputeCentralizinglySplitModuleDecompositionLastPart(theGlobalVariables);
   if (this->owner->flagDoComputePairingTable)
   { this->ComputePairingTable(theGlobalVariables);
     this->EnumerateAllNilradicals(theGlobalVariables);
   }
+}
+
+void CandidateSSSubalgebra::GetWeightProjectionFundCoords
+(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetWeightProjectionFundCoords");
+  output.SetSize(this->theHs.size);
+  for (int j=0; j<this->theHs.size; j++)
+    output[j]= this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->theHs[j])*2/
+    this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
+}
+
+void CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords
+(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords");
+  output.SetSize(this->theHs.size+this->CartanOfCentralizer.size);
+  for (int j=0; j<this->theHs.size; j++)
+    output[j]= this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->theHs[j])*2/
+    this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
+  for (int j=0; j<this->CartanOfCentralizer.size; j++)
+    output[j+this->theHs.size]=
+    this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->CartanOfCentralizer[j]);
 }
 
 void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPart
@@ -883,16 +949,8 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPar
     Vector<Rational>& currentHWrelative=this->highestWeightsModules[i];
     Vector<Rational>& currentHWCentralizerRelative=
     this->highestWeightsCartanCentralizerSplitModules[i];
-    currentHWrelative.SetSize(this->theHs.size);
-    currentHWCentralizerRelative.SetSize(this->theHs.size+this->CartanOfCentralizer.size);
-    for (int j=0; j<this->theHs.size; j++)
-    { currentHWrelative[j]= this->GetAmbientWeyl().RootScalarCartanRoot(currentRoot, this->theHs[j])*2/
-      this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
-      currentHWCentralizerRelative[j]=currentHWrelative[j];
-    }
-    for (int j=0; j<this->CartanOfCentralizer.size; j++)
-      currentHWCentralizerRelative[j+this->theHs.size]=
-      this->GetAmbientWeyl().RootScalarCartanRoot(currentRoot, this->CartanOfCentralizer[j]);
+    this->GetWeightProjectionFundCoords(currentRoot, currentHWrelative);
+    this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWCentralizerRelative);
     theWeight.weightFundamentalCoords=currentHWCentralizerRelative;
     this->theCharOverCartanPlusCartanCentralizer.AddMonomial(theWeight, 1);
   }
@@ -2654,11 +2712,19 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         Vector<Rational> currentNilrad;
         currentNilrad=this->FKNilradicalCandidates[i];
         out << currentNilrad.ToStringLetterFormat("V");
+        if (this->NilradicalConesIntersect[i])
+          out << ". Cones intersect. ";
+        else
+          out << ". Cones don't intersect. ";
+        out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
+        << "; highest weight cone: " << this->theNonFKhws[i].ToString();
+        if (this->NilradicalConesIntersect[i])
+          out << this->ConeIntersections[i].ToStringLetterFormat("w");
+        else
+          out << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
       }
       if (this->nilradicalGenerationLog!="")
-      { out << "<br>Nilradical generation log:"
-        << this->nilradicalGenerationLog;
-      }
+        out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
     }
   }
   return out.str();

@@ -234,6 +234,7 @@ public:
   //The highest weights are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsModules;
   List<Vector<Rational> > highestWeightsCartanCentralizerSplitModules;
+
   List<Vector<Rational> > highestWeightsModules;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
@@ -251,11 +252,17 @@ public:
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknowns;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
+  List<bool> NilradicalConesIntersect;
+  Vectors<Rational> ConeIntersections;
+  Vectors<Rational> ConeSeparatingNormals;
+  List<Vectors<Rational> > theNilradicalWeights;
+  List<Vectors<Rational> > theNonFKhws;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByWeight;
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
   List<List<List<int> > > NilradicalPairingTable;
   List<int> candidateSubalgebraModules;
+  List<int> primalSubalgebraModules;
   List<List<int> > OppositeModules;
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
@@ -290,6 +297,9 @@ public:
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
   ;
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
+;
+  void GetTheTwoCones
+  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws)
 ;
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively
@@ -345,10 +355,16 @@ public:
     this->modulesWithZeroWeights=other.modulesWithZeroWeights;
     this->OppositeModules=other.OppositeModules;
     this->FKNilradicalCandidates=other.FKNilradicalCandidates;
+    this->NilradicalConesIntersect=other.NilradicalConesIntersect;
+    this->theNonFKhws=other.theNonFKhws;
+    this->theNilradicalWeights=other.theNilradicalWeights;
+    this->ConeIntersections=other.ConeIntersections;
+    this->ConeSeparatingNormals=other.ConeSeparatingNormals;
     this->flagDoLogNilradicalGeneration=other.flagDoLogNilradicalGeneration;
     this->nilradicalGenerationLog=other.nilradicalGenerationLog;
     this->RecursionDepthCounterForNilradicalGeneration=other.RecursionDepthCounterForNilradicalGeneration;
     this->candidateSubalgebraModules=other.candidateSubalgebraModules;
+    this->primalSubalgebraModules=other.primalSubalgebraModules;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
@@ -370,12 +386,18 @@ public:
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecompositionLastPart(GlobalVariables* theGlobalVariables);
+  void GetPrimalWeightProjectionFundCoords
+  (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)
+  ;
+  void GetWeightProjectionFundCoords
+  (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+  ;
   void ComputeCentralizinglySplitModuleDecompositionHWVsOnly
   (GlobalVariables* theGlobalVariables,
    HashedList<Vector<Rational> >& inputHws)
    ;
   void ComputeCentralizinglySplitModuleDecompositionWeightsOnly
-  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWs)
+  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
   ;
   bool ComputeSystem
 (GlobalVariables* theGlobalVariables)

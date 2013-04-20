@@ -3895,38 +3895,38 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   { output.init(WeylRank+1, WeylRank);
     output.NullifyAll();
     for (int i=0; i<WeylRank; i++)
-    { output.elements[i][i]=1;
-      output.elements[i+1][i]=-1;
+    { output(i,i)=1;
+      output(i+1,i)=-1;
     }
-    output.elements[WeylRank][WeylRank-1]=-1;
+    output(WeylRank,WeylRank-1)=-1;
   }
   if (WeylLetter=='B')
   { output.init(WeylRank, WeylRank);
     output.NullifyAll();
     for (int i=0; i<WeylRank-1; i++)
-    { output.elements[i][i]=1;
-      output.elements[i+1][i]=-1;
+    { output(i,i)=1;
+      output(i+1,i)=-1;
     }
-    output.elements[WeylRank-1][WeylRank-1]=1;
+    output(WeylRank-1, WeylRank-1)=1;
   }
   if (WeylLetter=='C')
   { output.init(WeylRank, WeylRank);
     output.NullifyAll();
     for (int i=0; i<WeylRank-1; i++)
-    { output.elements[i][i]=1;
-      output.elements[i+1][i]=-1;
+    { output(i,i)=1;
+      output(i+1,i)=-1;
     }
-    output.elements[WeylRank-1][WeylRank-1]=2;
+    output(WeylRank-1,WeylRank-1)=2;
   }
   if (WeylLetter=='D')
   { output.init(WeylRank, WeylRank);
     output.NullifyAll();
     for (int i=0; i<WeylRank-1; i++)
-    { output.elements[i][i]=1;
-      output.elements[i+1][i]=-1;
+    { output(i,i)=1;
+      output(i+1,i)=-1;
     }
-    output.elements[WeylRank-1][WeylRank-1]=1;
-    output.elements[WeylRank-2][WeylRank-1]=1;
+    output(WeylRank-1,WeylRank-1)=1;
+    output(WeylRank-2,WeylRank-1)=1;
   }
   Rational RHalf(1,2);
   Rational RMHalf(-1,2);
@@ -3979,18 +3979,18 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     output.NullifyAll();
 
     //image of first simple root (long one):
-    output.elements[0][0]=2;
+    output(0,0)=2;
     //image of second simple root (long one)
-    output.elements[0][1]=-1;
-    output.elements[1][1]=-1;
-    output.elements[2][1]=1;
-    output.elements[3][1]=1;
+    output(0,1)=-1;
+    output(1,1)=-1;
+    output(2,1)=1;
+    output(3,1)=1;
     //image of third simple root (short one):
-    output.elements[1][2]=1;
-    output.elements[2][2]=-1;
+    output(1,2)=1;
+    output(2,2)=-1;
     //image of fourth simple root (short one)
-    output.elements[2][3]=1;
-    output.elements[3][3]=-1;
+    output(2,3)=1;
+    output(3,3)=-1;
     //eps_2:
     //eps_4:
   }
@@ -4000,12 +4000,12 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     output.init(3, 2);
     output.NullifyAll();
     //image of the first simple root(short one):
-    output.elements[0][0]=1;
-    output.elements[1][0]=-1;
+    output(0,0)=1;
+    output(1,0)=-1;
     //image of second simple root:
-    output.elements[0][1]=-2;
-    output.elements[1][1]=1;
-    output.elements[2][1]=1;
+    output(0,1)=-2;
+    output(1,1)=1;
+    output(2,1)=1;
   }
 }
 

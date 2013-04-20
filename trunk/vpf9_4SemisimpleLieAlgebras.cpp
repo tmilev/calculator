@@ -51,6 +51,15 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   out << "<br>Total, there are " << this->Hcandidates.size << " = " << candidatesRealized
   << " realized + " << candidatesProvenImpossible << " proven impossible + "
   << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
+  out << "The subalgebras are sorted relative to their Dynkin types. "
+  << "<br>Dynkin types are compared first by rank; if ranks are equal, they are compared "
+  << " <br>by their largest simple component and its multiplicity. If the largest simple component is equal,"
+  << "they are compared by the second largest component, and so on. "
+  << "<br>Simple components are compared as follows. "
+  << "<br>A simple component of higher rank is considered to be larger than a smaller rank one. "
+  << "<br>If the ranks are equal, the simple components are compared by type with the type order "
+  << " A<D<B<C<E<F<G (provided ranks are equal, this order is consistent with the order given by comparing "
+  << " the corresponding Lie algebras by dimension). ";
   for (int i=0; i<this->Hcandidates.size; i++)
     out << this->Hcandidates[i].ToString(theFormat) << "\n<hr>\n ";
   if (this->theSl2s.size!=0)
@@ -2881,6 +2890,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
 
 void SemisimpleSubalgebras::HookUpCentralizers()
 { std::cout << "Ere I am, J.H. ... the ghost in the machine!";
+  this->Hcandidates.QuickSortAscending();
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
@@ -2901,6 +2911,35 @@ void SemisimpleSubalgebras::HookUpCentralizers()
       }
     }
   }
+}
+
+bool DynkinType::operator>(const DynkinType& other)const
+{ if (this->GetRank()>other.GetRank())
+    return true;
+  if (other.GetRank()>this->GetRank())
+    return false;
+  DynkinType difference;
+  difference=*this;
+  difference-=other;
+  if (difference.IsEqualToZero())
+    return false;
+  DynkinSimpleType highestSimpleTypeDifference=difference[0];
+  Rational maxComponentDifferenceMult=difference.theCoeffs[0];
+  for (int i=1; i<difference.size; i++)
+    if (difference[i]>highestSimpleTypeDifference)
+    { maxComponentDifferenceMult=difference.theCoeffs[i];
+      highestSimpleTypeDifference=difference[i];
+    }
+  return maxComponentDifferenceMult>0;
+}
+
+bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other)const
+{ //if (this->owner!=other.owner)
+  //{ std::cout << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
+  //  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //  assert(false);
+  //}
+  return this->theWeylNonEmbeddeD.theDynkinType>other.theWeylNonEmbeddeD.theDynkinType;
 }
 
 bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolution)
@@ -2990,3 +3029,5 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   }
 }
+
+

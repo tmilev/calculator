@@ -4463,7 +4463,6 @@ public:
   }
   bool operator>(const ChevalleyGenerator& other)const;
   std::string ToString(FormatExpressions* inputFormat=0)const;
-  bool IsNilpotent()const;
   void CheckConsistencyWithOther(const ChevalleyGenerator& other)const;
   bool operator==(const ChevalleyGenerator& other)
   { this->CheckConsistencyWithOther(other);
@@ -8213,12 +8212,7 @@ public:
   void MakeGGenerator
   (const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
   ;
-  bool IsElementCartan()
-  { for (int i=0; i<this->size; i++)
-      if (this->TheObjects[i].IsNilpotent())
-        return false;
-    return true;
-  }
+  bool IsElementCartan()const;
   void MakeHgenerator(const Vector<CoefficientType>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator
   (int generatorIndex, SemisimpleLieAlgebra& inputOwner)

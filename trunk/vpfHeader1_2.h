@@ -8989,4 +8989,15 @@ void charSSAlgMod<CoefficientType>::MakeFromWeight
   this->owner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
   this->AddMonomial(theMon, 1);
 }
+
+template<class CoefficientType>
+bool ElementSemisimpleLieAlgebra<CoefficientType>::IsElementCartan()const
+{ if (this->size==0)
+    return true;
+  SemisimpleLieAlgebra* owner= (*this)[0].owneR;
+  for (int i=0; i<this->size; i++)
+    if (!owner->IsGeneratorFromCartan((*this)[i].theGeneratorIndex))
+      return false;
+  return true;
+}
 #endif

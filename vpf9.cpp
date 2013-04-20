@@ -1612,7 +1612,7 @@ bool partFraction::ReduceOnceGeneralMethod
  Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
 { if (this->IndicesNonZeroMults.size==owner.AmbientDimension)
     return false;
-  Matrix<Rational> & tempMat = bufferMat;
+  Matrix<Rational>& tempMat = bufferMat;
   bufferVectors.size=0;
   this->LastDistinguishedIndex=this->getSmallestNonZeroIndexGreaterThanOrEqualTo(owner, this->LastDistinguishedIndex);
   int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;

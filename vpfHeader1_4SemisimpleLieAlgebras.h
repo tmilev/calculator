@@ -415,6 +415,8 @@ public:
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
+  bool operator>(const CandidateSSSubalgebra& other)const ;
+
 };
 
 class SemisimpleSubalgebras

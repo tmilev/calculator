@@ -850,9 +850,9 @@ class DynkinSimpleType
       return true;
     if (this->theRank<other.theRank)
       return false;
-    if (this->theLetter=='B' && other.theLetter=='D')
+    if ((this->theLetter=='B' ||this->theLetter=='C') && other.theLetter=='D')
       return true;
-    if (this->theLetter=='D' && other.theLetter=='B')
+    if (this->theLetter=='D' && (other.theLetter=='B' ||other.theLetter=='C'))
       return false;
     if (this->theLetter>other.theLetter)
       return true;
@@ -941,6 +941,7 @@ public:
   std::string GetLieAlgebraName(FormatExpressions* theFormat=0)const;
   std::string GetWeylGroupName(FormatExpressions* theFormat=0)const;
   bool HasExceptionalComponent()const;
+  bool operator>(const DynkinType& other)const;
 };
 
 class WeylGroup: public HashedList<ElementWeylGroup>

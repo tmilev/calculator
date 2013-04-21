@@ -4798,7 +4798,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   out << "The letter " << CGI::GetHtmlMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
   << " the letter " << CGI::GetHtmlMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
   << " The generator " << CGI::GetHtmlMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
-  << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" +hLetter+"_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
+  << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
   << ", <br> where g is a Chevalley generator, " << CGI::GetHtmlMathSpanPure("\\gamma") << " is its weight, and <br>"
   << CGI::GetHtmlMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;

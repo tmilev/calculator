@@ -382,7 +382,7 @@ public:
   ;
   bool CheckInitialization()const;
   SemisimpleLieAlgebra& GetAmbientSS();
-  WeylGroup& GetAmbientWeyl();
+  WeylGroup& GetAmbientWeyl()const;
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecompositionLastPart(GlobalVariables* theGlobalVariables);

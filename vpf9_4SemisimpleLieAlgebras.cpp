@@ -58,10 +58,23 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   << "<br>Simple components are compared as follows. "
   << "<br>A simple component of higher rank is considered to be larger than a smaller rank one. "
   << "<br>If the ranks are equal, the simple components are compared by type with the type order "
-  << " A<D<B<C<E<F<G (provided ranks are equal, this order is consistent with the order given by comparing "
-  << " the corresponding Lie algebras by dimension). ";
+  << " A&lt;D&lt;B&lt;C&lt;E&lt;F&lt;G (provided ranks are equal, this order is consistent with the order given by comparing "
+  << " the corresponding Lie algebras by dimension). "
+  << "<br>We now explain the upper index of the Dynkin types. Fix a Dynkin type, say A^3_2 "
+  << "(rank 2, type A, upper index 3). "
+  << "The upper index 3 stands for the length of the first co-root squared, that is, the length of "
+  << " the element of the Cartan corresponding to the first root. Here, we need to clarify how we measure "
+  << "``lengths'' in the Cartan subalgebra of A^3_2. Indeed, we inherit a scalar product from the ambient Cartan"
+  << ", however it is not clear how "
+  << "<hr> ";
+  int counter=0;
   for (int i=0; i<this->Hcandidates.size; i++)
+  { if (!this->Hcandidates[i].flagSystemProvedToHaveNoSolution)
+    { counter++;
+      out << "Subalgebra number " << counter << ".<br>";
+    }
     out << this->Hcandidates[i].ToString(theFormat) << "\n<hr>\n ";
+  }
   if (this->theSl2s.size!=0)
     out << this->theSl2s.ToString(theFormat);
   return out.str();
@@ -335,7 +348,7 @@ bool CandidateSSSubalgebra::CheckInitialization()const
   return true;
 }
 
-WeylGroup& CandidateSSSubalgebra::GetAmbientWeyl()
+WeylGroup& CandidateSSSubalgebra::GetAmbientWeyl()const
 { this->CheckInitialization();
   return this->owner->GetSSowner().theWeyl;
 }
@@ -2448,7 +2461,7 @@ void rootSubalgebra::ToString
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
-  out << this->theWeylNonEmbeddeD.theDynkinType;
+  out << CGI::GetHtmlMathSpanPure(this->theWeylNonEmbeddeD.theDynkinType.ToString());
   out << ". ";
   if (this->indicesDirectSummandSuperAlgebra.size>0)
   { out << "Contained as an immediate (no in-betweens) direct summand of: ";
@@ -2465,7 +2478,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { out << theTypes[i] << ": ";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-    { out << this->CartanSAsByComponent[i][j].ToString();
+    { out << this->CartanSAsByComponent[i][j].ToString() << ": "
+      << this->GetAmbientWeyl().RootScalarCartanRoot
+      (this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);
       if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
         out << ", ";
     }

@@ -336,6 +336,8 @@ class Expression
   bool Sequencefy
   ()
   ;
+  void Substitute(const Expression& input, Expression& output)
+  ;
   void AssignXOXToChild
   (int childIndex, CommandList& owner, int theOp, const Expression& left, const Expression& right)
   { Expression tempE;
@@ -514,23 +516,22 @@ class SyntacticElement
 //the following class is meant to use to draw plots for calculus students.
 class CalculusFunctionPlot
 { public:
-  List<std::string> theFunctionsCalculatorInput;
-  List<std::string> theFunctions;
-  List<Rational> lowerBounds;
-  List<Rational> upperBounds;
+  List<std::string> thePlotElements;
+  List<std::string> thePlotElementsWithHtml;
+
   std::string GetPlotStringAddLatexCommands(bool useHtml);
+  std::string GetPlotStringFromFunctionStringAndRanges
+(bool useHtml, const std::string& functionStringPostfixNotation,
+ const std::string& functionStringCalculatorFormat, const Rational& lowerBound,
+ const Rational& upperBound)
+  ;
+
   void operator=(const CalculusFunctionPlot& other)
-  { this->theFunctions=other.theFunctions;
-    this->lowerBounds=other.lowerBounds;
-    this->upperBounds=other.upperBounds;
-    this->theFunctionsCalculatorInput=other.theFunctionsCalculatorInput;
+  { this->thePlotElements=other.thePlotElements;
+    this->thePlotElementsWithHtml=other.thePlotElementsWithHtml;
   }
   bool operator==(const CalculusFunctionPlot& other)const
-  { return
-    this->theFunctions==other.theFunctions &&
-    this->lowerBounds==other.lowerBounds &&
-    this->upperBounds==other.upperBounds &&
-    this->theFunctionsCalculatorInput==other.theFunctionsCalculatorInput;
+  { return this->thePlotElements==other.thePlotElements;
   }
   void operator+=(const CalculusFunctionPlot& other);
 };
@@ -1406,6 +1407,9 @@ public:
   static bool innerPlot2D
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerPlot2DWithBars
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerSuffixNotationForPostScript
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1610,7 +1614,7 @@ public:
   static bool fFactor
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fSolveSeparableBilinearSystem
+  static bool innerSolveSerreLikeSystem
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fMinPoly

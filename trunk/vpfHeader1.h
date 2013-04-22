@@ -445,6 +445,11 @@ public:
     result.append(")");
     return result;
   }
+  static double ReducePrecision(double x)
+  { if (x<0.00001 && x>-0.00001)
+      return 0;
+    return x;
+  }
   inline static unsigned int HashDouble(const double& input)
   { return (unsigned) (input*10000);
   }

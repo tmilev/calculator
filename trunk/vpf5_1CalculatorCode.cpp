@@ -171,74 +171,6 @@ bool CommandList::innerPolynomialDivisionVerbose
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
 
-bool CommandList::fSolveSeparableBilinearSystem
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
-  Vector<Polynomial<Rational> > thePolys;
-  Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
-    return output.SetError("Failed to extract list of polynomials. ", theCommands);
-  int numVars=theContext.GetNumContextVariables();
-  HashedList<MonomialP> theMonsInPlay;
-  FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
-  for (int i=0; i<thePolys.size; i++)
-    theMonsInPlay.AddOnTopNoRepetition(thePolys[i]);
-  std::cout << "<br>The context vars:<br>" << theContext.ToString();
-  std::cout << "<br>The mons in play: <br>" << theMonsInPlay.ToString();
-  std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);
-  Selection linearIndices;
-  linearIndices.MakeFullSelection(numVars);
-  for (int i=0; i<theMonsInPlay.size; i++)
-  { bool foundIndex=false;
-    for (int j=theMonsInPlay[i].GetMinNumVars()-1; j>=0; j--)
-      if (theMonsInPlay[i][j]!=0)
-      { if (foundIndex)
-          linearIndices.RemoveSelection(j);
-        foundIndex=true;
-      }
-  }
-  Matrix<RationalFunctionOld> theSystem, theConstantTerms;
-  theSystem.init(thePolys.size, linearIndices.CardinalitySelection);
-  theConstantTerms.init(thePolys.size, 1);
-  RationalFunctionOld theZero;
-  theZero.MakeZero(theCommands.theGlobalVariableS);
-  theSystem.NullifyAll(theZero);
-  theConstantTerms.NullifyAll(theZero);
-  MonomialP newMon;
-  Polynomial<Rational> tempP;
-  for (int j=0; j<thePolys.size; j++)
-    for(int k=0; k<thePolys[j].size; k++)
-    { MonomialP& curMon=thePolys[j][k];
-      bool found=false;
-      for (int i=0; i<linearIndices.CardinalitySelection; i++)
-        if (curMon[i]!=0)
-        { newMon=curMon;
-          newMon[i]=0;
-          tempP.MakeZero();
-          tempP.AddMonomial(newMon, thePolys[j].theCoeffs[k]);
-          theSystem(j,i)+=tempP;
-          found=true;
-          break;
-        }
-      if (!found)
-      { tempP.MakeZero();
-        tempP.SubtractMonomial(curMon, thePolys[j].theCoeffs[k]);
-        theConstantTerms(j,0)+=tempP;
-      }
-    }
-  std::cout << "<br>The system matrix: <br>" << theSystem.ToString(&theFormat);
-  std::cout << "<br>The column vector: <br>" << theConstantTerms.ToString(&theFormat);
-  Selection tempSel;
-  bool oldReportFlag=true;
-  MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
-  theSystem.GaussianEliminationByRows(theConstantTerms, tempSel, theCommands.theGlobalVariableS);
-  MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
-  std::stringstream out;
-  out << theSystem.ToString(&theFormat) << theConstantTerms.ToString(&theFormat);
-  return output.AssignValue(out.str(), theCommands);
-}
-
 bool CommandList::innerSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
@@ -581,10 +513,26 @@ bool CommandList::innerDrawPolarRfunctionTheta
 }
 
 void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
-{ this->theFunctions.AddListOnTop(other.theFunctions);
-  this->lowerBounds.AddListOnTop(other.lowerBounds);
-  this->upperBounds.AddListOnTop(other.upperBounds);
-  this->theFunctionsCalculatorInput.AddListOnTop(other.theFunctionsCalculatorInput);
+{ this->thePlotElements.AddListOnTop(other.thePlotElements);
+  this->thePlotElementsWithHtml.AddListOnTop(other.thePlotElementsWithHtml);
+}
+
+std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
+(bool useHtml, const std::string& functionStringPostfixNotation,
+ const std::string& functionStringCalculatorFormat, const Rational& lowerBound,
+ const Rational& upperBound)
+{ std::stringstream out;
+  out << "\n\n%Function formula: " << functionStringCalculatorFormat << "\n\n";
+  if (useHtml)
+    out << "<br>";
+  out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
+  if (useHtml)
+    out << "<br>\n";
+  out << "\\psplot[linecolor=red, plotpoints=1000]{"
+  << lowerBound.DoubleValue() << "}{"
+  << upperBound.DoubleValue() << "}{";
+  out << functionStringPostfixNotation << "}";
+  return out.str();
 }
 
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
@@ -605,18 +553,11 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
   resultStream << " \\psaxes[ticks=none, labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
   if (useHtml)
     resultStream << "<br>";
-  for (int i=0; i<this->theFunctions.size; i++)
-  { resultStream << "\n\n%Function formula: " << this->theFunctionsCalculatorInput[i] << "\n\n";
+  for (int i=0; i<this->thePlotElements.size; i++)
     if (useHtml)
-      resultStream << "<br>";
-    resultStream << "\\rput(1,3){$y=" << this->theFunctionsCalculatorInput[i] << "$}\n\n";
-    if (useHtml)
-      resultStream << "<br>\n";
-    resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
-    << this->lowerBounds[i].DoubleValue() << "}{"
-    << this->upperBounds[i].DoubleValue() << "}{";
-    resultStream << this->theFunctions[i] << "}";
-  }
+      resultStream << this->thePlotElementsWithHtml[i];
+    else
+      resultStream << this->thePlotElements[i];
   if (useHtml)
     resultStream << "<br>";
   resultStream << "\\end{pspicture}\n\n";
@@ -626,13 +567,136 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
   return resultStream.str();
 }
 
+void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbedWith)
+{ if(this->IsBuiltInType())
+    return;
+  Expression tempE;
+  for (int i=0; i<this->children.size; i++)
+    if (toBeSubbed==(*this)[i])
+      this->AssignChild(i, toBeSubbedWith);
+    else
+    { tempE=(*this)[i];
+      tempE.Substitute(toBeSubbed, toBeSubbedWith);
+      if (!(tempE==(*this)[i]))
+        this->AssignChild(i, tempE);
+    }
+}
+
+bool CommandList::innerPlot2DWithBars
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPlot2DWithBars");
+  //std::cout << input.ToString();
+  if (input.children.size<5)
+    return output.SetError
+    ("Plotting coordinates takes three or more arguments: function, lower and upper bound. ", theCommands);
+  bool tempB=theCommands.innerPlot2D(theCommands, input, output);
+  if (!tempB || !output.IsOfType<CalculusFunctionPlot>())
+  { theCommands.Comments << "<hr>Failed to a plot from " << input.ToString()
+    << ", not proceding with bar plot.";
+    return false;
+  }
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
+  const Expression& deltaE=input[4];
+  Rational theDeltaNoSign, theDeltaWithSign;
+  if (!deltaE.IsOfType<Rational>(&theDeltaWithSign))
+    return false;
+  theDeltaNoSign=theDeltaWithSign;
+  if (theDeltaNoSign<0)
+    theDeltaNoSign*=-1;
+  if (theDeltaNoSign==0)
+    theDeltaNoSign=1;
+  Rational upperBound, lowerBound;
+  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
+    return
+    output.SetError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  Expression tempE1, tempE2, tempX, tempResult;
+  tempX.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("x"), theCommands);
+  List<double> xValues;
+  List<double> fValues;
+  List<Rational> rValues;
+  for (Rational i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
+  { if (theDeltaWithSign<0 && i==lowerBound)
+      continue;
+    rValues.AddOnTop(i);
+    if (theDeltaWithSign>0 && i==upperBound)
+      continue;
+    tempE1.AssignValue(i, theCommands);
+    tempE2=input[1];
+    tempE2.Substitute(tempX, tempE1);
+//    std::cout << "<br>substitution result:" << tempE2.ToString();
+    BoundVariablesSubstitution tempSub;
+    bool tempB;
+    if (!theCommands.EvaluateExpression(tempE2, tempResult, tempSub, tempB))
+      return false;
+//    std::cout << "and after evaluation: " << tempResult.ToString();
+    Rational finalResultRat;
+    double finalREsultDouble;
+    if (!tempResult.IsOfType<Rational>(&finalResultRat))
+    { if (!tempResult.IsOfType<double>(&finalREsultDouble))
+      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i;
+        return false;
+      }
+    } else finalREsultDouble=finalResultRat.DoubleValue();
+    xValues.AddOnTop(i.DoubleValue());
+    fValues.AddOnTop(finalREsultDouble);
+  }
+  std::stringstream outTex, outHtml;
+  for (int k=0; k<2; k++)
+  { if (k==0)
+    { outTex << "\\psline*[linecolor=cyan, linewidth=0.1pt]";
+      outHtml << "\\psline*[linecolor=cyan, linewidth=0.1pt]";
+    } else
+    { outTex << "\\psline[linecolor=blue, linewidth=0.1pt]";
+      outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
+    }
+    for (int i=0; i<xValues.size; i++)
+    { outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
+      << MathRoutines::ReducePrecision(xValues[i]) << ", "
+      << MathRoutines::ReducePrecision(fValues[i]) << ")"
+      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")("
+      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", 0)";
+      outHtml << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
+      << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValues[i])
+      << ")"
+      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")("
+      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", 0)";
+    }
+  }
+  outHtml << "<br>";
+  for (int i=0; i<rValues.size; i++)
+  { std::stringstream tempStream;
+    tempStream << "\\rput[t](" << MathRoutines::ReducePrecision(rValues[i].DoubleValue()) << ",-0.03)"
+    << "{$";
+    if (rValues[i].IsInteger())
+      tempStream << rValues[i].ToString();
+    else
+      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}"
+      << "{" << rValues[i].GetDenominator().ToString() << "}";
+    tempStream << "$}";
+    outHtml << tempStream.str();
+    outTex << tempStream.str();
+  }
+  outHtml << "<br>";
+  CalculusFunctionPlot thePlot;
+  thePlot.thePlotElements.AddOnTop(outTex.str());
+  thePlot.thePlotElementsWithHtml.AddOnTop(outHtml.str());
+  thePlot+=output.GetValuE<CalculusFunctionPlot>();
+  return output.AssignValue(thePlot, theCommands);
+}
+
 bool CommandList::innerPlot2D
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
   //std::cout << input.ToString();
-  if (!input.IsListNElements(4))
+  if (input.children.size<4)
     return output.SetError
-    ("Plotting coordinates takes three arguments: function, lower and upper bound. ", theCommands);
+    ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
   Expression functionE;
@@ -646,10 +710,12 @@ bool CommandList::innerPlot2D
   if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
     return false;
   CalculusFunctionPlot thePlot;
-  thePlot.theFunctions.AddOnTop(functionE.GetValuE<std::string>());
-  thePlot.lowerBounds.AddOnTop(lowerBound);
-  thePlot.upperBounds.AddOnTop(upperBound);
-  thePlot.theFunctionsCalculatorInput.AddOnTop(input[1].ToString());
+  thePlot.thePlotElements.AddOnTop
+  (thePlot.GetPlotStringFromFunctionStringAndRanges
+  (false, functionE.GetValuE<std::string>(), input[1].ToString(), lowerBound, upperBound));
+  thePlot.thePlotElementsWithHtml.AddOnTop
+  (thePlot.GetPlotStringFromFunctionStringAndRanges
+  (true, functionE.GetValuE<std::string>(), input[1].ToString(), lowerBound, upperBound));
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -794,5 +860,21 @@ bool CommandList::innerConesIntersect
       out << "<br>\\langle v_{" << i+1 + coneNonStrictGens.size << "}, n\\rangle = "
       << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
   }
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerSolveSerreLikeSystem
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerSolveSerreLikeSystem");
+  Vector<Polynomial<Rational> > thePolys;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
+    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  //int numVars=theContext.GetNumContextVariables();
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  std::stringstream out;
+  out << "<br>The context vars:<br>" << theContext.ToString();
+  out << "<br>The polynomials: " << thePolys.ToString(&theFormat);
   return output.AssignValue(out.str(), theCommands);
 }

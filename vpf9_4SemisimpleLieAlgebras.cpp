@@ -63,9 +63,9 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   << "<br>We now explain the upper index of the Dynkin types. Fix a Dynkin type, say A^3_2 "
   << "(rank 2, type A, upper index 3). "
   << "The upper index 3 stands for the length of the first co-root squared, that is, the length of "
-  << " the element of the Cartan corresponding to the first root. Here, we need to clarify how we measure "
-  << "``lengths'' in the Cartan subalgebra of A^3_2. Indeed, we inherit a scalar product from the ambient Cartan"
-  << ", however it is not clear how "
+  << " the element of the Cartan corresponding to the first weight space. Here, we scale the element of the "
+  << "Cartan so that it acts by the constant 2 on the corresponding positive weight space. "
+  << ""
   << "<hr> ";
   int counter=0;
   for (int i=0; i<this->Hcandidates.size; i++)
@@ -2955,39 +2955,6 @@ bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other)const
   //  assert(false);
   //}
   return this->theWeylNonEmbeddeD.theDynkinType>other.theWeylNonEmbeddeD.theDynkinType;
-}
-
-bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolution)
-{ MacroRegisterFunctionWithName("PolynomialSystem::IsALinearSystemWithSolution");
-  if (this->size<=0)
-    return false;
-  Matrix<Rational> theSystem;
-  Matrix<Rational> theColumnVect, theSolution;
-  int numVars=0;
-  for (int i=0; i<this->size; i++)
-    numVars=MathRoutines::Maximum(numVars, (*this)[i].GetMinNumVars());
-  theSystem.init(this->size, numVars);
-  theSystem.NullifyAll();
-  theColumnVect.init(this->size, 1);
-  theColumnVect.NullifyAll();
-  for (int i=0; i<this->size; i++)
-  { Polynomial<Rational>& curP=(*this)[i];
-    for (int j=0; j<curP.size; j++)
-    { MonomialP& curMon=curP[j];
-      int theIndex;
-      if (curMon.IsOneLetterFirstDegree(&theIndex))
-        theSystem(j,theIndex)=curP.theCoeffs[j];
-      else if (curMon.IsAConstant())
-        theColumnVect(j, 0)=curP.theCoeffs[j];
-      else
-        return false;
-    }
-  }
-  if (!theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, theColumnVect, theSolution))
-    return false;
-  if (outputSolution!=0)
-    outputSolution->AssignMatDetectRowOrColumn(theSolution);
-  return true;
 }
 
 bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const

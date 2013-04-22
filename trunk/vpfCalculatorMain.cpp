@@ -330,6 +330,7 @@ int main(int argc, char **argv)
 (g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
 )))";*/
 //  civilizedInput="PenkovProjectTest";
+//civilizedInput="GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );   ";
 if(civilizedInput=="PenkovProjectTest")
 { civilizedInput="%HideLHS \
 Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \

@@ -4249,8 +4249,16 @@ void List<Object>::QuickSortAscendingOrder
       LowIndex--;
       HighIndex--;
     }
-  if (theOrder(this->TheObjects[HighIndex],this->TheObjects[BottomIndex]))
+  if (theOrder(this->TheObjects[HighIndex], this->TheObjects[BottomIndex]))
+  { if (HighIndex==BottomIndex)
+    { std::cout << "This is a programming error. The programmer has given me a bad strict order: "
+      << " the order claims that object of index " << HighIndex << " is strictly greater than itself "
+      << " which is not allowed for strict orders. Maybe the programmer has given a non-strict order instead of "
+      << " strict one by mistake? " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     HighIndex--;
+  }
   this->SwapTwoIndices(BottomIndex, HighIndex);
   this->QuickSortAscendingOrder(BottomIndex, HighIndex-1, theOrder);
   this->QuickSortAscendingOrder(HighIndex+1, TopIndex, theOrder);
@@ -4291,7 +4299,13 @@ void List<Object>::AddListOnTop(const List<Object>& theList)
 
 template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2)
-{ if (index1==index2)
+{ if (index1<0 || index1>=this->size || index2<0 || index2>=this->size)
+  { std::cout << "This is a programming error: requested to the elements with indices "
+    << index1 << " and " << index2 << " in a list that has " << this->size << " elements. This "
+    << " is impossible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (index1==index2)
     return;
   Object tempO;
   tempO= this->TheObjects[index1];

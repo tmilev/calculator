@@ -5805,6 +5805,8 @@ class GroebnerBasisComputation
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
+  bool flagSystemProvenToHaveNoSolution;
+  bool flagSystemSolvedOverBaseField;
   MemorySaving<List<Polynomial<CoefficientType> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
@@ -5812,6 +5814,8 @@ class GroebnerBasisComputation
   MemorySaving<List<Polynomial<CoefficientType> > > intermediateSubtractands;
   MemorySaving<List<int> > intermediateSelectedDivisors;
   MemorySaving<Polynomial<CoefficientType> > startingPoly;
+  MemorySaving<List<CoefficientType> > systemSolution;
+
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
    const std::string& extraStyle, const std::string& extraHighlightStyle, FormatExpressions* theFormat=0,
@@ -5838,6 +5842,9 @@ class GroebnerBasisComputation
  Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
+ bool SolveSerreLikeSystem
+ (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables=0)
+ ;
  bool AddRemainderToBasis
  (GlobalVariables* theGlobalVariables)
  ;
@@ -9235,6 +9242,7 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
 (FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
+  MacroRegisterFunctionWithName("MonomialCollection::ToString");
   std::stringstream out;
   std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
@@ -9536,9 +9544,9 @@ bool GroebnerBasisComputation<CoefficientType>::AddPolyAndReduceBasis
       if (!(this->remainderDivision==this->theBasiS[i]))
       { this->flagBasisGuaranteedToGenerateIdeal=false;
         this->basisCandidates.AddOnTop(this->remainderDivision);
-        this->leadingMons.RemoveIndexSwapWithLast(i);
-        this->leadingCoeffs.RemoveIndexSwapWithLast(i);
-        this->theBasiS.RemoveIndexSwapWithLast(i);
+        this->leadingMons.RemoveIndexShiftDown(i);
+        this->leadingCoeffs.RemoveIndexShiftDown(i);
+        this->theBasiS.RemoveIndexShiftDown(i);
         i--;
         changed=true;
       }
@@ -10007,6 +10015,8 @@ GroebnerBasisComputation<CoefficientType>::GroebnerBasisComputation()
   this->flagDoSortBasis=true;
   this->flagBasisGuaranteedToGenerateIdeal=false;
   this->flagDoLogDivision=false;
+  this->flagSystemProvenToHaveNoSolution=false;
+  this->flagSystemSolvedOverBaseField=false;
   this->MaxNumComputations=0;
 }
 

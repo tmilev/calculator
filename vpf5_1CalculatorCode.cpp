@@ -290,7 +290,7 @@ bool CommandList::innerAdCommonEigenSpaces
 bool CommandList::innerGroebner
 (CommandList& theCommands, const Expression& input, Expression& output, bool useGr,
    bool useRevLex, bool useModZp)
-{ MacroRegisterFunctionWithName("CommandList::innerGroebnerBuchberger");
+{ MacroRegisterFunctionWithName("CommandList::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   List<Polynomial<Rational> > outputGroebner, outputGroebner2;
@@ -347,17 +347,19 @@ bool CommandList::innerGroebner
   GroebnerBasisComputation<Rational> theGroebnerComputation;
   if (useGr)
   { if (!useRevLex)
-      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
-    else
+    { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
+      theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+    } else
     { std::cout << "This is not programmed yet! Crashing to let you know. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
+  } else if (!useRevLex)
+  { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+    theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   } else
-  { if (!useRevLex)
-      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-    else
-      theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+    theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
   }
   theGroebnerComputation.MaxNumComputations=upperBoundComputations;
   bool success=
@@ -371,9 +373,6 @@ bool CommandList::innerGroebner
       out << ", ";
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
-  theFormat.thePolyMonOrder= useGr ?
-  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest :
-  MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   for(int i=0; i<inputVector.size; i++)
     out << "<br>"
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
@@ -383,7 +382,7 @@ bool CommandList::innerGroebner
     << " using " << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> "
-      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
+      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner[i].ToString(&theFormat));
   } else
   { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  "
     << upperBoundComputations << " polynomial operations. ";
@@ -418,7 +417,7 @@ bool CommandList::innerDeterminant
   if (theCommands.GetMatrix(input, matRat, 0, 0, 0))
   { if (matRat.NumRows==matRat.NumCols)
     { if (matRat.NumRows>100)
-      { theCommands.Comments << "I have been instructed not to compute determinants of rational matrices larger than "
+      { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than "
         << " 100 x 100 " << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
         << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
         return false;
@@ -429,7 +428,7 @@ bool CommandList::innerDeterminant
       return output.SetError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
   if (!theCommands.GetMatrix(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
-  { theCommands.Comments << "I have been instructed to only compute determinants of matrices whose entries are "
+  { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " ratinoal functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
     << " file " << __FILE__ << ", line " << __LINE__ << ". ";

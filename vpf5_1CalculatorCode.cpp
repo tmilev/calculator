@@ -549,7 +549,7 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
   resultStream << "\\psframe*[linecolor=white](-5,-5)(5,5)\n\n";
   if (useHtml)
     resultStream << "<br>";
-  resultStream << " \\psaxes[ticks=none, labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  resultStream << " \\psaxes[ticks=none, labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)\\tiny";
   if (useHtml)
     resultStream << "<br>";
   for (int i=0; i<this->thePlotElements.size; i++)

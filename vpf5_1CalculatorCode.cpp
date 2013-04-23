@@ -862,6 +862,87 @@ bool CommandList::innerConesIntersect
   return output.AssignValue(out.str(), theCommands);
 }
 
+template <class CoefficientType>
+bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
+ (List<Polynomial<CoefficientType> >& inputSystem, PolynomialSubstitution<CoefficientType>& outputSub)
+{ int numVars=this->systemSolution.GetElement().size;
+  MonomialP tempM;
+  Polynomial<CoefficientType> tempP;
+  for (int i=0; i<inputSystem.size; i++)
+  { tempP=inputSystem[i];
+    for (int j=0; j<numVars; j++)
+    { tempM.MakeEi(j, 1, numVars);
+      int indexTempM=tempP.GetIndex(tempM);
+      if (indexTempM==-1)
+        continue;
+      CoefficientType tempCF=tempP.theCoeffs[indexTempM];
+      tempP.SubtractMonomial(tempM, tempCF);
+      bool isGood=true;
+      for (int k=0; k<tempP.size; k++)
+        if (!(tempP[k][j]==0))
+        { isGood=false;
+          tempP.AddMonomial(tempM, tempCF);
+          break;
+        }
+      if (!isGood)
+        continue;
+      outputSub.MakeIdSubstitution(numVars);
+      outputSub[j]=tempP;
+      tempCF*=-1;
+      outputSub[j]/=tempCF;
+      CoefficientType theConst;
+      if (outputSub[j].IsAConstant(&theConst))
+        this->systemSolution.GetElement()[j]=theConst;
+      return true;
+    }
+  }
+  return false;
+}
+
+template <class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
+ (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+{ RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
+  bool changed=true;
+  PolynomialSubstitution<CoefficientType> theSub;
+  while (changed)
+  { bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+    if (inputSystem.size==1)
+      if (inputSystem[0].IsEqualToOne())
+      { this->flagSystemProvenToHaveNoSolution=true;
+        this->flagSystemSolvedOverBaseField=false;
+        return;
+      }
+    if (success)
+      this->flagSystemProvenToHaveSolution=true;
+    std::cout << "<hr>input system: " << inputSystem.ToString();
+    changed=this->HasImpliedSubstitutions(inputSystem, theSub);
+    if (changed)
+    { std::cout << "<hr>The sub: " << theSub.ToString();
+      for (int i=0; i<inputSystem.size; i++)
+        inputSystem[i].SubstitutioN(theSub);
+    }
+  }
+  if (inputSystem.size==0)
+  { this->flagSystemProvenToHaveNoSolution=false;
+    this->flagSystemSolvedOverBaseField=true;
+  }
+}
+
+template <class CoefficientType>
+void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
+ (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+{ this->flagSystemProvenToHaveNoSolution=false;
+  this->flagSystemSolvedOverBaseField=false;
+  this->flagSystemProvenToHaveSolution=false;
+  this->RecursionCounterSerreLikeSystem=0;
+  int numVars=0;
+  for (int i=0; i<inputSystem.size; i++)
+    numVars=MathRoutines::Maximum(numVars, inputSystem[i].GetMinNumVars());
+  this->systemSolution.GetElement().initFillInObject(numVars, 0);
+  this->SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
+}
+
 bool CommandList::innerSolveSerreLikeSystem
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSolveSerreLikeSystem");
@@ -872,8 +953,29 @@ bool CommandList::innerSolveSerreLikeSystem
   //int numVars=theContext.GetNumContextVariables();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+  GroebnerBasisComputation<Rational> theComputation;
+  theComputation.MaxNumComputations=10000;
+  theComputation.SolveSerreLikeSystem(thePolys, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
   out << "<br>The polynomials: " << thePolys.ToString(&theFormat);
+  out << "<br>Total number of polynomial computations: " << theComputation.NumberOfComputations;
+  if (theComputation.flagSystemProvenToHaveNoSolution)
+    out << "<br>System proven to have no solution";
+  else if(theComputation.flagSystemProvenToHaveSolution)
+    out << "<br>System proven to have solution.";
+  if (!theComputation.flagSystemProvenToHaveNoSolution)
+  { if (theComputation.flagSystemSolvedOverBaseField)
+    { out << "<br>One solution follows. ";
+      Polynomial<Rational> tempP;
+      for (int i=0; i<theComputation.systemSolution.GetElement().size; i++)
+      { tempP.MakeMonomiaL(i, 1, 1);
+        out << "<br>" << tempP.ToString(&theFormat) << " = " << theComputation.systemSolution.GetElement()[i];
+      }
+    } else
+    { out << "<br>I was unable to find an actual solution over the base field (however, "
+      << "I have not proved or disproved its existence).";
+    }
+  }
   return output.AssignValue(out.str(), theCommands);
 }

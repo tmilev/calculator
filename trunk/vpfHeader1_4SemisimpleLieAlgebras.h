@@ -247,6 +247,9 @@ public:
   List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByWeight;
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
+  List<Vectors<Rational> > weightsOfModules;
+  List<Vectors<Rational> > weightsOfPrimallySplitModules;
+
   List<List<List<int> > > NilradicalPairingTable;
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
@@ -352,6 +355,8 @@ public:
     this->RecursionDepthCounterForNilradicalGeneration=other.RecursionDepthCounterForNilradicalGeneration;
     this->candidateSubalgebraModules=other.candidateSubalgebraModules;
     this->primalSubalgebraModules=other.primalSubalgebraModules;
+    this->weightsOfModules=other.weightsOfModules;
+    this->weightsOfPrimallySplitModules=other.weightsOfPrimallySplitModules;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)

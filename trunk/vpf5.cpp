@@ -3108,7 +3108,9 @@ bool CommandList::innerDouble
     return true;
   }
   if (!input.IsOfType(&ratValue))
+  { std::cout << "input not of rat value: " << input.ToString();
     return false;
+  }
   return output.AssignValue(ratValue.DoubleValue(), theCommands);
 }
 

@@ -5777,7 +5777,6 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
       this->TheObjects[i].MakeDegreeOne((int)(direction.size+1), i, direction.size, 1, tempRat);
     }
   }
-  void MakeIdSubstitution(int numVars);
 };
 
 //std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
@@ -5801,11 +5800,13 @@ class GroebnerBasisComputation
   List<CoefficientType> leadingCoeffs;
   int NumberOfComputations;
   int MaxNumComputations;
+  int RecursionCounterSerreLikeSystem;
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
   bool flagDoLogDivision;
   bool flagSystemProvenToHaveNoSolution;
+  bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
   MemorySaving<List<Polynomial<CoefficientType> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
@@ -5842,8 +5843,14 @@ class GroebnerBasisComputation
  Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
- bool SolveSerreLikeSystem
+ void SolveSerreLikeSystem
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables=0)
+ ;
+ bool HasImpliedSubstitutions
+ (List<Polynomial<CoefficientType> >& inputSystem, PolynomialSubstitution<CoefficientType>& outputSub)
+ ;
+ void SolveSerreLikeSystemRecursively
+ (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
  ;
  bool AddRemainderToBasis
  (GlobalVariables* theGlobalVariables)

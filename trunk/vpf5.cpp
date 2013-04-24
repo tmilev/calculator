@@ -217,6 +217,22 @@ bool CommandList::fAnimateLittelmannPaths
   (thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
 }
 
+void CommandList::GetOutputFolders
+(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay,
+ FormatExpressions& outputFormat)
+{ std::stringstream outMainPath, outMainDisplayPath;
+  outMainPath << this->PhysicalPathOutputFolder << theType.ToString() << "/";
+  outputFolderPhysical=outMainPath.str();
+  outMainDisplayPath << this->DisplayPathOutputFolder << theType.ToString() << "/";
+  outputFolderDisplay=outMainDisplayPath.str();
+  outputFormat.flagUseHTML=true;
+  outputFormat.flagUseLatex=false;
+  outputFormat.flagUsePNG=true;
+  outputFormat.DisplayNameCalculator=this->DisplayNameCalculator;
+  outputFormat.physicalPath=outputFolderPhysical;
+  outputFormat.htmlPathServer=outputFolderDisplay;
+}
+
 bool CommandList::innerRootSAsAndSltwos
 (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 { MacroRegisterFunctionWithName("CommandList::innerRootSAsAndSltwos");
@@ -227,22 +243,17 @@ bool CommandList::innerRootSAsAndSltwos
       (Serialization::innerSSLieAlgebra, input, ownerSS, &errorString))
     return output.SetError(errorString, theCommands);
   CGI::SetCGIServerIgnoreUserAbort();
-  std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
+  std::string outMainDisplayPatH, outMainPatH;
+  std::stringstream outSltwoPath, outSltwoDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  char weylLetter;
-  int theRank;
-  if (!ownerSS->theWeyl.theDynkinType.IsSimple(&weylLetter, &theRank))
-    return output.SetError
-    ("I have been instructed to work only on simple Lie algebras only. ", theCommands);
-  outMainPath << theCommands.PhysicalPathOutputFolder <<  weylLetter << theRank << "/";
-  outMainDisplayPath << theCommands.DisplayPathOutputFolder
-  << weylLetter << theRank << "/";
-  outSltwoPath << outMainPath.str() << "sl2s/";
-  outSltwoDisplayPath << outMainDisplayPath.str() << "sl2s/";
-  bool NeedToCreateFolders=(!CGI::FileExists(outMainPath.str()) || !CGI::FileExists(outSltwoPath.str()));
+  FormatExpressions theFormat;
+  theCommands.GetOutputFolders(ownerSS->theWeyl.theDynkinType, outMainPatH, outMainDisplayPatH, theFormat);
+  outSltwoPath << outMainPatH << "sl2s/";
+  outSltwoDisplayPath << outMainDisplayPatH << "sl2s/";
+  bool NeedToCreateFolders=(!CGI::FileExists(outMainPatH) || !CGI::FileExists(outSltwoPath.str()));
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << outMainPath.str();
+    outMkDirCommand1 << "mkdir " << outMainPatH;
     outMkDirCommand2 << "mkdir " << outSltwoPath.str();
     theCommands.theGlobalVariableS->System(outMkDirCommand1.str());
     theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
@@ -250,17 +261,11 @@ bool CommandList::innerRootSAsAndSltwos
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
   outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
   outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
-  outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
+  outRootHtmlFileName << outMainPatH << "rootHtml.html";
+  outRootHtmlDisplayName << outMainDisplayPatH << "rootHtml.html";
   bool mustRecompute=false;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  FormatExpressions theFormat;
-  theFormat.flagUseHTML=true;
-  theFormat.flagUseLatex=false;
-  theFormat.flagUsePNG=true;
-  theFormat.DisplayNameCalculator=theCommands.DisplayNameCalculator;
-  theFormat.physicalPath=outMainPath.str();
-  theFormat.htmlPathServer=outMainDisplayPath.str();
+
   if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
   std::stringstream out;

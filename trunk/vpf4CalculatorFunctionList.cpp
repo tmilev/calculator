@@ -669,10 +669,15 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+1, x-a^4, y-b^4 );\n \
    GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebras", this->innerSSsubalgebras, "",
+  ("experimentalPrintSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebras{}(A_2)", true, false);
+  this->AddOperationInnerHandler
+  ("experimentalPrintSemisimpleSubalgebrasForceRecompute", this->innerPrintSSsubalgebrasForceRecompute, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+   "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)", true, false);
   this->AddOperationInnerHandler
   ("experimentalEmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

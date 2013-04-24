@@ -60,7 +60,9 @@
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
-		<Unit filename="vpfCalculatorMain.cpp" />
+		<Unit filename="vpfCalculatorMain.cpp">
+			<Option target="Debug" />
+		</Unit>
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters.h" />
 		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />

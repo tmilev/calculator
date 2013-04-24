@@ -171,6 +171,36 @@ bool CommandList::innerPolynomialDivisionVerbose
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
 
+bool CommandList::innerPrintSSsubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute)
+{ //bool showIndicator=true;
+  MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
+  std::string errorString;
+  SemisimpleLieAlgebra* ownerSSPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
+  std::stringstream out;
+  if (ownerSS.GetRank()>4)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
+    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    return output.AssignValue(out.str(), theCommands);
+  } else
+    out << "<b>This code is completely experimental. Use the following printouts on "
+    << "your own risk</b>";
+  std::string physicalFolder, displayFolder;
+  FormatExpressions theFormat;
+  theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
+  SemisimpleSubalgebras tempSSsas(ownerSS);
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras
+  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
+  ;
+  theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
+  return output.AssignValue(theSSsubalgebras, theCommands);
+}
+
 bool CommandList::innerSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
@@ -180,17 +210,16 @@ bool CommandList::innerSSsubalgebras
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
-
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
-  }
-  else
+  } else
     out << "<b>This code is completely experimental. Use the following printouts on "
     << "your own risk</b>";
+
   SemisimpleSubalgebras tempSSsas(ownerSS);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras

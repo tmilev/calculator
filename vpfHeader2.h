@@ -751,6 +751,10 @@ public:
   std::string ToStringFunctionHandlers();
   std::stringstream Comments;
   FormatExpressions formatVisibleStrings;
+  void GetOutputFolders
+(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay,
+ FormatExpressions& outputFormat)
+  ;
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
   //to make operations read only, we make operations private and return const pointer to it.
@@ -1697,6 +1701,17 @@ static bool innerDrawRootSystem
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerPrintSSsubalgebras
+  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false)
+;
+  static bool innerPrintSSsubalgebrasForceRecompute
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true);
+}
+  static bool innerPrintSSsubalgebrasRegular
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false);
+}
 static bool innerDouble
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

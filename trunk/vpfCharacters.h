@@ -494,6 +494,7 @@ public:
   bool operator==(const CoxeterRepresentation<coefficient>& other)const
   { return this->G==other.G && this->character==other.character;
   }
+  Matrix<coefficient> MatrixOfElement(int g);
   ClassFunction<coefficient> GetCharacter();
   coefficient GetNumberOfComponents();
   bool CheckRepresentationConsistency();

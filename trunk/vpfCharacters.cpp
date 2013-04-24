@@ -628,6 +628,18 @@ Matrix<coefficient> TrixTree<coefficient>::GetElement(CoxeterElement &g, const L
 }
 
 template <typename coefficient>
+Matrix<coefficient> CoxeterRepresentation<coefficient>::MatrixOfElement(int g)
+{ CoxeterElement gg = G->GetCoxeterElement(g);
+  return elements.GetElement(gg, gens);
+}
+
+//template <typename coefficient>
+//void CoxeterRepresentation<coefficient>::PrintMatrixOfElement(int g)
+//{ std::cout << MatrixOfElement(g).ToString(&testformat) << std::endl;
+//}
+
+
+template <typename coefficient>
 class SpaceTree
 {
 public:
@@ -729,8 +741,7 @@ void CoxeterRepresentation<coefficient>::ClassFunctionMatrix
       for(int icci=0; icci<this->G->conjugacyClasses[cci].size; icci++)
       { //Matrix<coefficient> Mi;
         //Mi.MakeIdMatrix(this->gens[0].NumCols);
-        CoxeterElement g = G->GetCoxeterElement(G->conjugacyClasses[cci][icci]);
-        classFunctionMatrices[cci] += elements.GetElement(g,gens);
+        classFunctionMatrices[cci] += MatrixOfElement(G->conjugacyClasses[cci][icci]);
         //for(int gi=g.reflections.size-1; ; gi--)
         //{  if(gi < 0)
         //      break;
@@ -780,6 +791,7 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced()
       out.basis.AddOnTop(v);
    }
 
+/*
    if(classFunctionMatrices.size > 0)
    { out.classFunctionMatrices.SetSize(G->ccCount);
      for(int i=0; i<classFunctionMatrices.size; i++)
@@ -788,8 +800,8 @@ CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced()
           MatrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
         }
       }
-
    }
+*/
    return out;
 }
 
@@ -843,12 +855,13 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
       Vb=tempVectors;
     }
   if((Vb.size < basis.size) && (Vb.size > 0))
-  { CoxeterRepresentation<coefficient> V;
+  { std::cout << "calculating remaining subrep... ";
+    CoxeterRepresentation<coefficient> V;
     V.G = G;
     V.gens = gens;
-    V.classFunctionMatrices = classFunctionMatrices;
     V.basis = Vb;
     V = V.Reduced();
+    std::cout << "done" << std::endl;
     std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
     return V.Decomposition(ct,gr);
   }
@@ -886,7 +899,6 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   { CoxeterRepresentation<coefficient> outeme;
     outeme.G = G;
     outeme.gens = gens;
-    outeme.classFunctionMatrices = classFunctionMatrices;
     outeme.basis = leaves[i];
     out.AddOnTop(outeme.Reduced());
   }
@@ -972,13 +984,7 @@ ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()
   this->character.data.SetSize(G->ccCount);
   Matrix<coefficient> M;
   for(int cci=0; cci < G->ccCount; cci++)
-  { CoxeterElement g;
-    g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
-    M.MakeIdMatrix(gens[0].NumRows);
-    for(int gi=0; gi<g.reflections.size; gi++)
-      M.MultiplyOnTheRight(gens[g.reflections[gi]]);
-    this->character.data[cci] = M.GetTrace();
-  }
+    this->character.data[cci] = MatrixOfElement(G->conjugacyClasses[cci][0]).GetTrace();
   return this->character;
 }
 
@@ -1533,7 +1539,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
   p.AssignMinPoly(M);
   for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
   { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
-    std::cout << "checking " << i << " found " << found << std::endl;
+//    std::cout << "checking " << i << " found " << found << std::endl;
     Rational r = i;
     if(p(r) == 0)
     { Matrix<Rational> M2 = M;

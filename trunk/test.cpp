@@ -11,333 +11,92 @@ FormatExpressions testformat;
 
 
 
+/* dunno why i thought it was fun to spend so much time on this
+class f127
+{ public:
+  int n;
 
-
-
-
-
-
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
-{ Vector<coefficient> tmp = v;
-  return AddVectorDestructively(tmp);
+  f127 operator+(const f127 right) const;
+  void operator+=(const f127 right);
+  void operator-();
+  f127 operator-(const f127 right) const;
+  void operator-=(const f127 right);
+  f127 operator*(const f127 right) const;
+  void operator*=(const f127 right);
+  void Invert();
+  f127 operator/(const f127 right) const;
+  void operator/=(const f127 right);
+  void operator=(const int rhs);
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
-{ if(fastbasis.NumRows == 0)
-  { fastbasis.MakeZeroMatrix(v.size);
-    degree = v.size;
-    if(v.IsEqualToZero())
-    { rank = 0;
-      return false;
-    }
-    for(int i=0; i<v.size; i++)
-      fastbasis.elements[0][i] = v[i];
-    rank = 1;
-    return true;
+f127 f127::operator+(const f127 right) const
+{ return (n+right.n)%127;
+}
+
+void f127::operator+=(const f127 right)
+{ n += right.n;
+  n %= 127;
+}
+
+f127 f127::operator-(const f127 right) const
+{ int x = (n-right.n)%127;
+  f127 out;
+  out.n = x>=0?x:-x;
+  return out;
+}
+
+void f127::operator-=(const f127 right)
+{ n -= right.n;
+  n %= 127;
+  if(n<0)
+    n = -n;
+}
+
+f127 f127::operator*(const f127 right) const
+{ return (n*right.n)%127;
+}
+
+void f127::operator*=(const f127 right)
+{ n *= right.n;
+  n %= 127;
+}
+
+void f127::Invert()
+{ int x = 0;
+  int y = 1;
+  int a = 127;
+  int b = n;
+  int m = 1
+  n = 0;
+  while(b != 0)
+  { int q = a / b;
+    int r = a % b;
+    a = b;
+    b = r;
+    int s = m - q*x;
+    int t = n - q*y;
+    m = x;
+    n = y;
+    x = s;
+    y = t;
   }
-  int jj=0;
-  for(int i=0; i<fastbasis.NumRows; i++)
-  { while((jj<v.size)&&(v[jj] == 0))
-      jj++;
-    if(jj==v.size)
-      return false;
-    int j = i;
-    for(;(j<fastbasis.NumCols)&&(fastbasis.elements[i][j] == 0); j++);
-    if(jj<j)
-    { // memmove()
-      for(int bi=degree-1; bi>i; bi--)
-        for(int bj=0; bj<fastbasis.NumCols; bj++)
-          fastbasis.elements[bi][bj] = fastbasis.elements[bi-1][bj];
-      for(int bj=0; bj<fastbasis.NumCols; bj++)
-        fastbasis.elements[i][bj] = v[bj];
-      Matrix<coefficient> one;
-      Selection two;
-      fastbasis.GaussianEliminationByRows(fastbasis, one, two);
-      rank++;
-      return true;
-    }
-    if(jj>j)
-      continue;
-    coefficient x = -v[jj]/fastbasis.elements[i][j];
-    for(int jjj=jj; jjj<v.size; jjj++)
-      v[jjj] += x*fastbasis.elements[i][jjj];
-  }
-  if(v.IsEqualToZero())
-    return false;
-  //realloc()
-  Matrix<coefficient> tmp = fastbasis;
-  fastbasis.init(fastbasis.NumRows+1,fastbasis.NumCols);
-  for(int i=0; i<tmp.NumRows; i++)
-    for(int j=0; j<tmp.NumCols; j++)
-      fastbasis.elements[i][j] = tmp.elements[i][j];
-  for(int j=0; j<fastbasis.NumCols; j++)
-    fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
-  rank++;
-  return true;
 }
 
-template <typename coefficient>
-bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
-{ if(AddVector(v))
-  { basis.AddVector(v);
-    return true;
-  }
-  return false;
+f127 operator/(const f127 right) const;
+{ tmp = right;
+  tmp.Invert();
+  return *this *tmp;
 }
 
-
-
-template <typename coefficient>
-void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
-{ int d = basis.size;
-  out.init(d, d);
-  for(int i=0; i<d; i++)
-    for(int j=0; j<d; j++)
-      out.elements[i][j] = basis[i].ScalarEuclidean(in*basis[j]);
-  out.MultiplyOnTheLeft(gramMatrix);
+void operator/=(const f127 right)
+{ tmp = right;
+  tmp.Invert();
+  *this *= tmp;
 }
-
-template <typename coefficient>
-void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, const Matrix<coefficient>& BM)
-{ int d = BM.NumRows;
-  Matrix<coefficient> M = BM;
-  Matrix<coefficient> inT = in;
-  inT.Transpose();
-  M.MultiplyOnTheRight(inT);
-  out.MakeZeroMatrix(d);
-  for(int i=0; i<d; i++)
-  { int jj = 0;
-    for(int j=0; j<d; j++)
-    {while((jj < M.NumCols) and (M.elements[i][jj] == 0))
-      jj++;
-     if(jj == M.NumCols){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     if(BM.elements[j][jj] == 0){
-      out.elements[i][j] = 0;
-      continue;
-     }
-     out.elements[i][j] = M.elements[i][jj] / BM.elements[j][jj];
-     for(int k=jj; k<M.NumCols; k++)
-       M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
-    }
-  }
-//  std::cout << "MatrixInBasisFast" << std::endl;
-//  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
-}
-
-
-
-// g gets eaten up by this algorithm lol
-template <typename coefficient>
-Matrix<coefficient> TrixTree<coefficient>::GetElement(CoxeterElement &g, const List<Matrix<coefficient> > &gens)
-{ if(M.NumCols == 0)
-    M.MakeIdMatrix(gens[0].NumCols);
-  if(g.reflections.size == 0)
-    return M;
-  int i = g.reflections.PopLastObject();
-  if(others.size == 0)
-    others.SetSize(gens.size);
-  if(others[i].M.NumCols == 0)
-    others[i].M = M * gens[i];
-  return others[i].GetElement(g,gens);
-}
-
-template <typename coefficient>
-class SpaceTree
-{
-public:
-   List<Vector<coefficient> > space;
-   List<SpaceTree<coefficient> > subspaces;
-
-   void PlaceInTree(const List<Vector<coefficient> >& V);
-   void GetLeaves(List<List<Vector<coefficient> > >& leaves) const;
-   void DisplayTree() const;
-};
-
-template <typename coefficient>
-void SpaceTree<coefficient>::PlaceInTree(const List<Vector<coefficient> > &V)
-{  for(int i=0; i<subspaces.size; i++)
-   {  List<Vector<coefficient> > U = intersection(V,subspaces[i].space);
-      if(U.size == 0)
-         continue;
-      if(U.size == subspaces[i].space.size)
-         return;
-      subspaces[i].PlaceInTree(U);
-   }
-   List<Vector<coefficient> > W;
-   for(int i=0; i<subspaces.size; i++)
-      W = getunion(W,subspaces[i].space);
-   if(intersection(W,V).size != V.size)
-   {  SpaceTree<coefficient> vst;
-      vst.space = V;
-      subspaces.AddOnTop(vst);
-   }
-}
-
-template <typename coefficient>
-void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves) const
-{  if(subspaces.size > 0)
-      for(int i=0; i<subspaces.size; i++)
-         subspaces[i].GetLeaves(leaves);
-   else
-      leaves.AddOnTop(space);
-}
-
-template <typename coefficient>
-void SpaceTree<coefficient>::DisplayTree() const
-{  std::cout << '[' << space.size << ',';
-   for(int i=0; i<subspaces.size; i++)
-      subspaces[i].DisplayTree();
-   std::cout << ']';
-}
-
-
-
-
-template <typename coefficient>
-CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*(const CoxeterRepresentation<coefficient>& other) const
-{ CoxeterRepresentation<coefficient> U;
-
-  int Vd = this->basis[0].size;
-   int Wd = other.basis[0].size;
-   int Ud = Vd*Wd;
-   for(int vi=0; vi<this->basis.size; vi++)
-   {  for(int wi=0; wi<other.basis.size; wi++)
-      {  Vector<coefficient> u;
-         u.SetSize(Ud);
-         for(int i=0; i<Vd; i++)
-            for(int j=0; j<Wd; j++)
-               u[i*Wd+j] = this->basis[vi][i] * other.basis[wi][j];
-         U.basis.AddOnTop(u);
-      }
-   }
-
-   U.gens.SetSize(gens.size);
-   for(int i=0; i<gens.size; i++)
-     U.gens[i].AssignTensorProduct(gens[i],other.gens[i]);
-
-   /* would that it be this simple
-   if((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0))
-   { U.classFunctionMatrices.SetSize(G->ccCount);
-     for(int i=0; i<classFunctionMatrices.size; i++)
-     { if((classFunctionMatrices[i].NumCols>0) && (other.classFunctionMatrices[i].NumCols>0))
-        U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
-     }
-   }*/
-
-
-   U.G = G;
-   return U;
-}
-
-template <typename coefficient>
-Matrix<coefficient> CoxeterRepresentation<coefficient>::ClassFunctionMatrix(ClassFunction<coefficient> cf)
-{  Matrix<coefficient> M;
-   M.MakeZeroMatrix(this->gens[0].NumRows);
-   if(classFunctionMatrices.size == 0)
-    classFunctionMatrices.SetSize(G->ccCount);
-   for(int cci=0; cci<this->G->ccCount; cci++)
-   {  if(cf[cci] == 0)
-         continue;
-      if(classFunctionMatrices[cci].NumCols == 0)
-      { std::cout << "Generating class function matrix " << cci << " with dimension " << gens[0].NumCols << "(cc has " << G->conjugacyClasses[cci].size << ")" << std::endl;
-        classFunctionMatrices[cci].MakeZeroMatrix(gens[0].NumCols);
-        for(int icci=0; icci<this->G->conjugacyClasses[cci].size; icci++)
-        { //Matrix<coefficient> Mi;
-          //Mi.MakeIdMatrix(this->gens[0].NumCols);
-          CoxeterElement g = G->GetCoxeterElement(G->conjugacyClasses[cci][icci]);
-          classFunctionMatrices[cci] += elements.GetElement(g,gens);
-          //for(int gi=g.reflections.size-1; ; gi--)
-          //{  if(gi < 0)
-          //      break;
-          //    Mi.MultiplyOnTheRight(gens[g.reflections[gi]]);
-          //}
-          //classFunctionMatrices[cci] += Mi;
-        }
-      }
-      for(int i=0; i<M.NumRows; i++)
-        for(int j=0; j<M.NumCols; j++)
-          M.elements[i][j] += classFunctionMatrices[cci].elements[i][j] * cf[cci];
-   }
-   return M;
-}
-
-template <typename coefficient>
-CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::Reduced() const
-{  int d = basis.size;
-
-   Matrix<coefficient> GM;
-   GM.init(d, d);
-   for(int i=0; i<d; i++)
-      for(int j=0; j<d; j++)
-         GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
-   GM.Invert();
-
- /*
-   Matrix<coefficient> BM;
-   BM.init(d,basis[0].size);
-   for(int i=0; i<d; i++)
-    for(int j=0; j<basis[0].size; j++)
-      BM.elements[i][j] = basis[i][j];
-   Matrix<coefficient> one;
-   Selection two;
-   BM.GaussianEliminationByRows(BM,one,two);
 */
 
-   CoxeterRepresentation<coefficient> out;
-   out.gens.SetSize(gens.size);
-   for(int i=0; i<gens.size; i++)
-//     MatrixInBasisFast(out.gens[i], gens[i], BM);
-     MatrixInBasis(out.gens[i],gens[i],basis,GM);
 
-   out.G = G;
-   for(int i=0; i<d; i++) // this should go in its own function at some point
-   {  Vector<coefficient> v;
-      v.MakeEi(d,i);
-      out.basis.AddOnTop(v);
-   }
-
-   if(classFunctionMatrices.size > 0)
-   { out.classFunctionMatrices.SetSize(G->ccCount);
-     for(int i=0; i<classFunctionMatrices.size; i++)
-      { if(classFunctionMatrices[i].NumRows > 0)
-        { //MatrixInBasisFast(out.classFunctionMatrices[i],classFunctionMatrices[i],BM);
-          MatrixInBasis(out.classFunctionMatrices[i],classFunctionMatrices[i],basis,GM);
-        }
-      }
-
-   }
-   return out;
-}
-
-template <typename coefficient>
-VectorSpace<coefficient> CoxeterRepresentation<coefficient>::FindDecentBasis() const
-{ VectorSpace<coefficient>  V;
-  int d = gens[0].NumCols;
-  for(int geni=0; geni<gens.size; geni++)
-  { List<Vector<coefficient> > ess = eigenspaces(gens[geni]);
-    for(int essi=0; essi<ess.size; essi++)
-    { for(int esi=0; esi<ess[essi].size; esi++)
-      { // the best laid coding practices of mice and men oft go astray
-        if(!V.AddVectorToBasis(ess[essi][esi]))
-          return V;
-      }
-    }
-  }
-  // This should not be possible
-  for(int i=0; i<d; i++)
-  { Vector<coefficient> v;
-    v.MakeEi(d,i);
-    if(!V.AddVectorToBasis(v))
-      return V;
-  }
-  // if it gets here, it deserves to crash
-}
-
+/*
 template <typename coefficient>
 List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
 {  List<CoxeterRepresentation<coefficient> > out;
@@ -407,6 +166,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
    }
    return out;
 }
+*/
 
 /*template <typename coefficient>
 List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition() const
@@ -478,280 +238,6 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   std::cout << "decomposition might be complete, found " << out.size << " components" << std::endl;
   return out;
 }*/
-
-template <typename coefficient>
-ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()
-{  if(character.data.size)
-     return character;
-
-   character.G = G;
-   character.data.SetSize(G->ccCount);
-   for(int cci=0; cci < G->ccCount; cci++)
-   {  CoxeterElement g;
-      g = G->GetCoxeterElement(G->conjugacyClasses[cci][0]);
-      Matrix<coefficient> M;
-      M.MakeIdMatrix(gens[0].NumRows);
-      for(int gi=0; gi<g.reflections.size; gi++)
-         M.MultiplyOnTheRight(gens[g.reflections[gi]]);
-      character.data[cci] = M.GetTrace();
-   }
-   return character;
-}
-
-template <typename coefficient>
-coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
-{  ClassFunction<coefficient> X;
-   X = GetCharacter();
-   return X.norm();
-}
-
-
- // From Dr. Milev's Rational class
-template <typename integral>
-integral gcd(integral a, integral b)
-{  integral temp;
-   while(!(b==0))
-   {  temp= a % b;
-      a=b;
-      b=temp;
-   }
-   return a;
-}
-
-
-
-
-
-
-
-// Univariate dense polynomials.
-template <typename coefficient>
-class UDPolynomial
-{
-public:
-   // "So the last shall be first, and the first last" -- Matthew 20:12
-   List<coefficient> data;
-
-//  UDPolynomial<coefficient> operator+(const UDPolynomial<coefficient>& right) const;
-   void operator+=(const UDPolynomial<coefficient>& right);
-//  UDPolynomial<coefficient> operator-(const UDPolynomial<coefficient>& right) const;
-   void operator-=(const UDPolynomial<coefficient>& right);
-   UDPolynomial<coefficient> operator*(const UDPolynomial<coefficient>& right) const;
-//  UDPolynomial<coefficient> operator*(const coefficient& right) const;
-   void operator*=(const coefficient& right);
-   UDPolynomial<coefficient> TimesXn(int n) const;
-// Quick divisibility test
-// bool DivisibleBy(const UDPolynomial<coefficient>& divisor) const;
-   struct DivisionResult<UDPolynomial<coefficient> > DivideBy(const UDPolynomial<coefficient>& right) const;
-   UDPolynomial<coefficient> operator/(const UDPolynomial<coefficient>& divisor) const;
-   UDPolynomial<coefficient> operator%(const UDPolynomial<coefficient>& divisor) const;
-   void operator/=(const coefficient& right);
-   coefficient operator()(const coefficient& x) const;
-   void ClearDenominators();
-   void FormalDerivative();
-   void SquareFree();
-   List<coefficient> GetRoots() const;
-   void DoKronecker() const;
-//  static List<UDPolynomial<coefficient> > LagrangeInterpolants(List<coefficient> xs);
-   coefficient& operator[](int i) const;
-   bool operator<(const UDPolynomial<coefficient>& right) const;
-   bool operator==(int other) const;
-};
-
-template <typename coefficient>
-coefficient& UDPolynomial<coefficient>::operator[](int i) const
-{ return data[i];
-}
-
-template <typename coefficient>
-coefficient UDPolynomial<coefficient>::operator()(const coefficient &x) const
-{  coefficient acc = 0;
-   coefficient y = 1;
-   for(int i=0; i<data.size; i++)
-   {  acc += y*data[i];
-      y *= x;
-   }
-   return acc;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator+=(const UDPolynomial<coefficient>& right)
-{  int t = min(right.data.size, data.size);
-   for(int i=0; i<t; i++)
-      data[i] += right.data[i];
-
-   if(right.data.size > data.size)
-   {  int n = data.size;
-      data.SetSize(right.data.size);
-      for(int i=n; i<right.data.size; i++)
-         data[i] = right.data[i];
-   }
-   else
-      while((data.size != 0) and (data[data.size-1] != 0))
-         data.size--;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator-=(const UDPolynomial<coefficient>& right)
-{  // int t = min(right.data.size, data.size); // wtf lol
-  int t = right.data.size;
-  if(data.size < t)
-    t = data.size;
-
-  for(int i=0; i<t; i++)
-    data[i] -= right.data[i];
-
-  if(right.data.size > data.size)
-  {  int n = data.size;
-     data.SetSize(right.data.size);
-     for(int i=n; i<right.data.size; i++)
-       data[i] = -right.data[i];
-  }
-  else
-    while((data.size != 0) and (data[data.size-1] == 0))
-      data.size--;
-}
-
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::operator*(const UDPolynomial<coefficient>& right) const
-{  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+right.data.size-1);
-   for(int i=0; i<out.data.size; i++)
-      out.data[i] = 0;
-   for(int i=0; i<data.size; i++)
-      for(int j=0; j<right.data.size; j++)
-         out.data[i+j] += data[i]*right.data[j];
-   return out;
-}
-
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::TimesXn(int n) const
-{  UDPolynomial<coefficient> out;
-   out.data.SetSize(data.size+n);
-   for(int i=0; i<n; i++)
-     out.data[i] = 0;
-   // not memcpy()
-   for(int i=0; i<data.size; i++)
-      out.data[i+n] = data[i];
-
-   return out;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::operator*=(const coefficient& right)
-{  for(int i=0; i<data.size; i++)
-      data[i] *= right;
-}
-
-template <typename coefficient>
-struct DivisionResult<UDPolynomial<coefficient> > UDPolynomial<coefficient>::DivideBy(const UDPolynomial<coefficient>& divisor) const
-{  struct DivisionResult<UDPolynomial<coefficient> > out;
-   out.remainder = *this;
-   if(data.size < divisor.data.size)
-      return out;
-   int r = data.size - divisor.data.size + 1;
-   out.quotient.data.SetSize(r);
-   for(int i=r-1; i!=-1; i--)
-   {  if(out.remainder.data.size - divisor.data.size != i)
-      { out.quotient[i] = 0;
-        continue;
-      }
-      UDPolynomial<coefficient> p = divisor.TimesXn(i);
-      out.quotient[i] = out.remainder.data[out.remainder.data.size-1]/divisor.data[divisor.data.size-1];
-      p *= out.quotient[i];
-      out.remainder -= p;
-   }
-   return out;
-}
-
-template <typename coefficient>
-UDPolynomial<coefficient> UDPolynomial<coefficient>::operator/(const UDPolynomial<coefficient>& divisor) const
-{ struct DivisionResult<UDPolynomial<coefficient> > tmp = this->DivideBy(divisor);
-  return tmp.quotient;
-}
-
- template <typename coefficient>
- UDPolynomial<coefficient> UDPolynomial<coefficient>::operator%(const UDPolynomial<coefficient>& divisor) const
- { struct DivisionResult<UDPolynomial<coefficient> > tmp = this->DivideBy(divisor);
-   return tmp.remainder;
- }
-
- template <typename coefficient>
- bool UDPolynomial<coefficient>::operator==(const int other) const
- { if(other == 0)
-  {if(data.size == 0)
-    return true;
-    return false;
-  }
-  if(data.size != 1)
-    return false;
-  if(data[0] == other)
-    return true;
-  return false;
- }
-
-template <typename coefficient>
-//template <typename integral>
-void UDPolynomial<coefficient>::ClearDenominators()
-{  int acc = 1;
-   for(int i=0; i<data.size; i++)
-      acc = lcm(acc,data[i].GetDenominator());
-   *this *= acc;
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::FormalDerivative()
-{  if(data.size < 2)
-      data.size = 0;
-   for(int i=1; i<data.size; i++)
-      data[i-1] = i*data[i];
-   data.size--;
-}
-
-template <typename coefficient>
-bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right) const
-{  if(data.size < right.data.size)
-      return true;
-   if(data.size > right.data.size)
-      return false;
-   if(data.size == 0)
-      return false;
-   return data[data.size-1] < right.data[data.size-1];
-}
-
-template <typename coefficient>
-void UDPolynomial<coefficient>::SquareFree()
-{ std::cout << *this << std::endl;
-  UDPolynomial<coefficient> p = FormalDerivative();
-  std::cout << p << std::endl;
-  UDPolynomial<coefficient> q = gcd(*this,p);
-  if(q.data.size > 1)
-    data = (*this/q).data;
-}
-
-template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
-{ if(p.data.size == 0)
-    out << 0;
-  else
-  { for(int i=p.data.size-1; i!=0; i--)
-    { if(p.data[i] == 0)
-        continue;
-      if(i!=p.data.size-1)
-        out << " + ";
-      out << p.data[i];
-      if(i>1)
-        out << "x^" << i;
-      else if(i==1)
-        out << "x";
-    }
-  }
-  return out;
-}
-
-
-
-
 
 
 /*
@@ -1821,9 +1307,40 @@ int main(void)
      std::cout << p << std::endl;
 */
 
+   /*std::cout << '[';
+   for(int i=0; i<G.ccCount; i++)
+     std::cout << G.conjugacyClasses[i][0] << ", ";
+   std::cout << ']' << std::endl;
+   for(int i=0; i<G.ccCount; i++)
+     std::cout << i << ' ' << G.ccSizes[i] << ' ' << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << std::endl;
+   for(int i=0; i<G.ccCount; i++)
+     std::cout << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << ", ";*/
    G.ComputeIrreducibleRepresentations();
+   /*
+   List<ClassFunction<Rational> > ct;
+   List<CoxeterRepresentation<Rational> > gr;
 
-   std::string s;
-   std::cin >> s;
+   CoxeterRepresentation<Rational> sr = G.StandardRepresentation();
+   CoxeterRepresentation<Rational> sr2 = sr*sr;
+
+   List<CoxeterRepresentation<Rational> > sr2d = sr2.Decomposition(ct,gr);
+
+   std::cout << "std (x) std = ";
+   for(int i=0; i<sr2d.size; i++)
+   { std::cout << sr2d[i].GetCharacter() << std::endl;
+     for(int j=0; j<sr2d[i].gens.size; j++)
+      std::cout << sr2d[i].gens[j].ToString(&testformat) << std::endl;
+   }
+   */
+
+   std::cout << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
+   std::cout << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;
+   std::cout << "\nRational.TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
+   std::cout << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << std::endl;
+
+
+
+//   std::string s;
+//   std::cin >> s;
    return 0;
 }

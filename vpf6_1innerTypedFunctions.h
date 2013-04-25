@@ -51,7 +51,13 @@ static bool innerMultiplyRationalBySequence
 static bool innerMultiplySequenceByRational
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerMultiplySequenceBySequence
+static bool innerMultiplyMatrixSequenceByMatrixSequence
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyMatrixRationalOrRationalByMatrixRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddMatrixRationalToMatrixRational
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerAddRatToRat

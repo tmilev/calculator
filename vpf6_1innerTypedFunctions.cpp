@@ -613,6 +613,77 @@ bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence
   return true;
 }
 
+bool CommandListInnerTypedFunctions::innerMultiplyMatrixSequenceByMatrixSequence
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");
+  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  if (!input.IsListNElements(3))
+    return false;
+  Matrix<Expression> leftMat, rightMat;
+  if (!theCommands.GetMatrixExpressions(input[1], leftMat))
+    return false;
+  if (!theCommands.GetMatrixExpressions(input[2], rightMat, leftMat.NumCols))
+    return false;
+  if (leftMat.NumCols!=rightMat.NumRows)
+    return false;
+  Matrix<Expression> outputMat;
+  outputMat.init(leftMat.NumRows, rightMat.NumCols);
+  Expression leftSummand, rightSummand;
+  for (int i=0; i<leftMat.NumRows; i++)
+    for (int j=0; j<rightMat.NumCols; j++)
+      for (int k=0; k<leftMat.NumCols; k++)
+      { if (k==0)
+          outputMat(i,j).MakeProducT(theCommands, leftMat(i,k), rightMat(k,j) );
+        else
+        { rightSummand=outputMat(i,j);
+          leftSummand.MakeProducT(theCommands, leftMat(i,k), rightMat(k,j));
+          outputMat(i,j).MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+        }
+      }
+  return output.AssignMatrixExpressions(outputMat, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<Matrix<Rational> >())
+    return false;
+  Rational theScalar;
+  if (leftE.IsOfType<Rational>(&theScalar))
+  { Matrix<Rational> result=rightE.GetValuE<Matrix<Rational> >();
+    result*=theScalar;
+    return output.AssignValue(result, theCommands);
+  }
+  if (!leftE.IsOfType<Matrix<Rational> >())
+    return false;
+  const Matrix<Rational>& rightMat=rightE.GetValuE<Matrix<Rational> >();
+  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+    return false;
+  Matrix<Rational> result=leftE.GetValuE<Matrix<Rational> >();
+  result.MultiplyOnTheRight(rightMat);
+  return output.AssignValue(result, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<Matrix<Rational> >()|| !leftE.IsOfType<Matrix<Rational> >())
+    return false;
+  const Matrix<Rational>& rightMat=rightE.GetValuE<Matrix<Rational> >();
+  const Matrix<Rational>& leftMat=leftE.GetValuE<Matrix<Rational> >();
+  if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
+    return false;
+  Matrix<Rational> result=leftMat;
+  result+=rightMat;
+  return output.AssignValue(result, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerMultiplySequenceByRational
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");

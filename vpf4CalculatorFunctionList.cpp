@@ -51,13 +51,13 @@ void CommandList::initPredefinedInnerFunctions()
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
    "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true, false)
    ;
-  this->AddOperationHandler
+  this->AddOperationInnerHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
    "Creates character of a semisimple Lie algebra finite dimensional irreducible module. \
    First argument gives type, second argument gives highest weight in fundamental coordinates.",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true, false)
    ;
-  this->AddOperationHandler
+  this->AddOperationInnerHandler
   ("ConesIntersection", this->innerConesIntersect, "",
    "Takes as input two sequences of vectors, generates cones over Q, and intersects them using the simplex\
    algorithm. The output is a string report of the operation.",
@@ -850,6 +850,13 @@ void CommandList::initPredefinedStandardOperations()
    In case the entries of the sequences are elements of a base field, corresponds to vector addition.",
    "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational,
+   this->opMatRat(), this->opMatRat(),
+   "Adds two matrices.",
+   " A:=MatrixRationals{}((5, 8), (3, 5)); A*A-A;"
+   , true);
+
 
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
@@ -883,6 +890,16 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
    "Multiplies two polynomials. ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational,
+   this->opMatRat(), this->opMatRat(),
+   "Multiplies matrix rational by matrix rational. ",
+   "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational,
+   this->opRational(), this->opMatRat(),
+   "Multiplies rational by matrix rational. ",
+   "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
   this->AddOperationInnerHandler
   ("*", this->innerCollectMultiplicands, "",
    "Collects multiplicand exponents.",
@@ -986,6 +1003,11 @@ void CommandList::initPredefinedStandardOperations()
     interpretation might not be applicable).",
    "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
    , true);
+    this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixSequenceByMatrixSequence,
+   this->opSequence(), this->opSequence(),
+   "Multiplies two sequences of sequences in a similar way as if those were matrices.",
+   "2+2", true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",

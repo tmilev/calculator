@@ -3126,6 +3126,58 @@ bool CommandList::fSqrt
   return true;
 }
 
+bool Expression::AssignMatrixExpressions
+(const Matrix<Expression>& input, CommandList& owner)
+{ this->reset(owner);
+  this->children.ReservE(input.NumRows+1);
+  this->AddAtomOnTop(owner.opSequence());
+  Expression currentRow;
+  for (int i=0; i<input.NumRows; i++)
+  { currentRow.reset(owner);
+    currentRow.children.ReservE(input.NumCols+1);
+    currentRow.AddAtomOnTop(owner.opSequence());
+    for (int j=0; j<input.NumCols; j++)
+      currentRow.AddChildOnTop(input(i,j));
+    this->AddChildOnTop(currentRow);
+  }
+  return true;
+}
+
+bool CommandList::GetMatrixExpressions
+(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
+{ if (!input.IsSequenceNElementS())
+  { output.init(1,1);
+    output(0,0)=input;
+    return true;
+  }
+  if (!input[1].IsSequenceNElementS())
+  { if (desiredNumRows>0)
+      if (desiredNumRows!=1)
+        return false;
+    if (desiredNumCols>0)
+      if (desiredNumCols!=input.children.size-1)
+        return false;
+    output.init(1, input.children.size-1);
+    for (int i=1; i<input.children.size; i++)
+      output(0, i-1)=input[i];
+    return true;
+  }
+  if (desiredNumRows>0)
+    if (desiredNumRows!=input.children.size-1)
+      return false;
+  if (desiredNumCols>0)
+    if (desiredNumCols!=input[1].children.size-1)
+      return false;
+  output.init(input.children.size-1, input[1].children.size-1);
+  for (int i=1; i<input.children.size; i++)
+    if (input[i].IsSequenceNElementS(output.NumCols))
+      for (int j=1; j<input[i].children.size; j++)
+        output(i-1, j-1)=input[i][j];
+    else
+      return false;
+  return true;
+}
+
 class DoxygenInstance
 {
   public:

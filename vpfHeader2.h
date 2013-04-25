@@ -153,6 +153,7 @@ class Expression
   }
   bool AssignChild(int childIndexInMe, const Expression& inputChild);
   bool AssignChild(int childIndexInMe, int childIndexInBoss);
+  bool AssignMatrixExpressions(const Matrix<Expression>& input, CommandList& owner);
   bool AssignMeMyChild(int childIndex)
   { Expression tempExp=(*this)[childIndex];
     this->operator=(tempExp);
@@ -934,6 +935,10 @@ public:
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt()
+  ;
+  bool GetMatrixExpressions
+  (const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1,
+   int desiredNumCols=-1)
   ;
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);

@@ -345,11 +345,14 @@ g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
 ) \
 ))";
 }
-
   if (civilizedInput=="PenkovProject")
+  { civilizedInput="experimentalPrintSemisimpleSubalgebras{}(F_4)";
+  }
+
+  if (civilizedInput=="PenkovProjectRecompute")
   {civilizedInput= "\
 %HideLHS \n\
-Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\n\
+experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\n\
 (\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\n\
 (\n\

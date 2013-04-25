@@ -4857,7 +4857,6 @@ class MonomialWeylAlgebra
   }
 };
 
-
 struct FormatExpressions
 {
 public:
@@ -4890,6 +4889,7 @@ public:
   bool flagUseLatex;
   bool flagUsePNG;
   bool flagUseHTML;
+//  bool flagDynkinTypeDontUsePlusAndUpperIndex;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsFinal;

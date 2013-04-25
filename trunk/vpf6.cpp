@@ -3405,22 +3405,30 @@ bool CommandList::innerPrintSSLieAlgebra
     << "</td></tr>";
   }
   out << "</table>";
-  Matrix<Rational> tempM, tempM2;
-  theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
-  tempM2=tempM;
-  tempM2.Transpose();
-  tempM2.MultiplyOnTheRight(tempM);
-  if (!(tempM2==theWeyl.CartanSymmetric))
-  { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the "
-    << "vectors are incorrect. Please fix function DynkinType::GetEpsilonMatrix. "
-    << "The matrix of the epsilon coordinates is "
-    << tempM.ToString()
-    << ", the Symmetric Cartan matrix is "
-    << theWeyl.CartanSymmetric.ToString() << ", and the  "
-    << "transpose of the epsilon matrix times the epsilon matrix:  "
-    << tempM2.ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  DynkinSimpleType tempSimpleType;
+  if (theWeyl.theDynkinType.IsSimple
+      (&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.lengthFirstCoRootSquared))
+  { if ((tempSimpleType.theLetter!='F' && tempSimpleType.lengthFirstCoRootSquared==2) ||
+        (tempSimpleType.theLetter=='F' && tempSimpleType.lengthFirstCoRootSquared==1))
+    { //std::cout << "here i am";
+      Matrix<Rational> tempM, tempM2;
+      theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
+      tempM2=tempM;
+      tempM2.Transpose();
+      tempM2.MultiplyOnTheRight(tempM);
+      if (!(tempM2==theWeyl.CartanSymmetric))
+      { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the "
+        << "vectors are incorrect. Please fix function DynkinType::GetEpsilonMatrix. "
+        << "The matrix of the epsilon coordinates is "
+        << tempM.ToString()
+        << ", the Symmetric Cartan matrix is "
+        << theWeyl.CartanSymmetric.ToString() << ", and the  "
+        << "transpose of the epsilon matrix times the epsilon matrix:  "
+        << tempM2.ToString() << ". "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
   }
   out << "Note on root system convention. Except for F_4, "
   << "our epsilon notation follows the convention "
@@ -5524,14 +5532,15 @@ std::string CommandList::ToStringFunctionHandlers()
   for (int i=0; i<this->operations.size; i++)
     if (this->FunctionHandlers[i].size>0)
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      { if (found)
-          out << "<br>\n";
-        found=true;
-        out << openTag2 << this->operations[i] << closeTag2;
-        if (this->FunctionHandlers[i].size>1)
-          out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
-        out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
-      }
+        if (this->FunctionHandlers[i][j].flagIamVisible)
+        { if (found)
+            out << "<br>\n";
+          found=true;
+          out << openTag2 << this->operations[i] << closeTag2;
+          if (this->FunctionHandlers[i].size>1)
+            out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
+          out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
+        }
   return out.str();
 }
 

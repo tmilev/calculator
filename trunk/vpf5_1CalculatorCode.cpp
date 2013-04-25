@@ -175,30 +175,56 @@ bool CommandList::innerPrintSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
-  std::string errorString;
-  SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
-  if (ownerSS.GetRank()>4)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
-    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    return output.AssignValue(out.str(), theCommands);
+  SemisimpleLieAlgebra* ownerSSPointer;
+  bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
+  if (!isAlreadySubalgebrasObject)
+  { std::string errorString;
+    if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+        (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
+      return output.SetError(errorString, theCommands);
+    if (ownerSSPointer->GetRank()>4)
+    { out << "<b>This code is completely experimental and has been set to run up to rank 4."
+      << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+      return output.AssignValue(out.str(), theCommands);
+    } else
+      out << "<b>This code is completely experimental. Use the following printouts on "
+      << "your own risk</b>";
   } else
-    out << "<b>This code is completely experimental. Use the following printouts on "
-    << "your own risk</b>";
+    ownerSSPointer=input.GetValuE<SemisimpleSubalgebras>().owneR;
+  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
-  SemisimpleSubalgebras tempSSsas(ownerSS);
-  SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras
-  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
-  ;
-  theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
-  return output.AssignValue(theSSsubalgebras, theCommands);
+  std::string theTitlePageFileNameNoPath="SemisimpleSubalgebras_"+ownerSS.theWeyl.theDynkinType.ToString();
+  std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
+  out << "<br>Output file: <a href= \"" << displayFolder
+  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
+  out << "<script> var reservedCountDownToRefresh = 5; "
+  << "setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
+  << "= --reservedCountDownToRefresh;}, 1000); </script>";
+  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
+  << "seconds...  </b>"
+  << "<meta http-equiv=\"refresh\" content=\"5; url="
+  << displayFolder << theTitlePageFileNameNoPath
+  << "\">";
+  if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
+  { SemisimpleSubalgebras tempSSsas(ownerSS);
+    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
+    input.GetValuENonConstUseWithCaution <SemisimpleSubalgebras>() :
+    theCommands.theObjectContainer.theSSsubalgebras
+    [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
+    ;
+    if (!isAlreadySubalgebrasObject)
+      theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
+    std::fstream theFile;
+    theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
+    CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false);
+    theFile << "<html>" << "<script src=\"" << theCommands.DisplayPathServerBase
+    << "jsmath/easy/load.js\"></script> " << "<body>"
+    << theSSsubalgebras.ToString(&theFormat) << "</body></html>";
+  }
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::innerSSsubalgebras

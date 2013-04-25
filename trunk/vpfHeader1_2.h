@@ -152,11 +152,11 @@ public:
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   void Substitution
-  (const Matrix<Rational> & mapFromNewSpaceToOldSpace,
+  (const Matrix<Rational>& mapFromNewSpaceToOldSpace,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   void Substitution
-  (const Vector<Rational> & inputTranslationSubtractedFromArgument,
+  (const Vector<Rational>& inputTranslationSubtractedFromArgument,
    QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   bool SubstitutionLessVariables
@@ -183,7 +183,7 @@ private:
   void findPivot();
   void findInitialPivot();
   //void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
-  bool rootIsInFractionCone (partFractions& owner, Vector<Rational> * theRoot, GlobalVariables& theGlobalVariables);
+  bool rootIsInFractionCone (partFractions& owner, Vector<Rational>* theRoot, GlobalVariables& theGlobalVariables);
   friend class partFractions;
   friend class partFractionPolynomialSubstitution;
 public:
@@ -203,7 +203,7 @@ public:
   bool RemoveRedundantShortRootsClassicalRootSystem
 (partFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
-  bool RemoveRedundantShortRoots(partFractions& owner, Vector<Rational> * Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+  bool RemoveRedundantShortRoots(partFractions& owner, Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
 //  static  bool flagUsingPrecomputedOrlikSolomonBases;
@@ -214,20 +214,20 @@ public:
   static Vector<Rational> theVectorToBePartitioned;
 //  static ListPointers<partFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial
-  (QuasiPolynomial& outputQP, MonomialP& theMon, Vectors<Rational>& normals,
+  (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
   ;
   static void EvaluateIntPoly
-  (const Polynomial<LargeInt>& input, const Vector<Rational> & values, Rational& output)
+  (const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output)
   ;
   static void MakePolynomialFromOneNormal
-  (Vector<Rational>& normal, MonomialP& shiftRational, int theMult,
+  (Vector<Rational>& normal, const MonomialP& shiftRational, int theMult,
    Polynomial<Rational>& output);
   void ComputeNormals
 (partFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
   ;
   int ComputeGainingMultiplicityIndexInLinearRelation
-(bool flagUsingOrlikSolomon, Matrix<Rational> & theLinearRelation)
+(bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation)
   ;
   void GetRootsFromDenominator
   (partFractions& owner, Vectors<Rational>& output)
@@ -325,7 +325,7 @@ public:
   ;
   static void GetNElongationPoly(Vector<Rational>& exponent, int n, Polynomial<LargeInt>& output, int theDimension);
   int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
-  bool operator==(const partFraction& right);
+  bool operator==(const partFraction& right)const;
   void operator=(const partFraction& right);
   bool initFromRoots(partFractions& owner, Vectors<Rational>& input);
   std::string ToString
@@ -349,19 +349,18 @@ public:
 //  bool flagHasSufficientlyManyVertices;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
-  std::string ToString(FormatExpressions* theFormat=0){return this->ToString(false, false, *theFormat);}
+  std::string ToString(FormatExpressions* theFormat=0)const;
   void TransformToWeylProjective
   (ConeComplex& owner, GlobalVariables& theGlobalVariables)
   ;
-  std::string ToString(bool useLatex, bool useHtml, FormatExpressions& theFormat){return this->ToString(useLatex, useHtml, false, false, theFormat);}
-  std::string ToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, FormatExpressions& theFormat);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
-  void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
-  bool IsAnHonest1DEdgeAffine(Vector<Rational> & vertex1, Vector<Rational> & vertex2)
+  void TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
+  bool IsAnHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2)const
   { int numCommonWalls=0;
     for (int i=0; i<this->Normals.size; i++)
-      if(vertex1.ScalarEuclidean(this->Normals[i]).IsEqualToZero() && vertex2.ScalarEuclidean(this->Normals[i]).IsEqualToZero())
+      if(vertex1.ScalarEuclidean(this->Normals[i]).IsEqualToZero() &&
+         vertex2.ScalarEuclidean(this->Normals[i]).IsEqualToZero())
       { numCommonWalls++;
         if (numCommonWalls==this->GetDim()-2)
           return true;
@@ -371,17 +370,17 @@ public:
   bool IsTheEntireSpace()
   { return this->Normals.size==0 && this->flagIsTheZeroCone;
   }
-  bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2)
-  { Vector<Rational> & vertex1=this->Vertices[vertexIndex1];
-    Vector<Rational> & vertex2=this->Vertices[vertexIndex2];
+  bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2)const
+  { Vector<Rational>& vertex1=this->Vertices[vertexIndex1];
+    Vector<Rational>& vertex2=this->Vertices[vertexIndex2];
     return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
   }
   bool DrawMeLastCoordAffine
   (bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat,
-   int ChamberWallColor=0);
+   int ChamberWallColor=0)const;
   bool DrawMeProjective
-(Vector<Rational> * coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
-  ;
+(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
+  const;
   bool IsInCone(const Vector<Rational>& point) const;
   bool IsInCone(const Vectors<Rational>& vertices)const
   { for (int i=0; i<vertices.size; i++)
@@ -390,21 +389,21 @@ public:
     return true;
   }
   bool GetLatticePointsInCone
-  (Lattice& theLattice, Vector<Rational> & theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
-   Vectors<Rational>& outputPoints, Vector<Rational> * shiftAllPointsBy)
+  (Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
+   Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)const
   ;
   bool MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables);
   void ChangeBasis
-  (Matrix<Rational> & theLinearMap, GlobalVariables& theGlobalVariables)
+  (Matrix<Rational>& theLinearMap, GlobalVariables& theGlobalVariables)
     ;
   std::string DebugString;
-  int GetDim()
+  int GetDim()const
   { if (this->Normals.size==0)
       return 0;
     return this->Normals.TheObjects[0].size;
   }
   void SliceInDirection
-  (Vector<Rational> & theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
+  (Vector<Rational>& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
 ;
   bool CreateFromNormalS
   (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
@@ -419,12 +418,16 @@ public:
   bool CreateFromVertices
   (Vectors<Rational>& inputVertices, GlobalVariables& theGlobalVariables)
   ;
-  void GetInternalPoint(Vector<Rational> & output)
+  void GetInternalPoint(Vector<Rational>& output)const
   { if (this->Vertices.size<=0)
       return;
     this->Vertices.sum(output, this->Vertices[0].size);
   }
-  Vector<Rational>  GetInternalPoint(){Vector<Rational>  result; this->GetInternalPoint(result); return result;}
+  Vector<Rational> GetInternalPoint()const
+  { Vector<Rational> result;
+    this->GetInternalPoint(result);
+    return result;
+  }
   unsigned int HashFunction()const
   { return this->Vertices.HashFunction();
   }
@@ -545,12 +548,14 @@ public:
       return -1;
     return this->TheObjects[0].GetDim();
   }
-  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone, GlobalVariables& theGlobalVariables);
+  bool AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone, GlobalVariables& theGlobalVariables);
   void PopChamberSwapWithLast(int index);
   void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals
     (Vectors<Rational>& output)const
   ;
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  bool DrawMeLastCoordAffine
+  (bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
+  ;
   void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector, GlobalVariables& theGlobalVariables);
   void InitFromDirectionsAndRefine
   (Vectors<Rational>& inputVectors, GlobalVariables& theGlobalVariables)
@@ -562,7 +567,7 @@ public:
 (DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 ;
   bool DrawMeProjective
-(Vector<Rational> * coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
+(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
   ;
   std::string DrawMeToHtmlProjective
 (DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
@@ -570,17 +575,17 @@ public:
   std::string ToString(){return this->ToString(false, false);}
   std::string ToString(bool useLatex, bool useHtml);
   void ComputeDebugString(){this->DebugString=this->ToString();}
-  int GetLowestIndexchamberContaining(const Vector<Rational> & theRoot)const
+  int GetLowestIndexchamberContaining(const Vector<Rational>& theRoot)const
   { for (int i=0; i<this->size; i++)
       if (this->TheObjects[i].IsInCone(theRoot))
         return i;
     return -1;
   }
   bool findMaxLFOverConeProjective
-  (Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  (const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
   bool findMaxLFOverConeProjective
-  (Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
+  (const Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
    List<int>& outputMaximumOverEeachSubChamber,
    GlobalVariables& theGlobalVariables)
   ;
@@ -591,10 +596,10 @@ public:
 (List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
-(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational> & killerNormal, GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables)
   ;
   void GetNewVerticesAppend
-  (Cone& myDyingCone, Vector<Rational> & killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables)
+  (Cone& myDyingCone, Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables)
   ;
   void init()
   { this->splittingNormals.Clear();
@@ -1136,7 +1141,9 @@ template <class CoefficientType>
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
   static Rational GetSizeWeylByFormula(char weylLetter, int theDim);
-  bool IsARoot(const Vector<Rational> & input){ return this->RootSystem.Contains(input); }
+  bool IsARoot(const Vector<Rational>& input)const
+  { return this->RootSystem.Contains(input);
+  }
   void GenerateRootSubsystem(Vectors<Rational>& theRoots);
   template <class CoefficientType>
   bool GenerateOrbit
@@ -1180,12 +1187,12 @@ template <class CoefficientType>
       outputWeylElt[i]=i;
   }
   template <class Element>
-  void ActOn(ElementWeylGroup& theGroupElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
+  void ActOn(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
   { for (int i=0; i<theGroupElement.size; i++)
       this->SimpleReflection(theGroupElement[i], theVector, RhoAction, UseMinusRho, theRingZero);
   }
   template <class Element>
-  void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
+  void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
   { this->ActOn((*this)[indexOfWeylElement], theVector, RhoAction, UseMinusRho, theRingZero);
   }
   template <class Element>
@@ -1193,25 +1200,29 @@ template <class CoefficientType>
   //theRoot is a list of the simple coordinates of the Vector<Rational>
   //theRoot serves as both input and output
   void ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
-  void ActOnRootByGroupElement(int index, Vector<Rational> & theRoot, bool RhoAction, bool UseMinusRho);
-  void ActOnDualSpaceElementByGroupElement(int index, Vector<Rational> & theDualSpaceElement, bool RhoAction);
-  void SimpleReflectionRoot(int index, Vector<Rational> & theRoot, bool RhoAction, bool UseMinusRho);
+  void ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
+  void ActOnDualSpaceElementByGroupElement(int index, Vector<Rational>& theDualSpaceElement, bool RhoAction);
+  void SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
   template <class Element>
   void SimpleReflection
-  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
   ;
-  void GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix);
-  void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
-  void GetElementOfMatrix(Matrix<Rational> &input, ElementWeylGroup &output);
-  void SimpleReflectionDualSpace(int index, Vector<Rational> & DualSpaceElement);
+  void GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const ;
+  void GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const;
+  void GetElementOfMatrix(Matrix<Rational>& input, ElementWeylGroup &output);
+  void SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
-  bool IsPositiveOrPerpWRTh(const Vector<Rational> & input, const Vector<Rational> & theH){ return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero(); }
+  bool IsPositiveOrPerpWRTh(const Vector<Rational>& input, const Vector<Rational>& theH)
+  { return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero();
+  }
   template<class CoefficientType>
-  void ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)const;
-  bool IsRegular(Vector<Rational> & input, int* indexFirstPerpendicularRoot);
+  void ReflectBetaWRTAlpha
+  (const Vector<Rational>& alpha, const Vector<CoefficientType>& Beta, bool RhoAction,
+   Vector<CoefficientType>& Output)const;
+  bool IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot);
   template <class leftType, class rightType>
   void RootScalarCartanRoot
-  (const Vector<leftType> & r1, const Vector<rightType> & r2, leftType& output)const;
+  (const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const;
   double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2)const
   { if (r1.size!=r2.size || r1.size!=this->GetDim())
     { std::cout << "This is a programming error: attempting to take the root system scalar product of "
@@ -1251,7 +1262,7 @@ template <class CoefficientType>
 
 template <class Element>
 void WeylGroup::SimpleReflection
-  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)const
 { Element alphaShift, tempRat;
   alphaShift=theRingZero;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -1342,7 +1353,7 @@ public:
   (const Vector<CoefficientType>& theWeightInSimpleCoords, const CoefficientType& theRingUnit=1)
   ;
   void FindQuotientRepresentatives(int UpperLimit);
-  void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
+  void GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const;
   template <class CoefficientType>
   bool GenerateOrbitReturnFalseIfTruncated
   (const Vector<CoefficientType>& input, Vectors<CoefficientType>& outputOrbit,
@@ -1353,19 +1364,21 @@ public:
    bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   template <class CoefficientType>
-  void ActByElement(int index, Vector<CoefficientType> & theRoot);
+  void ActByElement(int index, Vector<CoefficientType>& theRoot)const;
   template <class CoefficientType>
-  void ActByElement(int index, Vector<CoefficientType> & input, Vector<CoefficientType> & output)
+  void ActByElement(int index, Vector<CoefficientType>& input, Vector<CoefficientType>& output)const
   { this->ActByElement(this->TheObjects[index], input, output);
   }
   template <class CoefficientType>
-  void ActByElement(ElementWeylGroup& theElement, Vector<CoefficientType>& input, Vector<CoefficientType>& output);
+  void ActByElement
+  (const ElementWeylGroup& theElement, const Vector<CoefficientType>& input, Vector<CoefficientType>& output)const;
   template <class CoefficientType>
-  void ActByElement(int index, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)
+  void ActByElement(int index, const Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)const
   { this->ActByElement(this->TheObjects[index], input, output);
   }
   template <class CoefficientType>
-  void ActByElement(ElementWeylGroup& theElement, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output);
+  void ActByElement
+  (const ElementWeylGroup& theElement, const Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)const;
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void operator=(const ReflectionSubgroupWeylGroup& other);
@@ -1661,19 +1674,19 @@ public:
   void ComputeAll();
   void ComputeRootsOfK();
   void ComputeKModules();
-  void ComputeHighestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputHW);
-  void ComputeExtremeWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
+  void ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW);
+  void ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
   inline void operator=(const rootSubalgebra& right)
   { this->Assign(right);
   }
   void Assign(const rootSubalgebra& right);
-  void ComputeLowestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputLW);
+  void ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW);
   void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
   void initForNilradicalGeneration();
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
-  bool LinCombToString(Vector<Rational> & alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
-  bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational> & alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
+  bool LinCombToString(Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
+  bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
   void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
   void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
 };
@@ -1966,7 +1979,7 @@ public:
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
   bool GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const
   ;
   Rational GetConstant(const Vector<Rational> & root1, const Vector<Rational> & root2);
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
@@ -2014,7 +2027,7 @@ public:
   int GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
   void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);}
-  bool operator==(const SemisimpleLieAlgebra& other)
+  bool operator==(const SemisimpleLieAlgebra& other)const
   { return this->theWeyl==other.theWeyl;
   }
 };
@@ -2083,14 +2096,14 @@ public:
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
   bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
   void ApplyHomomorphism
-  (ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
+  (const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
   ;
   bool ApplyHomomorphism
-  (ElementUniversalEnveloping<RationalFunctionOld>& input,
+  (const ElementUniversalEnveloping<RationalFunctionOld>& input,
    ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
   bool ApplyHomomorphism
-(MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
+(const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
  ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
 };
@@ -2777,8 +2790,8 @@ public:
   }
   void RaiseToPower(int thePower);
   void MultiplyTwoMonomials
-(MonomialWeylAlgebra& left, MonomialWeylAlgebra& right,
- ElementWeylAlgebra& output)
+(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right,
+ ElementWeylAlgebra& output)const
 ;
   void AssignPolynomial(const Polynomial<Rational>& input)
   { this->MakeZero();
@@ -2804,11 +2817,11 @@ public:
   WeylGroup* owner;
   Vectors<Rational> Waypoints;
   void MakeFromWeightInSimpleCoords
-  (const Vector<Rational> & weightInSimpleCoords, WeylGroup& theOwner)
+  (const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
   ;
   void MakeFromWaypoints
   (Vectors<Rational>& weightsInSimpleCoords, WeylGroup& theOwner)
-  { this->owner=& theOwner;
+  { this->owner=&theOwner;
     this->Waypoints=weightsInSimpleCoords;
     this->Simplify();
   }
@@ -2826,10 +2839,10 @@ public:
   (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
   ;
   std::string ElementToStringIndicesToCalculatorOutput
-(LittelmannPath& inputStartingPath, List<int> & input)
+(LittelmannPath& inputStartingPath, List<int>& input)
   ;
   std::string ElementToStringOperatorSequenceStartingOnMe
-(List<int> & input)
+(List<int>& input)
   ;
   bool GenerateOrbit
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
@@ -2883,7 +2896,7 @@ class ConeLatticeAndShiftMaxComputation
 
   std::string ToString(FormatExpressions* theFormat=0);
   void init
-  (Vector<Rational> & theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift)
+  (Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift)
   ;
   void FindExtremaParametricStep1
     (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
@@ -2970,13 +2983,12 @@ public:
     return output;
   }
   void AccountSingleWeight
-(Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords,
- WeylGroup& theWeyl, Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)
+(const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
+ WeylGroup& theWeyl, Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)const
   ;
   std::string TensorAndDecompose
-(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner,
- charSSAlgMod<CoefficientType>& output,
- GlobalVariables& theGlobalVariables)
+(const MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod<CoefficientType>& output,
+ GlobalVariables& theGlobalVariables)const
    ;
   std::string ToString
   (FormatExpressions* theFormat=0)const
@@ -3588,7 +3600,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   GlobalVariables& theGlobalVariables)
    ;
 bool GetActionEulerOperatorPart
-(MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
+(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
    ;
    ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
    {}
@@ -3620,7 +3632,7 @@ class MonomialGeneralizedVerma
   (FormatExpressions* theFormat=0, bool includeV=true)const
   ;
   static const bool IsEqualToZero(){return false;}
-  bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)
+  bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)const
   { if (this->indexFDVector==other.indexFDVector && this->owneR==other.owneR)
       return this->theMonCoeffOne==other.theMonCoeffOne;
     return false;
@@ -4100,7 +4112,7 @@ public:
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
   std::string PrepareReportOneCone
-  (FormatExpressions& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
+  (FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables)
   ;
   void GetProjection(int indexOperator, const Vector<Rational> & input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
@@ -6966,7 +6978,7 @@ void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(Vector<CoefficientType>&
 }
 
 template <class CoefficientType>
-void WeylGroup::ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)const
+void WeylGroup::ReflectBetaWRTAlpha(const Vector<Rational>& alpha, const Vector<CoefficientType>& Beta, bool RhoAction, Vector<CoefficientType>& Output)const
 { CoefficientType bufferCoeff, alphaShift, lengthA;
   Vector<CoefficientType> result;
   result=(Beta);
@@ -7038,7 +7050,7 @@ bool charSSAlgMod<CoefficientType>::DrawMe
   HashedList<Vector<CoefficientType> > finalWeights;
   Vector<Rational> convertor;
   for (int i=0; i< CharCartan.size; i++)
-  { MonomialChar<CoefficientType>& currentMon=CharCartan[i];
+  { const MonomialChar<CoefficientType>& currentMon=CharCartan[i];
     dominantWeightsNonHashed.size=0;
     dominantWeightsNonHashed.AddOnTop
     (theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords));
@@ -7537,8 +7549,8 @@ std::string charSSAlgMod<CoefficientType>::MultiplyBy(const charSSAlgMod& other,
   CoefficientType theCF;
   for (int i=0; i<this->size; i++)
     for (int j=0; j<other.size; j++)
-    { MonomialChar<Rational>& left = this->TheObjects[i];
-      MonomialChar<Rational>& right=other[j];
+    { const MonomialChar<Rational>& left = (*this)[i];
+      const MonomialChar<Rational>& right=other[j];
       potentialError=left.TensorAndDecompose(right, *this->owner, summand, theGlobalVariables);
       if (potentialError!="")
         return potentialError;
@@ -7553,11 +7565,11 @@ std::string charSSAlgMod<CoefficientType>::MultiplyBy(const charSSAlgMod& other,
 
 template <class CoefficientType>
 void MonomialChar<CoefficientType>::AccountSingleWeight
-(Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords,
+(const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
  WeylGroup& theWeyl,
- Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)
-{ //This is the Brauer-Klimyk formula. Reference: Humphreys,
-  //Humphreys J. Introduction to Lie algebras and representation theory
+ Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)const
+{ //This is the Brauer-Klimyk formula. Reference:
+  //Humphreys J., Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
   //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
   //<< " with coefficient " << finalCoeff.ToString();
@@ -7588,9 +7600,9 @@ void MonomialChar<CoefficientType>::AccountSingleWeight
 
 template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::TensorAndDecompose
-(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner,
- charSSAlgMod<CoefficientType>& output, GlobalVariables& theGlobalVariables)
-{ //This is the Brauer-Klimyk formula. Reference: Humphreys,
+(const MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner,
+ charSSAlgMod<CoefficientType>& output, GlobalVariables& theGlobalVariables)const
+{ //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
   MacroRegisterFunctionWithName("MonomialChar_CoefficientType::TensorAndDecompose");
@@ -7975,14 +7987,15 @@ void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
 }
 
 template <class CoefficientType>
-void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<CoefficientType>& theRoot)
+void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<CoefficientType>& theRoot)const
 { Vector<CoefficientType> tempRoot;
   this->ActByElement(index, theRoot, tempRoot);
   theRoot=(tempRoot);
 }
 
 template <class CoefficientType>
-void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vector<CoefficientType>& input, Vector<CoefficientType>& output)
+void ReflectionSubgroupWeylGroup::ActByElement
+(const ElementWeylGroup& theElement, const Vector<CoefficientType>& input, Vector<CoefficientType>& output)const
 { assert(&input!=&output);
   int NumElts=theElement.size;
   Vector<CoefficientType> tempRoot, tempRoot2;
@@ -8004,7 +8017,8 @@ void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vec
 }
 
 template<class CoefficientType>
-void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)
+void ReflectionSubgroupWeylGroup::ActByElement
+(const ElementWeylGroup& theElement, const Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)const
 { assert(&input!=&output);
   output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
@@ -8027,7 +8041,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordList=
     this->theGeneratingWordsIntGrouppedByWeight[i];
-    Vector<Rational>& currentWeight=this->theModuleWeightsSimpleCoords[i];
+    const Vector<Rational>& currentWeight=this->theModuleWeightsSimpleCoords[i];
     targetWeight=currentWeight+genWeight;
 //    std::cout << "<br>target weight: " << targetWeight.ToString() << "="
 //    << currentWeight.ToString() << "+" << inputWeight.ToString();
@@ -8441,7 +8455,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   CoefficientType leftMonCoeff;
   for (int j=0; j<TAleft.size; j++)
   { intermediateAccum=startingElt;
-    MonomialUniversalEnveloping<CoefficientType>& leftMon=TAleft[j];
+    const MonomialUniversalEnveloping<CoefficientType>& leftMon=TAleft[j];
     leftMonCoeff=TAleft.theCoeffs[j];
     int thePower;
     for (int i=leftMon.Powers.size-1; i>=0; i--)

@@ -57,7 +57,7 @@ ReduceMod
 //  << "x_2^" << theM << "- (" << Bm.ToString() << ") (it has " << Bm.NumVars << " variables)";
   for (int i=0; i<toBeReduced.size; i++)
     for (int j=0; j<theNs.size; j++)
-      if (toBeReduced[i][j]>=theNs[j])
+      if (toBeReduced[i](j)>=theNs[j])
       { toBeReduced.PopMonomial(i, tempM, currentCoeff);
   //      std::cout << " select monomial " << tempM.ToString() << " with coeff " << currentCoeff;
         int thePower=tempM[j].NumShort/theNs[j];
@@ -120,10 +120,10 @@ bool AlgebraicNumber::AssignOperation
   buffer2.MakeOne(theNs.size);
   for (int i=0; i<ProductNsPlusOne; i++)
   { for (int j=0; j<buffer2.size; j++)
-    { MonomialP& currentMon=buffer2[j];
-      int theIndex=currentMon[0].NumShort;
+    { const MonomialP& currentMon=buffer2[j];
+      int theIndex=currentMon(0).NumShort;
       for (int k=1; k<theNs.size; k++)
-        theIndex=theIndex*theNs[k]+ currentMon[k].NumShort;
+        theIndex=theIndex*theNs[k]+ currentMon(k).NumShort;
       theDep(theIndex, i)=buffer2.theCoeffs[j];
     }
     if (i!=ProductNs)

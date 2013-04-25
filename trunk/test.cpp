@@ -3,7 +3,7 @@
 
 #include "vpfCharacters.h"
 #include "vpfGraph.h"
-#include "testlib.h"
+//#include "testlib.h"
 #include <iostream>
 
 // this is one reason test.cpp isn't even compiled into the actual calculator

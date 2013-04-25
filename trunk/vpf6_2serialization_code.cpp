@@ -466,7 +466,7 @@ bool Serialization::innerLoadFromObject
   DynkinSimpleType simpleComponent;
   theDynkinType.MakeZero();
   for (int i=0; i<theType.size; i++)
-  { MonomialP& currentMon=theType[i];
+  { const MonomialP& currentMon=theType[i];
     int variableIndex;
     if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
       return output.SetError
@@ -813,7 +813,7 @@ bool Serialization::innerLoadFromObject
   tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   outputSubalgebra.indexInOwnersOfNonEmbeddedMe=
   owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
-  owner.theSubalgebrasNonEmbedded[outputSubalgebra.indexInOwnersOfNonEmbeddedMe].theWeyl.ComputeRho(true);
+  owner.theSubalgebrasNonEmbedded.GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
 
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
@@ -940,7 +940,7 @@ bool Serialization::innerLoad
   if (input.children.size<2)
     return false;
   output=input;
-  output.children.PopIndexShiftDown(0);
+  output.children.RemoveIndexShiftDown(0);
   return true;
 }
 
@@ -992,14 +992,14 @@ bool Serialization::innerUE
   Expression theContext=polyE.GetContext();
   Expression outputPolyVars;
   outputPolyVars.reset(theCommands, 1);
-  outputPolyVars.AssignChildAtomValue(0, theCommands.opPolynomialVariables(), theCommands);
+  outputPolyVars.AddChildAtomOnTop(theCommands.opPolynomialVariables());
   for (int j=0; j<theP.size; j++)
-  { MonomialP& currentMon=theP[j];
+  { const MonomialP& currentMon=theP[j];
     currentSummand.MakeConst(theP.theCoeffs[j], owner);
     currentMultiplicandRFpartMon.MakeOne();
     for (int i=0; i<currentMon.GetMinNumVars(); i++)
     { int thePower;
-      if (!currentMon[i].IsSmallInteger(&thePower))
+      if (!currentMon(i).IsSmallInteger(&thePower))
       { theCommands.Comments << "<hr>Failed to convert one of the exponents appearing in "
         << input.ToString() << " to  a small integer polynomial.<hr>";
         return false;

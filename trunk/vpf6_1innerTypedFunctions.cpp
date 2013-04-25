@@ -604,7 +604,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence
     return false;
   output.reset(theCommands);
   output.children.ReservE(input[2].children.size);
-  output.AddAtomOnTop(theCommands.opSequence());
+  output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempProduct;
   for (int i=1; i<input[2].children.size; i++)
   { tempProduct.MakeProducT(theCommands, input[1], input[2][i]);
@@ -715,7 +715,7 @@ bool CommandListInnerTypedFunctions::innerAddSequenceToSequence
   }
   output.reset(theCommands);
   output.children.ReservE(input[1].children.size);
-  output.AddAtomOnTop(theCommands.opSequence());
+  output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempSum;
   for (int i=1; i<input[2].children.size; i++)
   { tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);

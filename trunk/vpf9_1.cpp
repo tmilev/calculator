@@ -2639,7 +2639,7 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 }
 
 bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
-(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)
+(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const
 { output=-1;
   Vector<Rational> tempRoot=beta;
   if (alpha.IsEqualToZero())

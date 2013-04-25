@@ -90,17 +90,17 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 }
 
 void ElementWeylAlgebra::MultiplyTwoMonomials
-(MonomialWeylAlgebra& left, MonomialWeylAlgebra& right, ElementWeylAlgebra& output)
+(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
   tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
   tempSel.MaxMultiplicities.SetSize(theDimensioN);
   for (int i=0; i<theDimensioN; i++)
   { int powerDiffOp=0;
-    if (!left.differentialPart[i].IsSmallInteger(&powerDiffOp))
+    if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp))
     { std::cout << "This is a programming error. Requested operations "
       << " with elements of weyl algebra"
-      << " that have monomials of exponent " << left.differentialPart[i]
+      << " that have monomials of exponent " << left.differentialPart(i)
       << " which I cannot handle. "
       << " If this is bad user input, it should have been caught at an earlier level. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -120,12 +120,12 @@ void ElementWeylAlgebra::MultiplyTwoMonomials
     { int multDrop=tempSel.Multiplicities[k];
       int theDOPower=0;
       int thePolPower=0;
-      left.differentialPart[k].IsSmallInteger(&theDOPower);
-      right.polynomialPart[k].IsSmallInteger(&thePolPower);
+      left.differentialPart(k).IsSmallInteger(&theDOPower);
+      right.polynomialPart(k).IsSmallInteger(&thePolPower);
       coeffBuff*=Rational::NChooseK(theDOPower, multDrop)
       *Rational::NChooseK(thePolPower, multDrop)* Rational::Factorial(multDrop);
-      buffer.polynomialPart[k]=left.polynomialPart[k]+right.polynomialPart[k]-multDrop;
-      buffer.differentialPart[k]= left.differentialPart[k]+right.differentialPart[k]-multDrop;
+      buffer.polynomialPart[k]=left.polynomialPart(k)+right.polynomialPart(k)-multDrop;
+      buffer.differentialPart[k]= left.differentialPart(k)+right.differentialPart(k)-multDrop;
     }
     output.AddMonomial(buffer, coeffBuff);
     tempSel.IncrementSubset();
@@ -338,14 +338,14 @@ bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
   Rational coeff;
   for (int i=0; i<this->size; i++)
     for (int j=0; j<thePoly.size; j++)
-    { MonomialP& currentPolMon=thePoly[j];
-      MonomialWeylAlgebra& currentOpMon=(*this)[i];
+    { const MonomialP& currentPolMon=thePoly[j];
+      const MonomialWeylAlgebra& currentOpMon=(*this)[i];
       resultMon=currentPolMon;
       coeff=thePoly.theCoeffs[j];
       coeff*=this->theCoeffs[i];
       for (int k=0; k<currentOpMon.GetMinNumVars(); k++)
       { int numDiff=0;
-        if (!currentOpMon.differentialPart[k].IsSmallInteger(&numDiff))
+        if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff))
           return false;
         for (; numDiff>0; numDiff--)
         { coeff*=resultMon[k];
@@ -496,7 +496,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
       Polynomial<Rational>& currentPoly= outputSystemToBeSolved[i];
       Rational& currentCoeff=currentPoly.theCoeffs[j];
       for (int k=0; k<numberVariables; k++)
-        if (currentPoly[j][k]==1)
+        if (currentPoly[j](k)==1)
         { if (k<halfNumberVariables)
             lowerIndex=k;
           else
@@ -1361,7 +1361,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
   while(NonExplored.CardinalitySelection>0)
   { for (int i=0; i<NonExplored.CardinalitySelection; i++)
     { int theIndex = NonExplored.elements[i];
-      Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
+      const Vector<Rational>& current = this->theWeyl.RootSystem[theIndex];
       for (int j=0; j<theDimension; j++)
       { left.MakeEi(theDimension, j);
         for (int k=0; k<2; k++, left.Minus())
@@ -1524,10 +1524,10 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   while (NonExplored.CardinalitySelection>0)
   { for (int i=0; i<NonExplored.CardinalitySelection; i++)
     { int theIndex = NonExplored.elements[i];
-      Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
+      const Vector<Rational>& current = this->theDomain().theWeyl.RootSystem[theIndex];
       for (int j=0; j<NonExplored.MaxSize; j++)
         if (!NonExplored.selected[j])
-        { Vector<Rational>& left= this->theDomain().theWeyl.RootSystem[j];
+        { const Vector<Rational>& left= this->theDomain().theWeyl.RootSystem[j];
           right= current-left;
 //          left.ComputeDebugString(); right.ComputeDebugString(); current.ComputeDebugString();
           if (this->theDomain().theWeyl.IsARoot(right))
@@ -1601,7 +1601,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
+(const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
  ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
 { ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   output.MakeZero(this->theRange());
@@ -1624,7 +1624,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(ElementUniversalEnveloping<RationalFunctionOld>& input,
+(const ElementUniversalEnveloping<RationalFunctionOld>& input,
  ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=&input);
   output.MakeZero(this->theRange());
@@ -2149,8 +2149,8 @@ void RationalFunctionOld::lcm
   int maxMonNoTIndex=-1;
   Rational MaxTotalDeg;
   for(int i=0; i<theBasis.size; i++)
-  { MonomialP& currentMon= theBasis[i][theBasis[i].GetIndexMaxMonomialLexicographicLastVariableStrongest()];
-    if (currentMon[theNumVars]==0)
+  { const MonomialP& currentMon= theBasis[i][theBasis[i].GetIndexMaxMonomialLexicographicLastVariableStrongest()];
+    if (currentMon(theNumVars)==0)
     { if (maxMonNoTIndex==-1)
       { MaxTotalDeg= currentMon.TotalDegree();
         maxMonNoTIndex=i;

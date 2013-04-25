@@ -1103,7 +1103,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
   int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
   int numG2NegGenerators=this->theHmm.theDomain().GetNumPosRoots();
   for (int i=0; i<numB3NegGenerators; i++)
-  { Vector<Rational>& currentWeight=theLargeWeyl.RootSystem[i];
+  { const Vector<Rational>& currentWeight=theLargeWeyl.RootSystem[i];
     bool isInNilradical=false;
     for (int k=0; k<this->selInducing.CardinalitySelection; k++)
       if (!currentWeight[this->selInducing.elements[k]].IsEqualToZero())
@@ -1118,7 +1118,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
     }
   }
   for (int i=0; i<numG2NegGenerators; i++)
-  { Vector<Rational>& currentWeight=theSmallWeyl.RootSystem[i];
+  { const Vector<Rational>& currentWeight=theSmallWeyl.RootSystem[i];
     bool isInNilradical=false;
     for (int k=0; k<this->selSmallParSel.CardinalitySelection; k++)
       if (!currentWeight[this->selSmallParSel.elements[k]].IsEqualToZero())

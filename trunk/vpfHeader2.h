@@ -112,7 +112,7 @@ class Expression
   //However, for the current calculator purposes, no such danger exists.
   public:
   int theData;
-  List<int> children;
+  HashedList<int, MathRoutines::IntUnsignIdentity> children;
   CommandList* theBoss;
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
@@ -129,30 +129,24 @@ class Expression
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
   };
-  void reset(CommandList& newBoss, int newNumChildren=0)
+  void reset(CommandList& newBoss, int numExpectedChildren=0)
   { this->theBoss=&newBoss;
     this->theData=0;
     this->format=this->formatDefault;
-    if (newNumChildren<0)
-      newNumChildren=0;
-    this->children.SetSize(newNumChildren);
-    for (int i=0; i<newNumChildren; i++)
-      this->children[i]=-1;
+    this->children.Clear();
+    this->children.SetExpectedSize(numExpectedChildren);
   }
-  bool AssignChildAtomValue(int childIndex, int theAtom, CommandList& owner);
-  bool AddChildOnTop(const Expression& inputChild)
-  { this->children.SetSize(this->children.size+1);
-    return this->AssignChild(this->children.size-1, inputChild);
-  }
-  bool AddAtomOnTop(const std::string& theOperationString);
-  bool AddAtomOnTop(int theOp)
+  bool AddChildOnTop(const Expression& inputChild);
+  bool AddChildAtomOnTop(const std::string& theOperationString);
+  bool AddChildAtomOnTop(int theOp)
   { this->CheckInitialization();
     Expression tempE;
     tempE.MakeAtom(theOp, *this->theBoss);
     return this->AddChildOnTop(tempE);
   }
-  bool AssignChild(int childIndexInMe, const Expression& inputChild);
-  bool AssignChild(int childIndexInMe, int childIndexInBoss);
+  bool SetChildAtomValue(int childIndex, int TheAtomValue);
+  bool SetChilD(int childIndexInMe, const Expression& inputChild);
+  bool SetChilD(int childIndexInMe, int childIndexInBoss);
   bool AssignMatrixExpressions(const Matrix<Expression>& input, CommandList& owner);
   bool AssignMeMyChild(int childIndex)
   { Expression tempExp=(*this)[childIndex];
@@ -241,26 +235,23 @@ class Expression
   (const theType& inputValue, const Expression& theContext, CommandList& owner)
   { this->reset(owner, 3);
     int theIndex =this->AddObjectReturnIndex(inputValue);
-    Expression tempE;
-    tempE.MakeAtom(this->GetTypeOperation<theType>(), owner);
-    this->AssignChild(0, tempE);
-    this->AssignChild(1, theContext);
-    tempE.MakeAtom(theIndex, owner);
-    this->AssignChild(2, tempE);
-    return true;
+    this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
+    this->AddChildOnTop(theContext);
+    return this->AddChildAtomOnTop(theIndex);
   }
   template <class theType>
-  bool AssignValueToChild(int childIndex, const theType& inputValue, CommandList& owner)
-  { Expression tempE;
-    tempE.AssignValue(inputValue, owner);
-    return this->AssignChild(childIndex, tempE);
+  bool AddChildValueOnTop(const theType& inputValue)
+  { this->CheckInitialization();
+    Expression tempE;
+    tempE.AssignValue(inputValue, *this->theBoss);
+    return this->AddChildOnTop(tempE);
   }
   template <class theType>
   bool AssignValueWithContextToChild
   (int childIndex, const theType& inputValue, const Expression& theContext, CommandList& owner)
   { Expression tempE;
     tempE.AssignValueWithContext(inputValue, theContext, owner);
-    return this->AssignChild(childIndex, tempE);
+    return this->SetChilD(childIndex, tempE);
   }
   bool SetContextAtLeastEqualTo(Expression& inputOutputMinContext);
   int GetNumContextVariables()const;
@@ -343,7 +334,7 @@ class Expression
   (int childIndex, CommandList& owner, int theOp, const Expression& left, const Expression& right)
   { Expression tempE;
     tempE.MakeXOX(owner, theOp, left, right);
-    this->AssignChild(childIndex, tempE);
+    this->SetChilD(childIndex, tempE);
   }
   bool MakeEmptyContext
   (CommandList& owner)
@@ -1366,7 +1357,7 @@ public:
    int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
   { Expression tempE=theExpression;
     if (tempE.IsLisT())
-      tempE.AssignChildAtomValue(0, this->opSequence(), *this);
+      tempE.SetChildAtomValue(0, this->opSequence());
     return this->GetMatrix
     (tempE, outputMat, inputOutputStartingContext, targetNumColsNonMandatory, conversionFunction);
   }
@@ -1384,7 +1375,7 @@ public:
   { Expression tempE=input;
     if (tempE.IsLisT())
     { //std::cout << "<hr>tempE: " << tempE.Lispify();
-      tempE.AssignChildAtomValue(0, this->opSequence(), *this);
+      tempE.SetChildAtomValue(0, this->opSequence());
       //std::cout << "<br>tempE after change: " << tempE.Lispify();
     }
     return this->GetVectoR(tempE, output, inputOutputStartingContext, targetDimNonMandatory, conversionFunction);
@@ -1969,7 +1960,7 @@ bool Serialization::innerStoreMonCollection
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
   for (int i=input.size-1; i>=0; i--)
-  { TemplateMonomial& currentMon=input[i];
+  { const TemplateMonomial& currentMon=input[i];
     bool isNonConst=true;
     if (!Serialization::innerStoreObject
         (theCommands, currentMon, termE, theContext, &isNonConst))

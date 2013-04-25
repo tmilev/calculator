@@ -175,6 +175,9 @@ class HashedListReferences : public HashTemplate<Object, ListReferences<Object>,
   inline bool Contains(const List<Object>& theList)const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(theList);
   }
+  Object& GetElement(int theObjectIndex)const
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetElement(theObjectIndex);
+  }
   int GetIndex(const Object& o) const
   { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndex(o);
   }

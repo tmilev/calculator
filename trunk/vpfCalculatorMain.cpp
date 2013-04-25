@@ -331,6 +331,7 @@ int main(int argc, char **argv)
 )))";*/
 //  civilizedInput="PenkovProjectTest";
 //civilizedInput="GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );   ";
+//civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
 if(civilizedInput=="PenkovProjectTest")
 { civilizedInput="%HideLHS \
 Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \

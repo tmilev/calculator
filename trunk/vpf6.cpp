@@ -866,7 +866,8 @@ Expression Expression::ContextGetPolynomialVariables()const
 
 bool Expression::ContextMergeContexts
 (const Expression& leftContext, const Expression& rightContext, Expression& outputContext)
-{ if (&leftContext==&outputContext || &rightContext==&outputContext)
+{ MacroRegisterFunctionWithName("Expression::ContextMergeContexts");
+  if (&leftContext==&outputContext || &rightContext==&outputContext)
   { Expression leftCopy=leftContext;
     Expression rightCopy=rightContext;
     return Expression::ContextMergeContexts(leftCopy, rightCopy, outputContext);
@@ -894,8 +895,7 @@ bool Expression::ContextMergeContexts
   CommandList& owner=*leftContext.theBoss;
   for (int i=0; i<varUnion.size; i++)
     varUnionIndices[i]=owner.theExpressionContainer.GetIndex(varUnion[i]);
-  outputContext.children.ReservE(5+varUnion.size);
-  outputContext.reset(owner, 1);
+  outputContext.reset(owner, 5+varUnion.size);
   outputContext.AddChildAtomOnTop(owner.opContext());
   if (varUnion.size>0)
   { Expression polyVarsE;

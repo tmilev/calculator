@@ -131,9 +131,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
   SemisimpleLieAlgebra& theSSalg=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
-  std::cout << "<br>Multiplying "
-  << leftCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString()
-  << " * " << output.ToString();
+  std::cout << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
       (*leftUE, outputElt, theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
   { //std::cout << "<br>failed to multiply on the left";

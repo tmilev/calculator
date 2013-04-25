@@ -842,7 +842,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
-   " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}})\n\
+   " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}});\n\
    [g_{22}+g_{20}+g_{14},g_{-14}+g_{-20}+g_{-22}]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -871,7 +871,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
    "Multiplies two coxeter elements if possible. ",
-   "x:=MakeCoxeterElement{}(A_2, 1); x*x", true);
+   "x:=MakeWeylGroupElement{}(A_2, 1); x*x", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
    "Multiplies two semisimple Lie algebra finite dimensinal characters and decomposes using the \

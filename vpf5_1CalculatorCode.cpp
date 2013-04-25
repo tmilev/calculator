@@ -196,10 +196,11 @@ bool CommandList::innerPrintSSsubalgebras
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
-  std::string theTitlePageFileNameNoPath="SemisimpleSubalgebras_"+ownerSS.theWeyl.theDynkinType.ToString();
+  std::string theTitlePageFileNameNoPath=
+  "SemisimpleSubalgebras_"+ownerSS.theWeyl.theDynkinType.ToString() + ".html";
   std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
   out << "<br>Output file: <a href= \"" << displayFolder
-  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
+  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << ".html</a>";
   out << "<script> var reservedCountDownToRefresh = 5; "
   << "setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
   << "= --reservedCountDownToRefresh;}, 1000); </script>";

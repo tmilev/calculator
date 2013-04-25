@@ -362,8 +362,9 @@ bool CommandList::innerGroebner
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
   int upperBoundComputations=(int) upperBound.DoubleValue();
-  output=input;
-  output.children.RemoveIndexShiftDown(1);
+  output.reset(theCommands);
+  for (int i=1; i<input.children.size; i++)
+    output.children.AddOnTop(input.children[i]);
   int theMod;
   if (useModZp)
   { if (!output[1].IsSmallInteger(&theMod))
@@ -627,12 +628,12 @@ void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbed
   Expression tempE;
   for (int i=0; i<this->children.size; i++)
     if (toBeSubbed==(*this)[i])
-      this->AssignChild(i, toBeSubbedWith);
+      this->SetChilD(i, toBeSubbedWith);
     else
     { tempE=(*this)[i];
       tempE.Substitute(toBeSubbed, toBeSubbedWith);
       if (!(tempE==(*this)[i]))
-        this->AssignChild(i, tempE);
+        this->SetChilD(i, tempE);
     }
 }
 
@@ -934,7 +935,7 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
       tempP.SubtractMonomial(tempM, tempCF);
       bool isGood=true;
       for (int k=0; k<tempP.size; k++)
-        if (!(tempP[k][j]==0))
+        if (!(tempP[k](j)==0))
         { isGood=false;
           tempP.AddMonomial(tempM, tempCF);
           break;

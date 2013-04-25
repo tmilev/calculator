@@ -116,7 +116,7 @@ void SemisimpleSubalgebras::AddCandidatesSubalgebra
   bool needToComputeConstants=this->theSubalgebrasNonEmbedded.Contains(tempSA);
   int theIndex=this->theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
   if (needToComputeConstants)
-    this->theSubalgebrasNonEmbedded[theIndex].ComputeChevalleyConstantS(theGlobalVariables);
+    this->theSubalgebrasNonEmbedded.GetElement(theIndex).ComputeChevalleyConstantS(theGlobalVariables);
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
@@ -529,7 +529,7 @@ bool CandidateSSSubalgebra::ComputeSystem
     currentInvolvedNegGens.SetSize(0);
     currentInvolvedPosGens.SetSize(0);
     for (int j=0; j<this->GetAmbientWeyl().RootSystem.size; j++)
-    { Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
+    { const Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
       int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
       int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-currentAmbRoot);
       currentGen.MakeGenerator(*this->owner->owneR, indexCurGen);
@@ -556,7 +556,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
-  SemisimpleLieAlgebra& nonEmbeddedMe=
+  const SemisimpleLieAlgebra& nonEmbeddedMe=
   this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknowns=0;
   if (this->theHs.size==0)
@@ -772,7 +772,7 @@ void CandidateSSSubalgebra::ComputePairingTable
 void CandidateSSSubalgebra::GetTheTwoCones
   (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetTheTwoCones");
-  List<int>& currentFKNilradicalCandidates= this->FKNilradicalCandidates[inputFKIndex];
+  const List<int>& currentFKNilradicalCandidates= this->FKNilradicalCandidates[inputFKIndex];
   outputNilradicalWeights.SetSize(0);
   outputNonFKhws.SetSize(0);
   Vector<Rational> tempV;
@@ -1195,7 +1195,7 @@ bool CandidateSSSubalgebra::ComputeChar
   accumChar=this->theCharFundamentalCoordsRelativeToCartan;
 
   this->theCharFundCoords.MakeZero
-  (&this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe])
+  (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe))
   ;
   while (accumChar.size>0)
   { int currentIndex=
@@ -1213,7 +1213,7 @@ bool CandidateSSSubalgebra::ComputeChar
       if (accumChar[currentIndex].weightFundamentalCoords[i]<0)
         return false;
     freudenthalChar.MakeZero
-    (&this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe]);
+    (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe));
     freudenthalChar.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     this->theCharFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
@@ -1371,7 +1371,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
 }
 
 void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegularSAs
-(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
+(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const
 { std::stringstream out;
   std::string tempS;
   if (useLatex)
@@ -1410,7 +1410,7 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
 
 void slTwoSubalgebra::ElementToHtmlCreateFormulaOutputReference
 (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml,
- SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
+ SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const
 { if (!usePNG)
   { output << formulaTex;
     //if (useHtml)
@@ -1445,8 +1445,7 @@ bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
   return this->hCharacteristic==(right.hCharacteristic);
 }
 
-
-std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)
+std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
 { if (this->container==0)
     return "sl(2) subalgebra not initialized.";
   std::stringstream out;  std::string tempS;
@@ -1593,11 +1592,15 @@ void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
   this->DynkinsEpsilon=0;
 }
 
-bool slTwoSubalgebra::ModuleDecompositionFitsInto(const slTwoSubalgebra& other)
-{ return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+bool slTwoSubalgebra::ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const
+{ return this->ModuleDecompositionFitsInto
+  (this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights,
+   other.multiplicitiesHighestWeights);
 }
 
-bool slTwoSubalgebra::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
+bool slTwoSubalgebra::ModuleDecompositionFitsInto
+(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft,
+ const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
 { for (int i=0; i<highestWeightsLeft.size; i++)
   { int theIndex= highestWeightsRight.GetIndex(highestWeightsLeft[i]);
     if (theIndex==-1)
@@ -1644,7 +1647,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
     (output, i, theGlobalVariables);
   }
   for (int i=0; i<output.size; i++)
-  { slTwoSubalgebra& theSl2= output[i];
+  { slTwoSubalgebra& theSl2= output.GetElement(i);
     theSl2.IndicesMinimalContainingRootSA.ReservE(theSl2.IndicesContainingRootSAs.size);
     theSl2.IndicesMinimalContainingRootSA.size=0;
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
@@ -1801,7 +1804,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         theSl2.MakeReportPrecomputations
         (theGlobalVariables, output, output.size, indexInContainer, *this);
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-        { output[indexIsoSl2].IndicesContainingRootSAs.AddOnTop(indexInContainer);
+        { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexInContainer);
           output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
         } else
         { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
@@ -1859,7 +1862,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic
   return false;
 }
 
-void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
+void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const
 { std::stringstream out;
   for (int i=0; i<this->highestWeights.size; i++)
   { if (this->multiplicitiesHighestWeights[i]>1)
@@ -2102,7 +2105,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << "which the sl(2) has no centralizer</td> </tr>";
 
   for (int i=0; i<this->size; i++)
-  { slTwoSubalgebra& theSl2= (*this)[i];
+  { const slTwoSubalgebra& theSl2= (*this)[i];
     if (useHtml)
       out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"
       << i << "\"title=\"" << tooltipHchar << "\" >";
@@ -2343,7 +2346,7 @@ void rootSubalgebra::ToString
     << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
     for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size; i++)
     { int theSl2index=sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i];
-      slTwoSubalgebra& theSl2 = (*sl2s)[theSl2index];
+      const slTwoSubalgebra& theSl2 = (*sl2s)[theSl2index];
       if (useHtml)
         out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
       out << theSl2.hCharacteristic.ToString() << ", ";
@@ -2610,7 +2613,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (this->owner!=0 && this->theHorbitIndices.size>0)
       if (this->theHorbitIndices[0].size>0)
         if (this->theUnknownPosGens.size>0)
-        { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
+        { const slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
           out << "<br>First positive generator seed realization.<br> "
           << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
           out << "<br>First negative generator seed realization.<br> "

@@ -2037,7 +2037,7 @@ ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output, Semisimple
   ModuleSSalgebra<CoefficientType>* theModPtr=0;
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<this->size; i++)
-  { MonomialGeneralizedVerma<CoefficientType>& currentMon=(*this)[i];
+  { const MonomialGeneralizedVerma<CoefficientType>& currentMon=(*this)[i];
     if (i==0)
       theModPtr=currentMon.owneR;
     if (currentMon.owneR!=theModPtr)
@@ -3098,7 +3098,7 @@ bool CommandList::fFactor
   output.reset(theCommands, theFactors.size+1);
   Expression tempE;
   tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  output.AssignChild(0, tempE);
+  output.AddChildOnTop(tempE);
   for (int i=1; i<=theFactors.size; i++)
     output.AssignValueWithContextToChild(i, theFactors[i], theContext, theCommands);
   std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
@@ -3128,14 +3128,13 @@ bool CommandList::fSqrt
 
 bool Expression::AssignMatrixExpressions
 (const Matrix<Expression>& input, CommandList& owner)
-{ this->reset(owner);
-  this->children.ReservE(input.NumRows+1);
-  this->AddAtomOnTop(owner.opSequence());
+{ this->reset(owner, input.NumRows+1);
+  this->AddChildAtomOnTop(owner.opSequence());
   Expression currentRow;
   for (int i=0; i<input.NumRows; i++)
   { currentRow.reset(owner);
     currentRow.children.ReservE(input.NumCols+1);
-    currentRow.AddAtomOnTop(owner.opSequence());
+    currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
       currentRow.AddChildOnTop(input(i,j));
     this->AddChildOnTop(currentRow);

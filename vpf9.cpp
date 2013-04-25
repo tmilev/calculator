@@ -2162,7 +2162,7 @@ void partFraction::GetNElongationPoly
 }
 
 void partFraction::MakePolynomialFromOneNormal
-(Vector<Rational>& normal, MonomialP& shiftRational, int theMult, Polynomial<Rational>& output)
+(Vector<Rational>& normal, const MonomialP& shiftRational, int theMult, Polynomial<Rational>& output)
 { int theDimension= normal.size;
   output.MakeOne(theDimension);
   if (theMult==1)
@@ -2172,7 +2172,7 @@ void partFraction::MakePolynomialFromOneNormal
   Vector<Rational> shiftRationalVector;
   shiftRationalVector.MakeZero(normal.size);
   for (int i=0; i<normal.size; i++)
-    shiftRationalVector[i]=shiftRational[i];
+    shiftRationalVector[i]=shiftRational(i);
   tempRat=Vector<Rational>::ScalarEuclidean(normal, shiftRationalVector);
   for (int j=0; j<theMult-1; j++)
   { tempP.MakeLinPolyFromRootNoConstantTerm(normal);
@@ -2255,7 +2255,7 @@ unsigned int partFraction::HashFunction() const
   return result;
 }
 
-bool partFraction::operator==(const partFraction& right)
+bool partFraction::operator==(const partFraction& right)const
 { if (this->size!= right.size)
     return false;
   for (int i=0; i<this->size; i++)
@@ -3205,7 +3205,7 @@ void oneFracWithMultiplicitiesAndElongations::init()
 }
 
 void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum
-(Rational& output, Vector<Rational>& theExp, int theDimension)
+(Rational& output, const Vector<Rational>& theExp, int theDimension)
 { output=1;
   std::string tempS;
   Vector<Rational> CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(theDimension);
@@ -3676,7 +3676,7 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
     return false;
   if (this->theCoeffs[0]!=1)
     return false;
-  DynkinSimpleType& theMon=(*this)[0];
+  const DynkinSimpleType& theMon=(*this)[0];
   if (outputtype!=0)
     *outputtype=theMon.theLetter;
   if (outputRank!=0)
@@ -4484,7 +4484,7 @@ void WeylGroup::ComputeRho(bool Recompute)
   //this->ComputeDebugString();
   this->rho.MakeZero(this->CartanSymmetric.NumRows);
   for (int i=0; i<this->RootSystem.size; i++)
-    if (RootSystem[i].IsPositiveOrZero() )
+    if (this->RootSystem[i].IsPositiveOrZero() )
       this->rho+=(RootSystem[i]);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
     this->rho[i].DivideByInteger(2);
@@ -4536,7 +4536,7 @@ void ElementWeylGroup::operator =(const ElementWeylGroup& right)
 { this->::List<int>::operator=(right);
 }
 
-bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
+bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)const
 { if (this->size!=right.size)
     return false;
   for (int i=0; i<this->size; i++)
@@ -5250,7 +5250,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsWRTh
   }
 }
 
-void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
+void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
 { outputW=(input);
   for(bool FoundHigher=true; FoundHigher; )
   { FoundHigher=false;
@@ -5273,11 +5273,11 @@ void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(Vector<Rational>& input, 
   }
 }
 
-void rootSubalgebra::ComputeHighestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputHW)
+void rootSubalgebra::ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW)
 { this->ComputeExtremeWeightInTheSameKMod(input, outputHW, true);
 }
 
-void rootSubalgebra::ComputeLowestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputLW)
+void rootSubalgebra::ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW)
 { this->ComputeExtremeWeightInTheSameKMod(input, outputLW, false);
 }
 
@@ -5609,7 +5609,7 @@ void rootSubalgebra::ComputeKModules()
   this->LowestWeightsGmodK.ReservE(AllRoots.size);
   this->HighestWeightsGmodK.ReservE(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
-  { if (this->AllRootsK.GetIndex(AllRoots[i])==-1)
+    if (this->AllRootsK.GetIndex(AllRoots[i])==-1)
     { this->ComputeLowestWeightInTheSameKMod(AllRoots[i], tempLW);
       this->ComputeHighestWeightInTheSameKMod(AllRoots[i], tempHW);
       int x=this->LowestWeightsGmodK.GetIndex(tempLW);
@@ -5623,8 +5623,7 @@ void rootSubalgebra::ComputeKModules()
       this->kModules[x].AddOnTop(AllRoots[i]);
       if (AllRoots[i]==(tempHW))
         this->kModules[x].SwapTwoIndices(0, this->kModules[x].size-1);
-    }
-    else
+    } else
     { if (AllRoots[i].IsPositiveOrZero())
       { Vector<Rational> tempHW;
         this->ComputeHighestWeightInTheSameKMod(AllRoots[i], tempHW);
@@ -5637,7 +5636,6 @@ void rootSubalgebra::ComputeKModules()
         this->PosRootsKConnectedComponents[x].AddOnTop(AllRoots[i]);
       }
     }
-  }
 }
 
 int rootSubalgebra::NumRootsInNilradical()

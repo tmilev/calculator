@@ -566,10 +566,11 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    <br>Outcome 1. While processing the polynomial system, the limit of computations was \
    hit and the computation was aborted (i.e., the system was too large). \
    No information on the system can be given (except that it is large).\
-   <br>Outcome 2. The system was proven to be non-contradictory (a solution over the complex numbers \
+   <br>Outcome 2. The system was proven to be contradictory (no solution exists).\
+   <br>Outcome 3. The system was proven to be non-contradictory (a solution over the complex numbers \
    was proven to exist by proving that a corresponding reduced Groebner basis is not equal to {1}). However, no\
    solution over the rationals was found.\
-   <br>Outcome 3. The system has a solution over the rationals. A solution is given.\
+   <br>Outcome 4. The system has a solution over the rationals. A solution is given.\
    ",
    "SolveSerreLikePolynomialSystem{}(\
    x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \

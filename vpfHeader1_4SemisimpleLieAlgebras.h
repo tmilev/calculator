@@ -55,21 +55,26 @@ public:
     }
     return *this->owneR;
   }
-  std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToString(FormatExpressions* theFormat=0)const;
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
   void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
-  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
+  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const;
+  void ElementToStringModuleDecompositionMinimalContainingRegularSAs
+  (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
   void ComputeModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
-  bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other);
-  static bool ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
+  bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
+  static bool ModuleDecompositionFitsInto
+  (const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft,
+   const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
   void ElementToHtml(std::string& filePath);
-  void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
+  void ElementToHtmlCreateFormulaOutputReference
+  (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml,
+   SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
   void operator=(const slTwoSubalgebra& right)
   { this->highestWeights=right.highestWeights;
     this->multiplicitiesHighestWeights=right.multiplicitiesHighestWeights;

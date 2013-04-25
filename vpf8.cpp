@@ -117,9 +117,9 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
   projectivizedChamberFinal.Refine(theGlobalVariables);
   out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ToString(false, false);
   for (int i=0; i<projectivizedChamberFinal.size; i++)
-  { Cone& currentCone=projectivizedChamberFinal[i];
+  { const Cone& currentCone=projectivizedChamberFinal[i];
     bool isNonDominant=false;
-    for (int j=0; j< this->PreimageWeylChamberSmallerAlgebra.Normals.size; j++)
+    for (int j=0; j<this->PreimageWeylChamberSmallerAlgebra.Normals.size; j++)
       if (currentCone.GetInternalPoint().ScalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).IsNegative())
       { isNonDominant=true;
         break;
@@ -145,7 +145,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 }
 
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-  (ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
+  (const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
   output.MakeZero(this->theRange());
   for (int i=0; i<input.size; i++)
@@ -173,7 +173,7 @@ Vector<Rational> ReflectionSubgroupWeylGroup::GetRho()
 }
 
 void ReflectionSubgroupWeylGroup::GetMatrixOfElement
-(ElementWeylGroup& input, Matrix<Rational> & outputMatrix)
+(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
@@ -268,9 +268,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.ToString() << "\n\n\n\n\n\n";
   this->log << theSubgroup.ElementToStringBruhatGraph();
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic (" << theSubgroup.size << " elements):\n";
-
   for (int i=0; i<theSubgroup.size; i++)
-  { Matrix<Rational> & currentLinearOperator=this->theLinearOperators[i];
+  { Matrix<Rational>& currentLinearOperator=this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat);
@@ -423,7 +422,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   //theGlobalVariables.MakeReport();
 }
 
-void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix)
+void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const
 { assert(theIndex<this->size);
   this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
 }
@@ -446,7 +445,7 @@ bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
   (&selectedRoots, &tempRootsCol, &theGlobalVariables, UpperLimitNumElements, true);
 }
 
-void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix)
+void WeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
 { Vector<Rational> tempRoot;
   int theDim=this->CartanSymmetric.NumRows;
   outputMatrix.init(theDim, theDim);
@@ -713,7 +712,7 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
 
 bool Cone::GetLatticePointsInCone
 (Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
- Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)
+ Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)const
 { if (upperBoundPointsInEachDim<=0)
     upperBoundPointsInEachDim=5;
   Vector<Rational> theActualShift=theShift;
@@ -924,12 +923,12 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
 { std::stringstream out;
   FormatExpressions theFormat;
   for (int i=0; i<this->theProjectivizedComplex.size; i++)
-  { Cone& currentCone= this->theProjectivizedComplex[i];
+  { const Cone& currentCone= this->theProjectivizedComplex[i];
     QuasiPolynomial& currentQP=this->theQPs[i];
     out << "Chamber number " << i+1;
     if (useHtml)
       out << "<br>";
-    out << currentCone.ToString(false, true, true, true, theFormat);
+    out << currentCone.ToString(&theFormat);
     if (useHtml)
       out << "<br>";
     out << "quasipolynomial: ";
@@ -1038,11 +1037,11 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
         std::cout << "<hr>Error!!! Failed on chamber " << theIndex+1 << " and " << i+1;
         std::cout << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
         std::cout << "<br>Chamber " << theIndex+1 << ": "
-        << this->theProjectivizedComplex[theIndex].ToString(false, true, true, true, tempFormat);
+        << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
         std::cout << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
         std::cout << "<br>value: " << result.ToString();
         std::cout << "<br><br>Chamber " << i+1 << ": "
-        << this->theProjectivizedComplex[i].ToString(false, true, true, true, tempFormat);
+        << this->theProjectivizedComplex[i].ToString(&tempFormat);
         std::cout << "<br>QP: " << this->theQPs[i].ToString(true, false);
         std::cout << "<br>value: " << altResult.ToString();
         if (firstFail)
@@ -1203,7 +1202,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   (tempMat, theGlobalVariables)
   ;
 //  std::cout << "<br> after the basis change: " << smallWeylChamber.ToString(false, true, theFormat);
-  out << "<br> The small Weyl chamber: " << smallWeylChamber.ToString(false, true, theFormat);
+  out << "<br> The small Weyl chamber: " << smallWeylChamber.ToString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged= -translationsProjectedFinal[0];
 //  std::cout << highestWeightSmallAlgBasisChanged.ToString();
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=100;
@@ -1773,7 +1772,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep5
   { this->finalMaximaChambers[i].SetSize(this->complexRefinedPerRepresentative[i].size);
     this->theFinalRepresentatives[i].SetSize(this->complexRefinedPerRepresentative[i].size);
     for(int j=0; j<1; j++)//this->complexRefinedPerRepresentative[i].size; j++)
-    { Cone& currentCone=this->complexRefinedPerRepresentative[i][j];
+    { const Cone& currentCone=this->complexRefinedPerRepresentative[i][j];
       this->finalMaximaChambers[i][j].init();
       this->finalMaximaChambers[i][j]
       .findMaxLFOverConeProjective
@@ -1942,7 +1941,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
         (exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]);
     }
-    std::cout << "<hr><hr><hr>" << currentCone.ToString(false, true, theFormat);
+    std::cout << "<hr><hr><hr>" << currentCone.ToString(&theFormat);
     std::cout << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
     std::cout << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
     std::cout << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString() << "<br>exitNormalsShiftedAffineProjected";
@@ -2134,10 +2133,12 @@ bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVa
 }
 
 bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition
-(Cone& newCone, GlobalVariables& theGlobalVariables)
-{ newCone.Normals.QuickSortAscending();
-  this->ConvexHull.MakeConvexHullOfMeAnd(newCone, theGlobalVariables);
-  return this->AddOnTopNoRepetition(newCone);
+(const Cone& newCone, GlobalVariables& theGlobalVariables)
+{ Cone theConeSorted;
+  theConeSorted=newCone;
+  theConeSorted.Normals.QuickSortAscending();
+  this->ConvexHull.MakeConvexHullOfMeAnd(theConeSorted, theGlobalVariables);
+  return this->AddOnTopNoRepetition(theConeSorted);
 }
 
 void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
@@ -2490,8 +2491,13 @@ void ConeComplex::initFromCones
     }
 }
 
-std::string Cone::ToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, FormatExpressions& theFormat)
+std::string Cone::ToString
+(FormatExpressions* theFormat)const
 { std::stringstream out;
+  bool PrepareMathReport= theFormat==0 ? false: theFormat->flagUseLatex;
+  bool useHtml= theFormat==0 ? false: theFormat->flagUseHTML;
+  bool useLatex= theFormat==0 ? false: theFormat->flagUseLatex;
+  bool lastVarIsConstant=false;
   if (this->flagIsTheZeroCone)
     out << "The cone is the zero cone.";
   else if(this->Normals.size==0)
@@ -2509,7 +2515,10 @@ std::string Cone::ToString(bool useLatex, bool useHtml, bool PrepareMathReport, 
     out << "<br>";
   if (useLatex)
     out << "\\[";
-  out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml, lastVarIsConstant, theFormat);
+  FormatExpressions tempF;
+  if (theFormat==0)
+    theFormat=&tempF;
+  out << this->Normals.ElementsToInequalitiesString(useLatex, useHtml, lastVarIsConstant, *theFormat);
   if (useLatex)
     out << "\\]";
   out << "\nProjectivized Vertices: " << this->Vertices.ToString();
@@ -2544,7 +2553,7 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
     out << "\n\n\nChamber " << i+1 << ":\n";
     if (useHtml)
       out << "<br>";
-    out << this->TheObjects[i].ToString(useLatex, useHtml, theFormat) << "\n\n\n";
+    out << this->TheObjects[i].ToString(&theFormat) << "\n\n\n";
   }
   return out.str();
 }
@@ -2610,14 +2619,14 @@ void RationalFunctionOld::GetRelations
 }
 
 bool ConeComplex::findMaxLFOverConeProjective
-  (Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  (const Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> HyperPlanesCorrespondingToLF;
   if (input.Normals.size<1 || inputLinPolys.size<1)
     return false;
-  int theDim=input.Normals.TheObjects[0].size;
+  int theDim=input.Normals[0].size;
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
   for (int i=0; i<inputLinPolys.size; i++)
-  { Polynomial<Rational> & currentPoly=inputLinPolys.TheObjects[i];
+  { Polynomial<Rational>& currentPoly=inputLinPolys[i];
     if (currentPoly.TotalDegree()!=1 )
     { std::cout << "You messed up the total degree which must be one, instead it is "
       << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
@@ -2627,7 +2636,7 @@ bool ConeComplex::findMaxLFOverConeProjective
     newWall.MakeZero(theDim);
     for (int j=0; j<currentPoly.size; j++)
       for (int k=0; k<theDim; k++)
-        if (currentPoly[j][k]==1)
+        if (currentPoly[j](k)==1)
         { newWall[k]=currentPoly.theCoeffs[j];
           break;
         }
@@ -2637,7 +2646,7 @@ bool ConeComplex::findMaxLFOverConeProjective
 }
 
 bool ConeComplex::findMaxLFOverConeProjective
-  (Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
+  (const Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
    List<int>& outputMaximumOverEeachSubChamber,
    GlobalVariables& theGlobalVariables)
 { this->init();
@@ -3222,7 +3231,7 @@ void partFraction::GetRootsFromDenominator
 }
 
 void partFraction::ComputePolyCorrespondingToOneMonomial
-  (QuasiPolynomial& outputQP, MonomialP& theMon, Vectors<Rational>& normals,
+  (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { Polynomial<Rational> tempP, outputPolyPart;
   Rational tempRat2;
@@ -4419,16 +4428,16 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
 }
 
 std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
-  (FormatExpressions& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
+  (FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables)
 { std::stringstream out1;
   std::string tempS1, tempS2;
   Vector<Rational> normalNoConstant;
-  int dimSmallerAlgebra=this->theLinearOperators.TheObjects[0].NumRows;
-  int dimLargerAlgebra=this->theLinearOperators.TheObjects[0].NumCols;
+  int dimSmallerAlgebra=this->theLinearOperators[0].NumRows;
+  int dimLargerAlgebra=this->theLinearOperators[0].NumCols;
   Rational theConst;
   out1 << "\\begin{tabular}{rcl}";
   for (int i=0; i<theCone.Normals.size; i++)
-  { Vector<Rational>& currentNormal=theCone.Normals.TheObjects[i];
+  { Vector<Rational>& currentNormal=theCone.Normals[i];
     normalNoConstant=currentNormal;
     normalNoConstant.SetSize(dimSmallerAlgebra+dimLargerAlgebra);
     theConst=-(*currentNormal.LastObject());
@@ -4776,7 +4785,7 @@ std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
 
 std::string ConeLatticeAndShift::ToString(FormatExpressions& theFormat)
 { std::stringstream out;
-  out << this->theProjectivizedCone.ToString(false, true, true, true, theFormat);
+  out << this->theProjectivizedCone.ToString(&theFormat);
   out << "<br>Shift+lattice: " << this->theShift.ToString() << " + " << this->theLattice.ToString();
   return out.str();
 }
@@ -5559,7 +5568,7 @@ bool ConeComplex::DrawMeProjective
 
 bool Cone::DrawMeLastCoordAffine
 (bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat,
- int ChamberWallColor)
+ int ChamberWallColor)const
 { Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
   Vectors<Rational> VerticesScaled;
@@ -5626,12 +5635,13 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
     out << "<br>The cone does not lie in the upper half-space. ";
   else
     out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
-  out << "<br>" << this->ToString(false, true, true, true, theFormat);
+  out << "<br>" << this->ToString(&theFormat);
   return out.str();
 }
 
 bool Cone::DrawMeProjective
-(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
+(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars,
+ DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)const
 { Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
   if (coordCenterTranslation==0)
@@ -5677,14 +5687,15 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
     return "The cone is the entire space.";
   std::stringstream out;
   if (this->Vertices.size<1)
-  { out << "There has been a programming error. The cone is empty.<br>" << this->ToString(false, true, true, false, theFormat);
+  { out << "There has been a programming error. The cone is empty.<br>"
+    << this->ToString(&theFormat);
     return out.str();
   }
   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
   this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() ,0);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
-  out << "<br>" << this->ToString(false, true, true, false, theFormat);
+  out << "<br>" << this->ToString(&theFormat);
   return out.str();
 }
 
@@ -6733,7 +6744,7 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
 }
 
 std::string ElementWeylGroup::ToString
-  (int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)
+  (int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
 { if (this->size==0)
     return "id";
   std::string simpleRootLetter= theFormat==0 ? "\\eta" : theFormat->simpleRootLetter;

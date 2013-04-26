@@ -2967,7 +2967,7 @@ void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& the
 { Polynomial<CoefficientType> theLagrangeInterpolator, tempP;
   this->MakeZero();
   for (int i=0; i<thePoints.size; i++)
-  { theLagrangeInterpolator.MakeConsT(1, 1);
+  { theLagrangeInterpolator.MakeConst(1, 1);
     for (int j=0; j<thePoints.size; j++)
       if (i!=j)
       { tempP.MakeDegreeOne(1, 0, 1, -thePoints[j]);

@@ -5229,7 +5229,7 @@ public:
     output+=other;
     return output;
   }
-  void MakeConsT(const CoefficientType& coeff)
+  void MakeConst(const CoefficientType& coeff)
   { TemplateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, coeff);
@@ -5329,7 +5329,7 @@ class ElementMonomialAlgebra: public MonomialCollection<TemplateMonomial, Coeffi
   { if (d==1)
       return;
     ElementMonomialAlgebra<TemplateMonomial, CoefficientType> theOne;
-    theOne.MakeConsT(1);
+    theOne.MakeConst(1);
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
 };
@@ -5340,7 +5340,7 @@ class Polynomial: public ElementMonomialAlgebra<MonomialP, CoefficientType>
 public:
   friend std::iostream& operator << <CoefficientType>(std::iostream& output, const Polynomial<CoefficientType>& input);
   Polynomial(int x)
-  { this->MakeConsT(x, 0);
+  { this->MakeConst(x, 0);
   }
   Polynomial(){}
   Polynomial(const Polynomial<CoefficientType>& other)
@@ -5415,7 +5415,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     this->GetConstantTerm(result, 0);
     return result;
   }
-  void MakeConsT(const CoefficientType& theConst, int ExpectedNumVars=0)
+  void MakeConst(const CoefficientType& theConst, int ExpectedNumVars=0)
   {// int commentGrandMasterChecksWhenDone=-1;
     //this->GrandMasterConsistencyCheck();
     this->MakeZero();
@@ -5660,7 +5660,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   { this->::MonomialCollection<MonomialP, CoefficientType>::operator=(other);
   }
   void operator=(const CoefficientType& other)
-  { this->MakeConsT(other);
+  { this->MakeConst(other);
   }
   void operator=(int other)
   { CoefficientType tempCF;
@@ -5846,6 +5846,39 @@ class GroebnerBasisComputation
   MemorySaving<Polynomial<CoefficientType> > startingPoly;
   MemorySaving<List<CoefficientType> > systemSolution;
 
+  void operator=(GroebnerBasisComputation<CoefficientType>& other)
+  { this->theMonOrdeR=other.theMonOrdeR;
+    this->SoPolyBuf=other.SoPolyBuf;
+    this->remainderDivision=other.remainderDivision;
+    this->bufPoly=other.bufPoly;
+    this->bufPolyForGaussianElimination=other.bufPolyForGaussianElimination;
+    this->SoPolyLeftShift=other.SoPolyLeftShift;
+    this->SoPolyRightShift=other.SoPolyRightShift;
+    this->bufferMoN1=other.bufferMoN1;
+    this->theBasiS=other.theBasiS;
+    this->basisCandidates=other.basisCandidates;
+    this->leadingMons=other.leadingMons;
+    this->leadingCoeffs=other.leadingCoeffs;
+    this->NumberOfComputations=other.NumberOfComputations;
+    this->MaxNumComputations=other.MaxNumComputations;
+    this->RecursionCounterSerreLikeSystem=other.RecursionCounterSerreLikeSystem;
+    this->flagBasisGuaranteedToGenerateIdeal=other.flagBasisGuaranteedToGenerateIdeal;
+    this->flagDoProgressReport=other.flagDoProgressReport;
+    this->flagDoSortBasis=other.flagDoSortBasis;
+    this->flagDoLogDivision=other.flagDoLogDivision;
+    this->flagSystemProvenToHaveNoSolution=other.flagSystemProvenToHaveNoSolution;
+    this->flagSystemProvenToHaveSolution=other.flagSystemProvenToHaveSolution;
+    this->flagSystemSolvedOverBaseField=other.flagSystemSolvedOverBaseField;
+    this->intermediateRemainders=other.intermediateRemainders;
+    this->intermediateHighlightedMons=other.intermediateHighlightedMons;
+    this->intermediateHighestMonDivHighestMon=other.intermediateHighestMonDivHighestMon;
+    this->intermediateCoeffs=other.intermediateCoeffs;
+    this->intermediateSubtractands=other.intermediateSubtractands;
+    this->intermediateSelectedDivisors=other.intermediateSelectedDivisors;
+    this->startingPoly=other.startingPoly;
+    this->systemSolution=other.systemSolution;
+  }
+
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
    const std::string& extraStyle, const std::string& extraHighlightStyle, FormatExpressions* theFormat=0,
@@ -5878,6 +5911,7 @@ class GroebnerBasisComputation
  bool HasImpliedSubstitutions
  (List<Polynomial<CoefficientType> >& inputSystem, PolynomialSubstitution<CoefficientType>& outputSub)
  ;
+ int GetPreferredSerreSystemSubIndex();
  void SolveSerreLikeSystemRecursively
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
  ;
@@ -5977,7 +6011,7 @@ public:
   }
   RationalFunctionOld GetOne()const
   { RationalFunctionOld tempRat;
-    tempRat.MakeConsT(1, this->context);
+    tempRat.MakeConst(1, this->context);
     return tempRat;
   }
   RationalFunctionOld GetZero()const
@@ -6042,10 +6076,10 @@ public:
   { return input.HashFunction();
   }
   inline void operator=(int other)
-  { this->MakeConsT(other, 0);
+  { this->MakeConst(other, 0);
   }
   inline void operator=(const Rational& other)
-  { this->MakeConsT(other, 0);
+  { this->MakeConst(other, 0);
   }
   void operator=(const RationalFunctionOld& other);
   bool checkConsistency()const;
@@ -6060,7 +6094,7 @@ public:
 ;
   void GetNumerator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
-    { case RationalFunctionOld::typeRational: output.MakeConsT(this->ratValue); return;
+    { case RationalFunctionOld::typeRational: output.MakeConst(this->ratValue); return;
       default: output=this->Numerator.GetElementConst(); return;
     }
   }
@@ -6080,7 +6114,7 @@ public:
       }
       output=this->Denominator.GetElementConst();
       return;
-      default: output.MakeConsT((Rational) 1); return;
+      default: output.MakeConst((Rational) 1); return;
     }
   }
   void ClearDenominators
@@ -6108,7 +6142,7 @@ public:
   void SimplifyLeadingCoefficientOnly();
   void operator+=(int theConstant)
   { RationalFunctionOld tempRF;
-    tempRF.MakeConsT((Rational) theConstant, this->context);
+    tempRF.MakeConst((Rational) theConstant, this->context);
     (*this)+=tempRF;
   }
   void operator*=(const RationalFunctionOld& other);
@@ -6149,7 +6183,7 @@ public:
   inline void TimesConstant(const Rational& theConst){ this->operator*=(theConst);}
   void Invert();
   void MakeOne(GlobalVariables* theContext)
-  { this->MakeConsT(1, theContext);
+  { this->MakeConst(1, theContext);
   }
   void MakeZero(GlobalVariables* theContext=0)
   { this->expressionType=this->typeRational;
@@ -6160,7 +6194,7 @@ public:
     this->Denominator.FreeMemory();
     assert(this->checkConsistency());
   }
-  void MakeConsT(const Rational& theCoeff, GlobalVariables* theContext)
+  void MakeConst(const Rational& theCoeff, GlobalVariables* theContext)
   { this->MakeZero(theContext);
     this->ratValue=theCoeff;
   }
@@ -6213,7 +6247,7 @@ public:
   inline void operator-=(const Rational& other)
   { assert(this->checkConsistency());
     RationalFunctionOld tempRF;
-    tempRF.MakeConsT(other, this->context);
+    tempRF.MakeConst(other, this->context);
     tempRF.Minus();
     this->operator+=(tempRF);
     assert(this->checkConsistency());
@@ -6231,7 +6265,7 @@ public:
   }
   inline void operator/=(int other)
   { RationalFunctionOld tempRF;
-    tempRF.MakeConsT(other, this->context);
+    tempRF.MakeConst(other, this->context);
     *this/=tempRF;
   }
   inline void operator/=(const Polynomial<Rational>& other)
@@ -6257,7 +6291,7 @@ bool MonomialP::SubstitutioN
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  output.MakeConsT(1);
+  output.MakeConst(1);
   if (this->IsAConstant())
     return true;
   Polynomial<Element> tempPoly;
@@ -6947,7 +6981,7 @@ bool Polynomial<CoefficientType>::SubstitutioN
 
 template <class Element>
 void Polynomial<Element>::MakeOne(int ExpectedNumVars)
-{ this->MakeConsT(1, ExpectedNumVars);
+{ this->MakeConst(1, ExpectedNumVars);
 }
 
 template <class Element>
@@ -10020,7 +10054,7 @@ bool GroebnerBasisComputation<CoefficientType>::AddRemainderToBasis
     this->leadingMons.SetSize(this->theBasiS.size);
     this->leadingCoeffs.SetSize(this->theBasiS.size);
     for (int i=theBasiS.size-1; i>=0; i--)
-    { bool shouldAddHere=(i==0) ? true: this->remainderDivision.size>this->theBasiS[i-1].size;
+    { bool shouldAddHere=(i==0) ? true: theNewLeadingMon>this->theBasiS[i-1].GetMaxMonomial(this->theMonOrdeR);
       if (shouldAddHere)
       { this->theBasiS[i]=this->remainderDivision;
         this->leadingMons[i]=theNewLeadingMon;

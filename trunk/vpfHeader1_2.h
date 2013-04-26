@@ -6020,7 +6020,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByGeneratorPow
 { if (thePower==0)
     return;
   Polynomial<Rational> tempP;
-  tempP.MakeConsT(thePower);
+  tempP.MakeConst(thePower);
   this->MultiplyByGeneratorPowerOnTheRight(theGeneratorIndex, tempP);
 }
 

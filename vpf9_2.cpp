@@ -1905,11 +1905,11 @@ bool RationalFunctionOld::ConvertToType(int theType)
     return true;
   if (this->expressionType==this->typeRational && this->expressionType<theType)
   { this->expressionType=this->typePoly;
-    this->Numerator.GetElement().MakeConsT(this->ratValue);
+    this->Numerator.GetElement().MakeConst(this->ratValue);
   }
   if (this->expressionType==this->typePoly && this->expressionType<theType)
   { this->expressionType=this->typeRationalFunction;
-    this->Denominator.GetElement().MakeConsT(1);
+    this->Denominator.GetElement().MakeConst(1);
   }
   return true;
 }
@@ -2654,12 +2654,12 @@ void RationalFunctionOld::ClearDenominators
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
       this->ratValue.GetDenominator(tempRat);
-      outputWasMultipliedBy.MakeConsT(tempRat, this->context);
+      outputWasMultipliedBy.MakeConst(tempRat, this->context);
       this->ratValue*=tempRat;
     break;
     case RationalFunctionOld::typePoly:
       this->Numerator.GetElement().ClearDenominators(tempRat);
-      outputWasMultipliedBy.MakeConsT(tempRat, this->context);
+      outputWasMultipliedBy.MakeConst(tempRat, this->context);
     break;
     case RationalFunctionOld::typeRationalFunction:
       RationalFunctionOld tempRF;

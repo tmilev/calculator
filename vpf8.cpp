@@ -333,7 +333,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   { Matrix<Rational> & currentLoExt=this->theLinearOperatorsExtended[i];
     for (int j=0; j<currentLoExt.NumRows; j++)
       for (int k=0; k<currentLoExt.NumCols; k++)
-        tempMatPoly.elements[j][k].MakeConsT(currentLoExt.elements[j][k], tempVect.size);
+        tempMatPoly.elements[j][k].MakeConst(currentLoExt.elements[j][k], tempVect.size);
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j=0; j<tempVect2.size; j++)
       tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];

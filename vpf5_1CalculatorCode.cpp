@@ -200,7 +200,7 @@ bool CommandList::innerPrintSSsubalgebras
   "SemisimpleSubalgebras_"+ownerSS.theWeyl.theDynkinType.ToString() + ".html";
   std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
   out << "<br>Output file: <a href= \"" << displayFolder
-  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << ".html</a>";
+  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
   out << "<script> var reservedCountDownToRefresh = 5; "
   << "setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
@@ -427,7 +427,7 @@ bool CommandList::innerGroebner
   for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
   { out << theContext.ContextGetContextVariable(i).ToString();
     if (i!=theContext.ContextGetNumContextVariables()-1)
-      out << ", ";
+      out << (useRevLex ? "&gt;": "&lt;");
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for(int i=0; i<inputVector.size; i++)
@@ -957,6 +957,15 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
 }
 
 template <class CoefficientType>
+int GroebnerBasisComputation<CoefficientType>::GetPreferredSerreSystemSubIndex()
+{ const MonomialP& theMon=this->theBasiS[0].GetMaxMonomial(this->theMonOrdeR);
+  for (int i=0; i<theMon.GetMinNumVars(); i++)
+    if (theMon(i)>0)
+      return i;
+  return -1;
+}
+
+template <class CoefficientType>
 void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
 { RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
@@ -964,12 +973,6 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   PolynomialSubstitution<CoefficientType> theSub;
   while (changed)
   { bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
-    if (inputSystem.size==1)
-      if (inputSystem[0].IsEqualToOne())
-      { this->flagSystemProvenToHaveNoSolution=true;
-        this->flagSystemSolvedOverBaseField=false;
-        return;
-      }
     if (success)
       this->flagSystemProvenToHaveSolution=true;
     std::cout << "<hr>input system: " << inputSystem.ToString();
@@ -982,8 +985,47 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   }
   if (inputSystem.size==0)
   { this->flagSystemProvenToHaveNoSolution=false;
+    this->flagSystemProvenToHaveSolution=true;
     this->flagSystemSolvedOverBaseField=true;
+    return;
   }
+  if (inputSystem.size==1)
+    if (inputSystem[0].IsEqualToOne())
+    { this->flagSystemProvenToHaveNoSolution=true;
+      this->flagSystemProvenToHaveSolution=false;
+      this->flagSystemSolvedOverBaseField=false;
+      return;
+    }
+  GroebnerBasisComputation newComputation;
+  List<Polynomial<CoefficientType> > oldSystem=inputSystem;
+  int theVarIndex=this->GetPreferredSerreSystemSubIndex();
+  theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
+  theSub[theVarIndex]=0;
+  oldSystem[theVarIndex]=0;
+  for (int i=0; i<inputSystem.size; i++)
+    inputSystem[i].SubstitutioN(theSub);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
+  if (newComputation.flagSystemSolvedOverBaseField)
+  { *this=newComputation;
+     return;
+  }
+  if (newComputation.flagSystemProvenToHaveSolution)
+    this->flagSystemProvenToHaveNoSolution=true;
+  inputSystem=oldSystem;
+  newComputation.flagSystemProvenToHaveNoSolution=false;
+  newComputation.flagSystemProvenToHaveSolution=false;
+  theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
+  theSub[theVarIndex]=1;
+  for (int i=0; i<inputSystem.size; i++)
+    inputSystem[i].SubstitutioN(theSub);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
+  if (newComputation.flagSystemSolvedOverBaseField)
+  { *this=newComputation;
+    return;
+  }
+  if (newComputation.flagSystemProvenToHaveSolution)
+    this->flagSystemProvenToHaveNoSolution=true;
+  inputSystem=oldSystem;
 }
 
 template <class CoefficientType>
@@ -1030,9 +1072,8 @@ bool CommandList::innerSolveSerreLikeSystem
         out << "<br>" << tempP.ToString(&theFormat) << " = " << theComputation.systemSolution.GetElement()[i];
       }
     } else
-    { out << "<br>I was unable to find an actual solution over the base field (however, "
+      out << "<br>I was unable to find an actual solution over the base field (however, "
       << "I have not proved or disproved its existence).";
-    }
   }
   return output.AssignValue(out.str(), theCommands);
 }

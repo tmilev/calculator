@@ -535,7 +535,7 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { Polynomial<Rational> resultP;
-    resultP.MakeConsT(this->GetValuE<Rational>());
+    resultP.MakeConst(this->GetValuE<Rational>());
     return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
@@ -569,7 +569,7 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { RationalFunctionOld resultRF;
-    resultRF.MakeConsT(this->GetValuE<Rational>(), this->theBoss->theGlobalVariableS);
+    resultRF.MakeConst(this->GetValuE<Rational>(), this->theBoss->theGlobalVariableS);
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())

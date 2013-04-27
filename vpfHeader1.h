@@ -5845,7 +5845,12 @@ class GroebnerBasisComputation
   MemorySaving<List<int> > intermediateSelectedDivisors;
   MemorySaving<Polynomial<CoefficientType> > startingPoly;
   MemorySaving<List<CoefficientType> > systemSolution;
+  MemorySaving<Selection> solutionsFound;
 
+  void SetSerreLikeSolutionIndex(int theIndex, const CoefficientType& theConst)
+  ;
+  void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<CoefficientType>& outputSub)
+  ;
   void operator=(GroebnerBasisComputation<CoefficientType>& other)
   { this->theMonOrdeR=other.theMonOrdeR;
     this->SoPolyBuf=other.SoPolyBuf;
@@ -5877,7 +5882,11 @@ class GroebnerBasisComputation
     this->intermediateSelectedDivisors=other.intermediateSelectedDivisors;
     this->startingPoly=other.startingPoly;
     this->systemSolution=other.systemSolution;
+    this->solutionsFound=other.solutionsFound;
   }
+  std::string ToStringSerreLikeSolution
+  (FormatExpressions* theFormat=0)
+  ;
 
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,

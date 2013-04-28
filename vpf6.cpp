@@ -1558,7 +1558,8 @@ bool CommandList::AllowsPlusInPreceding(const std::string& lookAhead)
     lookAhead==")" || lookAhead==";" ||
     lookAhead=="]" || lookAhead=="}" ||
     lookAhead==":" || lookAhead=="," ||
-    lookAhead=="EndProgram"
+    lookAhead=="EndProgram" ||
+    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
     ;
 }
 
@@ -1648,7 +1649,10 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(1);
   if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!="}" && lastS!=" ")
     return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
-
+  if (secondToLastS=="\\left" && lastS == "(")
+    return this->ReplaceXYByY();
+  if (secondToLastS=="\\right" && lastS == ")")
+    return this->ReplaceXYByY();
   if (lastS=="=" && secondToLastS=="=")
     return this->ReplaceXXByCon(this->conEqualEqual());
   if (lastS=="Integer" && secondToLastS=="Integer")
@@ -1709,6 +1713,10 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceEOEXByEX();
+  if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
+  //else
+  //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" &&
@@ -1744,22 +1752,24 @@ bool CommandList::ApplyOneRule()
     else
       return this->PopTopSyntacticStack();
   }
-  if (secondToLastS=="Expression" && lastS=="&")
-    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXBySequenceX(this->conSequenceMatrixRow(), Expression::formatMatrix);
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
     return this->ReplaceYXdotsXBySequenceYXdotsX(this->conMatrixRow(), Expression::formatMatrixRow, 1);
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequenceMatrixRow(), Expression::formatMatrix);
+  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
+  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
+  if (secondToLastS=="Expression" && lastS=="&")
+    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
+  if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
+    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
+  if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
+    return this->ReplaceYXBySequenceX(this->conSequenceMatrixRow(), Expression::formatMatrix);
   if (thirdToLastS=="MatrixSeparator" && secondToLastS=="SequenceMatrixRows" && lastS=="MatrixSeparator")
     return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
+  if (secondToLastS=="MatrixRowSeparator" && lastS == "MatrixSeparator")
+    return this->ReplaceXYByY();
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
   if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) &&
@@ -3655,6 +3665,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("MatrixSeparator");
   this->controlSequences.AddOnTop("MatrixRowSeparator");
   this->controlSequences.AddOnTop("\\begin");
+  this->controlSequences.AddOnTop("\\left");
+  this->controlSequences.AddOnTop("\\right");
   this->controlSequences.AddOnTop("array");
   this->controlSequences.AddOnTop("\\end");
   this->controlSequences.AddOnTop("\\\\");
@@ -5046,8 +5058,7 @@ std::string Expression::ToString
     else
       out << "(" << firstE << ")";
     out << "^{" << secondE << "}";
-  }
-  else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
+  } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
@@ -5098,7 +5109,7 @@ std::string Expression::ToString
     out << (*this)[1].ToString(theFormat)
     << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
-  { switch (this->format)
+    switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
         { out << (*this)[i].ToString(theFormat);
@@ -5140,7 +5151,7 @@ std::string Expression::ToString
         out << ")";
         break;
     }
-  } else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
+  else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat)
     << "," << (*this)[2].ToString(theFormat)
     << "]";
@@ -5205,8 +5216,8 @@ std::string Expression::ToString
     this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
     << ". " << (*this)[1].ToString(theFormat);
   } else if (this->children.size==1)
-  { out << (*this)[0].ToString(theFormat);
-  } else if (this->children.size>=2)
+    out << (*this)[0].ToString(theFormat);
+  else if (this->children.size>=2)
   { out << (*this)[0].ToString(theFormat);
     if (this->format==this->formatFunctionUseUnderscore)
       out << "_";

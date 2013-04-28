@@ -1712,11 +1712,10 @@ template <typename coefficient>
 std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   out << "Character: " << this->character.ToString(theFormat);
-  out << "<br>The simple generators (" << this->gens.size << " total):";
+  out << "<br>The simple generators (" << this->gens.size << " total):<br> ";
+  std::stringstream tempStream;
   for (int i=0; i<this->gens.size; i++)
-  { out << CGI::GetHtmlMathSpanPure(this->gens[i].ToString(theFormat));
-    if (i!=this->gens.size-1)
-      out << ", ";
-  }
+    tempStream << "s_" << i+1 << ":=" << this->gens[i].ToString(theFormat) << "; ";
+  out << CGI::GetHtmlMathSpanPure(tempStream.str());
   return out.str();
 }

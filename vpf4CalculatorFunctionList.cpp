@@ -43,7 +43,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
    "Gets the natural representation of the Weyl group.",
-   "WeylGroupNaturalRep{}(B_3)", true, true)
+   "WeylGroupNaturalRep{}(B_3)", true, false)
    ;
 
   this->AddOperationInnerHandler

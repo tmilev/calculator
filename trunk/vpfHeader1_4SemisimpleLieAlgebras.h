@@ -233,6 +233,7 @@ public:
   List<Polynomial<Rational> > theSystemToSolve;
   List<Polynomial<Rational> > transformedSystem;
   SemisimpleSubalgebras* owner;
+  int indexInOwner;
   int indexInOwnersOfNonEmbeddedMe;
   int indexMaxSSContainer;
   List<int> indicesDirectSummandSuperAlgebra;
@@ -240,7 +241,6 @@ public:
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
-  bool flagDoLogNilradicalGeneration;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknowns;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
@@ -263,7 +263,8 @@ public:
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
   std::string nilradicalGenerationLog;
 
-  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), indexMaxSSContainer(-1),
+  CandidateSSSubalgebra(): owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
+  indexMaxSSContainer(-1),
   flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
   flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
   {}
@@ -355,13 +356,13 @@ public:
     this->theNilradicalWeights=other.theNilradicalWeights;
     this->ConeIntersections=other.ConeIntersections;
     this->ConeSeparatingNormals=other.ConeSeparatingNormals;
-    this->flagDoLogNilradicalGeneration=other.flagDoLogNilradicalGeneration;
     this->nilradicalGenerationLog=other.nilradicalGenerationLog;
     this->RecursionDepthCounterForNilradicalGeneration=other.RecursionDepthCounterForNilradicalGeneration;
     this->candidateSubalgebraModules=other.candidateSubalgebraModules;
     this->primalSubalgebraModules=other.primalSubalgebraModules;
     this->weightsOfModules=other.weightsOfModules;
     this->weightsOfPrimallySplitModules=other.weightsOfPrimallySplitModules;
+    this->indexInOwner=other.indexInOwner;
   }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
@@ -412,6 +413,8 @@ public:
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
+  std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   bool operator>(const CandidateSSSubalgebra& other)const ;
 
 };
@@ -429,6 +432,7 @@ public:
   int theRecursionCounter;
   bool flagAttemptToSolveSystems;
   bool flagDoComputePairingTable;
+  bool flagDoComputeNilradicals;
   void operator=(const SemisimpleSubalgebras& other)
   { this->owneR=other.owneR;
     this->theSl2s=other.theSl2s;
@@ -438,7 +442,15 @@ public:
     this->Hcandidates=other.Hcandidates;
     this->theRecursionCounter=other.theRecursionCounter;
     this->flagAttemptToSolveSystems=other.flagAttemptToSolveSystems;
+    this->flagDoComputeNilradicals=other.flagDoComputeNilradicals;
+    this->flagDoComputePairingTable=other.flagDoComputePairingTable;
   }
+  int GetNumPossibleSAs()const;
+  std::string GetAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
+  std::string GetPhysicalFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetDisplayFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+
   bool operator==(const SemisimpleSubalgebras& other)
   { if (this->owneR==other.owneR)
       return true;

@@ -112,6 +112,14 @@ void makeReport(IndicatorWindowVariables& input)
   theFile.close();
 }
 
+void makeStdCoutReport(IndicatorWindowVariables& input)
+{ static int counter =-1;
+  counter++;
+  std::cout << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
+  for (int i=0; i<input.ProgressReportStringS.size; i++)
+    std::cout << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
+}
+
 void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
@@ -165,194 +173,37 @@ std::string GetSelectHTMLStringTEmp
   return out.str();
 }
 
-int main_command_input(int argc, char **argv)
-{ std::stringstream theInputStream;
-  for (int i=1; i<argc; i++)
-    theInputStream << argv[i] << " ";
-  theParser.inputStringRawestOfTheRaw =theInputStream.str();
-  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
-  std::cout << theParser.outputString;
-  std::cout << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.";
-  return 0;
-}
-
-int main(int argc, char **argv)
-{
-#ifndef WIN32
-  gettimeofday(&ComputationStartGlobal, NULL);
-#endif
-  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
-  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  //Change the below line to modify the computation time of the calculator.
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500;
-  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
-
-
-	std::cout << "Content-Type: text/html\n\n";
-
-  theParser.init(theGlobalVariables);
-  MacroRegisterFunctionWithName("main");
-
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  std::string inputPatH;
-  std::string inputDisplayPath="vpf/";
-  if (argc>=1)
-  { getPath(argv[0], inputPatH);
-//    std::cout << "input path: " << inputPatH;
-
-    bool found=false;
-    for (int j=inputPatH.size()-2; j>=0; j--)
-    { if (inputPatH[j]=='/')
-      { if (found)
-          break;
-        inputDisplayPath="";
-        found=true;
-      }
-      if (found)
-        inputDisplayPath.push_back(inputPatH[j]);
-    }
-    if (found)
-      for (unsigned j=0; j<inputDisplayPath.size()/2; j++)
-        MathRoutines::swap(inputDisplayPath[j], inputDisplayPath[inputDisplayPath.size()-1-j]);
-//    std::cout << "<br>input display path: " << inputDisplayPath;
-    std::string::size_type foundExperimental=inputDisplayPath.find("experimental");
-    if (foundExperimental!=std::string::npos)
-      std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
-
-  }
-  std::string tempS;
-  theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
-  theParser.InitJavaScriptDisplayIndicator();
-
-	if (argc>1)
-    return main_command_input(argc, argv);
-  else
-    std::cin >> theParser.inputStringRawestOfTheRaw;
-  ComputationComplete=false;
-	if (theParser.inputStringRawestOfTheRaw=="")
-	{
-#ifdef WIN32
-    char buffer[2000];
-		size_t tempI=1500;
-		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
-		theParser.inputStringRawestOfTheRaw=buffer;
-#else
-		theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
-//		inputString=::getenv("QUERY_STRING");
-#endif
-    IPAdressCaller=getenv("REMOTE_ADDR");
-    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
-      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
-	}
-//	inputString="textInput=+asf&buttonGo=Go";
-//  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
-  std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
-  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>vpf version  "
-  << __DATE__ << ", " << __TIME__ << "</title>";
-  //below follows a script for collapsing and expanding menus
-//  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
-//  << "></script>";
-//  << " djConfig = \"parseOnLoad: true\"></script>";
-
-  std::cout << "<script src=\"" << theParser.DisplayPathServerBase
-  << "jsmath/easy/load.js\"></script> ";
-  std::cout << "\n"
-//  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
-  << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
-  //std::cout << IPAdressCaller;
-//  std::stringstream tempStreamX;
-//  static_html3(tempStreamX);
-//  static_html5(tempStreamX);
-//  std::cout << tempStreamX.str() << std::endl;
-//  std::cout << inputString;
-#ifndef WIN32
-  pthread_create(&TimerThread, NULL,*RunTimer, 0);
-#endif
-//  std::cout << "Raw input: " << inputString << "<hr>";
-  CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
-  List<std::string> inputStrings, inputStringNames;
-  CGI::ChopCGIInputStringToMultipleStrings
-  (theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-//  std::cout << "Chopped strings: ";
-//  for (int i=0; i<inputStrings.size; i++)
-//    std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
-//  std::cout << "<hr>";
-  std::string civilizedInput, inputRankString, inputWeylString;
-  if (inputStringNames.Contains("textInput"))
-    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
-  if (inputStringNames.Contains("textDim"))
-    inputRankString= inputStrings[inputStringNames.GetIndex("textDim")];
-  if (inputStringNames.Contains("textType"))
-    inputWeylString= inputStrings[inputStringNames.GetIndex("textType")];
-  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  List<std::string> optionsType, optionsRank;
-  optionsType.AddOnTop("A");
-  optionsType.AddOnTop("B");
-  optionsType.AddOnTop("C");
-  optionsType.AddOnTop("D");
-  optionsType.AddOnTop("E");
-  optionsType.AddOnTop("F");
-  optionsType.AddOnTop("G");
-//  optionsType.AddOnTop("NoPreamble");
-  optionsRank.AddOnTop("1");
-  optionsRank.AddOnTop("2");
-  optionsRank.AddOnTop("3");
-  optionsRank.AddOnTop("4");
-  optionsRank.AddOnTop("5");
-  optionsRank.AddOnTop("6");
-  optionsRank.AddOnTop("7");
-  optionsRank.AddOnTop("8");
-//  civilizedInput="SolveSerreLikePolynomialSystem{}(   x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)";
-//  civilizedInput="MakeCoxeterElement{}(A_2, 1,2);";
-  //civilizedInput=
-  //"g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; [5 g_{9},g_{-1}]";
-//  civilizedInput="PolyDivRemainder{}(x^3+6xy+5xy^2+y^3, x^2+y^2-1, x^3+y^3-xy) ;";
-//  civilizedInput="plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)";
-//  civilizedInput="MakeCoxeterElement{}(B_3,2,1,1,1,1,2,2,1,2,1,2,1,2,1);";
-//  civilizedInput="Deserialize{}(Serialize{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))";
-  //civilizedInput="1/2";
-//  civilizedInput="MakeCharacter{}(B_3, 1);";
-  //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
-  //civilizedInput="Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\+Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\+6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";
-  //civilizedInput="Melt{}(a);";
-  //civilizedInput="Melt{}(a;b);";
-//  civilizedInput="a; b";
-//  civilizedInput=" ";
-//  civilizedInput="c:=(a:=b);c;a;";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
-//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
-  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6)))))";
-  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-1+g_-3, g_1+g_3, g_-2, g_2 ) ) ))";
-//  civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-6+g_-7, g_6+g_7, g_-8, g_8 ) ) ))";
-/*  civilizedInput=
-  "%HideLHS Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\
-  (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
-(g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
-)))";*/
-//  civilizedInput="PenkovProjectTest";
-//civilizedInput="GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );   ";
-//civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
-if(civilizedInput=="PenkovProjectTest")
-{ civilizedInput="%HideLHS \
-Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
-( \
-Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
-(3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
-) \
-), \
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
-(g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
-g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
-) \
-))";
-}
-  if (civilizedInput=="PenkovProject")
-  { civilizedInput="experimentalPrintSemisimpleSubalgebras{}(F_4)";
-  }
-
-  if (civilizedInput=="PenkovProjectRecompute")
-  {civilizedInput= "\
+void PredefinedStrings(std::string& inputOutputCivilizedString)
+{ if(inputOutputCivilizedString=="PenkovProjectTest")
+    inputOutputCivilizedString="%HideLHS \
+    Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
+    ( \
+    Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
+    (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
+    ) \
+    ), \
+    Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
+    (g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
+    g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
+    ) \
+    ))";
+  if (inputOutputCivilizedString=="PenkovProject")
+    inputOutputCivilizedString="experimentalPrintSemisimpleSubalgebras{}(F_4)";
+  if(inputOutputCivilizedString=="PenkovProjectRecomputeTest")
+    inputOutputCivilizedString="%HideLHS \
+    experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
+    ( \
+    Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
+    (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
+    ) \
+    ), \
+    Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
+    (g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
+    g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
+    ) \
+    ))";
+  if (inputOutputCivilizedString=="PenkovProjectRecompute")
+    inputOutputCivilizedString= "\
 %HideLHS \n\
 experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\n\
 (\n\
@@ -601,7 +452,183 @@ Serialization{}(LoadCandidateSubalgebra, (F)^{1}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 
  g_{4},  g_{-4})\n\
 )))\n\
   ";
+
+}
+
+int main_command_input(int argc, char **argv)
+{ std::stringstream theInputStream;
+  theParser.theGlobalVariableS->SetFeedDataToIndicatorWindowDefault(&makeStdCoutReport);
+  for (int i=1; i<argc; i++)
+  { theInputStream << argv[i];
+    if (i<argc-1)
+      theInputStream << " ";
   }
+  theParser.inputStringRawestOfTheRaw =theInputStream.str();
+  PredefinedStrings(theParser.inputStringRawestOfTheRaw);
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::cout << theParser.outputString;
+  std::cout << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.";
+  return 0;
+}
+
+int main(int argc, char **argv)
+{
+#ifndef WIN32
+  gettimeofday(&ComputationStartGlobal, NULL);
+#endif
+  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
+  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
+  //Change the below line to modify the computation time of the calculator.
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500;
+  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
+
+	std::cout << "Content-Type: text/html\n\n";
+
+  theParser.init(theGlobalVariables);
+  MacroRegisterFunctionWithName("main");
+
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+  std::string inputPatH;
+  std::string inputDisplayPath="vpf/";
+  if (argc>=1)
+  { getPath(argv[0], inputPatH);
+//    std::cout << "input path: " << inputPatH;
+
+    bool found=false;
+    for (int j=inputPatH.size()-2; j>=0; j--)
+    { if (inputPatH[j]=='/')
+      { if (found)
+          break;
+        inputDisplayPath="";
+        found=true;
+      }
+      if (found)
+        inputDisplayPath.push_back(inputPatH[j]);
+    }
+    if (found)
+      for (unsigned j=0; j<inputDisplayPath.size()/2; j++)
+        MathRoutines::swap(inputDisplayPath[j], inputDisplayPath[inputDisplayPath.size()-1-j]);
+//    std::cout << "<br>input display path: " << inputDisplayPath;
+    std::string::size_type foundExperimental=inputDisplayPath.find("experimental");
+    if (foundExperimental!=std::string::npos)
+      std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
+
+  }
+  std::string tempS;
+  theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
+  theParser.InitJavaScriptDisplayIndicator();
+
+	if (argc>1)
+    return main_command_input(argc, argv);
+  else
+    std::cin >> theParser.inputStringRawestOfTheRaw;
+  ComputationComplete=false;
+	if (theParser.inputStringRawestOfTheRaw=="")
+	{
+#ifdef WIN32
+    char buffer[2000];
+		size_t tempI=1500;
+		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
+		theParser.inputStringRawestOfTheRaw=buffer;
+#else
+		theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
+//		inputString=::getenv("QUERY_STRING");
+#endif
+    IPAdressCaller=getenv("REMOTE_ADDR");
+    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
+      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
+	}
+//	inputString="textInput=+asf&buttonGo=Go";
+//  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
+  std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
+  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>vpf version  "
+  << __DATE__ << ", " << __TIME__ << "</title>";
+  //below follows a script for collapsing and expanding menus
+//  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
+//  << "></script>";
+//  << " djConfig = \"parseOnLoad: true\"></script>";
+
+  std::cout << "<script src=\"" << theParser.DisplayPathServerBase
+  << "jsmath/easy/load.js\"></script> ";
+  std::cout << "\n"
+//  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
+  << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
+  //std::cout << IPAdressCaller;
+//  std::stringstream tempStreamX;
+//  static_html3(tempStreamX);
+//  static_html5(tempStreamX);
+//  std::cout << tempStreamX.str() << std::endl;
+//  std::cout << inputString;
+#ifndef WIN32
+  pthread_create(&TimerThread, NULL,*RunTimer, 0);
+#endif
+//  std::cout << "Raw input: " << inputString << "<hr>";
+  CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
+  List<std::string> inputStrings, inputStringNames;
+  CGI::ChopCGIInputStringToMultipleStrings
+  (theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+//  std::cout << "Chopped strings: ";
+//  for (int i=0; i<inputStrings.size; i++)
+//    std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
+//  std::cout << "<hr>";
+  std::string civilizedInput, inputRankString, inputWeylString;
+  if (inputStringNames.Contains("textInput"))
+    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
+  if (inputStringNames.Contains("textDim"))
+    inputRankString= inputStrings[inputStringNames.GetIndex("textDim")];
+  if (inputStringNames.Contains("textType"))
+    inputWeylString= inputStrings[inputStringNames.GetIndex("textType")];
+  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
+  List<std::string> optionsType, optionsRank;
+  optionsType.AddOnTop("A");
+  optionsType.AddOnTop("B");
+  optionsType.AddOnTop("C");
+  optionsType.AddOnTop("D");
+  optionsType.AddOnTop("E");
+  optionsType.AddOnTop("F");
+  optionsType.AddOnTop("G");
+//  optionsType.AddOnTop("NoPreamble");
+  optionsRank.AddOnTop("1");
+  optionsRank.AddOnTop("2");
+  optionsRank.AddOnTop("3");
+  optionsRank.AddOnTop("4");
+  optionsRank.AddOnTop("5");
+  optionsRank.AddOnTop("6");
+  optionsRank.AddOnTop("7");
+  optionsRank.AddOnTop("8");
+//  civilizedInput="SolveSerreLikePolynomialSystem{}(   x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)";
+//  civilizedInput="MakeCoxeterElement{}(A_2, 1,2);";
+  //civilizedInput=
+  //"g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; [5 g_{9},g_{-1}]";
+//  civilizedInput="PolyDivRemainder{}(x^3+6xy+5xy^2+y^3, x^2+y^2-1, x^3+y^3-xy) ;";
+//  civilizedInput="plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)";
+//  civilizedInput="MakeCoxeterElement{}(B_3,2,1,1,1,1,2,2,1,2,1,2,1,2,1);";
+//  civilizedInput="Deserialize{}(Serialize{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))";
+  //civilizedInput="1/2";
+//  civilizedInput="MakeCharacter{}(B_3, 1);";
+  //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
+  //civilizedInput="Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\+Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\+6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";
+  //civilizedInput="Melt{}(a);";
+  //civilizedInput="Melt{}(a;b);";
+//  civilizedInput="a; b";
+//  civilizedInput=" ";
+//  civilizedInput="c:=(a:=b);c;a;";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
+  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6)))))";
+  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-1+g_-3, g_1+g_3, g_-2, g_2 ) ) ))";
+//  civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-6+g_-7, g_6+g_7, g_-8, g_8 ) ) ))";
+/*  civilizedInput=
+  "%HideLHS Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\
+  (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
+(g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
+)))";*/
+//  civilizedInput="PenkovProjectTest";
+//civilizedInput="GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );   ";
+//civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
+  PredefinedStrings(civilizedInput);
+
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);

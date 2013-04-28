@@ -4899,9 +4899,10 @@ public:
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   std::string simpleRootLetter;
-  std::string DisplayNameCalculator;
-  std::string physicalPath;
-  std::string htmlPathServer;
+  std::string PathDisplayNameCalculator;
+  std::string PathPhysicalOutputFolder;
+  std::string PathDisplayOutputFolder;
+  std::string PathDisplayServerBaseFolder;
   List<std::string> polyAlphabeT;
   List<std::string> weylAlgebraLetters;
   std::string GetPolyLetter(int index)const;
@@ -4918,6 +4919,7 @@ public:
   bool flagUseLatex;
   bool flagUsePNG;
   bool flagUseHTML;
+  bool flagUseHtmlAndStoreToHD;
 //  bool flagDynkinTypeDontUsePlusAndUpperIndex;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
@@ -4926,6 +4928,7 @@ public:
   bool flagIncludeLieAlgebraNonTechnicalNames;
   bool flagIncludeLieAlgebraTypes;
   bool flagUseReflectionNotation;
+  bool flagCandidateSubalgebraShortReportOnly;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>
@@ -4939,9 +4942,10 @@ public:
     this->CustomCoeffMonSeparator=other.CustomCoeffMonSeparator;
     this->FDrepLetter=other.FDrepLetter;
     this->simpleRootLetter=other.simpleRootLetter;
-    this->DisplayNameCalculator=other.DisplayNameCalculator;
-    this->physicalPath=other.physicalPath;
-    this->htmlPathServer=other.htmlPathServer;
+    this->PathDisplayNameCalculator=other.PathDisplayNameCalculator;
+    this->PathPhysicalOutputFolder=other.PathPhysicalOutputFolder;
+    this->PathDisplayOutputFolder=other.PathDisplayOutputFolder;
+    this->PathDisplayServerBaseFolder=other.PathDisplayServerBaseFolder;
     this->polyAlphabeT=other.polyAlphabeT;
     this->weylAlgebraLetters=other.weylAlgebraLetters;
     this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
@@ -4963,6 +4967,8 @@ public:
     this->flagIncludeLieAlgebraNonTechnicalNames=other.flagIncludeLieAlgebraNonTechnicalNames;
     this->flagIncludeLieAlgebraTypes=other.flagIncludeLieAlgebraTypes;
     this->flagUseReflectionNotation=other.flagUseReflectionNotation;
+    this->flagUseHtmlAndStoreToHD=other.flagUseHtmlAndStoreToHD;
+    this->flagCandidateSubalgebraShortReportOnly=other.flagCandidateSubalgebraShortReportOnly;
   }
   FormatExpressions();
 };

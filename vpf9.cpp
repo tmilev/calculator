@@ -314,7 +314,7 @@ bool CGI::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& t
   theFile.close();
   theFile.open(theFileName.c_str(), std::fstream::out | std::fstream::in | std::fstream::trunc);
   theFile.clear();
-  return false;
+  return theFile.is_open();
 }
 
 bool CGI::FileExists(const std::string& theFileName)
@@ -822,6 +822,7 @@ FormatExpressions::FormatExpressions()
   this->flagIncludeLieAlgebraNonTechnicalNames=false;
   this->flagIncludeLieAlgebraTypes=true;
   this->flagUseReflectionNotation=false;
+  this->flagUseHtmlAndStoreToHD=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

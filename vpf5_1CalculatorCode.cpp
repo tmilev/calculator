@@ -197,7 +197,7 @@ bool CommandList::innerPrintSSsubalgebras
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
   std::string theTitlePageFileNameNoPath=
-  "SemisimpleSubalgebras_"+ownerSS.theWeyl.theDynkinType.ToString() + ".html";
+  "SemisimpleSubalgebras_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
   std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
   out << "<br>Output file: <a href= \"" << displayFolder
   << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
@@ -212,7 +212,7 @@ bool CommandList::innerPrintSSsubalgebras
   if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
-    input.GetValuENonConstUseWithCaution <SemisimpleSubalgebras>() :
+    input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
@@ -221,6 +221,9 @@ bool CommandList::innerPrintSSsubalgebras
     std::fstream theFile;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false);
+    theFormat.flagUseHTML=true;
+    theFormat.flagUseHtmlAndStoreToHD=true;
+    theFormat.flagUseLatex=true;
     theFile << "<html>" << "<script src=\"" << theCommands.DisplayPathServerBase
     << "jsmath/easy/load.js\"></script> " << "<body>"
     << theSSsubalgebras.ToString(&theFormat) << "</body></html>";

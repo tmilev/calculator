@@ -228,9 +228,10 @@ void CommandList::GetOutputFolders
   outputFormat.flagUseHTML=true;
   outputFormat.flagUseLatex=false;
   outputFormat.flagUsePNG=true;
-  outputFormat.DisplayNameCalculator=this->DisplayNameCalculator;
-  outputFormat.physicalPath=outputFolderPhysical;
-  outputFormat.htmlPathServer=outputFolderDisplay;
+  outputFormat.PathDisplayNameCalculator=this->DisplayNameCalculator;
+  outputFormat.PathPhysicalOutputFolder=outputFolderPhysical;
+  outputFormat.PathDisplayOutputFolder=outputFolderDisplay;
+  outputFormat.PathDisplayServerBaseFolder=this->DisplayPathServerBase;
 }
 
 bool CommandList::innerRootSAsAndSltwos

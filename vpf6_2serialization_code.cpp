@@ -831,6 +831,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   (CommandList& theCommands, const Expression& inpuT, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerLoadSemisimpleSubalgebras");
   Expression input=inpuT;
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   Serialization::innerLoad(theCommands, inpuT, input);
   if (input.children.size!= 3)
   { theCommands.Comments << "<hr>Error loading semisimple subalgebras: I expect input with 3 children, got "
@@ -858,10 +859,16 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.Hcandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
+  theSAs.flagDoComputePairingTable=true;
+  theSAs.flagDoComputeNilradicals=false;
   if (theCandidatesE.children.size>10)
-    theSAs.flagDoComputePairingTable=false;
+    theSAs.flagDoComputeNilradicals=false;
+  ProgressReport theReport(theCommands.theGlobalVariableS);
   for (int i=1; i<theCandidatesE.children.size; i++)
-  { CandidateSSSubalgebra tempCandidate;
+  { std::stringstream reportStream;
+    reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;
+    theReport.Report(reportStream.str());
+    CandidateSSSubalgebra tempCandidate;
     if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
       << " number " << i << " subalgebra. <hr>";

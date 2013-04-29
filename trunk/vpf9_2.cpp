@@ -941,18 +941,18 @@ void rootSubalgebra::GeneratePossibleNilradicals
       assert(this->RootsDefineASubalgebra(tempRootsTest));*/
     for (; parabolicsCounter<StartingNilradicalsNoRepetition.size; parabolicsCounter++, owner.flagNilradicalComputationInitialized=false)
     { if (!owner.flagNilradicalComputationInitialized)
-      { impliedSelections.TheObjects[0].Assign(StartingNilradicalsNoRepetition.TheObjects[parabolicsCounter]);
+      { impliedSelections[0]=(StartingNilradicalsNoRepetition[parabolicsCounter]);
         owner.RecursionDepthNilradicalsGeneration=0;
-        owner.CountersNilradicalsGeneration.TheObjects[0]=this->CentralizerRoots.size;
+        owner.CountersNilradicalsGeneration[0]=this->CentralizerRoots.size;
       }
       this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
     }
   }
   else
   { this->flagFirstRoundCounting=false;
-    impliedSelections.TheObjects[0].init(this->kModules.size);
+    impliedSelections[0].init(this->kModules.size);
     owner.RecursionDepthNilradicalsGeneration=0;
-    owner.CountersNilradicalsGeneration.TheObjects[0]=0;
+    owner.CountersNilradicalsGeneration[0]=0;
     this->GeneratePossibleNilradicalsRecursive(PauseMutex, theGlobalVariables, this->theMultTable, impliedSelections, this->theOppositeKmods, owner, indexInOwner);
   }
 }

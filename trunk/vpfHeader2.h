@@ -404,7 +404,7 @@ class Expression
   bool operator!=(const Expression& other)const
   { return ! (*this==other);
   }
-  void operator=(const Expression& other);
+//  void operator=(const Expression& other);
   bool operator>(const Expression& other)const;
 };
 

@@ -2571,8 +2571,8 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
 { if (this->modulesGrouppedByWeight.size<=0)
     return "";
   std::stringstream out;
-  out << "Module decomposition over primal subalgebra(total "
-  << this->modulesGrouppedByWeight.size << "). ";
+  out << "Isotypic module decomposition over primal subalgebra (total "
+  << this->modulesGrouppedByWeight.size << " isotypic components). ";
   out << "<table border=\"1\"><tr><td>Module highest weight in fund. coords. and label</td>";
   for (int i=0; i<this->theCharOverCartanPlusCartanCentralizer.size; i++)
     out << "<td>" << "V_{" << i+1 << "}="

@@ -1715,7 +1715,7 @@ std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theF
   out << "<br>The simple generators (" << this->gens.size << " total):<br> ";
   std::stringstream tempStream;
   for (int i=0; i<this->gens.size; i++)
-    tempStream << "s_" << i+1 << ":=" << this->gens[i].ToString(theFormat) << "; ";
+    tempStream << "s_" << i+1 << ":=MatrixRationals{}" << this->gens[i].ToString(theFormat) << "; ";
   out << CGI::GetHtmlMathSpanPure(tempStream.str());
   return out.str();
 }

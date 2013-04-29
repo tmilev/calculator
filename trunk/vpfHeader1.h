@@ -1599,6 +1599,10 @@ public:
   inline void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
   { this->::HashTemplate<Object, List<Object>, hashFunction>::QuickSortDescending(theOrder);
   }
+  inline void SetExpectedSize(int expectedSize)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::SetExpectedSize(expectedSize);
+  }
+
 };
 
 //class used to avoid a gcc compiler bug.

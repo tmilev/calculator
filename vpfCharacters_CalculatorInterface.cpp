@@ -247,3 +247,46 @@ bool CommandList::innerMinPolyMatrix
   theMinPoly.AssignMinPoly(theMat);
   return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
 }
+
+bool CommandList::innerGenerateMultiplicativelyClosedSet
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerGenerateMultiplicativelyClosedSet");
+  if (input.children.size<=2)
+    return output.SetError("I need at least two arguments - upper bound and at least one element to multiply.", theCommands);
+  int upperLimit;
+  if (!input[1].IsSmallInteger(&upperLimit))
+    return output.SetError
+    ("First argument must be a small integer, serving as upper bound for the set.", theCommands);
+  if (upperLimit <=0)
+    upperLimit=10000;
+  HashedList<Expression> theSet;
+  theSet.SetExpectedSize(input.children.size-2);
+  for (int i=2; i<input.children.size; i++)
+    theSet.AddOnTop(input[i]);
+  int numGenerators=theSet.size;
+  Expression theProduct, evaluatedProduct;
+  BoundVariablesSubstitution tempSub;
+  bool tempBool;
+  for (int i=0; i<theSet.size; i++)
+    for (int j=0; j<numGenerators; j++)
+    { tempSub.reset();
+      theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
+      theCommands.EvaluateExpression(theProduct, evaluatedProduct, tempSub, tempBool);
+      theSet.AddOnTopNoRepetition(evaluatedProduct);
+      if (theSet.size>upperLimit)
+      { std::stringstream out;
+        out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
+        << upperLimit << " elements.";
+        evaluatedProduct.SetError(out.str(), theCommands);
+        theSet.AddOnTop(evaluatedProduct);
+        i=theSet.size; break;
+      }
+    }
+  theCommands.Comments << "Generated a list of " << theSet.size << " elements";
+  output.reset(theCommands, theSet.size+1);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  for (int i=0; i<theSet.size; i++)
+    output.AddChildOnTop(theSet[i]);
+  return true;
+
+}

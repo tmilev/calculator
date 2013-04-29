@@ -41,11 +41,20 @@ void CommandList::initPredefinedInnerFunctions()
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
   this->AddOperationInnerHandler
+  ("GenerateMultiplicativelyClosedSet", CommandList::innerGenerateMultiplicativelyClosedSet, "",
+   "The first argument gives upper bound to the number of elements of the set. \
+   Generates multiplicatively closed subset or returns error indicating the multiplicatively closed \
+   envelope is too larger than the upper bound.",
+   "s_1:=MatrixRationals{}((-1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\
+\ns_2:=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
+\ns_3:=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
+\nGenerateMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
    "Gets the natural representation of the Weyl group.",
    "WeylGroupNaturalRep{}(B_3)", true, false)
    ;
-
   this->AddOperationInnerHandler
   ("MinPoly", this->innerMinPolyMatrix, "",
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",

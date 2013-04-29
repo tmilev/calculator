@@ -1395,6 +1395,9 @@ public:
   static bool innerFunctionToMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerGenerateMultiplicativelyClosedSet
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerDeterminant
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;

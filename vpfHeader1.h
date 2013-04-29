@@ -1682,7 +1682,7 @@ public:
     tempMat.init(this->NumCols, this->NumRows);
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
-        tempMat.elements[j][i].Assign(this->elements[i][j]);
+        tempMat.elements[j][i]=this->elements[i][j];
     *this=tempMat;
   }
   void AppendMatrixOnTheRight(const Matrix<Element>& standsOnTheRight)
@@ -2285,11 +2285,13 @@ ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols
 class Selection
 {
 public:
-  inline static std::string GetXMLClassName(){ return "Selection";}
   List<int> elements;
   List<bool> selected;
   int MaxSize;
   int CardinalitySelection;
+  inline static std::string GetXMLClassName()
+  { return "Selection";
+  }
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
   void RemoveSelection(int index)
@@ -2331,7 +2333,6 @@ public:
   void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
   inline void incrementSelectionFixedCardinality(int card){int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore; this->incrementSelectionFixedCardinality(card, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);}
   void incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore);
-  void Assign(const Selection& right);
   void WriteToFile(std::fstream& output);
   inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);
@@ -2341,8 +2342,8 @@ public:
     this->ComputeIndicesFromSelection();
   }
   inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ this->ReadFromFile(input);}
-  inline void operator=(const Selection& right){this->Assign(right); }
-  void operator=(const Vector<Rational> & other);
+  void operator=(const Selection& right);
+  void operator=(const Vector<Rational>& other);
 //  void operator=(const std::string& other);
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
@@ -2358,7 +2359,7 @@ public:
   Selection(int m);
   Selection(const Vector<Rational>& other) { this->operator=(other);}
   Selection(const Selection& other):MaxSize(0), CardinalitySelection(0)
-  { this->Assign(other);
+  { *this=other;
   }
 };
 
@@ -4852,10 +4853,6 @@ class MonomialWeylAlgebra
   { return this->polynomialPart.IsAConstant() && this->differentialPart.IsAConstant();
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void operator=(const MonomialWeylAlgebra& other)
-  { this->polynomialPart=other.polynomialPart;
-    this->differentialPart=other.differentialPart;
-  }
   static unsigned int HashFunction(const MonomialWeylAlgebra& input)
   { return
     input.polynomialPart.HashFunction()+
@@ -4937,43 +4934,6 @@ public:
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>
   typename List<TemplateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
-  void operator=(const FormatExpressions& other)
-  { this->chevalleyGgeneratorLetter=other.chevalleyGgeneratorLetter;
-    this->chevalleyHgeneratorLetter=other.chevalleyHgeneratorLetter ;
-    this->fundamentalWeightLetter=other.fundamentalWeightLetter;
-    this->polyDefaultLetter=other.polyDefaultLetter;
-    this->CustomPlusSign=other.CustomPlusSign;
-    this->CustomCoeffMonSeparator=other.CustomCoeffMonSeparator;
-    this->FDrepLetter=other.FDrepLetter;
-    this->simpleRootLetter=other.simpleRootLetter;
-    this->PathDisplayNameCalculator=other.PathDisplayNameCalculator;
-    this->PathPhysicalOutputFolder=other.PathPhysicalOutputFolder;
-    this->PathDisplayOutputFolder=other.PathDisplayOutputFolder;
-    this->PathDisplayServerBaseFolder=other.PathDisplayServerBaseFolder;
-    this->polyAlphabeT=other.polyAlphabeT;
-    this->weylAlgebraLetters=other.weylAlgebraLetters;
-    this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
-    this->NumAmpersandsPerNewLineForLaTeX=other.NumAmpersandsPerNewLineForLaTeX;
-    this->MaxRecursionDepthPerExpression=other.MaxRecursionDepthPerExpression;
-    this->MaxLineLength=other.MaxLineLength;
-    this->MaxLinesPerPage=other.MaxLinesPerPage;
-    this->MatrixColumnVerticalLineIndex=other.MatrixColumnVerticalLineIndex;
-    this->flagPassCustomCoeffMonSeparatorToCoeffs=other.flagPassCustomCoeffMonSeparatorToCoeffs;
-    this->flagMakingExpressionTableWithLatex=other.flagMakingExpressionTableWithLatex;
-    this->flagUseLatex=other.flagUseLatex;
-    this->flagUsePNG=other.flagUsePNG;
-    this->flagUseHTML=other.flagUseHTML;
-    this->flagUseCalculatorFormatForUEOrdered=other.flagUseCalculatorFormatForUEOrdered;
-    this->flagQuasiDiffOpCombineWeylPart=other.flagQuasiDiffOpCombineWeylPart;
-    this->thePolyMonOrder=other.thePolyMonOrder;
-    this->flagExpressionIsFinal=other.flagExpressionIsFinal;
-    this->flagExpressionNewLineAllowed=other.flagExpressionNewLineAllowed;
-    this->flagIncludeLieAlgebraNonTechnicalNames=other.flagIncludeLieAlgebraNonTechnicalNames;
-    this->flagIncludeLieAlgebraTypes=other.flagIncludeLieAlgebraTypes;
-    this->flagUseReflectionNotation=other.flagUseReflectionNotation;
-    this->flagUseHtmlAndStoreToHD=other.flagUseHtmlAndStoreToHD;
-    this->flagCandidateSubalgebraShortReportOnly=other.flagCandidateSubalgebraShortReportOnly;
-  }
   FormatExpressions();
 };
 

@@ -25,8 +25,8 @@ class ClassFunction{
     List<coefficient> data;
 
     ClassFunction():G(0){} //the syntax :G(0) initializes the pointer G with 0.
-    //although there may be a minor speed penalty
-    //(I such a speed penalty is system dependent and possibly
+    //Although there may be a minor speed penalty
+    //(such a speed penalty is system dependent and possibly
     //even hardware dependent),
     //it is worth it to initialize all pointers with 0.
 
@@ -40,10 +40,6 @@ class ClassFunction{
     ClassFunction<coefficient> operator-(const ClassFunction<coefficient> &other) const;
     ClassFunction<coefficient> ReducedWithChars(const List<ClassFunction<coefficient> > chars = 0);
     coefficient& operator[](int i) const;
-    void operator=(const ClassFunction<coefficient>& X)
-    { this->G = X.G;
-      this->data = X.data;
-    }
     std::string ToString(FormatExpressions* theFormat=0) const;
     static unsigned int HashFunction(const ClassFunction<coefficient>& input);
     inline unsigned int HashFunction()const
@@ -82,20 +78,6 @@ class CoxeterGroup
   void MakeFrom(const DynkinType& D);
   bool operator==(const CoxeterGroup& other) const
   { return this->CartanSymmetric==other.CartanSymmetric;
-  }
-  void operator=(const CoxeterGroup& other)
-  { this->CartanSymmetric=other.CartanSymmetric;
-    this->rootSystem=other.rootSystem;
-    this->rho = other.rho;
-    this->rhoOrbit=other.rhoOrbit;
-    this->conjugacyClasses=other.conjugacyClasses;
-    this->nGens=other.nGens;
-    this->N=other.N;
-    this->ccCount=other.ccCount;
-    this->ccSizes=other.ccSizes;
-    this->squares=other.squares;
-    this->characterTable=other.characterTable;
-//     std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
   }
   static unsigned int HashFunction(const CoxeterGroup& input)
   { return input.CartanSymmetric.HashFunction();
@@ -142,7 +124,6 @@ class CoxeterElement{
   static unsigned int HashFunction(const CoxeterElement& input);
   std::string ToString(FormatExpressions* theFormat=0) const;
   void operator*=(const CoxeterElement& other);
-  void operator=(const CoxeterElement& other);
   bool operator==(const CoxeterElement& other) const;
   bool operator>(const CoxeterElement& other) const
   { if(this->owner!=other.owner)
@@ -152,7 +133,6 @@ class CoxeterElement{
     }
     return this->reflections>other.reflections;
   }
-
   static inline const bool IsEqualToZero()
   { return false;
   }
@@ -461,7 +441,9 @@ class TrixTree
   // Would be nice to make this a pointer
   // and malloc() it to an appropriate size
   List<TrixTree<coefficient> > others;
-
+  void reset()
+  { this->others.SetSize(0);
+  }
   Matrix<coefficient> GetElement(CoxeterElement &g, const List<Matrix<coefficient> > &gens);
 };
 
@@ -481,8 +463,27 @@ public:
   TrixTree<coefficient> elements;
 
   CoxeterRepresentation():G(0){}
-
-  CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other) const;
+  void reset(CoxeterGroup* inputG=0)
+  { this->G=inputG;
+    this->basis.SetSize(0);
+    this->gens.SetSize(0);
+    this->character.G=this->G;
+    this->character.MakeZero();
+    this->classFunctionMatrices.SetSize(0);
+    this->elements.reset();
+  }
+  CoxeterRepresentation<coefficient> operator*(const CoxeterRepresentation<coefficient>& other)const
+  { CoxeterRepresentation<coefficient> output;
+    this->MultiplyBy(other, output);
+    return output;
+  }
+  void MultiplyBy
+  (const CoxeterRepresentation<coefficient>& other, CoxeterRepresentation<coefficient>& output)const;
+  void operator*=(const CoxeterRepresentation<coefficient>& other)
+  { CoxeterRepresentation<coefficient> output;
+    this->MultiplyBy(other, output);
+    *this=output;
+  }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
@@ -548,9 +549,6 @@ public:
   coefficient& operator[](int i) const;
   bool operator<(const UDPolynomial<coefficient>& right) const;
   bool operator==(int other) const;
-  void operator=(const UDPolynomial<coefficient>& right)
-  { this->data=right.data;
-  }
   std::string ToString(FormatExpressions* theFormat=0)const;
   void AssignMinPoly(const Matrix<coefficient>& input);
 };

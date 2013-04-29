@@ -667,7 +667,7 @@ void Selection::MakeSubSelection(Selection &theSelection, Selection &theSubSelec
     this->AddSelectionAppendNewIndex(theSelection.elements[theSubSelection.elements[i]]);
 }
 
-void Selection::Assign(const Selection& right)
+void Selection::operator=(const Selection& right)
 { if (this==&right)
     return;
   if (this->MaxSize!=right.MaxSize)
@@ -5420,7 +5420,7 @@ bool rootSubalgebra::ListHasNonSelectedIndexLowerThanGiven(int index, List<int>&
 bool rootSubalgebra::IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables)
 { Selection& targetSel= impliedSelections[RecursionDepth+1];
   Selection& originalSel=impliedSelections[RecursionDepth];
-  targetSel.Assign(originalSel);
+  targetSel=(originalSel);
   targetSel.AddSelectionAppendNewIndex(startIndex);
   for (int k=targetSel.CardinalitySelection-1; k<targetSel.CardinalitySelection; k++)
   { int tempI=targetSel.elements[k];
@@ -5452,7 +5452,7 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
   if (this->flagFirstRoundCounting)
     this->NumTotalSubalgebras=this->NumNilradicalsAllowed;
   if (!this->flagFirstRoundCounting)
-  { this->NilradicalKmods.Assign(selKmods);
+  { this->NilradicalKmods=selKmods;
     if(!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, owner.flagComputingLprohibitingWeights))
     { this->NumConeConditionFailures++;
       owner.NumConeConditionFailures++;

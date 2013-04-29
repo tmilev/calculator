@@ -404,11 +404,6 @@ void CoxeterElement::operator*=(const CoxeterElement& other)
 { reflections = owner->DecomposeTodorsVector(owner->ApplyList(reflections, owner->ComposeTodorsVector(other.reflections)));
 }
 
-void CoxeterElement::operator=(const CoxeterElement& other)
-{ this->reflections=other.reflections;
-  this->owner=other.owner;
-}
-
 bool CoxeterElement::operator==(const CoxeterElement& other)const
 { // this is all stuffed on one line because the auto keyword is only in cxx11
   if (this->owner!=other.owner)
@@ -693,37 +688,47 @@ void SpaceTree<coefficient>::DisplayTree() const
 }
 
 template <typename coefficient>
-CoxeterRepresentation<coefficient> CoxeterRepresentation<coefficient>::operator*(const CoxeterRepresentation<coefficient>& other) const
-{ CoxeterRepresentation<coefficient> U;
-
+void CoxeterRepresentation<coefficient>::MultiplyBy
+(const CoxeterRepresentation<coefficient>& other, CoxeterRepresentation<coefficient>& output) const
+{ //lazy programmers handling://////
+  if (&output==this || &output==&other)
+  { CoxeterRepresentation<coefficient> thisCopy, otherCopy;
+    thisCopy=*this;
+    otherCopy=other;
+    thisCopy.MultiplyBy(otherCopy, output);
+    return;
+  }
+  //////////////////////////////////
+  if (this->G!=other.G)
+  { std::cout << "This is a programming error: attempting to multiply representations with "
+    << " different owner groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output.reset(this->G);
   int Vd = this->basis[0].size;
-   int Wd = other.basis[0].size;
-   int Ud = Vd*Wd;
-   for(int vi=0; vi<this->basis.size; vi++)
-   {  for(int wi=0; wi<other.basis.size; wi++)
-      {  Vector<coefficient> u;
-         u.SetSize(Ud);
-         for(int i=0; i<Vd; i++)
-            for(int j=0; j<Wd; j++)
-               u[i*Wd+j] = this->basis[vi][i] * other.basis[wi][j];
-         U.basis.AddOnTop(u);
-      }
-   }
-
-   U.gens.SetSize(gens.size);
-   for(int i=0; i<gens.size; i++)
-     U.gens[i].AssignTensorProduct(gens[i],other.gens[i]);
-
-   /* would that it be this simple
-   if((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0))
-   { U.classFunctionMatrices.SetSize(G->ccCount);
-     for(int i=0; i<classFunctionMatrices.size; i++)
-     { if((classFunctionMatrices[i].NumCols>0) && (other.classFunctionMatrices[i].NumCols>0))
-        U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
-     }
-   }*/
-  U.G = G;
-  return U;
+  int Wd = other.basis[0].size;
+  int Ud = Vd*Wd;
+  for(int vi=0; vi<this->basis.size; vi++)
+    for(int wi=0; wi<other.basis.size; wi++)
+    { Vector<coefficient> u;
+      u.SetSize(Ud);
+      for(int i=0; i<Vd; i++)
+        for(int j=0; j<Wd; j++)
+            u[i*Wd+j] = this->basis[vi][i] * other.basis[wi][j];
+      output.basis.AddOnTop(u);
+    }
+  output.gens.SetSize(gens.size);
+  for(int i=0; i<gens.size; i++)
+    output.gens[i].AssignTensorProduct(gens[i],other.gens[i]);
+  /* would that it be this simple
+  if((classFunctionMatrices.size > 0) && (other.classFunctionMatrices.size > 0))
+  { U.classFunctionMatrices.SetSize(G->ccCount);
+    for(int i=0; i<classFunctionMatrices.size; i++)
+    { if((classFunctionMatrices[i].NumCols>0) && (other.classFunctionMatrices[i].NumCols>0))
+      U.classFunctionMatrices[i].AssignTensorProduct(classFunctionMatrices[i],other.classFunctionMatrices[i]);
+    }
+  }*/
+  output.G = G;
 }
 
 template <typename coefficient>
@@ -1716,6 +1721,6 @@ std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theF
   std::stringstream tempStream;
   for (int i=0; i<this->gens.size; i++)
     tempStream << "s_" << i+1 << ":=MatrixRationals{}" << this->gens[i].ToString(theFormat) << "; ";
-  out << CGI::GetHtmlMathSpanPure(tempStream.str());
+  out << CGI::GetHtmlMathSpanPure(tempStream.str(), 3000);
   return out.str();
 }

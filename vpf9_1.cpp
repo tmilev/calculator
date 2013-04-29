@@ -310,7 +310,7 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
   this->owneR=right.owneR;
 //  this->indexInOwners=right.indexInOwners;
   this->AllRootsK=(right.AllRootsK);
-  this->CentralizerKmods.Assign(right.CentralizerKmods);
+  this->CentralizerKmods=(right.CentralizerKmods);
   this->CentralizerRoots=(right.CentralizerRoots);
   this->HighestRootsK=(right.HighestRootsK);
   this->HighestWeightsGmodK=(right.HighestWeightsGmodK);
@@ -321,7 +321,7 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
   this->theCentralizerDiagram.Assign(right.theCentralizerDiagram);
   this->PositiveRootsK=(right.PositiveRootsK);
   this->PosRootsKConnectedComponents=(right.PosRootsKConnectedComponents);
-  this->NilradicalKmods.Assign(right.NilradicalKmods);
+  this->NilradicalKmods=(right.NilradicalKmods);
   this->SimpleBasisCentralizerRoots=(right.SimpleBasisCentralizerRoots);
   this->SimpleBasisK=(right.SimpleBasisK);
   this->indicesSubalgebrasContainingK=(right.indicesSubalgebrasContainingK);
@@ -471,7 +471,7 @@ void rootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetS
   tempSel.initNoMemoryAllocation();
   for (int i=0; i<targetSel.CardinalitySelection; i++)
     tempSel.AddSelectionAppendNewIndex(generator.TheObjects[targetSel.elements[i]]);
-  targetSel.Assign(tempSel);
+  targetSel=(tempSel);
 }
 
 bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables)

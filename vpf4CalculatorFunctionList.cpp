@@ -41,10 +41,11 @@ void CommandList::initPredefinedInnerFunctions()
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
   this->AddOperationInnerHandler
-  ("GenerateMultiplicativelyClosedSet", CommandList::innerGenerateMultiplicativelyClosedSet, "",
-   "The first argument gives upper bound to the number of elements of the set. \
-   Generates multiplicatively closed subset or returns error indicating the multiplicatively closed \
-   envelope is too larger than the upper bound.",
+  ("GenerateFiniteMultiplicativelyClosedSet", CommandList::innerGenerateMultiplicativelyClosedSet, "",
+   "The first argument gives upper_bound to the number of elements of the set. \
+   Generates a finite multiplicatively closed set of at most upper_bound elements, \
+   or returns error indicating the multiplicatively closed \
+   set is larger than the upper bound.",
    "s_1:=MatrixRationals{}((-1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\
 \ns_2:=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
 \ns_3:=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
@@ -1106,6 +1107,11 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("\\otimes", WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps,
+   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
+   "Tensor product of two Weyl group reps. ",
+   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V", true);
 
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",

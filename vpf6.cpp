@@ -948,15 +948,6 @@ bool Expression::IsSequenceNElementS(int N)const
   return this->IsListNElementsStartingWithAtom(this->theBoss->opSequence(), N+1);
 }
 
-void Expression::operator=(const Expression& other)
-{ if (this==&other)
-    return;
-  this->theBoss=other.theBoss;
-  this->theData=other.theData;
-  this->children=other.children;
-  this->format=other.format;
-}
-
 bool Expression::IsEqualToOne()const
 { int theInt;
   if (this->IsSmallInteger(&theInt))

@@ -169,7 +169,26 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
 
 bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ return false;
+{ std::cout << "Here i am!";
+  if (input.children.size!=3)
+    return false;
+  CoxeterRepresentation<Rational> leftRep;
+  CoxeterRepresentation<Rational> rightRep;
+  if (!input[1].IsOfType<CoxeterRepresentation<Rational> > (&leftRep))
+    return false;
+  if (!input[2].IsOfType<CoxeterRepresentation<Rational> > (&rightRep))
+    return false;
+  FormatExpressions theFormat;
+  theFormat.flagUseLatex=true;
+  theFormat.flagUseHTML=false;
+  std::cout << "<br>left rep is: " << leftRep.ToString(&theFormat);
+  std::cout << "<br>right rep is: " << rightRep.ToString(&theFormat);
+  if (leftRep.G!=rightRep.G)
+    return output.SetError
+    ("Error: attempting to tensor irreps with different owner groups. ", theCommands);
+  leftRep*=rightRep;
+  std::cout << "<br>product: " << leftRep.ToString(&theFormat);
+  return false;
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
@@ -258,7 +277,10 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet
     return output.SetError
     ("First argument must be a small integer, serving as upper bound for the set.", theCommands);
   if (upperLimit <=0)
-    upperLimit=10000;
+  { upperLimit=10000;
+    theCommands.Comments << "The upper computation limit I got was 0 or less; I replaced it with the default value "
+    << upperLimit << ".";
+  }
   HashedList<Expression> theSet;
   theSet.SetExpectedSize(input.children.size-2);
   for (int i=2; i<input.children.size; i++)

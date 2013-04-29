@@ -3548,7 +3548,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->theGlobalVariableS=& inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
   this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->MaxAlgTransformationsPerExpression=100;
+  this->MaxAlgTransformationsPerExpression=10000;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->NumErrors=0;
@@ -4474,35 +4474,36 @@ bool CommandList::EvaluateExpression
       break;
     }
 //////------Handling naughty expressions end------
-/////-------Evaluating children -------
+/////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
-    for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
-    { bool tempBool=true;
-//      bool debugBool=false;
-//      if (output[i].ToString()=="c");
-//        debugBool=true;
-      if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
-        output.SetChilD(i, tempE);
-      if (!tempBool)
-        outputIsFree=false;
-      if (output[i].IsError())
-      { this->flagAbortComputationASAP=true;
-        break;
-      }
-/*      if (this->RecursionDeptH==1)
-      { std::cout << "<hr>Considering whether "
-        << output[i].Lispify() << " is rule-stack-worthy.";
-        if (output.ToString()=="a:=b")
-          std::cout << "<hr>a:=b is here<hr>";
-      }*/
-      if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
-        if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) ||
-          output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
-        { this->RuleStack.AddOnTop(output[i]);
-          this->RuleContextIdentifier++;
-         // std::cout << ".. added !!!!";
+    if (!output.IsBuiltInType())
+      for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
+      { bool tempBool=true;
+  //      bool debugBool=false;
+  //      if (output[i].ToString()=="c");
+  //        debugBool=true;
+        if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
+          output.SetChilD(i, tempE);
+        if (!tempBool)
+          outputIsFree=false;
+        if (output[i].IsError())
+        { this->flagAbortComputationASAP=true;
+          break;
         }
-    }
+  /*      if (this->RecursionDeptH==1)
+        { std::cout << "<hr>Considering whether "
+          << output[i].Lispify() << " is rule-stack-worthy.";
+          if (output.ToString()=="a:=b")
+            std::cout << "<hr>a:=b is here<hr>";
+        }*/
+        if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
+          if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) ||
+            output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
+          { this->RuleStack.AddOnTop(output[i]);
+            this->RuleContextIdentifier++;
+           // std::cout << ".. added !!!!";
+          }
+      }
     if (this->flagAbortComputationASAP)
       break;
     //->/////-------Default operation handling-------

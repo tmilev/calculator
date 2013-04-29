@@ -696,7 +696,8 @@ bool CommandList::innerPlot2DWithBars
     double finalREsultDouble;
     if (!tempResult.IsOfType<Rational>(&finalResultRat))
     { if (!tempResult.IsOfType<double>(&finalREsultDouble))
-      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i;
+      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead "
+        << "I evaluated to " << tempResult.ToString();
         return false;
       }
     } else finalREsultDouble=finalResultRat.DoubleValue();
@@ -705,15 +706,37 @@ bool CommandList::innerPlot2DWithBars
   }
   std::stringstream outTex, outHtml;
   for (int k=0; k<2; k++)
-  { if (k==0)
-    { outTex << "\\psline*[linecolor=cyan, linewidth=0.1pt]";
-      outHtml << "\\psline*[linecolor=cyan, linewidth=0.1pt]";
-    } else
-    { outTex << "\\psline[linecolor=blue, linewidth=0.1pt]";
-      outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
-    }
     for (int i=0; i<xValues.size; i++)
-    { outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
+    { bool includePsLine=false;
+      bool useNegativePattern=false;
+      if (i==0)
+      { includePsLine=true;
+        useNegativePattern=(fValues[i]<0);
+      }
+      if (i>0)
+        if (fValues[i]*fValues[i-1]<=0)
+        { includePsLine=true;
+          useNegativePattern=!(fValues[i]>fValues[i-1]);
+        }
+      if (includePsLine)
+      { if (k==0 && useNegativePattern)
+        { outTex << "\\psline*[linecolor=orange, linewidth=0.1pt]";
+          outHtml << "<br>\\psline*[linecolor=orange, linewidth=0.1pt]";
+        }
+        if (k==0 && !useNegativePattern)
+        { outTex << "\\psline*[linecolor=cyan, linewidth=0.1pt]";
+          outHtml << "<br>\\psline*[linecolor=cyan, linewidth=0.1pt]";
+        }
+        if (k>0 && useNegativePattern)
+        { outTex << "\\psline[linecolor=brown, linewidth=0.1pt]";
+          outHtml << "<br>\\psline[linecolor=brown, linewidth=0.1pt]";
+        }
+        if (k>0 && !useNegativePattern)
+        { outTex << "\\psline[linecolor=blue, linewidth=0.1pt]";
+          outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
+        }
+      }
+      outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
       << MathRoutines::ReducePrecision(xValues[i]) << ", "
       << MathRoutines::ReducePrecision(fValues[i]) << ")"
       << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
@@ -726,7 +749,6 @@ bool CommandList::innerPlot2DWithBars
       << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")("
       << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", 0)";
     }
-  }
   outHtml << "<br>";
   for (int i=0; i<rValues.size; i++)
   { std::stringstream tempStream;

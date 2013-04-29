@@ -169,7 +169,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
 
 bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ std::cout << "Here i am!";
+{ //std::cout << "Here i am!";
   if (input.children.size!=3)
     return false;
   CoxeterRepresentation<Rational> leftRep;
@@ -181,14 +181,13 @@ bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.flagUseHTML=false;
-  std::cout << "<br>left rep is: " << leftRep.ToString(&theFormat);
-  std::cout << "<br>right rep is: " << rightRep.ToString(&theFormat);
+  //std::cout << "<br>left rep is: " << leftRep.ToString(&theFormat);
+  //std::cout << "<br>right rep is: " << rightRep.ToString(&theFormat);
   if (leftRep.G!=rightRep.G)
     return output.SetError
     ("Error: attempting to tensor irreps with different owner groups. ", theCommands);
   leftRep*=rightRep;
-  std::cout << "<br>product: " << leftRep.ToString(&theFormat);
-  return false;
+  return output.AssignValue(leftRep, theCommands);
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep

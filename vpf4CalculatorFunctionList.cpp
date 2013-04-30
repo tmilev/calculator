@@ -1051,10 +1051,6 @@ void CommandList::initPredefinedStandardOperations()
    "Divides polynomial by polynomial (to get a rational function). ",
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
-//  this->AddOperationOuterHandler
-//  ("^", this->outerPower, "",
-//   "Realizes the tranformation a^1:=a. ",
-//  "x^1+x^2", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerRatPowerRat, this->opRational(), this->opRational(),
@@ -1103,6 +1099,17 @@ void CommandList::initPredefinedStandardOperations()
    \nXcardano:=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
    true);
+  this->AddOperationOuterHandler
+  ("^", this->innerAssociateExponentExponent, "",
+   "Substitutes (a^b)^c with a^{b*c}.",
+   "(a^m)^n", true);
+  this->AddOperationOuterHandler
+  ("^", this->outerPowerRaiseToFirst, "",
+   "Provided the base is not equal to one of the letters A, B, C, D, E, F, or G, realizes \
+   the tranformation {{anything}}^1:=a. We note that the notation A^1, B^1, C^1, D^1, E^1, F^1, G^1\
+   is reserved for denoting Dynkin types. ",
+  "x^1+x^2; A^1", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Tensor product of two generalized Verma modules. \

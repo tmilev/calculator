@@ -107,12 +107,12 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
   static bool theGhostHasAppeared=false;
   output=input[2];
   Expression leftCopy=input[1];
-  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+//  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
-  { std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
+  { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
     return false;
   }
-  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+//  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   ElementUniversalEnveloping<RationalFunctionOld>* leftUE;
   std::string errorString;
 //  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
@@ -131,7 +131,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
   SemisimpleLieAlgebra& theSSalg=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
-  std::cout << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
+  //std::cout << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
       (*leftUE, outputElt, theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
   { //std::cout << "<br>failed to multiply on the left";

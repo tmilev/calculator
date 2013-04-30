@@ -167,7 +167,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
   return true;
 }
 
-bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
+bool WeylGroupCalculatorFunctions::innerTensorWeylReps
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "Here i am!";
   if (input.children.size!=3)
@@ -189,6 +189,27 @@ bool WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps
   leftRep*=rightRep;
   return output.AssignValue(leftRep, theCommands);
 }
+
+bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps(theCommands, input, output))
+    return false;
+  CoxeterRepresentation<Rational> theRep;
+  if (!output.IsOfType<CoxeterRepresentation<Rational> > (&theRep))
+    return true;
+  List<ClassFunction<Rational> > theCFs;
+  List<CoxeterRepresentation<Rational> > outputReps;
+  theRep.Decomposition(theCFs, outputReps);
+  output.reset(theCommands, outputReps.size+1);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  Expression tempE;
+  for (int i=0; i<outputReps.size; i++)
+  { tempE.AssignValue(outputReps[i], theCommands);
+    output.AddChildOnTop(tempE);
+  }
+  return true;
+}
+
 
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
 (CommandList& theCommands, const Expression& input, Expression& output)
@@ -288,11 +309,18 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet
   Expression theProduct, evaluatedProduct;
   BoundVariablesSubstitution tempSub;
   bool tempBool;
+  //std::cout << "<br>" << theSet[0].ToString() << "->" << theSet[0].ToStringFull() << " is with hash " << theSet[0].HashFunction();
   for (int i=0; i<theSet.size; i++)
     for (int j=0; j<numGenerators; j++)
     { tempSub.reset();
       theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
+      //std::cout << "<br>Evaluating: " << theProduct.ToString() << "->" << theProduct.ToStringFull();
       theCommands.EvaluateExpression(theProduct, evaluatedProduct, tempSub, tempBool);
+      //std::cout << " to get " << evaluatedProduct.ToString() << "->" << evaluatedProduct.ToStringFull();
+      //std::cout << " with hash " << evaluatedProduct.HashFunction();
+      //if (evaluatedProduct==theSet[0])
+      //{ //std::cout << " and equals the first element. ";
+      //}
       theSet.AddOnTopNoRepetition(evaluatedProduct);
       if (theSet.size>upperLimit)
       { std::stringstream out;
@@ -303,7 +331,7 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet
         i=theSet.size; break;
       }
     }
-  theCommands.Comments << "Generated a list of " << theSet.size << " elements";
+  theCommands.Comments << "<hr>Generated a list of " << theSet.size << " elements";
   output.reset(theCommands, theSet.size+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   for (int i=0; i<theSet.size; i++)

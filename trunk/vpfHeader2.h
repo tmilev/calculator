@@ -344,6 +344,7 @@ class Expression
   ;
   bool ToStringData
   (std::string& output, FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
+  std::string ToStringFull()const;
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -1299,6 +1300,9 @@ public:
   static bool outerEqualEqual
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool outerGreaterThan
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool outerCombineFractions
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1329,7 +1333,9 @@ public:
   static bool outerMeltBrackets
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-
+  static bool innerMultiplyByOne
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool outerDistribute
 (CommandList& theCommands, const Expression& input, Expression& output,
   int AdditiveOp, int multiplicativeOp)

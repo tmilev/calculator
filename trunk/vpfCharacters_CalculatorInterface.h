@@ -31,7 +31,13 @@ public:
   static bool innerWeylGroupNaturalRep
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool innerDecomposeProductWeylIrreps
+  static bool innerDecomposeWeylRep
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerTensorWeylReps
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerTensorAndDecomposeWeylReps
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 };

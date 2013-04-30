@@ -915,6 +915,10 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerCollectMultiplicands, "",
    "Collects multiplicand exponents.",
    "x*(x*y)*x*(x*x^3*x); ", true);
+  this->AddOperationInnerHandler
+  ("*", this->innerMultiplyByOne, "",
+   "Rule 1*{{anything}}=anything.",
+   "x*1;x*1-x ", true);
 
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
@@ -954,6 +958,7 @@ void CommandList::initPredefinedStandardOperations()
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
    \nv:=hwv{}(G_2, (1,0),(0,0));\
    \n2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor, this->opPoly(), this->opElementTensorGVM(),
    "Handles multiplying polynomial by an element of tensor product of generalized Verma modules. \
@@ -1108,11 +1113,17 @@ void CommandList::initPredefinedStandardOperations()
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("\\otimes", WeylGroupCalculatorFunctions::innerDecomposeProductWeylIrreps,
+  ("\\otimes", WeylGroupCalculatorFunctions::innerTensorWeylReps,
    this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
-   "Tensor product of two Weyl group reps. ",
-   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V", true);
-
+   "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
+   If you want decomposition, use V*V instead. ",
+   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
+   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
+   "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
+   If you want decomposition, use V*V instead. ",
+   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. \
@@ -1163,6 +1174,12 @@ void CommandList::initPredefinedStandardOperations()
   << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
   << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
+
+  this->AddOperationOuterHandler
+  (">", this->outerGreaterThan, "",
+   "If both the left hand side and the right hand side are rational, replaces the expression by \
+   1 if the left number is greater than the right, else replaces the expression by 0.",
+   "x>5; x:=3; x>3; 7>5;", true);
   this->AddOperationOuterHandler
   ("==", this->outerEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \

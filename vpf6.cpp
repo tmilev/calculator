@@ -1132,6 +1132,8 @@ bool CommandList::isRightSeparator(char c)
 { switch(c)
   { case ' ':
     case '\n':
+    case '>':
+    case '<':
     case ':':
     case ',':
     case ';':
@@ -1165,6 +1167,8 @@ bool CommandList::isLeftSeparator(char c)
 { switch(c)
   { case ' ':
     case '\n':
+    case '>':
+    case '<':
     case ':':
     case ',':
     case ';':
@@ -1693,6 +1697,9 @@ bool CommandList::ApplyOneRule()
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
+  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" &&
+      fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
       fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" &&
@@ -3539,7 +3546,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->theGlobalVariableS=& inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
   this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->MaxAlgTransformationsPerExpression=10000;
+  this->MaxAlgTransformationsPerExpression=100;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->NumErrors=0;
@@ -3598,6 +3605,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
+  this->AddOperationNoRepetitionAllowed(">");
   this->AddOperationNoRepetitionAllowed("==");
   this->AddOperationNoRepetitionAllowed("\\cup");
   this->AddOperationNoRepetitionAllowed("\\sqcup");
@@ -3950,6 +3958,16 @@ bool CommandList::StandardIsDenotedBy
   return true;
 }
 
+bool CommandList::innerMultiplyByOne
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.children.size!=3)
+    return false;
+  if (!input[1].IsEqualToOne())
+    return false;
+  output=input[2];
+  return true;
+}
+
 bool CommandList::outerDistribute
 (CommandList& theCommands, const Expression& input, Expression& output,
  int AdditiveOp, int multiplicativeOp)
@@ -4148,6 +4166,20 @@ bool CommandList::outerStandardFunction
           }
     }
   return false;
+}
+
+bool CommandList::outerGreaterThan
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& left=input[1];
+  const Expression& right=input[2];
+  Rational leftRat, rightRat;
+  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational> (&rightRat))
+    return false;
+  if (leftRat>rightRat)
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
 }
 
 bool CommandList::outerEqualEqual
@@ -4950,6 +4982,22 @@ bool Expression::ToStringData
   return result;
 }
 
+std::string Expression::ToStringFull()const
+{ std::stringstream out;
+  if (this->IsAtoM())
+    out << this->theData << " ";
+  if (this->children.size>0)
+  { out << "(";
+    for (int i=0; i<this->children.size; i++)
+    { out << (*this)[i].ToStringFull();
+      if (i!=this->children.size-1)
+        out << ", ";
+    }
+    out << ")";
+  }
+  return out.str();
+}
+
 std::string Expression::ToString
 (FormatExpressions* theFormat, Expression* startingExpression)const
 { MacroRegisterFunctionWithName("Expression::ToString");
@@ -5101,6 +5149,8 @@ std::string Expression::ToString
     out << (*this)[1].ToString(theFormat)
     << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
+  { if (this->IsSequenceNElementS(1))
+      out << "Sequence{}";
     switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
@@ -5143,6 +5193,7 @@ std::string Expression::ToString
         out << ")";
         break;
     }
+  }
   else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat)
     << "," << (*this)[2].ToString(theFormat)

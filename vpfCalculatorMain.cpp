@@ -646,7 +646,7 @@ int main(int argc, char **argv)
     std::cout
     << "Your input has been treated normally, however the return string"
     << " of your input has been modified. More precisely, &lt; and &gt;  are "
-    << " modified due to a javascript hijack issue. ";
+    << " modified due to a javascript hijack issue. <br>";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\""
   << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
   << " this.form.submit(); return false;}\" >";

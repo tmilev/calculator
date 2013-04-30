@@ -1266,7 +1266,7 @@ public:
   static bool outerPlus
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool outerPower
+  static bool outerPowerRaiseToFirst
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool CollectSummands
@@ -1319,6 +1319,9 @@ public:
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerAssociateDivisionDivision
+(CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerAssociateExponentExponent
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerAssociateTimesDivision

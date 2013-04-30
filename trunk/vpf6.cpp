@@ -4031,12 +4031,29 @@ bool CommandList::CollectSummands
   return true;
 }
 
-bool CommandList::outerPower
+bool CommandList::innerAssociateExponentExponent
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ int opPower=theCommands.opThePower();
+  if (!input.IsListNElementsStartingWithAtom(opPower, 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(opPower, 3))
+    return false;
+  Expression tempE;
+  tempE.MakeProducT(theCommands, input[1][2], input[2]);
+  return output.MakeXOX(theCommands, opPower, input[1][1], tempE);
+}
+
+bool CommandList::outerPowerRaiseToFirst
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     return false;
   if (input[2].IsEqualToOne())
-  { output=input[1];
+  { std::string tempS;
+    if (input[1].IsOperation(&tempS))
+      if (tempS=="A" || tempS=="B" || tempS=="C" || tempS=="D" || tempS=="E" ||
+          tempS=="F" || tempS=="G")
+        return false;
+    output=input[1];
     return true;
   }
   return false;

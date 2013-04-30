@@ -192,11 +192,17 @@ bool WeylGroupCalculatorFunctions::innerTensorWeylReps
 
 bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps(theCommands, input, output))
+{ Expression theTensor;
+  if (!WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps(theCommands, input, theTensor))
     return false;
-  CoxeterRepresentation<Rational> theRep;
-  if (!output.IsOfType<CoxeterRepresentation<Rational> > (&theRep))
-    return true;
+  return WeylGroupCalculatorFunctions::innerDecomposeWeylRep(theCommands, theTensor, output);
+}
+
+bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ CoxeterRepresentation<Rational> theRep;
+  if (!input.IsOfType<CoxeterRepresentation<Rational> > (&theRep))
+    return false;
   List<ClassFunction<Rational> > theCFs;
   List<CoxeterRepresentation<Rational> > outputReps;
   theRep.Decomposition(theCFs, outputReps);

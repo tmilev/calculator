@@ -565,7 +565,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    printout of all Gaussian elimantion steps. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
   this->AddOperationInnerHandler
-  ("SolveSerreLikePolynomialSystem", this->innerSolveSerreLikeSystem, "",
+  ("FindOneSolutionSerreLikePolynomialSystem", this->innerSolveSerreLikeSystem, "",
    "Attempts to heuristically solve a system of polynomial of equations over the rationals. \
    The input system of equations can be arbitrary, \
    however it is assumed that the system is Serre-like, i.e., comes \
@@ -582,7 +582,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    solution over the rationals was found.\
    <br>Outcome 4. The system has a solution over the rationals. A solution is given.\
    ",
-   "SolveSerreLikePolynomialSystem{}(\
+   "FindOneSolutionSerreLikePolynomialSystem{}(\
    x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \
 x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},\
 x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},\
@@ -1128,8 +1128,8 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
    this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
-   "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
-   If you want decomposition, use V*V instead. ",
+   "Tensor product and decompose two Weyl group reps. This operation is similar to the \
+   \\otimes operation, but in addition decomposes the product. ",
    "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",

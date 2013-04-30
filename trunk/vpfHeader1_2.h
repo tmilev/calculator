@@ -6550,24 +6550,24 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     basisMon.MakeConst(*this->owneR);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, theRingUnit);
-    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
-    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
+//    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
+//    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
 //    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
     return;
   }
-  std::cout << "<br>Not a monomial basis of fd part";
+//  std::cout << "<br>Not a monomial basis of fd part";
 //  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-  std::cout << "<br>";
-  for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
-  { std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
-  }
+//  std::cout << "<br>";
+//  for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
+//  { std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
+//  }
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().owneR);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
-  std::cout << " <br>the monomial:" << this->ToString();
+//  std::cout << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
+//  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
@@ -6579,7 +6579,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   CoefficientType theCF;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
-    std::cout << "<br> Processing monomial " << currentMon.ToString();
+    //std::cout << "<br> Processing monomial " << currentMon.ToString();
     tempMat1.MakeIdSpecial();
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { std::stringstream reportStream;
@@ -6602,7 +6602,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       reportStream << "done!";
       theReport.Report(reportStream.str());
     }
-    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
+//    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
     for (int i=0; i<tempMat1.size; i++)
     { int otherIndex=-1;
@@ -6615,16 +6615,16 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         newMon.indexFDVector=otherIndex;
         theCF=theUEelt.theCoeffs[l];
         theCF*=tempMat1.theCoeffs[i];
-        std::cout << "<br>adding to " << output.ToString()
-        << " the monomial " << newMon.ToString() << " with coefficient "
-        << theCF.ToString() << " to obtain ";
+        //std::cout << "<br>adding to " << output.ToString()
+        //<< " the monomial " << newMon.ToString() << " with coefficient "
+        //<< theCF.ToString() << " to obtain ";
         output.AddMonomial(newMon, theCF);
-        std::cout << output.ToString();
+        //std::cout << output.ToString();
       }
     }
   }
-  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
-  std::cout << "<br> Final output: " << output.ToString();
+//  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
+//  std::cout << "<br> Final output: " << output.ToString();
   theMod.GetOwner().OrderSSLieAlgebraStandard();
 }
 

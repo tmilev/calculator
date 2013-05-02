@@ -1323,7 +1323,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
   /*if (this->theWeyl.WeylLetter=='D' && theDimension==4)
     theAutoIndex=2;
 */
-  mapOnRootSpaces.AssignRootsToRowsOfMatrix(theAutos.ExternalAutomorphisms.TheObjects[theAutoIndex]);
+  mapOnRootSpaces.AssignVectorsToRows(theAutos.ExternalAutomorphisms[theAutoIndex]);
   mapOnRootSpaces.Transpose(theGlobalVariables);
 //  mapOnRootSpaces.ComputeDebugString();
 //  Matrix<Rational>  theDet=mapOnRootSpaces;
@@ -1353,7 +1353,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
       tempElt.MakeGGenerator(rangeRoot, *this);
       Range[theIndex]=tempElt;
       tempElt.MakeGGenerator(domainRoot, *this);
-      Domain.TheObjects[theIndex]=tempElt;
+      Domain[theIndex]=tempElt;
       NonExplored.RemoveSelection(theIndex);
     }
   }

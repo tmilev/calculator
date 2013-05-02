@@ -3228,7 +3228,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
   Vectors<Rational> outputCartanCentralizer;
-  theHWs.IntersectTwoLinSpaces(theHWs, theCartan, outputCartanCentralizer, *theGlobalVariables);
+  theHWs.IntersectTwoLinSpaces(theHWs, theCartan, outputCartanCentralizer, 0, theGlobalVariables);
   this->CartanOfCentralizer.SetSize(outputCartanCentralizer.size);
   for (int i=0; i<this->CartanOfCentralizer.size; i++)
   { tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owneR);

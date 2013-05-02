@@ -1893,7 +1893,7 @@ public:
     return Result;
   }
   inline Element& operator()(int i, int j)const
-  { if (i<0  || i>=this->NumRows || j<0 || j>this->NumCols)
+  { if (i<0  || i>=this->NumRows || j<0 || j>=this->NumCols)
     { std::cout << "This is a programming error: requesting row, column indexed"
       << " by " << i+1 << " and " << j+1 << " but I am a matrix with "
       << this->NumRows << " rows and " << this->NumCols << " colums. "
@@ -1916,8 +1916,8 @@ public:
      return true;
   }
   void ColToRoot(int colIndex, Vector<Element>& output)const;
-  void RowToRoot(int rowIndex, Vector<Element>& output)const;
-  int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
+  void GetVectorFromRow(int rowIndex, Vector<Element>& output)const;
+  int FindPivot(int columnIndex, int RowStartIndex);
   bool FindFirstNonZeroElementSearchEntireRow(Element& output)
   { for (int i=0; i<this->NumCols; i++)
       for(int j=0; j<this->NumRows; j++)
@@ -1930,8 +1930,8 @@ public:
   void MakeLinearOperatorFromDomainAndRange(Vectors<Element>& domain, Vectors<Element>& range)
   { Matrix<Element> A;
     Matrix<Element> B;
-    A.AssignRootsToRowsOfMatrix(domain);
-    B.AssignRootsToRowsOfMatrix(range);
+    A.AssignVectorsToRows(domain);
+    B.AssignVectorsToRows(range);
     A.Invert();
     (*this)=A*B;
     this->Transpose();
@@ -1967,7 +1967,7 @@ public:
   void NonPivotPointsToEigenVectorMatrixForm
   (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 ;
-  void GetListRowsToVectors(List<Vector<Element> >& output)
+  void GetVectorsFromRows(List<Vector<Element> >& output)
   { output.SetSize(this->NumRows);
     for (int i=0; i<this->NumRows; i++)
     { output[i].SetSize(this->NumCols);
@@ -1993,7 +1993,7 @@ void NonPivotPointsToEigenVector
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
   void AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T);
-  void AssignVectorsToRows(Vectors<Element>& input)
+  void AssignVectorsToRows(const Vectors<Element>& input)
   { int numCols=-1;
     if (input.size>0)
       numCols=input[0].size;
@@ -2022,9 +2022,6 @@ void NonPivotPointsToEigenVector
     for (int i=0; i<input.size; i++)
       this->elements[0][i]=input.TheObjects[i];
   }
-  void FindZeroEigenSpacE
-  (List<List<Element> >& output, const Element& theRingUnit, const Element& theRingMinusUnit, const Element& theRingZero, GlobalVariables& theGlobalVariables)
-;
   void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero=0);
   inline bool operator==(const Matrix<Element>& other)const
   { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)
@@ -2127,21 +2124,16 @@ void NonPivotPointsToEigenVector
   //In the Gaussian elimination below, we define non-pivot points to be indices of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
-  inline static void GaussianEliminationByRows
-  (Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints,
-   GlobalVariables* theGlobalVariables=0)
-  { Matrix<Element>::GaussianEliminationByRows
-    (theMatrix, otherMatrix, outputNonPivotPoints, true, theGlobalVariables);
-  }
   static void GaussianEliminationByRows
-  (Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
-   bool returnNonPivotPoints, GlobalVariables* theGlobalVariables=0)
+  (Matrix<Element>& mat, Matrix<Element>* carbonCopyMat=0,
+   Selection* outputNonPivotColumns=0, Selection* outputPivotColumns=0,
+   GlobalVariables* theGlobalVariables=0)
   ;
   void GaussianEliminationByRows
-  (Matrix<Element>& otherMatrix, Selection& outputNonPivotColumns,
+  (Matrix<Element>* carbonCopyMat=0, Selection* outputNonPivotColumns=0, Selection* outputPivotColumns=0,
    GlobalVariables* theGlobalVariables=0)
   { Matrix<Element>::GaussianEliminationByRows
-    (*this, otherMatrix, outputNonPivotColumns, theGlobalVariables);
+    (*this, carbonCopyMat, outputNonPivotColumns, outputPivotColumns, theGlobalVariables);
   }
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
   (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
@@ -2158,8 +2150,6 @@ void NonPivotPointsToEigenVector
   Element GetTrace();
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
-  void AssignRootsToRowsOfMatrix(const Vectors<Rational>& input)
-  ;
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
   void LieBracketWith(const Matrix<Element>& right);
@@ -2167,13 +2157,17 @@ void NonPivotPointsToEigenVector
   (Vectors<Rational>& outputBasis, const Rational& DesiredError, int SuggestedOrder, int numIterations)
   ;
   void MatrixToRoot(Vector<Rational> & output);
-  inline void FindZeroEigenSpace(Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
-  { this->FindZeroEigenSpaceOneOneForEachNonPivot(output);
+  void FindZeroEigenSpace(List<Vector<Element> >& output)const
+  { Matrix<Element> tempMat=*this;
+    tempMat.FindZeroEigenSpaceModifyMe(output);
   }
-  inline void FindZeroEigenSpace(Vectors<Rational>& output)
-  { this->FindZeroEigenSpaceOneOneForEachNonPivot(output);
+  void FindZeroEigenSpaceModifyMe(List<Vector<Element> >& output);
+  void DestructiveEigenspace
+  (const Element &inputEigenValue, List<Vector<Element> >& outputEigenspace)
+  { for(int i=0; i<this->NumCols; i++)
+      this->elements[i][i] -= inputEigenValue;
+    this->FindZeroEigenSpaceModifyMe(outputEigenspace);
   }
-  void FindZeroEigenSpaceOneOneForEachNonPivot(Vectors<Element>& output);
   static bool SystemLinearInequalitiesHasSolution
   (Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputPoint);
   static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
@@ -2465,24 +2459,23 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
 
 template <typename Element>
 bool Matrix<Element>::Invert(const Element& theRingUnit, const Element& theRingZero)
-{ assert(this->NumCols==this->NumRows);
+{ if (this->NumCols!=this->NumRows)
+  { std::cout << "This is a programming error: requesting to invert a non-square matrix of "
+    << this->NumRows << " rows and " << this->NumCols << " columns. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  MacroRegisterFunctionWithName("Matrix::Invert");
 //  if (this->flagComputingDebugInfo)
 //    this->ComputeDebugString();
-  Matrix tempMatrix;
-  Selection NonPivotPts;
-  tempMatrix.init(this->NumRows, this->NumCols);
-  tempMatrix.NullifyAll(theRingZero);
-  for (int i=0; i<this->NumCols; i++)
-    tempMatrix.elements[i][i]=theRingUnit;
-  this->GaussianEliminationByRows(*this, tempMatrix, NonPivotPts);
-  if(NonPivotPts.CardinalitySelection!=0)
+  Matrix theInverse;
+  theInverse.MakeIdMatrix(this->NumRows);
+  Selection NonPivotCols;
+  this->GaussianEliminationByRows(*this, &theInverse, &NonPivotCols);
+  if(NonPivotCols.CardinalitySelection!=0)
     return false;
-  else
-  { *this=tempMatrix;
-//    if (this->flagComputingDebugInfo)
-//      this->ComputeDebugString();
-    return true;
-  }
+  *this=theInverse;
+  return true;
 }
 
 template <typename Element>
@@ -2548,31 +2541,6 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 }
 
 template<typename Element>
-void Matrix<Element>::FindZeroEigenSpacE(List<List<Element> >& output, const Element& theRingUnit, const Element& theRingMinusUnit, const Element& theRingZero, GlobalVariables& theGlobalVariables)
-{ Matrix<Element> tempMat;
-  Matrix<Element> emptyMat;
-  tempMat=(*this);
-  Selection nonPivotPts;
-  tempMat.GaussianEliminationByRows(tempMat, emptyMat, nonPivotPts);
-  output.SetSize(nonPivotPts.CardinalitySelection);
-  Element tempElt;
-  for (int i=0; i<nonPivotPts.CardinalitySelection; i++)
-  { List<Element>& current= output.TheObjects[i];
-    current.initFillInObject(this->NumCols, theRingZero);
-    int currentPivotIndex = nonPivotPts.elements[i];
-    current.TheObjects[currentPivotIndex]=theRingUnit;
-    int rowCounter=0;
-    for (int j=0; j<this->NumCols; j++)
-      if (!nonPivotPts.selected[j])
-      { tempElt=tempMat.elements[rowCounter][currentPivotIndex];
-        tempElt.operator*=(theRingMinusUnit);
-        current.TheObjects[j]=tempElt;
-        rowCounter++;
-      }
-  }
-}
-
-template<typename Element>
 void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 { assert(this!=&m1 && this!=&m2);
   this->Resize(m1.NumRows+m2.NumRows, m1.NumCols+m2.NumCols, false);
@@ -2613,8 +2581,8 @@ void Matrix<Element>::DirectSumWith(const Matrix<Element>& m2, const Element& th
 }
 
 template <typename Element>
-inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex)
-{ for(int i = RowStartIndex; i<= RowEndIndex; i++)
+inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex)
+{ for(int i = RowStartIndex; i<this->NumRows; i++)
     if (!this->elements[i][columnIndex].IsEqualToZero())
       return i;
   return -1;
@@ -2649,11 +2617,12 @@ inline void Matrix<Element>::SwitchTwoRows(int row1, int row2)
 }
 
 template <typename Element>
-bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
+bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
 { assert(A.NumRows== b.NumRows);
   Selection thePivotPoints;
-  Matrix<Element>::GaussianEliminationByRows(A, b, thePivotPoints, false);
-  return A.RowEchelonFormToLinearSystemSolution( thePivotPoints, b, output);
+  Matrix<Element>::GaussianEliminationByRows(A, &b, 0, &thePivotPoints);
+  return A.RowEchelonFormToLinearSystemSolution(thePivotPoints, b, output);
 }
 
 template <typename Element>
@@ -2666,11 +2635,11 @@ bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(Selection& inputPivot
   int NumPivots=0;
   for (int i=0; i<this->NumCols; i++)
     if (inputPivotPoints.selected[i])
-    { outputSolution.elements[i][0].Assign(inputRightHandSide.elements[NumPivots][0]);
+    { outputSolution(i,0)=inputRightHandSide(NumPivots,0);
       NumPivots++;
     }
     else
-      outputSolution.elements[i][0].MakeZero();
+      outputSolution(i,0).MakeZero();
   for (int i=NumPivots; i<this->NumRows; i++)
     if (!inputRightHandSide.elements[i][0].IsEqualToZero())
       return false;
@@ -4266,8 +4235,10 @@ class Vectors: public List<Vector<CoefficientType> >
     Selection bufferSelection;
     return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
-  void SelectABasis
-  (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices, GlobalVariables& theGlobalVariables)const
+  static void SelectABasisInSubspace
+  (const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
+   const CoefficientType& theRingZero, Selection& outputSelectedPivots,
+   GlobalVariables* theGlobalVariables=0)
   ;
   int GetRankOfSpanOfElements
   (Matrix<CoefficientType>* buffer=0, Selection* bufferSelection=0)const
@@ -4454,9 +4425,9 @@ bool ComputeNormalFromSelectionAndExtraRoot
     this->operator=(output);
   }
   static void IntersectTwoLinSpaces
-  (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
-   Vectors<CoefficientType>& output, GlobalVariables& theGlobalVariables, const CoefficientType& theRingZero=0
-   )
+  (const List<Vector<CoefficientType> >& firstSpace, const List<Vector<CoefficientType> >& secondSpace,
+   List<Vector<CoefficientType> >& output, const CoefficientType& theRingZero=0,
+   GlobalVariables* theGlobalVariables=0)
      ;
   bool IsRegular
   (Vector<CoefficientType>& r, Vector<CoefficientType>& outputFailingNormal,
@@ -7629,13 +7600,11 @@ int Vectors<CoefficientType>::GetRankOfSpanOfElements(Matrix<CoefficientType>* b
 template <class CoefficientType>
 void Vectors<CoefficientType>::GaussianEliminationForNormalComputation(Matrix<CoefficientType>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
 { inputMatrix.init((int)this->size, (int)theDimension);
-  Matrix<CoefficientType> matOutputEmpty;
-  matOutputEmpty.init(-1, -1);
   outputNonPivotPoints.init(theDimension);
   for(int i=0; i<this->size; i++)
     for(int j=0; j<theDimension; j++)
-      inputMatrix.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
-  Matrix<CoefficientType>::GaussianEliminationByRows(inputMatrix, matOutputEmpty, outputNonPivotPoints);
+      inputMatrix(i,j)=(*this)[i][j];
+  Matrix<CoefficientType>::GaussianEliminationByRows(inputMatrix, 0, &outputNonPivotPoints);
 }
 
 template <class CoefficientType>
@@ -7718,10 +7687,10 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
         break;
     if (col>=theDim)
        break;
-    bufferMatGaussianElimination.RowToRoot(i, tempRoot);
-    output.TheObjects[i]=this->TheObjects[col];
-    output.TheObjects[i]/=bufferMatGaussianElimination.elements[i][col];
-    tempRoot*=output.TheObjects[i];
+    bufferMatGaussianElimination.GetVectorFromRow(i, tempRoot);
+    output[i]=this->TheObjects[col];
+    output[i]/=bufferMatGaussianElimination.elements[i][col];
+    tempRoot*=output[i];
     theCombination-=tempRoot;
   }
   if (!theCombination.IsEqualToZero())
@@ -7764,13 +7733,11 @@ void Vectors<CoefficientType>::GetLinearDependenceRunTheLinearAlgebra
     return;
   int Dimension=(int) this->TheObjects[0].size;
   outputTheSystem.init(Dimension, (int)this->size);
-  Matrix<CoefficientType> matOutputEmpty;
-  matOutputEmpty.init(-1, -1);
   for(int i=0; i<this->size; i++)
     for(int j=0; j<Dimension; j++)
       outputTheSystem.elements[j][i]=(this->TheObjects[i][j]);
   //outputTheSystem.ComputeDebugString();
-  Matrix<CoefficientType>::GaussianEliminationByRows(outputTheSystem, matOutputEmpty, outputNonPivotPoints);
+  Matrix<CoefficientType>::GaussianEliminationByRows(outputTheSystem, 0, &outputNonPivotPoints);
   //outputTheSystem.ComputeDebugString();
 }
 
@@ -8096,44 +8063,51 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
 }
 
 template <class CoefficientType>
-void Vectors<CoefficientType>::SelectABasis
-  (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices, GlobalVariables& theGlobalVariables)const
-{ assert(this!=&output);
-  ProgressReport theReport(&theGlobalVariables);
-  if (this->size==0)
+void Vectors<CoefficientType>::SelectABasisInSubspace
+(const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
+ const CoefficientType& theRingZero, Selection& outputSelectedPivotColumns,
+ GlobalVariables* theGlobalVariables)
+{ if (&input==&output)
+  { List<Vector<CoefficientType> > inputCopy=input;
+    Vectors<CoefficientType>::SelectABasisInSubspace
+    (inputCopy, output, theRingZero, outputSelectedPivotColumns, theGlobalVariables);
     return;
-  int theDim=this->TheObjects[0].size;
-  output.ReservE(this->size);
-  output.size=0;
-  Matrix<CoefficientType> theMat, matEmpty;
-  theMat.init(1, theDim);
+  }
+  if (input.size==0)
+  { output=input;
+    return;
+  }
+  MacroRegisterFunctionWithName("Vectors::SelectABasisInSubspace");
+  ProgressReport theReport(theGlobalVariables);
+  int theDim=input[0].size;
+  if (theGlobalVariables!=0)
+  { std::stringstream reportStream;
+    reportStream << "Selecting a basis of a vector space with "
+    << input.size << "generators in dimension " << theDim << "... " ;
+    theReport.Report(reportStream.str());
+  }
+  Matrix<CoefficientType> theMat;
+  int MaxNumRows=MathRoutines::Minimum(input.size, theDim);
+  theMat.init(MaxNumRows, theDim);
   int currentRow=0;
-  Selection theSel;
-  outputSelectedIndices.init(this->size);
-  for (int i=0; i<this->size; i++)
-  { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-    { std::stringstream out;
-      out << "Selecting a basis in dimension " << theDim << ", processed " << i
-      << " out of " << this->size;
-      theReport.Report(out.str());
-    }
-    for (int j=0; j<theDim; j++)
-      theMat.elements[currentRow][j]=(*this)[i][j];
-    theMat.GaussianEliminationByRows(theMat, matEmpty, theSel);
-    if (currentRow<theDim-theSel.CardinalitySelection)
-    { output.AddOnTop(this->TheObjects[i]);
-      outputSelectedIndices.AddSelectionAppendNewIndex(i);
-      theMat.Resize(currentRow+2, theDim, true, &theRingZero);
-    }
-    currentRow=theDim-theSel.CardinalitySelection;
-    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-    { std::stringstream out;
-      out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of "
-      << this->size;
-      theReport.Report(out.str());
-    }
+  for (int i=0; i<input.size; i++)
+  { for (int j=0; j<theDim; j++)
+      theMat(i,j)=input[i][j];
+    currentRow++;
+    if (currentRow==theDim || i==input.size-1)
+      theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
+    currentRow=outputSelectedPivotColumns.CardinalitySelection;
     if (currentRow==theDim)
-      return;
+      break;
+  }
+  output.SetSize(outputSelectedPivotColumns.CardinalitySelection);
+  for (int i=0; i<output.size; i++)
+    theMat.GetVectorFromRow(i, output[i]);
+  if (theGlobalVariables!=0)
+  { std::stringstream reportStream;
+    reportStream << "Selecting a basis of a vector space with "
+    << input.size << "generators in dimension " << theDim << "... DONE! " ;
+    theReport.Report(reportStream.str());
   }
 }
 
@@ -8510,22 +8484,20 @@ bool Vectors<CoefficientType>::IsRegular
 template<class CoefficientType>
 bool Vectors<CoefficientType>::ComputeNormalExcludingIndex
 (Vector<CoefficientType>& output, int index, Matrix<CoefficientType>& bufferMatrix)
-{ Matrix<CoefficientType> matOutputEmpty;
-  Selection NonPivotPoints;
+{ Selection NonPivotPoints;
   if (this->size==0)
     return false;
   int theDimension= this->TheObjects[0].size;
   output.SetSize(theDimension);
   bufferMatrix.init((int)this->size-1, (int)theDimension);
-  matOutputEmpty.init(-1, -1);
   int k=-1;
   for(int i=0; i<this->size; i++)
     if (i!=index)
     { k++;
       for(int j=0; j<theDimension; j++)
-        bufferMatrix.elements[k][j].Assign(this->TheObjects[i].TheObjects[j]);
+        bufferMatrix.elements[k][j]=(*this)[i][j];
     }
-  Matrix<CoefficientType>::GaussianEliminationByRows(bufferMatrix, matOutputEmpty, NonPivotPoints);
+  Matrix<CoefficientType>::GaussianEliminationByRows(bufferMatrix, 0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -8535,15 +8507,13 @@ bool Vectors<CoefficientType>::ComputeNormalExcludingIndex
 template<class CoefficientType>
 bool Vectors<CoefficientType>::ComputeNormalFromSelection
 (Vector<CoefficientType>& output, Selection& theSelection, Matrix<CoefficientType>& bufferMatrix, int theDimension)
-{ Matrix<CoefficientType> matOutputEmpty;
-  Selection NonPivotPoints;
-  matOutputEmpty.init(-1, -1);
+{ Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
   for(int i=0; i<theSelection.CardinalitySelection; i++)
     for(int j=0; j<theDimension; j++)
-      bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-  Matrix<Rational>::GaussianEliminationByRows(bufferMatrix, matOutputEmpty, NonPivotPoints);
+      bufferMatrix.elements[i][j]=(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
+  Matrix<Rational>::GaussianEliminationByRows(bufferMatrix, 0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
@@ -8817,14 +8787,6 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
   }
 }
 
-template <typename Element>
-void Matrix<Element>::AssignRootsToRowsOfMatrix(const Vectors<Rational>& input)
-{ this->init(input.size, input.GetDim());
-  for (int i=0; i<this->NumRows; i++)
-    for (int j=0; j<this->NumCols; j++)
-      this->elements[i][j]=input[i][j];
-}
-
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
 (Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution,
@@ -9034,22 +8996,23 @@ inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator
 }
 
 template <typename Element>
-void Matrix<Element>::FindZeroEigenSpaceOneOneForEachNonPivot(Vectors<Element>& output)
-{ Matrix<Element> tempMat;
-  tempMat=(*this);
-  Matrix<Element> emptyMat;
+void Matrix<Element>::FindZeroEigenSpaceModifyMe(List<Vector<Element> >& output)
+{ if (this->NumRows==0)
+  { output.SetSize(this->NumCols);
+    for (int i=0; i<this->NumCols; i++)
+      output[i].MakeEi(this->NumCols, i);
+    return;
+  }
   Selection nonPivotPts;
-  tempMat.GaussianEliminationByRows(tempMat, emptyMat, nonPivotPts);
+  this->GaussianEliminationByRows(0, &nonPivotPts);
   output.SetSize(nonPivotPts.CardinalitySelection);
   for (int i=0; i<nonPivotPts.CardinalitySelection; i++)
-  { Vector<Element>& current= output[i];
-    current.MakeZero(this->NumCols);
-    int currentPivotIndex = nonPivotPts.elements[i];
-    current[currentPivotIndex]=1;
+  { int currentPivotIndex = nonPivotPts.elements[i];
+    output[i].MakeEi(this->NumCols, currentPivotIndex);
     int rowCounter=0;
     for (int j=0; j<this->NumCols; j++)
       if (!nonPivotPts.selected[j])
-      { current[j]=-tempMat.elements[rowCounter][currentPivotIndex];
+      { output[i][j]-=this->elements[rowCounter][currentPivotIndex];
         rowCounter++;
       }
   }
@@ -9395,73 +9358,77 @@ inline void Matrix<Element>::AddTwoRows
 
 template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows
-(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
- bool returnNonPivotPoints, GlobalVariables* theGlobalVariables)
-{ int tempI;
+( Matrix<Element>& mat, Matrix<Element>* carbonCopyMat,
+  Selection* outputNonPivotColumns, Selection* outputPivotColumns,
+  GlobalVariables* theGlobalVariables)
+{ //Checking for bees
+  if (mat.NumRows==0)
+  { std::cout << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
+    << " zero rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (carbonCopyMat!=0)
+    if (carbonCopyMat->NumRows!=mat.NumRows)
+    { std::cout << "This is a programming error: requesting to do Gaussian elimination with carbon copy, "
+      << " however the matrix has " << mat.NumRows << " rows, while the carbon copy has "
+      << carbonCopyMat->NumRows << " rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  ///////////////////
+  int tempI;
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
   Element tempElement;
-  outputSelection.init(mat.NumCols);
+  if (outputNonPivotColumns!=0)
+    outputNonPivotColumns->init(mat.NumCols);
+  if (outputPivotColumns!=0)
+    outputPivotColumns->init(mat.NumCols);
   bool doProgressReport= theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
   ProgressReport theReport(theGlobalVariables);
-  //mat.ComputeDebugString();
+  //Initialization done! Time to do actual work:
   for (int i=0; i<mat.NumCols; i++)
   { if (NumFoundPivots == MaxRankMat)
-    { if (returnNonPivotPoints)
+    { if (outputNonPivotColumns!=0)
         for (int j =i; j<mat.NumCols; j++)
-          outputSelection.AddSelectionAppendNewIndex(j);
+          outputNonPivotColumns->AddSelectionAppendNewIndex(j);
       return;
     }
-    tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
-    if (tempI!=-1)
-    { if (tempI!=NumFoundPivots)
-      { mat.SwitchTwoRows(NumFoundPivots, tempI);
-        output.SwitchTwoRows (NumFoundPivots, tempI);
-      }
-      tempElement=mat.elements[NumFoundPivots][i];
-//      std::string tempS;
-//      if (i==9 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic)
-//      { std::cout << tempS;
-//      }
-//      tempS=tempElement.ToString();
-      tempElement.Invert();
-//      assert(tempElement.checkConsistency());
-//      tempS=tempElement.ToString();
-      mat.RowTimesScalar(NumFoundPivots, tempElement);
-      output.RowTimesScalar(NumFoundPivots, tempElement);
-//      assert(tempElement.checkConsistency());
-      for (int j = 0; j<mat.NumRows; j++)
-        if (j!=NumFoundPivots)
-          if (!mat.elements[j][i].IsEqualToZero())
-          { //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-            //{ tempS=tempElement.ToString();
-              //mat.ComputeDebugString();
-            //}
-            tempElement=(mat.elements[j][i]);
-            tempElement.Minus();
-            //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-              //tempS=tempElement.ToString();
-            if (doProgressReport)
-            { std::stringstream out;
-              out << "Gaussian elimination (" << mat.NumRows << "x" << mat.NumCols
-              << "): column " << i+1 << " out of " << mat.NumCols
-              << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row "
-              << j+1 << " out of " << mat.NumRows;
-              theReport.Report(out.str());
-            }
-            mat.AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
-            output.AddTwoRows(NumFoundPivots, j, 0, tempElement, theGlobalVariables);
-            //assert(tempElement.checkConsistency());
-            //mat.ComputeDebugString();
-          }
-      NumFoundPivots++;
-      if (!returnNonPivotPoints)
-        outputSelection.AddSelectionAppendNewIndex(i);
+    tempI = mat.FindPivot(i, NumFoundPivots);
+    if (tempI==-1)
+    { if (outputNonPivotColumns!=0)
+        outputNonPivotColumns->AddSelectionAppendNewIndex(i);
+      continue;
     }
-    else
-      if (returnNonPivotPoints)
-        outputSelection.AddSelectionAppendNewIndex(i);
-    //mat.ComputeDebugString();
+    if (outputPivotColumns!=0)
+      outputPivotColumns->AddSelectionAppendNewIndex(i);
+    mat.SwitchTwoRows(NumFoundPivots, tempI);
+    if (carbonCopyMat!=0)
+      carbonCopyMat->SwitchTwoRows(NumFoundPivots, tempI);
+    tempElement=mat.elements[NumFoundPivots][i];
+    tempElement.Invert();
+    mat.RowTimesScalar(NumFoundPivots, tempElement);
+    if (carbonCopyMat!=0)
+      carbonCopyMat->RowTimesScalar(NumFoundPivots, tempElement);
+    for (int j = 0; j<mat.NumRows; j++)
+      if (j!=NumFoundPivots)
+        if (!mat.elements[j][i].IsEqualToZero())
+        { tempElement=(mat.elements[j][i]);
+          tempElement.Minus();
+          if (doProgressReport)
+          { std::stringstream reportStream;
+            reportStream << "Gaussian elimination (" << mat.NumRows << "x" << mat.NumCols
+            << "): column " << i+1 << " out of " << mat.NumCols
+            << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row "
+            << j+1 << " out of " << mat.NumRows;
+            theReport.Report(reportStream.str());
+          }
+          mat.AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
+          if (carbonCopyMat!=0)
+            carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement, theGlobalVariables);
+          //assert(tempElement.checkConsistency());
+          //mat.ComputeDebugString();
+        }
+    NumFoundPivots++;
   }
 }
 

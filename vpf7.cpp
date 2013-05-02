@@ -200,7 +200,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
   if (this->basisRationalForm.NumRows==0)
     outputGenerator.MakeZero(inputLine.size);
   else
-    this->basisRationalForm.RowToRoot(0, outputGenerator);
+    this->basisRationalForm.GetVectorFromRow(0, outputGenerator);
 }
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex)

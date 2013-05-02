@@ -787,7 +787,7 @@ bool Serialization::innerLoadFromObject
       currentComponent.SetSize(theRanks[i]);
       for (int k=0; k<theRanks[i]; k++)
       { counter++;
-        theHs.RowToRoot(counter, currentComponent[k]);
+        theHs.GetVectorFromRow(counter, currentComponent[k]);
       }
     }
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);

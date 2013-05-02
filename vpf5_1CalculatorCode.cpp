@@ -915,8 +915,8 @@ bool CommandList::innerConesIntersect
     << " which is not allowed. ";
     return output.SetError(out.str(), theCommands);
   }
-  coneNonStrictMatForm.GetListRowsToVectors(coneNonStrictGens);
-  coneStrictMatForm.GetListRowsToVectors(coneStrictGens);
+  coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
+  coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
   out << "<br>Input cone 1: ";
   for (int i=0; i<coneNonStrictGens.size; i++)
     out << "<br>v_{" << i+1 << "}:=" << coneNonStrictGens[i].ToString() << ";";

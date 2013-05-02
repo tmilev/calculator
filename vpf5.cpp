@@ -1284,7 +1284,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(tempStream1.str());
 //  std::cout << "<br>Parabolic selection: " << LeviInSmall.ToString();
-  List<List<List<CoefficientType> > > eigenSpacesPerSimpleGenerator;
+  List<List<Vector<CoefficientType> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall=LeviInSmall;
   InvertedLeviInSmall.InvertSelection();
@@ -1315,22 +1315,21 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       theReport.Report(tempStream3.str());
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
-    currentOpMat.FindZeroEigenSpacE
-    (eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    currentOpMat.FindZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
       tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1
       << " seconds.";
       theReport.Report(tempStream3.str());
     if (i==0)
-      theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
+      theFinalEigenSpace=(eigenSpacesPerSimpleGenerator[i]);
     else
     {   std::stringstream tempStream4;
         double timeAtStart2=theGlobalVariables.GetElapsedSeconds();
         tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.ToString() << "...";
       tempSpace1=theFinalEigenSpace;
         theReport.Report(tempStream4.str());
-      tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
+      tempSpace2=eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.IntersectTwoLinSpaces
-      (tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
+      (tempSpace1, tempSpace2, theFinalEigenSpace, theRingZero, &theGlobalVariables);
         tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart2 << " seconds.";
         theReport.Report(tempStream4.str());
     }
@@ -2858,7 +2857,7 @@ bool CommandList::innerInvertMatrix
   tempMat.AppendMatrixOnTheRight(outputMat);
   out << "<br>" << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat)) ;
   for (int i=0; i<mat.NumCols; i++)
-  { tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
+  { tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI!=-1)
     { if (tempI!=NumFoundPivots)
       { mat.SwitchTwoRows(NumFoundPivots, tempI);

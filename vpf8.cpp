@@ -177,7 +177,7 @@ void ReflectionSubgroupWeylGroup::GetMatrixOfElement
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
-  outputMatrix.AssignRootsToRowsOfMatrix(imageBasis);
+  outputMatrix.AssignVectorsToRows(imageBasis);
   outputMatrix.Transpose();
 }
 
@@ -214,7 +214,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   //this->preferredBasiS[0]="(1,0)";
   //this->preferredBasiS[1]="(0,1)";
   ////////////////////////////////////////
-  this->preferredBasisChangE.AssignRootsToRowsOfMatrix(this->preferredBasiS);
+  this->preferredBasisChangE.AssignVectorsToRows(this->preferredBasiS);
   this->preferredBasisChangE.Transpose();
   this->preferredBasisChangeInversE=this->preferredBasisChangE;
   this->preferredBasisChangeInversE.Invert();
@@ -351,7 +351,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   tempMat.Invert(theGlobalVariables);
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
-  { tempMat.RowToRoot(i, tempRoot);
+  { tempMat.GetVectorFromRow(i, tempRoot);
     if(ParabolicEvaluationRootImage[i].IsEqualToZero())
     { WallsWeylChamberLargerAlgebra.SetSize(WallsWeylChamberLargerAlgebra.size+1);
       *WallsWeylChamberLargerAlgebra.LastObject()=tempRoot;
@@ -379,10 +379,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
-  { input.theDomain().theWeyl.CartanSymmetric.RowToRoot(i, tempRoot);
+  { input.theDomain().theWeyl.CartanSymmetric.GetVectorFromRow(i, tempRoot);
     if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).IsEqualToZero())
     { tempRoots.SetSize(tempRoots.size+1);
-      tempMat.RowToRoot(i, *tempRoots.LastObject());
+      tempMat.GetVectorFromRow(i, *tempRoots.LastObject());
     }
   }
   this->preferredBasisChangeInversE.ActOnVectorsColumn(tempRoots);
@@ -1088,7 +1088,7 @@ void Lattice::GetDefaultFundamentalDomainInternalPoint
 { output.MakeZero(this->GetDim());
   Vector<Rational> tempRoot;
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
-  { this->basisRationalForm.RowToRoot(i, tempRoot);
+  { this->basisRationalForm.GetVectorFromRow(i, tempRoot);
     output+=tempRoot;
   }
   output/=2;
@@ -1186,7 +1186,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   tMpRt=this->ParabolicSelectionSmallerAlgebra;
 //  std::cout << "<br>sel smaller: " << tMpRt.ToString();
   for (int i=0; i<this->ParabolicSelectionSmallerAlgebra.MaxSize; i++)
-  { tempMat.RowToRoot(i, tempRoot);
+  { tempMat.GetVectorFromRow(i, tempRoot);
     tempVertices.AddOnTop(tempRoot);
     if(this->ParabolicSelectionSmallerAlgebra.selected[i])
       tempVertices.AddOnTop(-tempRoot);
@@ -1821,10 +1821,10 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
 (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine,
  List<ConeLatticeAndShift>& outputAppend, Matrix<Rational> & theProjectionLatticeLevel,
  GlobalVariables& theGlobalVariables)
-{ Matrix<Rational>  matVertices;
-  matVertices.AssignRootsToRowsOfMatrix(this->theProjectivizedCone.Vertices);
+{ Matrix<Rational> matVertices;
+  matVertices.AssignVectorsToRows(this->theProjectivizedCone.Vertices);
   Vectors<Rational> theNormals;
-  matVertices.FindZeroEigenSpace(theNormals, theGlobalVariables);
+  matVertices.FindZeroEigenSpaceModifyMe(theNormals);
   Vector<Rational> preferredNormal;
   for (int i=0; i<theNormals.size; i++)
     if (!theNormals[i][0].IsEqualToZero())
@@ -2014,8 +2014,7 @@ void ConeComplex::GetNewVerticesAppend
   Selection nonPivotPoints=theGlobalVariables.selGetNewVerticesAppend2.GetElement();
   theSel.init(myDyingCone.Normals.size);
 //  int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore;
-  Matrix<Rational> & theLinearAlgebra=theGlobalVariables.matGetNewVerticesAppend.GetElement();
-  Matrix<Rational>  matEmpty;
+  Matrix<Rational>& theLinearAlgebra=theGlobalVariables.matGetNewVerticesAppend.GetElement();
   theLinearAlgebra.init(theDimMinusTwo+1, theDim);
   Vector<Rational> tempRoot;
   for (int i=0; i<numCycles; i++)
@@ -2029,7 +2028,7 @@ void ConeComplex::GetNewVerticesAppend
     }
     for (int k=0; k<theDim; k++)
       theLinearAlgebra.elements[theDimMinusTwo][k]=killerNormal.TheObjects[k];
-    theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, matEmpty, nonPivotPoints);
+    theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, 0, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
     { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
       tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
@@ -2222,7 +2221,6 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
     return;
   }
   Matrix<Rational>& theMat=theGlobalVariables.matComputeNormalFromSelection.GetElement();
-  Matrix<Rational> emptyMat;
   Vector<Rational> tempRoot;
   theMat.init(theDim-1, theDim);
   for (int i=0; i<numCycles; i++)
@@ -2230,7 +2228,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
     for (int j=0; j<theSel.CardinalitySelection; j++)
       for (int k=0; k<theDim; k++)
         theMat.elements[j][k]=this->Normals.TheObjects[theSel.elements[j]].TheObjects[k];
-    theMat.GaussianEliminationByRows(theMat, emptyMat, nonPivotPoints);
+    theMat.GaussianEliminationByRows(theMat, 0, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
     { theMat.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool=this->IsInCone(tempRoot);
@@ -2257,11 +2255,11 @@ bool Cone::EliminateFakeNormalsUsingVertices
   if (numAddedFakeWalls!=0)
   { //we modify the normals so that they lie in the subspace spanned by the vertices
     Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
-    tempMat.AssignRootsToRowsOfMatrix(this->Vertices);
+    tempMat.AssignVectorsToRows(this->Vertices);
     Vectors<Rational> NormalsToSubspace;
-    tempMat.FindZeroEigenSpace(NormalsToSubspace, theGlobalVariables);
+    tempMat.FindZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size>0)
-    { matNormals.AssignRootsToRowsOfMatrix(NormalsToSubspace);
+    { matNormals.AssignVectorsToRows(NormalsToSubspace);
 //      std::cout << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
       gramMatrixInverted=matNormals;
       gramMatrixInverted.Transpose();
@@ -2370,7 +2368,7 @@ bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables&
   extraVertices.SetSize(0);
   if (rankVerticesSpan<theDim)
   { Matrix<Rational>  tempMat;
-    tempMat.AssignRootsToRowsOfMatrix(inputVertices);
+    tempMat.AssignVectorsToRows(inputVertices);
     tempMat.FindZeroEigenSpace(extraVertices);
     for (int i=0; i<extraVertices.size; i++)
     { this->Normals.AddOnTop(extraVertices[i]);
@@ -2757,7 +2755,7 @@ void Lattice::MakeFromMat(const Matrix<Rational> & input)
 
 void Lattice::MakeFromRoots(const Vectors<Rational>& input)
 { Matrix<Rational> tempMat;
-  tempMat.AssignRootsToRowsOfMatrix(input);
+  tempMat.AssignVectorsToRows(input);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
 }
@@ -2846,11 +2844,11 @@ bool Lattice::GetAllRepresentatives
       return false;
 //    }
     else
-      thePeriods.TheObjects[i]=currentPeriodInt.value.TheObjects[0];
-    this->basisRationalForm.RowToRoot(i, thePeriodVectors.TheObjects[i]);
-    rougherLattice.basisRationalForm.RowToRoot(i, tempRoot2);
-    tempRoot=thePeriodVectors.TheObjects[i];
-    tempRoot*=thePeriods.TheObjects[i];
+      thePeriods[i]=currentPeriodInt.value[0];
+    this->basisRationalForm.GetVectorFromRow(i, thePeriodVectors[i]);
+    rougherLattice.basisRationalForm.GetVectorFromRow(i, tempRoot2);
+    tempRoot=thePeriodVectors[i];
+    tempRoot*=thePeriods[i];
 
 //    if (!(tempRoot-tempRoot2).IsEqualToZero())
 //    { std::cout << "exited at point 2 counter i is " << i << " the period vector=" << thePeriodVectors.TheObjects[i].ToString() << " rougher lattice basis vector: " << tempRoot2.ToString();
@@ -3010,10 +3008,9 @@ void Lattice::IntersectWith(const Lattice& other)
   Matrix<Rational> bufferMat;
   startBasis.AssignMatrixRows(this->basisRationalForm);
   otherBasis.AssignMatrixRows(other.basisRationalForm);
-  GlobalVariables theGlobalVariables;
 //  std::cout << "<br>this basis: " << startBasis.ToString();
 //  std::cout << "<br>other basis: " << otherBasis.ToString();
-  startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis, theGlobalVariables);
+  startBasis.IntersectTwoLinSpaces(startBasis, otherBasis, commonBasis);
 //  std::cout << "<br> basis of linear space intersection: " << commonBasis.ToString() << "<br><br> ";
   Lattice thisLatticeIntersected, otherLatticeIntersected;
   thisLatticeIntersected=*this;
@@ -3256,7 +3253,7 @@ void partFraction::GetVectorPartitionFunction
 //  std::cout << "<hr><hr> the lattice generators: " << theLatticeGenerators.ToString();
 //  std::cout << "<br>Corresponding lattice: " << theLattice.ToString();
   Matrix<Rational>  theNormalsMatForm;
-  theNormalsMatForm.AssignRootsToRowsOfMatrix(theLatticeGenerators);
+  theNormalsMatForm.AssignVectorsToRows(theLatticeGenerators);
   theNormalsMatForm.Invert();
   theNormals.AssignMatrixColumns(theNormalsMatForm);
   output.MakeZeroLatTiceZn(owner.AmbientDimension);
@@ -3531,7 +3528,7 @@ void QuasiPolynomial::Substitution
   Vector<Rational> tempRoot;
   for (int i=0; i<theSub.size; i++)
   { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
-    mapFromNewSpaceToOldSpace.RowToRoot(i, tempRoot);
+    mapFromNewSpaceToOldSpace.GetVectorFromRow(i, tempRoot);
     currentPoly.MakeLinPolyFromRootNoConstantTerm(tempRoot);
   }
   Polynomial<Rational> tempP;
@@ -3693,7 +3690,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   resultBasis.ReservE(theScalarProducts.size-1);
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
-  { theZnLattice.basisRationalForm.RowToRoot(i, tempRoot);
+  { theZnLattice.basisRationalForm.GetVectorFromRow(i, tempRoot);
     orthogonalComponent=tempRoot.ScalarEuclidean(theScalarProducts)/theScalarProducts.ScalarEuclidean(theScalarProducts);
     tempRoot-=theScalarProducts*orthogonalComponent;
     assert(orthogonalComponent.IsInteger());
@@ -3741,19 +3738,19 @@ return false;
 }
 
 bool Lattice::SubstitutionHomogeneous
-  (const Matrix<Rational> & theSub, GlobalVariables& theGlobalVariables)
+  (const Matrix<Rational>& theSub, GlobalVariables& theGlobalVariables)
 { int targetDim=theSub.NumCols;
   if (theSub.NumRows!=this->GetDim())
     return false;
   //std::cout <<"<br> the sub: " << theSub.ToString(true, false) << "<br>";
   int startingDim=this->GetDim();
-  Matrix<Rational>  theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
+  Matrix<Rational> theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat=theSub;
   oldBasisTransformed=this->basisRationalForm;
   oldBasisTransformed.Transpose();
   Selection nonPivotPoints;
   //std::cout << "<br>the matrices to be transformed: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
-  theMat.GaussianEliminationByRows(oldBasisTransformed, nonPivotPoints);
+  theMat.GaussianEliminationByRows(&oldBasisTransformed, &nonPivotPoints);
   //std::cout << "<br>afer transformation: " << theMat.ToString(true, false) << "<br>" << oldBasisTransformed.ToString(true, false);
   if (nonPivotPoints.CardinalitySelection!=0)
     return false;
@@ -3764,10 +3761,10 @@ bool Lattice::SubstitutionHomogeneous
     for (int j=0; j<startingDim; j++)
       matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
   Vectors<Rational> theEigenSpace;
-  matRelationBetweenStartingVariables.FindZeroEigenSpace(theEigenSpace, theGlobalVariables);
+  matRelationBetweenStartingVariables.FindZeroEigenSpaceModifyMe(theEigenSpace);
   //std::cout << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ToString(true, false);
   for (int i=0; i<theEigenSpace.size; i++)
-    theEigenSpace.TheObjects[i].ScaleByPositiveRationalToIntegralMinHeight();
+    theEigenSpace[i].ScaleByPositiveRationalToIntegralMinHeight();
   //std::cout << "the basis: " << theEigenSpace.ToString();
   oldBasisTransformed.ActOnVectorsColumn(theEigenSpace);
   //std::cout << "<br>the basis transformed: " << theEigenSpace.ToString();
@@ -4241,14 +4238,14 @@ void Cone::IntersectAHyperplane
   Vectors<Rational> theBasis;
   tempMat.FindZeroEigenSpace(theBasis);
   assert(theBasis.size==theNormal.size-1);
-  theEmbedding.AssignRootsToRowsOfMatrix(theBasis);
+  theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
   theBasis.AddOnTop(theNormal);
   Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
   Matrix<Rational> tempMat2;
   tempRoots.MakeEiBasis(theDimension);
   tempRoots.GetCoordsInBasis(theBasis, tempRoots2, tempRoots3, tempMat2);
-  theProjection.AssignRootsToRowsOfMatrix(tempRoots2);
+  theProjection.AssignVectorsToRows(tempRoots2);
   theProjection.Transpose();
   theProjection.Resize(theDimension-1, theDimension, false);
   Vectors<Rational> newNormals=this->Normals;
@@ -4625,7 +4622,7 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   tempRoots.AddOnTop(theDirection);
   theDirectionLattice=*this;
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  theDirectionLattice.basisRationalForm.RowToRoot(0, outputDirectionMultipleOnLattice);
+  theDirectionLattice.basisRationalForm.GetVectorFromRow(0, outputDirectionMultipleOnLattice);
   //std::cout << "<br>the normal: " << theNormal.ToString();
   //std::cout << "<br> the direction lattice: " << theDirectionLattice.ToString();
   theHyperplaneLatticeNoShift=*this;
@@ -4694,7 +4691,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
       basisMonsZeroWeight.AddMonomial(theMon, theMonCoeff);
   }
 //  std::cout << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ToString(PolyFormatLocal);
-  Matrix<Rational>  tempMat;
+  Matrix<Rational> tempMat;
   tempMat.init(basisMonsAll.size*2, basisMonsZeroWeight.size);
 //  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
   Polynomial<Rational>  tempP;
@@ -4716,7 +4713,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 //  if (tempMat.NumRows<120)
 //    std::cout << "<div class=\"math\" scale=\"50\">" << tempMat.ToString(false, true) << "</div>";
   Vectors<Rational> tempRoots;
-  tempMat.FindZeroEigenSpace(tempRoots, theGlobalVariables);
+  tempMat.FindZeroEigenSpaceModifyMe(tempRoots);
   output.SetSize(tempRoots.size);
 //  std::cout << "<br>invariants Vector<Rational> form: " << tempRoots.ToString();
 //  std::cout << "<br> .... and the invariants are: ";
@@ -5912,18 +5909,18 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
   return output;
 }
 
-void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational> & output)
+void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output)
 { Vectors<Rational> basis;
   int theDim=this->GetDim();
   basis.MakeEiBasis(theDim);
 //  output.init(theDim, theDim);
   for (int i=0; i<theDim; i++)
     this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
-  output.AssignRootsToRowsOfMatrix(basis);
+  output.AssignVectorsToRows(basis);
   output.Transpose();
 }
 
-void rootSubalgebra::GetCoxeterElement(Matrix<Rational> & output)
+void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output)
 { int theDim=this->GetAmbientWeyl().GetDim();
   output.MakeIdMatrix(theDim);
   Matrix<Rational>  tempMat;
@@ -5985,10 +5982,8 @@ void rootSubalgebra::GetCoxeterPlane
       if (i==j)
         eigenMat.elements[i][i]-=theEigenValue;
     }
-  List<List<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE
-  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
-   theGlobalVariables);
+  List<Vector<CompleX<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpace(theEigenSpaceList);
   Vectors<CompleX<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
@@ -6048,10 +6043,8 @@ void WeylGroup::GetCoxeterPlane
       if (i==j)
         eigenMat.elements[i][i]-=theEigenValue;
     }
-  List<List<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE
-  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
-   theGlobalVariables);
+  List<Vector<CompleX<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpace(theEigenSpaceList);
   Vectors<CompleX<double> > theEigenSpace;
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);
@@ -6895,7 +6888,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     Matrix<Rational>  tempMat;
     head2 << "\\begin{array}{rcl}";
     for (int i=0; i<this->ExternalAutomorphisms.size; i++)
-    { tempMat.AssignRootsToRowsOfMatrix(this->ExternalAutomorphisms[i]);
+    { tempMat.AssignVectorsToRows(this->ExternalAutomorphisms[i]);
       tempMat.Transpose();
       head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(&latexFormat) << "\\\\";
     }
@@ -6912,7 +6905,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
     body << "\\begin{array}{l}";
     for (int i=0; i<this->size; i++)
-    { ElementWeylGroup& currentElt=this->TheObjects[i];
+    { const ElementWeylGroup& currentElt=(*this)[i];
       body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators)
       << "\\\\";
     }
@@ -6967,7 +6960,9 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
       this->Simplify();
 //      assert(this->checkConsistency());
       return;
-    default: assert(false); break;
+    default:
+      assert(false);
+      break;
   }
 }
 

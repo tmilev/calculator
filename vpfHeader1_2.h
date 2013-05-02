@@ -949,7 +949,7 @@ public:
   bool operator>(const DynkinType& other)const;
 };
 
-class WeylGroup: public HashedList<ElementWeylGroup>
+class WeylGroup
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
 //  void UpdateIntBuffer()
@@ -980,6 +980,8 @@ class WeylGroup: public HashedList<ElementWeylGroup>
   }
 public:
   Matrix<Rational> CartanSymmetric;
+  HashedList<ElementWeylGroup> theElements;
+
   Vector<Rational> rho;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
@@ -1193,7 +1195,7 @@ template <class CoefficientType>
   }
   template <class Element>
   void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
-  { this->ActOn((*this)[indexOfWeylElement], theVector, RhoAction, UseMinusRho, theRingZero);
+  { this->ActOn(this->theElements[indexOfWeylElement], theVector, RhoAction, UseMinusRho, theRingZero);
   }
   template <class Element>
   void ActOnDual(int index,Vector<Element>& theVector, bool RhoAction, const Element& theRingZero);
@@ -1255,7 +1257,6 @@ template <class CoefficientType>
 ;
   void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
-  void operator=(const WeylGroup& other);
   bool operator==(const WeylGroup& other)const;
   void operator+=(const WeylGroup& other);
 };

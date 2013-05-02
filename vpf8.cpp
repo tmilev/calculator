@@ -423,8 +423,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 }
 
 void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const
-{ assert(theIndex<this->size);
-  this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
+{ this->GetMatrixOfElement(this->theElements[theIndex], outputMatrix);
 }
 
 bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots

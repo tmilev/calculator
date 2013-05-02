@@ -825,17 +825,23 @@ int main(void)
 
 
    DynkinType D;
-   D.MakeSimpleType('F',4);
+   D.MakeSimpleType('G',2);
    Matrix<Rational> M;
    D.GetCartanSymmetric(M);
    std::cout << M << std::endl;
 
+  CoxeterGroup G;
+  G.CartanSymmetric = M;
+  G.GetTauSignatures();
+
+
+  /*
    CoxeterGroup G;
-   G.MakeFrom(D);
+   G.MakeFrom(M);
    G.ComputeInitialCharacters();
    for(int i=0; i<G.characterTable.size; i++)
       std::cout << G.characterTable[i] << std::endl;
-
+  */
    /*
      for(int i=0;i<G.ccCount;i++){
        int n = G.conjugacyClasses[i][0];
@@ -1315,7 +1321,7 @@ int main(void)
      std::cout << i << ' ' << G.ccSizes[i] << ' ' << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << std::endl;
    for(int i=0; i<G.ccCount; i++)
      std::cout << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << ", ";*/
-   G.ComputeIrreducibleRepresentations();
+ //  G.ComputeIrreducibleRepresentations();
    /*
    List<ClassFunction<Rational> > ct;
    List<CoxeterRepresentation<Rational> > gr;

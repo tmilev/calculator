@@ -37,7 +37,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroup orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921))
+  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet.theElements, 1921))
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
     << " elements only.";
   else
@@ -66,14 +66,14 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
     << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
-    latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
+    latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $"
     << orbitEltStringEpsilonCoords
     << "$ & $"
     <<  weightEltString << "$ & $"
@@ -84,8 +84,8 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
     { currentWeight=theHWsimpleCoords;
       standardElt.MakeConst(*theSSalgebra);
       bool isGood=true;
-      for (int j=0; j<orbitGeneratingSet[i].size; j++)
-      { int simpleIndex=orbitGeneratingSet[i][j];
+      for (int j=0; j<orbitGeneratingSet.theElements[i].size; j++)
+      { int simpleIndex=orbitGeneratingSet.theElements[i][j];
         theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
         theWeyl.SimpleReflection(simpleIndex, currentWeight, useRho, false);
         theExp*=2;

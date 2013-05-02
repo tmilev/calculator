@@ -1966,7 +1966,7 @@ bool CommandList::fDecomposeCharGenVerma
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunctionOld> currentHW;
   out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
-  for (int i=0; i<theWeyl.size; i++)
+  for (int i=0; i<theWeyl.theElements.size; i++)
   { currentHW=theHWsimpCoords;
     currentHW+=theSub.GetRho();
     theWeyl.ActOn(i, currentHW, false, false);
@@ -1991,7 +1991,7 @@ bool CommandList::fDecomposeCharGenVerma
   for (int i=0; i<theWeylElements.size; i++)
   { ElementWeylGroup& currentElt=theWeylElements[i];
     out << "<tr><td>" << currentElt.ToString() << "</td>";
-    int indexInWeyl=theKLpolys.TheWeylGroup->GetIndex(currentElt);
+    int indexInWeyl=theKLpolys.TheWeylGroup->theElements.GetIndex(currentElt);
     if (indexInWeyl==-1)
     { std::cout << "This is a programming error. Something is wrong: I am getting that an element "
       << "of the Weyl group of the Levi part of the parabolic does not lie in the ambient Weyl group, which "
@@ -2007,7 +2007,7 @@ bool CommandList::fDecomposeCharGenVerma
         theWeyl.ActOn(j, currentHW, true, false);
 //        currentHW-=theSub.GetRho();
         theMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
-        int sign= (currentElt.size- theWeyl[j].size)%2==0 ? 1 :-1;
+        int sign= (currentElt.size- theWeyl.theElements[j].size)%2==0 ? 1 :-1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
       }
     currentHW=theHWsimpCoords;

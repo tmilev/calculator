@@ -2351,7 +2351,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
-      for (int j=1; j<WeylFDSmall.AmbientWeyl.size; j++)
+      for (int j=1; j<WeylFDSmall.AmbientWeyl.theElements.size; j++)
       { tempRoot2=tempRoot;
         WeylFDSmall.AmbientWeyl.ActOn(j, tempRoot2, true, false);
         theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
@@ -2448,7 +2448,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
-  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.size;
+  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theElements.size;
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   FormatExpressions theFormat;

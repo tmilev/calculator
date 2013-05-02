@@ -2785,7 +2785,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   Rational centralizerCartanSize=this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
   bool CentralizerIsWellChosen= (centralizerCartanSize==0 )? true: false;
   if (centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
-  { if (this->indexMaxSSContainer!=-1)
+  { Rational centralizerRank=centralizerCartanSize;
+    if (this->indexMaxSSContainer!=-1)
     { DynkinType centralizerType =
       this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
       centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
@@ -2795,9 +2796,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       else
         out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
       out << ". ";
-      centralizerCartanSize-=centralizerType.GetRootSystemSize();
+      centralizerRank-=centralizerType.GetRootSystemSize();
     }
-    CentralizerIsWellChosen=(centralizerCartanSize==this->CartanOfCentralizer.size );
+    CentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
     if (!CentralizerIsWellChosen)
     { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
       << "Cartan of the centralizer, instead I got: </b> ";
@@ -2924,7 +2925,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     for (int i=0; i<this->weightsOfModules.size; i++)
       for (int j=0; j<this->weightsOfModules[i].size; j++)
         if(this->weightsOfModules[i][j].IsEqualToZero())
-          numZeroWeights++;
+          numZeroWeights+=this->modulesGrouppedByWeight[i].size;
     out << numZeroWeights << " - " << centralizerCartanSize << "="
     << ((centralizerCartanSize-numZeroWeights)*(-1)).ToString() << ".";
   }
@@ -2953,7 +2954,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<table border=\"1px solid black\"><tr><td>Highest vectors of representations (total "
     << this->highestVectorsModules.size << ") ";
     if (CentralizerIsWellChosen)
-      out << "; the vectors are Cartan-centralizer-split";
+      out << "; the vectors are over the primal subalgebra.";
     out << "</td>";
     for (int i=0; i<this->highestVectorsModules.size; i++)
       out << "<td>" << this->highestVectorsModules[i].ToString() << "</td>";

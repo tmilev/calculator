@@ -125,7 +125,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
   for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
   { tempRoot=this->AmbientWeyl.rho;
     this->AmbientWeyl.ActOnRootByGroupElement
-  (this->AmbientWeyl.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
+  (this->AmbientWeyl.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
 //    orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
@@ -154,8 +154,8 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
 { this->AmbientWeyl.ComputeWeylGroup(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size=0;
-  this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.size);
-  for (int i=0; i<this->AmbientWeyl.size; i++)
+  this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.theElements.size);
+  for (int i=0; i<this->AmbientWeyl.theElements.size; i++)
   { image1=this->AmbientWeyl.rho;
     this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
     bool isGood=true;
@@ -165,7 +165,7 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
         break;
       }
     if (isGood)
-      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl[i]);
+      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl.theElements[i]);
   }
 }
 

@@ -4225,11 +4225,11 @@ void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ration
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
-{ int tempI= this->TheObjects[index].size;
+{ int tempI= this->theElements[index].size;
   for (int i=0; i<tempI; i++)
-  { this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], output.affinePoint, RhoAction, UseMinusRho);
+  { this->SimpleReflectionRoot(this->theElements[index][i], output.affinePoint, RhoAction, UseMinusRho);
 //    output.affinePoint.ComputeDebugString();
-    this->SimpleReflectionDualSpace(this->TheObjects[index].TheObjects[tempI-i-1], output.normal);
+    this->SimpleReflectionDualSpace(this->theElements[index][tempI-i-1], output.normal);
   }
 }
 
@@ -4250,27 +4250,9 @@ bool WeylGroup::operator==(const WeylGroup& other)const
   this->theDynkinType==other.theDynkinType;
 }
 
-void WeylGroup::operator=(const WeylGroup& right)
-{ this->theDynkinType=right.theDynkinType;
-//  this->ShortRootLength.Assign(right.ShortRootLength);
-//  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
-//  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
-//  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
-  this->MatrixSendsSimpleVectorsToEpsilonVectors=right.MatrixSendsSimpleVectorsToEpsilonVectors;
-//  this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
-  this->CartanSymmetric=(right.CartanSymmetric);
-  this->::HashedList<ElementWeylGroup>::operator=(right);
-  this->RootSystem=(right.RootSystem);
-  this->RootsOfBorel=(right.RootsOfBorel);
-  this->rho=right.rho;
-  this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
-  this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
-  this->flagFundamentalToSimpleMatricesAreComputed=right.flagFundamentalToSimpleMatricesAreComputed;
-}
-
 void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
-{ for (int i=0; i<this->TheObjects[index].size; i++)
-    this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], theRoot, RhoAction, UseMinusRho);
+{ for (int i=0; i<this->theElements[index].size; i++)
+    this->SimpleReflectionRoot(this->theElements[index][i], theRoot, RhoAction, UseMinusRho);
 }
 
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
@@ -4307,8 +4289,8 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ for (int i=0; i<this->TheObjects[index].size; i++)
-    this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i], theRoot, RhoAction);
+{ for (int i=0; i<this->theElements[index].size; i++)
+    this->SimpleReflectionRootAlg(this->theElements[index][i], theRoot, RhoAction);
 }
 
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
@@ -4329,14 +4311,14 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
 
 std::string WeylGroup::ToString()
 { std::stringstream out;
-  out << "Size: " << this->size << "\n";
+  out << "Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "rho:" << this->rho.ToString() << "\n";
   out << "Root system(" << this->RootSystem.size << " elements):\n"
   << this->RootSystem.ToString() << "\n";
   out << "Elements of the group:\n";
-  for (int i=0; i<this->size; i++)
-    out << i << ". " << this->TheObjects[i].ToString() << "\n";
+  for (int i=0; i<this->theElements.size; i++)
+    out << i << ". " << this->theElements[i].ToString() << "\n";
   out << "<br>Symmetric cartan: "
   << this->CartanSymmetric.ToString();
   return out.str();
@@ -4450,7 +4432,7 @@ void WeylGroup::GetEpsilonCoords
 }
 
 bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
-{ for (int i=0; i<this->size; i++)
+{ for (int i=0; i<this->theElements.size; i++)
     if (this->IsARoot(theVectors[i]+input))
       return true;
   return false;
@@ -4458,7 +4440,7 @@ bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVe
 
 int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
 { int result=0;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->theElements.size; i++)
     if (!Vector<Rational>::ScalarProduct(theVectors[i], input, this->CartanSymmetric).IsEqualToZero())
       result++;
   return result;
@@ -4473,10 +4455,10 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
 //  this->ComputeDebugString();
   Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(this->rho);
-  this->Clear();
+  this->theElements.Clear();
   HashedList<Vector<Rational> > tempRoots2;
   tempRoots2.Clear();
-  this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, this, UpperLimitNumElements);
+  this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, &this->theElements, UpperLimitNumElements);
 }
 
 void WeylGroup::ComputeRho(bool Recompute)
@@ -4668,7 +4650,7 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
     }
   }
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
-  if (this->theKLcoeffs.size==this->TheWeylGroup->size)
+  if (this->theKLcoeffs.size==this->TheWeylGroup->theElements.size)
   { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
     << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
@@ -4677,12 +4659,12 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: "
     << "<br><table border=\"1\"><tr><td>Weyl elt.</td>";
-    for (int i=0; i<this->TheWeylGroup->size; i++)
-      out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+    for (int i=0; i<this->TheWeylGroup->theElements.size; i++)
+      out << "<td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
     out << "</tr>";
-    for (int i=0; i<this->TheWeylGroup->size; i++)
+    for (int i=0; i<this->TheWeylGroup->theElements.size; i++)
       if (this->theKLPolys[i].size>0)
-      { out << "<tr>" << "<td>" << (*this->TheWeylGroup)[i].ToString()  << "</td>";
+      { out << "<tr>" << "<td>" << this->TheWeylGroup->theElements[i].ToString()  << "</td>";
         for (int j=0; j<this->theKLcoeffs[i].size; j++)
           out << "<td>" << theKLcoeffs[i][j].ToString() << "</td>";
         out << "</tr>";
@@ -4913,8 +4895,8 @@ bool KLpolys::IndexGreaterThanIndex(int a, int b)
 
 int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
-  for (int i=0; i<this->TheWeylGroup->TheObjects[x].size; i++)
-    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->TheObjects[x][i]];
+  for (int i=0; i<this->TheWeylGroup->theElements[x].size; i++)
+    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theElements[x][i]];
   return start;
 }
 
@@ -4940,11 +4922,12 @@ void KLpolys::ComputeKLxy(int x, int y)
         tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
       }
       int tempI;
-      if (((*this->TheWeylGroup)[x].size+(*this->TheWeylGroup)[i].size)%2==0)
+      if ((this->TheWeylGroup->theElements[x].size+this->TheWeylGroup->theElements[i].size)%2==0)
         tempI=1;
       else
         tempI=-1;
-      Rational powerQ= -(*this->TheWeylGroup)[x].size+2*(*this->TheWeylGroup)[i].size -(*this->TheWeylGroup)[y].size;
+      Rational powerQ= -this->TheWeylGroup->theElements[x].size+2*this->TheWeylGroup->theElements[i].size -
+      this->TheWeylGroup->theElements[y].size;
       powerQ/=2;
       tempP2.MakeMonomiaL(0, powerQ, tempI, 1);
       tempP1*=tempP2;
@@ -4960,7 +4943,7 @@ void KLpolys::ComputeKLxy(int x, int y)
       Accum+=tempP1;
     }
   this->theKLPolys[x][y].MakeZero();
-  Rational lengthDiff= (*this->TheWeylGroup)[y].size-(*this->TheWeylGroup)[x].size;
+  Rational lengthDiff= this->TheWeylGroup->theElements[y].size-this->TheWeylGroup->theElements[x].size;
   lengthDiff/=2;
 //  std::cout << "Accum: " << Accum.ToString();
   for (int i=0; i<Accum.size; i++)
@@ -5015,12 +4998,12 @@ std::string KLpolys::KLPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << "<table border=\"1\">";
   out << "<tr><td>Weyl elt.</td>";
-  for (int i=0; i<this->TheWeylGroup->size; i++)
-    out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+  for (int i=0; i<this->TheWeylGroup->theElements.size; i++)
+    out << "<td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
   out << "</tr>";
   for (int i=0; i<this->theKLPolys.size; i++)
     if (this->theKLPolys[i].size>0)
-    { out << "<tr><td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+    { out << "<tr><td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
       for (int j=0; j<this->theKLPolys[i].size; j++)
         out << "<td>" << this->theKLPolys[i][j].ToString(theFormat) << "</td>";
       out << "</tr>";
@@ -5032,11 +5015,11 @@ std::string KLpolys::KLPolysToString(FormatExpressions* theFormat)
 std::string KLpolys::RPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
   out << "<table border=\"1\"><tr><td>Weyl elt.</td>";
-  for (int i=0; i<this->TheWeylGroup->size; i++)
-    out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+  for (int i=0; i<this->TheWeylGroup->theElements.size; i++)
+    out << "<td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
   out << "</tr>";
   for (int i=0; i<this->theRPolys.size; i++)
-  { out << "<tr><td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+  { out << "<tr><td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
     for (int j=0; j<this->theRPolys[i].size; j++)
       out << "<td>" << this->theRPolys[i][j].ToString(theFormat) << "</td>\n";
     out << "</tr>";

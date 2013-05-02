@@ -76,6 +76,7 @@ class CoxeterGroup
   { this->MakeFrom(D);
   }
   void MakeFrom(const DynkinType& D);
+  void MakeFrom(const Matrix<Rational>& M);
   bool operator==(const CoxeterGroup& other) const
   { return this->CartanSymmetric==other.CartanSymmetric;
   }
@@ -92,6 +93,7 @@ class CoxeterGroup
   Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
   Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
   CoxeterElement GetCoxeterElement(int i) const;
+  int GetIndexOfElement(const CoxeterElement& g) const;
   // note: the list is backwards
 
   List<int> DecomposeTodorsVector(const Vector<Rational> &v) const;
@@ -101,10 +103,13 @@ class CoxeterGroup
   int MultiplyElements(int i, int j) const;
   int operator()(int i, int j) const;
   CoxeterRepresentation<Rational> StandardRepresentation();
+  void ComputeElements();
   void ComputeConjugacyClasses();
   void ComputeSquares();
   void ComputeInitialCharacters();
   void ComputeIrreducibleRepresentations();
+
+  List<List<bool> > GetTauSignatures();
 };
 
 class CoxeterElement{

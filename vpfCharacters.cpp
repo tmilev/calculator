@@ -50,9 +50,18 @@ std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void CoxeterGroup::MakeFrom(const DynkinType& D){
+void CoxeterGroup::MakeFrom(const DynkinType& D)
+{ D.GetCartanSymmetric(this->CartanSymmetric);
+  ComputeElements();
+}
+
+void CoxeterGroup::MakeFrom(const Matrix<Rational>& M)
+{ this->CartanSymmetric = M;
+  ComputeElements();
+}
+
+void CoxeterGroup::ComputeElements(){
 //    std::cout << "MakeFrom called" << std::endl;
-    D.GetCartanSymmetric(this->CartanSymmetric);
     this->nGens = this->CartanSymmetric.NumCols;
     int n = this->CartanSymmetric.NumCols;
     HashedList<Vector<Rational> > roots;
@@ -103,6 +112,8 @@ HashedList<Vector<Rational> > CoxeterGroup::GetOrbit(const Vector<Rational> &vv)
 }
 
 void CoxeterGroup::ComputeRhoOrbit(){
+    if(rho.size == 0)
+      ComputeElements();
     rhoOrbit = GetOrbit(rho);
     N = rhoOrbit.size;
 }
@@ -390,6 +401,13 @@ CoxeterElement CoxeterGroup::GetCoxeterElement(int i)const
     assert(false);
   }
   return CoxeterElement(this, this->DecomposeTodorsVector(rhoOrbit[i]));
+}
+
+int CoxeterGroup::GetIndexOfElement(const CoxeterElement &g) const
+{ Vector<Rational> v = rho;
+  for(int i=g.reflections.size-1; i>-1; i--)
+    v = SimpleReflection(g.reflections[i],v);
+  return rhoOrbit.GetIndex(v);
 }
 
 //-------------------------------CoxeterElement--------------------------
@@ -1019,8 +1037,11 @@ CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
   return out;
 }
 
+extern FormatExpressions testformat;
 void CoxeterGroup::ComputeIrreducibleRepresentations()
-{  CoxeterRepresentation<Rational> sr = this->StandardRepresentation();
+{  if(squares.size == 0)
+      ComputeSquares();
+   CoxeterRepresentation<Rational> sr = this->StandardRepresentation();
    ClassFunction<Rational> cfmgen;
    Matrix<Rational> tempMat;
    cfmgen.G = this;
@@ -1036,8 +1057,7 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
    newspaces.AddOnTop(sr);
    while(newspaces.size > 0)
    {  CoxeterRepresentation<Rational> nspace = newspaces.PopLastObject();
-      for(int irri = 0; irri < irreps.size; irri++)
-      {  CoxeterRepresentation<Rational> tspace = nspace * irreps[irri];
+      CoxeterRepresentation<Rational> tspace = nspace * sr;
          std::cout << "Decomposing " << tspace.GetCharacter() << std::endl;
          List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition(characterTable,irreps);
          for(int spi = 0; spi < spaces.size; spi++)
@@ -1052,17 +1072,14 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
          }
          if(irreps.size == ccCount)
             break;
-      }
-      irreps.QuickSortAscending();
-      characterTable.QuickSortAscending();
-      if(irreps.size == ccCount)
-         break;
-   }
+    }
+    irreps.QuickSortAscending();
+    characterTable.QuickSortAscending();
 //  chartable.QuickSortAscending();
    for(int i=0; i<characterTable.size; i++)
    {  std::cout << characterTable[i] << '\n';
       for(int j=0; j<irreps[i].gens.size; j++)
-         std::cout << irreps[i].gens[j].ToString(0) << '\n';
+         std::cout << irreps[i].gens[j].ToString(&testformat) << '\n';
    }
    for(int i=0; i<characterTable.size; i++)
    { std::cout << characterTable[i] << '\n';
@@ -1727,4 +1744,81 @@ std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theF
   }
   out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();
   return out.str();
+}
+
+List<List<bool> > CoxeterGroup::GetTauSignatures()
+{ ComputeIrreducibleRepresentations();
+  ClassFunction<Rational> signRep;
+  signRep.G = this;
+  signRep.data.SetSize(ccCount);
+  for(int i=0; i<ccCount; i++)
+    signRep.data[i] = TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant();
+
+
+  Selection sel;
+  sel.init(CartanSymmetric.NumCols);
+  int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
+
+  List<CoxeterGroup> PSGs;
+  PSGs.SetSize(numCycles-2);
+  List<List<int> > ccBackMaps;
+  ccBackMaps.SetSize(PSGs.size);
+  CoxeterElement g;
+  g.owner = this;
+
+  for (int i=0; i<PSGs.size; i++)
+  { sel.incrementSelection();
+    std::cout << "\n" << sel.ToString() << "\n";
+    int d = sel.CardinalitySelection;
+    PSGs[i].CartanSymmetric.init(d,d);
+    for(int ii=0; ii<d; ii++)
+      for(int jj=0; jj<d; jj++)
+        PSGs[i].CartanSymmetric.elements[ii][jj] = CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
+    std::cout << PSGs[i].CartanSymmetric.ToString(&testformat);
+    // ComputeInitialCharacters gets the character of the sign representation
+    // as characterTable[1]
+    PSGs[i].ComputeInitialCharacters();
+
+    ccBackMaps[i].SetSize(PSGs[i].ccCount);
+    for(int j=0; j<PSGs[i].ccCount; j++)
+    { CoxeterElement h = PSGs[i].GetCoxeterElement(PSGs[i].conjugacyClasses[j][0]);
+      g.reflections.SetSize(h.reflections.size);
+      for(int k=0; k<h.reflections.size; k++)
+        g.reflections[k] = sel.elements[h.reflections[k]];
+      int gi = this->GetIndexOfElement(g);
+      for(int k=0; k<this->ccCount; k++)
+        for(int l=0; l<this->conjugacyClasses[k].size; l++)
+          if(this->conjugacyClasses[k][l] == gi)
+          { ccBackMaps[i][j] = k;
+            goto endloop;
+          }
+      endloop:;
+    }
+    std::cout << ccBackMaps[i] << std::endl;
+  }
+
+  List<List<bool> > tauSignatures;
+  tauSignatures.SetSize(this->ccCount);
+  ClassFunction<Rational> Xi; // this will be scribbled on over and over
+  Xi.data.SetSize(this->ccCount); // too big, but only allocated once
+  for(int i=0; i<this->ccCount; i++)
+  { tauSignatures[i].SetSize(numCycles);
+    tauSignatures[i][0] = true;
+    for(int j=0; j<PSGs.size; j++)
+    { for(int k=0; k<PSGs[j].ccCount; k++)
+        Xi.data[k] = this->characterTable[i].data[ccBackMaps[j][k]];
+      Rational x = PSGs[j].characterTable[1].IP(Xi);
+      if(x == 0)
+        tauSignatures[i][j+1] = false;
+      else
+        tauSignatures[i][j+1] = true;
+    }
+    if(signRep.IP(this->characterTable[i]) == 0)
+      tauSignatures[i][numCycles-1] = false;
+    else
+      tauSignatures[i][numCycles-1] = true;
+
+    std::cout << tauSignatures[i] << std::endl;
+  }
+  return tauSignatures;
 }

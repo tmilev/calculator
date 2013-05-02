@@ -22,7 +22,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("WeylGroupIrrepsAndCharTable", WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable, "",
    "Computes the irreducible representations and the character table of a Weyl group.",
-   "WeylGroupIrrepsAndCharTable{}(b_3);", true, true)
+   "WeylGroupIrrepsAndCharTable{}(b_3);", true, false)
    ;
     this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords",  WeylGroupCalculatorFunctions::innerWeylGroupOrbitSimple, "",

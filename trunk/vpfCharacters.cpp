@@ -7,6 +7,8 @@ static ProjectInformationInstance ProjectInfoVpfCharacters
 (__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 
+extern FormatExpressions testformat;
+
 template<>
 typename List<CoxeterElement>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<CoxeterElement>()
 { return 0;
@@ -493,7 +495,7 @@ template <typename coefficient>
 Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& input)
 { if (true)
   { Vectors<Rational> theBasisVectorForm;
-    this->basis.GetListRowsToVectors(theBasisVectorForm);
+    this->basis.GetVectorsFromRows(theBasisVectorForm);
     Vector<coefficient> output;
     input.GetCoordsInBasiS(theBasisVectorForm, output);
     return output;
@@ -546,9 +548,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
           fastbasis.elements[bi][bj] = fastbasis.elements[bi-1][bj];
       for(int bj=0; bj<fastbasis.NumCols; bj++)
         fastbasis.elements[i][bj] = v[bj];
-      Matrix<coefficient> one;
-      Selection two;
-      fastbasis.GaussianEliminationByRows(fastbasis, one, two);
+      fastbasis.GaussianEliminationByRows(fastbasis);
       rank++;
       return true;
     }
@@ -873,7 +873,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     if(this->character.IP(ct[i])!=0)
     { std::cout << "contains irrep " << i << std::endl;
       ClassFunctionMatrix(ct[i], splittingOperatorMatrix);
-      DestructiveKernel(splittingOperatorMatrix, splittingMatrixKernel);
+      splittingOperatorMatrix.FindZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb=tempVectors;
     }
@@ -1037,7 +1037,6 @@ CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
   return out;
 }
 
-extern FormatExpressions testformat;
 void CoxeterGroup::ComputeIrreducibleRepresentations()
 {  if(squares.size == 0)
       ComputeSquares();
@@ -1079,7 +1078,7 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
    for(int i=0; i<characterTable.size; i++)
    {  std::cout << characterTable[i] << '\n';
       for(int j=0; j<irreps[i].gens.size; j++)
-         std::cout << irreps[i].gens[j].ToString(&testformat) << '\n';
+         std::cout << irreps[i].gens[j].ToString() << '\n';
    }
    for(int i=0; i<characterTable.size; i++)
    { std::cout << characterTable[i] << '\n';
@@ -1363,9 +1362,7 @@ void getunion
   for(int i=0; i<W.size; i++)
     for(int j=0; j<d; j++)
       M.elements[V.size+i][j] = W[i][j];
-  Matrix<coefficient> one;
-  Selection two;
-  M.GaussianEliminationByRows(M,one,two);
+  M.GaussianEliminationByRows(M);
   output.SetSize(0);
   Vector<coefficient> v;
   for(int i=0; i<M.NumRows; i++)
@@ -1394,7 +1391,7 @@ void intersection
     for(int j=0; j<d; j++)
       MV.elements[i][j] = V[i][j];
   List<Vector<coefficient> > Vperp;
-  DestructiveKernel(MV, Vperp);
+  MV.FindZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<coefficient> MW;
   MW.init(W.size, d);
@@ -1402,7 +1399,7 @@ void intersection
     for(int j=0; j<d; j++)
       MW.elements[i][j] = W[i][j];
   List<Vector<coefficient> > Wperp;
-  DestructiveKernel(MW, Wperp);
+  MW.FindZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<coefficient> M;
   M.init(Vperp.size+Wperp.size,d);
@@ -1413,7 +1410,7 @@ void intersection
   for(; i<Vperp.size+Wperp.size; i++)
     for(int j=0; j<d; j++)
       M.elements[i][j] = Wperp[i-Vperp.size][j];
-  return DestructiveKernel(M, output);
+  M.FindZeroEigenSpaceModifyMe(output);
 }
 
 template <typename coefficient>
@@ -1495,38 +1492,6 @@ List<int> factorpoly(List<coefficient> p, int maxfac)
 }
 
 template <typename coefficient>
-void DestructiveKernel(Matrix<coefficient> &M, List<Vector<coefficient> >& outputKernel)
-{ Matrix<coefficient> MM;
-  Selection s;
-//  std::cout << "DestructiveKernel: GaussianEliminationByRows" << std::endl;
-  M.GaussianEliminationByRows(M, MM, s);
-//  std::cout << "DestructiveKernel: calculating kernel space" << std::endl;
-  outputKernel.SetSize(0);
-  Vector<coefficient> v;
-  for(int i=0; i<s.selected.size; i++)
-  { if(!s.selected[i])
-      continue;
-    v.MakeEi(M.NumCols,i);
-    int rowmap = 0;
-    for(int j=0; j<M.NumCols; j++)
-      if(!s.selected[j])
-      { v[j] = -M.elements[rowmap][i];
-        rowmap++;
-      }
-    outputKernel.AddOnTop(v);
-  }
-//  std::cout << "DestructiveKernel: done" << std::endl;
-}
-
-template <typename coefficient>
-void DestructiveEigenspace
-(Matrix<coefficient> &M, const coefficient &l, List<Vector<coefficient> >& outputEigenspace)
-{ for(int i=0; i<M.NumCols; i++)
-    M.elements[i][i] -= l;
-  DestructiveKernel(M, outputEigenspace);
-}
-
-template <typename coefficient>
 List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
 {  M.Transpose();
    Matrix<coefficient> dummy1;
@@ -1566,7 +1531,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
     if(p(r) == 0)
     { Matrix<Rational> M2 = M;
       List<Vector<Rational> > V;
-      DestructiveEigenspace(M2, r, V);
+      M2.DestructiveEigenspace(r, V);
       found += V.size;
       spaces.AddOnTop(V);
       if(found == M.NumCols)
@@ -1774,7 +1739,7 @@ List<List<bool> > CoxeterGroup::GetTauSignatures()
     for(int ii=0; ii<d; ii++)
       for(int jj=0; jj<d; jj++)
         PSGs[i].CartanSymmetric.elements[ii][jj] = CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
-    std::cout << PSGs[i].CartanSymmetric.ToString(&testformat);
+    std::cout << PSGs[i].CartanSymmetric.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
     PSGs[i].ComputeInitialCharacters();

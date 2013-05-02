@@ -4088,18 +4088,16 @@ bool CommandList::outerPlus
       current=theSum[i];
   }
   if (summandsWithCoeff.size>=2)
-  { if (summandsWithCoeff[0]>summandsWithCoeff[1] &&
-        summandsWithCoeff[1]>summandsWithCoeff[0])
-    { std::cout << "Bad comparison! ";
+    if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
+    { std::cout << "This is a pgoramming error: bad comparison! "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-  }
   summandsWithCoeff.QuickSortAscending();
   if (summandsWithCoeff.size==1)
   { output=summandsWithCoeff[0];
     return true;
   }
-
   output.MakeXOX
   (theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1],
    summandsWithCoeff[summandsWithCoeff.size-2]);

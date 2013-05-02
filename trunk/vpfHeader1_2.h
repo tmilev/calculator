@@ -972,7 +972,7 @@ class WeylGroup: public HashedList<ElementWeylGroup>
       return;
     Vectors<Rational> fundamentalBasis;
     this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
-    this->FundamentalToSimpleCoords.AssignRootsToRowsOfMatrix(fundamentalBasis);
+    this->FundamentalToSimpleCoords.AssignVectorsToRows(fundamentalBasis);
     this->FundamentalToSimpleCoords.Transpose();
     this->SimpleToFundamentalCoords=this->FundamentalToSimpleCoords;
     this->SimpleToFundamentalCoords.Invert();
@@ -4158,7 +4158,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::MakeOneGenerator
 }
 
 template<typename Element>
-void Matrix<Element>::RowToRoot(int rowIndex, Vector<Element>& output)const
+void Matrix<Element>::GetVectorFromRow(int rowIndex, Vector<Element>& output)const
 { output.SetSize(this->NumCols);
   for (int i=0; i<this->NumCols; i++)
     output.TheObjects[i]=this->elements[rowIndex][i];
@@ -5209,7 +5209,7 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const E
   int dim =this->NumCols;
   for (int i=0; i<dim; i++)
   {  //this->ComputeDebugString();
-    tempI = this->FindPivot(i, i, dim-1);
+    tempI = this->FindPivot(i, i);
     if (tempI==-1)
     { output=theRingZero;
       return;
@@ -6829,36 +6829,37 @@ void WeylGroup::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<ri
 
 template<class CoefficientType>
 void Vectors<CoefficientType>::IntersectTwoLinSpaces
-  (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
-   Vectors<CoefficientType>& output, GlobalVariables& theGlobalVariables, const CoefficientType& theRingZero
-   )
+(const List<Vector<CoefficientType> >& firstSpace, const List<Vector<CoefficientType> >& secondSpace,
+ List<Vector<CoefficientType> >& output, const CoefficientType& theRingZero,
+ GlobalVariables* theGlobalVariables)
 { //std::cout << "<br>*****Debugging Intersection linear spaces: ";
   //std::cout << "<br>input first space: " << firstSpace.ToString();
   //std::cout << "<br>input second space: " << secondSpace.ToString();
   Vectors<CoefficientType> firstReduced, secondReduced;
   Selection tempSel;
-  firstSpace.SelectABasis(firstReduced, theRingZero, tempSel, theGlobalVariables);
-  secondSpace.SelectABasis(secondReduced, theRingZero, tempSel, theGlobalVariables);
+  Vectors<CoefficientType>::SelectABasisInSubspace
+  (firstSpace, firstReduced, theRingZero, tempSel, theGlobalVariables);
+  Vectors<CoefficientType>::SelectABasisInSubspace
+  (secondSpace, secondReduced, theRingZero, tempSel, theGlobalVariables);
   //std::cout << "<br>first selected basis: " << firstSpace.ToString();
   //std::cout << "<br>second selected basis: " << secondSpace.ToString();
   if (firstReduced.size==0 || secondReduced.size==0)
   { output.size=0;
     return;
   }
-  int theDim=firstReduced.TheObjects[0].size;
+  int theDim=firstReduced[0].size;
   Matrix<CoefficientType> theMat;
   theMat.init(theDim, firstReduced.size+secondReduced.size);
   for (int i=0; i<theDim; i++)
   { for (int j=0; j<firstReduced.size; j++)
-      theMat.elements[i][j]=firstReduced.TheObjects[j].TheObjects[i];
+      theMat.elements[i][j]=firstReduced[j][i];
     for (int j=0; j<secondReduced.size; j++)
     { theMat.elements[i][firstReduced.size+j]=theRingZero;
-      theMat.elements[i][firstReduced.size+j]-=secondReduced.TheObjects[j].TheObjects[i];
+      theMat.elements[i][firstReduced.size+j]-=secondReduced[j][i];
     }
   }
-  Matrix<CoefficientType> matEmpty;
   //std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString(true, false);
-  theMat.GaussianEliminationByRows(matEmpty, tempSel);
+  theMat.GaussianEliminationByRows(0, &tempSel);
   //std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString(true, false);
   output.ReservE(tempSel.CardinalitySelection);
   output.size=0;
@@ -6870,7 +6871,7 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
     nextIntersection.MakeZero(theDim, theRingZero);
     for (int j=0; j<firstReduced.size; j++)
       if (!tempSel.selected[j])
-        nextIntersection+=firstReduced.TheObjects[j]*theMat.elements[j][currentIndex];
+        nextIntersection+=firstReduced[j]*theMat.elements[j][currentIndex];
     output.AddOnTop(nextIntersection);
   }
   //std::cout << "<br> final output: " << output.ToString();
@@ -7446,7 +7447,7 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
     return;
   }
   out << "<br>Parabolic selection: " << splittingParSel.ToString();
-  List<List<List<CoefficientType> > > eigenSpacesPerSimpleGenerator;
+  List<List<Vector<CoefficientType> > > eigenSpacesPerSimpleGenerator;
  // if (false)
   eigenSpacesPerSimpleGenerator.SetSize(splittingParSelectedInLevi.CardinalitySelection);
   Vectors<CoefficientType> tempSpace1, tempSpace2;
@@ -7460,10 +7461,12 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
     this->GetActionGeneratorIndeX(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim() );
-    currentOpMat.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    currentOpMat.FindZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1=theFinalEigenSpace;
-    tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-    theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
+    tempSpace2=eigenSpacesPerSimpleGenerator[i];
+    theFinalEigenSpace.IntersectTwoLinSpaces
+    (tempSpace1, tempSpace2, theFinalEigenSpace, theRingZero, &theGlobalVariables)
+    ;
   }
   out << "<br>Eigenvectors:<table> ";
 //  Vector<Rational> zeroRoot;

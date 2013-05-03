@@ -13,8 +13,6 @@
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
-class CoxeterElement;
-
 class Expression
 { void reset()
   { this->theBoss=0;
@@ -534,8 +532,8 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  HashedListReferences<CoxeterElement> theCoxeterElements;
-  ListReferences<CoxeterGroup> theCoxeterGroups;
+  HashedListReferences<ElementWeylGroup> theWeylGroupElements;
+  ListReferences<WeylGroup> theWeylGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
@@ -1120,11 +1118,8 @@ public:
   int opContext()
   { return this->operations.GetIndexIMustContainTheObject("Context");
   }
-  int opCoxeterGroup()
-  { return this->operations.GetIndexIMustContainTheObject("CoxeterGroup");
-  }
-  int opCoxeterElement()
-  { return this->operations.GetIndexIMustContainTheObject("CoxeterElement");
+  int opWeylGroupElement()
+  { return this->operations.GetIndexIMustContainTheObject("ElementWeylGroup");
   }
   int opClassFunction()
   { return this->operations.GetIndexIMustContainTheObject("ClassFunction");

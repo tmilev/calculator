@@ -550,12 +550,12 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
 Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
 { Rational output=1;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    output*=WeylGroup::GetSizeWeylByFormula
+    output*=WeylGroup::GetSizeWeylGroupByFormula
     (this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
   return output;
 }
 
-Rational WeylGroup::GetSizeWeylByFormula(char weylLetter, int theDim)
+Rational WeylGroup::GetSizeWeylGroupByFormula(char weylLetter, int theDim)
 { //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
   Rational theOutput=1;
   if (weylLetter=='A')

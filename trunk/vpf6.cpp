@@ -117,9 +117,9 @@ int Expression::GetTypeOperation<SemisimpleSubalgebras>()const
 }
 
 template < >
-int Expression::GetTypeOperation<CoxeterGroup>()const
+int Expression::GetTypeOperation<WeylGroup>()const
 { this->CheckInitialization();
-  return this->theBoss->opCoxeterGroup();
+  return this->theBoss->opWeylGroup();
 }
 
 template < >
@@ -129,9 +129,9 @@ int Expression::GetTypeOperation<CoxeterRepresentation<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<CoxeterElement>()const
+int Expression::GetTypeOperation<ElementWeylGroup>()const
 { this->CheckInitialization();
-  return this->theBoss->opCoxeterElement();
+  return this->theBoss->opWeylGroupElement();
 }
 
 template < >
@@ -289,10 +289,10 @@ CalculusFunctionPlot
 
 template < >
 int Expression::AddObjectReturnIndex(const
-CoxeterGroup
+WeylGroup
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theCoxeterGroups
+  return this->theBoss->theObjectContainer.theWeylGroups
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -307,10 +307,10 @@ CoxeterRepresentation<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-CoxeterElement
+ElementWeylGroup
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theCoxeterElements
+  return this->theBoss->theObjectContainer.theWeylGroupElements
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -495,20 +495,20 @@ CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-CoxeterGroup& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<CoxeterGroup>())
-  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+WeylGroup& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<WeylGroup>())
+  { std::cout << "This is a programming error: expression not of required type WeylGroup. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theCoxeterGroups[this->GetLastChild().theData];
+  return this->theBoss->theObjectContainer.theWeylGroups[this->GetLastChild().theData];
 }
 
 template < >
 CoxeterRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<CoxeterRepresentation<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+  { std::cout << "This is a programming error: expression not of required type WeylGroupRepresentation. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -517,14 +517,14 @@ CoxeterRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()con
 }
 
 template < >
-CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<CoxeterElement>())
+ElementWeylGroup& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<ElementWeylGroup>())
   { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theCoxeterElements.GetElement(this->GetLastChild().theData);
+  return this->theBoss->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -1969,7 +1969,7 @@ bool CommandList::fDecomposeCharGenVerma
   for (int i=0; i<theWeyl.theElements.size; i++)
   { currentHW=theHWsimpCoords;
     currentHW+=theSub.GetRho();
-    theWeyl.ActOn(i, currentHW, false, false);
+    theWeyl.ActOn(i, currentHW);
     currentHW-=theSub.GetRho();
     out << "<tr><td>" << currentHW.ToString() << "</td><td>"
     << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
@@ -2004,7 +2004,7 @@ bool CommandList::fDecomposeCharGenVerma
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero())
       { currentHW=theHWsimpCoords;
 //        currentHW+=theSub.GetRho();
-        theWeyl.ActOn(j, currentHW, true, false);
+        theWeyl.ActOnRhoModified(j, currentHW);
 //        currentHW-=theSub.GetRho();
         theMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
         int sign= (currentElt.size- theWeyl.theElements[j].size)%2==0 ? 1 :-1;
@@ -2012,7 +2012,7 @@ bool CommandList::fDecomposeCharGenVerma
       }
     currentHW=theHWsimpCoords;
     currentHW+=theSub.GetRho();
-    theWeyl.ActOn(indexInWeyl, currentHW, false, false);
+    theWeyl.ActOn(indexInWeyl, currentHW);
     currentHW-=theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega")
     << "</td>";
@@ -3287,10 +3287,10 @@ bool CommandList::fKLcoeffs
     return output.SetError(errorString, theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
-  if (theWeyl.theDynkinType.GetSizeWeylByFormula()>192)
+  if (theWeyl.theDynkinType.GetSizeWeylGroupByFormula()>192)
   { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra->GetLieAlgebraName() << " has "
-    << theWeyl.theDynkinType.GetSizeWeylByFormula() << ".";
+    << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -3324,7 +3324,7 @@ bool CommandList::innerPrintSSLieAlgebra
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.theDynkinType.GetSizeWeylByFormula() << "."
+  out << "<br>Weyl group size: " << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << "."
   << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
@@ -3630,8 +3630,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("SemisimpleSubalgebras");
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
   this->AddOperationBuiltInType("WeylGroup");
-  this->AddOperationBuiltInType("CoxeterGroup");
-  this->AddOperationBuiltInType("CoxeterElement");
+  this->AddOperationBuiltInType("ElementWeylGroup");
   this->AddOperationBuiltInType("ClassFunction");
   this->AddOperationBuiltInType("WeylGroupIrrep");
 
@@ -4945,16 +4944,16 @@ bool Expression::ToStringData
     } else
       out << "(plot not shown)";
     result=true;
-  } else if (this->IsOfType<CoxeterGroup>())
-  { CoxeterGroup& theGroup=this->GetValuENonConstUseWithCaution<CoxeterGroup>();
+  } else if (this->IsOfType<WeylGroup>())
+  { WeylGroup& theGroup=this->GetValuENonConstUseWithCaution<WeylGroup>();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
     tempFormat.flagUseReflectionNotation=true;
     out << theGroup.ToString(&tempFormat);
     result=true;
-  } else if (this->IsOfType<CoxeterElement>())
-  { CoxeterElement& theElt=this->GetValuENonConstUseWithCaution<CoxeterElement>();
+  } else if (this->IsOfType<ElementWeylGroup>())
+  { ElementWeylGroup& theElt=this->GetValuENonConstUseWithCaution<ElementWeylGroup>();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
@@ -5247,7 +5246,7 @@ std::string Expression::ToString
           out << (*this)[i].GetValuE<std::string>();
         else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
                   (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
-                  (*this)[i].IsOfType<CoxeterGroup>() ||
+                  (*this)[i].IsOfType<WeylGroup>() ||
                   (*this)[i].IsOfType<CoxeterRepresentation<Rational> >()
                   )
                  && isFinal)
@@ -5313,7 +5312,7 @@ std::string Expression::ToString
       if ((this->IsOfType<std::string>() ||
            this->IsOfType<CalculusFunctionPlot>() ||
            this->IsOfType<SemisimpleSubalgebras>() ||
-           this->IsOfType<CoxeterGroup>()
+           this->IsOfType<WeylGroup>()
            ) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else

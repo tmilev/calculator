@@ -189,7 +189,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   WeylGroup& theWeYl=input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ToString();
-  theWeYl.ComputeWeylGroup();
+  theWeYl.ComputeAllElements();
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
   Matrix<Rational>  theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
@@ -450,7 +450,7 @@ void WeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rationa
   outputMatrix.init(theDim, theDim);
   for (int i=0; i<theDim; i++)
   { tempRoot.MakeEi(theDim, i);
-    this->ActOn(input, tempRoot, false, false, (Rational) 0);
+    this->ActOn(input, tempRoot);
     for (int j=0; j<theDim; j++)
       outputMatrix.elements[j][i]=tempRoot.TheObjects[j];
   }
@@ -1532,7 +1532,7 @@ void Cone::TransformToWeylProjective
 
 void ConeComplex::TransformToWeylProjective
   (GlobalVariables& theGlobalVariables)
-{/* this->AmbientWeyl.GetElement().ComputeWeylGroup();
+{/* this->AmbientWeyl.GetElement().ComputeAllElements();
   this->log << this->AmbientWeyl.GetElement().ToString();
   std::string tempS;
   this->ToString(tempS);
@@ -5851,7 +5851,12 @@ void WeylGroup::GetExtremeElementInOrbit
           *stabilizerFound=true;
       if (shouldApplyReflection)
       { found=true;
-        this->SimpleReflection<Rational>(i, inputOutput, RhoAction, UseMinusRho, (Rational) 0);
+        if (!RhoAction)
+          this->SimpleReflection<Rational>(i, inputOutput);
+        else if (!UseMinusRho)
+          this->SimpleReflectionRhoModified(i, inputOutput);
+        else
+          this->SimpleReflectionMinusRhoModified(i, inputOutput);
         if (outputWeylElt!=0)
           outputWeylElt->AddOnTop(i);
         if (sign!=0)
@@ -6643,7 +6648,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords,
  int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
-  double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylByFormula().DoubleValue();
+  double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
@@ -6658,7 +6663,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
   (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
 
-  out <<  tempS << "<br>";
+  out << tempS << "<br>";
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
   else
@@ -6666,7 +6671,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int)
-  (this->theDynkinType.GetSizeWeylByFormula().DoubleValue()*theDominantWeights.size);
+  (this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
@@ -6739,19 +6744,17 @@ std::string ElementWeylGroup::ToString
   (int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
 { if (this->size==0)
     return "id";
-  std::string simpleRootLetter= theFormat==0 ? "\\eta" : theFormat->simpleRootLetter;
   std::string outerAutoLetter= "a";
   std::stringstream out;
   for (int i=this->size-1; i>=0; i--)
     if (NumSimpleGens<0 || (*this)[i]<NumSimpleGens)
-    { out << "s_{" << simpleRootLetter << "_{";
+    { out << "s_{";
       if (DisplayIndicesOfSimpleRoots==0)
         out << (*this)[i]+1;
       else
         out << (*DisplayIndicesOfSimpleRoots)[(*this)[i]];
-      out << "} }";
-    }
-    else
+      out << "}";
+    } else
       out << outerAutoLetter << "_{" << (*this)[i]-NumSimpleGens+1 << "}";
   return out.str();
 }

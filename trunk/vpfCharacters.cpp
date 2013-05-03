@@ -120,6 +120,31 @@ void CoxeterGroup::ComputeRhoOrbit(){
     N = rhoOrbit.size;
 }
 
+void ElementWeylGroup::MakeCanonical()
+{ //I am not quite sure if this mathematically deserves to be called "canonical"
+  this->CheckInitialization();
+  if (this->owner->rho.size==0)
+    this->owner->ComputeRho(false);
+  Vector<Rational> theVector=this->owner->rho, tempV;
+  this->owner->ActOn(*this, theVector);
+  int theRank=this->owner->GetDim();
+  this->SetSize(0);
+  while (theVector!=this->owner->rho)
+    for (int i=theRank-1; i>=0; i--)
+    //note that the order is reversed: we want the reflections with
+    //smaller index to come first in the final answer, which means we want the reflections with
+    //higher index to come first in the inverse of our element, which is what we are computing atm.
+    { tempV=theVector;
+      this->owner->SimpleReflection(i, tempV);
+      if (tempV>theVector)
+      { theVector=tempV;
+        this->AddOnTop(i);
+        break;
+      }
+    }
+  this->ReverseOrderElements();
+}
+
 List<int> CoxeterGroup::DecomposeTodorsVector(const Vector<Rational> &vv) const{
     List<int> l;
     Vector<Rational> v=vv,w;
@@ -222,6 +247,43 @@ int CoxeterGroup::MultiplyElements(int i, int j) const
 
 int CoxeterGroup::operator()(int i, int j) const
 { return MultiplyElements(i,j);
+}
+
+void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
+{ const int hardcodedUpperLimit=60000;
+  if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
+  { std::cout << "I am crashing for safety reasons (this is not a programming error). "
+    << " You requested to compute the conjugacy classes of a Weyl group of type "
+    << this->theDynkinType.ToString() << ", which, by formula, has "
+    << this->theDynkinType.GetSizeWeylGroupByFormula() << " elements, but I have a hard-coded "
+    << "safety limit of " << hardcodedUpperLimit << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->ComputeAllElements(hardcodedUpperLimit+1);
+  List<bool> Accounted;
+  Accounted.initFillInObject(this->theElements.size, false);
+  this->conjugacyClasses.SetSize(0);
+  this->conjugacyClasses.ReservE(50);
+  HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
+  int theRank=this->GetDim();
+  Vector<Rational> theRhoImage;
+  for (int i=0; i<this->theElements.size; i++)
+    if (!Accounted[i])
+    { theStack.Clear();
+      theStack.AddOnTop(i);
+      for (int j=0; j<theStack.size; j++)
+        for (int k=0; k<theRank; k++)
+        { theRhoImage=this->rho;
+          this->SimpleReflection(k, theRhoImage);
+          this->ActOn(theStack[j], theRhoImage);
+          this->SimpleReflection(k, theRhoImage);
+          int accountedIndex=this->rhoOrbit.GetIndex(theRhoImage);
+          theStack.AddOnTopNoRepetition(accountedIndex);
+          Accounted[accountedIndex]=true;
+        }
+      this->conjugacyClasses.AddOnTop(theStack);
+    }
 }
 
 void CoxeterGroup::ComputeConjugacyClasses(){
@@ -412,6 +474,7 @@ int CoxeterGroup::GetIndexOfElement(const CoxeterElement &g) const
   return rhoOrbit.GetIndex(v);
 }
 
+
 //-------------------------------CoxeterElement--------------------------
 
 void CoxeterElement::canonicalize()
@@ -493,7 +556,7 @@ void Basis<coefficient>::ComputeGramMatrix()
 
 template <typename coefficient>
 Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& input)
-{ if (true)
+{ if (false)
   { Vectors<Rational> theBasisVectorForm;
     this->basis.GetVectorsFromRows(theBasisVectorForm);
     Vector<coefficient> output;
@@ -1035,6 +1098,11 @@ CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
   out.basis.MakeEiBasis(this->nGens);
   out.GetCharacter();
   return out;
+}
+
+void WeylGroup::ComputeIrreducibleRepresentations
+(GlobalVariables* theGlobalVariables)
+{
 }
 
 void CoxeterGroup::ComputeIrreducibleRepresentations()

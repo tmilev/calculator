@@ -786,7 +786,7 @@ int main(void)
        G.MakeFromDynkinType(D);
        std::cout << G << std::endl;
        std::cout << G.CartanSymmetric << std::endl;
-       G.ComputeWeylGroup();
+       G.ComputeAllElements();
        std::cout << G << std::endl;
    */
    /*

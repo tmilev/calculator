@@ -879,7 +879,7 @@ void CommandList::initPredefinedStandardOperations()
    "Multiplies two rationals. ",
    "2*3", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyCoxeterEltByCoxeterElt, this->opWeylGroupElement(), this->opWeylGroupElement(),
    "Multiplies two coxeter elements if possible. ",
    "x:=MakeWeylGroupElement{}(A_2, 1); x*x", true);
   this->AddOperationBinaryInnerHandlerWithTypes

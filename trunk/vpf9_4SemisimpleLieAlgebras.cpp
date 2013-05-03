@@ -1860,11 +1860,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       ////////////////////
       reflectedSimpleBasisK=this->SimpleBasisK;
       for (int k=0; k<reflectedSimpleBasisK.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k], false, false);
+        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
       ////////////////////
       theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
       for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k], false, false);
+        this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
 
       theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
       theSl2.theE.MakeZero(theLieAlgebra);

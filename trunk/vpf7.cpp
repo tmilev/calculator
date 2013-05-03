@@ -145,13 +145,13 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
 bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right)
 { Vector<Rational> leftImage; leftImage=this->rho;
   Vector<Rational> rightImage; rightImage=this->rho;
-  this->ActOn(left, leftImage, false, false, (Rational) 0);
-  this->ActOn(right, rightImage, false, false, (Rational) 0);
+  this->ActOn(left, leftImage);
+  this->ActOn(right, rightImage);
   return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
 }
 
 void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
-{ this->AmbientWeyl.ComputeWeylGroup(UpperLimit);
+{ this->AmbientWeyl.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size=0;
   this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.theElements.size);
@@ -287,7 +287,7 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
   { differences[i]=this->Waypoints[i+precedingIndex+1]-this->Waypoints[i+precedingIndex];
     currentDist+=theWeyl.RootScalarCartanRoot(differences[i], alphaScaled);
     if (currentDist<minDist)
-    { theWeyl.SimpleReflection(indexAlpha, differences[i], false, false);
+    { theWeyl.SimpleReflection(indexAlpha, differences[i]);
       minDist=currentDist;
     }
   }
@@ -360,7 +360,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
   { diff=this->Waypoints[i+minIndex+1]-oldWayPoint;
     currentDist+=theWeyl.RootScalarCartanRoot(diff, alphaScaled);
     if (currentDist>0)
-    { theWeyl.SimpleReflection(indexAlpha, diff, false, false);
+    { theWeyl.SimpleReflection(indexAlpha, diff);
       currentDist=0;
     }
     oldWayPoint=this->Waypoints[i+minIndex+1];

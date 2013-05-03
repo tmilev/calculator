@@ -87,11 +87,10 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
       for (int j=0; j<orbitGeneratingSet.theElements[i].size; j++)
       { int simpleIndex=orbitGeneratingSet.theElements[i][j];
         theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
-        theWeyl.SimpleReflection(simpleIndex, currentWeight, useRho, false);
+        theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
         theExp*=2;
         theExp/=theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex];
-        if (useRho)
-          theExp+=1;
+        theExp+=1;
         if (theExp.IsInteger(&tempInt))
           if (tempInt<0)
           { isGood=false;
@@ -118,17 +117,14 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses(theCommands, input, output))
     return false;
-  if (!output.IsOfType<CoxeterGroup>())
+  if (!output.IsOfType<WeylGroup>())
     return true;
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
-  theGroup.ComputeInitialCharacters();
-  std::stringstream out;
-  for(int i=0; i<theGroup.characterTable.size; i++)
-    out << theGroup.characterTable[i] << "<br>";
+  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
   theGroup.ComputeIrreducibleRepresentations();
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
+  std::stringstream out;
   out << theGroup.ToString(&tempFormat);
   return output.AssignValue(out.str(), theCommands);
 }
@@ -155,15 +151,24 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
     return output.SetError(errorString, theCommands);
-  CoxeterGroup tmpG;
-  tmpG.MakeFrom(thePointer->theWeyl.theDynkinType);
-  output.AssignValue(tmpG, theCommands);
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
+  output.AssignValue(thePointer->theWeyl, theCommands);
+  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
   if (theGroup.CartanSymmetric.NumRows>4)
     return output.AssignValue<std::string>
     ("I have been instructed not to do this for Weyl groups of rank greater \
      than 4 because of the size of the computation.", theCommands);
+
+  CoxeterGroup otherGroup;
+  otherGroup.MakeFrom(theGroup.CartanSymmetric);
+  double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theGroup.ComputeConjugacyClasses();
+  std::cout << "Time of conjugacy class computation method1: "
+  << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1;
+  double timeStart2=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  otherGroup.ComputeConjugacyClasses();
+  std::cout << "Time of conjugacy class computation method2: "
+  << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart2;
+
   return true;
 }
 
@@ -216,17 +221,18 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
   return true;
 }
 
-
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
       (theCommands, input, output))
     return false;
-  if (!output.IsOfType<CoxeterGroup>())
+  if (!output.IsOfType<WeylGroup>())
     return false;
-  CoxeterGroup& theGroup=output.GetValuENonConstUseWithCaution<CoxeterGroup>();
+  std::cout << "not implemented!";
+  assert(false);
+  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
   //std::cout << theGroup.ToString();
-  return output.AssignValue(theGroup.StandardRepresentation(), theCommands);
+  //return output.AssignValue(theGroup.StandardRepresentation(), theCommands);
 }
 
 bool WeylGroupCalculatorFunctions::innerCoxeterElement
@@ -244,31 +250,30 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
     return output.SetError(errorString, theCommands);
-  List<int> theReflections;
+  ElementWeylGroup theElt;
+  theElt.ReservE(input.children.size-2);
   for(int i=2; i<input.children.size; i++){
     int tmp;
     if (!input[i].IsSmallInteger(& tmp))
       return false;
-    theReflections.AddOnTop(tmp-1);
+    theElt.AddOnTop(tmp-1);
   }
-  CoxeterGroup theGroup;
-  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
-  CoxeterElement theElt;
+  WeylGroup theGroup;
+  theGroup=thePointer->theWeyl;
   int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  theCommands.theObjectContainer.theWeylGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
   //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
   //<< indexOfOwnerGroupInObjectContainer;
 
-  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+  theElt.owner=&theCommands.theObjectContainer.theWeylGroups[indexOfOwnerGroupInObjectContainer];
   //std::cout << "<br>theElt.owner: " << theElt.owner;
 //  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
-  for(int i=0; i<theReflections.size; i++){
-    if (theReflections[i] >= thePointer->GetRank() || theReflections[i] < 0)
+  for(int i=0; i<theElt.size; i++){
+    if (theElt[i] >= thePointer->GetRank() || theElt[i] < 0)
       return output.SetError("Bad reflection index", theCommands);
   }
 //  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
-  theElt.reflections=(theReflections);
-  theElt.canonicalize();
+  theElt.MakeCanonical();
   return output.AssignValue(theElt, theCommands);
 }
 

@@ -8,6 +8,8 @@
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
+class WeylGroup;
+
 class Lattice
 {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output);
@@ -20,31 +22,31 @@ public:
   int GetRank()const{return this->basis.NumRows;}
   void IntersectWith(const Lattice& other);
   bool FindOnePreimageInLatticeOf
-    (const Matrix<Rational> & theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+    (const Matrix<Rational>& theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
 ;
   void IntersectWithPreimageOfLattice
   (const Matrix<Rational> & theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
-  void IntersectWithLineGivenBy(Vector<Rational> & inputLine, Vector<Rational> & outputGenerator);
+  void IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Rational>& outputGenerator);
   static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
-  (Vector<Rational> & startingPoint, Vector<Rational> & theAffineHyperplane, Vector<Rational> & theDirection, Vector<Rational> & outputPoint)
+  (Vector<Rational>& startingPoint, Vector<Rational>& theAffineHyperplane, Vector<Rational>& theDirection, Vector<Rational>& outputPoint)
   ;
-  void GetDefaultFundamentalDomainInternalPoint(Vector<Rational> & output);
+  void GetDefaultFundamentalDomainInternalPoint(Vector<Rational>& output);
   bool GetInternalPointInConeForSomeFundamentalDomain
-(Vector<Rational> & output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
   ;
   void GetRootOnLatticeSmallestPositiveProportionalTo
-(Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
   ;
   void GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
-  (const Vector<Rational> & theDirection, Vector<Rational> & outputDirectionMultipleOnLattice, Vector<Rational> & theShift, Vector<Rational> & theAffineHyperplane,
+  (const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
    Vectors<Rational>& outputRepresentatives,
    Vectors<Rational>& movementInDirectionPerRepresentative,
    Lattice& outputRougherLattice,
    GlobalVariables& theGlobalVariables)
      ;
   void ApplyLinearMap
-  (Matrix<Rational> & theMap, Lattice& output)
+  (Matrix<Rational>& theMap, Lattice& output)
   ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
@@ -68,7 +70,7 @@ public:
   //1 -1
   //1  0
   bool SubstitutionHomogeneous
-    (const Matrix<Rational> & theSub, GlobalVariables& theGlobalVariables)
+    (const Matrix<Rational>& theSub, GlobalVariables& theGlobalVariables)
 ;
   bool SubstitutionHomogeneous
     (const PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
@@ -77,16 +79,16 @@ public:
 // in order to assure that the preimage of the lattice is a lattice,
 //we provide as input an ambient lattice in the new vector space of dimension m
   bool SubstitutionHomogeneous
-    (const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
+    (const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
 ;
   void Reduce
   ()
   ;
   void IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
   void IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
-  void IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational> & theNormal);
+  void IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
 static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
-(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational> & output, GlobalVariables& theGlobalVariables)
+(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output, GlobalVariables& theGlobalVariables)
 ;
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
@@ -118,7 +120,7 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
   Lattice(){}
   Lattice(const Lattice& other){this->operator=(other);}
   void MakeFromMat
-  (const Matrix<Rational> & input)
+  (const Matrix<Rational>& input)
   ;
 };
 
@@ -135,7 +137,7 @@ public:
   std::string ToString(bool useHtml, bool useLatex){return this->ToString(useHtml, useLatex, 0);}
   std::string ToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ToString(false, false);}
-  Rational Evaluate(const Vector<Rational> & input);
+  Rational Evaluate(const Vector<Rational>& input);
   void AddLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
@@ -400,7 +402,7 @@ public:
   int GetDim()const
   { if (this->Normals.size==0)
       return 0;
-    return this->Normals.TheObjects[0].size;
+    return this->Normals[0].size;
   }
   void SliceInDirection
   (Vector<Rational>& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
@@ -892,7 +894,7 @@ public:
   ;
   void GetDynkinTypeWithDefaultLengths(DynkinType& output);
   DynkinSimpleType GetGreatestSimpleType()const;
-  Rational GetSizeWeylByFormula()const;
+  Rational GetSizeWeylGroupByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out << *this;
@@ -949,6 +951,57 @@ public:
   bool operator>(const DynkinType& other)const;
 };
 
+template <class coefficient>
+class WeylGroupRepresentation
+{
+  private:
+  List<Matrix<coefficient> > theElementImages;
+  List<bool> theElementIsComputed;
+  public:
+  WeylGroup* OwnerGroup;
+  Vector<coefficient> theCharacter;
+
+  Matrix<coefficient>& GetElementImage(int elementIndex);
+};
+
+class ElementWeylGroup: public List<int>
+{
+public:
+  WeylGroup* owner;
+  ElementWeylGroup():owner(0)
+  {}
+  bool CheckInitialization()
+  { if (this->owner==0)
+    { std::cout << "This is a programming error: non-initialized element Weyl group. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return true;
+  }
+  void MakeCanonical();
+  void ToString(std::string& output)
+  { output=this->ToString();
+  }
+  std::string ToString
+  (FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
+  { return this->ToString(-1, theFormat, DisplayIndicesOfSimpleRoots);
+  }
+  std::string ToString
+  (int NumSimpleGens, FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
+  ;
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const ElementWeylGroup& input)
+  { return input.HashFunction();
+  }
+  void operator*=(const ElementWeylGroup& other);
+  bool operator==(const ElementWeylGroup& other)const
+  { if (this->owner!=other.owner)
+      return false;
+    return this->::List<int>::operator==(other);
+  }
+};
+
 class WeylGroup
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
@@ -961,11 +1014,6 @@ class WeylGroup
   Matrix<Rational> FundamentalToSimpleCoords;
   Matrix<Rational> SimpleToFundamentalCoords;
   MemorySaving<Matrix<Rational> > MatrixSendsSimpleVectorsToEpsilonVectors;
-  MemorySaving<Matrix<Rational> > buffer1NotCopied;
-  MemorySaving<Matrix<Rational> > buffer2NotCopied;
-  MemorySaving<DynkinDiagramRootSubalgebra> bufferDynNotCopied;
-  MemorySaving<Vectors<Rational> > buffer1VectorsNotCopied;
-  MemorySaving<Vectors<Rational> > buffer2VectorsNotCopied;
   bool flagFundamentalToSimpleMatricesAreComputed;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
@@ -979,20 +1027,26 @@ class WeylGroup
     this->flagFundamentalToSimpleMatricesAreComputed=true;
   }
 public:
+  DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   HashedList<ElementWeylGroup> theElements;
-
   Vector<Rational> rho;
+  HashedList<Vector<Rational> > rhoOrbit;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
-  DynkinType theDynkinType;
+
+  List<List<int> > conjugacyClasses;
+  List<WeylGroupRepresentation<Rational> > irreps;
+
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init()
   { this->flagFundamentalToSimpleMatricesAreComputed=false;
   }
+  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
+  void ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables=0);
   void ComputeRho(bool Recompute);
-  std::string ToString();
+  std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType)
   ;
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
@@ -1116,9 +1170,8 @@ public:
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
-  void ComputeWeylGroup();
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
-  void GetMatrixReflection(Vector<Rational> & reflectionRoot, Matrix<Rational> & output);
+  void GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output);
   template <class CoefficientType>
   bool GetAlLDominantWeightsHWFDIM
 (Vector<CoefficientType> & highestWeightSimpleCoords, HashedList<Vector<CoefficientType> >& outputWeightsSimpleCoords,
@@ -1139,10 +1192,10 @@ template <class CoefficientType>
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
-  void ComputeWeylGroup(int UpperLimitNumElements);
+  void ComputeAllElements(int UpperLimitNumElements=0);
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  static Rational GetSizeWeylByFormula(char weylLetter, int theDim);
+  static Rational GetSizeWeylGroupByFormula(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
   { return this->RootSystem.Contains(input);
   }
@@ -1189,13 +1242,22 @@ template <class CoefficientType>
       outputWeylElt[i]=i;
   }
   template <class Element>
-  void ActOn(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
+  void ActOn(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
   { for (int i=0; i<theGroupElement.size; i++)
-      this->SimpleReflection(theGroupElement[i], theVector, RhoAction, UseMinusRho, theRingZero);
+      this->SimpleReflection(theGroupElement[i], theVector);
   }
   template <class Element>
-  void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
-  { this->ActOn(this->theElements[indexOfWeylElement], theVector, RhoAction, UseMinusRho, theRingZero);
+  void ActOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
+  { for (int i=0; i<theGroupElement.size; i++)
+      this->SimpleReflectionRhoModified(theGroupElement[i], theVector);
+  }
+  template <class Element>
+  void ActOnRhoModified(int indexOfWeylElement, Vector<Element>& theVector)const
+  { this->ActOnRhoModified(this->theElements[indexOfWeylElement], theVector);
+  }
+  template <class Element>
+  void ActOn(int indexOfWeylElement, Vector<Element>& theVector)const
+  { this->ActOn(this->theElements[indexOfWeylElement], theVector);
   }
   template <class Element>
   void ActOnDual(int index,Vector<Element>& theVector, bool RhoAction, const Element& theRingZero);
@@ -1207,8 +1269,13 @@ template <class CoefficientType>
   void SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
   template <class Element>
   void SimpleReflection
-  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)const
-  ;
+  (int index, Vector<Element>& theVector)const;
+  template <class Element>
+  void SimpleReflectionRhoModified
+  (int index, Vector<Element>& theVector)const;
+  template <class Element>
+  void SimpleReflectionMinusRhoModified
+  (int index, Vector<Element>& theVector)const;
   void GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const ;
   void GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const;
   void GetElementOfMatrix(Matrix<Rational>& input, ElementWeylGroup &output);
@@ -1262,27 +1329,47 @@ template <class CoefficientType>
 };
 
 template <class Element>
-void WeylGroup::SimpleReflection
-  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)const
+void WeylGroup::SimpleReflectionRhoModified
+(int index, Vector<Element>& theVector)const
 { Element alphaShift, tempRat;
-  alphaShift=theRingZero;
+  alphaShift=0;
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempRat=(theVector[i]);
+    tempRat*=this->CartanSymmetric.elements[index][i]*(-2);
+    alphaShift+=(tempRat);
+  }
+  alphaShift/=(this->CartanSymmetric.elements[index][index]);
+  alphaShift-=1;
+  theVector[index]+=(alphaShift);
+}
+
+template <class Element>
+void WeylGroup::SimpleReflectionMinusRhoModified
+  (int index, Vector<Element>& theVector)const
+{ Element alphaShift, tempRat;
+  alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat=(theVector[i]);
     tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
     alphaShift+=(tempRat);
   }
-  if (this->flagAnErrorHasOcurredTimeToPanic)
-  { std::string tempS;
-    tempS=alphaShift.ToString();
+  alphaShift/=(this->CartanSymmetric.elements[index][index]);
+  alphaShift+=(1);
+  theVector[index]+=(alphaShift);
+}
+
+template <class Element>
+void WeylGroup::SimpleReflection
+(int index, Vector<Element>& theVector)const
+{ Element alphaShift, tempRat;
+  alphaShift=0;
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempRat=(theVector[i]);
+    tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
+    alphaShift+=(tempRat);
   }
   alphaShift/=(this->CartanSymmetric.elements[index][index]);
-  if (RhoAction)
-  { if(UseMinusRho)
-      alphaShift+=(1);
-    else
-      alphaShift+=(-1);
-  }
-  theVector.TheObjects[index]+=(alphaShift);
+  theVector[index]+=(alphaShift);
 }
 
 class ReflectionSubgroupWeylGroup: public HashedList<ElementWeylGroup>
@@ -1333,11 +1420,11 @@ public:
  ;
   template <class CoefficientType>
   bool GetAlLDominantWeightsHWFDIM
-  (Vector<CoefficientType> & highestWeightSimpleCoords, HashedList<Vector<CoefficientType> >& outputWeightsSimpleCoords,
+  (Vector<CoefficientType>& highestWeightSimpleCoords, HashedList<Vector<CoefficientType> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;
   bool DrawContour
-(const Vector<Rational> & highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
+(const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
  int UpperBoundVertices)
     ;
 //The dirty C++ language forces that the body of this function appear after the definitions of IsDominantWRTgenerator.
@@ -7749,11 +7836,12 @@ bool WeylGroup::GenerateOrbit
  bool UseMinusRho, int expectedOrbitSize, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
 { output.Clear();
   for (int i=0; i<theRoots.size; i++)
-    output.AddOnTop(theRoots.TheObjects[i]);
+    output.AddOnTop(theRoots[i]);
   Vector<CoefficientType> currentRoot;
   ElementWeylGroup tempEW;
+  tempEW.owner=this;
   if (expectedOrbitSize<=0)
-    expectedOrbitSize=(this->theDynkinType.GetSizeWeylByFormula()).NumShort;
+    expectedOrbitSize=(this->theDynkinType.GetSizeWeylGroupByFormula()).NumShort;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;
   output.SetExpectedSize(expectedOrbitSize);
@@ -7773,7 +7861,12 @@ bool WeylGroup::GenerateOrbit
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}
-      this->SimpleReflection(j, currentRoot, RhoAction, UseMinusRho);
+      if (!RhoAction)
+        this->SimpleReflection(j, currentRoot);
+      else if (!UseMinusRho)
+        this->SimpleReflectionRhoModified(j, currentRoot);
+      else
+        this->SimpleReflectionMinusRhoModified(j, currentRoot);
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}

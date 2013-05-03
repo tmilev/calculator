@@ -122,16 +122,16 @@ void CoxeterGroup::ComputeRhoOrbit(){
 
 void ElementWeylGroup::MakeCanonical()
 { this->CheckInitialization();
-  //ElementWeylGroup tempElt=*this;
+//  ElementWeylGroup tempElt=*this;
   this->MakeCanonicalProvidedAllElementsOwnerAreComputed();
-  //tempElt.MakeCanonicalWithoutElementsOwnerComputed();
-  //if (tempElt!=*this)
+ // tempElt.MakeCanonicalWithoutElementsOwnerComputed();
+//  if (tempElt!=*this)
   //{ std::cout << "This is a mathematical error made by T. Milev: canonical way of writing element "
   //  << this->ToString() << " is different from the canonical way of writing "
   //  << tempElt.ToString() << ". "
   //  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   //  assert(false);
-  //}
+ // }
 }
 
 void ElementWeylGroup::MakeCanonicalProvidedAllElementsOwnerAreComputed()
@@ -153,7 +153,7 @@ void ElementWeylGroup::MakeCanonicalWithoutElementsOwnerComputed()
   int theRank=this->owner->GetDim();
   this->SetSize(0);
   while (theVector!=this->owner->rho)
-    for (int i=theRank-1; i>=0; i--)
+    for (int i=0; i<theRank; i++)
     //note that the order is reversed: we want the reflections with
     //smaller index to come first in the final answer, which means we want the reflections with
     //higher index to come first in the inverse of our element, which is what we are computing atm.

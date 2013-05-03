@@ -4331,6 +4331,8 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->conjugacyClasses.size; i++)
     { out << "<br>Conjugacy class " << i+1 << " (" << this->conjugacyClasses[i].size
       << " elements total): ";
+      if (this->conjugacyClasses[i].size>10)
+        out << "... too many elements, skipping";
       for (int j=0; j<this->conjugacyClasses[i].size; j++)
       { out << this->theElements[this->conjugacyClasses[i][j]].ToString(theFormat);
         if (j!=this->conjugacyClasses[i].size-1)

@@ -153,26 +153,26 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
     return output.SetError(errorString, theCommands);
   output.AssignValue(thePointer->theWeyl, theCommands);
   WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
-  if (theGroup.CartanSymmetric.NumRows>4)
+  if (theGroup.CartanSymmetric.NumRows>6)
     return output.AssignValue<std::string>
     ("I have been instructed not to do this for Weyl groups of rank greater \
-     than 4 because of the size of the computation.", theCommands);
+     than 6 because of the size of the computation.", theCommands);
 
-  CoxeterGroup otherGroup;
-  otherGroup.MakeFrom(theGroup.CartanSymmetric);
-  double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  //CoxeterGroup otherGroup;
+  //otherGroup.MakeFrom(theGroup.CartanSymmetric);
+  //double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theGroup.ComputeConjugacyClasses();
-  std::cout << "Time of conjugacy class computation method1: "
-  << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1;
-  double timeStart2=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  otherGroup.ComputeConjugacyClasses();
-  std::cout << "Time of conjugacy class computation method2: "
-  << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart2;
-  ElementWeylGroup tempTestElt;
-  for (int i=0; i<theGroup.theElements.size; i++)
-  { tempTestElt=theGroup.theElements[i];
-    tempTestElt.MakeCanonical();
-  }
+  //std::cout << "Time of conjugacy class computation method1: "
+  //<< theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1;
+  //double timeStart2=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  //otherGroup.ComputeConjugacyClasses();
+  //std::cout << "Time of conjugacy class computation method2: "
+  //<< theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart2;
+  //ElementWeylGroup tempTestElt;
+  //for (int i=0; i<theGroup.theElements.size; i++)
+  //{ tempTestElt=theGroup.theElements[i];
+  //  tempTestElt.MakeCanonical();
+  //}
   return true;
 }
 

@@ -7043,27 +7043,6 @@ public:
    FormatExpressions& PolyFormatLocal);
 };
 
-class ElementWeylGroup: public List<int>
-{
-public:
-  void ToString(std::string& output)
-  { output=this->ToString();
-  }
-  std::string ToString
-  (FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
-  { return this->ToString(-1, theFormat, DisplayIndicesOfSimpleRoots);
-  }
-  std::string ToString
-  (int NumSimpleGens, FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
-  ;
-  unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const ElementWeylGroup& input)
-  { return input.HashFunction();
-  }
-  void operator=(const ElementWeylGroup& right);
-  bool operator==(const ElementWeylGroup& right)const;
-};
-
 class LaTeXProcedures
 {
 public:

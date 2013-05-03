@@ -3752,11 +3752,11 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   }
 }
 
-Rational DynkinType::GetSizeWeylByFormula()const
+Rational DynkinType::GetSizeWeylGroupByFormula()const
 { Rational result=1;
   Rational tempRat;
   for (int i=0; i<this->size; i++)
-  { tempRat=WeylGroup::GetSizeWeylByFormula((*this)[i].theLetter, (*this)[i].theRank);
+  { tempRat=WeylGroup::GetSizeWeylGroupByFormula((*this)[i].theLetter, (*this)[i].theRank);
     tempRat.RaiseToPower(this->GetMult(i));
     result*=tempRat;
   }
@@ -4244,6 +4244,18 @@ void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors
     }
 }
 
+void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
+{ if (this->owner!=other.owner)
+  { std::cout << "This is a programming error: attempting to multiply elements of Weyl groups "
+    << " with different owners. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  List<int> oldMe=*this;
+  *this=other;
+  this->AddListOnTop(oldMe);
+  this->MakeCanonical();
+}
+
 bool WeylGroup::operator==(const WeylGroup& other)const
 { return
   this->CartanSymmetric==other.CartanSymmetric &&
@@ -4294,7 +4306,7 @@ void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rat
 }
 
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
-{ this->ComputeWeylGroup();
+{ this->ComputeAllElements();
   output.size=0;
   output.ReservE(this->RootSystem.size/2);
   for (int i=0; i<this->RootSystem.size; i++)
@@ -4309,12 +4321,24 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
   output=(this->RootsOfBorel);
 }
 
-std::string WeylGroup::ToString()
+std::string WeylGroup::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
-  out << "Size: " << this->theElements.size << "\n";
+  out << "<br>Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
-  out << "rho:" << this->rho.ToString() << "\n";
-  out << "Root system(" << this->RootSystem.size << " elements):\n"
+  out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
+  if (this->conjugacyClasses.size>0)
+  { out << "<br>" << this->conjugacyClasses.size << " conjugacy classes total.\n";
+    for (int i=0; i<this->conjugacyClasses.size; i++)
+    { out << "<br>Conjugacy class " << i+1 << " (" << this->conjugacyClasses[i].size
+      << " elements total): ";
+      for (int j=0; j<this->conjugacyClasses[i].size; j++)
+      { out << this->theElements[this->conjugacyClasses[i][j]].ToString(theFormat);
+        if (j!=this->conjugacyClasses[i].size-1)
+          out << ", ";
+      }
+    }
+  }
+  out << "<br>Root system(" << this->RootSystem.size << " elements):\n"
   << this->RootSystem.ToString() << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->theElements.size; i++)
@@ -4375,11 +4399,11 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra
 (Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
-{ Matrix<Rational>& basisChange = this->buffer1NotCopied.GetElement();
-  Matrix<Rational>& tempMat = this->buffer2NotCopied.GetElement();
-  DynkinDiagramRootSubalgebra& tempDyn = this->bufferDynNotCopied.GetElement();
-  Vectors<Rational>& simpleBasis = this->buffer1VectorsNotCopied.GetElement();
-  Vectors<Rational>& coordsInNewBasis = this->buffer2VectorsNotCopied.GetElement();
+{ Matrix<Rational> basisChange;
+  Matrix<Rational> tempMat;
+  DynkinDiagramRootSubalgebra tempDyn;
+  Vectors<Rational> simpleBasis;
+  Vectors<Rational> coordsInNewBasis;
   simpleBasis=(generators);
   tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
   bool tempBool = true;
@@ -4446,19 +4470,14 @@ int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rationa
   return result;
 }
 
-void WeylGroup::ComputeWeylGroup()
-{ this->ComputeWeylGroup(0);
-}
 
-void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
+void WeylGroup::ComputeAllElements(int UpperLimitNumElements)
 { this->ComputeRho(true);
 //  this->ComputeDebugString();
   Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(this->rho);
   this->theElements.Clear();
-  HashedList<Vector<Rational> > tempRoots2;
-  tempRoots2.Clear();
-  this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, &this->theElements, UpperLimitNumElements);
+  this->GenerateOrbit<Rational>(tempRoots, false, this->rhoOrbit, true, -1, &this->theElements, UpperLimitNumElements);
 }
 
 void WeylGroup::ComputeRho(bool Recompute)
@@ -4515,22 +4534,9 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
     this->RootsOfBorel[i]=this->RootSubsystem[i+numPosRoots];
 }
 
-void ElementWeylGroup::operator =(const ElementWeylGroup& right)
-{ this->::List<int>::operator=(right);
-}
-
-bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)const
-{ if (this->size!=right.size)
-    return false;
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=right[i])
-      return false;
-  return true;
-}
-
 unsigned int ElementWeylGroup::HashFunction() const
 { int top = MathRoutines::Minimum(this->size, ::SomeRandomPrimesSize);
-  unsigned int result =0;
+  unsigned int result = this->owner==0 ? 0 : this->owner->HashFunction();
   for (int i=0; i<top; i++)
     result+=this->TheObjects[i]*::SomeRandomPrimes[i];
   return result;
@@ -4810,7 +4816,7 @@ void KLpolys::initFromWeyl(WeylGroup* theWeylGroup)
 
 bool KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup)
 { MacroRegisterFunctionWithName("KLpolys::ComputeKLPolys");
-  theWeylGroup->ComputeWeylGroup(-1);
+  theWeylGroup->ComputeAllElements(-1);
   this->initFromWeyl(theWeylGroup);
   this->GeneratePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;

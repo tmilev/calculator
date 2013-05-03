@@ -2340,7 +2340,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
     std::string tempS;
     output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
     Vector<Rational> tempRoot, tempRoot2;
-    WeylFDSmall.AmbientWeyl.ComputeWeylGroup(20);
+    WeylFDSmall.AmbientWeyl.ComputeAllElements(20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
@@ -2353,7 +2353,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
       theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
       for (int j=1; j<WeylFDSmall.AmbientWeyl.theElements.size; j++)
       { tempRoot2=tempRoot;
-        WeylFDSmall.AmbientWeyl.ActOn(j, tempRoot2, true, false);
+        WeylFDSmall.AmbientWeyl.ActOnRhoModified(j, tempRoot2);
         theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
       }
     }
@@ -2454,8 +2454,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
-        theSubgroup.AmbientWeyl.theDynkinType.GetSizeWeylByFormula())
+  { if (theSubgroup.AmbientWeyl.GetSizeWeylGroupByFormula('E', 6) <=
+        theSubgroup.AmbientWeyl.theDynkinType.GetSizeWeylGroupByFormula())
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
@@ -2495,8 +2495,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
       << "</td>";
       theHWsimplecoords=
       theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-      theSSalgebra.theWeyl.ActOn
-      (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords, true, false);
+      theSSalgebra.theWeyl.ActOnRhoModified
+      (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
       << (useJavascript ? CGI::GetHtmlMathSpanPure(theHWsimplecoords.ToString(&theFormat))
       : theHWsimplecoords.ToString(&theFormat))

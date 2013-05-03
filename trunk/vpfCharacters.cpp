@@ -121,6 +121,29 @@ void CoxeterGroup::ComputeRhoOrbit(){
 }
 
 void ElementWeylGroup::MakeCanonical()
+{ this->CheckInitialization();
+  //ElementWeylGroup tempElt=*this;
+  this->MakeCanonicalProvidedAllElementsOwnerAreComputed();
+  //tempElt.MakeCanonicalWithoutElementsOwnerComputed();
+  //if (tempElt!=*this)
+  //{ std::cout << "This is a mathematical error made by T. Milev: canonical way of writing element "
+  //  << this->ToString() << " is different from the canonical way of writing "
+  //  << tempElt.ToString() << ". "
+  //  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //  assert(false);
+  //}
+}
+
+void ElementWeylGroup::MakeCanonicalProvidedAllElementsOwnerAreComputed()
+{ this->CheckInitialization();
+  if (this->owner->rhoOrbit.size==0)
+    this->owner->ComputeAllElements();
+  Vector<Rational> tempV=this->owner->rho;
+  this->owner->ActOn(*this, tempV);
+  *this=this->owner->theElements[this->owner->rhoOrbit.GetIndex(tempV)];
+}
+
+void ElementWeylGroup::MakeCanonicalWithoutElementsOwnerComputed()
 { //I am not quite sure if this mathematically deserves to be called "canonical"
   this->CheckInitialization();
   if (this->owner->rho.size==0)

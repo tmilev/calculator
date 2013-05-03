@@ -980,6 +980,9 @@ public:
     return true;
   }
   void MakeCanonical();
+  void MakeCanonicalProvidedAllElementsOwnerAreComputed();
+  //the two canonical forms do not coincide! This needs to be fixed, not critical however.
+  void MakeCanonicalWithoutElementsOwnerComputed();
   void ToString(std::string& output)
   { output=this->ToString();
   }

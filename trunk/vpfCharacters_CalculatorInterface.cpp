@@ -168,7 +168,11 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
   otherGroup.ComputeConjugacyClasses();
   std::cout << "Time of conjugacy class computation method2: "
   << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart2;
-
+  ElementWeylGroup tempTestElt;
+  for (int i=0; i<theGroup.theElements.size; i++)
+  { tempTestElt=theGroup.theElements[i];
+    tempTestElt.MakeCanonical();
+  }
   return true;
 }
 
@@ -321,11 +325,15 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet
   BoundVariablesSubstitution tempSub;
   bool tempBool;
   //std::cout << "<br>" << theSet[0].ToString() << "->" << theSet[0].ToStringFull() << " is with hash " << theSet[0].HashFunction();
+  ProgressReport theReport(theCommands.theGlobalVariableS);
   for (int i=0; i<theSet.size; i++)
     for (int j=0; j<numGenerators; j++)
     { tempSub.reset();
       theProduct.MakeProducT(theCommands, theSet[j], theSet[i]);
-      //std::cout << "<br>Evaluating: " << theProduct.ToString() << "->" << theProduct.ToStringFull();
+      std::stringstream reportStream;
+      reportStream << "found " << theSet.size << "elements so far, exploring element " << i+1;
+      reportStream << "<br>Evaluating: " << theProduct.ToString();
+      theReport.Report(reportStream.str());
       theCommands.EvaluateExpression(theProduct, evaluatedProduct, tempSub, tempBool);
       //std::cout << " to get " << evaluatedProduct.ToString() << "->" << evaluatedProduct.ToStringFull();
       //std::cout << " with hash " << evaluatedProduct.HashFunction();

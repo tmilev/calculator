@@ -502,7 +502,8 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
 
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
+{ MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep");
+  if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
       (theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())

@@ -147,8 +147,8 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
         this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
       }
       this->classFunctionMatricesComputed[cci]=true;
-      std::cout << "<br>Class function matrix of conjugacy class "
-      << cci+1 << " computed to be: " << this->classFunctionMatrices[cci].ToString();
+//      std::cout << "<br>Class function matrix of conjugacy class "
+//      << cci+1 << " computed to be: " << this->classFunctionMatrices[cci].ToString();
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)
@@ -255,12 +255,12 @@ Vector<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
 { this->CheckInitialization();
   if (this->theCharacter.size>0)
     return this->theCharacter;
-  std::cout << "Computing character: ";
+//  std::cout << "Computing character: ";
   int numClasses=this->OwnerGroup->conjugacyClasses.size;
   this->theCharacter.SetSize(numClasses);
   for (int i=0; i<numClasses; i++)
     this->theCharacter[i]= this->GetElementImage(this->OwnerGroup->conjugacyClasses[i][0]).GetTrace();
-  std::cout << "... done: character is: " << this->theCharacter.ToString();
+//  std::cout << "... done: character is: " << this->theCharacter.ToString();
   return this->theCharacter;
 }
 
@@ -289,7 +289,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   { coefficient NumIrrepsOfType=this->OwnerGroup->GetHermitianProduct
        (this->theCharacter, this->OwnerGroup->irreps[i].theCharacter);
     if(NumIrrepsOfType!=0)
-    { std::cout << "<hr>contains irrep " << i << std::endl;
+    { //std::cout << "<hr>contains irrep " << i << std::endl;
       this->GetClassFunctionMatrix(this->OwnerGroup->irreps[i].theCharacter, splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
@@ -299,11 +299,11 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
     }
   }
   if((remainingVectorSpace.size < this->GetDim()) && (remainingVectorSpace.size > 0))
-  { std::cout << "<br>restricting to subrep(s)... ";
+  { //std::cout << "<br>restricting to subrep(s)... ";
     WeylGroupRepresentation<coefficient> reducedRep;
     this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep);
-    std::cout << "done" << std::endl;
-    std::cout << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << std::endl;
+    //std::cout << "done" << std::endl;
+    //std::cout << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << std::endl;
     return reducedRep.DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables);
   }
   if(remainingVectorSpace.size == 0)
@@ -311,7 +311,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   int NumClasses=this->OwnerGroup->conjugacyClasses.size;
   Vector<coefficient> virtualChar;
   List<Vectors<coefficient> > theSubRepsBasis;
-  for(int cfi=0; cfi<NumClasses; cfi++)
+  for(int cfi=NumClasses-1; cfi>=0; cfi--)
   { virtualChar.MakeZero(NumClasses);
     virtualChar[cfi] = 1;
 //    std::cout << "<br>getting matrix of virtual char " << virtualChar << std::endl;
@@ -328,13 +328,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    std::cout << "<br>the eigenspaces were of dimensions: ";
-    for(int i=0; i<theSubRepsBasis.size; i++)
-      std::cout << theSubRepsBasis[i].size << " ";
+    //std::cout << "<br>the eigenspaces were of dimensions: ";
+//    for(int i=0; i<theSubRepsBasis.size; i++)
+//      std::cout << theSubRepsBasis[i].size << " ";
     WeylGroupRepresentation<coefficient> newRep;
     if (theSubRepsBasis.size>1)//we found splitting, so let us recursively decompose:
     { for(int i=0; i<theSubRepsBasis.size; i++)
-      { std::cout << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
+      { //std::cout << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
         remainingCharacter.SetSize(0);
         this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
         if (!newRep.DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables))

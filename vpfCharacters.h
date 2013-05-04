@@ -505,7 +505,7 @@ public:
   coefficient GetNumberOfComponents();
   bool CheckRepresentationConsistency();
   void ClassFunctionMatrix(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat);
-  List<CoxeterRepresentation<coefficient> > Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> >& gr);
+  List<CoxeterRepresentation<coefficient> > Decomposition();
   CoxeterRepresentation<coefficient> Reduced() const;
   VectorSpace<coefficient> FindDecentBasis() const;
   bool operator>(CoxeterRepresentation<coefficient>& right);

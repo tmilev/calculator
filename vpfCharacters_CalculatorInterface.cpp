@@ -214,7 +214,8 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
     return false;
   List<ClassFunction<Rational> > theCFs;
   List<CoxeterRepresentation<Rational> > outputReps;
-  theRep.Decomposition(theCFs, outputReps);
+//  theRep.Decomposition(theCFs, outputReps);
+  theRep.Decomposition();
   output.reset(theCommands, outputReps.size+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   Expression tempE;

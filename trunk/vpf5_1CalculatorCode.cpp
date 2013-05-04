@@ -910,8 +910,8 @@ bool CommandList::innerConesIntersect
   }
   std::stringstream out;
   if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
-  { out << "I got as input vectors of different dimensions, "
-    << coneNonStrictMatForm.NumCols << " and " << coneStrictMatForm.NumCols
+  { out << "I got as input vectors of different dimensions, first groups had vectors of dimension "
+    << coneNonStrictMatForm.NumCols << " and second of dimension " << coneStrictMatForm.NumCols
     << " which is not allowed. ";
     return output.SetError(out.str(), theCommands);
   }

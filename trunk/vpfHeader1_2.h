@@ -9206,8 +9206,11 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
 { if (this->OwnerGroup==0)
     return "non-initialized representation";
   std::stringstream out;
-  out << "Character: " << this->theCharacter.ToString(theFormat) << " of length "
-  << this->OwnerGroup->GetCharacterNorm(this->theCharacter);
+  if (this->theCharacter.size>0)
+    out << "Character: " << this->theCharacter.ToString(theFormat) << " of length "
+    << this->OwnerGroup->GetCharacterNorm(this->theCharacter);
+  else
+    out << "Character needs to be computed.";
   int theRank=this->OwnerGroup->GetDim();
   out << "<br>The simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;

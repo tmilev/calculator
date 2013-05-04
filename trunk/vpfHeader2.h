@@ -683,6 +683,7 @@ public:
   bool flagLogFullTreeCrunching;
   bool flagProduceLatexLink;
   bool flagHideLHS;
+  bool flagDisplayFullExpressionTree;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;
@@ -2159,7 +2160,7 @@ bool CommandList::GetMatrix
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
   Expression theConverted;
-//  std::cout << "<br>extracting matrix from: " << theExpression.Lispify();
+  std::cout << "<br>extracting matrix from: " << theExpression.ToStringFull();
   if (!theExpression.IsSequenceNElementS())
   { if (targetNumColsNonMandatory>0)
       if (targetNumColsNonMandatory!=1)

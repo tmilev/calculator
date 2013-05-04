@@ -44,6 +44,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
     ElementsExplored.AddOnTop(tempElt);
   }
   for (int i=0; i<ElementsExplored.size; i++)
+  { int indexParentElement=this->OwnerGroup->theElements.GetIndex(ElementsExplored[i]);
     for (int j=0; j<theRank; j++)
     { tempElt=ElementsExplored[i];
       tempElt.AddOnTop(j);
@@ -51,11 +52,12 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
       if (!ElementsExplored.Contains(tempElt))
       { int indexCurrentElt=this->OwnerGroup->theElements.GetIndex(tempElt);
         this->theElementIsComputed[indexCurrentElt]=true;
-        this->theElementImages[i].MultiplyOnTheLeft
+        this->theElementImages[indexParentElement].MultiplyOnTheLeft
         (this->theElementImages[j+1], this->theElementImages[indexCurrentElt]);
         ElementsExplored.AddOnTop(tempElt);
       }
     }
+  }
 //  this->CheckRepIsMultiplicativelyClosed();
 }
 

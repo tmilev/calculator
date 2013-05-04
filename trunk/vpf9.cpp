@@ -4332,7 +4332,10 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
     { out << "<br>Conjugacy class " << i+1 << " (" << this->conjugacyClasses[i].size
       << " elements total): ";
       if (this->conjugacyClasses[i].size>10)
-        out << "... too many elements, skipping";
+      { out << " ... has too many elements, displaying the first element only: ";
+        out << this->theElements[this->conjugacyClasses[i][0]].ToString(theFormat);
+        continue;
+      }
       for (int j=0; j<this->conjugacyClasses[i].size; j++)
       { out << this->theElements[this->conjugacyClasses[i][j]].ToString(theFormat);
         if (j!=this->conjugacyClasses[i].size-1)
@@ -4342,9 +4345,12 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   }
   out << "<br>Root system(" << this->RootSystem.size << " elements):\n"
   << this->RootSystem.ToString() << "\n";
-  out << "Elements of the group:\n";
-  for (int i=0; i<this->theElements.size; i++)
-    out << i << ". " << this->theElements[i].ToString() << "\n";
+  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
+  if (this->theElements.size<=100)
+    for (int i=0; i<this->theElements.size; i++)
+      out << i << ". " << this->theElements[i].ToString() << "\n";
+  else
+    out << "... too many, not displaying. ";
   out << "<br>Symmetric cartan: "
   << this->CartanSymmetric.ToString();
   return out.str();

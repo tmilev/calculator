@@ -350,6 +350,32 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   return false;
 }
 
+void WeylGroup::ComputeIrreducibleRepresentations
+(GlobalVariables* theGlobalVariables)
+{ if(this->theElements.size == 0)
+    this->ComputeConjugacyClasses(theGlobalVariables);
+  WeylGroupRepresentation<Rational> theStandardRep, newRep;
+  this->StandardRepresentation(theStandardRep);
+  int NumClasses=this->conjugacyClasses.size;
+  Vector<Rational> decompositionNewRep;
+  for (int i=0; i<this->irreps.size && this->irreps.size!=NumClasses; i++)
+  { newRep= theStandardRep;
+    std::cout << "Decomposing " << newRep.ToString() << " * " << theStandardRep.ToString() << std::endl;
+    newRep*= this->irreps[i];
+    bool tempB=
+    newRep.DecomposeMeIntoIrreps(decompositionNewRep, theGlobalVariables);
+    if (!tempB)
+    { std::cout << "This is a mathematical error: failed to decompose " << newRep.ToString() << ". "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
+  this->irreps.QuickSortAscending();
+  std::cout << "Irrep table:";
+  for (int i=0; i<this->irreps.size; i++)
+    std::cout <<"\n<br>\n" << this->irreps[i].ToString();
+}
+
 bool WeylGroupCalculatorFunctions::innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
@@ -464,7 +490,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
   if (!output.IsOfType<WeylGroup>())
     return true;
   WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
-  theGroup.ComputeIrreducibleRepresentations();
+  theGroup.ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;

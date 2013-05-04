@@ -3002,7 +3002,7 @@ class Rational
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
     if (this->DenShort<=0 || OtherDen<=0)
-    { std::cout << "This is a programming error: corrupt rational number(s) with denominator "
+    { std::cout << "This is a programming error: corrupt rational number(s) with denominators "
       << this->DenShort << " and " << OtherDen << ". The cause of the error should be in some of "
       << " the calling functions. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -4267,8 +4267,7 @@ class Vectors: public List<Vector<CoefficientType> >
   }
   static void SelectABasisInSubspace
   (const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
-   const CoefficientType& theRingZero, Selection& outputSelectedPivots,
-   GlobalVariables* theGlobalVariables=0)
+   Selection& outputSelectedPivots, GlobalVariables* theGlobalVariables=0)
   ;
   int GetRankOfSpanOfElements
   (Matrix<CoefficientType>* buffer=0, Selection* bufferSelection=0)const
@@ -4456,8 +4455,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
   }
   static void IntersectTwoLinSpaces
   (const List<Vector<CoefficientType> >& firstSpace, const List<Vector<CoefficientType> >& secondSpace,
-   List<Vector<CoefficientType> >& output, const CoefficientType& theRingZero=0,
-   GlobalVariables* theGlobalVariables=0)
+   List<Vector<CoefficientType> >& output, GlobalVariables* theGlobalVariables=0)
      ;
   bool IsRegular
   (Vector<CoefficientType>& r, Vector<CoefficientType>& outputFailingNormal,
@@ -8086,12 +8084,11 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
 template <class CoefficientType>
 void Vectors<CoefficientType>::SelectABasisInSubspace
 (const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
- const CoefficientType& theRingZero, Selection& outputSelectedPivotColumns,
- GlobalVariables* theGlobalVariables)
+ Selection& outputSelectedPivotColumns, GlobalVariables* theGlobalVariables)
 { if (&input==&output)
   { List<Vector<CoefficientType> > inputCopy=input;
     Vectors<CoefficientType>::SelectABasisInSubspace
-    (inputCopy, output, theRingZero, outputSelectedPivotColumns, theGlobalVariables);
+    (inputCopy, output, outputSelectedPivotColumns, theGlobalVariables);
     return;
   }
   if (input.size==0)
@@ -8113,12 +8110,12 @@ void Vectors<CoefficientType>::SelectABasisInSubspace
   int currentRow=0;
   for (int i=0; i<input.size; i++)
   { for (int j=0; j<theDim; j++)
-      theMat(i,j)=input[i][j];
+      theMat(currentRow,j)=input[i][j];
     currentRow++;
-    if (currentRow==theDim || i==input.size-1)
+    if (currentRow==MaxNumRows || i==input.size-1)
       theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
     currentRow=outputSelectedPivotColumns.CardinalitySelection;
-    if (currentRow==theDim)
+    if (currentRow==MaxNumRows)
       break;
   }
   output.SetSize(outputSelectedPivotColumns.CardinalitySelection);

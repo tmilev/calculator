@@ -957,10 +957,52 @@ class WeylGroupRepresentation
   private:
   List<Matrix<coefficient> > theElementImages;
   List<bool> theElementIsComputed;
+  Vector<coefficient> theCharacter;
+  List<Matrix<coefficient> > classFunctionMatrices;
+  List<bool> classFunctionMatricesComputed;
+  friend class WeylGroup;
   public:
   WeylGroup* OwnerGroup;
-  Vector<coefficient> theCharacter;
-
+  WeylGroupRepresentation():OwnerGroup(0){}
+  unsigned int HashFunction() const;
+  bool CheckInitialization()
+  { if (this->OwnerGroup==0)
+    { std::cout << "This is a programming error: working with a representation with "
+      << " non-initialized owner Weyl group. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return true;
+  }
+  static unsigned int HashFunction(const WeylGroupRepresentation<coefficient>& input)
+  { return input.HashFunction();
+  }
+  void ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables=0);
+  Vector<coefficient>& GetCharacter();
+  void reset(WeylGroup* inputOwner);
+  void GetClassFunctionMatrix
+(Vector<coefficient>& virtualCharacter, Matrix<coefficient>& outputMat,
+ GlobalVariables* theGlobalVariables=0)
+;
+  int GetDim()const
+  { if (this->theElementImages.size==1)
+      return this->theElementImages[0].NumRows;
+    return this->theElementImages[1].NumRows;
+  }
+  void Restrict
+(const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter,
+ WeylGroupRepresentation<coefficient>& output)
+   ;
+  bool DecomposeMeIntoIrrepsRecursive
+  (Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
+  bool DecomposeMeIntoIrreps(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
+  coefficient GetNumberOfComponents();
+  void operator*=(const WeylGroupRepresentation<coefficient>& other);
+  bool operator==(const WeylGroupRepresentation<coefficient>& other)const
+  { return this->OwnerGroup==other.OwnerGroup && this->theCharacter==other.theCharacter;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
   Matrix<coefficient>& GetElementImage(int elementIndex);
 };
 
@@ -1052,6 +1094,26 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType)
   ;
+  bool CheckInitializationFDrepComputation()const
+  { if (this->conjugacyClasses.size==0 || this->theElements.size==0)
+    { std::cout << "This is a programming error: requesting to compute character hermitian product "
+      << " in a group whose conjugacy classes and/or elements have not been computed. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return true;
+  }
+  template <typename coefficient>
+  coefficient GetHermitianProduct
+  (const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const
+  ;
+  template <typename coefficient>
+  inline coefficient GetCharacterNorm
+  (const Vector<coefficient>& theCharacter)const
+  { return this->GetHermitianProduct(theCharacter, theCharacter);
+  }
+  void StandardRepresentation(WeylGroupRepresentation<Rational>& output);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
@@ -1153,6 +1215,7 @@ public:
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 ;
+  void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const;
   void DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
  bool drawWeylChamber, Vector<Rational> * bluePoint=0, bool LabelDynkinDiagramVertices=false,
@@ -7552,7 +7615,7 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
     this->GetActionGeneratorIndeX(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim() );
-    currentOpMat.FindZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
+    currentOpMat.GetZeroEigenSpaceModifyMe(eigenSpacesPerSimpleGenerator[i]);
     tempSpace1=theFinalEigenSpace;
     tempSpace2=eigenSpacesPerSimpleGenerator[i];
     theFinalEigenSpace.IntersectTwoLinSpaces
@@ -9128,5 +9191,48 @@ bool ElementSemisimpleLieAlgebra<CoefficientType>::IsElementCartan()const
     if (!owner->IsGeneratorFromCartan((*this)[i].theGeneratorIndex))
       return false;
   return true;
+}
+
+template <typename coefficient>
+unsigned int WeylGroupRepresentation<coefficient>::HashFunction()const
+{ unsigned int result= this->OwnerGroup==0? 0 : this->OwnerGroup->HashFunction();
+  result+=this->theCharacter.HashFunction();
+  return result;
+}
+
+template <typename coefficient>
+std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* theFormat)const
+{ if (this->OwnerGroup==0)
+    return "non-initialized representation";
+  std::stringstream out;
+  out << "Character: " << this->theCharacter.ToString(theFormat) << " of length "
+  << this->OwnerGroup->GetCharacterNorm(this->theCharacter);
+  int theRank=this->OwnerGroup->GetDim();
+  out << "<br>The simple generators (" << theRank << " total):<br> ";
+  std::stringstream forYourCopyConvenience;
+  for (int i=1; i<theRank+1; i++)
+    if (this->theElementIsComputed[i])
+    { std::stringstream tempStream;
+      tempStream << "s_" << i << ":=MatrixRationals{}"
+      << this->theElementImages[i].ToString(theFormat) << "; \\\\\n";
+      forYourCopyConvenience << tempStream.str();
+      out << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
+    } else
+      out << "Element s_{" << i << "} not computed ";
+  out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();
+  return out.str();
+}
+
+template <typename coefficient>
+coefficient WeylGroup::GetHermitianProduct
+  (const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const
+{ this->CheckInitializationFDrepComputation();
+  coefficient result = 0;
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+    result +=
+    leftCharacter[i].GetComplexConjugate() * rightCharacter[i].GetComplexConjugate() *
+    this->conjugacyClasses[i].size;
+  result/=this->theElements.size;
+  return result;
 }
 #endif

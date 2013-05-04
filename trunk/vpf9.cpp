@@ -4472,7 +4472,6 @@ int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rationa
   return result;
 }
 
-
 void WeylGroup::ComputeAllElements(int UpperLimitNumElements)
 { this->ComputeRho(true);
 //  this->ComputeDebugString();

@@ -962,7 +962,7 @@ int main(void)
    }
    */
    //  Vectors<Rational> V;
-   //  XP.FindZeroEigenSpace(V);
+   //  XP.GetZeroEigenSpace(V);
    //  std::cout << V << std::endl;
    //  std::cout << V.GetDim() << std::endl;
 

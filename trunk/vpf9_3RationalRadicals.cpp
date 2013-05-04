@@ -133,7 +133,7 @@ bool AlgebraicNumber::AssignOperation
   }
   std::cout << "<br>The matrix: " << theDep.ToString();
   Vectors<Rational> theEigenVectors;
-  theDep.FindZeroEigenSpace(theEigenVectors);
+  theDep.GetZeroEigenSpace(theEigenVectors);
   std::cout << "<br>result eigenvectors: " << theEigenVectors.ToString();
   if (theEigenVectors.size<1)
   { std::cout << "This is a programing error: I am asked to find the eigenspace of "

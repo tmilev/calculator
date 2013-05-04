@@ -316,8 +316,9 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
           Accounted[accountedIndex]=true;
         }
       this->conjugacyClasses.AddOnTop(theStack);
-      this->conjugacyClasses.QuickSortAscending();
+      this->conjugacyClasses.LastObject()->QuickSortAscending();
     }
+  this->conjugacyClasses.QuickSortAscending();
 }
 
 void CoxeterGroup::ComputeConjugacyClasses(){

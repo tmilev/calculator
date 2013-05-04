@@ -1329,7 +1329,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
         theReport.Report(tempStream4.str());
       tempSpace2=eigenSpacesPerSimpleGenerator[i];
       theFinalEigenSpace.IntersectTwoLinSpaces
-      (tempSpace1, tempSpace2, theFinalEigenSpace, theRingZero, &theGlobalVariables);
+      (tempSpace1, tempSpace2, theFinalEigenSpace, &theGlobalVariables);
         tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart2 << " seconds.";
         theReport.Report(tempStream4.str());
     }

@@ -1140,6 +1140,8 @@ void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output
     output.theElementIsComputed[i+1]=true;
   }
   output.GetCharacter();
+  if (!this->irreps.Contains(output))
+    this->irreps.AddOnTop(output);
 }
 
 CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
@@ -1154,11 +1156,6 @@ CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
   out.basis.MakeEiBasis(this->nGens);
   out.GetCharacter();
   return out;
-}
-
-void WeylGroup::ComputeIrreducibleRepresentations
-(GlobalVariables* theGlobalVariables)
-{
 }
 
 void CoxeterGroup::ComputeIrreducibleRepresentations()

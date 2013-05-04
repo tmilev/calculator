@@ -17,7 +17,7 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
     commonAd.AppendMatrixToTheBottom(tempAd);
   }
   Vectors<Rational> outputV;
-  commonAd.FindZeroEigenSpace(outputV);
+  commonAd.GetZeroEigenSpace(outputV);
 //  std::cout << "<br>Common ad: " << commonAd.ToString();
 //  std::cout << "<br>Eigenvectors: " << outputV.ToString();
   outputCentralizingElements.SetSize(outputV.size);

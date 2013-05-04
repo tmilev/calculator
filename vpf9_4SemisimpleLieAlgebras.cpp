@@ -1127,7 +1127,7 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnl
       tempAd-=temp;
       adIncludingCartanActions.AppendMatrixToTheBottom(tempAd);
     }
-    adIncludingCartanActions.FindZeroEigenSpace(outputV);
+    adIncludingCartanActions.GetZeroEigenSpace(outputV);
     //  std::cout << "<br>Common ad: " << commonAd.ToString();
     //  std::cout << "<br>Eigenvectors: " << outputV.ToString();
     for (int j=0; j<outputV.size; j++)

@@ -123,7 +123,7 @@ int Expression::GetTypeOperation<WeylGroup>()const
 }
 
 template < >
-int Expression::GetTypeOperation<CoxeterRepresentation<Rational> >()const
+int Expression::GetTypeOperation<WeylGroupRepresentation<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opWeylGroupIrrep();
 }
@@ -298,7 +298,7 @@ WeylGroup
 
 template < >
 int Expression::AddObjectReturnIndex(const
-CoxeterRepresentation<Rational>
+WeylGroupRepresentation<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theWeylGroupIrreps
@@ -506,8 +506,8 @@ WeylGroup& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-CoxeterRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<CoxeterRepresentation<Rational> >())
+WeylGroupRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<WeylGroupRepresentation<Rational> >())
   { std::cout << "This is a programming error: expression not of required type WeylGroupRepresentation. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -4960,9 +4960,9 @@ bool Expression::ToStringData
     tempFormat.flagUseReflectionNotation=true;
     out << theElt.ToString(&tempFormat);
     result=true;
-  } else if (this->IsOfType<CoxeterRepresentation<Rational> >())
-  { CoxeterRepresentation<Rational>& theElt=
-    this->GetValuENonConstUseWithCaution<CoxeterRepresentation<Rational> >();
+  } else if (this->IsOfType<WeylGroupRepresentation<Rational> >())
+  { WeylGroupRepresentation<Rational>& theElt=
+    this->GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
@@ -5247,7 +5247,7 @@ std::string Expression::ToString
         else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
                   (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
                   (*this)[i].IsOfType<WeylGroup>() ||
-                  (*this)[i].IsOfType<CoxeterRepresentation<Rational> >()
+                  (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()
                   )
                  && isFinal)
           out << (*this)[i].ToString(theFormat);

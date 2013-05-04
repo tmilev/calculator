@@ -1823,7 +1823,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
 { Matrix<Rational> matVertices;
   matVertices.AssignVectorsToRows(this->theProjectivizedCone.Vertices);
   Vectors<Rational> theNormals;
-  matVertices.FindZeroEigenSpaceModifyMe(theNormals);
+  matVertices.GetZeroEigenSpaceModifyMe(theNormals);
   Vector<Rational> preferredNormal;
   for (int i=0; i<theNormals.size; i++)
     if (!theNormals[i][0].IsEqualToZero())
@@ -2256,7 +2256,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
     Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
     tempMat.AssignVectorsToRows(this->Vertices);
     Vectors<Rational> NormalsToSubspace;
-    tempMat.FindZeroEigenSpaceModifyMe(NormalsToSubspace);
+    tempMat.GetZeroEigenSpaceModifyMe(NormalsToSubspace);
     if (NormalsToSubspace.size>0)
     { matNormals.AssignVectorsToRows(NormalsToSubspace);
 //      std::cout << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ToString();
@@ -2368,7 +2368,7 @@ bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables&
   if (rankVerticesSpan<theDim)
   { Matrix<Rational>  tempMat;
     tempMat.AssignVectorsToRows(inputVertices);
-    tempMat.FindZeroEigenSpace(extraVertices);
+    tempMat.GetZeroEigenSpace(extraVertices);
     for (int i=0; i<extraVertices.size; i++)
     { this->Normals.AddOnTop(extraVertices[i]);
       this->Normals.AddOnTop(-extraVertices[i]);
@@ -3709,7 +3709,7 @@ void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theS
 { Vectors<Rational> theNormals;
   Matrix<Rational> theMat;
   theSubspaceBasis.GetMatrixRootsToRows(theMat);
-  theMat.FindZeroEigenSpace(theNormals);
+  theMat.GetZeroEigenSpace(theNormals);
   this->IntersectWithLinearSubspaceGivenByNormals(theNormals);
 }
 
@@ -3760,7 +3760,7 @@ bool Lattice::SubstitutionHomogeneous
     for (int j=0; j<startingDim; j++)
       matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
   Vectors<Rational> theEigenSpace;
-  matRelationBetweenStartingVariables.FindZeroEigenSpaceModifyMe(theEigenSpace);
+  matRelationBetweenStartingVariables.GetZeroEigenSpaceModifyMe(theEigenSpace);
   //std::cout << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ToString(true, false);
   for (int i=0; i<theEigenSpace.size; i++)
     theEigenSpace[i].ScaleByPositiveRationalToIntegralMinHeight();
@@ -4235,7 +4235,7 @@ void Cone::IntersectAHyperplane
   Matrix<Rational> tempMat, theEmbedding, theProjection;
   tempMat.AssignVectorRow(theNormal);
   Vectors<Rational> theBasis;
-  tempMat.FindZeroEigenSpace(theBasis);
+  tempMat.GetZeroEigenSpace(theBasis);
   assert(theBasis.size==theNormal.size-1);
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
@@ -4712,7 +4712,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 //  if (tempMat.NumRows<120)
 //    std::cout << "<div class=\"math\" scale=\"50\">" << tempMat.ToString(false, true) << "</div>";
   Vectors<Rational> tempRoots;
-  tempMat.FindZeroEigenSpaceModifyMe(tempRoots);
+  tempMat.GetZeroEigenSpaceModifyMe(tempRoots);
   output.SetSize(tempRoots.size);
 //  std::cout << "<br>invariants Vector<Rational> form: " << tempRoots.ToString();
 //  std::cout << "<br> .... and the invariants are: ";
@@ -5548,7 +5548,7 @@ bool ConeComplex::DrawMeProjective
     if (this->GetDim()>2)
     { this->ConvexHull.GetInternalPoint(tempRoot);
       tempMat.AssignVectorRow(tempRoot);
-      tempMat.FindZeroEigenSpace(tempRoots);
+      tempMat.GetZeroEigenSpace(tempRoots);
       for (int i=0; i<2; i++)
         for (int j=0; j<this->GetDim(); j++)
           theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j]=tempRoots[i][j].DoubleValue();
@@ -5987,7 +5987,7 @@ void rootSubalgebra::GetCoxeterPlane
         eigenMat.elements[i][i]-=theEigenValue;
     }
   List<Vector<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpace(theEigenSpaceList);
+  eigenMat.GetZeroEigenSpace(theEigenSpaceList);
   Vectors<CompleX<double> > theEigenSpace;
   theEigenSpace.operator=(theEigenSpaceList);
   DrawOperations tempDO;
@@ -6048,7 +6048,7 @@ void WeylGroup::GetCoxeterPlane
         eigenMat.elements[i][i]-=theEigenValue;
     }
   List<Vector<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpace(theEigenSpaceList);
+  eigenMat.GetZeroEigenSpace(theEigenSpaceList);
   Vectors<CompleX<double> > theEigenSpace;
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);

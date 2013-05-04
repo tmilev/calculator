@@ -226,12 +226,12 @@ std::ostream& operator<<(std::ostream& out, const GroupRingElement<coefficient> 
 
 //---------------------------------------------------------------------------Characters --------------------------------
 //--------------------------------Characters----------------------------
-//This will be incorrect if it's ever extended to a complex type
+
 template<typename coefficient>
 coefficient ClassFunction<coefficient>::IP(const ClassFunction<coefficient> &other) const{
     coefficient acc = 0;
     for(int i=0;i<G->ccCount;i++)
-        acc +=  this->data[i] * other[i] * G->ccSizes[i];
+        acc +=  this->data[i].GetComplexConjugate() * other[i].GetComplexConjugate() * G->ccSizes[i];
     return acc/G->N;
 }
 

@@ -201,6 +201,14 @@ Vector<Rational> CoxeterGroup::ComposeTodorsVector(const List<int> &l) const
 {   return CoxeterGroup::ApplyList(l,rho);
 }
 
+void WeylGroup::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const
+{ int rank=this->GetDim();
+  output.MakeIdMatrix(rank);
+  for (int j=0; j<rank; j++)
+    output(indexSimpleRoot,j)-=
+    (this->CartanSymmetric(indexSimpleRoot,j) / CartanSymmetric(indexSimpleRoot, indexSimpleRoot) )*2;
+}
+
 Matrix<Rational> CoxeterGroup::SimpleReflectionMatrix(int i) const
 { Matrix<Rational> out;
   out.MakeIdMatrix(nGens);
@@ -289,6 +297,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
+  theStack.SetExpectedSize(this->theElements.size);
   int theRank=this->GetDim();
   Vector<Rational> theRhoImage;
   for (int i=0; i<this->theElements.size; i++)
@@ -306,6 +315,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
           Accounted[accountedIndex]=true;
         }
       this->conjugacyClasses.AddOnTop(theStack);
+      this->conjugacyClasses.QuickSortAscending();
     }
 }
 
@@ -667,8 +677,6 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
   return false;
 }
 
-
-
 template <typename coefficient>
 void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
 { int d = basis.size;
@@ -724,6 +732,21 @@ Matrix<coefficient> TrixTree<coefficient>::GetElement(CoxeterElement &g, const L
   if(others[i].M.NumCols == 0)
     others[i].M = M * gens[i];
   return others[i].GetElement(g,gens);
+}
+
+template <typename coefficient>
+Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int elementIndex)
+{ this->CheckInitialization();
+  this->OwnerGroup->CheckInitializationFDrepComputation();
+  Matrix<coefficient>& theMat=this->theElementImages[elementIndex];
+  if (this->theElementIsComputed[elementIndex])
+    return theMat;
+  const ElementWeylGroup& theElt=this->OwnerGroup->theElements[elementIndex];
+  this->theElementIsComputed[elementIndex]=true;
+  theMat.MakeIdMatrix(this->GetDim());
+  for (int i=0; i<theElt.size; i++)
+    theMat.MultiplyOnTheLeft(this->theElementImages[theElt[i]+1]);
+  return theMat;
 }
 
 template <typename coefficient>
@@ -958,7 +981,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     if(this->character.IP(G->characterTable[i])!=0)
     { std::cout << "contains irrep " << i << std::endl;
       ClassFunctionMatrix(G->characterTable[i], splittingOperatorMatrix);
-      splittingOperatorMatrix.FindZeroEigenSpaceModifyMe(splittingMatrixKernel);
+      splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb=tempVectors;
     }
@@ -1085,6 +1108,18 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
 }*/
 
 template <typename coefficient>
+Vector<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
+{ this->CheckInitialization();
+  if (this->theCharacter.size>0)
+    return this->theCharacter;
+  int numClasses=this->OwnerGroup->conjugacyClasses.size;
+  this->theCharacter.SetSize(numClasses);
+  for (int i=0; i<numClasses; i++)
+    this->theCharacter[i]= this->GetElementImage(this->OwnerGroup->conjugacyClasses[i][0]).GetTrace();
+  return this->theCharacter;
+}
+
+template <typename coefficient>
 ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()
 { if(this->character.data.size)
     return this->character;
@@ -1106,6 +1141,30 @@ coefficient CoxeterRepresentation<coefficient>::GetNumberOfComponents()
 template <typename coefficient>
 bool CoxeterRepresentation<coefficient>::operator>(CoxeterRepresentation<coefficient>& right)
 { return GetCharacter() > right.GetCharacter();
+}
+
+template <typename coefficient>
+void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
+{ this->OwnerGroup=inputOwner;
+  this->CheckInitialization();
+  this->OwnerGroup->CheckInitializationFDrepComputation();
+  this->theCharacter.SetSize(0);
+  this->theElementImages.SetSize(this->OwnerGroup->theElements.size);
+  this->theElementIsComputed.initFillInObject(this->OwnerGroup->theElements.size, false);
+  this->classFunctionMatrices.SetSize(this->OwnerGroup->conjugacyClasses.size);
+  this->classFunctionMatricesComputed.initFillInObject(this->OwnerGroup->conjugacyClasses.size, false);
+}
+
+void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output)
+{ this->CheckInitializationFDrepComputation();
+  output.reset(this);
+  output.theElementImages.SetSize(this->theElements.size);
+  int NumClasses=this->conjugacyClasses.size;
+  for(int i=0; i<NumClasses; i++)
+  { this->GetSimpleReflectionMatrix(i, output.theElementImages[i+1]);
+    output.theElementIsComputed[i+1]=true;
+  }
+  output.GetCharacter();
 }
 
 CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
@@ -1511,7 +1570,7 @@ void intersection
     for(int j=0; j<d; j++)
       MV.elements[i][j] = V[i][j];
   List<Vector<coefficient> > Vperp;
-  MV.FindZeroEigenSpaceModifyMe(Vperp);
+  MV.GetZeroEigenSpaceModifyMe(Vperp);
 
   Matrix<coefficient> MW;
   MW.init(W.size, d);
@@ -1519,7 +1578,7 @@ void intersection
     for(int j=0; j<d; j++)
       MW.elements[i][j] = W[i][j];
   List<Vector<coefficient> > Wperp;
-  MW.FindZeroEigenSpaceModifyMe(Wperp);
+  MW.GetZeroEigenSpaceModifyMe(Wperp);
 
   Matrix<coefficient> M;
   M.init(Vperp.size+Wperp.size,d);
@@ -1530,7 +1589,7 @@ void intersection
   for(; i<Vperp.size+Wperp.size; i++)
     for(int j=0; j<d; j++)
       M.elements[i][j] = Wperp[i-Vperp.size][j];
-  M.FindZeroEigenSpaceModifyMe(output);
+  M.GetZeroEigenSpaceModifyMe(output);
 }
 
 template <typename coefficient>
@@ -1651,7 +1710,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
     if(p(r) == 0)
     { Matrix<Rational> M2 = M;
       List<Vector<Rational> > V;
-      M2.DestructiveEigenspace(r, V);
+      M2.GetEigenspaceModifyMe(r, V);
       found += V.size;
       spaces.AddOnTop(V);
       if(found == M.NumCols)

@@ -1737,6 +1737,19 @@ public:
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j]=standsBelow(i-oldNumRows, j);
   }
+  static void MatrixInBasis
+  (const Matrix<Element>& input, Matrix<Element>& output,
+   const List<Vector<Element> >& basis, const Matrix<Element>& gramMatrixInverted)
+  { int d = basis.size;
+    output.init(d, d);
+    Vector<Rational> tempV;
+    for(int j=0; j<d; j++)
+    { input.ActOnVectorColumn(basis[j], tempV);
+      for(int i=0; i<d; i++)
+        output.elements[i][j] = basis[i].ScalarEuclidean(tempV);
+    }
+    output.MultiplyOnTheLeft(gramMatrixInverted);
+  }
   void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
   void ActOnVectorROWSOnTheLeft(List<Vector<Element> >& standOnTheRightAsVectorRow)const
   { List<Vector<Element> > output;
@@ -1992,7 +2005,7 @@ void NonPivotPointsToEigenVector
   void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
-  void AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T);
+  void AssignTensorProduct(const Matrix<Element>& left, const Matrix<Element>& right);
   void AssignVectorsToRows(const Vectors<Element>& input)
   { int numCols=-1;
     if (input.size>0)
@@ -2001,6 +2014,12 @@ void NonPivotPointsToEigenVector
     for (int i=0; i<input.size; i++)
       for (int j=0; j<numCols; j++)
         this->elements[i][j]=input[i][j];
+  }
+  void AssignVectorsToColumns(const Vectors<Element>& input)
+  { this->init(input[0].size, input.size);
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        (*this)(i,j)=input[j][i];
   }
   void AssignVectorColumn(const Vector<Element>& input)
   { this->init(input.size, 1);
@@ -2147,7 +2166,7 @@ void NonPivotPointsToEigenVector
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
   (Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
   Element GetDeterminant();
-  Element GetTrace();
+  Element GetTrace()const;
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
@@ -2157,16 +2176,18 @@ void NonPivotPointsToEigenVector
   (Vectors<Rational>& outputBasis, const Rational& DesiredError, int SuggestedOrder, int numIterations)
   ;
   void MatrixToRoot(Vector<Rational> & output);
-  void FindZeroEigenSpace(List<Vector<Element> >& output)const
+  bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim
+  (List<Vectors<Element> >& output)const;
+  void GetZeroEigenSpace(List<Vector<Element> >& output)const
   { Matrix<Element> tempMat=*this;
-    tempMat.FindZeroEigenSpaceModifyMe(output);
+    tempMat.GetZeroEigenSpaceModifyMe(output);
   }
-  void FindZeroEigenSpaceModifyMe(List<Vector<Element> >& output);
-  void DestructiveEigenspace
+  void GetZeroEigenSpaceModifyMe(List<Vector<Element> >& output);
+  void GetEigenspaceModifyMe
   (const Element &inputEigenValue, List<Vector<Element> >& outputEigenspace)
   { for(int i=0; i<this->NumCols; i++)
       this->elements[i][i] -= inputEigenValue;
-    this->FindZeroEigenSpaceModifyMe(outputEigenspace);
+    this->GetZeroEigenSpaceModifyMe(outputEigenspace);
   }
   static bool SystemLinearInequalitiesHasSolution
   (Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputPoint);
@@ -2554,15 +2575,21 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 }
 
 template<typename Element>
-void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& S, const Matrix<Element>& T)
-{ assert(this!=&S && this!=&T);
-  this->Resize(S.NumRows*T.NumRows, S.NumCols*T.NumCols, false);
-  int sr = T.NumRows; int sc = T.NumCols;
-  for(int iv = 0; iv<S.NumRows; iv++)
-    for(int iw = 0; iw<T.NumRows; iw++)
-      for(int jv = 0; jv<S.NumCols; jv++)
-        for(int jw = 0; jw <T.NumCols; jw++)
-          this->elements[iv*sr+iw][jv*sc+jw] = S.elements[iv][jv] * T.elements[iw][jw];
+void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& left, const Matrix<Element>& right)
+{ //handle lazy programmers:
+  if (this==&left || this==&right)
+  { Matrix<Element> leftCopy=left;
+    Matrix<Element> rightCopy=right;
+    this->AssignTensorProduct(leftCopy, rightCopy);
+    return;
+  }
+  this->Resize(left.NumRows*right.NumRows, left.NumCols*right.NumCols, false);
+  int sr = right.NumRows; int sc = right.NumCols;
+  for(int iv = 0; iv<left.NumRows; iv++)
+    for(int iw = 0; iw<right.NumRows; iw++)
+      for(int jv = 0; jv<left.NumCols; jv++)
+        for(int jw = 0; jw <right.NumCols; jw++)
+          this->elements[iv*sr+iw][jv*sc+jw] = left.elements[iv][jv] * right.elements[iw][jw];
 }
 
 template<typename Element>
@@ -3138,6 +3165,9 @@ public:
   { LargeInt result;
     this->GetNumerator(result);
     return result;
+  }
+  inline const Rational& GetComplexConjugate()const
+  { return *this;
   }
   inline void GetNumerator(LargeInt& output)const
   { this->GetNumerator(output.value);
@@ -5313,6 +5343,7 @@ public:
   //////////////////////////////////////////////
   void AssignFloor()const
   {}
+  void AssignMinPoly(const Matrix<CoefficientType>& input);
   void AssignMonomialWithExponent(Vector<Rational>& r, const CoefficientType& theCoeff=1)
   { MonomialP tempM=r;
     this->MakeZero(r.size);
@@ -5459,8 +5490,13 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   inline bool GetRootFromLinPolyConstTermLastVariable(Vector<CoefficientType>& outputRoot, const CoefficientType& theZero= (CoefficientType) 0){return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);}
   void Evaluate
-(const Vector<CoefficientType>& input, CoefficientType& output, const CoefficientType& theRingZero=0)
+(const Vector<CoefficientType>& input, CoefficientType& output)
   ;
+  CoefficientType Evaluate(const Vector<CoefficientType>& input)
+  { CoefficientType result;
+    this->Evaluate(input, result);
+    return result;
+  }
   bool IsProportionalTo(const Polynomial<CoefficientType>& other, CoefficientType& TimesMeEqualsOther, const CoefficientType& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
   const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
@@ -5577,6 +5613,12 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   void operator*=(const Polynomial<CoefficientType>& other)
   { this->::ElementMonomialAlgebra<MonomialP, CoefficientType>::operator*=(other);
+  }
+  Polynomial<CoefficientType> operator%(const Polynomial<CoefficientType>& other)
+  { Polynomial<CoefficientType> temp;
+    Polynomial<CoefficientType> result;
+    this->DivideBy(other, temp, result);
+    return result;
   }
   void operator/=(const Polynomial<CoefficientType>& other)
   { Polynomial<CoefficientType> tempMe=*this;
@@ -6438,11 +6480,11 @@ void Polynomial<CoefficientType>::ShiftVariableIndicesToTheRight
   *this=Accum;
 }
 
-template <class Element>
-void Polynomial<Element>::Evaluate
-(const Vector<Element>& input, Element& output, const Element& theRingZero)
-{ output=theRingZero;
-  Element tempElt;
+template <class CoefficientType>
+void Polynomial<CoefficientType>::Evaluate
+(const Vector<CoefficientType>& input, CoefficientType& output)
+{ output=0;
+  CoefficientType tempElt;
   for (int i=0; i<this->size; i++)
   { tempElt=this->theCoeffs[i];
     const MonomialP& currentMon=(*this)[i];
@@ -8395,9 +8437,16 @@ Element Matrix<Element> ::GetDeterminant()
 }
 
 template <class Element>
-Element Matrix<Element>::GetTrace()
-{   Element acc = 0;
-    for(int i=0; i<NumCols; i++)
+Element Matrix<Element>::GetTrace()const
+{ if (this->NumCols!=this->NumRows)
+  { std::cout << "This is either programming error, a mathematical error,"
+    << " or requires a more general definition of trace. Requesting the trace of "
+    << " a non-square matrix of " << this->NumRows << " rows and " << this->NumCols << " columns "
+    << " is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+    Element acc = 0;
+    for(int i=0; i<this->NumCols; i++)
         acc += this->elements[i][i];
     return acc;
 }
@@ -8975,7 +9024,7 @@ inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator
 }
 
 template <typename Element>
-void Matrix<Element>::FindZeroEigenSpaceModifyMe(List<Vector<Element> >& output)
+void Matrix<Element>::GetZeroEigenSpaceModifyMe(List<Vector<Element> >& output)
 { if (this->NumRows==0)
   { output.SetSize(this->NumCols);
     for (int i=0; i<this->NumCols; i++)

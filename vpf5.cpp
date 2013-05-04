@@ -1315,7 +1315,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       theReport.Report(tempStream3.str());
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
-    currentOpMat.FindZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
+    currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
       tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1
       << " seconds.";
       theReport.Report(tempStream3.str());
@@ -1530,7 +1530,7 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
   for (int i=0; i<divisorsH.size; i++)
     for (int j=0; j<divisorsS.size; j++)
     { tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
-      myCopy.Evaluate(tempV, val, 0);
+      myCopy.Evaluate(tempV, val);
 //      std::cout << "<br>" << myCopy.ToString() << " eval at "
 //      << tempV.ToString() << " equals " << val.ToString();
       if (val==0)

@@ -552,7 +552,7 @@ public:
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
-  HashedListReferences<CoxeterRepresentation<Rational> > theWeylGroupIrreps;
+  HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupIrreps;
   ListReferences<CalculusFunctionPlot> thePlots;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;

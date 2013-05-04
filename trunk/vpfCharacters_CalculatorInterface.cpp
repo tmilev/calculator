@@ -56,7 +56,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
         ElementsExplored.AddOnTop(tempElt);
       }
     }
-  this->CheckRepIsMultiplicativelyClosed();
+//  this->CheckRepIsMultiplicativelyClosed();
 }
 
 template <typename coefficient>
@@ -119,8 +119,8 @@ void WeylGroupRepresentation<coefficient>::Restrict
        GramMatrixInverted);
     }
 
-  std::cout << "<hr>The restriction result: " << output.ToString();
-  this->CheckRepIsMultiplicativelyClosed();
+//  std::cout << "<hr>The restriction result: " << output.ToString();
+//  this->CheckRepIsMultiplicativelyClosed();
 }
 
 template <class coefficient>
@@ -147,6 +147,8 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
         this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
       }
       this->classFunctionMatricesComputed[cci]=true;
+      std::cout << "<br>Class function matrix of conjugacy class "
+      << cci+1 << " computed to be: " << this->classFunctionMatrices[cci].ToString();
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)
@@ -326,27 +328,24 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-//    std::cout << "<br>the eigenspaces were " << theSubRepsBasis.ToString();
+    std::cout << "<br>the eigenspaces were of dimensions: ";
     for(int i=0; i<theSubRepsBasis.size; i++)
       std::cout << theSubRepsBasis[i].size << " ";
+    WeylGroupRepresentation<coefficient> newRep;
+    if (theSubRepsBasis.size>1)//we found splitting, so let us recursively decompose:
+    { for(int i=0; i<theSubRepsBasis.size; i++)
+      { std::cout << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
+        remainingCharacter.SetSize(0);
+        this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
+        if (!newRep.DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables))
+          return false;
+      }
+      return true;
+    }
 //    std::cout << std::endl;
   }
-  WeylGroupRepresentation<coefficient> newRep;
-  for(int i=0; i<theSubRepsBasis.size; i++)
-  { std::cout << "<br>restricting current rep to basis " << theSubRepsBasis[i].ToString();
-    remainingCharacter.SetSize(0);
-    this->Restrict(theSubRepsBasis[i], remainingCharacter, newRep);
-    if (this->OwnerGroup->GetCharacterNorm(newRep.GetCharacter())>1)
-    { std::cout << "<hr><b>Found reducible isotypic component! Should this happen?</b>";
-      std::cout << "<br>The new character is  " << newRep.GetCharacter().ToString()
-      << " with norm " << this->OwnerGroup->GetCharacterNorm(newRep.GetCharacter());
 
-      return false;
-    }
-    int theIndex =this->OwnerGroup->irreps.AddNoRepetitionOrReturnIndexFirst(newRep);
-    outputIrrepMults[theIndex]+=1;
-  }
-  return true;
+  return false;
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylOrbit

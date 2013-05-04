@@ -911,6 +911,12 @@ void CommandList::initPredefinedStandardOperations()
    this->opRational(), this->opMatRat(),
    "Multiplies rational by matrix rational. ",
    "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
+   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
+   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
+   "Tensor product and decompose two Weyl group reps. This operation is similar to the \
+   \\otimes operation, but in addition decomposes the product. ",
+   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
   this->AddOperationInnerHandler
   ("*", this->innerCollectMultiplicands, "",
    "Collects multiplicand exponents.",
@@ -1023,7 +1029,7 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixSequenceByMatrixSequence,
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",
-   "2+2", true);
+   "((1,-1),(0,-1))((1, 0), (-1,-1))", true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",
@@ -1124,12 +1130,6 @@ void CommandList::initPredefinedStandardOperations()
    this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
    "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
    If you want decomposition, use V*V instead. ",
-   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
-   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
-   "Tensor product and decompose two Weyl group reps. This operation is similar to the \
-   \\otimes operation, but in addition decomposes the product. ",
    "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",

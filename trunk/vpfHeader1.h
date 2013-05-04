@@ -9226,8 +9226,11 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
         out << "<td>";
       out << tempS;
       if (useLatex)
-        if (j!=this->NumCols-1)
+      { if (j!=this->NumCols-1)
           out << " & ";
+        else
+          out << "\\\\";
+      }
       if (useHtml)
         out << "</td>";
       if (!useHtml && !useLatex)
@@ -9235,8 +9238,6 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
     }
     if (useHtml)
       out << "</tr>";
-    if (useLatex)
-      out << "\\\\";
     out << "\n";
   }
   if (useHtml)

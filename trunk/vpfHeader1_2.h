@@ -981,6 +981,7 @@ class WeylGroupRepresentation
   void ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables=0);
   Vector<coefficient>& GetCharacter();
   void reset(WeylGroup* inputOwner);
+  void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix
 (Vector<coefficient>& virtualCharacter, Matrix<coefficient>& outputMat,
  GlobalVariables* theGlobalVariables=0)

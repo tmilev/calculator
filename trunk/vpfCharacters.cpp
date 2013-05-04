@@ -939,26 +939,25 @@ VectorSpace<coefficient> CoxeterRepresentation<coefficient>::FindDecentBasis() c
 }
 
 template <typename coefficient>
-List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition
-(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
+List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition()
 { Matrix<coefficient> splittingOperatorMatrix;
   List<CoxeterRepresentation<coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if(GetNumberOfComponents() == 1)
-  { if(ct.GetIndex(this->character) == -1)
-    { std::cout << "new irrep found, have " << ct.size << std::endl;
-      ct.AddOnTop(this->character);
-      gr.AddOnTop(*this);
+  { if(G->characterTable.GetIndex(this->character) == -1)
+    { std::cout << "new irrep found, have " << G->characterTable.size << std::endl;
+      G->characterTable.AddOnTop(this->character);
+      G->irreps.AddOnTop(*this);
     }
     out.AddOnTop(*this);
     return out;
   }
   List<Vector<coefficient> > Vb = basis;
   List<Vector<coefficient> > tempVectors;
-  for(int i=0; i<ct.size; i++)
-    if(this->character.IP(ct[i])!=0)
+  for(int i=0; i<G->characterTable.size; i++)
+    if(this->character.IP(G->characterTable[i])!=0)
     { std::cout << "contains irrep " << i << std::endl;
-      ClassFunctionMatrix(ct[i], splittingOperatorMatrix);
+      ClassFunctionMatrix(G->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.FindZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb=tempVectors;
@@ -972,7 +971,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     V = V.Reduced();
     std::cout << "done" << std::endl;
     std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
-    return V.Decomposition(ct,gr);
+    return V.Decomposition();
   }
   if(Vb.size == 0)
   return out;
@@ -1132,36 +1131,66 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
 {  if(squares.size == 0)
       ComputeSquares();
    CoxeterRepresentation<Rational> sr = this->StandardRepresentation();
-   ClassFunction<Rational> cfmgen;
-   Matrix<Rational> tempMat;
-   cfmgen.G = this;
-   cfmgen.data.SetSize(this->ccCount);
-   for(int i=0; i<this->ccCount; i++)
-     cfmgen.data[i] = 1;
-   sr.ClassFunctionMatrix(cfmgen, tempMat);
    this->irreps.AddOnTop(sr);
    this->characterTable.SetSize(0);
    characterTable.AddOnTop(sr.GetCharacter());
    std::cout << sr.GetCharacter() << std::endl;
    List<CoxeterRepresentation<Rational> > newspaces;
    newspaces.AddOnTop(sr);
-   while(newspaces.size > 0)
-   {  CoxeterRepresentation<Rational> nspace = newspaces.PopLastObject();
-      CoxeterRepresentation<Rational> tspace = nspace * sr;
-         std::cout << "Decomposing " << tspace.GetCharacter() << std::endl;
-         List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition(characterTable,irreps);
-         for(int spi = 0; spi < spaces.size; spi++)
-         {  if(spaces[spi].GetNumberOfComponents() == 1)
-            {  if(!characterTable.Contains(spaces[spi].GetCharacter()))
-               {  characterTable.AddOnTop(spaces[spi].GetCharacter());
+   List<CoxeterRepresentation<Rational> > incompletely_digested;
+   while((newspaces.size > 0) || (incompletely_digested.size > 0))
+   {  CoxeterRepresentation<Rational> nspace;
+      if(newspaces.size > 0)
+        nspace = newspaces.PopLastObject();
+      else
+      { nspace = incompletely_digested[0];
+        incompletely_digested.RemoveIndexShiftDown(0);
+      }
+      CoxeterRepresentation<Rational> tspace = sr * nspace;
+      tspace.character.data.size = 0;
+      std::cout << "Decomposing (left tensor)" << tspace.GetCharacter() << std::endl;
+      List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition();
+      tspace = nspace * sr;
+      tspace.character.data.size = 0;
+      std::cout << "Decomposing (right tensor)" << tspace.GetCharacter() << std::endl;
+      spaces.AddListOnTop(tspace.Decomposition());
+      for(int spi = 0; spi < spaces.size; spi++)
+      {  if(spaces[spi].GetNumberOfComponents() == 1)
+         {  if(!characterTable.Contains(spaces[spi].GetCharacter()))
+            {  characterTable.AddOnTop(spaces[spi].GetCharacter());
+               irreps.AddOnTop(spaces[spi]);
+               newspaces.AddOnTop(spaces[spi]);
+               std::cout << "we have " << irreps.size << " irreps" << std::endl;
+            }
+         } else {
+            incompletely_digested.AddOnTop(spaces[spi]);
+         }
+      }
+      if(irreps.size == ccCount)
+         break;
+      for(int spi=0; spi<incompletely_digested.size; spi++)
+      { for(int ci=0; ci<characterTable.size; ci++)
+        { if(incompletely_digested[spi].GetCharacter().IP(characterTable[ci]) != 0)
+          { std::cout << "incompletely digested " << incompletely_digested[spi].GetCharacter() << "will now be further decomposed" << std::endl;
+            List<CoxeterRepresentation<Rational> > shards = incompletely_digested[spi].Decomposition();
+            incompletely_digested.RemoveIndexShiftDown(spi);
+            for(int shi=0; shi<shards.size; shi++)
+            { if(shards[shi].GetNumberOfComponents() == 1)
+              { if(!characterTable.Contains(shards[shi].GetCharacter()))
+                { characterTable.AddOnTop(shards[shi].GetCharacter());
                   irreps.AddOnTop(spaces[spi]);
                   newspaces.AddOnTop(spaces[spi]);
-                  std::cout << "we have " << irreps.size << " irreps" << std::endl;
-               }
+                  std::cout << "we have " << irreps.size << " irreps (got from shards)" << std::endl;
+                }
+              }
+              else {
+                incompletely_digested.AddOnTop(shards[shi]);
+              }
             }
-         }
-         if(irreps.size == ccCount)
             break;
+          }
+        }
+      }
     }
     irreps.QuickSortAscending();
     characterTable.QuickSortAscending();

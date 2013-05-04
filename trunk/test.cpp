@@ -9,8 +9,6 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
-
-
 /* dunno why i thought it was fun to spend so much time on this
 class f127
 { public:
@@ -94,6 +92,9 @@ void operator/=(const f127 right)
   *this *= tmp;
 }
 */
+
+
+
 
 
 /*
@@ -825,14 +826,19 @@ int main(void)
 
 
    DynkinType D;
-   D.MakeSimpleType('G',2);
+   D.MakeSimpleType('B',3);
    Matrix<Rational> M;
    D.GetCartanSymmetric(M);
    std::cout << M << std::endl;
 
+//  Matrix<f127> M2;
+//  M2.init(M.NumRows, M.NumCols);
+//  for(int i=0; i<M.NumRows; i++)
+//    for(int j=0; j<M.NumCols; j++)
+//     M2.elements[i][j].n = M.elements[i][j].GetNumerator().GetIntValueTruncated();
   CoxeterGroup G;
   G.CartanSymmetric = M;
-  G.GetTauSignatures();
+  G.ComputeIrreducibleRepresentations();
 
 
   /*
@@ -954,7 +960,7 @@ int main(void)
      vP.MakeEi(&G,i);
      std::cout << (XP*vv == (XPP*vP).data) << ' ';
    }
-
+   */
    //  Vectors<Rational> V;
    //  XP.FindZeroEigenSpace(V);
    //  std::cout << V << std::endl;
@@ -1345,6 +1351,13 @@ int main(void)
    std::cout << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << std::endl;
 
 
+/*  f127 a;
+  a.n = 2;
+  f127 b;
+  b.n = 5;
+  std::cout << (a*b).n << std::endl;
+  std::cout << (a/b).n << std::endl;
+*/
 
 //   std::string s;
 //   std::cin >> s;

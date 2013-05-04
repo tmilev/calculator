@@ -202,7 +202,8 @@ Vector<Rational> CoxeterGroup::ComposeTodorsVector(const List<int> &l) const
 }
 
 void WeylGroup::GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const
-{ int rank=this->GetDim();
+{ MacroRegisterFunctionWithName("WeylGroup::GetSimpleReflectionMatrix");
+  int rank=this->GetDim();
   output.MakeIdMatrix(rank);
   for (int j=0; j<rank; j++)
     output(indexSimpleRoot,j)-=
@@ -1156,11 +1157,11 @@ void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
 }
 
 void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output)
-{ this->CheckInitializationFDrepComputation();
+{ MacroRegisterFunctionWithName("WeylGroup::StandardRepresentation");
+  this->CheckInitializationFDrepComputation();
   output.reset(this);
   output.theElementImages.SetSize(this->theElements.size);
-  int NumClasses=this->conjugacyClasses.size;
-  for(int i=0; i<NumClasses; i++)
+  for(int i=0; i<this->GetDim(); i++)
   { this->GetSimpleReflectionMatrix(i, output.theElementImages[i+1]);
     output.theElementIsComputed[i+1]=true;
   }

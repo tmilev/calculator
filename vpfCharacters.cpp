@@ -736,21 +736,6 @@ Matrix<coefficient> TrixTree<coefficient>::GetElement(CoxeterElement &g, const L
 }
 
 template <typename coefficient>
-Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int elementIndex)
-{ this->CheckInitialization();
-  this->OwnerGroup->CheckInitializationFDrepComputation();
-  Matrix<coefficient>& theMat=this->theElementImages[elementIndex];
-  if (this->theElementIsComputed[elementIndex])
-    return theMat;
-  const ElementWeylGroup& theElt=this->OwnerGroup->theElements[elementIndex];
-  this->theElementIsComputed[elementIndex]=true;
-  theMat.MakeIdMatrix(this->GetDim());
-  for (int i=0; i<theElt.size; i++)
-    theMat.MultiplyOnTheLeft(this->theElementImages[theElt[i]+1]);
-  return theMat;
-}
-
-template <typename coefficient>
 Matrix<coefficient> CoxeterRepresentation<coefficient>::MatrixOfElement(int g)
 { CoxeterElement gg = G->GetCoxeterElement(g);
   return elements.GetElement(gg, gens);
@@ -1107,18 +1092,6 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   std::cout << "decomposition might be complete, found " << out.size << " components" << std::endl;
   return out;
 }*/
-
-template <typename coefficient>
-Vector<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
-{ this->CheckInitialization();
-  if (this->theCharacter.size>0)
-    return this->theCharacter;
-  int numClasses=this->OwnerGroup->conjugacyClasses.size;
-  this->theCharacter.SetSize(numClasses);
-  for (int i=0; i<numClasses; i++)
-    this->theCharacter[i]= this->GetElementImage(this->OwnerGroup->conjugacyClasses[i][0]).GetTrace();
-  return this->theCharacter;
-}
 
 template <typename coefficient>
 ClassFunction<coefficient> CoxeterRepresentation<coefficient>::GetCharacter()

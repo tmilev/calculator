@@ -1615,6 +1615,11 @@ bool CommandList::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="FullTree")
+  { this->flagDisplayFullExpressionTree=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
   if (secondToLastS=="%" && lastS=="HideLHS")
   { this->flagHideLHS=true;
     this->PopTopSyntacticStack();
@@ -3557,6 +3562,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagLogFullTreeCrunching=false;
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
+  this->flagDisplayFullExpressionTree=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
@@ -3675,6 +3681,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LogFull");
   this->controlSequences.AddOnTop("LatexLink");
+  this->controlSequences.AddOnTop("FullTree");
   this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("EndProgram");
 //additional operations treated like regular expressions.
@@ -4771,8 +4778,13 @@ void CommandList::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
-  out << this->theProgramExpression.ToString
-  (&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
+  if (!this->flagDisplayFullExpressionTree)
+    out << this->theProgramExpression.ToString
+    (&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
+  else
+  { out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
+    << "Output:<br>" << this->theProgramExpression.ToStringFull();
+  }
   this->outputString=out.str();
   if (this->Comments.str()!="")
   { std::stringstream commentsStream;
@@ -4794,6 +4806,7 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
   if (makeTable)
   { out << "</td></tr><tr><td>";
     out << this->theData.ToString(0);
+    out << "</td></tr><tr><td>" << this->theData.ToStringFull();
     if (this->errorString!="")
       out << "</td></tr><tr><td>" << this->errorString;
     out << "</td></tr></table>";

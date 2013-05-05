@@ -1134,12 +1134,13 @@ void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output
 { MacroRegisterFunctionWithName("WeylGroup::StandardRepresentation");
   this->CheckInitializationFDrepComputation();
   output.reset(this);
-  output.theElementImages.SetSize(this->theElements.size);
+//  output.theElementImages.SetSize(this->theElements.size);
   for(int i=0; i<this->GetDim(); i++)
   { this->GetSimpleReflectionMatrix(i, output.theElementImages[i+1]);
     output.theElementIsComputed[i+1]=true;
   }
   output.GetCharacter();
+  std::cout << "Generated representation: " << output.theCharacter.ToString();
   if (!this->irreps.Contains(output))
     this->irreps.AddOnTop(output);
 }

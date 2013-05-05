@@ -6,6 +6,25 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP
 (__FILE__, "Weyl group calculator interface");
 
+bool WeylGroup::CheckInitializationFDrepComputation()const
+{ if (this->conjugacyClasses.size==0 || this->theElements.size==0)
+  { std::cout << "This is a programming error: requesting to compute character hermitian product "
+    << " in a group whose conjugacy classes and/or elements have not been computed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    return false;
+  }
+  for (int i=0; i<this->irreps.size; i++)
+    if (this->irreps[i].theCharacter.IsEqualToZero())
+    { std::cout << "This is a programming error: irrep number " << i+1
+      << " has zero character!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+  return true;
+}
+
+
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed
 ()
@@ -58,6 +77,9 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
       }
     }
   }
+//  for (int i=0; i<this->theElementIsComputed.size; i++)
+//  { assert(this->theElementIsComputed[i]);
+//  }
 //  this->CheckRepIsMultiplicativelyClosed();
 }
 
@@ -141,16 +163,18 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
   { if(virtualCharacter[cci] == 0)
       continue;
     if (!this->classFunctionMatricesComputed[cci])
-    { List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];
+    { this->classFunctionMatricesComputed[cci]=true;
+      List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];
       this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
+      std::cout << "Accounting elements: ";
       for (int i=0; i<currentConjugacyClass.size; i++)
       { if (!this->theElementIsComputed[currentConjugacyClass[i]])
           this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
         this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
+        std::cout << currentConjugacyClass[i]+1 << ", ";
       }
-      this->classFunctionMatricesComputed[cci]=true;
-//      std::cout << "<br>Class function matrix of conjugacy class "
-//      << cci+1 << " computed to be: " << this->classFunctionMatrices[cci].ToString();
+      std::cout << "<br>Class function matrix of conjugacy class "
+      << cci+1 << " computed to be: " << this->classFunctionMatrices[cci].ToString();
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)
@@ -267,12 +291,34 @@ Vector<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
 }
 
 template <class coefficient>
+void WeylGroupRepresentation<coefficient>::SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace)
+{ this->CheckInitialization();
+  outputBasisGeneratedSpace.SetSize(1);
+  outputBasisGeneratedSpace[0]=input;
+  Vector<coefficient> tempV;
+  int theRank=this->OwnerGroup->GetDim();
+  for (int i=0; i<outputBasisGeneratedSpace.size; i++)
+    for (int j=0; j<theRank; j++)
+    { tempV=outputBasisGeneratedSpace[i];
+      this->theElementImages[j+1].ActOnVectorColumn(tempV);
+      if (!outputBasisGeneratedSpace.LinSpanContainsVector(tempV))
+        outputBasisGeneratedSpace.AddOnTop(tempV);
+    }
+}
+
+template <class coefficient>
 bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
 (Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName(" WeylGroupRepresentation::DecomposeMeIntoIrrepsRecursive");
   this->CheckInitialization();
   this->OwnerGroup->CheckInitializationFDrepComputation();
-  if(this->GetNumberOfComponents() == 1)
+  coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
+  if (SumOfNumComponentsSquared==0)
+  { std::cout << "This is a programming error: a module claims to have zero character. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if(SumOfNumComponentsSquared== 1)
   { int indexMe=this->OwnerGroup->irreps.GetIndex(*this);
     if(indexMe== -1)
     { this->OwnerGroup->irreps.AddOnTop(*this);
@@ -287,17 +333,42 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   remainingCharacter=this->theCharacter;
   remainingVectorSpace.MakeEiBasis(this->GetDim());
   //chop off already known pieces:
+  std::cout << "<br>Starting char: " << this->theCharacter.ToString();
   for(int i=0; i<this->OwnerGroup->irreps.size; i++)
   { coefficient NumIrrepsOfType=this->OwnerGroup->GetHermitianProduct
        (this->theCharacter, this->OwnerGroup->irreps[i].theCharacter);
     if(NumIrrepsOfType!=0)
-    { //std::cout << "<hr>contains irrep " << i << std::endl;
+    { std::cout << "<hr>contains irrep " << this->OwnerGroup->irreps[i].theCharacter.ToString() << " with multiplicity "
+      << NumIrrepsOfType << std::endl;
+      this->OwnerGroup->CheckInitializationFDrepComputation();
+      std::cout << "<hr>Getting class f-n matrix from character: " << this->OwnerGroup->irreps[i].theCharacter;
       this->GetClassFunctionMatrix(this->OwnerGroup->irreps[i].theCharacter, splittingOperatorMatrix);
+      std::cout << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString();
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
+      std::cout << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
+      << remainingVectorSpace.ToString() ;
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
+      std::cout << " ... to get: " << tempSpace.ToString();
       remainingVectorSpace=tempSpace;
       outputIrrepMults[i]+=NumIrrepsOfType;
+      std::cout << "<br>Subtracting: " << (this->OwnerGroup->irreps[i].theCharacter*NumIrrepsOfType).ToString();
       remainingCharacter-=this->OwnerGroup->irreps[i].theCharacter*NumIrrepsOfType;
+      if(remainingCharacter[0]!=remainingVectorSpace.size)
+      { std::cout << "<br>This is a programming error: remaining char "
+        << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0]
+        << " but remaining vector space has dim "
+        << remainingVectorSpace.size;
+        assert(false);
+      }
+      std::cout << " to get: " << remainingCharacter.ToString();
+      if (remainingCharacter.IsEqualToZero())
+      { if (!remainingVectorSpace.size==0)
+        { std::cout << "This is a programming error: remaining char is zero but remaining space is "
+          << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacter.ToString()
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
+      }
     }
   }
   if((remainingVectorSpace.size < this->GetDim()) && (remainingVectorSpace.size > 0))
@@ -346,7 +417,27 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
     }
 //    std::cout << std::endl;
   }
-
+  Vector<coefficient> startingVector, tempV, average;
+  startingVector.MakeEi(this->GetDim(), 0);
+  average.MakeZero(this->GetDim());
+  for (int i=0; i<this->theElementImages.size; i++)
+  { if (!this->theElementIsComputed[i])
+    { std::cout << "<hr>Oh shit! ";
+      assert(false);
+    }
+    this->theElementImages[i].ActOnVectorColumn(startingVector, tempV);
+    average+=tempV;
+  }
+  std::cout << "<br>Current char: " << this->GetCharacter().ToString();
+  std::cout << "<br>Spreading: " << average.ToString();
+  Vectors<coefficient> theSpread;
+  this->SpreadVector(average, theSpread);
+  if (theSpread.size==this->GetDim())
+  { std::cout << "<hr><b>I was horribly wrong!</b>";
+    assert(false);
+  } else
+  { std::cout << "<hr>The image of the spread is " << theSpread.size << " dimensional. ";
+  }
   return false;
 }
 
@@ -359,21 +450,25 @@ void WeylGroup::ComputeIrreducibleRepresentations
   int NumClasses=this->conjugacyClasses.size;
   Vector<Rational> decompositionNewRep;
   for (int i=0; i<this->irreps.size && this->irreps.size!=NumClasses; i++)
-  { newRep= theStandardRep;
-    std::cout << "Decomposing " << newRep.ToString() << " * " << theStandardRep.ToString() << std::endl;
+  { std::cout << "<hr>So far found irreps: ";
+    for (int j=0; j<this->irreps.size; j++)
+      std::cout <<"\n<br>\n" << this->irreps[j].theCharacter.ToString();
+    std::cout << "<hr>Decomposing <br>" << theStandardRep.theCharacter.ToString() << " * <br>"
+    << this->irreps[i].theCharacter.ToString() << std::endl;
+    newRep= theStandardRep;
     newRep*= this->irreps[i];
     bool tempB=
     newRep.DecomposeMeIntoIrreps(decompositionNewRep, theGlobalVariables);
     if (!tempB)
-    { std::cout << "This is a mathematical error: failed to decompose " << newRep.ToString() << ". "
+    { std::cout << "This is a mathematical error: failed to decompose " << newRep.theCharacter.ToString() << ". "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      //assert(false);
     }
   }
   this->irreps.QuickSortAscending();
   std::cout << "Irrep table:";
   for (int i=0; i<this->irreps.size; i++)
-    std::cout <<"\n<br>\n" << this->irreps[i].ToString();
+    std::cout <<"\n<br>\n" << this->irreps[i].theCharacter.ToString();
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylOrbit

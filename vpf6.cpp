@@ -125,7 +125,7 @@ int Expression::GetTypeOperation<WeylGroup>()const
 template < >
 int Expression::GetTypeOperation<WeylGroupRepresentation<Rational> >()const
 { this->CheckInitialization();
-  return this->theBoss->opWeylGroupIrrep();
+  return this->theBoss->opWeylGroupRep();
 }
 
 template < >
@@ -135,9 +135,9 @@ int Expression::GetTypeOperation<ElementWeylGroup>()const
 }
 
 template < >
-int Expression::GetTypeOperation<ClassFunction<Rational> >()const
+int Expression::GetTypeOperation<WeylGroupVirtualRepresentation>()const
 { this->CheckInitialization();
-  return this->theBoss->opClassFunction();
+  return this->theBoss->opWeylGroupVirtualRep();
 }
 
 //Expression::GetTypeOperation specializations end.
@@ -301,7 +301,16 @@ int Expression::AddObjectReturnIndex(const
 WeylGroupRepresentation<Rational>
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theWeylGroupIrreps
+  return this->theBoss->theObjectContainer.theWeylGroupReps
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+WeylGroupVirtualRepresentation
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theWeylGroupVirtualReps
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -513,7 +522,7 @@ WeylGroupRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()c
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theWeylGroupIrreps.GetElement(this->GetLastChild().theData);
+  return this->theBoss->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -525,6 +534,17 @@ ElementWeylGroup& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+WeylGroupVirtualRepresentation& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<WeylGroupVirtualRepresentation>())
+  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3637,8 +3657,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
   this->AddOperationBuiltInType("WeylGroup");
   this->AddOperationBuiltInType("ElementWeylGroup");
-  this->AddOperationBuiltInType("ClassFunction");
-  this->AddOperationBuiltInType("WeylGroupIrrep");
+  this->AddOperationBuiltInType("WeylGroupRep");
+  this->AddOperationBuiltInType("WeylGroupVirtualRep");
 
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
@@ -4976,6 +4996,15 @@ bool Expression::ToStringData
   } else if (this->IsOfType<WeylGroupRepresentation<Rational> >())
   { WeylGroupRepresentation<Rational>& theElt=
     this->GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    tempFormat.flagUseReflectionNotation=true;
+    out << theElt.ToString(&tempFormat);
+    result=true;
+  } else if (this->IsOfType<WeylGroupVirtualRepresentation>())
+  { WeylGroupVirtualRepresentation& theElt=
+    this->GetValuENonConstUseWithCaution<WeylGroupVirtualRepresentation>();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;

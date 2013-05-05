@@ -965,7 +965,7 @@ class WeylGroupRepresentation
   WeylGroup* OwnerGroup;
   WeylGroupRepresentation():OwnerGroup(0){}
   unsigned int HashFunction() const;
-  bool CheckInitialization()
+  bool CheckInitialization()const
   { if (this->OwnerGroup==0)
     { std::cout << "This is a programming error: working with a representation with "
       << " non-initialized owner Weyl group. "

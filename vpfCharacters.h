@@ -6,6 +6,34 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersHEader
 (__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
+class WeylGroupVirtualRepresentation
+{
+  public:
+  WeylGroup* ownerGroup;
+  Vector<Rational> coefficientsIrreps;
+  WeylGroupVirtualRepresentation():ownerGroup(0){}
+  std::string ToString(FormatExpressions* theFormat)const;
+  void AssignWeylGroupRep
+  (const WeylGroupRepresentation<Rational>& input, GlobalVariables* theGlobalVariables=0)
+  ;
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const WeylGroupVirtualRepresentation& input)
+  { unsigned int result=0;
+    if (input.ownerGroup!=0)
+      result+=input.ownerGroup->HashFunction();
+    result+=input.coefficientsIrreps.HashFunction();
+    return result;
+  }
+  void operator+=(const WeylGroupVirtualRepresentation& other);
+  void operator*=(const WeylGroupVirtualRepresentation& other);
+  bool operator==(const WeylGroupVirtualRepresentation& other)const
+  { return this->ownerGroup==other.ownerGroup &&
+    this->coefficientsIrreps==other.coefficientsIrreps;
+  }
+};
+
 template <typename ElementEuclideanDomain>
 struct DivisionResult
 {  ElementEuclideanDomain quotient;

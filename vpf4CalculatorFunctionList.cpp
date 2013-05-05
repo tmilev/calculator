@@ -57,6 +57,11 @@ void CommandList::initPredefinedInnerFunctions()
    "WeylGroupNaturalRep{}(B_3)", true, false)
    ;
   this->AddOperationInnerHandler
+  ("MakeVirtualWeylGroupRepresentation", WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep, "",
+   "Convert a representation into virtual one.",
+   "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("MinPoly", this->innerMinPolyMatrix, "",
    "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
    "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true, false)
@@ -913,10 +918,9 @@ void CommandList::initPredefinedStandardOperations()
    "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
    this->AddOperationBinaryInnerHandlerWithTypes
   ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
-   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
-   "Tensor product and decompose two Weyl group reps. This operation is similar to the \
-   \\otimes operation, but in addition decomposes the product. ",
-   "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
+   this->opWeylGroupVirtualRep(), this->opWeylGroupVirtualRep(),
+   "Tensor and decompose two virtual Weyl group representations. ",
+   "W:= WeylGroupNaturalRep{}(B_3); V:=MakeVirtualWeylGroupRepresentation{}W; W\\otimes W; V*V", true);
   this->AddOperationInnerHandler
   ("*", this->innerCollectMultiplicands, "",
    "Collects multiplicand exponents.",
@@ -1127,7 +1131,7 @@ void CommandList::initPredefinedStandardOperations()
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", WeylGroupCalculatorFunctions::innerTensorWeylReps,
-   this->opWeylGroupIrrep(), this->opWeylGroupIrrep(),
+   this->opWeylGroupRep(), this->opWeylGroupRep(),
    "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
    If you want decomposition, use V*V instead. ",
    "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);

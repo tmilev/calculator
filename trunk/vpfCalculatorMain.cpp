@@ -630,7 +630,7 @@ int main(int argc, char **argv)
 //civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
   //civilizedInput="WeylGroupNaturalRep{}(B_3);";
   //civilizedInput="V:=WeylGroupNaturalRep{}(B_3); V*V";
-  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
+//  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
   PredefinedStrings(civilizedInput);
 
 

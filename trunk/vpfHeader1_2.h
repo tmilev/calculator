@@ -1003,6 +1003,7 @@ class WeylGroupRepresentation
   bool operator==(const WeylGroupRepresentation<coefficient>& other)const
   { return this->OwnerGroup==other.OwnerGroup && this->theCharacter==other.theCharacter;
   }
+  void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string ToString(FormatExpressions* theFormat=0)const;
   Matrix<coefficient>& GetElementImage(int elementIndex);
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const
@@ -1098,16 +1099,7 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType)
   ;
-  bool CheckInitializationFDrepComputation()const
-  { if (this->conjugacyClasses.size==0 || this->theElements.size==0)
-    { std::cout << "This is a programming error: requesting to compute character hermitian product "
-      << " in a group whose conjugacy classes and/or elements have not been computed. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-      return false;
-    }
-    return true;
-  }
+  bool CheckInitializationFDrepComputation()const;
   template <typename coefficient>
   coefficient GetHermitianProduct
   (const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const
@@ -7015,15 +7007,15 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
       theMat(i,firstReduced.size+j)-=secondReduced[j][i];
     }
   }
-  //std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString(true, false);
+  std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
   theMat.GaussianEliminationByRows(0, &tempSel);
-  //std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString(true, false);
+  std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
   output.ReservE(tempSel.CardinalitySelection);
   output.size=0;
   Vector<CoefficientType> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)
   { int currentIndex=tempSel.elements[i];
-    //std::cout << "<br>current pivot index : " << currentIndex;
+    std::cout << "<br>current pivot index : " << currentIndex;
     assert(currentIndex>=firstReduced.size);
     nextIntersection.MakeZero(theDim);
     for (int j=0; j<firstReduced.size; j++)
@@ -7031,8 +7023,8 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
         nextIntersection+=firstReduced[j]*theMat.elements[j][currentIndex];
     output.AddOnTop(nextIntersection);
   }
-  //std::cout << "<br> final output: " << output.ToString();
-  //std::cout << "<br>******************End of debugging linear space intersections";
+  std::cout << "<br> final output: " << output.ToString();
+  std::cout << "<br>******************End of debugging linear space intersections";
 }
 
 template <class CoefficientType>

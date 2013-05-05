@@ -8113,8 +8113,9 @@ void Vectors<CoefficientType>::SelectABasisInSubspace
       theMat(currentRow,j)=input[i][j];
     currentRow++;
     if (currentRow==MaxNumRows || i==input.size-1)
-      theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
-    currentRow=outputSelectedPivotColumns.CardinalitySelection;
+    { theMat.GaussianEliminationByRows(0, 0, &outputSelectedPivotColumns);
+      currentRow=outputSelectedPivotColumns.CardinalitySelection;
+    }
     if (currentRow==MaxNumRows)
       break;
   }
@@ -8458,18 +8459,17 @@ Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
 
 template <class Element>
 Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
-{
-  if(v.size != NumCols){
-    std::cout << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
+{ if(v.size != NumCols)
+  { std::cout << "matrix application mismatch: matrix with" << NumCols
+    << "columns attempted to multiply vector of length" << v.size
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
     assert(false);
   }
   Vector<Element> out;
   out.MakeZero(NumRows);
-  for(int i=0;i<NumRows;i++){
-    for(int j=0;j<NumCols;j++){
+  for(int i=0;i<NumRows;i++)
+    for(int j=0;j<NumCols;j++)
       out[i] += elements[i][j] * v[j];
-    }
-  }
   return out;
 }
 

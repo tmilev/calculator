@@ -40,6 +40,9 @@ public:
   static bool innerTensorAndDecomposeWeylReps
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerMakeVirtualWeylRep
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 };
 
 #endif

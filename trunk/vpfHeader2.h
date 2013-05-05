@@ -533,6 +533,8 @@ class ObjectContainer
   //by various predefined function handlers.
 public:
   HashedListReferences<ElementWeylGroup> theWeylGroupElements;
+  HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupReps;
+  HashedListReferences<WeylGroupVirtualRepresentation> theWeylGroupVirtualReps;
   ListReferences<WeylGroup> theWeylGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
@@ -552,7 +554,6 @@ public:
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
-  HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupIrreps;
   ListReferences<CalculusFunctionPlot> thePlots;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
@@ -1074,8 +1075,8 @@ public:
   int opMatRat()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
   }
-  int opWeylGroupIrrep()
-  { return this->operations.GetIndexIMustContainTheObject("WeylGroupIrrep");
+  int opWeylGroupRep()
+  { return this->operations.GetIndexIMustContainTheObject("WeylGroupRep");
   }
   int opMatRF()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_RF");
@@ -1085,6 +1086,9 @@ public:
   }
   int opElementUEoverRF()
   { return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
+  }
+  int opWeylGroupVirtualRep()
+  { return this->operations.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
   }
   int opElementTensorGVM()
   { return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
@@ -1121,9 +1125,6 @@ public:
   }
   int opWeylGroupElement()
   { return this->operations.GetIndexIMustContainTheObject("ElementWeylGroup");
-  }
-  int opClassFunction()
-  { return this->operations.GetIndexIMustContainTheObject("ClassFunction");
   }
   int opEndStatement()
   { return this->operations.GetIndexIMustContainTheObject(";");

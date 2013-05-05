@@ -668,9 +668,17 @@ bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps");
   Expression theTensor;
-  if (!WeylGroupCalculatorFunctions::innerTensorWeylReps(theCommands, input, theTensor))
+  if (!input.children.size==3)
     return false;
-  return WeylGroupCalculatorFunctions::innerDecomposeWeylRep(theCommands, theTensor, output);
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!leftE.IsOfType<WeylGroupVirtualRepresentation> ())
+    return false;
+  if (!rightE.IsOfType<WeylGroupVirtualRepresentation> ())
+    return false;
+  WeylGroupVirtualRepresentation outputRep=leftE.GetValuENonConstUseWithCaution<WeylGroupVirtualRepresentation>();
+  outputRep*=rightE.GetValuE<WeylGroupVirtualRepresentation>();
+  return output.AssignValue(outputRep, theCommands);
 }
 
 bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
@@ -679,21 +687,12 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
   if (!input.IsOfType<WeylGroupRepresentation<Rational> > ())
     return false;
 //  theRep.Decomposition(theCFs, outputReps);
-  WeylGroupRepresentation<Rational>& theRep =
+  WeylGroupRepresentation<Rational>& inputRep =
   input.GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
-  Vector<Rational> theChar;
-  theRep.DecomposeMeIntoIrreps(theChar, theCommands.theGlobalVariableS);
-  output.reset(theCommands, theChar.GetNumNonZeroCoords()+1);
-  output.AddChildAtomOnTop(theCommands.opSequence());
-  Expression tempE;
-//  std::srtingstream out;
-  for (int i=0; i<theChar.size; i++)
-    if (theChar[i]!=0)
-    { tempE.AssignValue(theRep.OwnerGroup->irreps[i], theCommands);
-      output.AddChildOnTop(tempE);
-    }
-  theCommands.Comments << "<hr>Rep as a linear combination of irreps: " << theChar.ToString();
-  return true;
+  WeylGroupVirtualRepresentation outputRep;
+  outputRep.ownerGroup=inputRep.OwnerGroup;
+  inputRep.DecomposeMeIntoIrreps(outputRep.coefficientsIrreps, theCommands.theGlobalVariableS);
+  return output.AssignValue(outputRep, theCommands);
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
@@ -829,5 +828,83 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet
   for (int i=0; i<theSet.size; i++)
     output.AddChildOnTop(theSet[i]);
   return true;
-
 }
+
+void WeylGroupVirtualRepresentation::operator+=(const WeylGroupVirtualRepresentation& other)
+{ if (this->ownerGroup!=other.ownerGroup)
+  { std::cout << "This is a programming error: adding virtual representations of different groups. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->coefficientsIrreps+=other.coefficientsIrreps;
+}
+
+void WeylGroupVirtualRepresentation::operator*=(const WeylGroupVirtualRepresentation& other)
+{ if (this->ownerGroup!=other.ownerGroup)
+  { std::cout << "This is a programming error: adding virtual representations of different groups. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  WeylGroupVirtualRepresentation output;
+  output.ownerGroup=this->ownerGroup;
+  output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);
+  WeylGroupRepresentation<Rational> tempRep;
+  Vector<Rational> currentContribution;
+  for (int i=0; i<this->coefficientsIrreps.size; i++)
+    for (int j=0; j<other.coefficientsIrreps.size; j++)
+    { Rational theCoeff= this->coefficientsIrreps[i]*other.coefficientsIrreps[j];
+      if (theCoeff==0)
+        continue;
+      tempRep=this->ownerGroup->irreps[i];
+      tempRep*=this->ownerGroup->irreps[j];
+      tempRep.DecomposeMeIntoIrreps(currentContribution, 0);
+      output.coefficientsIrreps+=currentContribution;
+    }
+  *this=output;
+}
+
+std::string WeylGroupVirtualRepresentation::ToString(FormatExpressions* theFormat)const
+{ if (this->ownerGroup==0)
+    return "(not initialized)";
+  std::stringstream out;
+  bool found=false;
+  std::string tempS;
+  for (int i=0; i<this->coefficientsIrreps.size; i++)
+    if (this->coefficientsIrreps[i]!=0)
+    { if (found)
+        if (this->coefficientsIrreps[i]>0)
+          out << "+";
+      found=true;
+      tempS=this->coefficientsIrreps[i].ToString();
+      if(tempS=="-1")
+        tempS="-";
+      if (tempS=="1")
+        tempS="";
+      out << tempS << "V_{" << this->ownerGroup->irreps[i].GetCharacter().ToString() << "}";
+    }
+  return out.str();
+}
+
+void WeylGroupVirtualRepresentation::AssignWeylGroupRep
+(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables)
+{ WeylGroupRepresentation<Rational> otherCopy;
+  this->ownerGroup=other.OwnerGroup;
+  otherCopy=other;
+  otherCopy.DecomposeMeIntoIrreps(this->coefficientsIrreps, theGlobalVariables);
+}
+
+bool WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (input.IsOfType<WeylGroupVirtualRepresentation>())
+  { output=input;
+    return true;
+  }
+  if (!input.IsOfType<WeylGroupRepresentation<Rational> >())
+    return false;
+  WeylGroupRepresentation<Rational>& inputRep=
+  input.GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
+  WeylGroupVirtualRepresentation outputRep;
+  outputRep.AssignWeylGroupRep(inputRep);
+  return output.AssignValue(outputRep, theCommands);
+}
+

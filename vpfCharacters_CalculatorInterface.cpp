@@ -249,7 +249,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   Vector<Element> theEigenValueCandidate;
   theEigenValueCandidate.SetSize(1);
   Matrix<Rational> tempMat;
-  for(int ii=0; ii<upperLimitComputations; ii++) // lol, this did end up working though
+  for(int ii=0; ii<upperLimitComputations; ii++)
   { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
 //    std::cout << "checking " << i << " found " << found << std::endl;
     theEigenValueCandidate[0] = i;

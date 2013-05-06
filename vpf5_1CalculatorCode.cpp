@@ -6,6 +6,224 @@
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
+template<class Element>
+bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution,
+ GlobalVariables* theGlobalVariables)
+//this function return true if Ax=b>=0 has a solution with x>=0 and records a solution x at outputPoint
+//else returns false, where b is a given nonnegative column vector, A is an n by m matrix
+//and x is a column vector with m entries
+{ MemorySaving<Matrix<Rational> > tempA;
+  MemorySaving<Vector<Rational> > tempX;
+  Matrix<Rational>& tempMatA=
+  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matSimplexAlgorithm1.GetElement();
+  Vector<Rational>& matX=
+  theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+
+  MemorySaving<Selection> tempSel;
+  Selection& BaseVariables =
+  theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
+  Rational GlobalGoal;
+  GlobalGoal.MakeZero();
+  assert (matA.NumRows== matb.NumRows);
+  for (int j=0; j<matb.NumRows; j++)
+  { GlobalGoal+=(matb.elements[j][0]);
+    assert(!matb.elements[j][0].IsNegative());
+  }
+  std::cout << "<hr>Starting matrix A: " << matA.ToString();
+  std::cout << "<hr>Starting matrix b: " << matb.ToString();
+  if (GlobalGoal.IsEqualToZero())
+    return false;
+  int NumTrueVariables=matA.NumCols;
+  //tempMatb.Assign(matb);
+  tempMatA.init(matA.NumRows, NumTrueVariables+matA.NumRows);
+  MemorySaving<HashedList<Selection> > tempSelList;
+  HashedList<Selection>& VisitedVertices =
+  theGlobalVariables==0 ? tempSelList.GetElement() : theGlobalVariables->hashedSelSimplexAlg.GetElement();
+  VisitedVertices.Clear();
+  BaseVariables.init(tempMatA.NumCols);
+  tempMatA.NullifyAll();
+  matX.MakeZero(tempMatA.NumCols);
+  for (int j=0; j<matA.NumCols; j++)
+    for (int i=0; i<matA.NumRows; i++)
+      tempMatA.elements[i][j].Assign(matA.elements[i][j]);
+  for (int j=0; j<matA.NumRows; j++)
+  { tempMatA.elements[j][j+NumTrueVariables].MakeOne();
+    matX[j+NumTrueVariables]=(matb.elements[j][0]);
+    BaseVariables.AddSelectionAppendNewIndex(j+NumTrueVariables);
+  }
+  Rational PotentialChangeGradient;
+  Rational ChangeGradient; //Change, PotentialChange;
+  int EnteringVariable=0;
+  bool WeHaveNotEnteredACycle=true;
+//  int ProblemCounter=0;
+  while (EnteringVariable!=-1 && WeHaveNotEnteredACycle && GlobalGoal.IsPositive())
+  {//  ProblemCounter++;
+  //  if (ProblemCounter==8)
+    //{ BaseVariables.ComputeDebugString();
+    //}
+    //tempMatA.ComputeDebugString(); matX.ComputeDebugString();
+    EnteringVariable=-1; ChangeGradient.MakeZero();
+    for (int i=0; i<tempMatA.NumCols; i++)
+      if (!BaseVariables.selected[i])
+      { Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
+        Matrix<Rational> ::ComputePotentialChangeGradient
+        (tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
+        if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
+        { EnteringVariable= i;
+          ChangeGradient.Assign(PotentialChangeGradient);
+        }
+      }
+    if (EnteringVariable!=-1)
+    { int LeavingVariableRow;  Rational MaxMovement;
+      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow
+      (MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
+      Rational tempRat, tempTotalChange;
+      assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
+      tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
+      tempRat.Invert();
+  //    if (BaseVariables.elements[LeavingVariableRow]==34)
+  //      tempMatA.ComputeDebugString();
+      for (int i=0; i<tempMatA.NumRows; i++)
+        assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1));
+      tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
+      //if (BaseVariables.elements[LeavingVariableRow]==34)
+      //  tempMatA.ComputeDebugString();
+      tempTotalChange.Assign(MaxMovement);
+      tempTotalChange.MultiplyBy(ChangeGradient);
+      matX[EnteringVariable]+=(MaxMovement);
+      if (!tempTotalChange.IsEqualToZero())
+      { VisitedVertices.Clear();
+        GlobalGoal.Subtract(tempTotalChange);
+      } else
+      { //BaseVariables.ComputeDebugString();
+        int tempI= VisitedVertices.GetIndex(BaseVariables);
+        if (tempI==-1)
+          VisitedVertices.AddOnTop(BaseVariables);
+        else
+          WeHaveNotEnteredACycle=false;
+      }
+      //if (BaseVariables.elements[LeavingVariableRow]==34)
+      //  tempMatA.ComputeDebugString();
+      for (int i=0; i<tempMatA.NumRows; i++)
+      { if (!tempMatA.elements[i][EnteringVariable].IsEqualToZero()&& i!=LeavingVariableRow)
+        { tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+          tempRat.MultiplyBy(MaxMovement);
+          matX[BaseVariables.elements[i]]-=tempRat;
+          tempRat.Assign(tempMatA.elements[i][EnteringVariable]);
+          tempRat.Minus();
+          tempMatA.AddTwoRows(LeavingVariableRow, i, 0, tempRat);
+        }
+        if (i==LeavingVariableRow)
+          matX[BaseVariables.elements[i]]=0;
+        //tempMatA.ComputeDebugString();
+        //matX.ComputeDebugString();
+      }
+      assert(matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero());
+      BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
+      BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
+      BaseVariables.selected[EnteringVariable]= true;
+      //BaseVariables.ComputeDebugString();
+      for (int i=0; i<tempMatA.NumRows; i++)
+        assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1));
+    }
+//    if (::Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic)
+//    { Matrix<Rational>  tempMat;
+//      tempMat.Assign(matX);
+//      tempMat.ComputeDebugString();
+//      tempDebugMat.ComputeDebugString();
+//      tempMat.MultiplyOnTheLeft(tempDebugMat);
+//      tempMat.ComputeDebugString();
+//      assert(tempMat.IsEqualTo(matb));
+//    }
+  }
+//  std::string tempS;
+//  std::stringstream out;
+//  for (int i=0; i<BaseVariables.CardinalitySelection; i++)
+//  { int tempI=BaseVariables.elements[i];
+//    matX.elements[tempI][0].ToString(tempS);
+//    out << tempS <<"(";
+//    if (tempI<matA.NumCols)
+//    {  for (int j=0; j<matA.NumRows; j++)
+//      { matA.elements[j][tempI].ToString(tempS);
+//        out << tempS;
+//        if (j!=matA.NumRows-1)
+//          out <<", ";
+//      }
+//    } else
+//      out<<"dummy column " << i <<" ";
+//    out <<")";
+//    if (i!=BaseVariables.CardinalitySelection-1)
+//      out <<"+";
+//  }
+//  tempS=out.str();
+  for(int i=NumTrueVariables; i<matX.size; i++)
+    if (matX[i].IsPositive())
+      return false;
+  if (outputSolution!=0)
+  { outputSolution->SetSize(NumTrueVariables);
+    for (int i=0; i<NumTrueVariables; i++)
+      (*outputSolution)[i]=matX[i];
+  }
+  return true;
+}
+
+template <class CoefficientType>
+bool Vectors<CoefficientType>::ConesIntersect
+(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
+ Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal,
+ GlobalVariables* theGlobalVariables)
+{ MemorySaving<Matrix<Rational> > tempA, tempB;
+  Matrix<Rational>& matA=
+  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
+  Matrix<Rational>& matb=
+  theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
+  if (StrictCone.size==0)
+    return false;
+  int theDimension= StrictCone[0].size;
+  int numCols= StrictCone.size + NonStrictCone.size;
+  matA.init((int)theDimension+1, (int)numCols);
+  matb.init((int)theDimension+1, 1);
+  matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
+  for (int i=0; i<StrictCone.size; i++)
+  { for (int k=0; k<theDimension; k++)
+      matA.elements[k][i].Assign(StrictCone[i][k]);
+    matA.elements[theDimension][i].MakeOne();
+  }
+  for (int i=0; i<NonStrictCone.size; i++)
+  { int currentCol=i+StrictCone.size;
+    for (int k=0; k<theDimension; k++)
+    { matA.elements[k][currentCol].Assign(NonStrictCone[i][k]);
+      matA.elements[k][currentCol].Minus();
+    }
+    matA.elements[theDimension][currentCol].MakeZero();
+  }
+  //matA.ComputeDebugString();
+  //matb.ComputeDebugString();
+  //matX.ComputeDebugString();
+  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
+      (matA, matb, outputLinearCombo, theGlobalVariables))
+  { if (outputSplittingNormal!=0)
+    { bool tempBool=Vectors<CoefficientType>::GetNormalSeparatingCones
+      (StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
+      if (!tempBool)
+      { std::cout << "This is an algorithmic/mathematical (hence also programming) error: "
+        << "I get that two cones do not intersect, yet there exists no plane separating them. "
+        << "Something is wrong with the implementation of the simplex algorithm. "
+        << "The input which manifested the problem was: <br>StrictCone: <br>" << StrictCone.ToString()
+        << "<br>Non-strict cone: <br>" << NonStrictCone.ToString()
+        << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
+    return false;
+  }
+  if (outputLinearCombo!=0)
+    for (int i=StrictCone.size; i<outputLinearCombo->size; i++)
+      (*outputLinearCombo)[i]*=-1;
+  return true;
+}
+
 template <class CoefficientType>
 void SemisimpleLieAlgebra::GetCommonCentralizer
 (const List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputElementsToCentralize,
@@ -900,11 +1118,11 @@ bool CommandList::innerConesIntersect
   Matrix<Rational> coneStrictMatForm;
   Vectors<Rational> coneNonStrictGens;
   Vectors<Rational> coneStrictGens;
-  if (!theCommands.GetMatrix(input[1], coneNonStrictMatForm))
+  if (!theCommands.GetMatrix(input[1], coneStrictMatForm))
   { theCommands.Comments << "Failed to extract matrix from the first argument, " << input[1].ToString();
     return false;
   }
-  if (!theCommands.GetMatrix(input[2], coneStrictMatForm))
+  if (!theCommands.GetMatrix(input[2], coneNonStrictMatForm))
   { theCommands.Comments << "Failed to extract matrix from the second argument, " << input[2].ToString();
     return false;
   }
@@ -917,12 +1135,12 @@ bool CommandList::innerConesIntersect
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
   coneStrictMatForm.GetVectorsFromRows(coneStrictGens);
-  out << "<br>Input cone 1: ";
-  for (int i=0; i<coneNonStrictGens.size; i++)
-    out << "<br>v_{" << i+1 << "}:=" << coneNonStrictGens[i].ToString() << ";";
-  out << "<br>Input cone 2: ";
+  out << "<br>Input non-strict (i.e., over Z_{&gt;=0}) cone: ";
   for (int i=0; i<coneStrictGens.size; i++)
-    out << "<br>v_{" << coneNonStrictGens.size+ i+1 << "}:=" << coneStrictGens[i].ToString() << ";";
+    out << "<br>v_{" << i+1 << "}:=" << coneStrictGens[i].ToString() << ";";
+  out << "<br>Input strict (i.e., over Z_{&gt;0}) cone: ";
+  for (int i=0; i<coneNonStrictGens.size; i++)
+    out << "<br>v_{" << coneStrictGens.size+ i+1 << "}:=" << coneNonStrictGens[i].ToString() << ";";
   Vector<Rational> outputIntersection, outputSeparatingNormal;
   bool conesDoIntersect=
   coneNonStrictGens.ConesIntersect
@@ -930,29 +1148,30 @@ bool CommandList::innerConesIntersect
   if (conesDoIntersect)
   { Vector<Rational> checkVector;
     checkVector.MakeZero(coneStrictMatForm.NumCols);
-    for (int i=0; i<coneNonStrictGens.size; i++)
-      checkVector+=coneNonStrictGens[i]*outputIntersection[i];
     for (int i=0; i<coneStrictGens.size; i++)
-      checkVector+=coneStrictGens[i]*outputIntersection[coneNonStrictGens.size+i];
+      checkVector+=coneStrictGens[i]*outputIntersection[i];
+    for (int i=0; i<coneNonStrictGens.size; i++)
+      checkVector+=coneNonStrictGens[i]*outputIntersection[coneStrictGens.size+i];
     if (!checkVector.IsEqualToZero())
-    { std::cout << "<br>This is a programming error: the cone intersection " << checkVector.ToString()
-      << " is not equal to zero! Here is the cone output so far: "
+    { std::cout << "<br>This is a programming error: the output linear combination"
+      << outputIntersection.ToString()
+      << " corresponds to the cone intersection " << checkVector.ToString()
+      << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     out << "<br>Cones intersect, here is one intersection: 0= "
     << outputIntersection.ToStringLetterFormat("v");
-  }
-  else
+  } else
   { out << "<br>Cones have empty intersection.";
     out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString()
     << ". Indeed, ";
-    for (int i=0; i<coneNonStrictGens.size; i++)
-      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
     for (int i=0; i<coneStrictGens.size; i++)
-      out << "<br>\\langle v_{" << i+1 + coneNonStrictGens.size << "}, n\\rangle = "
+      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = "
       << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+    for (int i=0; i<coneNonStrictGens.size; i++)
+      out << "<br>\\langle v_{" << i+1 + coneStrictGens.size << "}, n\\rangle = "
+      << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
   }
   return output.AssignValue(out.str(), theCommands);
 }

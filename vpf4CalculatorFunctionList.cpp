@@ -74,8 +74,11 @@ void CommandList::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("ConesIntersection", this->innerConesIntersect, "",
-   "Takes as input two sequences of vectors, generates cones over Q, and intersects them using the simplex\
-   algorithm. The output is a string report of the operation.",
+   "Takes as input two sequences of vectors, generates two cones, \
+   and intersects them using the simplex\
+   algorithm. The output is a string report of the operation. \
+   The first cone is generated over Z_{&gt;} (``strict cone'')\
+   the second cone is generated over Z_{&gt;=0} (``non-strict cone'').",
    "v_1:=(1, 2, 3 ); v_2:=(1, 3, 2); v_3:=(3,1,1); v_4:=(-2,2, 2);\
    \n ConesIntersection{}((v_1,v_2 ), (v_3,v_4 ));\nConesIntersection{}((v_1,v_2 ), (v_3,-v_4 ));", true, false)
    ;

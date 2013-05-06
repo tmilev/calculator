@@ -3527,11 +3527,6 @@ public:
   std::string ToStringEpsilonFormat()const
   { return this->ToStringLetterFormat("\\varepsilon");
   }
-  inline CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero=0)const
-  { CoefficientType output;
-    this->ScalarEuclidean(other, output, theRingZero);
-    return output;
-  }
   static void ScalarProduct
 (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& TheBilinearForm, CoefficientType& result)
   { result=Vector<CoefficientType>::ScalarProduct(r1, r2, TheBilinearForm);
@@ -3608,23 +3603,23 @@ public:
       result+=this->TheObjects[i];
     return result;
   }
-  static CoefficientType ScalarEuclidean
-  (const Vector<CoefficientType>&left, const Vector<CoefficientType>&right, const CoefficientType& theRingZero=0)
+  inline CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other)const
   { CoefficientType output;
-    left.ScalarEuclidean(right, output, theRingZero);
+    this->ScalarEuclidean(other, output);
     return output;
   }
-  static void ScalarEuclidean
-  (const Vector<CoefficientType>&left, const Vector<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero=0)
-  { left.ScalarEuclidean(right, output, theRingZero);
-  }
-  void  ScalarEuclidean
-  (const Vector<CoefficientType>& other, CoefficientType& output, const CoefficientType& theRingZero=0) const
-  { CoefficientType tempElt;
-    assert(this->size==other.size);
-    output=theRingZero;
+  void ScalarEuclidean(const Vector<CoefficientType>& other, CoefficientType& output)const
+  { if (this->size!=other.size)
+    { std::cout << "This is a programming error: "
+      << "taking scalar product of elements of different dimensions: "
+      << this->ToString() << " and " << other.ToString()
+      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    CoefficientType tempElt;
+    output=0;
     for (int i=0; i<this->size; i++)
-    { tempElt=other.TheObjects[i];
+    { tempElt=other[i];
       tempElt*=this->TheObjects[i];
       output+=tempElt;
     }
@@ -4204,19 +4199,19 @@ class Vectors: public List<Vector<CoefficientType> >
   }
   bool HasAnElementWithPositiveScalarProduct(const Vector<CoefficientType>& input)const
   { for (int i=0; i<this->size; i++)
-      if (Vector<CoefficientType>::ScalarEuclidean(this->TheObjects[i], input).IsPositive())
+      if (input.ScalarEuclidean(this->TheObjects[i]).IsPositive())
         return true;
     return false;
   }
   bool HasAnElementWithNegativeScalarProduct(const Vector<CoefficientType>& input)const
   { for (int i=0; i<this->size; i++)
-      if (Vector<CoefficientType>::ScalarEuclidean(this->TheObjects[i], input).IsNegative())
+      if (input.ScalarEuclidean(this->TheObjects[i]).IsNegative())
         return true;
     return false;
   }
   bool HasAnElementPerpendicularTo(const Vector<CoefficientType>& input)const
   { for (int i=0; i<this->size; i++)
-      if (Vector<CoefficientType>::ScalarEuclidean(this->TheObjects[i], input).IsEqualToZero())
+      if (input.ScalarEuclidean(this->TheObjects[i]).IsEqualToZero())
         return true;
     return false;
   }
@@ -4229,7 +4224,7 @@ class Vectors: public List<Vector<CoefficientType> >
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
     { Vector<CoefficientType>& tempRoot=this->TheObjects[theSelection.elements[i]];
       for (int j=0; j<OutputDimension; j++)
-        output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
+        output.elements[StartRowIndex+i][j]=tempRoot[j];
     }
   }
   void SelectionToMatrix
@@ -4237,13 +4232,13 @@ class Vectors: public List<Vector<CoefficientType> >
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
     { Vector<Rational>& tempRoot=this->TheObjects[theSelection.elements[i]];
       for (int j=0; j<OutputDimension; j++)
-        output.elements[StartRowIndex+i][j].Assign(tempRoot.TheObjects[j]);
+        output.elements[StartRowIndex+i][j]=tempRoot[j];
     }
   }
   void GetGramMatrix
-  (Matrix<CoefficientType> & output, const Matrix<CoefficientType>& theBilinearForm)const
+  (Matrix<CoefficientType>& output, const Matrix<CoefficientType>* theBilinearForm=0)const
   ;
-  void GetMatrixRootsToRows(Matrix<Rational> & output)const
+  void GetMatrixRootsToRows(Matrix<Rational>& output)const
   { int tempNumCols= 0;
     if (this->size!=0)
       tempNumCols=(int)this->TheObjects[0].size;
@@ -8492,12 +8487,13 @@ bool Vectors<CoefficientType>::IsRegular
   WallSelection.init(this->size);
   int x= MathRoutines::NChooseK(this->size, theDimension-1);
   Matrix<CoefficientType> bufferMat;
+  Vector<CoefficientType> tempRoot;
+  CoefficientType theScalarProduct;
   for (int i=0; i<x; i++)
   { WallSelection.incrementSelectionFixedCardinality(theDimension-1);
-    Vector<CoefficientType> tempRoot;
     if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension))
-    { CoefficientType tempRat=Vector<CoefficientType>::ScalarEuclidean(tempRoot, r);
-      if (tempRat.IsEqualToZero())
+    { tempRoot.ScalarEuclidean(r, theScalarProduct);
+      if (theScalarProduct.IsEqualToZero())
       { outputFailingNormal=(tempRoot);
         return false;
       }
@@ -8596,13 +8592,17 @@ bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndTwoExtraRoots
 
 template<class CoefficientType>
 void Vectors<CoefficientType>::GetGramMatrix
-(Matrix<CoefficientType> & output, const Matrix<CoefficientType>& theBilinearForm) const
+(Matrix<CoefficientType>& output, const Matrix<CoefficientType>* theBilinearForm) const
 { output.Resize(this->size, this->size, false);
   for (int i=0; i<this->size; i++)
     for(int j=i; j<this->size; j++)
-    { Vector<CoefficientType>::ScalarProduct(this->TheObjects[i], this->TheObjects[j], theBilinearForm, output.elements[i][j]);
+    { if (theBilinearForm!=0)
+        Vector<CoefficientType>::ScalarProduct
+        (this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
+      else
+        output(i,j)=(*this)[i].ScalarEuclidean((*this)[j]);
       if (i!=j)
-        output.elements[j][i].Assign(output.elements[i][j]);
+        output(j,i)=output(i,j);
     }
 }
 
@@ -8709,11 +8709,11 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
   if (result)
   { Rational tempRat;
     for(int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
-    { tempRat=Vector<Rational>::ScalarEuclidean(coneStrictlyPositiveCoeffs.TheObjects[i], outputNormal);
+    { coneStrictlyPositiveCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
       assert(tempRat.IsPositive());
     }
     for(int i=0; i<coneNonNegativeCoeffs.size; i++)
-    { tempRat=Vector<Rational>::ScalarEuclidean(coneNonNegativeCoeffs.TheObjects[i], outputNormal);
+    { coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
       assert(tempRat.IsNonPositive());
     }
   }

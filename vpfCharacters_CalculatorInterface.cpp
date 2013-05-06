@@ -81,7 +81,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
       }
     }
   }
-  this->CheckRepIsMultiplicativelyClosed();
+//  this->CheckRepIsMultiplicativelyClosed();
   //std::cout << "<hr>";
   //FormatExpressions tempFormat;
   //tempFormat.flagUseLatex=true;
@@ -127,13 +127,8 @@ void WeylGroupRepresentation<coefficient>::Restrict
 (const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter,
  WeylGroupRepresentation<coefficient>& output)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
-  int newDim = VectorSpaceBasisSubrep.size;
   Matrix<coefficient> GramMatrixInverted;
-  GramMatrixInverted.init(newDim, newDim);
-  for(int i=0; i<newDim; i++)
-    for(int j=0; j<newDim; j++)
-      GramMatrixInverted(i,j) =
-      VectorSpaceBasisSubrep[i].ScalarEuclidean(VectorSpaceBasisSubrep[j]);
+  VectorSpaceBasisSubrep.GetGramMatrix(GramMatrixInverted);
   GramMatrixInverted.Invert();
   output.reset(this->OwnerGroup);
   output.theCharacter=remainingCharacter;
@@ -153,7 +148,7 @@ void WeylGroupRepresentation<coefficient>::Restrict
     }
 
 //  std::cout << "<hr>The restriction result: " << output.ToString();
-  this->CheckRepIsMultiplicativelyClosed();
+//  this->CheckRepIsMultiplicativelyClosed();
 }
 
 template <class coefficient>

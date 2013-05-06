@@ -64,11 +64,11 @@ void Rational::AssignString(const std::string& input)
 
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal)
-{ Matrix<Rational>  theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
-  Vector<Rational>& theTranslation=this->theTranslationsProjectedBasisChanged.TheObjects[indexOperator];
+{ Matrix<Rational>  theOperatorExtended=this->theLinearOperatorsExtended[indexOperator];
+  Vector<Rational>& theTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
-  Rational theConst=Vector<Rational>::ScalarEuclidean
-  (this->NonIntegralOriginModificationBasisChanged+theTranslation, startingNormal);
+  Rational theConst;
+  startingNormal.ScalarEuclidean(this->NonIntegralOriginModificationBasisChanged+theTranslation, theConst);
   theOperatorExtended.Transpose();
   outputNormal=startingNormal;
   theOperatorExtended.ActOnVectorColumn(outputNormal);
@@ -2073,9 +2073,9 @@ bool ConeComplex::SplitChamber
   ZeroVertices.Clear();
   Rational tempRat;
   for (int i=0; i<myDyingCone.Vertices.size; i++)
-  { tempRat=Vector<Rational>::ScalarEuclidean(killerNormal, myDyingCone.Vertices.TheObjects[i]);
+  { killerNormal.ScalarEuclidean(myDyingCone.Vertices[i], tempRat);
     if (tempRat.IsPositive())
-      newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
+      newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices[i]);
     if (tempRat.IsEqualToZero())
       ZeroVertices.AddOnTopNoRepetition(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsNegative())
@@ -2291,12 +2291,12 @@ bool Cone::EliminateFakeNormalsUsingVertices
   int DesiredRank=this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
   if (DesiredRank>1)
     for (int i=0; i<this->Normals.size; i++)
-    { Vector<Rational>& currentNormal=this->Normals.TheObjects[i];
+    { Vector<Rational>& currentNormal=this->Normals[i];
       verticesOnWall.size=0;
       bool wallIsGood=false;
       for (int j=0; j<this->Vertices.size; j++)
-        if (Vector<Rational>::ScalarEuclidean(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
-        { verticesOnWall.AddOnTop(this->Vertices.TheObjects[j]);
+        if (currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+        { verticesOnWall.AddOnTop(this->Vertices[j]);
           int theRank=verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank< verticesOnWall.size)
             verticesOnWall.RemoveLastObject();
@@ -2664,9 +2664,9 @@ bool ConeComplex::findMaxLFOverConeProjective
   { this->TheObjects[i].GetInternalPoint(tempRoot);
     bool isInitialized=false;
     for (int j=0; j<inputLFsLastCoordConst.size; j++)
-      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0)>theMax)
-      { theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0);
-        outputMaximumOverEeachSubChamber.TheObjects[i]=j;
+      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j])>theMax)
+      { theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst[j]);
+        outputMaximumOverEeachSubChamber[i]=j;
         isInitialized=true;
       }
   }
@@ -3658,7 +3658,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   Vector<Rational> theScalarProducts;
   theScalarProducts.SetSize(startingBasis.size);
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
-    theScalarProducts[i]=Vector<Rational>::ScalarEuclidean(startingBasis[i], theNormal);
+    theScalarProducts[i]=theNormal.ScalarEuclidean(startingBasis[i]);
   if (theScalarProducts.IsEqualToZero())
     return;
   //std::cout << "<br>the scalar products: " << theScalarProducts.ToString();
@@ -4687,7 +4687,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
       theWeight[j]=theMon[j];
     }
     basisMonsAll.AddMonomial(theMon, theMonCoeff);
-    if (Vector<Rational>::ScalarEuclidean(theWeight, theCartanAction).IsEqualToZero())
+    if (theWeight.ScalarEuclidean(theCartanAction).IsEqualToZero())
       basisMonsZeroWeight.AddMonomial(theMon, theMonCoeff);
   }
 //  std::cout << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ToString(PolyFormatLocal);

@@ -597,40 +597,9 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  civilizedInput="N:=4;A:=0.1;B:=1.5;delta:=-(B-A)/N;plot2DWithBars{}(10*x(x-0.6)(x-1.2)(x-1.6), A, B, delta)";
-//  civilizedInput="SolveSerreLikePolynomialSystem{}(   x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)";
-//  civilizedInput="MakeCoxeterElement{}(A_2, 1,2);";
-  //civilizedInput=
-  //"g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; [5 g_{9},g_{-1}]";
-//  civilizedInput="PolyDivRemainder{}(x^3+6xy+5xy^2+y^3, x^2+y^2-1, x^3+y^3-xy) ;";
-//  civilizedInput="plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)";
-//  civilizedInput="MakeCoxeterElement{}(B_3,2,1,1,1,1,2,2,1,2,1,2,1,2,1);";
-//  civilizedInput="Deserialize{}(Serialize{}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))";
-  //civilizedInput="1/2";
-//  civilizedInput="MakeCharacter{}(B_3, 1);";
-  //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
-  //civilizedInput="Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\+Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), 3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\+6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))";
-  //civilizedInput="Melt{}(a);";
-  //civilizedInput="Melt{}(a;b);";
-//  civilizedInput="a; b";
-//  civilizedInput=" ";
-//  civilizedInput="c:=(a:=b);c;a;";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
-//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
-  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6)))))";
-  //civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-1+g_-3, g_1+g_3, g_-2, g_2 ) ) ))";
-//  civilizedInput="Load{}Serialization{}(LoadSemisimpleSubalgebras, (B)^{2}_{3}, (Serialization{}(LoadCandidateSubalgebra, (G)^{6}_{2}, ((2, 3, 4), (-3, -3, -6) ),( g_-6+g_-7, g_6+g_7, g_-8, g_8 ) ) ))";
-/*  civilizedInput=
-  "%HideLHS Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\
-  (Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\
-(g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},4g_{4}+15g_{3}+14g_{2}+22g_{1})\
-)))";*/
-//  civilizedInput="PenkovProjectTest";
-//civilizedInput="GroebnerRevLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );   ";
-//civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
-  //civilizedInput="WeylGroupNaturalRep{}(B_3);";
-  //civilizedInput="V:=WeylGroupNaturalRep{}(B_3); V*V";
+
 //  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
+  //civilizedInput= "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)";
   PredefinedStrings(civilizedInput);
 
 

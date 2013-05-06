@@ -264,8 +264,8 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<R
 void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 { this->kModulesKepsCoords.SetSize(this->kModules.size);
   this->kModulesgEpsCoords.SetSize(this->kModules.size);
-  Matrix<Rational> & InvertedGramMatrix=theGlobalVariables.matComputeEpsCoordsWRTk.GetElement();
-  Vectors<Rational>& tempRoots=theGlobalVariables.rootsComputeEpsCoordsWRTk.GetElement();
+  Matrix<Rational>& InvertedGramMatrix=theGlobalVariables.matComputeEpsCoordsWRTk.GetElement();
+  Vectors<Rational>& EpsCoordsWRTk=theGlobalVariables.rootsComputeEpsCoordsWRTk.GetElement();
   Vectors<Rational>& simpleBasisG=theGlobalVariables.rootsComputeEpsCoordsWRTk2.GetElement();
   int theDimension=this->GetAmbientWeyl().CartanSymmetric.NumRows;
   simpleBasisG.SetSize(theDimension);
@@ -273,24 +273,35 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   { simpleBasisG[i].MakeZero(theDimension);
     simpleBasisG[i][i]=1;
   }
-  this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix, this->GetAmbientWeyl().CartanSymmetric);
-  InvertedGramMatrix.Invert(theGlobalVariables);
+//  std::cout << "<br>Getting gram matrix from: " << this->SimpleBasisK.ToString();
+  if (this->SimpleBasisK.size>0)
+  { this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix, &this->GetAmbientWeyl().CartanSymmetric);
+//  std::cout << "<br>The gram matrix is: " << InvertedGramMatrix.ToString();
+    InvertedGramMatrix.Invert(theGlobalVariables);
+  }
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
   for(int i=0; i<this->kModules.size; i++)
-  { tempRoots.size=0;
-    for (int j=0; j<this->kModules[i].size; j++)
-    { tempRoot.SetSize(this->SimpleBasisK.size);
-      for (int k=0; k<this->SimpleBasisK.size; k++)
-        this->GetAmbientWeyl().RootScalarCartanRoot(this->kModules[i][j], this->SimpleBasisK[k], tempRoot[k]);
-      InvertedGramMatrix.ActOnVectorColumn(tempRoot, tempRoot3);
-      tempRoot2.MakeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
-      for (int j=0; j<this->SimpleBasisK.size; j++)
-        tempRoot2+=this->SimpleBasisK[j]*tempRoot3[j];
-      tempRoots.AddOnTop(tempRoot2);
+  { if (this->SimpleBasisK.size>0)
+    { EpsCoordsWRTk.size=0;
+      for (int j=0; j<this->kModules[i].size; j++)
+      { tempRoot.SetSize(this->SimpleBasisK.size);
+        for (int k=0; k<this->SimpleBasisK.size; k++)
+          this->GetAmbientWeyl().RootScalarCartanRoot(this->kModules[i][j], this->SimpleBasisK[k], tempRoot[k]);
+        InvertedGramMatrix.ActOnVectorColumn(tempRoot, tempRoot3);
+        tempRoot2.MakeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
+        for (int j=0; j<this->SimpleBasisK.size; j++)
+          tempRoot2+=this->SimpleBasisK[j]*tempRoot3[j];
+        EpsCoordsWRTk.AddOnTop(tempRoot2);
+      }
+  //    tempRoots.ComputeDebugString();
+      this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra
+      (this->SimpleBasisK, EpsCoordsWRTk, this->kModulesKepsCoords[i]);
+      this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra
+      (simpleBasisG, this->kModules[i], this->kModulesgEpsCoords[i]);
+    }else
+    { Vector<Rational> emptyV;
+      this->kModulesgEpsCoords[i].initFillInObject(this->kModules[i].size, emptyV);
     }
-//    tempRoots.ComputeDebugString();
-    this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords[i]);
-    this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules[i], this->kModulesgEpsCoords[i]);
     Vector<Rational> tempRoot;
     if (this->kModulesKepsCoords[i].size>0)
     { this->kModulesKepsCoords[i].average(tempRoot, this->kModulesKepsCoords[i][0].size);
@@ -1466,8 +1477,8 @@ bool affineHyperplane::operator ==(const affineHyperplane& right)
   if (!(tempRoot1==tempRoot2))
     return false;
   Rational tempRat1, tempRat2;
-  tempRat1=Vector<Rational>::ScalarEuclidean(tempRoot1, this->affinePoint);
-  tempRat2=Vector<Rational>::ScalarEuclidean(tempRoot1, right.affinePoint);
+  tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
+  tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
   return tempRat1.IsEqualTo(tempRat2);
 }
 
@@ -1489,18 +1500,18 @@ bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
 
 bool affineHyperplane::ContainsPoint(Vector<Rational>& thePoint)
 { Rational tempRat1, tempRat2;
-  tempRat1=Vector<Rational>::ScalarEuclidean(this->normal, thePoint);
-  tempRat2=Vector<Rational>::ScalarEuclidean(this->normal, this->affinePoint);
+  tempRat1=this->normal.ScalarEuclidean(thePoint);
+  tempRat2=this->normal.ScalarEuclidean(this->affinePoint);
   return tempRat2.IsEqualTo(tempRat1);
 }
 
 bool affineHyperplane::HasACommonPointWithPositiveTwoToTheNth_ant()
 { Rational tempRat;
-  tempRat= Vector<Rational>::ScalarEuclidean(this->normal, this->affinePoint);
+  tempRat= this->normal.ScalarEuclidean(this->affinePoint);
   if (tempRat.IsEqualToZero())
     return true;
   for(int i=0; i<this->normal.size; i++)
-  { Rational& tempRat2= this->normal.TheObjects[i];
+  { Rational& tempRat2= this->normal[i];
     if (tempRat.IsNegative() && tempRat2.IsNegative())
       return true;
     if (tempRat.IsPositive() && tempRat2.IsPositive())
@@ -1528,7 +1539,7 @@ unsigned int affineHyperplane::HashFunction() const
   Vector<Rational> tempNormal;
   tempNormal=(this->normal);
   tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  Rational tempRat=Vector<Rational>::ScalarEuclidean(this->normal, this->affinePoint);
+  Rational tempRat=this->normal.ScalarEuclidean(this->affinePoint);
   return this->normal.HashFunction()+ tempRat.HashFunction();
 }
 

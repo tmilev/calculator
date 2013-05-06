@@ -388,10 +388,10 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   if (input.TheObjects[0].IsNegative())
     basepoint.Minus();
 //////////////////////////////////////////////////
-  Vector<Rational>::ScalarEuclidean(output, normal, tempRat2);
-  Vector<Rational>::ScalarEuclidean(basepoint, normal, tempRat);
+  output.ScalarEuclidean(normal, tempRat2);
+  basepoint.ScalarEuclidean(normal, tempRat);
   if (!tempRat2.IsEqualToZero())
-  { tempRat3.Assign(tempRat);
+  { tempRat3=tempRat;
     tempRat3.DivideBy(tempRat2);
     output*=tempRat3;
   }
@@ -2174,7 +2174,7 @@ void partFraction::MakePolynomialFromOneNormal
   shiftRationalVector.MakeZero(normal.size);
   for (int i=0; i<normal.size; i++)
     shiftRationalVector[i]=shiftRational(i);
-  tempRat=Vector<Rational>::ScalarEuclidean(normal, shiftRationalVector);
+  tempRat=normal.ScalarEuclidean(shiftRationalVector);
   for (int j=0; j<theMult-1; j++)
   { tempP.MakeLinPolyFromRootNoConstantTerm(normal);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -2214,7 +2214,7 @@ void partFraction::ComputeNormals
   Rational tempRat, tempRat2;
   for (int i=0; i<theDimension; i++)
   { dens.ComputeNormalExcludingIndex(tempRoot, i, buffer);
-    tempRat=Vector<Rational>::ScalarEuclidean(tempRoot, dens[i]);
+    tempRat=tempRoot.ScalarEuclidean(dens[i]);
     assert(!tempRat.IsEqualToZero());
     tempRoot/=tempRat;
     output.AddOnTop(tempRoot);

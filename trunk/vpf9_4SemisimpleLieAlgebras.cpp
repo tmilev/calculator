@@ -2028,8 +2028,7 @@ void slTwoSubalgebra::ComputeModuleDecomposition
   positiveRootsContainingRegularSA.GetCoordsInBasis
   (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
-  { tempRat=Vector<Rational>::ScalarEuclidean
-    (this->hCharacteristic, coordsInPreferredSimpleBasis[k]);
+  { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     assert(tempRat.DenShort==1);
     if (tempRat>positiveRootsContainingRegularSA.size*2)
     { std::cout << "This is a programming error. The scalar product of the h-Characteristic "

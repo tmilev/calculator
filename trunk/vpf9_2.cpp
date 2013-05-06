@@ -3331,7 +3331,7 @@ bool Cone::IsInCone(const Vector<Rational>& point) const
     return point.IsEqualToZero();
   Rational tempRat;
   for (int i=0; i<this->Normals.size; i++)
-  { tempRat=Vector<Rational>::ScalarEuclidean(this->Normals[i], point);
+  { tempRat=point.ScalarEuclidean(this->Normals[i]);
     if (tempRat.IsNegative())
       return false;
   }

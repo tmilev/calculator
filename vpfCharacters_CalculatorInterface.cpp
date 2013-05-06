@@ -31,18 +31,22 @@ void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed
 { HashedList<Matrix<Rational> > tempList;
   tempList.AddOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
+  ElementWeylGroup tempElt;
   for (int i=0; i<tempList.size; i++)
     for (int j=0; j<tempList.size; j++)
     { tempMat=tempList[i];
       tempMat.MultiplyOnTheLeft(tempList[j]);
-      if (!tempList.Contains(tempMat))
+      tempElt=this->OwnerGroup->theElements[j];
+      tempElt*=this->OwnerGroup->theElements[i];
+      tempElt.MakeCanonical();
+      int targetIndex=this->OwnerGroup->theElements.GetIndex(tempElt);
+      if (!(tempMat==this->theElementImages[targetIndex]))
       { std::cout << "this is a programming error: element " << i+1 << " times element "
         << j+1 << " is outside of the set, i.e.,  " << tempList[i].ToString() << " * "
         << tempList[j].ToString() << " is bad. ";
         assert(false);
       }
     }
-
 }
 
 template <typename coefficient>
@@ -77,10 +81,15 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
       }
     }
   }
-//  for (int i=0; i<this->theElementIsComputed.size; i++)
-//  { assert(this->theElementIsComputed[i]);
-//  }
-//  this->CheckRepIsMultiplicativelyClosed();
+  this->CheckRepIsMultiplicativelyClosed();
+  //std::cout << "<hr>";
+  //FormatExpressions tempFormat;
+  //tempFormat.flagUseLatex=true;
+  //for (int i=0; i<this->theElementImages.size; i++)
+  //{ std::cout << "<br>Element  " << i+1 << ": " << this->theElementImages[i].ToString() << " = "
+  //  << this->theElementImages[i].ToString(& tempFormat);
+  //}
+  //std::cout << "<hr>";
 }
 
 template <typename coefficient>
@@ -103,7 +112,7 @@ void WeylGroupRepresentation<coefficient>::operator*=
   output.reset(this->OwnerGroup);
   output.theCharacter=this->theCharacter;
   for (int i=0; i<output.theCharacter.size; i++)
-    output.theCharacter[i]*=this->theCharacter[i];
+    output.theCharacter[i]*=other.theCharacter[i];
   for(int i=0; i<output.theElementImages.size; i++)
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i])
     { output.theElementImages[i].AssignTensorProduct
@@ -144,7 +153,7 @@ void WeylGroupRepresentation<coefficient>::Restrict
     }
 
 //  std::cout << "<hr>The restriction result: " << output.ToString();
-//  this->CheckRepIsMultiplicativelyClosed();
+  this->CheckRepIsMultiplicativelyClosed();
 }
 
 template <class coefficient>
@@ -159,6 +168,8 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
   this->OwnerGroup->CheckInitializationFDrepComputation();
   outputMat.MakeZeroMatrix(this->GetDim());
   int numClasses=this->OwnerGroup->conjugacyClasses.size;
+  std::cout << "<hr>Getting class function matrix from character: "
+  << virtualCharacter.ToString();
   for(int cci=0; cci<numClasses; cci++)
   { if(virtualCharacter[cci] == 0)
       continue;
@@ -166,7 +177,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
     { this->classFunctionMatricesComputed[cci]=true;
       List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];
       this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
-      std::cout << "Accounting elements: ";
+      std::cout << "<br>Accounting elements: ";
       for (int i=0; i<currentConjugacyClass.size; i++)
       { if (!this->theElementIsComputed[currentConjugacyClass[i]])
           this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
@@ -178,8 +189,9 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)
-        outputMat(j,k)+= this->classFunctionMatrices[cci](j,k) * virtualCharacter[cci];
+        outputMat(j,k)+= this->classFunctionMatrices[cci](j,k) * virtualCharacter[cci].GetComplexConjugate();
   }
+  std::cout << "<hr>";
 }
 
 template <class coefficient>
@@ -341,12 +353,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
     { std::cout << "<hr>contains irrep " << this->OwnerGroup->irreps[i].theCharacter.ToString() << " with multiplicity "
       << NumIrrepsOfType << std::endl;
       this->OwnerGroup->CheckInitializationFDrepComputation();
-      std::cout << "<hr>Getting class f-n matrix from character: " << this->OwnerGroup->irreps[i].theCharacter;
+      std::cout << "<hr>Getting class f-n matrix from character: "
+      << this->OwnerGroup->irreps[i].theCharacter;
       this->GetClassFunctionMatrix(this->OwnerGroup->irreps[i].theCharacter, splittingOperatorMatrix);
       std::cout << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString();
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
-      std::cout << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
-      << remainingVectorSpace.ToString() ;
+      std::cout << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString()
+      << " with " << remainingVectorSpace.ToString() ;
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
       std::cout << " ... to get: " << tempSpace.ToString();
       remainingVectorSpace=tempSpace;
@@ -358,7 +371,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
         << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0]
         << " but remaining vector space has dim "
         << remainingVectorSpace.size;
-        assert(false);
+        //assert(false);
       }
       std::cout << " to get: " << remainingCharacter.ToString();
       if (remainingCharacter.IsEqualToZero())
@@ -366,7 +379,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
         { std::cout << "This is a programming error: remaining char is zero but remaining space is "
           << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacter.ToString()
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+          //assert(false);
         }
       }
     }
@@ -469,6 +482,11 @@ void WeylGroup::ComputeIrreducibleRepresentations
   std::cout << "Irrep table:";
   for (int i=0; i<this->irreps.size; i++)
     std::cout <<"\n<br>\n" << this->irreps[i].theCharacter.ToString();
+  FormatExpressions tempFormat;
+  tempFormat.flagUseLatex=true;
+  for (int i=0; i<this->irreps.size; i++)
+  { std::cout << "<hr>irrep " << i+1 << "<br>" << this->irreps[i].ToString(&tempFormat);
+  }
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylOrbit
@@ -705,6 +723,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
     return false;
 //  std::cout << "not implemented!";
   WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
+  theGroup.ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
 //  std::cout << theGroup.ToString();
   WeylGroupRepresentation<Rational> tempRep;
   theGroup.StandardRepresentation(tempRep);
@@ -858,7 +877,7 @@ void WeylGroupVirtualRepresentation::operator*=(const WeylGroupVirtualRepresenta
       tempRep=this->ownerGroup->irreps[i];
       tempRep*=this->ownerGroup->irreps[j];
       tempRep.DecomposeMeIntoIrreps(currentContribution, 0);
-      output.coefficientsIrreps+=currentContribution;
+      output.coefficientsIrreps+=currentContribution*theCoeff;
     }
   *this=output;
 }
@@ -903,6 +922,8 @@ bool WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep
     return false;
   WeylGroupRepresentation<Rational>& inputRep=
   input.GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
+  if (inputRep.OwnerGroup->irreps.size<inputRep.OwnerGroup->conjugacyClasses.size)
+    inputRep.OwnerGroup->ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
   WeylGroupVirtualRepresentation outputRep;
   outputRep.AssignWeylGroupRep(inputRep);
   return output.AssignValue(outputRep, theCommands);

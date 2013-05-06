@@ -6990,8 +6990,8 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
   (firstSpace, firstReduced, tempSel, theGlobalVariables);
   Vectors<CoefficientType>::SelectABasisInSubspace
   (secondSpace, secondReduced, tempSel, theGlobalVariables);
-  std::cout << "<br>first selected basis: " << firstReduced.ToString();
-  std::cout << "<br>second selected basis: " << secondReduced.ToString();
+//  std::cout << "<br>first selected basis: " << firstReduced.ToString();
+//  std::cout << "<br>second selected basis: " << secondReduced.ToString();
   if (firstReduced.size==0 || secondReduced.size==0)
   { output.size=0;
     return;
@@ -7007,15 +7007,15 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
       theMat(i,firstReduced.size+j)-=secondReduced[j][i];
     }
   }
-  std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
+//  std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
   theMat.GaussianEliminationByRows(0, &tempSel);
-  std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
+//  std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
   output.ReservE(tempSel.CardinalitySelection);
   output.size=0;
   Vector<CoefficientType> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)
   { int currentIndex=tempSel.elements[i];
-    std::cout << "<br>current pivot index : " << currentIndex;
+//    std::cout << "<br>current pivot index : " << currentIndex;
     assert(currentIndex>=firstReduced.size);
     nextIntersection.MakeZero(theDim);
     for (int j=0; j<firstReduced.size; j++)
@@ -7023,8 +7023,8 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
         nextIntersection+=firstReduced[j]*theMat.elements[j][currentIndex];
     output.AddOnTop(nextIntersection);
   }
-  std::cout << "<br> final output: " << output.ToString();
-  std::cout << "<br>******************End of debugging linear space intersections";
+//  std::cout << "<br> final output: " << output.ToString();
+//  std::cout << "<br>******************End of debugging linear space intersections";
 }
 
 template <class CoefficientType>

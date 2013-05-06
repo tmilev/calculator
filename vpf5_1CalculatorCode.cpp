@@ -928,8 +928,21 @@ bool CommandList::innerConesIntersect
   coneNonStrictGens.ConesIntersect
   (coneStrictGens, coneNonStrictGens, &outputIntersection, &outputSeparatingNormal, theCommands.theGlobalVariableS);
   if (conesDoIntersect)
+  { Vector<Rational> checkVector;
+    checkVector.MakeZero(coneStrictMatForm.NumCols);
+    for (int i=0; i<coneNonStrictGens.size; i++)
+      checkVector+=coneNonStrictGens[i]*outputIntersection[i];
+    for (int i=0; i<coneStrictGens.size; i++)
+      checkVector+=coneStrictGens[i]*outputIntersection[coneNonStrictGens.size+i];
+    if (!checkVector.IsEqualToZero())
+    { std::cout << "<br>This is a programming error: the cone intersection " << checkVector.ToString()
+      << " is not equal to zero! Here is the cone output so far: "
+      << out.str() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     out << "<br>Cones intersect, here is one intersection: 0= "
     << outputIntersection.ToStringLetterFormat("v");
+  }
   else
   { out << "<br>Cones have empty intersection.";
     out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString()

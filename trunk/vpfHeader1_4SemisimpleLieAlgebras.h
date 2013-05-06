@@ -406,7 +406,7 @@ public:
   bool ComputeChar
 (GlobalVariables* theGlobalVariables)
   ;
-  bool SolveSeparableQuadraticSystemRecursively
+  bool AttemptToSolveSytem
   (GlobalVariables* theGlobalVariables)
   ;
   bool isGoodForTheTop

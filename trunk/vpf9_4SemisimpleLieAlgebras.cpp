@@ -681,7 +681,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  this->SolveSeparableQuadraticSystemRecursively(theGlobalVariables);
+  this->AttemptToSolveSytem(theGlobalVariables);
   this->theBasis=this->theNegGens;
   this->theBasis.AddListOnTop(this->thePosGens);
   if (this->theBasis.size>0)
@@ -1146,29 +1146,21 @@ void SemisimpleSubalgebras::reset()
   this->flagDoComputePairingTable=true;
 }
 
-bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
+bool CandidateSSSubalgebra::AttemptToSolveSytem
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
   this->flagSystemSolved=false;
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
-  if (this->theNegGens.size!=0)
-  { this->flagSystemSolved=true;
-    return true;
-  }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.MaxNumComputations=10000;
-  if (!this->owner->flagAttemptToSolveSystems)
-    return !this->flagSystemProvedToHaveNoSolution;
-  this->flagSystemGroebnerBasisFound=
-  theComputation.TransformToReducedGroebnerBasis
-  (this->transformedSystem, theGlobalVariables);
-  if (theComputation.theBasiS.size==1)
-    if (theComputation.theBasiS[0].IsAConstant())
-      if (!theComputation.theBasiS[0].IsEqualToZero())
-        this->flagSystemProvedToHaveNoSolution=true;
-  return !this->flagSystemProvedToHaveNoSolution;
+  theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
+  this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
+  this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
+  this->flagSystemGroebnerBasisFound=false;
+  if (this->flagSystemSolved)
+    this->aSolution=theComputation.systemSolution.GetElement();
+  return this->flagSystemSolved;
 }
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination

@@ -248,7 +248,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   ParabolicEvaluationRootImage=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
   this->ParabolicSelectionSmallerAlgebra.init(input.theDomain().GetRank());
   for (int i=0; i<input.theDomain().GetRank(); i++)
-  { DualCartanEmbedding.ColToRoot(i, tempRoot);
+  { DualCartanEmbedding.GetVectorFromColumn(i, tempRoot);
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).IsPositive())
       this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
   }

@@ -438,7 +438,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   }
   std::cout << "<br>Current char: " << this->GetCharacter().ToString();
   std::cout << "<br>Spreading: " << average.ToString();
-  Vectors<coefficient> theSpread;
+/*  Vectors<coefficient> theSpread;
   this->SpreadVector(average, theSpread);
   if (theSpread.size==this->GetDim())
   { std::cout << "<hr><b>I was horribly wrong!</b>";
@@ -446,6 +446,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   } else
   { std::cout << "<hr>The image of the spread is " << theSpread.size << " dimensional. ";
   }
+*/
   return false;
 }
 

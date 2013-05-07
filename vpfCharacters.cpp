@@ -873,6 +873,8 @@ void CoxeterRepresentation<coefficient>::ClassFunctionMatrix
       for(int j=0; j<outputMat.NumCols; j++)
         outputMat.elements[i][j]+= classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
   }
+  std::cout << outputMat.ToString(&testformat) << std::endl;
+
 }
 
 template <typename coefficient>
@@ -985,7 +987,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   }
   if(Vb.size == 0)
   return out;
-  SpaceTree<Rational> st;
+/*  SpaceTree<Rational> st;
   st.space = basis;
   for(int cfi=0; cfi<G->ccCount; cfi++)
   {  ClassFunction<coefficient> cf;
@@ -1012,12 +1014,31 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   for(int i=0; i<leaves.size; i++)
     std::cout << leaves[i].size << " ";
   std::cout << std::endl;
+*/
+  List<List<Vector<coefficient> > > es;
+  for(int cfi=G->ccCount-1; cfi>=0; cfi--)
+  { ClassFunction<coefficient> cf;
+    cf.G = G;
+    cf.MakeZero();
+    cf[cfi] = 1;
+    std::cout << "getting matrix " << cf << std::endl;
+    Matrix<coefficient> A;
+    ClassFunctionMatrix(cf, A);
+    es = eigenspaces(A);
+    if(es.size > 1)
+    { std::cout << "eigenspaces were ";
+      for(int i=0; i<es.size; i++)
+        std::cout << es[i].size << " ";
+      std::cout << std::endl;
+      break;
+    }
+  }
 
-  for(int i=0; i<leaves.size; i++)
+  for(int i=0; i<es.size; i++)
   { CoxeterRepresentation<coefficient> outeme;
     outeme.G = G;
     outeme.gens = gens;
-    outeme.basis = leaves[i];
+    outeme.basis = es[i];
     out.AddOnTop(outeme.Reduced());
   }
   return out;
@@ -1180,12 +1201,12 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
       }
       CoxeterRepresentation<Rational> tspace = sr * nspace;
       tspace.character.data.size = 0;
-      std::cout << "Decomposing (left tensor)" << tspace.GetCharacter() << std::endl;
+      std::cout << "Decomposing" << tspace.GetCharacter() << std::endl;
       List<CoxeterRepresentation<Rational> > spaces = tspace.Decomposition();
-      tspace = nspace * sr;
-      tspace.character.data.size = 0;
-      std::cout << "Decomposing (right tensor)" << tspace.GetCharacter() << std::endl;
-      spaces.AddListOnTop(tspace.Decomposition());
+//      tspace = nspace * sr;
+//      tspace.character.data.size = 0;
+//      std::cout << "Decomposing (right tensor)" << tspace.GetCharacter() << std::endl;
+//      spaces.AddListOnTop(tspace.Decomposition());
       for(int spi = 0; spi < spaces.size; spi++)
       {  if(spaces[spi].GetNumberOfComponents() == 1)
          {  if(!characterTable.Contains(spaces[spi].GetCharacter()))

@@ -1928,7 +1928,7 @@ public:
              return false;
      return true;
   }
-  void ColToRoot(int colIndex, Vector<Element>& output)const;
+  void GetVectorFromColumn(int colIndex, Vector<Element>& output)const;
   void GetVectorFromRow(int rowIndex, Vector<Element>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex);
   bool FindFirstNonZeroElementSearchEntireRow(Element& output)

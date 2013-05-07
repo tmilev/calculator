@@ -1006,6 +1006,10 @@ class WeylGroupRepresentation
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string ToString(FormatExpressions* theFormat=0)const;
   Matrix<coefficient>& GetElementImage(int elementIndex);
+  void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
+  { this->theElementImages[elementIndex] = input;
+    this->theElementIsComputed[elementIndex] = true;
+  }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const
   { return this->theCharacter>other.theCharacter;
   }
@@ -4315,7 +4319,7 @@ void Matrix<Element>::GetVectorFromRow(int rowIndex, Vector<Element>& output)con
 }
 
 template<typename Element>
-void Matrix<Element>::ColToRoot(int colIndex, Vector<Element>& output)const
+void Matrix<Element>::GetVectorFromColumn(int colIndex, Vector<Element>& output)const
 { output.SetSize(this->NumRows);
   for (int i=0; i<this->NumRows; i++)
     output[i]=this->elements[i][colIndex];

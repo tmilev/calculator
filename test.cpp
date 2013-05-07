@@ -9,6 +9,7 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+
 /* dunno why i thought it was fun to spend so much time on this
 class f127
 { public:
@@ -823,10 +824,10 @@ int main(void)
        std::cout << GetMatrixOfElement(G,G[6]) << std::endl;
        std::cout << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << std::endl;
    */
-
+/*
 
    DynkinType D;
-   D.MakeSimpleType('B',3);
+   D.MakeSimpleType('G',2);
    Matrix<Rational> M;
    D.GetCartanSymmetric(M);
    std::cout << M << std::endl;
@@ -839,7 +840,13 @@ int main(void)
   CoxeterGroup G;
   G.CartanSymmetric = M;
   G.ComputeIrreducibleRepresentations();
-
+  CoxeterRepresentation<Rational> r = G.irreps[0]*G.irreps[1];
+  Matrix<Rational> cfm;
+  ClassFunction<Rational> cf;
+  cf = G.irreps[0].GetCharacter();
+  r.ClassFunctionMatrix(cf,cfm);
+  std::cout << cfm.ToString(&testformat) << std::endl;
+*/
 
   /*
    CoxeterGroup G;
@@ -1344,6 +1351,85 @@ int main(void)
       std::cout << sr2d[i].gens[j].ToString(&testformat) << std::endl;
    }
    */
+
+   WeylGroup G;
+   G.MakeArbitrarySimple('B',3,NULL);
+   G.ComputeIrreducibleRepresentations();
+
+   std::cout << "Building QG" << std::endl;
+   WeylGroupRepresentation<Rational> QG;
+   QG.reset(&G);
+   for(int g=1; g<G.CartanSymmetric.NumRows+1; g++)
+   { Matrix<Rational> M;
+     M.MakeZeroMatrix(G.theElements.size);
+     for(int i=0; i<G.theElements.size; i++)
+     { ElementWeylGroup gg;
+       gg = G.theElements[g];
+       gg *= G.theElements[i];
+       gg.MakeCanonical();
+       M.elements[i][G.theElements.GetIndex(gg)] = 1;
+     }
+     QG.SetElementImage(g,M);
+   }
+
+   std::cout << "getting isotypic components of QG" << std::endl;
+   List<WeylGroupRepresentation<Rational> > isocomps;
+   isocomps.SetSize(G.irreps.size);
+   for(int i=0; i<G.irreps.size; i++)
+   { Matrix<Rational> M;
+     QG.GetClassFunctionMatrix(G.irreps[i].GetCharacter(),M);
+     VectorSpace<Rational> V;
+     Vectors<Rational> B;
+     for(int j=0; j<M.NumCols; j++)
+     { Vector<Rational> v;
+       M.GetVectorFromColumn(j,v);
+       if(!V.AddVector(v))
+         break;
+       B.AddOnTop(v);
+     }
+     Vector<Rational> v;
+     QG.Restrict(B,v,isocomps[i]);
+   }
+
+   std::cout << "trying to break up one isotypic component" << std::endl;
+   int cmpx = 2;
+   std::cout << isocomps[cmpx].ToString(&testformat) << std::endl;
+   int d = isocomps[cmpx].GetDim();
+   Matrix<Rational> B;
+   B.init(d,d);
+   for(int i=0; i<d; i++)
+     for(int j=0; j<d; j++)
+       for(int g=0; g<G.theElements.size; g++)
+       { Vector<Rational> v,w;
+         isocomps[cmpx].GetElementImage(g).GetVectorFromColumn(i,v);
+         isocomps[cmpx].GetElementImage(g).GetVectorFromColumn(j,w);
+         B.elements[i][j] = v.ScalarEuclidean(w);
+       }
+  std::cout << B.ToString(&testformat) << std::endl;
+
+  Vector<Rational> v;
+  v.MakeZero(B.NumRows);
+  for(int i=0; i<B.NumCols; i++)
+    for(int j=0; j<B.NumRows; j++)
+      v[j] += B.elements[i][j];
+  std::cout << v << std::endl;
+
+  VectorSpace<Rational> WS;
+  Vectors<Rational> W;
+  for(int g=0; g<G.theElements.size; g++)
+  { Vector<Rational> w = isocomps[cmpx].GetElementImage(g) * v;
+    if(WS.AddVector(w))
+      W.AddOnTop(w);
+  }
+  WeylGroupRepresentation<Rational> comp;
+  Vector<Rational> derp;
+  isocomps[1].Restrict(W,derp,comp);
+
+  std::cout << "This should be one component" << std::endl;
+  std::cout << comp.ToString(&testformat) << std::endl;
+
+
+
 
    std::cout << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
    std::cout << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;

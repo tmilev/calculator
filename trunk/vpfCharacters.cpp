@@ -873,7 +873,7 @@ void CoxeterRepresentation<coefficient>::ClassFunctionMatrix
       for(int j=0; j<outputMat.NumCols; j++)
         outputMat.elements[i][j]+= classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
   }
-  std::cout << outputMat.ToString(&testformat) << std::endl;
+//  std::cout << outputMat.ToString(&testformat) << std::endl;
 
 }
 

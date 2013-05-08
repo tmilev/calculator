@@ -690,6 +690,15 @@ unsigned int Selection::HashFunction() const
   return result;
 }
 
+void Rational::operator=(const Polynomial<Rational>& other)
+{ if (!other.IsAConstant(this))
+  { std::cout << "This is a programming error: attempting to assign"
+    << " non-constant polynomial to a Rational number is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
 bool Rational::IsEqualTo(const Rational& b) const
 { if (this->Extended==0 && b.Extended==0)
     return (this->NumShort*b.DenShort==b.NumShort*this->DenShort);

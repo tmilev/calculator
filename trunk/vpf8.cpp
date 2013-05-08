@@ -3533,7 +3533,7 @@ void QuasiPolynomial::Substitution
   Polynomial<Rational> tempP;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
   { tempP=this->valueOnEachLatticeShift[i];
-    bool tempB=tempP.SubstitutioN(theSub);
+    bool tempB=tempP.Substitution(theSub);
     if (!tempB)
     { std::cout << "This is a programming error: "
       << " substitution   " << theSub.ToString() << " into polynomial "
@@ -3542,8 +3542,8 @@ void QuasiPolynomial::Substitution
       assert(false);
     }
     for (int j=0; j<allRepresentatives.size; j++)
-      if (imagesAllRepresentatives.TheObjects[j]==this->LatticeShifts.TheObjects[i])
-        output.AddLatticeShift(tempP, allRepresentatives.TheObjects[j]);
+      if (imagesAllRepresentatives[j]==this->LatticeShifts[i])
+        output.AddLatticeShift(tempP, allRepresentatives[j]);
   }
 }
 
@@ -3556,13 +3556,13 @@ void QuasiPolynomial::Substitution
   PolynomialSubstitution<Rational> theSub;
   theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
   for (int i=0; i<theSub.size; i++)
-    theSub.TheObjects[i].AddConstant(-inputTranslationSubtractedFromArgument[i]);
-  Polynomial<Rational>  tempP;
+    theSub[i].AddConstant(-inputTranslationSubtractedFromArgument[i]);
+  Polynomial<Rational> tempP;
   output.MakeZeroLatTiceZn(this->GetNumVars());
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
   { tempP=this->valueOnEachLatticeShift[i];
-    bool tempB=tempP.SubstitutioN(theSub);
+    bool tempB=tempP.Substitution(theSub);
     if (!tempB)
     { std::cout << "This is a programming error: "
       << " substitution   " << theSub.ToString() << " into polynomial "
@@ -3610,7 +3610,7 @@ bool QuasiPolynomial::SubstitutionLessVariables
         (theLatticeSub, shiftMatForm, theShiftImage))
     { tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
       tempP=this->valueOnEachLatticeShift[i];
-      bool tempB=tempP.SubstitutioN(theSub);
+      bool tempB=tempP.Substitution(theSub);
       if (!tempB)
       { std::cout << "This is a programming error: "
         << " substitution   " << theSub.ToString() << " into polynomial "
@@ -6930,7 +6930,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
     case RationalFunctionOld::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
-      if (!this->Numerator.GetElement().SubstitutioN(theSub, 1))
+      if (!this->Numerator.GetElement().Substitution(theSub, 1))
       { std::cout << "This is a programming error: "
         << " substitution   " << theSub.ToString() << " into polynomial "
         << this->Numerator.GetElement().ToString()
@@ -6944,7 +6944,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      assert(this->checkConsistency());
       return;
     case RationalFunctionOld::typeRationalFunction:
-      if (!this->Numerator.GetElement().SubstitutioN(theSub, 1))
+      if (!this->Numerator.GetElement().Substitution(theSub, 1))
       { std::cout << "This is a programming error: "
         << " substitution   " << theSub.ToString() << " into polynomial "
         << this->Numerator.GetElement().ToString()
@@ -6952,7 +6952,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
-      if (!this->Denominator.GetElement().SubstitutioN(theSub, 1))
+      if (!this->Denominator.GetElement().Substitution(theSub, 1))
       { std::cout << "This is a programming error: "
         << " substitution   " << theSub.ToString() << " into polynomial "
         << this->Denominator.GetElement().ToString()

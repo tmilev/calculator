@@ -218,7 +218,7 @@ public:
 
   List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
-  Vector<Rational> aSolution;
+//  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
@@ -308,62 +308,6 @@ public:
   bool IsPossibleNilradicalCarryOutSelectionImplications
   (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0)
   ;
-  void operator=(const CandidateSSSubalgebra& other)
-  { this->CartanSAsByComponent=other.CartanSAsByComponent;
-    this->theCharFundamentalCoordsRelativeToCartan=other.theCharFundamentalCoordsRelativeToCartan;
-    this->theCharFundCoords=other.theCharFundCoords;
-    this->theWeylNonEmbeddeD=other.theWeylNonEmbeddeD;
-    this->theWeylNonEmbeddeDdefaultScale=other.theWeylNonEmbeddeDdefaultScale;
-    this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
-    this->indexInOwnersOfNonEmbeddedMe=other.indexInOwnersOfNonEmbeddedMe;
-//    this->theTypeTotal=other.theTypeTotal;
-    this->thePosGens=other.thePosGens;
-    this->theNegGens=other.theNegGens;
-    this->theHorbitIndices=other.theHorbitIndices;
-//    this->theHWeylGroupElts=other.theHWeylGroupElts;
-    this->theInvolvedPosGenerators=other.theInvolvedPosGenerators;
-    this->theInvolvedNegGenerators=other.theInvolvedNegGenerators;
-    this->owner=other.owner;
-    this->theSystemToSolve=other.theSystemToSolve;
-    this->theCoRoots=other.theCoRoots;
-    this->theHs=other.theHs;
-    this->theCoeffLetters=other.theCoeffLetters;
-    this->flagSystemSolved=other.flagSystemSolved;
-    this->flagSystemGroebnerBasisFound=other.flagSystemGroebnerBasisFound;
-    this->flagSystemProvedToHaveNoSolution=other.flagSystemProvedToHaveNoSolution;
-    this->transformedSystem=other.transformedSystem;
-    this->aSolution=other.aSolution;
-    this->totalNumUnknowns=other.totalNumUnknowns;
-    this->theUnknownNegGens=other.theUnknownNegGens;
-    this->theUnknownPosGens=other.theUnknownPosGens;
-    this->theBasis=other.theBasis;
-    this->indexMaxSSContainer=other.indexMaxSSContainer;
-    this->indicesDirectSummandSuperAlgebra=other.indicesDirectSummandSuperAlgebra;
-    this->highestVectorsModules=other.highestVectorsModules;
-    this->CartanOfCentralizer=other.CartanOfCentralizer;
-    this->highestWeightsModules=other.highestWeightsModules;
-    this->highestWeightsCartanCentralizerSplitModules=other.highestWeightsCartanCentralizerSplitModules;
-    this->highestVectorsGrouppedByWeight=other.highestVectorsGrouppedByWeight;
-    this->NilradicalPairingTable=other.NilradicalPairingTable;
-    this->theCharOverCartanPlusCartanCentralizer=other.theCharOverCartanPlusCartanCentralizer;
-    this->modulesGrouppedByWeight=other.modulesGrouppedByWeight;
-    this->modulesGrouppedByPrimalType=other.modulesGrouppedByPrimalType;
-    this->modulesWithZeroWeights=other.modulesWithZeroWeights;
-    this->OppositeModules=other.OppositeModules;
-    this->FKNilradicalCandidates=other.FKNilradicalCandidates;
-    this->NilradicalConesIntersect=other.NilradicalConesIntersect;
-    this->theNonFKhws=other.theNonFKhws;
-    this->theNilradicalWeights=other.theNilradicalWeights;
-    this->ConeIntersections=other.ConeIntersections;
-    this->ConeSeparatingNormals=other.ConeSeparatingNormals;
-    this->nilradicalGenerationLog=other.nilradicalGenerationLog;
-    this->RecursionDepthCounterForNilradicalGeneration=other.RecursionDepthCounterForNilradicalGeneration;
-    this->candidateSubalgebraModules=other.candidateSubalgebraModules;
-    this->primalSubalgebraModules=other.primalSubalgebraModules;
-    this->weightsOfModules=other.weightsOfModules;
-    this->weightsOfPrimallySplitModules=other.weightsOfPrimallySplitModules;
-    this->indexInOwner=other.indexInOwner;
-  }
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;

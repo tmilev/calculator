@@ -298,8 +298,21 @@ GlobalVariables* theGlobalVariables)
     { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
       return;
     }
+    for (int i=0; i<this->Hcandidates.size; i++)
+      if (newCandidate.theWeylNonEmbeddeD.theDynkinType==
+          this->Hcandidates[i].theWeylNonEmbeddeD.theDynkinType)
+      { if (newCandidate.IsDirectSummandOf(this->Hcandidates[i], true))
+          return;
+        std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
+        << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
+      }
 //    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
+    newCandidate.indexInOwner=this->Hcandidates.size;
     this->Hcandidates.AddOnTop(newCandidate);
+    if (!this->Hcandidates.LastObject()->indexInOwner==this->Hcandidates.size-1)
+    { std::cout << "<hr>wtf? ";
+      assert(false);
+    }
     if (propagateRecursion)
       this->ExtendCandidatesRecursive(newCandidate, propagateRecursion, theGlobalVariables);
     return;
@@ -1154,12 +1167,30 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
   GroebnerBasisComputation<Rational> theComputation;
+  std::cout << "<br>System before transformation: " << this->transformedSystem.ToString();
   theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
+  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
-  this->flagSystemGroebnerBasisFound=false;
+  this->flagSystemGroebnerBasisFound=this->flagSystemSolved;
   if (this->flagSystemSolved)
-    this->aSolution=theComputation.systemSolution.GetElement();
+  { this->theNegGens.SetSize(this->theUnknownNegGens.size);
+    this->thePosGens.SetSize(this->theUnknownPosGens.size);
+    PolynomialSubstitution<Rational> theSub;
+    theSub.SetSize(theComputation.systemSolution.GetElement().size);
+    for (int i=0; i<theSub.size; i++)
+      theSub[i].MakeConst(theComputation.systemSolution.GetElement()[i]);
+    ElementSemisimpleLieAlgebra<Polynomial<Rational> > currentNegElt;
+    ElementSemisimpleLieAlgebra<Polynomial<Rational> > currentPosElt;
+    for (int i=0; i<this->theUnknownNegGens.size; i++)
+    { currentNegElt=this->theUnknownNegGens[i];
+      currentPosElt=this->theUnknownPosGens[i];
+      currentNegElt.SubstitutionCoefficients(theSub);
+      currentPosElt.SubstitutionCoefficients(theSub);
+      this->theNegGens[i]=currentNegElt;
+      this->thePosGens[i]=currentPosElt;
+    }
+  }
   return this->flagSystemSolved;
 }
 
@@ -2898,15 +2929,22 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
           out << "<br>First negative generator seed realization.<br> "
           << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
         }
-    out << "<br><b>For the calculator: </b><br>GroebnerLexUpperLimit{}(10000, ";
-    for (int i=0; i<this->transformedSystem.size; i++)
-    { out << this->transformedSystem[i].ToString(&tempFormat);
-      if (i!=this->transformedSystem.size-1)
+    out << "<br><b>For the calculator part 1: </b><br>FindOneSolutionSerreLikePolynomialSystem{}( ";
+    for (int i=0; i<this->theSystemToSolve.size; i++)
+    { out << this->theSystemToSolve[i].ToString(&tempFormat);
+      if (i!=this->theSystemToSolve.size-1)
         out << ", ";
     }
     out << " )";
-    if (this->flagSystemSolved)
-      out << "<br>Solution of above system: " << this->aSolution.ToString();
+    out << "<br><b>For the calculator part 2: </b><br>GroebnerLexUpperLimit{}(10000, ";
+    for (int i=0; i<this->theSystemToSolve.size; i++)
+    { out << this->theSystemToSolve[i].ToString(&tempFormat);
+      if (i!=this->theSystemToSolve.size-1)
+        out << ", ";
+    }
+    out << " )";
+//    if (this->flagSystemSolved)
+//      out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
   if (CentralizerIsWellChosen)
   { int numZeroWeights=0;
@@ -3045,8 +3083,6 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
-  if (theDifference.IsEqualToZero())
-    return false;
   for (int i=0; i<theDifference.size; i++)
     if (theDifference.theCoeffs[i]<0)
     { //std::cout << " it's not because types don't match.";

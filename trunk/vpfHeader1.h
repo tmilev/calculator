@@ -3395,6 +3395,7 @@ ParallelComputing::GlobalPointerCounter++;
   }
   inline void operator=(const LargeIntUnsigned& right){LargeInt tempI; tempI=right; this->operator=(tempI); }
   inline void operator=(const Rational& right){this->Assign(right); }
+  void operator=(const Polynomial<Rational>& other);
   inline bool operator==(const int other)
   { if (other==0)
       return this->IsEqualToZero();
@@ -4997,7 +4998,6 @@ public:
   int AddMonomialNoCoeffCleanUpReturnsCoeffIndex
   (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   ;
-
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRows
   (List<MonomialCollectionTemplate>& theList,
@@ -5059,6 +5059,19 @@ public:
   { for (int i=0; i<this->size; i++)
       if (this->CleanupMonIndex(i))
         i--;
+  }
+  void SubstitutionCoefficients(const List<Polynomial<Rational> >& theSub)
+  { CoefficientType newCoeff;
+    for (int i=0; i<this->size; i++)
+    { newCoeff=this->theCoeffs[i];
+      newCoeff.Substitution(theSub);
+      if (newCoeff.IsEqualToZero())
+      { this->PopMonomial(i);
+        i--;
+        continue;
+      }
+      this->theCoeffs[i]=newCoeff;
+    }
   }
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   { this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
@@ -5419,7 +5432,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   void ScaleToPositiveMonomials(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<CoefficientType>& output);
-  bool SubstitutioN
+  bool Substitution
   (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit=1,
    const CoefficientType& theRingZero=0)
    ;
@@ -6938,7 +6951,7 @@ Rational Polynomial<Element>::TotalDegree()const
 }
 
 template <class CoefficientType>
-bool Polynomial<CoefficientType>::SubstitutioN
+bool Polynomial<CoefficientType>::Substitution
 (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit,
  const CoefficientType& theRingZero)
 { MacroRegisterFunctionWithName("Polynomial<CoefficientType>::Substitution");
@@ -8306,7 +8319,7 @@ public:
    return tempRoot1.IsProportionalTo(tempRoot2);
   }
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput)const
-  { Vector<Rational>  tempRoot1, tempRoot2;
+  { Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
     return tempRoot1.IsProportionalTo(tempRoot2, outputTimesMeEqualsInput);

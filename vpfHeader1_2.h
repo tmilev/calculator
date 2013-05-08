@@ -993,7 +993,7 @@ class WeylGroupRepresentation
   }
   void Restrict
 (const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter,
- WeylGroupRepresentation<coefficient>& output)
+ WeylGroupRepresentation<coefficient>& output, GlobalVariables* theGlobalVariables=0)
    ;
   bool DecomposeMeIntoIrrepsRecursive
   (Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
@@ -1049,6 +1049,12 @@ public:
   { return input.HashFunction();
   }
   void operator*=(const ElementWeylGroup& other);
+  ElementWeylGroup operator*(const ElementWeylGroup& other)
+  { ElementWeylGroup result=*this;
+    result*=other;
+    return result;
+  }
+
   bool operator==(const ElementWeylGroup& other)const
   { if (this->owner!=other.owner)
       return false;

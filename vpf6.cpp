@@ -797,7 +797,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   { Polynomial<Rational> newPoly=this->GetValuE<Polynomial<Rational> >();
     //std::cout << "<br>Subbing " << polySub.ToString() << " in "
     //<< newPoly.ToString();
-    if (!newPoly.SubstitutioN(polySub))
+    if (!newPoly.Substitution(polySub))
       return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }

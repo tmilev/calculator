@@ -125,23 +125,33 @@ void WeylGroupRepresentation<coefficient>::operator*=
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::Restrict
 (const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter,
- WeylGroupRepresentation<coefficient>& output)
+ WeylGroupRepresentation<coefficient>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   Matrix<coefficient> GramMatrixInverted;
   VectorSpaceBasisSubrep.GetGramMatrix(GramMatrixInverted);
   GramMatrixInverted.Invert();
   output.reset(this->OwnerGroup);
   output.theCharacter=remainingCharacter;
+  ProgressReport theReport(theGlobalVariables);
   for(int i=0; i<this->theElementImages.size; i++)
     if (this->theElementIsComputed[i])
     { output.theElementIsComputed[i]=true;
+      if (theGlobalVariables!=0)
+
       Matrix<coefficient>::MatrixInBasis
       (this->theElementImages[i], output.theElementImages[i], VectorSpaceBasisSubrep,
        GramMatrixInverted);
+
     }
   for (int i=0; i<this->classFunctionMatrices.size; i++)
     if (this->classFunctionMatricesComputed[i])
     { output.classFunctionMatricesComputed[i]=true;
+      if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << "Restricting class function matrix " << i+1 << " out of "
+        << this->classFunctionMatrices.size;
+        theReport.Report(reportStream.str());
+      }
       Matrix<coefficient>::MatrixInBasis
       (this->classFunctionMatrices[i], output.classFunctionMatrices[i], VectorSpaceBasisSubrep,
        GramMatrixInverted);
@@ -382,7 +392,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   if((remainingVectorSpace.size < this->GetDim()) && (remainingVectorSpace.size > 0))
   { //std::cout << "<br>restricting to subrep(s)... ";
     WeylGroupRepresentation<coefficient> reducedRep;
-    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep);
+    this->Restrict(remainingVectorSpace, remainingCharacter, reducedRep, theGlobalVariables);
     //std::cout << "done" << std::endl;
     //std::cout << "Decomposing remaining subrep(s) " << reducedRep.GetCharacter() << std::endl;
     return reducedRep.DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables);

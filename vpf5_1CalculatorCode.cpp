@@ -311,7 +311,7 @@ bool CommandList::GetListPolysVariableLabelsInLex
   for (int i=0; i<numVars; i++)
   { PolyVarsE.AddChildOnTop(theVars[i]);
     Polynomial<Rational>& currentP=output[i];
-    currentP.SubstitutioN(theSub);
+    currentP.Substitution(theSub);
   }
   return outputContext.AddChildOnTop(PolyVarsE);
 }
@@ -1257,7 +1257,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
     if (changed)
     { //std::cout << "<hr>The sub: " << theSub.ToString();
       for (int i=0; i<inputSystem.size; i++)
-        inputSystem[i].SubstitutioN(theSub);
+        inputSystem[i].Substitution(theSub);
     }
   }
   if (theGlobalVariables!=0)
@@ -1302,7 +1302,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   newComputation.SetSerreLikeSolutionIndex(theVarIndex, 0);
   //std::cout << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
   for (int i=0; i<inputSystem.size; i++)
-    inputSystem[i].SubstitutioN(theSub);
+    inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub first recursive call. " << inputSystem.ToString();
 
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
@@ -1329,7 +1329,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   //std::cout << "<br>Solution before second recursive call. "
   //<< newComputation.systemSolution.GetElement().ToString();
   for (int i=0; i<inputSystem.size; i++)
-    inputSystem[i].SubstitutioN(theSub);
+    inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
@@ -1365,7 +1365,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
         this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
         workingSystem=inputSystem;
         for (int i=0; i<workingSystem.size; i++)
-          workingSystem[i].SubstitutioN(theSub);
+          workingSystem[i].Substitution(theSub);
       }
   }while (weAreNotDone);
   inputSystem=workingSystem;

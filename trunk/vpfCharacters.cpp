@@ -1161,7 +1161,6 @@ void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output
     output.theElementIsComputed[i+1]=true;
   }
   output.GetCharacter();
-  std::cout << "Generated representation: " << output.theCharacter.ToString();
   if (!this->irreps.Contains(output))
     this->irreps.AddOnTop(output);
 }

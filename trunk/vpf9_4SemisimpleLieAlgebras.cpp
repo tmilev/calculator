@@ -793,6 +793,13 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     }
 }
 
+CandidateSSSubalgebra::CandidateSSSubalgebra():
+owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
+indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
+flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
+{
+}
+
 void CandidateSSSubalgebra::ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSinglePair");
@@ -1157,6 +1164,7 @@ void SemisimpleSubalgebras::reset()
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
   this->flagDoComputePairingTable=true;
+  this->flagDoComputeNilradicals=false;
 }
 
 bool CandidateSSSubalgebra::AttemptToSolveSytem
@@ -1167,9 +1175,9 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
   GroebnerBasisComputation<Rational> theComputation;
-  std::cout << "<br>System before transformation: " << this->transformedSystem.ToString();
+//  std::cout << "<br>System before transformation: " << this->transformedSystem.ToString();
   theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
-  std::cout << " <br>And after: " << this->transformedSystem.ToString();
+//  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
   this->flagSystemGroebnerBasisFound=this->flagSystemSolved;

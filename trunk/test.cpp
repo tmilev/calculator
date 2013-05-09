@@ -1351,10 +1351,11 @@ int main(void)
       std::cout << sr2d[i].gens[j].ToString(&testformat) << std::endl;
    }
    */
-
+   GlobalVariables localGlobalVariables;
+   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
    G.MakeArbitrarySimple('B',3,NULL);
-   G.ComputeIrreducibleRepresentations();
+   G.ComputeIrreducibleRepresentations(&localGlobalVariables);
 
    std::cout << "Building QG" << std::endl;
    WeylGroupRepresentation<Rational> QG;

@@ -263,11 +263,7 @@ public:
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
   std::string nilradicalGenerationLog;
 
-  CandidateSSSubalgebra(): owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
-  indexMaxSSContainer(-1),
-  flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-  flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
-  {}
+  CandidateSSSubalgebra();
   void GetHsByType
   (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
   ;

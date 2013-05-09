@@ -30,8 +30,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   { GlobalGoal+=(matb.elements[j][0]);
     assert(!matb.elements[j][0].IsNegative());
   }
-  std::cout << "<hr>Starting matrix A: " << matA.ToString();
-  std::cout << "<hr>Starting matrix b: " << matb.ToString();
+//  std::cout << "<hr>Starting matrix A: " << matA.ToString();
+//  std::cout << "<hr>Starting matrix b: " << matb.ToString();
   if (GlobalGoal.IsEqualToZero())
     return false;
   int NumTrueVariables=matA.NumCols;
@@ -1261,16 +1261,16 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
     }
   }
   if (theGlobalVariables!=0)
-  { std::cout << "<hr>The system solution candidate at recursion depth "
-    << this->RecursionCounterSerreLikeSystem << ": "
-    << this->ToStringSerreLikeSolution(&theGlobalVariables->theDefaultFormat);
-    std::cout << "<br>The system so far: (";
-    for (int i=0; i<inputSystem.size; i++)
-    { std::cout << inputSystem[i].ToString(&theGlobalVariables->theDefaultFormat);
-      if (i!=inputSystem.size-1)
-        std::cout << ", ";
-    }
-    std::cout << ")";
+  { //std::cout << "<hr>The system solution candidate at recursion depth "
+    //<< this->RecursionCounterSerreLikeSystem << ": "
+    //<< this->ToStringSerreLikeSolution(&theGlobalVariables->theDefaultFormat);
+    //std::cout << "<br>The system so far: (";
+    //for (int i=0; i<inputSystem.size; i++)
+    //{ std::cout << inputSystem[i].ToString(&theGlobalVariables->theDefaultFormat);
+    //  if (i!=inputSystem.size-1)
+    //    std::cout << ", ";
+    //}
+    //std::cout << ")";
   }
   if (inputSystem.size==0)
   { this->flagSystemProvenToHaveNoSolution=false;

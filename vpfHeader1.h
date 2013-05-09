@@ -1186,6 +1186,7 @@ public:
     b=b%256;
     return r*65536+g*256+b;
   }
+  static void makeStdCoutReport(IndicatorWindowVariables& input);
   static void FormatCPPSourceCode(const std::string& FileName);
   static void(*functionCGIServerIgnoreUserAbort)(void);
   static void SetCGIServerIgnoreUserAbort()
@@ -3873,6 +3874,9 @@ static void ProjectOntoHyperPlane
   }
   inline bool operator<(const Vector<CoefficientType>& other)const
   { return other>*this;
+  }
+  bool isGreaterThanLexicographic(const Vector<CoefficientType>& other)const
+  { return this->::List<CoefficientType>::operator>(other);
   }
   inline bool operator>(const Vector<CoefficientType>& other)const
   { assert(this->size==other.size);

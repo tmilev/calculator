@@ -965,16 +965,8 @@ class WeylGroupRepresentation
   WeylGroup* OwnerGroup;
   WeylGroupRepresentation():OwnerGroup(0){}
   unsigned int HashFunction() const;
-  bool CheckInitialization()const
-  { if (this->OwnerGroup==0)
-    { std::cout << "This is a programming error: working with a representation with "
-      << " non-initialized owner Weyl group. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-      return false;
-    }
-    return true;
-  }
+  bool CheckInitialization()const;
+  bool CheckAllSimpleGensAreOK()const;
   static unsigned int HashFunction(const WeylGroupRepresentation<coefficient>& input)
   { return input.HashFunction();
   }
@@ -1011,7 +1003,7 @@ class WeylGroupRepresentation
     this->theElementIsComputed[elementIndex] = true;
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const
-  { return this->theCharacter>other.theCharacter;
+  { return this->theCharacter.isGreaterThanLexicographic(other.theCharacter);
   }
 };
 

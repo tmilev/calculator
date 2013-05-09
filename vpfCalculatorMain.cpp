@@ -112,14 +112,6 @@ void makeReport(IndicatorWindowVariables& input)
   theFile.close();
 }
 
-void makeStdCoutReport(IndicatorWindowVariables& input)
-{ static int counter =-1;
-  counter++;
-  std::cout << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
-  for (int i=0; i<input.ProgressReportStringS.size; i++)
-    std::cout << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
-}
-
 void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
@@ -457,7 +449,7 @@ Serialization{}(LoadCandidateSubalgebra, (F)^{1}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 
 
 int main_command_input(int argc, char **argv)
 { std::stringstream theInputStream;
-  theParser.theGlobalVariableS->SetFeedDataToIndicatorWindowDefault(&makeStdCoutReport);
+  theParser.theGlobalVariableS->SetFeedDataToIndicatorWindowDefault(&CGI::makeStdCoutReport);
   for (int i=1; i<argc; i++)
   { theInputStream << argv[i];
     if (i<argc-1)
@@ -600,6 +592,7 @@ int main(int argc, char **argv)
 
 //  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
   //civilizedInput= "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)";
+ // civilizedInput="WeylGroupIrrepsAndCharTable{}(a_2);";
   PredefinedStrings(civilizedInput);
 
 

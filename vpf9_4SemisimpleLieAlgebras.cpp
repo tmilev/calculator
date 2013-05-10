@@ -734,15 +734,26 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
   int totalDim=0;
   for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
     for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
-    { this->ExtendToModule(this->modulesGrouppedByWeight[i][j], theGlobalVariables);
+    { if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
+      { std::cout << "<hr>Extending to module: " << this->modulesGrouppedByWeight[i][j].ToString() ;
+      }
+      this->ExtendToModule(this->modulesGrouppedByWeight[i][j], theGlobalVariables);
+      if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
+      { std::cout << "<br>To get: " << this->modulesGrouppedByWeight[i][j].ToString() ;
+      }
       totalDim+=this->modulesGrouppedByWeight[i][j].size;
     }
   if (totalDim!=this->GetAmbientSS().GetNumGenerators())
-  { std::cout << "<br><b>Something went very wrong with candidate "
+  { FormatExpressions theFormat;
+    theFormat.flagCandidateSubalgebraShortReportOnly=false;
+    std::cout << "<br><b>Something went very wrong with candidate "
     << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ": dimensions DONT FIT!!! More precisely, "
     << "I am getting total module dimension sum  " << totalDim << " instead of "
     << this->GetAmbientSS().GetNumGenerators()
-    << ".</b>";
+    << ".</b> Here is a detailed subalgebra printout. "
+    //<< //this->ToString(&theFormat)
+    ;
+//    assert(false);
   }
   this->modulesGrouppedByPrimalType.SetSize(this->modulesGrouppedByWeight.size);
   for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
@@ -1114,6 +1125,7 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionLastPar
     int theModuleIndex=this->theCharOverCartanPlusCartanCentralizer.GetIndex(theWeight);
     this->highestVectorsGrouppedByWeight[theModuleIndex].AddOnTop(this->highestVectorsModules[i]);
     this->modulesGrouppedByWeight[theModuleIndex].SetSize(this->modulesGrouppedByWeight[theModuleIndex].size+1);
+    this->modulesGrouppedByWeight[theModuleIndex].LastObject()->SetSize(0);
     this->modulesGrouppedByWeight[theModuleIndex].LastObject()->AddOnTop(this->highestVectorsModules[i]);
   }
 }
@@ -1123,9 +1135,12 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnl
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly");
   List<Matrix<Rational> > theAdsOfHs;
   Matrix<Rational> tempAd, temp, commonAd, adIncludingCartanActions;
+  std::cout << "<hr>Type "  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ", ads of: " << this->thePosGens.ToString();
   for (int i=0; i<this->thePosGens.size; i++)
   { this->GetAmbientSS().GetAd(tempAd, this->thePosGens[i]);
     commonAd.AppendMatrixToTheBottom(tempAd);
+//    std::cout << "Getting ad of: " << this->thePosGens[i].ToString();
   }
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   Vectors<Rational> allHs;
@@ -1155,6 +1170,9 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnl
       tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[j], this->GetAmbientSS());
       this->highestVectorsModules.AddOnTop(tempElt);
     }
+  }
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
+  { std::cout << "<hr>The common ads: " << this->highestVectorsModules.ToString() ;
   }
 }
 
@@ -2702,8 +2720,8 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << theSAvector.ToStringLetterFormat("V");
   out << "<br><table><tr><td>Modules</td>";
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-  out << "<td><b>" << "V_{" << i+1 << "}="
-  << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</b></td>";
+    out << "<td><b>" << "V_{" << i+1 << "}="
+    << this->theCharOverCartanPlusCartanCentralizer[i].ToString() << "</b></td>";
   out << "</tr>";
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
   { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
@@ -2719,7 +2737,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
     out << "</tr>";
   }
   out << "</table>";
-  out << "<br>Number of nilradical candidates: " << this->FKNilradicalCandidates.size;
+  out << "<br>Possible nilradicals of Fernando-Kac subalgebras of finite type: " << this->FKNilradicalCandidates.size;
   if (this->FKNilradicalCandidates.size>0)
   { for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     { out << "<br>Subalgebra " << i+1 << ": ";
@@ -2959,7 +2977,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus "
     << " the dimension of the centralizer of the subalgebra "
     << "equals " ;
-    for (int i=0; i<this->weightsOfModules.size; i++)
+    for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
       for (int j=0; j<this->weightsOfModules[i].size; j++)
         if(this->weightsOfModules[i][j].IsEqualToZero())
           numZeroWeights+=this->modulesGrouppedByWeight[i].size;

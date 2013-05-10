@@ -424,9 +424,10 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-  << "<meta http-equiv=\"refresh\" content=\"5; url="
-  << displayFolder << theTitlePageFileNameNoPath
-  << "\">";
+//  << "<meta http-equiv=\"refresh\" content=\"5; url="
+//  << displayFolder << theTitlePageFileNameNoPath
+//  << "\">"
+  ;
   if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?

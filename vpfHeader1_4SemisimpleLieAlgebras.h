@@ -373,18 +373,9 @@ public:
   bool flagAttemptToSolveSystems;
   bool flagDoComputePairingTable;
   bool flagDoComputeNilradicals;
-  void operator=(const SemisimpleSubalgebras& other)
-  { this->owneR=other.owneR;
-    this->theSl2s=other.theSl2s;
-    this->SimpleComponentsSubalgebras=other.SimpleComponentsSubalgebras;
-    this->theSubalgebrasNonEmbedded=other.theSubalgebrasNonEmbedded;
-    this->theSl2sOfSubalgebras=other.theSl2sOfSubalgebras;
-    this->Hcandidates=other.Hcandidates;
-    this->theRecursionCounter=other.theRecursionCounter;
-    this->flagAttemptToSolveSystems=other.flagAttemptToSolveSystems;
-    this->flagDoComputeNilradicals=other.flagDoComputeNilradicals;
-    this->flagDoComputePairingTable=other.flagDoComputePairingTable;
-  }
+  double timeComputationStartInSeconds;
+  int numAdditions;
+  int numMultiplications;
   int GetNumPossibleSAs()const;
   std::string GetAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;

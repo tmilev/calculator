@@ -79,10 +79,10 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   << "as we are confident in the accuracy of all tables.  "
   << " If you see any errors in the tables, we would be very grateful if "
   << "you email us with a simple explanation of the issue!</b><br>";
+  candidatesNotRealizedNotProvenImpossible=
+  this->Hcandidates.size-candidatesRealized- candidatesProvenImpossible;
   if (!writingToHD)
-  { candidatesNotRealizedNotProvenImpossible=
-    this->Hcandidates.size-candidatesRealized- candidatesProvenImpossible;
-    out << candidatesRealized << " subalgebras realized.";
+  { out << candidatesRealized << " subalgebras realized.";
     out << "<br>Total, there are " << this->Hcandidates.size << " = " << candidatesRealized
     << " realized + " << candidatesProvenImpossible << " proven impossible + "
     << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
@@ -93,12 +93,18 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       << " not realized (but not proven impossible)";
     out << ". ";
   }
-
   out << "The subalgebras are ordered by "
   << "(rank, dimensions of simple constituents, Dynkin indices of simple constituents). "
   << "The upper index stands for the length of the first co-root squared. "
   << " In type F_4, the upper index of a subalgebra coincides with its Dynkin index. "
-  << "<hr> ";
+  ;
+  if (this->timeComputationStartInSeconds!=-1)
+    out << "<br>Computation time in seconds: " << this->timeComputationStartInSeconds << ".";
+  if (this->numAdditions!=-1)
+    out << "<br>" << this->numAdditions+this->numMultiplications
+    << " total arithmetic operations performed = " << this->numAdditions << " additions and "
+    << this->numMultiplications << " multiplications. ";
+  out << "<hr> ";
   if (!writingToHD)
     for (int i=0; i<this->Hcandidates.size; i++)
     { if (!this->Hcandidates[i].flagSystemProvedToHaveNoSolution)
@@ -734,13 +740,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
   int totalDim=0;
   for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
     for (int j=0; j<this->modulesGrouppedByWeight[i].size; j++)
-    { if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
-      { std::cout << "<hr>Extending to module: " << this->modulesGrouppedByWeight[i][j].ToString() ;
-      }
-      this->ExtendToModule(this->modulesGrouppedByWeight[i][j], theGlobalVariables);
-      if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
-      { std::cout << "<br>To get: " << this->modulesGrouppedByWeight[i][j].ToString() ;
-      }
+    { this->ExtendToModule(this->modulesGrouppedByWeight[i][j], theGlobalVariables);
       totalDim+=this->modulesGrouppedByWeight[i][j].size;
     }
   if (totalDim!=this->GetAmbientSS().GetNumGenerators())
@@ -753,7 +753,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     << ".</b> Here is a detailed subalgebra printout. "
     //<< //this->ToString(&theFormat)
     ;
-//    assert(false);
+    assert(false);
   }
   this->modulesGrouppedByPrimalType.SetSize(this->modulesGrouppedByWeight.size);
   for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
@@ -1135,8 +1135,8 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnl
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnly");
   List<Matrix<Rational> > theAdsOfHs;
   Matrix<Rational> tempAd, temp, commonAd, adIncludingCartanActions;
-  std::cout << "<hr>Type "  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
-  << ", ads of: " << this->thePosGens.ToString();
+  //std::cout << "<hr>Type "  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  //<< ", ads of: " << this->thePosGens.ToString();
   for (int i=0; i<this->thePosGens.size; i++)
   { this->GetAmbientSS().GetAd(tempAd, this->thePosGens[i]);
     commonAd.AppendMatrixToTheBottom(tempAd);
@@ -1171,9 +1171,6 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecompositionHWVsOnl
       this->highestVectorsModules.AddOnTop(tempElt);
     }
   }
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{2/3}_1")
-  { std::cout << "<hr>The common ads: " << this->highestVectorsModules.ToString() ;
-  }
 }
 
 void SemisimpleSubalgebras::reset()
@@ -1183,6 +1180,9 @@ void SemisimpleSubalgebras::reset()
   this->flagAttemptToSolveSystems=true;
   this->flagDoComputePairingTable=true;
   this->flagDoComputeNilradicals=false;
+  this->timeComputationStartInSeconds=-1;
+  this->numAdditions=-1;
+  this->numMultiplications=-1;
 }
 
 bool CandidateSSSubalgebra::AttemptToSolveSytem
@@ -1192,8 +1192,11 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
   this->flagSystemSolved=false;
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
+//  return true;
   GroebnerBasisComputation<Rational> theComputation;
-//  std::cout << "<br>System before transformation: " << this->transformedSystem.ToString();
+  //std::cout << "<hr>"
+  //<< "System before transformation: " << this->transformedSystem.ToString()
+  //;
   theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
 //  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
@@ -1216,8 +1219,14 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
       this->theNegGens[i]=currentNegElt;
       this->thePosGens[i]=currentPosElt;
     }
+  } else
+  {// if (this->flagSystemProvedToHaveNoSolution)
+     // std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
+    //else
+      //std::cout << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
   }
-  return this->flagSystemSolved;
+//  std::cout << "<hr>";
+  return !this->flagSystemProvedToHaveNoSolution;
 }
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination

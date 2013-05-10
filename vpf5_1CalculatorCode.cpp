@@ -424,9 +424,9 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-//  << "<meta http-equiv=\"refresh\" content=\"5; url="
-//  << displayFolder << theTitlePageFileNameNoPath
-//  << "\">"
+  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
+  //<< displayFolder << theTitlePageFileNameNoPath
+  //<< "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
@@ -435,8 +435,15 @@ bool CommandList::innerPrintSSsubalgebras
     theCommands.theObjectContainer.theSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
+    double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
+    theSSsubalgebras.timeComputationStartInSeconds
+    =theCommands.theGlobalVariableS->GetElapsedSeconds()-startTime;
+    theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
+    theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
+    Rational::TotalLargeMultiplications;
+
     std::fstream theFile;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false);
@@ -1250,9 +1257,23 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   bool changed=true;
   PolynomialSubstitution<CoefficientType> theSub;
   while (changed)
-  { bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+  { this->NumberOfComputations=0;
+    bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
     if (success)
-      this->flagSystemProvenToHaveSolution=true;
+    { if (this->IsContradictoryReducedSystem(inputSystem))
+      { this->flagSystemProvenToHaveNoSolution=true;
+        this->flagSystemSolvedOverBaseField=false;
+        this->flagSystemProvenToHaveSolution=false;
+        return;
+      } else
+      { this->flagSystemProvenToHaveSolution=true;
+        if (inputSystem.size==0)
+        { this->flagSystemProvenToHaveNoSolution=false;
+          this->flagSystemSolvedOverBaseField=true;
+          return;
+        }
+      }
+    }
     //std::cout << "<hr>input system: " << inputSystem.ToString();
     changed=this->HasImpliedSubstitutions(inputSystem, theSub);
     if (changed)
@@ -1273,19 +1294,6 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
     //}
     //std::cout << ")";
   }
-  if (inputSystem.size==0)
-  { this->flagSystemProvenToHaveNoSolution=false;
-    this->flagSystemProvenToHaveSolution=true;
-    this->flagSystemSolvedOverBaseField=true;
-    return;
-  }
-  if (inputSystem.size==1)
-    if (inputSystem[0].IsEqualToOne())
-    { this->flagSystemProvenToHaveNoSolution=true;
-      this->flagSystemProvenToHaveSolution=false;
-      this->flagSystemSolvedOverBaseField=false;
-      return;
-    }
   List<Polynomial<CoefficientType> > oldSystem=inputSystem;
   GroebnerBasisComputation newComputation;
   newComputation.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
@@ -1349,6 +1357,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
+  this->MaxNumComputations=1000;
   int numVars=0;
   List<Polynomial<CoefficientType> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
@@ -1356,20 +1365,42 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   this->systemSolution.GetElement().initFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
   bool weAreNotDone;
+  int lastNumFoundVars=-1;
   do
   { this->SolveSerreLikeSystemRecursively(workingSystem, theGlobalVariables);
     weAreNotDone=false;
     if (this->flagSystemSolvedOverBaseField)
-      if (this->solutionsFound.GetElement().CardinalitySelection<numVars)
+      if (this->solutionsFound.GetElement().CardinalitySelection!=lastNumFoundVars)
       { weAreNotDone=true;
         PolynomialSubstitution<CoefficientType> theSub;
         this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
         workingSystem=inputSystem;
         for (int i=0; i<workingSystem.size; i++)
           workingSystem[i].Substitution(theSub);
+        lastNumFoundVars=this->solutionsFound.GetElement().CardinalitySelection;
       }
-  }while (weAreNotDone);
-  inputSystem=workingSystem;
+  } while (weAreNotDone);
+  for (int i=0; i<numVars; i++)
+    if (!this->solutionsFound.GetElement().selected[i])
+      this->SetSerreLikeSolutionIndex(i, 0);
+  if (this->flagSystemSolvedOverBaseField)
+  { PolynomialSubstitution<CoefficientType> theSub;
+    this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
+    workingSystem=inputSystem;
+    for (int i=0; i<workingSystem.size; i++)
+    { workingSystem[i].Substitution(theSub);
+      if (!workingSystem[i].IsEqualToZero())
+      { std::cout << "<br>This is a programming error. Function SolveSerreLikeSystem "
+        << "reports to have found a solution over the base field, but substituting the solution "
+        << " back to the original system does not yield a zero system of equations. More precisely, "
+        << "the reported solution was " << this->systemSolution.GetElement().ToString()
+        << " but substitution in equation " <<inputSystem[i].ToString() << " yields "
+        << workingSystem[i].ToString() << ". "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
+  }
 }
 
 template <class CoefficientType>

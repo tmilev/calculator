@@ -5844,39 +5844,6 @@ class GroebnerBasisComputation
   ;
   void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<CoefficientType>& outputSub)
   ;
-  void operator=(GroebnerBasisComputation<CoefficientType>& other)
-  { this->theMonOrdeR=other.theMonOrdeR;
-    this->SoPolyBuf=other.SoPolyBuf;
-    this->remainderDivision=other.remainderDivision;
-    this->bufPoly=other.bufPoly;
-    this->bufPolyForGaussianElimination=other.bufPolyForGaussianElimination;
-    this->SoPolyLeftShift=other.SoPolyLeftShift;
-    this->SoPolyRightShift=other.SoPolyRightShift;
-    this->bufferMoN1=other.bufferMoN1;
-    this->theBasiS=other.theBasiS;
-    this->basisCandidates=other.basisCandidates;
-    this->leadingMons=other.leadingMons;
-    this->leadingCoeffs=other.leadingCoeffs;
-    this->NumberOfComputations=other.NumberOfComputations;
-    this->MaxNumComputations=other.MaxNumComputations;
-    this->RecursionCounterSerreLikeSystem=other.RecursionCounterSerreLikeSystem;
-    this->flagBasisGuaranteedToGenerateIdeal=other.flagBasisGuaranteedToGenerateIdeal;
-    this->flagDoProgressReport=other.flagDoProgressReport;
-    this->flagDoSortBasis=other.flagDoSortBasis;
-    this->flagDoLogDivision=other.flagDoLogDivision;
-    this->flagSystemProvenToHaveNoSolution=other.flagSystemProvenToHaveNoSolution;
-    this->flagSystemProvenToHaveSolution=other.flagSystemProvenToHaveSolution;
-    this->flagSystemSolvedOverBaseField=other.flagSystemSolvedOverBaseField;
-    this->intermediateRemainders=other.intermediateRemainders;
-    this->intermediateHighlightedMons=other.intermediateHighlightedMons;
-    this->intermediateHighestMonDivHighestMon=other.intermediateHighestMonDivHighestMon;
-    this->intermediateCoeffs=other.intermediateCoeffs;
-    this->intermediateSubtractands=other.intermediateSubtractands;
-    this->intermediateSelectedDivisors=other.intermediateSelectedDivisors;
-    this->startingPoly=other.startingPoly;
-    this->systemSolution=other.systemSolution;
-    this->solutionsFound=other.solutionsFound;
-  }
   std::string ToStringSerreLikeSolution
   (FormatExpressions* theFormat=0)
   ;
@@ -5902,6 +5869,12 @@ class GroebnerBasisComputation
   void MakeMinimalBasis
 ()
   ;
+  static bool IsContradictoryReducedSystem(const List<Polynomial<CoefficientType> >& input)
+  { if (input.size==1)
+      if (input[0].IsEqualToOne())
+        return true;
+    return false;
+  }
   void RemainderDivisionWithRespectToBasis
 (Polynomial<CoefficientType>& inputOutput,
  Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
@@ -9904,6 +9877,7 @@ void GroebnerBasisComputation<CoefficientType>::initForGroebnerComputation
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  this->basisCandidates.SetSize(0);
   this->theBasiS.SetSize(0);
   this->theBasiS.ReservE(inputOutpuT.size);
   this->leadingMons.SetSize(0);

@@ -573,6 +573,13 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    printout of all Gaussian elimantion steps. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
   this->AddOperationInnerHandler
+  ("Reverse", this->innerReverseOrder, "",
+   "Reverses order of elements recursively. This operation will reverse products, orderes of lists, etc. \
+   More precisely, the command leaves the fist child in the internal representation of the object in place\
+   and flips the order of all other children.",
+   "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)");
+
+  this->AddOperationInnerHandler
   ("FindOneSolutionSerreLikePolynomialSystem", this->innerSolveSerreLikeSystem, "",
    "Attempts to heuristically solve a system of polynomial of equations over the rationals. \
    The input system of equations can be arbitrary, \

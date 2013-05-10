@@ -752,6 +752,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     << this->GetAmbientSS().GetNumGenerators()
     << ".</b> Here is a detailed subalgebra printout. "
     //<< //this->ToString(&theFormat)
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     ;
     assert(false);
   }

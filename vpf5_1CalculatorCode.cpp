@@ -424,9 +424,9 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
-  //<< displayFolder << theTitlePageFileNameNoPath
-  //<< "\">"
+//  << "<meta http-equiv=\"refresh\" content=\"5; url="
+//  << displayFolder << theTitlePageFileNameNoPath
+//  << "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
@@ -1421,6 +1421,37 @@ void GroebnerBasisComputation<CoefficientType>::SetSerreLikeSolutionIndex
 (int theIndex, const CoefficientType& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   this->solutionsFound.GetElement().AddSelectionAppendNewIndex(theIndex);
+}
+
+bool Expression::operator==(const std::string& other)const
+{ std::string tempS;
+  if (!this->IsOperation(&tempS))
+    return false;
+  return tempS==other;
+}
+
+bool CommandList::innerReverseOrder
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerReverse");
+  if (input.IsBuiltInType()||input.IsAtoM())
+  { output=input;
+    return true;
+  }
+  if (input[0]=="Reverse")
+  { Expression tempE=input;
+    tempE.SetChildAtomValue(0, theCommands.opSequence());
+    return theCommands.innerReverseOrder(theCommands, tempE, output);
+  }
+  output.reset(theCommands, input.children.size);
+  output.AddChildOnTop(input[0]);
+  for (int i=input.children.size-1; i>=1; i--)
+  { Expression currentE=input[i];
+    Expression reversedCurrentE;
+    if (!theCommands.innerReverseOrder(theCommands,  currentE, reversedCurrentE))
+      return false;
+    output.AddChildOnTop(reversedCurrentE);
+  }
+  return true;
 }
 
 bool CommandList::innerSolveSerreLikeSystem

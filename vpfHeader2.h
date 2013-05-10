@@ -400,6 +400,7 @@ class Expression
   }
 //  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
+  bool operator==(const std::string& other)const;
   bool operator!=(const Expression& other)const
   { return ! (*this==other);
   }
@@ -1223,7 +1224,12 @@ public:
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
    std::stringstream* theLog=0)
   ;
-
+  static bool innerReverseOrder
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerReverseOrderRecursivelyToSimilar
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool outerUnion
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;

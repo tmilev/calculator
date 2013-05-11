@@ -594,6 +594,7 @@ int main(int argc, char **argv)
   //civilizedInput= "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)";
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(a_2);";
  // civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(g_2)";
+// civilizedInput="experimentalPrintSemisimpleSubalgebras{}(d_4)";
   PredefinedStrings(civilizedInput);
 
 

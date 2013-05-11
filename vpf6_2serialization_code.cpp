@@ -215,7 +215,6 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   Expression rankE=input[1];
   Expression typeLetter=input[0];
   Rational firstCoRootSquaredLength=2;
-  bool foundLengthFromExpression=false;
   if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
   { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
     { theCommands.Comments << "<hr>Couldn't extract first co-root length from "
@@ -229,7 +228,6 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
       return false;
     }
     typeLetter.AssignMeMyChild(1);
-    foundLengthFromExpression=true;
   }
   std::string theTypeName;
   if (!typeLetter.IsOperation(&theTypeName))
@@ -274,9 +272,6 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
     return false;
   }
   outputMon.MakeArbitrary(theWeylLetter, theRank);
-  if (!foundLengthFromExpression)
-    if (theWeylLetter=='F')
-      firstCoRootSquaredLength=1;
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
   if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
   { std::cout << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get: " << outputMon.ToString();

@@ -3884,8 +3884,8 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared
       return 2;
     case 'F':
       if (rootIndex<2)
-        return 4;
-      return 2;
+        return 2;
+      return 1;
     case 'G':
       if (rootIndex==1)
         return 6;
@@ -3982,25 +3982,24 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     }
   }
   if (WeylLetter=='F')
-  { //convention different from Humpreys, Introduction to Lie algebras and representation
-    //theory, page 65
-    //rather using our own version
+  { //as of May 11 2013 the convention has been changed to coincide with that of
+    //Wikipedia
     output.init(4, 4);
     output.NullifyAll();
 
-    //image of first simple root (long one):
-    output(0,0)=2;
-    //image of second simple root (long one)
-    output(0,1)=-1;
-    output(1,1)=-1;
-    output(2,1)=1;
-    output(3,1)=1;
-    //image of third simple root (short one):
-    output(1,2)=1;
-    output(2,2)=-1;
+    //image of first simple root = e_1-e_2 (long one):
+    output(0,0)=1;
+    output(1,0)=-1;
+    //image of second simple root = e_2-e_3 (long one)
+    output(1,1)=1;
+    output(2,1)=-1;
+    //image of third simple root = e_3 (short one):
+    output(2,2)=1;
     //image of fourth simple root (short one)
-    output(2,3)=1;
-    output(3,3)=-1;
+    output(0,3)=RMHalf;
+    output(1,3)=RMHalf;
+    output(2,3)=RMHalf;
+    output(3,3)=RMHalf;
     //eps_2:
     //eps_4:
   }
@@ -4077,10 +4076,11 @@ void DynkinSimpleType::GetEn(int n, Matrix<Rational>& output)const
 
 void DynkinSimpleType::GetF4(Matrix<Rational>& output)const
 { output.init(4, 4);
-  output(0,0)=4 ;  output(0,1)=-2; output(0,2)=0 ; output(0,3)=0 ;
-  output(1,0)=-2;  output(1,1)=4 ; output(1,2)=-2; output(1,3)=0 ;
-  output(2,0)=0 ;  output(2,1)=-2; output(2,2)=2 ; output(2,3)=-1;
-  output(3,0)=0 ;  output(3,1)=0 ; output(3,2)=-1; output(3,3)=2 ;
+  Rational mh(-1,2);
+  output(0,0)=2 ;  output(0,1)=-1; output(0,2)=0 ; output(0,3)=0 ;
+  output(1,0)=-1;  output(1,1)=2 ; output(1,2)=-1; output(1,3)=0 ;
+  output(2,0)=0 ;  output(2,1)=-1; output(2,2)=1 ; output(2,3)=mh;
+  output(3,0)=0 ;  output(3,1)=0 ; output(3,2)=mh; output(3,3)=1 ;
 }
 
 void DynkinSimpleType::GetG2(Matrix<Rational>& output)const

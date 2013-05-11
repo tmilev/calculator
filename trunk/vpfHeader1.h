@@ -1918,15 +1918,15 @@ public:
   }
   bool IsIdMatrix()const
   { if (this->NumRows!=this->NumCols || this->NumRows<=0)
-       return false;
-     for (int i=0; i<this->NumRows; i++)
-       for (int j=0; j<this->NumCols; j++)
-         if (i==j)
-         { if (!this->elements[i][j].IsEqualToOne())
-             return false;
-         } else
-           if (!this->elements[i][j].IsEqualToZero())
-             return false;
+      return false;
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        if (i==j)
+        { if (!this->elements[i][j].IsEqualToOne())
+            return false;
+        } else
+          if (!this->elements[i][j].IsEqualToZero())
+            return false;
      return true;
   }
   void GetVectorFromColumn(int colIndex, Vector<Element>& output)const;
@@ -4484,6 +4484,7 @@ public:
   { output << theGen.ToString();
     return output;
   }
+  bool CheckInitialization()const;
   static const bool IsEqualToZero(){return false;}
   static inline unsigned int HashFunction(const ChevalleyGenerator& input)
   { return (unsigned) input.theGeneratorIndex;
@@ -5889,6 +5890,13 @@ class GroebnerBasisComputation
  int GetPreferredSerreSystemSubIndex();
  void SolveSerreLikeSystemRecursively
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+ ;
+ void BackSubstituteIntoPolySystem
+ (List<PolynomialSubstitution<CoefficientType> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
+ ;
+ void BackSubstituteIntoSinglePoly
+ (Polynomial<CoefficientType>& thePoly, int theIndex, PolynomialSubstitution<CoefficientType>& theFinalSub,
+  GlobalVariables* theGlobalVariables)
  ;
  bool AddRemainderToBasis
  (GlobalVariables* theGlobalVariables)

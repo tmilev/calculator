@@ -1748,8 +1748,20 @@ void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& oth
   }
 }
 
+bool ChevalleyGenerator::CheckInitialization()const
+{ if (this->owneR==0)
+  { std::cout << "This is a programming error: "
+    << "attempting to use a non-initialized Chevalley generator. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    return false;
+  }
+  return true;
+}
+
 std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat)const
-{ return this->owneR->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+{ this->CheckInitialization();
+  return this->owneR->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other)const

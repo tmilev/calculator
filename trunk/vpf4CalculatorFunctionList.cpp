@@ -245,16 +245,14 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
     <b>Remark.</b> It is advisable to omit the upper index (i.e., use default values) \
     when computing with a single semisimple Lie algebra. \
     <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
-    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^1_4, \
+    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^2_4, \
     G^2_2 in extended notation). \
     The roots are ordered in order the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
     By default (when the upper index is not present), the roots are scaled so that the long \
     root has squared length 2 in types \
-    A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2. \
-    Except for F_4, our default root length convention coincides with Humphreys', paragraph 12.1\
-    (for F_4, Humphreys' convention dictates long root length squared 2). \
+    A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2.\
     If the upper index is present, the root length squared of the first simple root equals \
     (upper index)*(default first root length squared)^2/4.\
     ",

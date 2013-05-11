@@ -415,7 +415,7 @@ public:
     this->initHookUpPointers(inputOwner);
   }
   std::string ToString(FormatExpressions* theFormat=0);
-  void AddCandidatesSubalgebra
+  void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;
   void HookUpCentralizers

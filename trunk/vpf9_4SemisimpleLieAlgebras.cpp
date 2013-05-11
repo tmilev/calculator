@@ -89,14 +89,16 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   } else
   { out << "Total, there are " << candidatesRealized << " subalgebras";
     if (candidatesNotRealizedNotProvenImpossible!=0)
-      out << " and "  << candidatesNotRealizedNotProvenImpossible << " subalgebra candidates which were "
+      out << " and "  << candidatesNotRealizedNotProvenImpossible
+      << " subalgebra candidate(s) which were "
       << " not realized (but not proven impossible)";
     out << ". ";
   }
   out << "The subalgebras are ordered by "
   << "(rank, dimensions of simple constituents, Dynkin indices of simple constituents). "
   << "The upper index stands for the length of the first co-root squared. "
-  << " In type F_4, the upper index of a subalgebra coincides with its Dynkin index. "
+  << " In type F_4, the upper index divided by two equals the Dynkin index of the subalgebra in the  "
+  << " F_4. "
   ;
   if (this->timeComputationStartInSeconds!=-1)
     out << "<br>Computation time in seconds: " << this->timeComputationStartInSeconds << ".";
@@ -173,9 +175,9 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
   this->ExtendCandidatesRecursive(emptyCandidate, true, theGlobalVariables);
 }
 
-void SemisimpleSubalgebras::AddCandidatesSubalgebra
+void SemisimpleSubalgebras::RegisterPossibleCandidate
 (CandidateSSSubalgebra& input, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddCandidatesSubalgebra");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
   bool needToComputeConstants=this->theSubalgebrasNonEmbedded.Contains(tempSA);
@@ -294,7 +296,7 @@ GlobalVariables* theGlobalVariables)
   ProgressReport theReport2(theGlobalVariables);
   if (numVectorsFound==theNewTypE.theRank)
   { newCandidate=baseCandidate;
-    this->AddCandidatesSubalgebra(newCandidate, theGlobalVariables);
+    this->RegisterPossibleCandidate(newCandidate, theGlobalVariables);
     if (!newCandidate.ComputeChar(theGlobalVariables))
     { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
       //std::cout << newCandidate.ToString() << " is bad<br>";
@@ -452,11 +454,6 @@ void CandidateSSSubalgebra::AddHincomplete
     }
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
   this->theHorbitIndices.LastObject()->AddOnTop(indexOfOrbit);
-//  this->theHWeylGroupElts.LastObject()->AddOnTop(theWE);
-  this->theInvolvedPosGenerators.LastObject()->SetSize
-  (this->theInvolvedPosGenerators.LastObject()->size+1);
-  this->theInvolvedNegGenerators.LastObject()->SetSize
-  (this->theInvolvedNegGenerators.LastObject()->size+1);
 }
 
 void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType)
@@ -479,10 +476,6 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   this->theHorbitIndices.LastObject()->size=0;
 //  this->theHWeylGroupElts.SetSize(this->theHWeylGroupElts.size+1);
 //  this->theHWeylGroupElts.LastObject()->size=0;
-  this->theInvolvedNegGenerators.SetSize(this->theInvolvedNegGenerators.size+1);
-  this->theInvolvedNegGenerators.LastObject()->size=0;
-  this->theInvolvedPosGenerators.SetSize(this->theInvolvedPosGenerators.size+1);
-  this->theInvolvedPosGenerators.LastObject()->size=0;
 }
 
 bool CandidateSSSubalgebra::isGoodForTheTop
@@ -754,7 +747,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     //<< //this->ToString(&theFormat)
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     ;
-    assert(false);
+//    assert(false);
   }
   this->modulesGrouppedByPrimalType.SetSize(this->modulesGrouppedByWeight.size);
   for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
@@ -3300,5 +3293,3 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   }
 }
-
-

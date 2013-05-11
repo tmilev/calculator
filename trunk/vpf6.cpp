@@ -3459,15 +3459,6 @@ bool CommandList::innerPrintSSLieAlgebra
       }
     }
   }
-  out << "Note on root system convention. Except for F_4, "
-  << "our epsilon notation follows the convention "
-  << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
-  << " <br> For F_4, we follow "
-  << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
-  << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
-  << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-  << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
-  << "of computations, <br>and for reducing sizes of the printouts.";
   if (Verbose)
   { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
     << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";

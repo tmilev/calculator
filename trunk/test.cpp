@@ -9,6 +9,191 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+class WeylSubgroup: public WeylGroup
+{
+  public:
+  WeylGroup *parent;
+  List<int> generatorPreimages;
+  List<int> ccPreimages;
+  List<bool> tauSignature;
+  void ComputeTauSignature();
+};
+
+void ParabolicSubgroup(WeylGroup* G, const Selection sel, WeylSubgroup& out)
+{ out.init();
+  out.parent = G;
+  int d = sel.CardinalitySelection;
+  out.CartanSymmetric.init(d,d);
+  for(int ii=0; ii<d; ii++)
+      for(int jj=0; jj<d; jj++)
+        out.CartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
+  out.generatorPreimages.SetSize(d);
+  for(int i=0; i<d; i++)
+    out.generatorPreimages[i] = sel.elements[i] + 1;
+}
+
+void PseudoParabolicSubgroup(WeylGroup* G, const Selection sel, WeylSubgroup& out)
+{ out.init();
+  out.parent = G;
+  int d = sel.CardinalitySelection+1;
+  out.generatorPreimages.SetSize(d);
+  // not sure if this is actually how this works
+  for(int i=0; i<d-1; i++)
+   out.generatorPreimages[i] = i+1;
+
+  out.CartanSymmetric.init(d,d);
+  for(int ii=0; ii<d-1; ii++)
+    for(int jj=0; jj<d-1; jj++)
+      out.CartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
+  // find the highest root
+  Vector<Rational> hr = G->RootSystem[0];
+  Rational vs = 0;
+  for(int i=0; i<hr.size; i++)
+    vs += hr[i];
+  for(int i=1; i<G->RootSystem.size; i++)
+  { Rational ws = 0;
+    for(int j=0; j<G->RootSystem[i].size; j++)
+      ws += G->RootSystem[i][j];
+    if(ws > vs)
+    { vs = ws;
+      hr = G->RootSystem[i];
+    }
+  }
+
+  for(int i=0; i<d-1; i++)
+  { Vector<Rational> v;
+    G->CartanSymmetric.GetVectorFromRow(sel.elements[i],v);
+    Rational x = v.ScalarEuclidean(hr);
+    out.CartanSymmetric.elements[i][d-1] = x;
+    out.CartanSymmetric.elements[d-1][i] = x;
+  }
+  out.CartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,hr,G->CartanSymmetric);
+  Rational x = hr.ScalarProduct(hr,G->rho,G->CartanSymmetric)/hr.ScalarProduct(hr,hr,G->CartanSymmetric) *-2;
+  Vector<Rational> rhoImage = G->rho + hr*x;
+  ElementWeylGroup g;
+  g.owner = G;
+  // hopefully i got the order right this time :)
+  while(G->rho != rhoImage)
+  { for(int i=0; i<G->CartanSymmetric.NumRows; i++)
+    { Vector<Rational> ricp = rhoImage;
+      G->SimpleReflection(i,ricp);
+      if(ricp > rhoImage)
+      { rhoImage = ricp;
+        g.AddOnTop(i);
+        break;
+      }
+    }
+  }
+  out.generatorPreimages[d-1] = G->theElements.GetIndex(g);
+}
+
+void WeylSubgroup::ComputeTauSignature()
+{ if(this->ccPreimages.size == 0)
+  { this->ccPreimages.SetSize(this->conjugacyClasses.size);
+    for(int i=0; i<this->conjugacyClasses.size; i++)
+    { ElementWeylGroup g;
+      g.owner = this->parent;
+      for(int j=0; j<this->theElements[this->conjugacyClasses[i][0]].size; j++)
+        g.AddListOnTop(this->parent->theElements[this->generatorPreimages[this->theElements[this->conjugacyClasses[i][0]][j]]]);
+      g.MakeCanonical();
+      int gi = this->parent->theElements.GetIndex(g);
+      for(int ci=0; ci<this->parent->conjugacyClasses.size; ci++)
+        for(int cj=0; cj<this->parent->conjugacyClasses[ci].size; cj++)
+          if(this->parent->conjugacyClasses[ci][cj] == gi)
+          { this->ccPreimages[i] = ci;
+            goto endloop;
+          }
+      endloop:;
+    }
+  }
+  Vector<Rational> Xs;
+  Xs.SetSize(this->conjugacyClasses.size);
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+  { int yn = this->theElements[this->conjugacyClasses[i][0]].size % 2;
+    if(yn == 0)
+      Xs[i] = 1;
+    else
+      Xs[i] = -1;
+  }
+  Vector<Rational> Xi;
+  Xi.SetSize(this->conjugacyClasses.size);
+  this->tauSignature.SetSize(this->parent->irreps.size);
+  for(int i=0; i<this->parent->irreps.size; i++)
+  { Vector<Rational> Xip = this->parent->irreps[i].GetCharacter();
+    for(int j=0; j<Xi.size; j++)
+      Xi[j] = Xip[this->ccPreimages[j]];
+    if(this->GetHermitianProduct(Xs,Xi) == 0)
+      this->tauSignature[i] = false;
+    else
+      this->tauSignature[i] = true;
+  }
+}
+
+void AllTauSignatures(WeylGroup* G, bool pseudo=false)
+{ Selection sel;
+  sel.init(G->CartanSymmetric.NumCols);
+  int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
+  List<List<bool> > tss;
+  tss.SetSize(numCycles-2);
+  for(int i=0; i<numCycles-2; i++)
+  { sel.incrementSelection();
+    WeylSubgroup H;
+    if(!pseudo)
+      ParabolicSubgroup(G,sel,H);
+    else
+      PseudoParabolicSubgroup(G,sel,H);
+    H.ComputeConjugacyClasses();
+    H.ComputeTauSignature();
+    tss[i] = H.tauSignature;
+    std::cout << H.CartanSymmetric.ToString(&testformat) << std::endl;
+  }
+
+  // we will need the sign character for the group
+  Vector<Rational> Xs;
+  Xs.SetSize(G->conjugacyClasses.size);
+  for(int i=0; i<G->conjugacyClasses.size; i++)
+  { int yn = G->theElements[G->conjugacyClasses[i][0]].size % 2;
+    if(yn == 0)
+      Xs[i] = 1;
+    else
+      Xs[i] = -1;
+  }
+
+  List<List<bool> > tauSignatures;
+  tauSignatures.SetSize(G->irreps.size);
+  for(int i=0; i<G->irreps.size; i++)
+  { tauSignatures[i].SetSize(numCycles);
+    tauSignatures[i][0] = 1;
+    for(int j=1; j<numCycles-1; j++)
+      tauSignatures[i][j] = tss[j-1][i];
+    tauSignatures[i][numCycles-1] =  G->irreps[i].GetCharacter() == Xs;
+  }
+
+  for(int i=0; i<G->irreps.size; i++)
+  { std::cout << G->irreps[i].GetCharacter() << std::endl;
+    for(int j=0; j<tauSignatures[i].size; j++)
+      std::cout << tauSignatures[i][j] << ' ';
+    std::cout << std::endl;
+  }
+}
+
+/*
+  for(int j=0; j<PSGs[i].ccCount; j++)
+  { CoxeterElement h = PSGs[i].GetCoxeterElement(PSGs[i].conjugacyClasses[j][0]);
+    g.reflections.SetSize(h.reflections.size);
+    for(int k=0; k<h.reflections.size; k++)
+      g.reflections[k] = sel.elements[h.reflections[k]];
+    int gi = this->GetIndexOfElement(g);
+    for(int k=0; k<this->ccCount; k++)
+      for(int l=0; l<this->conjugacyClasses[k].size; l++)
+        if(this->conjugacyClasses[k][l] == gi)
+        { ccBackMaps[i][j] = k;
+          goto endloop;
+        }
+    endloop:;
+  }
+*/
+
 
 /* dunno why i thought it was fun to spend so much time on this
 class f127
@@ -1356,7 +1541,19 @@ int main(void)
    WeylGroup G;
    G.MakeArbitrarySimple('B',3,NULL);
    G.ComputeIrreducibleRepresentations(&localGlobalVariables);
-
+   Selection sel;
+   sel.MakeFullSelection(G.CartanSymmetric.NumCols);
+   sel.RemoveSelection(0);
+   WeylSubgroup H;
+   ParabolicSubgroup(&G,sel,H);
+   H.ComputeIrreducibleRepresentations();
+   std::cout << "Parabolic subgroup" << std::endl;
+   std::cout << H.ToString(&testformat) << std::endl;
+   std::cout << "Tau signature" << std::endl;
+   H.ComputeTauSignature();
+   std::cout << H.tauSignature << std::endl;
+   AllTauSignatures(&G,true);
+/*
    std::cout << "Building QG" << std::endl;
    WeylGroupRepresentation<Rational> QG;
    QG.reset(&G);
@@ -1385,7 +1582,7 @@ int main(void)
      { Vector<Rational> v;
        M.GetVectorFromColumn(j,v);
        if(!V.AddVector(v))
-         break;
+         continue;
        B.AddOnTop(v);
      }
      Vector<Rational> v;
@@ -1396,6 +1593,7 @@ int main(void)
    int cmpx = 2;
    std::cout << isocomps[cmpx].ToString(&testformat) << std::endl;
    int d = isocomps[cmpx].GetDim();
+   std::cout << "the smoothed-out inner product" << std::endl;
    Matrix<Rational> B;
    B.init(d,d);
    for(int i=0; i<d; i++)
@@ -1424,11 +1622,11 @@ int main(void)
   }
   WeylGroupRepresentation<Rational> comp;
   Vector<Rational> derp;
-  isocomps[1].Restrict(W,derp,comp);
+  isocomps[cmpx].Restrict(W,derp,comp);
 
   std::cout << "This should be one component" << std::endl;
   std::cout << comp.ToString(&testformat) << std::endl;
-
+*/
 
 
 

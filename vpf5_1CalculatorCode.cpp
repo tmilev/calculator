@@ -1222,7 +1222,7 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
       tempCF*=-1;
       outputSub[j]/=tempCF;
       CoefficientType theConst;
-      std::cout << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
+//      std::cout << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
 //      if (outputSub[j].IsAConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
       //std::cout << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
@@ -1250,7 +1250,7 @@ void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoSinglePoly
   tempP.MakeMonomiaL(theIndex, 1, 1);
   if (thePoly==tempP)
     return;
-  std::cout << "<hr> Back substituting in x_{" << theIndex+1 << "}:=" << thePoly.ToString();
+  //std::cout << "<hr> Back substituting in x_{" << theIndex+1 << "}:=" << thePoly.ToString();
   thePoly.Substitution(theFinalSub);
   bool changed=false;
   for (int i=0; i<thePoly.size; i++)
@@ -1304,10 +1304,9 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   { this->NumberOfComputations=0;
     bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
     if (success)
-    { std::cout << "<hr>System groebner reduced successfully, output:";
-      for (int i=0; i <inputSystem.size; i++)
-        std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
-
+    { //std::cout << "<hr>System groebner reduced successfully, output:";
+      //for (int i=0; i <inputSystem.size; i++)
+        //std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
       if (this->IsContradictoryReducedSystem(inputSystem))
       { this->flagSystemProvenToHaveNoSolution=true;
         this->flagSystemSolvedOverBaseField=false;
@@ -1331,7 +1330,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
         inputSystem[i].Substitution(theSub);
     }
   }
-  std::cout << "<br>System has no more implied subs. ";
+//  std::cout << "<br>System has no more implied subs. ";
   if (theGlobalVariables!=0)
   { //std::cout << "<hr>The system solution candidate at recursion depth "
     //<< this->RecursionCounterSerreLikeSystem << ": "
@@ -1358,7 +1357,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   int theVarIndex=this->GetPreferredSerreSystemSubIndex();
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=0;
-  std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
+  //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
   newComputation.SetSerreLikeSolutionIndex(theVarIndex, 0);
   //std::cout << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
   for (int i=0; i<inputSystem.size; i++)
@@ -1384,7 +1383,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
 
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=1;
-  std::cout << "<hr>Setting x_{" << theVarIndex+1 << "}:=1";
+  //std::cout << "<hr>Setting x_{" << theVarIndex+1 << "}:=1";
   newComputation.SetSerreLikeSolutionIndex(theVarIndex, 1);
 
   //std::cout << "<hr>Input system before second recursive call. " << inputSystem.ToString();

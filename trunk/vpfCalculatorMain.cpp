@@ -590,7 +590,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
 
-  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(d_4)";
+  //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(d_4)";
 //  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
   //civilizedInput= "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)";
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(a_2);";

@@ -84,6 +84,8 @@ void PseudoParabolicSubgroup(WeylGroup* G, const Selection sel, WeylSubgroup& ou
       }
     }
   }
+  g.ReverseOrderElements();
+  std::cout << "highest root reflection is " << g << std::endl;
   out.generatorPreimages[d-1] = G->theElements.GetIndex(g);
 }
 
@@ -1539,21 +1541,37 @@ int main(void)
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
-   G.MakeArbitrarySimple('F',4,NULL);
+   G.MakeArbitrarySimple('G',2,NULL);
    G.ComputeIrreducibleRepresentations(&localGlobalVariables);
-   Selection sel;
+/*   Selection sel;
    sel.MakeFullSelection(G.CartanSymmetric.NumCols);
    sel.RemoveSelection(0);
    WeylSubgroup H;
    ParabolicSubgroup(&G,sel,H);
+   std::cout << G.CartanSymmetric.ToString(&testformat) << std::endl;
    H.ComputeIrreducibleRepresentations();
    std::cout << "Parabolic subgroup" << std::endl;
    std::cout << H.ToString(&testformat) << std::endl;
    std::cout << "Tau signature" << std::endl;
    H.ComputeTauSignature();
    std::cout << H.tauSignature << std::endl;
+*/
+   std::cout << "Tau signatures of parabolic subgroups" << std::endl;
    AllTauSignatures(&G);
+   std::cout << "Tau signatures of pseudo-parabolic subgroups" << std::endl;
    AllTauSignatures(&G,true);
+   for(int i=0; i<G.conjugacyClasses.size; i++)
+   {
+
+   std::cout << "conjugacy class " << i << std::endl;
+    for(int j=0; j<G.conjugacyClasses[i].size; j++)
+    {ElementWeylGroup g = G.theElements[G.conjugacyClasses[i][j]];
+      for(int k=0; k<g.size; k++)
+       std::cout << g[k] << ' ';
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+   }
 /*
    std::cout << "Building QG" << std::endl;
    WeylGroupRepresentation<Rational> QG;

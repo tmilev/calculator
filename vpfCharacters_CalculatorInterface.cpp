@@ -169,12 +169,12 @@ void WeylGroupRepresentation<coefficient>::Restrict
   output.reset(this->OwnerGroup);
   output.theCharacter=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);
-  for(int i=0; i<this->theElementImages.size; i++)
+  for(int i=1; i<this->OwnerGroup->CartanSymmetric.NumCols+1; i++)
     if (this->theElementIsComputed[i])
     { output.theElementIsComputed[i]=true;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "Restricting the action of generator of index " << i+1;
+        reportStream << "Restricting the action of generator of index " << i;
         theReport.Report(reportStream.str());
       }
       Matrix<coefficient>::MatrixInBasis
@@ -410,6 +410,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacter.ToString();
+    int denom = 0;
+    for(int gi=1; gi<this->OwnerGroup->CartanSymmetric.NumCols+1; gi++)
+      for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
+        for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
+          if(this->theElementImages[gi].elements[mi][mj].GetDenominator() > denom)
+            denom = this->theElementImages[gi].elements[mi][mj].GetDenominator().GetUnsignedIntValueTruncated();
+    reportStream << " largest denominator is " << denom;
     Report1.Report(reportStream.str());
   }
   //chop off already known pieces:

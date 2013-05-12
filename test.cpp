@@ -1539,7 +1539,7 @@ int main(void)
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
-   G.MakeArbitrarySimple('B',3,NULL);
+   G.MakeArbitrarySimple('F',4,NULL);
    G.ComputeIrreducibleRepresentations(&localGlobalVariables);
    Selection sel;
    sel.MakeFullSelection(G.CartanSymmetric.NumCols);
@@ -1552,6 +1552,7 @@ int main(void)
    std::cout << "Tau signature" << std::endl;
    H.ComputeTauSignature();
    std::cout << H.tauSignature << std::endl;
+   AllTauSignatures(&G);
    AllTauSignatures(&G,true);
 /*
    std::cout << "Building QG" << std::endl;

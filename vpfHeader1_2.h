@@ -961,6 +961,9 @@ class WeylGroupRepresentation
   List<Matrix<coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
   friend class WeylGroup;
+  WeylGroupRepresentation* parent;
+  Vectors<coefficient> vectorSpaceBasis;
+  Matrix<coefficient> gramMatrixInverted;
   public:
   WeylGroup* OwnerGroup;
   WeylGroupRepresentation():OwnerGroup(0){}

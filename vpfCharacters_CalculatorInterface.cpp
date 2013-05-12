@@ -157,16 +157,16 @@ void WeylGroupRepresentation<coefficient>::Restrict
 (const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter,
  WeylGroupRepresentation<coefficient>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
-  Matrix<coefficient> GramMatrixInverted;
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size==0)
   { std::cout << "This is a programming error: restriction of representation to a zero "
     << " subspace is not allowed. ";
     assert(false);
   }
-  VectorSpaceBasisSubrep.GetGramMatrix(GramMatrixInverted);
-  GramMatrixInverted.Invert();
   output.reset(this->OwnerGroup);
+  output.vectorSpaceBasis = VectorSpaceBasisSubrep;
+  output.vectorSpaceBasis.GetGramMatrix(output.gramMatrixInverted);
+  output.gramMatrixInverted.Invert();
   output.theCharacter=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);
   for(int i=1; i<this->OwnerGroup->CartanSymmetric.NumCols+1; i++)
@@ -178,10 +178,11 @@ void WeylGroupRepresentation<coefficient>::Restrict
         theReport.Report(reportStream.str());
       }
       Matrix<coefficient>::MatrixInBasis
-      (this->theElementImages[i], output.theElementImages[i], VectorSpaceBasisSubrep,
-       GramMatrixInverted);
+      (this->theElementImages[i], output.theElementImages[i], output.vectorSpaceBasis,
+       output.gramMatrixInverted);
 
     }
+  /*
   for (int i=0; i<this->classFunctionMatrices.size; i++)
     if (this->classFunctionMatricesComputed[i])
     { output.classFunctionMatricesComputed[i]=true;
@@ -192,9 +193,10 @@ void WeylGroupRepresentation<coefficient>::Restrict
         theReport.Report(reportStream.str());
       }
       Matrix<coefficient>::MatrixInBasis
-      (this->classFunctionMatrices[i], output.classFunctionMatrices[i], VectorSpaceBasisSubrep,
-       GramMatrixInverted);
+      (this->classFunctionMatrices[i], output.classFunctionMatrices[i], output.vectorSpaceBasis,
+       output.gramMatrixInverted);
     }
+  */
   output.CheckAllSimpleGensAreOK();
 //  std::cout << "<hr>The restriction result: " << output.ToString();
 //  this->CheckRepIsMultiplicativelyClosed();
@@ -218,17 +220,22 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
       continue;
     if (!this->classFunctionMatricesComputed[cci])
     { this->classFunctionMatricesComputed[cci]=true;
-      List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];
-      this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
-      for (int i=0; i<currentConjugacyClass.size; i++)
-      { if (!this->theElementIsComputed[currentConjugacyClass[i]])
-          this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
-        this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
-        if (theGlobalVariables!=0)
-        { std::stringstream reportstream;
-          reportstream << " Computing conjugacy class " << currentConjugacyClass[i]+1
-          << " (total num classes is " << numClasses << ").";
-          theReport.Report(reportstream.str());
+      // hack, dunno why classFunctionMatrise was uninitialized and dont have time to figure it out
+      if(this->parent && (this->parent->classFunctionMatrices.size == this->OwnerGroup->conjugacyClasses.size) && (this->parent->classFunctionMatricesComputed[cci]))
+      { Matrix<coefficient>::MatrixInBasis(this->parent->classFunctionMatrices[cci], this->classFunctionMatrices[cci], this->vectorSpaceBasis,this->gramMatrixInverted);
+      } else {
+        List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];
+        this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
+        for (int i=0; i<currentConjugacyClass.size; i++)
+        { if (!this->theElementIsComputed[currentConjugacyClass[i]])
+            this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
+          this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
+          if (theGlobalVariables!=0)
+          { std::stringstream reportstream;
+            reportstream << " Computing conjugacy class " << currentConjugacyClass[i]+1
+            << " (total num classes is " << numClasses << ").";
+            theReport.Report(reportstream.str());
+          }
         }
       }
       if (theGlobalVariables!=0)
@@ -238,6 +245,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
         << this->classFunctionMatrices[cci].ToString();
         theReport.Report(reportstream.str());
       }
+
     }
     for(int j=0; j<outputMat.NumRows; j++)
       for(int k=0; k<outputMat.NumCols; k++)

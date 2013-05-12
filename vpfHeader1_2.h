@@ -1114,6 +1114,7 @@ public:
   (const Vector<coefficient>& theCharacter)const
   { return this->GetHermitianProduct(theCharacter, theCharacter);
   }
+  void GetSignCharacter(Vector<Rational>& out);
   void StandardRepresentation(WeylGroupRepresentation<Rational>& output);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
@@ -1343,6 +1344,7 @@ template <class CoefficientType>
   template <class Element>
   void SimpleReflectionMinusRhoModified
   (int index, Vector<Element>& theVector)const;
+  int GetRootReflection(int rootIndex);
   void GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const ;
   void GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const;
   void GetElementOfMatrix(Matrix<Rational>& input, ElementWeylGroup &output);

@@ -3556,6 +3556,9 @@ public:
     }
     return result;
   }
+  CoefficientType ScalarProduct (const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& form) const
+  { return ScalarProduct(*this,r2,form);
+  }
   bool IsPositive()
   { return this->IsPositiveOrZero() && !this->IsEqualToZero();
   }

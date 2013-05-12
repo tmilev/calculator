@@ -1139,6 +1139,19 @@ bool CoxeterRepresentation<coefficient>::operator>(CoxeterRepresentation<coeffic
 { return GetCharacter() > right.GetCharacter();
 }
 
+void WeylGroup::GetSignCharacter(Vector<Rational>& out)
+{ if(this->conjugacyClasses.size == 0)
+    this->ComputeConjugacyClasses();
+  out.SetSize(this->conjugacyClasses.size);
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+  { int yn = this->theElements[this->conjugacyClasses[i][0]].size % 2;
+    if(yn == 0)
+      out[i] = 1;
+    else
+      out[i] = -1;
+  }
+}
+
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
 { this->OwnerGroup=inputOwner;

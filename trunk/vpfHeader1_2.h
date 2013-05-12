@@ -966,7 +966,7 @@ class WeylGroupRepresentation
   Matrix<coefficient> gramMatrixInverted;
   public:
   WeylGroup* OwnerGroup;
-  WeylGroupRepresentation():OwnerGroup(0){}
+  WeylGroupRepresentation():parent(0), OwnerGroup(0){}
   unsigned int HashFunction() const;
   bool CheckInitialization()const;
   bool CheckAllSimpleGensAreOK()const;

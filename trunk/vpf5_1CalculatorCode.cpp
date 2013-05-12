@@ -1256,7 +1256,16 @@ void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoSinglePoly
   for (int i=0; i<thePoly.size; i++)
     for (int j=0; j<thePoly[i].GetMinNumVars(); j++)
       if (thePoly[i](j)!=0)
-      { this->SetSerreLikeSolutionIndex(j, 0);
+      { if (!this->solutionsFound.GetElement().selected[j])
+          this->SetSerreLikeSolutionIndex(j, 0);
+        else
+          if (this->systemSolution.GetElement()[j]!=0)
+          { std::cout << "This is a programming error: variable index " << j+1
+            << " is supposed to be a free parameter, i.e., be set to zero, but "
+            << "instead it has a non-zero value. "
+            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
         theFinalSub[j]=0;
         changed=true;
       }
@@ -1404,6 +1413,20 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
 }
 
 template <class CoefficientType>
+std::string GroebnerBasisComputation<CoefficientType>::GetCalculatorInputFromSystem
+(const List<Polynomial<CoefficientType> >& inputSystem)
+{ std::stringstream out;
+  out << "FindOneSolutionSerreLikePolynomialSystem{}(";
+  for (int j=0; j<inputSystem.size; j++)
+  { out << inputSystem[j].ToString();
+    if (j!=inputSystem.size-1)
+      out << ", ";
+  }
+  out << ")";
+  return out.str();
+}
+
+template <class CoefficientType>
 void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
 { this->flagSystemProvenToHaveNoSolution=false;
@@ -1412,6 +1435,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   this->RecursionCounterSerreLikeSystem=0;
   this->MaxNumComputations=1000;
   int numVars=0;
+  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<CoefficientType> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
@@ -1439,13 +1463,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
         << " but substitution in equation " << inputSystem[i].ToString() << " yields "
         << workingSystem[i].ToString() << ". "
         << " Calculator input: "
-        << "<br>FindOneSolutionSerreLikePolynomialSystem{}(";
-        for (int j=0; j<inputSystem.size; j++)
-        { std::cout << inputSystem[j].ToString();
-          if (j!=inputSystem.size-1)
-            std::cout << ", ";
-        }
-        std::cout << ")<br>";
+        << "<br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>";
         std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }

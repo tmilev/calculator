@@ -220,8 +220,13 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
       continue;
     if (!this->classFunctionMatricesComputed[cci])
     { this->classFunctionMatricesComputed[cci]=true;
-      // hack, dunno why classFunctionMatrise was uninitialized and dont have time to figure it out
-      if(this->parent && (this->parent->classFunctionMatrices.size == this->OwnerGroup->conjugacyClasses.size) && (this->parent->classFunctionMatricesComputed[cci]))
+      // classFunctionMatrices does not have to be initialized.
+      bool useParent=false;
+      if (this->parent!=0)
+        useParent=
+        (this->parent->classFunctionMatrices.size == this->OwnerGroup->conjugacyClasses.size) &&
+        (this->parent->classFunctionMatricesComputed[cci]);
+      if(useParent)
       { Matrix<coefficient>::MatrixInBasis(this->parent->classFunctionMatrices[cci], this->classFunctionMatrices[cci], this->vectorSpaceBasis,this->gramMatrixInverted);
       } else {
         List<int>& currentConjugacyClass=this->OwnerGroup->conjugacyClasses[cci];

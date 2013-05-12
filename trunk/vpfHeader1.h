@@ -5881,6 +5881,9 @@ class GroebnerBasisComputation
  Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
+ static std::string GetCalculatorInputFromSystem
+ (const List<Polynomial<CoefficientType> >& inputSystem)
+;
  void SolveSerreLikeSystem
  (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables=0)
  ;

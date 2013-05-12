@@ -344,7 +344,7 @@ public:
 (GlobalVariables* theGlobalVariables)
  ;
   bool ComputeChar
-(GlobalVariables* theGlobalVariables)
+(bool allowBadCharacter, GlobalVariables* theGlobalVariables)
   ;
   bool AttemptToSolveSytem
   (GlobalVariables* theGlobalVariables)
@@ -419,7 +419,7 @@ public:
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;
   void HookUpCentralizers
-  ( )
+  ( GlobalVariables* theGlobalVariables=0)
   ;
   void FindAllEmbeddings
   (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)

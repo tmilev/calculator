@@ -173,6 +173,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
 { CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
   this->ExtendCandidatesRecursive(emptyCandidate, true, theGlobalVariables);
+  this->HookUpCentralizers(theGlobalVariables);
 }
 
 void SemisimpleSubalgebras::RegisterPossibleCandidate
@@ -297,7 +298,7 @@ GlobalVariables* theGlobalVariables)
   if (numVectorsFound==theNewTypE.theRank)
   { newCandidate=baseCandidate;
     this->RegisterPossibleCandidate(newCandidate, theGlobalVariables);
-    if (!newCandidate.ComputeChar(theGlobalVariables))
+    if (!newCandidate.ComputeChar(false, theGlobalVariables))
     { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
       //std::cout << newCandidate.ToString() << " is bad<br>";
       return;
@@ -1293,7 +1294,7 @@ void CandidateSSSubalgebra::GetGenericLinearCombination
 }
 
 bool CandidateSSSubalgebra::ComputeChar
-(GlobalVariables* theGlobalVariables)
+(bool allowBadCharacter, GlobalVariables* theGlobalVariables)
 { if (this->indexInOwnersOfNonEmbeddedMe==-1)
   { std::cout << "This is a programming error: attempting to compute char "
     << "of candidate subalgebra that has not been initialized properly. "
@@ -1320,6 +1321,16 @@ bool CandidateSSSubalgebra::ComputeChar
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
         /theTypes[i].GetDefaultRootLengthSquared(j)*2
         ;
+        if(!tempMon.weightFundamentalCoords[counter].IsInteger())
+        { if (!allowBadCharacter)
+          { std::cout << "This is a programming error: function ComputeChar called  "
+            << " with Cartan that suggests non-integral characters. At the same time, an option "
+            << " banning this possibility has been explicitly selected. "
+            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
+          return false;
+        }
       }
     this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, 1);
   }
@@ -1351,7 +1362,7 @@ bool CandidateSSSubalgebra::ComputeChar
     std::string tempS;
     bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter
     (outputChar, -1, &tempS, theGlobalVariables);
-    if (!tempBool)
+    if (!tempBool && !allowBadCharacter)
     { std::cout << "This is a programming error: failed to evaluate full character via "
       << " the Freudenthal formula on "
       << " a relatively small example, namely " << freudenthalChar.ToString()
@@ -1359,6 +1370,7 @@ bool CandidateSSSubalgebra::ComputeChar
       << ". This shouldn't happen. "
       <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
+      return false;
     }
     accumChar-=outputChar;
   }
@@ -3205,7 +3217,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
   return false;
 }
 
-void SemisimpleSubalgebras::HookUpCentralizers()
+void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];

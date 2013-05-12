@@ -168,7 +168,7 @@ std::string GetSelectHTMLStringTEmp
 void PredefinedStrings(std::string& inputOutputCivilizedString)
 { if(inputOutputCivilizedString=="PenkovProjectTest")
     inputOutputCivilizedString="%HideLHS \
-    Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
+    Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \
     ( \
     Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
     (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
@@ -183,7 +183,7 @@ void PredefinedStrings(std::string& inputOutputCivilizedString)
     inputOutputCivilizedString="experimentalPrintSemisimpleSubalgebras{}(F_4)";
   if(inputOutputCivilizedString=="PenkovProjectRecomputeTest")
     inputOutputCivilizedString="%HideLHS \
-    experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \
+    experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \
     ( \
     Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
     (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
@@ -197,7 +197,7 @@ void PredefinedStrings(std::string& inputOutputCivilizedString)
   if (inputOutputCivilizedString=="PenkovProjectRecompute")
     inputOutputCivilizedString= "\
 %HideLHS \n\
-experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)^{1}_{4}, \\\\\n\
+experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \\\\\n\
 (\n\
 Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\n\
 (\n\
@@ -596,6 +596,8 @@ int main(int argc, char **argv)
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(a_2);";
  // civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(g_2)";
 // civilizedInput="experimentalPrintSemisimpleSubalgebras{}(d_4)";
+  //civilizedInput="PenkovProjectTest";
+//  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
   PredefinedStrings(civilizedInput);
 
 

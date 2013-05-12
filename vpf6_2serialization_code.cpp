@@ -273,9 +273,6 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   }
   outputMon.MakeArbitrary(theWeylLetter, theRank);
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
-  if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
-  { std::cout << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get: " << outputMon.ToString();
-  }
   return true;
 }
 
@@ -812,9 +809,12 @@ bool Serialization::innerLoadFromObject
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
 
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
-  if (!outputSubalgebra.ComputeChar(theCommands.theGlobalVariableS))
-  { outputSubalgebra.theCharFundCoords.MakeZero(owner.owneR);
-    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
+  if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
+  { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra "
+    << " does not decompose properly over the candidate subalgebra. ";
+    return false;
+//    outputSubalgebra.theCharFundCoords.MakeZero(owner.owneR);
+//    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
   }
 
   //Serialization::innerLoadFromObject(theCommands,
@@ -854,7 +854,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.Hcandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
-  theSAs.flagDoComputePairingTable=true;
+  theSAs.flagDoComputePairingTable=false;
   theSAs.flagDoComputeNilradicals=false;
   if (theCandidatesE.children.size>10)
     theSAs.flagDoComputeNilradicals=false;

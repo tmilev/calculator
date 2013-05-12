@@ -4192,6 +4192,12 @@ void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpace
   }
 }
 
+int WeylGroup::GetRootReflection(int rootIndex)
+{ Rational x = this->RootSystem[rootIndex].ScalarProduct(this->rho,this->CartanSymmetric)/this->RootSystem[rootIndex].ScalarProduct(this->RootSystem[rootIndex],this->CartanSymmetric) *-2;
+  Vector<Rational> rhoImage = this->rho + this->RootSystem[rootIndex]*x;
+  return this->rhoOrbit.GetIndexIMustContainTheObject(rhoImage);
+}
+
 void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
 {// if (this->CartanSymmetric.elements[index][index].IsEqualToZero())
   //  return;

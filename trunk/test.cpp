@@ -45,20 +45,9 @@ void PseudoParabolicSubgroup(WeylGroup* G, const Selection sel, WeylSubgroup& ou
   for(int ii=0; ii<d-1; ii++)
     for(int jj=0; jj<d-1; jj++)
       out.CartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
-  // find the highest root
-  Vector<Rational> hr = G->RootSystem[0];
-  Rational vs = 0;
-  for(int i=0; i<hr.size; i++)
-    vs += hr[i];
-  for(int i=1; i<G->RootSystem.size; i++)
-  { Rational ws = 0;
-    for(int j=0; j<G->RootSystem[i].size; j++)
-      ws += G->RootSystem[i][j];
-    if(ws > vs)
-    { vs = ws;
-      hr = G->RootSystem[i];
-    }
-  }
+
+  // the highest root was the last one in the RootSystem
+  Vector<Rational> hr = G->RootSystem[G->RootSystem.size-1];
 
   for(int i=0; i<d-1; i++)
   { Vector<Rational> v;
@@ -67,26 +56,8 @@ void PseudoParabolicSubgroup(WeylGroup* G, const Selection sel, WeylSubgroup& ou
     out.CartanSymmetric.elements[i][d-1] = x;
     out.CartanSymmetric.elements[d-1][i] = x;
   }
-  out.CartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,hr,G->CartanSymmetric);
-  Rational x = hr.ScalarProduct(hr,G->rho,G->CartanSymmetric)/hr.ScalarProduct(hr,hr,G->CartanSymmetric) *-2;
-  Vector<Rational> rhoImage = G->rho + hr*x;
-  ElementWeylGroup g;
-  g.owner = G;
-  // hopefully i got the order right this time :)
-  while(G->rho != rhoImage)
-  { for(int i=0; i<G->CartanSymmetric.NumRows; i++)
-    { Vector<Rational> ricp = rhoImage;
-      G->SimpleReflection(i,ricp);
-      if(ricp > rhoImage)
-      { rhoImage = ricp;
-        g.AddOnTop(i);
-        break;
-      }
-    }
-  }
-  g.ReverseOrderElements();
-  std::cout << "highest root reflection is " << g << std::endl;
-  out.generatorPreimages[d-1] = G->theElements.GetIndex(g);
+  out.CartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,G->CartanSymmetric);
+  out.generatorPreimages[d-1] = G->GetRootReflection(G->RootSystem.size-1);
 }
 
 void WeylSubgroup::ComputeTauSignature()
@@ -109,14 +80,7 @@ void WeylSubgroup::ComputeTauSignature()
     }
   }
   Vector<Rational> Xs;
-  Xs.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
-  { int yn = this->theElements[this->conjugacyClasses[i][0]].size % 2;
-    if(yn == 0)
-      Xs[i] = 1;
-    else
-      Xs[i] = -1;
-  }
+  this->GetSignCharacter(Xs);
   Vector<Rational> Xi;
   Xi.SetSize(this->conjugacyClasses.size);
   this->tauSignature.SetSize(this->parent->irreps.size);
@@ -152,14 +116,7 @@ void AllTauSignatures(WeylGroup* G, bool pseudo=false)
 
   // we will need the sign character for the group
   Vector<Rational> Xs;
-  Xs.SetSize(G->conjugacyClasses.size);
-  for(int i=0; i<G->conjugacyClasses.size; i++)
-  { int yn = G->theElements[G->conjugacyClasses[i][0]].size % 2;
-    if(yn == 0)
-      Xs[i] = 1;
-    else
-      Xs[i] = -1;
-  }
+  G->GetSignCharacter(Xs);
 
   List<List<bool> > tauSignatures;
   tauSignatures.SetSize(G->irreps.size);

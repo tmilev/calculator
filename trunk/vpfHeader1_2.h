@@ -1049,6 +1049,7 @@ public:
     result*=other;
     return result;
   }
+  ElementWeylGroup Inverse() const;
 
   bool operator==(const ElementWeylGroup& other)const
   { if (this->owner!=other.owner)

@@ -4271,6 +4271,13 @@ void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
   this->MakeCanonical();
 }
 
+ElementWeylGroup ElementWeylGroup::Inverse() const
+{ ElementWeylGroup out = *this;
+  out.ReverseOrderElements();
+  out.MakeCanonical();
+  return out;
+}
+
 bool WeylGroup::operator==(const WeylGroup& other)const
 { return
   this->CartanSymmetric==other.CartanSymmetric &&

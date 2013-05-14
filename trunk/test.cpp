@@ -1654,7 +1654,7 @@ int main(void)
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
-   G.MakeArbitrarySimple('F',4,NULL);
+   G.MakeArbitrarySimple('E',6,NULL);
    G.ComputeIrreducibleRepresentations(&localGlobalVariables);
    Selection sel;
    sel.MakeFullSelection(G.CartanSymmetric.NumCols);
@@ -1673,7 +1673,7 @@ int main(void)
 //   std::cout << "Tau signatures of parabolic subgroups" << std::endl;
 //   AllTauSignatures(&G,ts);
    std::cout << "Tau signatures of pseudo-parabolic subgroups" << std::endl;
-   AllTauSignatures(&G,ts,true);
+   AllTauSignatures(&G,ts);
    for(int i=0; i<G.conjugacyClasses.size; i++)
    {
 
@@ -1726,9 +1726,9 @@ int main(void)
   std::cout << "\\[ \\begin{array}{";
   for(int i=0; i<numCycles+1; i++)
     std::cout << 'c';
-  std::cout << '|';
-  for(int i=0; i<numCycles-1; i++)
-    std::cout << 'c';
+ // std::cout << '|';
+ // for(int i=0; i<numCycles-1; i++)
+ //   std::cout << 'c';
   std::cout << "}\n";
   sel.init(G.CartanSymmetric.NumCols);
    for(int i=0; i<numCycles; i++)
@@ -1740,7 +1740,7 @@ int main(void)
      }
      std::cout << ">\t";
      sel.incrementSelection();
-   }
+   }/*
    sel.init(G.CartanSymmetric.NumCols);
    for(int i=0; i<numCycles-1; i++)
    { std::cout << "&<";
@@ -1749,7 +1749,7 @@ int main(void)
      std::cout << "hr";
      std::cout << ">\t";
      sel.incrementSelection();
-   }
+   }*/
    std::cout << "\\\\" << std::endl;
    for(int i=0; i<ts.size; i++)
    { for(int j=0; j<ts[i].size; j++)

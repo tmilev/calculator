@@ -299,12 +299,15 @@ GlobalVariables* theGlobalVariables)
   { newCandidate=baseCandidate;
     this->RegisterPossibleCandidate(newCandidate, theGlobalVariables);
     if (!newCandidate.ComputeChar(false, theGlobalVariables))
-    { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
-      //std::cout << newCandidate.ToString() << " is bad<br>";
+    { theReport.Report
+      ("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " doesn't have fitting chars.");
+      //std::cout << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " doesn't have fitting chars.<br>";
       return;
     }
     if (!newCandidate.ComputeSystem(theGlobalVariables))
-    { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
+    { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " -> no system solution.");
+      //std::cout << "Candidate "
+      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " -> no system solution. ";
       return;
     }
     for (int i=0; i<this->Hcandidates.size; i++)
@@ -315,7 +318,7 @@ GlobalVariables* theGlobalVariables)
         std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
         << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
       }
-//    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
+//    std::cout << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << "<b> IS GOOD</b><br>";
     newCandidate.indexInOwner=this->Hcandidates.size;
     this->Hcandidates.AddOnTop(newCandidate);
     if (!this->Hcandidates.LastObject()->indexInOwner==this->Hcandidates.size-1)
@@ -357,7 +360,7 @@ GlobalVariables* theGlobalVariables)
       else
         reportStreamX << " which is all nice and dandy.<br>";
       theReport1.Report(reportStreamX.str());
-//      std::cout << "<br>" << reportStreamX.str();
+     // std::cout << "<br>" << reportStreamX.str();
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
@@ -412,10 +415,6 @@ GlobalVariables* theGlobalVariables)
         if (theGlobalVariables!=0)
         { out2 << " the candidate is no good. ";
           theReport2.Report(out2.str());
-//            std::cout << "No good: " << baseCandidate.theTypes.ToString() << ", "
-//            << baseCandidate.CartanSAsByComponent.LastObject()->ToString()
-//            << " extra weight  " << Hrescaled.ToString()
-//            << "<br>";
         }
     }
   }
@@ -694,7 +693,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  this->AttemptToSolveSytem(theGlobalVariables);
+  if (this->flagDoAttemptToSolveSystem)
+    this->AttemptToSolveSytem(theGlobalVariables);
   if (this->flagSystemProvedToHaveNoSolution)
     return false;
   if (this->flagSystemSolved)
@@ -806,7 +806,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
 CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
+flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(false), totalNumUnknowns(0)
 {
 }
 
@@ -1188,8 +1188,6 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
-  this->flagSystemSolved=false;
-  this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
 //  return true;
   GroebnerBasisComputation<Rational> theComputation;
@@ -1311,16 +1309,27 @@ bool CandidateSSSubalgebra::ComputeChar
   (tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  //std::cout << "<br>Cartan symmetric, type  "
+  //<< this->theWeylNonEmbeddeD.theDynkinType.ToString() << " <br>"
+  //<< this->theWeylNonEmbeddeD.CartanSymmetric.ToString();
   for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
   { int counter=-1;
     for (int i=0; i<this->CartanSAsByComponent.size; i++)
       for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
       { counter++;
         tempMon.weightFundamentalCoords[counter]=
-        this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootScalarCartanRoot
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
-        /theTypes[i].GetDefaultRootLengthSquared(j)*2
+        /theTypes[i].GetDefaultRootLengthSquared(j))*2
         ;
+        /*std::cout << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
+        << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
+        << this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]).ToString()
+        << " -> "
+        << (this->GetAmbientWeyl().RootScalarCartanRoot
+        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
+        /theTypes[i].GetDefaultRootLengthSquared(j))*2;*/
         if(!tempMon.weightFundamentalCoords[counter].IsInteger())
         { if (!allowBadCharacter)
           { std::cout << "This is a programming error: function ComputeChar called  "
@@ -1340,6 +1349,8 @@ bool CandidateSSSubalgebra::ComputeChar
   this->theCharFundCoords.MakeZero
   (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe))
   ;
+//  std::cout << "<hr>Current candidate: " << this->ToStringCartanSA();
+//  std::cout << "<br>reducing: " << accumChar.ToString();
   while (accumChar.size>0)
   { int currentIndex=
     accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
@@ -1350,11 +1361,18 @@ bool CandidateSSSubalgebra::ComputeChar
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
+    //std::cout << "<br>Extreme weight: " << //this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
+    //(accumChar[currentIndex].weightFundamentalCoords).ToString();
+
     if (accumChar.theCoeffs[currentIndex]<0)
+    { //std::cout << "<br>accumChar has negative coeff!";
       return false;
+    }
     for (int i=0; i<accumChar[currentIndex].weightFundamentalCoords.size; i++)
       if (accumChar[currentIndex].weightFundamentalCoords[i]<0)
+      { //std::cout << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
         return false;
+      }
     freudenthalChar.MakeZero
     (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe));
     freudenthalChar.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
@@ -1373,6 +1391,7 @@ bool CandidateSSSubalgebra::ComputeChar
       return false;
     }
     accumChar-=outputChar;
+    //std::cout << "<br>remaining char:" << accumChar.ToString();
   }
   return true;
 }
@@ -1409,7 +1428,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
   consideringStream << "<br>\nCurrent rank: " << currentRank
   << "<br>\nConsidering: " << theType.ToString();
-//  std::cout << "<br>Considering: " << theType.ToString();
+  //std::cout << "<br>Considering: " << theType.ToString();
   theProgressReport1.Report(consideringStream.str());
   if (currentRank!=0 && dimCentralizerBase < theType.GetSSAlgDim())
   { consideringStream << " turns out to be no good as the desired root system size is "
@@ -1567,7 +1586,7 @@ void slTwoSubalgebra::ElementToHtmlCreateFormulaOutputReference
   (*container.texStringsEachFile.LastObject())=formulaTex;
   tempStream << (*physicalPath) << "fla";
   tempStream << container.texFileNamesForPNG.size << ".tex";
-  container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
+  container.texFileNamesForPNG[container.texFileNamesForPNG.size-1]=tempStream.str();
   output << "<img src=\"" << (*htmlPathServer) << "fla" << container.texFileNamesForPNG.size
   << ".png\">";
   if (useHtml)
@@ -2812,6 +2831,29 @@ std::string SemisimpleSubalgebras::GetAlgebraLink(int ActualIndexSubalgebra, For
   return out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
+  bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
+  List<DynkinSimpleType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  out << "<br>Elements Cartan by components: ";
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+  { if (useLaTeX && useHtml)
+      out << CGI::GetHtmlMathSpanPure(theTypes[i].ToString(), 1000) << ": ";
+    else
+      out << theTypes[i] << ":";
+    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+    { out << this->CartanSAsByComponent[i][j].ToString() << ": "
+      << this->GetAmbientWeyl().RootScalarCartanRoot
+      (this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);
+      if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
+        out << ", ";
+    }
+  }
+  return out.str();
+}
+
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
@@ -2821,6 +2863,15 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "Subalgebra type: " << this->owner->GetAlgebraLink(this->indexInOwner, theFormat)
   << " (click on type for detailed printout).";
   bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
+  bool weightsAreCoordinated=true;
+  if (this->modulesGrouppedByWeight.size!=this->weightsOfModules.size)
+    weightsAreCoordinated=false;
+  else
+    for (int i=0; i<this->modulesGrouppedByWeight.size; i++)
+      if (this->modulesGrouppedByWeight[i].size!=this->weightsOfModules[i].size)
+      { weightsAreCoordinated=false;
+        break;
+      }
   if (this->indicesDirectSummandSuperAlgebra.size>0)
   { /*out << "<br>Contained as an immediate (no in-betweens) direct summand of: ";
     DynkinType tempType;
@@ -2846,22 +2897,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << ". ";
   }
   if (!shortReportOnly)
-  { List<DynkinSimpleType> theTypes;
-    this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-    out << "<br>Elements Cartan by components: ";
-    for (int i=0; i<this->CartanSAsByComponent.size; i++)
-    { if (useLaTeX && useHtml)
-        out << CGI::GetHtmlMathSpanPure(theTypes[i].ToString(), 1000) << ": ";
-      else
-        out << theTypes[i] << ":";
-      for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-      { out << this->CartanSAsByComponent[i][j].ToString() << ": "
-        << this->GetAmbientWeyl().RootScalarCartanRoot
-        (this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);
-        if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
-          out << ", ";
-      }
-    }
+  { out <<this->ToStringCartanSA(theFormat);
   }
   MonomialChar<Rational> theZeroWeight;
   theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
@@ -3007,7 +3043,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 //    if (this->flagSystemSolved)
 //      out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
-  if (CentralizerIsWellChosen)
+  if (CentralizerIsWellChosen && weightsAreCoordinated)
   { int numZeroWeights=0;
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus "
     << " the dimension of the centralizer of the subalgebra "

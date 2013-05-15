@@ -3659,7 +3659,7 @@ void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstC
   theMon.theRank=rank;
   theMon.theLetter=type;
   if (inputFirstCoRootSqLength==0)
-    theMon.lengthFirstCoRootSquared= theMon.theLetter== 'F' ? 1 : 2;
+    theMon.lengthFirstCoRootSquared= 2;
   else
     theMon.lengthFirstCoRootSquared=*inputFirstCoRootSqLength;
   if (theMon.lengthFirstCoRootSquared<=0)
@@ -4108,10 +4108,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
       assert(false);
       break;
   }
-  if (this->theLetter!='F')
-    output*=(this->lengthFirstCoRootSquared/2);
-  else
-    output*=this->lengthFirstCoRootSquared;
+  output*=this->lengthFirstCoRootSquared/2;
 }
 
 Rational DynkinSimpleType::GetRatioLongRootToFirst
@@ -4159,7 +4156,7 @@ void DynkinSimpleType::operator++(int)
       return;
     }
     if (this->theRank==6 || this->theRank==7 || this->theRank==8)
-    { this->theLetter='F';
+    { this->theLetter='E';
       return;
     }
     this->theLetter='A';

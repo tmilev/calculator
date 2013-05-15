@@ -8100,7 +8100,7 @@ void Vectors<CoefficientType>::SelectABasisInSubspace
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "Selecting a basis of a vector space with "
-    << input.size << "generators in dimension " << theDim << "... " ;
+    << input.size << " generators in dimension " << theDim << "... " ;
     theReport.Report(reportStream.str());
   }
   Matrix<CoefficientType> theMat;

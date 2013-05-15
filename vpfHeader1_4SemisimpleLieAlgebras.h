@@ -241,6 +241,7 @@ public:
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
+  bool flagDoAttemptToSolveSystem;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknowns;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
@@ -353,6 +354,7 @@ public:
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   bool operator>(const CandidateSSSubalgebra& other)const ;

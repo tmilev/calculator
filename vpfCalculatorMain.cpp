@@ -436,7 +436,7 @@ Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{4}, ((1, 3/2, 2, 1), (-1/2, 0,
  g_{2},  g_{-2},\n\
  g_{3},  g_{-3})\n\
 ), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (F)^{1}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, -1, 0), (0, 0, 0, -1)),\n\
+Serialization{}(LoadCandidateSubalgebra, (F)_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, -1, 0), (0, 0, 0, -1)),\n\
 (\n\
  g_{-24},  g_{24},\n\
  g_{1},  g_{-1},\n\
@@ -598,6 +598,7 @@ int main(int argc, char **argv)
 // civilizedInput="experimentalPrintSemisimpleSubalgebras{}(d_4)";
   //civilizedInput="PenkovProjectTest";
 //  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
+
   PredefinedStrings(civilizedInput);
 
 

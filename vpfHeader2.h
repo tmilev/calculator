@@ -1434,7 +1434,10 @@ public:
   static bool innerIsRational
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fFreudenthalEval
+  static bool innerFreudenthalEval
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerFreudenthalFull
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
     static bool innerGCDOrLCM

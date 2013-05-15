@@ -755,14 +755,19 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}", true, true);
   this->AddOperationInnerHandler
-  ("Freudenthal", this->fFreudenthalEval, "",
+  ("Freudenthal", this->innerFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
    module of a highest weight given in fundamental coordinates. The first argument gives \
    the semisimple Lie algebra type, the second argument gives the highest weight in \
    fundamental coordinates. ",
    "Freudenthal{}(B_3, (2,2,2))", true, false)
    ;
-
+  this->AddOperationInnerHandler
+  ("FreudenthalFull", this->innerFreudenthalFull, "",
+   "Computes the full character and prints it to screen. \
+    Argument format same as the Freudenthal function. ",
+   "FreudenthalFull{}(G_2, (2,1))", true, false)
+   ;
 //  this->AddOperationInnerHandler
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",

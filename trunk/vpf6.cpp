@@ -3437,8 +3437,7 @@ bool CommandList::innerPrintSSLieAlgebra
   DynkinSimpleType tempSimpleType;
   if (theWeyl.theDynkinType.IsSimple
       (&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.lengthFirstCoRootSquared))
-  { if ((tempSimpleType.theLetter!='F' && tempSimpleType.lengthFirstCoRootSquared==2) ||
-        (tempSimpleType.theLetter=='F' && tempSimpleType.lengthFirstCoRootSquared==1))
+    if (tempSimpleType.lengthFirstCoRootSquared==2)
     { //std::cout << "here i am";
       Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
@@ -3458,7 +3457,6 @@ bool CommandList::innerPrintSSLieAlgebra
         assert(false);
       }
     }
-  }
   if (Verbose)
   { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
     << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
@@ -6136,7 +6134,32 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators
    &partialString, &exponentLetterString);
 }
 
-bool CommandList::fFreudenthalEval
+bool CommandList::innerFreudenthalFull
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Vector<Rational> hwFundamental, hwSimple;
+  Selection tempSel;
+  SemisimpleLieAlgebra* theSSalg;
+  Expression context;
+  if (!theCommands.innerGetTypeHighestWeightParabolic<Rational>
+      (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
+    return output.SetError("Failed to extract highest weight and algebra", theCommands);
+  if (output.IsError())
+    return true;
+  if (tempSel.CardinalitySelection>0)
+    return output.SetError("Failed to extract highest weight. ", theCommands);
+  charSSAlgMod<Rational> startingChar, resultChar ;
+  hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
+  startingChar.MakeFromWeight(hwSimple, theSSalg);
+  std::string reportString;
+  if (!startingChar.FreudenthalEvalMeFullCharacter
+      (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
+    return output.SetError(reportString, theCommands);
+  std::stringstream out;
+  out << resultChar.ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerFreudenthalEval
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;

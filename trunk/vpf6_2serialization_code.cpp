@@ -785,6 +785,7 @@ bool Serialization::innerLoadFromObject
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
+  outputSubalgebra.flagDoAttemptToSolveSystem=true;
   if (input.children.size==5)
   { Expression theGensE=input[4];
     theGensE.Sequencefy();
@@ -800,6 +801,9 @@ bool Serialization::innerLoadFromObject
       else
         outputSubalgebra.thePosGens.AddOnTop(curGen);
     }
+    outputSubalgebra.flagDoAttemptToSolveSystem=false;
+    outputSubalgebra.flagSystemProvedToHaveNoSolution=false;
+    outputSubalgebra.flagSystemSolved=true;
   }
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
@@ -807,7 +811,6 @@ bool Serialization::innerLoadFromObject
   owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded.GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
-
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
   if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra "

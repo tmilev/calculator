@@ -242,6 +242,7 @@ public:
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   bool flagDoAttemptToSolveSystem;
+  bool flagCentralizerIsWellChosen;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknowns;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
@@ -263,6 +264,7 @@ public:
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
   std::string nilradicalGenerationLog;
+  Rational centralizerCartanSize;
 
   CandidateSSSubalgebra();
   void GetHsByType
@@ -286,6 +288,8 @@ public:
   void GetGenericLinearCombinationInvolvedPosGens
   (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
+  void ComputeCentralizerIsWellChosen();
+  void AdjustCentralizerAndRecompute();
   void AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
   ;
@@ -354,6 +358,7 @@ public:
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;

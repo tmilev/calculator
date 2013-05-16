@@ -894,12 +894,14 @@ public:
   ;
   void GetDynkinTypeWithDefaultLengths(DynkinType& output);
   DynkinSimpleType GetGreatestSimpleType()const;
+  DynkinSimpleType GetSmallestSimpleType()const;
   Rational GetSizeWeylGroupByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out << *this;
     return out.str();
   }
+  void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier)const
   { int result;
     if(!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result))

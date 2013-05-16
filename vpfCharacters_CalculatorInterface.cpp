@@ -169,7 +169,7 @@ void WeylGroupRepresentation<coefficient>::Restrict
   output.gramMatrixInverted.Invert();
   output.theCharacter=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);
-  for(int i=1; i<this->OwnerGroup->CartanSymmetric.NumCols+1; i++)
+  for(int i=1; i<this->OwnerGroup->GetDim()+1; i++)
     if (this->theElementIsComputed[i])
     { output.theElementIsComputed[i]=true;
       if (theGlobalVariables!=0)
@@ -423,13 +423,18 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacter.ToString();
-    int denom = 0;
-    for(int gi=1; gi<this->OwnerGroup->CartanSymmetric.NumCols+1; gi++)
-      for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
-        for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
-          if(this->theElementImages[gi].elements[mi][mj].GetDenominator() > denom)
-            denom = this->theElementImages[gi].elements[mi][mj].GetDenominator().GetUnsignedIntValueTruncated();
-    reportStream << " largest denominator is " << denom;
+    LargeIntUnsigned denom = 0;
+    for(int gi=1; gi<this->OwnerGroup->GetDim()+1; gi++)
+      if (!this->theElementIsComputed[gi])
+      { std::cout << "This is a programming error: the simple generator has not been computed, but "
+        << " is being used. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      } else
+        for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
+          for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
+            if(this->theElementImages[gi](mi,mj).GetDenominator() > denom)
+              denom = this->theElementImages[gi](mi,mj).GetDenominator();
+    reportStream << " largest denominator is " << denom.ToString();
     Report1.Report(reportStream.str());
   }
   //chop off already known pieces:

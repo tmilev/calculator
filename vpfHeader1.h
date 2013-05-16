@@ -2847,7 +2847,7 @@ public:
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(unsigned int x)
-  { this->Assign(x);
+  { this->AssignShiftedUInt(x,0);
   }
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); ParallelComputing::SafePointDontCallMeFromDestructors();}
   LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; ParallelComputing::SafePointDontCallMeFromDestructors(); }
@@ -2858,7 +2858,12 @@ public:
     tempI.MakeOne();
     return tempI;
   }
-  inline bool operator<(const LargeIntUnsigned& other)const{return !this->IsGEQ(other);}
+  inline bool operator<(const LargeIntUnsigned& other)const
+  { return !this->IsGEQ(other);
+  }
+  bool operator>(const LargeIntUnsigned& other)const
+  { return other<*this;
+  }
   //must be rewritten:
   double GetDoubleValue();
   void FitSize();

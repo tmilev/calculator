@@ -2778,6 +2778,11 @@ public:
   }
   static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
   { LargeIntUnsigned tempUI, tempUI2;
+    if (a.IsEqualToZero() || b.IsEqualToZero())
+    { std::cout << "This is a programming error: calling lcm on zero elements is not allowed. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     LargeIntUnsigned::gcd(a, b, tempUI);
     a.MultiplyBy(b, tempUI2);
     output.Assign(tempUI2);

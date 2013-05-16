@@ -1435,7 +1435,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   this->RecursionCounterSerreLikeSystem=0;
   this->MaxNumComputations=1000;
   int numVars=0;
-  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
+//  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<CoefficientType> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());

@@ -96,7 +96,9 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   }
   out << "The subalgebras are ordered by "
   << "(rank, dimensions of simple constituents, Dynkin indices of simple constituents). "
-  << "The upper index stands for the length of the first co-root squared. "
+  << "The upper index stands for the length of the first co-root squared. In the parenthesis, "
+  << " the upper index equals the square of the length of the first co-root of the subalgebra "
+  << " divided by the square of the length of the first co-root of the ambient algebra. "
   << " In type F_4, the upper index divided by two equals the Dynkin index of the subalgebra in  "
   << " F_4. "
   ;
@@ -267,6 +269,19 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
     << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
     assert(false);
   }
+}
+
+DynkinSimpleType DynkinType::GetSmallestSimpleType()const
+{ if (this->size==0)
+  { std::cout << "This is a programming error: asking for the smallest simple type "
+    << " of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  DynkinSimpleType result=(*this)[0];
+  for (int i=1; i<this->size; i++)
+    if ((*this)[i]<result)
+      result=(*this)[i];
+  return result;
 }
 
 DynkinSimpleType DynkinType::GetGreatestSimpleType()const
@@ -806,7 +821,8 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
 CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(false), totalNumUnknowns(0)
+flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(true),
+flagCentralizerIsWellChosen(false), totalNumUnknowns(0)
 {
 }
 
@@ -2815,6 +2831,19 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   return out.str();
 }
 
+void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy)
+{ DynkinType result;
+  result.MakeZero();
+  result.SetExpectedSize(this->size);
+  DynkinSimpleType tempType;
+  for (int i=0; i<this->size; i++)
+  { tempType=(*this)[i];
+    tempType.lengthFirstCoRootSquared*=multiplyCoRootSquaredLengthBy;
+    result.AddMonomial(tempType, this->theCoeffs[i]);
+  }
+  *this=result;
+}
+
 std::string SemisimpleSubalgebras::GetAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { if (ActualIndexSubalgebra<0)
     return "(non-initialized)";
@@ -2822,12 +2851,18 @@ std::string SemisimpleSubalgebras::GetAlgebraLink(int ActualIndexSubalgebra, For
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->Hcandidates[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
     makeLink=false;
+  DynkinType& theType=this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
+  DynkinType typeScaled=theType;
+  Rational theScale =
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared;
+  theScale.Invert();
+  typeScaled.ScaleFirstCoRootSquaredLength(theScale);
   if (makeLink)
     out << "<a href=\"" << this->GetDisplayFileName(ActualIndexSubalgebra, theFormat) << "\">"
     << CGI::GetHtmlMathSpanPure
-    (this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToString()) << "</a>";
+    (theType.ToString()) << "</a> " << CGI::GetHtmlMathSpanPure("("+typeScaled.ToString()+")");
   else
-    out << this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToString();
+    out << theType.ToString() << " " << " (" << typeScaled.ToString() << ")";
   return out.str();
 }
 
@@ -2854,6 +2889,47 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   return out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
+  bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
+  if (this->flagCentralizerIsWellChosen && this->indexMaxSSContainer!=-1)
+  { DynkinType centralizerType =
+    this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
+    centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+    out << "<br>Centralizer type: ";
+    if (useLaTeX && useHtml)
+      out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
+    else
+      out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
+    out << ". ";
+  }
+  if (!this->flagCentralizerIsWellChosen)
+  { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
+    << "Cartan of the centralizer, instead I got: </b> ";
+  } else
+    out << "<br>Basis of Cartan of centralizer: ";
+  out << this->CartanOfCentralizer.ToString();
+  return out.str();
+}
+
+void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
+{ MonomialChar<Rational> theZeroWeight;
+  theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
+  this->centralizerCartanSize =this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
+  this->flagCentralizerIsWellChosen = (this->centralizerCartanSize==0 )? true: false;
+  if (this->centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
+  { Rational centralizerRank=this->centralizerCartanSize;
+    if (this->indexMaxSSContainer!=-1)
+    { DynkinType centralizerType =
+      this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
+      centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+      centralizerRank-=centralizerType.GetRootSystemSize();
+    }
+    this->flagCentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
+  }
+}
+
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
@@ -2873,22 +2949,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         break;
       }
   if (this->indicesDirectSummandSuperAlgebra.size>0)
-  { /*out << "<br>Contained as an immediate (no in-betweens) direct summand of: ";
-    DynkinType tempType;
-    bool foundNonDirectContainers=false;
-    for (int i=0; i<this->indicesDirectSummandSuperAlgebra.size; i++)
-    { tempType=this->owner->Hcandidates[this->indicesDirectSummandSuperAlgebra[i]].theWeylNonEmbeddeD.theDynkinType;
-      tempType-=this->theWeylNonEmbeddeD.theDynkinType;
-      if (tempType.IsSimple())
-      { out << this->owner->GetAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], theFormat);
-        if (i!=this->indicesDirectSummandSuperAlgebra.size-1)
-          out << ", ";
-      } else
-        foundNonDirectContainers=true;
-    }
-    out << ". ";*/
-    //if (foundNonDirectContainers)
-    out << "<br>Contained as a direct summand of: ";
+  { out << "<br>Contained up to conjugation as a direct summand of: ";
     for (int i=0; i<this->indicesDirectSummandSuperAlgebra.size; i++)
     { out << this->owner->GetAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], theFormat);
       if (i!=this->indicesDirectSummandSuperAlgebra.size-1)
@@ -2896,35 +2957,11 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
     out << ". ";
   }
-  if (!shortReportOnly)
-  { out <<this->ToStringCartanSA(theFormat);
-  }
-  MonomialChar<Rational> theZeroWeight;
-  theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
-  Rational centralizerCartanSize=this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
-  bool CentralizerIsWellChosen= (centralizerCartanSize==0 )? true: false;
-  if (centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
-  { Rational centralizerRank=centralizerCartanSize;
-    if (this->indexMaxSSContainer!=-1)
-    { DynkinType centralizerType =
-      this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
-      centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
-      out << "<br>Centralizer type: ";
-      if (useLaTeX && useHtml)
-        out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
-      else
-        out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
-      out << ". ";
-      centralizerRank-=centralizerType.GetRootSystemSize();
-    }
-    CentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
-    if (!CentralizerIsWellChosen)
-    { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
-      << "Cartan of the centralizer, instead I got: </b> ";
-    } else
-      out << "<br>Basis of Cartan of centralizer: ";
-    out << this->CartanOfCentralizer.ToString();
-  }
+  out << "<br>" << this->ToStringCartanSA(theFormat);
+  out << this->ToStringCentralizer(theFormat);
+//  if (!shortReportOnly)
+//  {
+//  }
 //  out << "<br>Predefined or computed simple generators follow. ";
 /*  out << "<br>Negative generators: ";
   for (int i=0; i<this->theNegGens.size; i++)
@@ -2981,7 +3018,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << this->theCharFundCoords.ToString();
   if (this->CartanOfCentralizer.size>0)
     out << "<br>Primal decomposition of the ambient Lie algebra "
-    << "(refining above decomposition; order from above decomposition not preserved): "
+    << "(refining the above decomposition; the order from the above decomposition is not preserved): "
     << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->theCharOverCartanPlusCartanCentralizer.ToString(), 2000)
     :this->theCharOverCartanPlusCartanCentralizer.ToString());
   if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
@@ -3043,7 +3080,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 //    if (this->flagSystemSolved)
 //      out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
-  if (CentralizerIsWellChosen && weightsAreCoordinated)
+  if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
   { int numZeroWeights=0;
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus "
     << " the dimension of the centralizer of the subalgebra "
@@ -3052,15 +3089,15 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       for (int j=0; j<this->weightsOfModules[i].size; j++)
         if(this->weightsOfModules[i][j].IsEqualToZero())
           numZeroWeights+=this->modulesGrouppedByWeight[i].size;
-    out << numZeroWeights << " - " << centralizerCartanSize << "="
-    << ((centralizerCartanSize-numZeroWeights)*(-1)).ToString() << ".";
+    out << numZeroWeights << " - " << this->centralizerCartanSize << "="
+    << ((this->centralizerCartanSize-numZeroWeights)*(-1)).ToString() << ".";
   }
   if (this->flagSystemSolved && !shortReportOnly)
   { out << "<br>In the table below we indicate the highest weight "
     << "vectors of the decomposition of "
     << " the ambient Lie algebra as a module over the semisimple part. The second row indicates "
     << " weights of the highest weight vectors relative to the Cartan of the semisimple subalgebra. ";
-    if (CentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
+    if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
     { out << "As the centralizer is well-chosen and the centralizer of our subalgebra is non-trivial, "
       << " we may in addition split highest weight vectors with the same weight over the semisimple part "
       << " over the centralizer (recall that the centralizer preserves the weights over the subalgebra "
@@ -3079,7 +3116,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
     out << "<table border=\"1px solid black\"><tr><td>Highest vectors of representations (total "
     << this->highestVectorsModules.size << ") ";
-    if (CentralizerIsWellChosen)
+    if (this->flagCentralizerIsWellChosen)
       out << "; the vectors are over the primal subalgebra.";
     out << "</td>";
     for (int i=0; i<this->highestVectorsModules.size; i++)
@@ -3088,7 +3125,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     for (int i=0; i<this->highestWeightsModules.size; i++)
       out << "<td>" << this->highestWeightsModules[i].ToStringLetterFormat("\\omega") << "</td>";
     out << "</tr>";
-    if (CentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
+    if (this->flagCentralizerIsWellChosen && this->CartanOfCentralizer.size>0)
     { out << "<tr><td>weights rel. to Cartan of (centralizer+semisimple s.a.). "
       << "</td>";
       for (int i=0; i<this->highestWeightsCartanCentralizerSplitModules.size; i++)
@@ -3253,6 +3290,11 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
   return false;
 }
 
+void CandidateSSSubalgebra::AdjustCentralizerAndRecompute()
+{ this->ComputeCentralizerIsWellChosen();
+
+}
+
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
   for (int i=0; i<this->Hcandidates.size; i++)
@@ -3276,6 +3318,8 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
       }
     }
   }
+  for (int i=0; i<this->Hcandidates.size; i++)
+    this->Hcandidates[i].AdjustCentralizerAndRecompute();
 }
 
 bool DynkinType::operator>(const DynkinType& other)const

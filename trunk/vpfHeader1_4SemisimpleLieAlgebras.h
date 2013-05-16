@@ -215,6 +215,7 @@ public:
   List<ElementSemisimpleLieAlgebra<Rational> > theBasis;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownCartanCentralizerBasis;
 
   List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
@@ -244,7 +245,8 @@ public:
   bool flagDoAttemptToSolveSystem;
   bool flagCentralizerIsWellChosen;
   int RecursionDepthCounterForNilradicalGeneration;
-  int totalNumUnknowns;
+  int totalNumUnknownsNoCentralizer;
+  int totalNumUnknownsWithCentralizer;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
   List<bool> NilradicalConesIntersect;
   Vectors<Rational> ConeIntersections;
@@ -273,6 +275,9 @@ public:
   bool HasConjugateHsTo(List<Vector<Rational> >& other);
   bool IsDirectSummandOf(CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
 
+  void GetGenericCartanCentralizerLinearCombination
+  (int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+  ;
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
@@ -289,7 +294,7 @@ public:
   (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
   void ComputeCentralizerIsWellChosen();
-  void AdjustCentralizerAndRecompute();
+  void AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables);
   void AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
   ;
@@ -343,10 +348,10 @@ public:
   (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
   ;
   bool ComputeSystem
-(GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
  ;
   bool ComputeSystemPart2
-(GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
  ;
   bool ComputeChar
 (bool allowBadCharacter, GlobalVariables* theGlobalVariables)

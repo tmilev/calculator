@@ -319,7 +319,7 @@ GlobalVariables* theGlobalVariables)
       //std::cout << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " doesn't have fitting chars.<br>";
       return;
     }
-    if (!newCandidate.ComputeSystem(theGlobalVariables))
+    if (!newCandidate.ComputeSystem(theGlobalVariables, false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " -> no system solution.");
       //std::cout << "Candidate "
       //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " -> no system solution. ";
@@ -587,7 +587,7 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
 }
 
 bool CandidateSSSubalgebra::ComputeSystem
-(GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
@@ -630,11 +630,11 @@ bool CandidateSSSubalgebra::ComputeSystem
     if (currentInvolvedNegGens.size==0)
       return false;
   }
-  return this->ComputeSystemPart2(theGlobalVariables);
+  return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer);
 }
 
 bool CandidateSSSubalgebra::ComputeSystemPart2
-(GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<Rational> >
@@ -644,7 +644,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
   const SemisimpleLieAlgebra& nonEmbeddedMe=
   this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
-  this->totalNumUnknowns=0;
+  this->totalNumUnknownsNoCentralizer=0;
   if (this->theHs.size==0)
   { std::cout << "This is a programming error: the number of involved H's cannot be zero. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -657,20 +657,39 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     assert(false);
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
-    this->totalNumUnknowns+=this->theInvolvedNegGenerators[i].size;
+    this->totalNumUnknownsNoCentralizer+=this->theInvolvedNegGenerators[i].size;
   if (this->theWeylNonEmbeddeD.RootSystem.size==0)
   { std::cout << "This is a programming error: the root system of the "
     << " candidate subalgebra has not been computed "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->totalNumUnknowns*=2;
+  this->totalNumUnknownsNoCentralizer*=2;
+  this->totalNumUnknownsWithCentralizer=this->totalNumUnknownsNoCentralizer;
   this->theUnknownNegGens.SetSize(this->theInvolvedNegGenerators.size);
   this->theUnknownPosGens.SetSize(this->theInvolvedPosGenerators.size);
+  if (!AttemptToChooseCentalizer)
+    this->theUnknownCartanCentralizerBasis.SetSize(0);
+  else
+  { int rankCentralizer;
+    bool tempB= this->centralizerCartanSize.IsSmallInteger(&rankCentralizer);
+    if (!tempB || rankCentralizer<0)
+    { std::cout << "This is a programming error: rankCentralizer not computed when it should be. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim();
+    this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
+  }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
     //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
+  }
+  for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
+  { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
+    std::cout << "<hr>Unknown generator index " << i << ": "
+    << this->theUnknownCartanCentralizerBasis[i].ToString();
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
@@ -681,6 +700,14 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     //<< this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
     lieBracketMinusGoalValue-=goalValue;
     this->AddToSystem(lieBracketMinusGoalValue);
+    for (int j=0; j<this->theUnknownCartanCentralizerBasis.size; j++)
+    { this->GetAmbientSS().LieBracket
+      (this->theUnknownNegGens[i], this->theUnknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
+      this->AddToSystem(lieBracketMinusGoalValue);
+      this->GetAmbientSS().LieBracket
+      (this->theUnknownPosGens[i], this->theUnknownCartanCentralizerBasis[j], lieBracketMinusGoalValue);
+      this->AddToSystem(lieBracketMinusGoalValue);
+    }
     for (int j=0; j<this->theInvolvedPosGenerators.size; j++)
       if (i!=j)
       { this->GetAmbientSS().LieBracket
@@ -822,7 +849,7 @@ CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(true),
-flagCentralizerIsWellChosen(false), totalNumUnknowns(0)
+flagCentralizerIsWellChosen(false), totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
 {
 }
 
@@ -1244,41 +1271,35 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{/* if (indexNegGens==0)
-  { Polynomial<Rational> tempP;
-    slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
-    output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
-    for (int j=0; j<curSl2.theF.size; j++)
-    { tempP.MakeConst(this->totalNumUnknowns, curSl2.theF.theCoeffs[j]);
-      output.AddMonomial(curSl2.theF[j], tempP);
-    }
-    return;
-  }*/
-  int offsetIndex=0;
+{ int offsetIndex=0;
   for (int i=0; i<indexNegGens; i++)
     offsetIndex+=this->theInvolvedNegGenerators[i].size;
   this->GetGenericLinearCombination
-  (this->totalNumUnknowns, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
+  (this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
+}
+
+void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination
+  (int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+{ int offsetIndex=
+  this->totalNumUnknownsNoCentralizer+indexCartanCentralizerGen*this->GetAmbientWeyl().GetDim() ;
+  List<ChevalleyGenerator> eltsCartan;
+  eltsCartan.SetSize(this->GetAmbientWeyl().GetDim());
+  for (int i=0; i<eltsCartan.size; i++)
+  { eltsCartan[i].theGeneratorIndex=this->GetAmbientSS().GetNumPosRoots()+i;
+    eltsCartan[i].owneR=&this->GetAmbientSS();
+  }
+  this->GetGenericLinearCombination
+  (this->totalNumUnknownsWithCentralizer, offsetIndex, eltsCartan, output);
 }
 
 void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ /*if (indexPosGens==0)
-  { Polynomial<Rational> tempP;
-    slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
-    output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
-    for (int j=0; j<curSl2.theE.size; j++)
-    { tempP.MakeConst(this->totalNumUnknowns, curSl2.theE.theCoeffs[j]);
-      output.AddMonomial(curSl2.theE[j], tempP);
-    }
-    return;
-  }*/
-  int offsetIndex=0;
+{ int offsetIndex=0;
   for (int i=0; i<indexPosGens; i++)
     offsetIndex+=this->theInvolvedPosGenerators[i].size;
-  offsetIndex+=this->totalNumUnknowns/2;
+  offsetIndex+=this->totalNumUnknownsNoCentralizer/2;
   this->GetGenericLinearCombination
-  (this->totalNumUnknowns, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
+  (this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
 }
 
 void CandidateSSSubalgebra::AddToSystem
@@ -3290,9 +3311,9 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
   return false;
 }
 
-void CandidateSSSubalgebra::AdjustCentralizerAndRecompute()
+void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
 { this->ComputeCentralizerIsWellChosen();
-
+  this->ComputeSystem(theGlobalVariables, true);
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
@@ -3319,7 +3340,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
     }
   }
   for (int i=0; i<this->Hcandidates.size; i++)
-    this->Hcandidates[i].AdjustCentralizerAndRecompute();
+    this->Hcandidates[i].AdjustCentralizerAndRecompute(theGlobalVariables);
 }
 
 bool DynkinType::operator>(const DynkinType& other)const

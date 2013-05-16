@@ -811,7 +811,7 @@ bool Serialization::innerLoadFromObject
   owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded.GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
-  outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS);
+  outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS, false);
   if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra "
     << " does not decompose properly over the candidate subalgebra. ";

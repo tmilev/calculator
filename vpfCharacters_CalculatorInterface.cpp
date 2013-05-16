@@ -391,6 +391,28 @@ void WeylGroupRepresentation<coefficient>::SpreadVector(const Vector<coefficient
 }
 
 template <class coefficient>
+void WeylGroupRepresentation<coefficient>::GetLargestDenominatorSimpleGens
+(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const
+{ MacroRegisterFunctionWithName("WeylGroupRepresentation::GetLargestDenominatorSimpleGens");
+  outputLCM=1;
+  outputDen=1;
+  for(int gi=1; gi<this->OwnerGroup->GetDim()+1; gi++)
+    if (!this->theElementIsComputed[gi])
+    { std::cout << "This is a programming error: the simple generator has not been computed, but "
+      << " is being used. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    } else
+      for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
+        for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
+        { if(this->theElementImages[gi](mi,mj).GetDenominator() > outputDen)
+            outputDen = this->theElementImages[gi](mi,mj).GetDenominator();
+          outputLCM=
+          LargeIntUnsigned::lcm(outputLCM, this->theElementImages[gi](mi,mj).GetDenominator());
+        }
+}
+
+
+template <class coefficient>
 bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
 (Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName(" WeylGroupRepresentation::DecomposeMeIntoIrrepsRecursive");
@@ -423,18 +445,10 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "<br>\nDecomposing module with character " << this->theCharacter.ToString();
-    LargeIntUnsigned denom = 0;
-    for(int gi=1; gi<this->OwnerGroup->GetDim()+1; gi++)
-      if (!this->theElementIsComputed[gi])
-      { std::cout << "This is a programming error: the simple generator has not been computed, but "
-        << " is being used. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      } else
-        for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
-          for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
-            if(this->theElementImages[gi](mi,mj).GetDenominator() > denom)
-              denom = this->theElementImages[gi](mi,mj).GetDenominator();
-    reportStream << " largest denominator is " << denom.ToString();
+    LargeIntUnsigned largestDen, lcmDen;
+    this->GetLargestDenominatorSimpleGens(lcmDen, largestDen);
+    reportStream << "\n<br>\n Largest denominator is " << largestDen.ToString()
+    << ", denominator lcm is: " << lcmDen.ToString();
     Report1.Report(reportStream.str());
   }
   //chop off already known pieces:

@@ -977,6 +977,8 @@ class WeylGroupRepresentation
   }
   void ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables=0);
   Vector<coefficient>& GetCharacter();
+  void GetLargestDenominatorSimpleGens
+  (LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const;
   void reset(WeylGroup* inputOwner);
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix
@@ -9216,7 +9218,11 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
   else
     out << "Character needs to be computed.";
   int theRank=this->OwnerGroup->GetDim();
-  out << "<br>The simple generators (" << theRank << " total):<br> ";
+  LargeIntUnsigned theLCM, theDen;
+  this->GetLargestDenominatorSimpleGens(theLCM, theDen);
+  out << "\n<br>\n LCM denominators simple generators: "
+  << theLCM.ToString() << ", largest denominator: " << theDen.ToString();
+  out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
   for (int i=1; i<theRank+1; i++)
     if (this->theElementIsComputed[i])

@@ -1445,11 +1445,9 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   if (this->flagSystemSolvedOverBaseField)
   { if (this->solutionsFound.GetElement().CardinalitySelection!=
         this->solutionsFound.GetElement().MaxSize)
-    { std::cout << "This is a programming error. Function SolveSerreLikeSystemRecursively"
-      << " reports to have found a solution over the base field, but not all variables were "
-      << " computed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      for (int i=0; i<this->solutionsFound.GetElement().MaxSize; i++)
+        if (!this->solutionsFound.GetElement().selected[i])
+          this->SetSerreLikeSolutionIndex(i, 0);
     PolynomialSubstitution<CoefficientType> theSub;
     this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
     workingSystem=inputSystem;

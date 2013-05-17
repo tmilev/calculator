@@ -1669,17 +1669,17 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   tempS=this->preferredAmbientSimpleBasis.ToString();
   std::string physicalPath="";
   std::string htmlPathServer="";
-  bool usePNG=false;
+  //bool usePNG=false;
   bool useHtml=true;
   bool useLatex=false;
   if (theFormat!=0)
     if (theFormat->PathPhysicalOutputFolder!="")
     { physicalPath=theFormat->PathPhysicalOutputFolder+ "sl2s/";
       htmlPathServer=theFormat->PathDisplayNameCalculator + "sl2s/";
-      usePNG=theFormat->flagUsePNG;
+      //usePNG=theFormat->flagUsePNG;
     }
   if (physicalPath=="" || htmlPathServer=="")
-  { usePNG=false;
+  { //usePNG=false;
     useHtml=false;
   }
   if (useHtml)
@@ -1715,67 +1715,45 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<br>";
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
-  this->ElementToHtmlCreateFormulaOutputReference
-  ("$"+tempS+"$", out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
+  out << CGI::GetHtmlMathSpanPure(tempS) << "\n<br>\n";
   if (indexInContainer!=-1)
   { this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
     this->container->IndicesSl2decompositionFlas[indexInContainer]=
     this->container->texFileNamesForPNG.size-1;
   }
-  out << "\nThe below list one possible realization of the sl(2) subalgebra.";
+  out << "\nBelow is one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS=this->theH.ToString(theFormat);
-  tempStreamH << "\n$h=$ $" << tempS << "$";
-  tempS= tempStreamH.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  tempStreamE << "\n$e=$ $" << this->theE.ToString(theFormat) << "$";
-  tempS= tempStreamE.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  tempStreamF << "\n$f=$ $" << this->theF.ToString(theFormat) << "$";
-  tempS= tempStreamF.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
+  tempStreamH << "\nh= " << tempS << "";
+  out << CGI::GetHtmlMathSpanPure(tempStreamH.str()) << "\n<br>\n";
+  tempStreamE << "\ne= " << this->theE.ToString(theFormat) << "\n<br>\n";
+  out << CGI::GetHtmlMathSpanPure(tempStreamE.str());
+  tempStreamF << "\nf= " << this->theF.ToString(theFormat) << "\n<br>\n";
+  out << CGI::GetHtmlMathSpanPure(tempStreamF.str()) << "\n<br>\n";
+  out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
-  tempStreamEF << "\n$[e, f]=$ $" <<  this->bufferEbracketF.ToString(theFormat) << "$";
-  tempS= tempStreamEF.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(theFormat) << "$";
-  tempS= tempStreamHE.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
-  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(theFormat) << "$";
-  tempS= tempStreamHF.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
+  tempStreamEF << "\n[e, f]=" <<  this->bufferEbracketF.ToString(theFormat) << "";
+  out << CGI::GetHtmlMathSpanPure(tempStreamEF.str()) << "\n<br>\n";
+  tempStreamHE << "\n[h, e]=" << this->bufferHbracketE.ToString(theFormat) << "";
+  out << CGI::GetHtmlMathSpanPure(tempStreamHE.str()) << "\n<br>\n";
+  tempStreamHF << "\n[h, f]= " << this->bufferHbracketF.ToString(theFormat) << "";
+  out << CGI::GetHtmlMathSpanPure(tempStreamHF.str()) << "\n<br>\n";
   //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
+  tempStreamActual << "\\begin{array}{l}";
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { tempS=this->theSystemToBeSolved[i].ToString(theFormat);
-    if (tempS=="")
-    { if (useLatex || usePNG)
-        tempStreamActual << "~\\\\";
-      else
-        tempStreamActual << "\n\n";
-    }
-    else
-      tempStreamActual << "\\noindent \\begin{eqnarray*}&& " << tempS << "=0\\end{eqnarray*}\n\n";
-  }
+    tempStreamActual << this->theSystemToBeSolved[i].ToString(theFormat) << "~\\\\";
+  tempStreamActual << "\\end{array}";
   out << "\nThe system we need to solve:\n";
   if (useHtml)
     out << "\n<br>\n";
-  tempS= tempStreamActual.str();
-  this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
+  out << CGI::GetHtmlMathSpanPure(tempStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -2275,6 +2253,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
   std::stringstream out2;
+  out2 << "<br>Length longest root ambient algebra squared/4= "
+  << this->GetOwnerWeyl().GetLongestRootLengthSquared()/4 << "<br>";
   out2
   << "<br> Given a root subsystem P, and a root subsubsystem P_0, in (10.2) "
   << " of Semisimple subalgebras of semisimple Lie algebras, E. Dynkin defines "
@@ -2283,8 +2263,6 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   << " the root subalgebra generated by P, such that it has characteristic 2 "
   << " for all simple roots of P lying in P_0, then e(P, P_0)=0. ";
 
-  out2 << "<br>Longest root ambient algebra= "
-  << this->GetOwnerWeyl().GetLongestRootLengthSquared()/4 << "<br>";
   if (this->BadHCharacteristics.size>0)
   { bool allbadAreGoodInTheirBadness=true;
     for (int i=0; i<this->BadHCharacteristics.size; i++)
@@ -2346,9 +2324,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     if (useHtml && usePNG)
-      out << "<img src=\"./fla"
-      << this->IndicesSl2decompositionFlas[i]+1 << ".png\"></td><td>";
-    else
+//      out << "<img src=\"./fla"
+//      << this->IndicesSl2decompositionFlas[i]+1 << ".png\"></td><td>";
+//    else
     { theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
       out << tempS;
       if (useHtml)
@@ -2410,7 +2388,7 @@ void SltwoSubalgebras::ElementToHtml
   std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->PathDisplayOutputFolder;
   std::string physicalPathSl2s= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder+"sl2s/";
   std::string htmlPathServerSl2s= theFormat==0 ? "": theFormat->PathDisplayOutputFolder+"sl2s/";
-
+  std::string PathDisplayServerBaseFolder= theFormat==0 ? "../../": theFormat->PathDisplayServerBaseFolder;
   ProgressReport theReport(theGlobalVariables);
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   std::string tempS;
@@ -2440,7 +2418,7 @@ void SltwoSubalgebras::ElementToHtml
   outNotation
   << "Notation, structure constants and Weyl group info: "
   << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())
-  << "<br> <a href=\""<< DisplayNameCalculator
+  << "<br> <a href=\"" << DisplayNameCalculator
   << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   out << this->ToString(theFormat);
@@ -2452,6 +2430,8 @@ void SltwoSubalgebras::ElementToHtml
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
     << this->theRootSAs[0].theDynkinDiagram.ToString() << "</title>";
+    theFile << "<script src=\"" << PathDisplayServerBaseFolder
+    << "jsmath/easy/load.js\"></script> ";
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"

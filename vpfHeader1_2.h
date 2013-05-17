@@ -850,6 +850,9 @@ class DynkinSimpleType
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
+  Rational GetRatioLongRootToFirst()const
+  { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
+  }
   std::string ToString(FormatExpressions* theFormat=0)const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other)const

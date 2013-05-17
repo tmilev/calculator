@@ -97,8 +97,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   out << "The subalgebras are ordered by "
   << "(rank, dimensions of simple constituents, Dynkin indices of simple constituents). "
   << "The upper index stands for the length of the first co-root squared. In the parenthesis, "
-  << " the upper index equals the square of the length of the first co-root of the subalgebra "
-  << " divided by the square of the length of the first co-root of the ambient algebra. "
+  << " the upper index equals the Dynkin index. "
   << " In type F_4, the upper index divided by two equals the Dynkin index of the subalgebra in  "
   << " F_4. "
   ;
@@ -2889,7 +2888,10 @@ std::string SemisimpleSubalgebras::GetAlgebraLink(int ActualIndexSubalgebra, For
   DynkinType& theType=this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
   DynkinType typeScaled=theType;
   Rational theScale =
-  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared;
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared
+  /
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst()
+  ;
   theScale.Invert();
   typeScaled.ScaleFirstCoRootSquaredLength(theScale);
   if (makeLink)

@@ -678,8 +678,22 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim();
+    this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()*2;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
+    Polynomial<Rational> tempP;
+    MonomialP tempM;
+    int theRank=this->GetAmbientWeyl().GetDim();
+    for (int i=0; i<rankCentralizer; i++)
+    { tempP.MakeZero();
+      for (int j=0; j<theRank; j++)
+      { tempM.MakeEi(i*theRank+this->totalNumUnknownsNoCentralizer+j, 1);
+        tempM[i*theRank+this->totalNumUnknownsNoCentralizer+rankCentralizer*theRank]=1;
+        tempP.AddMonomial(tempM, 1);
+      }
+      tempP+=-1;
+      this->theSystemToSolve.AddOnTop(tempP);
+      std::cout << "<hr>Adding to system: " << tempP.ToString();
+    }
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
@@ -3314,6 +3328,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
 void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
 { this->ComputeCentralizerIsWellChosen();
   this->ComputeSystem(theGlobalVariables, true);
+  this->ComputeCentralizerIsWellChosen();
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)

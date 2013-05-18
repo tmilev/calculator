@@ -599,7 +599,7 @@ int main(int argc, char **argv)
   //civilizedInput="PenkovProjectTest";
 //  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(c_3);";
-
+  //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
   PredefinedStrings(civilizedInput);
 
 

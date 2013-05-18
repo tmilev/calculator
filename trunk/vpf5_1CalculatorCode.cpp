@@ -1302,7 +1302,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   if (theGlobalVariables!=0)
   { std::stringstream out;
     out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem
-    << "<br>Solving the system" << inputSystem.ToString();
+    << "<br>Solving the system\n<br>\n" << inputSystem.ToString();
     theReport1.Report(out.str());
   }
   bool changed=true;

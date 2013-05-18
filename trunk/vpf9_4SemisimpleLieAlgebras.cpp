@@ -157,8 +157,10 @@ void SemisimpleSubalgebras::FindAllEmbeddings
   this->GetSSowner().FindSl2Subalgebras(theOwner, this->theSl2s, *theGlobalVariables);
   CandidateSSSubalgebra theCandidate;
   theCandidate.owner=this;
+//  bool aaarg;
   this->ExtendOneComponentOneTypeAllLengthsRecursive
   (theCandidate, theType, false, theGlobalVariables);
+//  this->HookUpCentralizers(theGlobalVariables);
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebras
@@ -309,6 +311,7 @@ GlobalVariables* theGlobalVariables)
   ProgressReport theReport0(theGlobalVariables);
   ProgressReport theReport1(theGlobalVariables);
   ProgressReport theReport2(theGlobalVariables);
+  //std::cout << "<hr> Trying to realize " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
   if (numVectorsFound==theNewTypE.theRank)
   { newCandidate=baseCandidate;
     this->RegisterPossibleCandidate(newCandidate, theGlobalVariables);
@@ -338,6 +341,9 @@ GlobalVariables* theGlobalVariables)
     if (!this->Hcandidates.LastObject()->indexInOwner==this->Hcandidates.size-1)
     { std::cout << "<hr>wtf? ";
       assert(false);
+    }
+    if (propagateRecursion)
+    { //std::cout << "<hr>Extending recursively: " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
     }
     if (propagateRecursion)
       this->ExtendCandidatesRecursive(newCandidate, propagateRecursion, theGlobalVariables);
@@ -374,7 +380,7 @@ GlobalVariables* theGlobalVariables)
       else
         reportStreamX << " which is all nice and dandy.<br>";
       theReport1.Report(reportStreamX.str());
-     // std::cout << "<br>" << reportStreamX.str();
+      //std::cout << "<br>" << reportStreamX.str();
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
@@ -427,8 +433,9 @@ GlobalVariables* theGlobalVariables)
         this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
       } else
         if (theGlobalVariables!=0)
-        { out2 << " the candidate is no good. ";
+        { out2 << " the orbit candidate is no good. ";
           theReport2.Report(out2.str());
+          //std::cout << out2.str();
         }
     }
   }
@@ -590,7 +597,7 @@ bool CandidateSSSubalgebra::ComputeSystem
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
-  this->theCoRoots.SetSize(this->theHs.size);
+  this->theHsScaledToActByTwo.SetSize(this->theHs.size);
   int counter=-1;
   DynkinType dynkinTypeDefaultLengths;
   this->theWeylNonEmbeddeD.theDynkinType.GetDynkinTypeWithDefaultLengths(dynkinTypeDefaultLengths);
@@ -601,12 +608,12 @@ bool CandidateSSSubalgebra::ComputeSystem
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     for (int j=0; j< this->CartanSAsByComponent[i].size; j++)
     { counter++;
-      this->theCoRoots[counter]=
+      this->theHsScaledToActByTwo[counter]=
       (this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
     }
-  this->theInvolvedNegGenerators.SetSize(this->theCoRoots.size);
-  this->theInvolvedPosGenerators.SetSize(this->theCoRoots.size);
-  for (int i=0; i<this->theCoRoots.size; i++)
+  this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
+  this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
+  for (int i=0; i<this->theHsScaledToActByTwo.size; i++)
   { List<ChevalleyGenerator>& currentInvolvedPosGens= this->theInvolvedPosGenerators[i];
     List<ChevalleyGenerator>& currentInvolvedNegGens= this->theInvolvedNegGenerators[i];
     currentInvolvedNegGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
@@ -671,7 +678,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     this->theUnknownCartanCentralizerBasis.SetSize(0);
   else
   { int rankCentralizer;
-    bool tempB= this->centralizerCartanSize.IsSmallInteger(&rankCentralizer);
+    bool tempB= this->centralizerRank.IsSmallInteger(&rankCentralizer);
     if (!tempB || rankCentralizer<0)
     { std::cout << "This is a programming error: rankCentralizer not computed when it should be. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -691,7 +698,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
       }
       tempP+=-1;
       this->theSystemToSolve.AddOnTop(tempP);
-      std::cout << "<hr>Adding to system: " << tempP.ToString();
+//      std::cout << "<hr>Adding to system: " << tempP.ToString();
     }
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
@@ -701,11 +708,11 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   }
   for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
   { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
-    std::cout << "<hr>Unknown generator index " << i << ": "
-    << this->theUnknownCartanCentralizerBasis[i].ToString();
+//    std::cout << "<hr>Unknown generator index " << i << ": "
+//    << this->theUnknownCartanCentralizerBasis[i].ToString();
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
-  { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
+  { desiredHpart=this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
     this->GetAmbientSS().LieBracket
     (this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
@@ -1372,14 +1379,14 @@ bool CandidateSSSubalgebra::ComputeChar
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
         /theTypes[i].GetDefaultRootLengthSquared(j))*2
         ;
-        /*std::cout << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
-        << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
-        << this->GetAmbientWeyl().RootScalarCartanRoot
-        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]).ToString()
-        << " -> "
-        << (this->GetAmbientWeyl().RootScalarCartanRoot
-        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
-        /theTypes[i].GetDefaultRootLengthSquared(j))*2;*/
+//        std::cout << "<br>Scalar of " << this->GetAmbientWeyl().RootSystem[k].ToString()
+//        << " and " << this->CartanSAsByComponent[i][j].ToString() << "="
+//        << this->GetAmbientWeyl().RootScalarCartanRoot
+//        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]).ToString()
+//        << " -> "
+//        << (this->GetAmbientWeyl().RootScalarCartanRoot
+//        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
+//        /theTypes[i].GetDefaultRootLengthSquared(j))*2;
         if(!tempMon.weightFundamentalCoords[counter].IsInteger())
         { if (!allowBadCharacter)
           { std::cout << "This is a programming error: function ComputeChar called  "
@@ -1411,8 +1418,8 @@ bool CandidateSSSubalgebra::ComputeChar
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    //std::cout << "<br>Extreme weight: " << //this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
-    //(accumChar[currentIndex].weightFundamentalCoords).ToString();
+//    std::cout << "<br>Extreme weight: " << //this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
+//    (accumChar[currentIndex].weightFundamentalCoords).ToString();
 
     if (accumChar.theCoeffs[currentIndex]<0)
     { //std::cout << "<br>accumChar has negative coeff!";
@@ -1486,6 +1493,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     << 2*baseCandidate.PosRootsPerpendicularPrecedingWeights.size
     << " weights to use. ";
     theProgressReport1.Report(consideringStream.str());
+    //std::cout << consideringStream.str();
     return;
   }
   if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
@@ -1570,11 +1578,13 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   { std::stringstream out;
     out << "\nExploring extensions of " << baseCandidate.ToString();
     theProgressReport1.Report(out.str());
-    //std::cout << "Exploring extensions of " << baseCandidate.ToString() << " by: ";
+    std::cout << "Exploring extensions of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " by: ";
   }
   List<DynkinSimpleType> theTypes;
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  if (theTypes.size==0)
+//  bool dirtylittlehack;
+
+  if (theTypes.size==0 )
     theType.MakeAone();
   else
     theType=*theTypes.LastObject();
@@ -2934,20 +2944,22 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
 }
 
 void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
-{ MonomialChar<Rational> theZeroWeight;
+{ if (this->flagSystemProvedToHaveNoSolution)
+    return;
+  MonomialChar<Rational> theZeroWeight;
   theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
-  this->centralizerCartanSize =this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
-  this->flagCentralizerIsWellChosen = (this->centralizerCartanSize==0 )? true: false;
-  if (this->centralizerCartanSize>0 && !this->flagSystemProvedToHaveNoSolution)
-  { Rational centralizerRank=this->centralizerCartanSize;
-    if (this->indexMaxSSContainer!=-1)
-    { DynkinType centralizerType =
-      this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
-      centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
-      centralizerRank-=centralizerType.GetRootSystemSize();
-    }
-    this->flagCentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
+  this->centralizerRank =this->theCharFundCoords.GetMonomialCoefficient(theZeroWeight);
+  if (this->centralizerRank==0)
+  { this->flagCentralizerIsWellChosen=true;
+    return;
   }
+  if (this->indexMaxSSContainer!=-1)
+  { DynkinType centralizerType =
+    this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
+    centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+    this->centralizerRank-=centralizerType.GetRootSystemSize();
+  }
+  this->flagCentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
 }
 
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
@@ -3052,6 +3064,14 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
         out << ", ";
     }
     out << ")<br>";
+    if (this->theUnknownCartanCentralizerBasis.size>0)
+    { out << "<br>Unknown splitting cartan of centralizer.";
+      for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
+      { out << this->theUnknownCartanCentralizerBasis[i].ToString();
+        if (i!=this->theUnknownCartanCentralizerBasis.size-1)
+          out << ", ";
+      }
+    }
     for (int i=0; i<this->theHs.size; i++)
     { out << "h: " << this->theHs[i] << ", "
       << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
@@ -3109,8 +3129,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       for (int j=0; j<this->weightsOfModules[i].size; j++)
         if(this->weightsOfModules[i][j].IsEqualToZero())
           numZeroWeights+=this->modulesGrouppedByWeight[i].size;
-    out << numZeroWeights << " - " << this->centralizerCartanSize << "="
-    << ((this->centralizerCartanSize-numZeroWeights)*(-1)).ToString() << ".";
+    out << numZeroWeights << " - " << this->centralizerRank << "="
+    << ((this->centralizerRank-numZeroWeights)*(-1)).ToString() << ".";
   }
   if (this->flagSystemSolved && !shortReportOnly)
   { out << "<br>In the table below we indicate the highest weight "

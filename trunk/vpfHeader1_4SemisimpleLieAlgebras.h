@@ -208,7 +208,7 @@ public:
   WeylGroup theWeylNonEmbeddeD;
   WeylGroup theWeylNonEmbeddeDdefaultScale;
   List<Vectors<Rational> > CartanSAsByComponent;
-  Vectors<Rational> theCoRoots;
+  Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
@@ -266,7 +266,7 @@ public:
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
   std::string nilradicalGenerationLog;
-  Rational centralizerCartanSize;
+  Rational centralizerRank;
 
   CandidateSSSubalgebra();
   void GetHsByType

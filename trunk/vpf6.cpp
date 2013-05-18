@@ -1562,6 +1562,7 @@ bool CommandList::AllowsTimesInPreceding(const std::string& lookAhead)
     lookAhead=="Variable" || lookAhead=="," ||
     lookAhead==";" || lookAhead=="]" ||
     lookAhead=="}" || lookAhead==":" ||
+    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
     lookAhead=="EndProgram"
     ;
 }
@@ -3983,6 +3984,20 @@ bool CommandList::innerMultiplyByOne
   return true;
 }
 
+bool CommandList::outerTimesToFunctionApplication
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
+    return false;
+  if (input.children.size<2)
+    return false;
+  const Expression& firstElt=input[1];
+  if (!firstElt.IsBuiltInOperation())
+    return false;
+  output=input;
+  output.children.RemoveIndexShiftDown(0);
+  return true;
+}
+
 bool CommandList::outerDistribute
 (CommandList& theCommands, const Expression& input, Expression& output,
  int AdditiveOp, int multiplicativeOp)
@@ -4369,8 +4384,10 @@ bool CommandList::ExpressionMatchesPattern
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.theBoss==this && input.theBoss==this))
   { std::cout << "This is a programming error. Either a pattern or an input has a wrongly "
-    << " initialized owner. The error is certainly in the preceding code; here "
-    << "is a stack trace "
+    << " initialized owner: the pattern is " << thePattern.ToString() << " and the input is "
+    << input.ToString() << ". "
+    << " The error is certainly in the preceding code; here "
+    << "is a stack trace"
     << ", however beware that the error might be in code preceding the stack loading. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -4437,7 +4454,7 @@ bool CommandList::EvaluateExpression
 (const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs,
  bool& outputIsFree)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
+  MacroRegisterFunctionWithName("CommandList::EvaluateExpression");
   if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
@@ -4609,6 +4626,7 @@ Expression* CommandList::PatternMatch
 (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
  const Expression* condition, std::stringstream* theLog, bool logAttempts)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+  MacroRegisterFunctionWithName("CommandList::PatternMatch");
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Error: while trying to evaluate expression, the maximum recursion depth of "
@@ -4619,6 +4637,8 @@ Expression* CommandList::PatternMatch
 //  if (theExpression.ToString()=="f{}((a)):=a+5")
 //  { std::cout << "!here";
 //  }
+  thePattern.CheckInitialization();
+  theExpression.CheckInitialization();
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
     return 0;
   if (theLog!=0 && logAttempts)
@@ -4627,17 +4647,20 @@ Expression* CommandList::PatternMatch
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
+  tempExp.CheckInitialization();
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
   this->SpecializeBoundVars(tempExp, bufferPairs);
+  tempExp.CheckInitialization();
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   BoundVariablesSubstitution tempPairs;
   bool isFree;
-  this->EvaluateExpression(tempExp, tempExp, tempPairs, isFree);
+  Expression conditionResult;
+  this->EvaluateExpression(tempExp, conditionResult, tempPairs, isFree);
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ToString() << "; evaluating...";
-  if (tempExp.IsEqualToOne())
+    (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString() << "; evaluating...";
+  if (conditionResult.IsEqualToOne())
     return &theExpression;
   return 0;
 }
@@ -4665,7 +4688,8 @@ void CommandList::SpecializeBoundVars
 bool CommandList::ProcessOneExpressionOnePatternOneSub
 (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
  std::stringstream* theLog, bool logAttempts)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+{ MacroRegisterFunctionWithName("CommandList::ProcessOneExpressionOnePatternOneSub");
+  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (!thePattern.IsListNElementsStartingWithAtom(this->opDefine(), 3) &&
       !thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4))
     return false;
@@ -4673,6 +4697,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
+  theExpression.CheckInitialization();
   const Expression& currentPattern=thePattern[1];
   const Expression* theCondition=0;
   bool isConditionalDefine=
@@ -5388,6 +5413,20 @@ bool Expression::IsLisT()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  return true;
+}
+
+bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  if (this->theData>= this->theBoss->NumPredefinedVars)
+    return false;
+  if (outputWhichOperation!=0)
+    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
   return true;
 }
 

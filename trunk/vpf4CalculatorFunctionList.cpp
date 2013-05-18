@@ -892,6 +892,11 @@ void CommandList::initPredefinedStandardOperations()
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
 
+  this->AddOperationOuterHandler
+  ("*", this->outerTimesToFunctionApplication, "",
+   "On condition that F is a built-int function name, replaces F*x with F{}x.",
+   "plot2D(\\sin{}x+cos{}x, 0, 5) ", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",

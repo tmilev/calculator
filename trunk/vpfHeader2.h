@@ -1869,10 +1869,14 @@ static bool innerStoreObject
 static bool innerStoreObject
 (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 ;
-static bool innerStoreObject
+static bool innerStoreCandidateSA
 (CommandList& theCommands, const CandidateSSSubalgebra& input, Expression& output)
 ;
 static bool innerStoreObject
+(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
+{ return Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input, output);
+}
+static bool innerStoreElementSemisimpleLieAlgebra
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
 ;
 static bool innerStoreObject
@@ -1891,7 +1895,7 @@ static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, Expression& output,
  SemisimpleLieAlgebra** outputPointer=0)
 ;
-static bool innerLoadFromObject
+static bool innerLoadCandidateSA
 (CommandList& theCommands, const Expression& input, Expression& output,
  CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner)
 ;
@@ -1902,8 +1906,11 @@ static bool innerSSLieAlgebra
 static bool innerStoreRationalFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerStoreSemisimpleSubalgebras
+static bool innerStoreSemisimpleSubalgebrasFromExpression
 (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerStoreSemisimpleSubalgebras
+(CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 ;
 static bool innerLoadSltwoSubalgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1914,10 +1921,16 @@ static bool innerLoadSltwoSubalgebras
 static bool innerLoadSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& inpuT, Expression& output)
 ;
+static bool innerStoreChevalleyGenerator
+(CommandList& theCommands, const ChevalleyGenerator& input, Expression& output)
+;
 static bool innerStoreObject
 (CommandList& theCommands, const ChevalleyGenerator& input, Expression& output,
  Expression* theContext=0, bool* isNonConst=0)
-;
+{ if (isNonConst!=0)
+    *isNonConst=true;
+  return Serialization::innerStoreChevalleyGenerator(theCommands, input, output);
+}
 static bool innerStoreObject
 (CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
  Expression& output, Expression* theContext=0, bool* isNonConst=0)
@@ -2174,7 +2187,7 @@ bool CommandList::GetMatrix
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
   Expression theConverted;
-  std::cout << "<br>extracting matrix from: " << theExpression.ToStringFull();
+//  std::cout << "<br>extracting matrix from: " << theExpression.ToStringFull();
   if (!theExpression.IsSequenceNElementS())
   { if (targetNumColsNonMandatory>0)
       if (targetNumColsNonMandatory!=1)

@@ -5220,7 +5220,7 @@ std::string Expression::ToString
     << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { if (this->IsSequenceNElementS(1))
-      out << "Sequence{}";
+      out << "{Sequence{}";
     switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
@@ -5263,6 +5263,8 @@ std::string Expression::ToString
         out << ")";
         break;
     }
+    if (this->IsSequenceNElementS(1))
+      out << "}";
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat)

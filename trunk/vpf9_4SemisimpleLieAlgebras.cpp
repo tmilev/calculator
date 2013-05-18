@@ -2937,10 +2937,11 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     out << ". ";
   }
   if (!this->flagCentralizerIsWellChosen)
-  { out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
-    << "Cartan of the centralizer, instead I got: </b> ";
-  } else
-    out << "<br>Basis of Cartan of centralizer: ";
+    out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the "
+    << "Cartan of the centralizer. The Cartan of the centralizer needs to have "
+    << this->centralizerRank.ToString() << " elements, it has instead "
+    << this->CartanOfCentralizer.size << " elements. </b> ";
+  out << "<br>Basis of Cartan of centralizer: ";
   out << this->CartanOfCentralizer.ToString();
   return out.str();
 }
@@ -2961,7 +2962,81 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
   }
-  this->flagCentralizerIsWellChosen=(centralizerRank==this->CartanOfCentralizer.size );
+  this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size );
+}
+
+std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
+  std::stringstream out;
+  if (!this->flagSystemSolved)
+    out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
+  else
+  { out << "Subalgebra realized. ";
+    if (!this->flagCentralizerIsWellChosen)
+      out << "<b>However, the centralizer is not well chosen.</b>";
+  }
+  out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:<br>(";
+  for (int i=0; i<this->theUnknownNegGens.size; i++)
+  { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
+    out << this->theUnknownPosGens[i].ToString(theFormat);
+    if (i!=this->theUnknownNegGens.size-1)
+      out << ", ";
+  }
+  out << ")<br>";
+  if (this->theUnknownCartanCentralizerBasis.size>0)
+  { out << "<br>Unknown splitting cartan of centralizer.";
+  for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
+    { out << this->theUnknownCartanCentralizerBasis[i].ToString();
+      if (i!=this->theUnknownCartanCentralizerBasis.size-1)
+        out << ", ";
+    }
+  }
+  for (int i=0; i<this->theHs.size; i++)
+  { out << "h: " << this->theHs[i] << ", "
+    << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
+    << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
+  }
+  out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
+  if (this->PosRootsPerpendicularPrecedingWeights.size>0)
+    out << " Positive roots that commute with the weight subsystem: "
+    << this->PosRootsPerpendicularPrecedingWeights.ToString();
+  out << "<br>Symmetric Cartan default scale: "
+  << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
+  out << "Character ambient Lie algebra: "
+  << this->theCharFundamentalCoordsRelativeToCartan.ToString();
+  out << "<br>A necessary system to realize the candidate subalgebra.  ";
+  FormatExpressions tempFormat=this->theCoeffLetters;
+  for (int i=0; i<this->theSystemToSolve.size; i++)
+    out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
+  out << "<br>The above system after transformation.  ";
+  for (int i=0; i<this->transformedSystem.size; i++)
+    out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
+  if (!this->flagSystemGroebnerBasisFound)
+    out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
+  if (this->owner!=0 && this->theHorbitIndices.size>0)
+    if (this->theHorbitIndices[0].size>0)
+      if (this->theUnknownPosGens.size>0)
+      { const slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
+        out << "<br>First positive generator seed realization.<br> "
+        << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
+        out << "<br>First negative generator seed realization.<br> "
+        << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
+      }
+  out << "<br><b>For the calculator part 1: </b><br>FindOneSolutionSerreLikePolynomialSystem{}( ";
+  for (int i=0; i<this->theSystemToSolve.size; i++)
+  { out << this->theSystemToSolve[i].ToString(&tempFormat);
+    if (i!=this->theSystemToSolve.size-1)
+      out << ", ";
+  }
+  out << " )";
+  out << "<br><b>For the calculator part 2: </b><br>GroebnerLexUpperLimit{}(10000, ";
+  for (int i=0; i<this->theSystemToSolve.size; i++)
+  { out << this->theSystemToSolve[i].ToString(&tempFormat);
+    if (i!=this->theSystemToSolve.size-1)
+      out << ", ";
+  }
+  out << " )";
+  return out.str();
 }
 
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
@@ -3055,73 +3130,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << "(refining the above decomposition; the order from the above decomposition is not preserved): "
     << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->theCharOverCartanPlusCartanCentralizer.ToString(), 2000)
     :this->theCharOverCartanPlusCartanCentralizer.ToString());
-  if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
-  { if (!this->flagSystemSolved)
-      out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
-    out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:<br>(";
-    for (int i=0; i<this->theUnknownNegGens.size; i++)
-    { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
-      out << this->theUnknownPosGens[i].ToString(theFormat);
-      if (i!=this->theUnknownNegGens.size-1)
-        out << ", ";
-    }
-    out << ")<br>";
-    if (this->theUnknownCartanCentralizerBasis.size>0)
-    { out << "<br>Unknown splitting cartan of centralizer.";
-      for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
-      { out << this->theUnknownCartanCentralizerBasis[i].ToString();
-        if (i!=this->theUnknownCartanCentralizerBasis.size-1)
-          out << ", ";
-      }
-    }
-    for (int i=0; i<this->theHs.size; i++)
-    { out << "h: " << this->theHs[i] << ", "
-      << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
-      << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
-    }
-    out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
-    if (this->PosRootsPerpendicularPrecedingWeights.size>0)
-      out << " Positive roots that commute with the weight subsystem: "
-      << this->PosRootsPerpendicularPrecedingWeights.ToString();
-    out << "<br>Symmetric Cartan default scale: "
-    << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
-    out << "Character ambient Lie algebra: "
-    << this->theCharFundamentalCoordsRelativeToCartan.ToString();
-    out << "<br>A necessary system to realize the candidate subalgebra.  ";
-    FormatExpressions tempFormat=this->theCoeffLetters;
-    for (int i=0; i<this->theSystemToSolve.size; i++)
-      out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
-    out << "<br>The above system after transformation.  ";
-    for (int i=0; i<this->transformedSystem.size; i++)
-      out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
-    if (!this->flagSystemGroebnerBasisFound)
-      out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
-    if (this->owner!=0 && this->theHorbitIndices.size>0)
-      if (this->theHorbitIndices[0].size>0)
-        if (this->theUnknownPosGens.size>0)
-        { const slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
-          out << "<br>First positive generator seed realization.<br> "
-          << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
-          out << "<br>First negative generator seed realization.<br> "
-          << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
-        }
-    out << "<br><b>For the calculator part 1: </b><br>FindOneSolutionSerreLikePolynomialSystem{}( ";
-    for (int i=0; i<this->theSystemToSolve.size; i++)
-    { out << this->theSystemToSolve[i].ToString(&tempFormat);
-      if (i!=this->theSystemToSolve.size-1)
-        out << ", ";
-    }
-    out << " )";
-    out << "<br><b>For the calculator part 2: </b><br>GroebnerLexUpperLimit{}(10000, ";
-    for (int i=0; i<this->theSystemToSolve.size; i++)
-    { out << this->theSystemToSolve[i].ToString(&tempFormat);
-      if (i!=this->theSystemToSolve.size-1)
-        out << ", ";
-    }
-    out << " )";
-//    if (this->flagSystemSolved)
-//      out << "<br>Solution of above system: " << this->aSolution.ToString();
-  }
+  if (!this->flagSystemSolved || !this->flagCentralizerIsWellChosen)
+    out << this->ToStringSystem(theFormat);
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
   { int numZeroWeights=0;
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus "
@@ -3333,8 +3343,10 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
 }
 
 void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
-{ this->ComputeCentralizerIsWellChosen();
-  if (!this->flagCentralizerIsWellChosen && this->flagDoAttemptToSolveSystem)
+{ if (this->flagSystemProvedToHaveNoSolution)
+    return;
+  this->ComputeCentralizerIsWellChosen();
+  if (!this->flagCentralizerIsWellChosen)
   { this->ComputeSystem(theGlobalVariables, true);
     this->ComputeCentralizerIsWellChosen();
   }

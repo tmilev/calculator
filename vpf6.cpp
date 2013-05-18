@@ -5030,7 +5030,12 @@ bool Expression::ToStringData
     out << theElt.ToString();
     result=true;
   } else if (this->IsOfType<SemisimpleSubalgebras>())
-  { SemisimpleSubalgebras& theSubalgebras=this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
+  { SemisimpleSubalgebras& theSubalgebras=
+    this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
+//    FormatExpressions tempFormat;
+//    tempFormat.flagUseLatex=true;
+//    tempFormat.flagUseHTML=true;
+//    tempFormat.flagCandidateSubalgebraShortReportOnly=false;
     out << theSubalgebras.ToString();
     result=true;
   } else if (this->IsOfType<double>())

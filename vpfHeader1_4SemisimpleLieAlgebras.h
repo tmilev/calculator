@@ -363,6 +363,7 @@ public:
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringSystem(FormatExpressions* theFormat=0)const;
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;

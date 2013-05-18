@@ -452,7 +452,12 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseLatex=true;
     theFile << "<html>" << "<script src=\"" << theCommands.DisplayPathServerBase
     << "jsmath/easy/load.js\"></script> " << "<body>"
-    << theSSsubalgebras.ToString(&theFormat) << "</body></html>";
+    << theSSsubalgebras.ToString(&theFormat)
+    << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+    Expression theSSE;
+    Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
+    theFile << theSSE.ToString();
+    theFile << "</body></html>";
   }
   return output.AssignValue(out.str(), theCommands);
 }

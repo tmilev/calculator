@@ -868,7 +868,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
 CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(true),
+flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(false),
 flagCentralizerIsWellChosen(false), totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
 {
 }
@@ -1252,18 +1252,20 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
   this->transformedSystem=this->theSystemToSolve;
+  std::cout << "<br>Ere i am j h.";
 //  return true;
   GroebnerBasisComputation<Rational> theComputation;
-  //std::cout << "<hr>"
-  //<< "System before transformation: " << this->transformedSystem.ToString()
-  //;
+  std::cout << "<hr>"
+  << "System before transformation: " << this->transformedSystem.ToString()
+  ;
   theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
-//  std::cout << " <br>And after: " << this->transformedSystem.ToString();
+  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
   this->flagSystemGroebnerBasisFound=this->flagSystemSolved;
   if (this->flagSystemSolved)
-  { this->theNegGens.SetSize(this->theUnknownNegGens.size);
+  { std::cout << "The system was solved!!!!";
+    this->theNegGens.SetSize(this->theUnknownNegGens.size);
     this->thePosGens.SetSize(this->theUnknownPosGens.size);
     PolynomialSubstitution<Rational> theSub;
     theSub.SetSize(theComputation.systemSolution.GetElement().size);
@@ -1280,10 +1282,10 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
       this->thePosGens[i]=currentPosElt;
     }
   } else
-  {// if (this->flagSystemProvedToHaveNoSolution)
-     // std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
-    //else
-      //std::cout << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
+  { if (this->flagSystemProvedToHaveNoSolution)
+      std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
+    else
+      std::cout << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
   }
 //  std::cout << "<hr>";
   return !this->flagSystemProvedToHaveNoSolution;
@@ -3332,7 +3334,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
 
 void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
 { this->ComputeCentralizerIsWellChosen();
-  if (!this->flagCentralizerIsWellChosen)
+  if (!this->flagCentralizerIsWellChosen && this->flagDoAttemptToSolveSystem)
   { this->ComputeSystem(theGlobalVariables, true);
     this->ComputeCentralizerIsWellChosen();
   }

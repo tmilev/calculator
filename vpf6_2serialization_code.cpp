@@ -2,27 +2,22 @@
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "C++ object to calculator expression serialization/deserialization.");
 
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const ChevalleyGenerator& input,
- Expression& output, Expression* theContext, bool* isNonConst)
-{ if (isNonConst!=0)
-    *isNonConst=true;
-  Expression theTypeE, genIndexE;
-  SemisimpleLieAlgebra& owner=*input.owneR;
-  if (!Serialization::innerStoreObject
-//      <MonomialCollection<DynkinSimpleType, Rational>, Rational>
-      (theCommands, owner.theWeyl.theDynkinType, theTypeE, theContext))
-    return false;
-  if (input.theGeneratorIndex>=owner.GetNumPosRoots() &&
-      input.theGeneratorIndex< owner.GetNumPosRoots()+owner.GetRank())
-  { output.MakeSerialization("getCartanGenerator", theCommands, 1);
-    genIndexE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-  } else
-  { output.MakeSerialization("getChevalleyGenerator", theCommands, 1);
-    genIndexE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
-  }
-  output.AddChildOnTop(theTypeE);
-  return output.AddChildOnTop(genIndexE);
+bool Serialization::innerStoreChevalleyGenerator
+(CommandList& theCommands, const ChevalleyGenerator& input, Expression& output)
+{ MacroRegisterFunctionWithName("innerStoreChevalleyGenerator");
+  input.CheckInitialization();
+  output.reset(theCommands, 2);
+  Expression generatorLetterE, generatorIndexE;
+  if (input.theGeneratorIndex>=input.owneR->GetNumPosRoots() &&
+      input.theGeneratorIndex< input.owneR->GetNumPosRoots()+input.owneR->GetRank())
+    generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
+  else
+    generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
+  output.AddChildOnTop(generatorLetterE);
+  output.format=output.formatFunctionUseUnderscore;
+  generatorIndexE.AssignValue
+  (input.owneR->GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+  return output.AddChildOnTop(generatorIndexE);
 }
 
 template <>
@@ -535,9 +530,9 @@ bool Serialization::innerStoreObject
 { return output.AssignValue(input, theCommands);
 }
 
-bool Serialization::innerStoreObject
+bool Serialization::innerStoreElementSemisimpleLieAlgebra
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreElementSemisimpleLieAlgebra");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
   if (!input.IsEqualToZero())
@@ -683,17 +678,17 @@ bool Serialization::innerLoadSltwoSubalgebras
   return false;
 }
 
-bool Serialization::innerStoreSemisimpleSubalgebras
+bool Serialization::innerStoreSemisimpleSubalgebrasFromExpression
   (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerStoreSemisimpleSubalgebrass");
   if (!input.IsOfType<SemisimpleSubalgebras>())
     return false;
   SemisimpleSubalgebras& theSubalgebras=
   input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
-  return Serialization::innerStoreObject(theCommands, theSubalgebras, output);
+  return Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSubalgebras, output);
 }
 
-bool Serialization::innerStoreObject
+bool Serialization::innerStoreCandidateSA
   (CommandList& theCommands, const CandidateSSSubalgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerStoreObject CandidateSSSubalgebra");
   output.MakeSerialization("LoadCandidateSubalgebra", theCommands);
@@ -705,19 +700,25 @@ bool Serialization::innerStoreObject
   output.AddChildOnTop(tempE);
   Serialization::innerStoreObject(theCommands, input.theHs, tempE);
   output.AddChildOnTop(tempE);
-/*  WeylGroup theWeylNonEmbeddeD;
-  WeylGroup theWeylNonEmbeddeDdefaultScale;
-  List<Vectors<Rational> > CartanSAsByComponent;
-  Vectors<Rational> theCoRoots;
-  Vectors<Rational> theHs;
-  List<DynkinSimpleType> theTypes;
-  List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
-*/
+  if (input.flagSystemSolved)
+  { Expression listGenerators;
+    listGenerators.reset(theCommands);
+    listGenerators.AddChildAtomOnTop(theCommands.opSequence());
+    for (int i=0; i<input.theNegGens.size; i++)
+    { Serialization::innerStoreElementSemisimpleLieAlgebra
+      (theCommands, input.theNegGens[i], tempE);
+      listGenerators.AddChildOnTop(tempE);
+      Serialization::innerStoreElementSemisimpleLieAlgebra
+      (theCommands, input.thePosGens[i], tempE);
+      listGenerators.AddChildOnTop(tempE);
+    }
+    output.AddChildOnTop(listGenerators);
+  }
+  //for (int i=0; i<this->
   return true;
 }
 
-bool Serialization::innerLoadFromObject
+bool Serialization::innerLoadCandidateSA
 (CommandList& theCommands, const Expression& input, Expression& output,
  CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
 { if (!input.IsListNElements(4) && !input.IsListNElements(5))
@@ -738,30 +739,18 @@ bool Serialization::innerLoadFromObject
 //  if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
 //    std::cout << "<br> loading " << input[2].ToString() << " to get "
 //    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  std::cout << "<hr>Making subalgebra from type "
-  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  //std::cout << "<hr>Making subalgebra from type "
+  //<< outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
   (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
-  int theSArank=outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetRank();
   Matrix<Rational> theHs;
-  if (theSArank>1)
-  { if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
-    { theCommands.Comments
-      << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
-      << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
-      return false;
-    }
-  } else
-  { Vector<Rational> tempV;
-    if (!theCommands.GetVectoR(input[3], tempV, 0, theRank, 0))
-    { theCommands.Comments
-      << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
-      << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
-      return false;
-    }
-    theHs.AssignVectorRow(tempV);
+  if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
+  { theCommands.Comments
+    << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
+    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+    return false;
   }
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
   { theCommands.Comments << "<hr>Failed to load cartan elements: I expected "
@@ -795,7 +784,6 @@ bool Serialization::innerLoadFromObject
   }
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
-  outputSubalgebra.flagDoAttemptToSolveSystem=true;
   if (input.children.size==5)
   { Expression theGensE=input[4];
     theGensE.Sequencefy();
@@ -877,7 +865,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
-    if (!Serialization::innerLoadFromObject(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
+    if (!Serialization::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
       << " number " << i << " subalgebra. <hr>";
       return false;
@@ -892,9 +880,9 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   return output.AssignValue(theSAs, theCommands);
 }
 
-bool Serialization::innerStoreObject
+bool Serialization::innerStoreSemisimpleSubalgebras
   (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreObject");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreSemisimpleSubalgebras");
   output.MakeSerialization("LoadSemisimpleSubalgebras", theCommands);
   Expression tempE, tempE2, candidateE;
   if (!Serialization::innerStoreMonCollection(theCommands, input.owneR->theWeyl.theDynkinType, tempE))
@@ -905,7 +893,7 @@ bool Serialization::innerStoreObject
   tempE2.MakeAtom(theCommands.opSequence(), theCommands);
   tempE.AddChildOnTop(tempE2);
   for (int i=0; i<input.Hcandidates.size; i++)
-  { if (!innerStoreObject(theCommands, input.Hcandidates[i], candidateE))
+  { if (!Serialization::innerStoreCandidateSA(theCommands, input.Hcandidates[i], candidateE))
       return false;
     tempE.AddChildOnTop(candidateE);
   }
@@ -922,12 +910,13 @@ bool Serialization::innerStore
   int theType;
   if (!input.IsBuiltInType(&theType))
     return false;
+  std::cout << "Here I aM!!!";
   if (theType==theCommands.opSSLieAlg())
     return Serialization::innerStoreSemisimpleLieAlgebra(theCommands, input, output);
   if (theType==theCommands.opPoly())
     return Serialization::innerStorePoly(theCommands, input, output);
   if (theType==theCommands.opSemisimpleSubalgebras())
-    return Serialization::innerStoreSemisimpleSubalgebras(theCommands, input, output);
+    return Serialization::innerStoreSemisimpleSubalgebrasFromExpression(theCommands, input, output);
   if (theType==theCommands.opElementUEoverRF())
     return Serialization::innerStoreUE(theCommands, input, output);
   return output.SetError("Serialization not implemented for this data type.", theCommands);

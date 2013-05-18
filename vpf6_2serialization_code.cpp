@@ -738,6 +738,8 @@ bool Serialization::innerLoadFromObject
 //  if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
 //    std::cout << "<br> loading " << input[2].ToString() << " to get "
 //    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  std::cout << "<hr>Making subalgebra from type "
+  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
   (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
@@ -783,6 +785,14 @@ bool Serialization::innerLoadFromObject
       }
     }
   outputSubalgebra.theHs.AssignListList(outputSubalgebra.CartanSAsByComponent);
+  Matrix<Rational> tempMat1;
+  outputSubalgebra.theHs.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
+  if (!(outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric== tempMat1))
+  { theCommands.Comments << "<hr>Failed to load semisimple subalgebra: "
+    << " the gram matrix of the elements of its cartan is " <<  tempMat1.ToString()
+    << " but it should be " << outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric.ToString() << "instead.";
+    return false;
+  }
   outputSubalgebra.thePosGens.SetSize(0);
   outputSubalgebra.theNegGens.SetSize(0);
   outputSubalgebra.flagDoAttemptToSolveSystem=true;
@@ -1090,14 +1100,14 @@ bool Serialization::innerStorePoly
     return output.SetError
     ("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
   Expression theContext=input.GetContext();
-  Expression tempE, resultE;
+  Expression resultE;
   if (!Serialization::innerStoreMonCollection(theCommands, thePoly, resultE, &theContext))
     return false;
   resultE.CheckInitialization();
   output.MakeSerialization("Polynomial", theCommands, 1);
-  output.AddChildOnTop(tempE);
   output.AddChildOnTop(resultE);
   output.format=output.formatDefault;
+  output.CheckInitialization();
   return true;
 }
 

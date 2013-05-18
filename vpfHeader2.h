@@ -184,6 +184,7 @@ class Expression
     return this->theData==desiredDataUseMinusOneForAny;
   }
   bool IsOperation(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
@@ -1346,6 +1347,9 @@ public:
 (CommandList& theCommands, const Expression& input, Expression& output,
   int AdditiveOp, int multiplicativeOp)
   ;
+  static bool outerTimesToFunctionApplication
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool outerDistributeTimes
 (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.outerDistribute

@@ -3326,22 +3326,26 @@ void WeylGroup::RaiseToMaximallyDominant
     }while (found);
 }
 
-bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)
+bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const
 { //std::cout << "<br>Checking whether " << this->theHs.ToString()
   //<< " are conjugated to " << input.ToString();
   if (input.size!=this->theHs.size)
     return false;
   List<Vector<Rational> > raisedInput=input;
   List<Vector<Rational> > myVectors=this->theHs;
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+  std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with "
+  << myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput);
   ambientWeyl.RaiseToMaximallyDominant(myVectors);
-  //std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
-  //<< myVectors.ToString();
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+  std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
+  << myVectors.ToString();
   return myVectors==raisedInput;
 }
 
-bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
+bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
 { if (other.flagSystemProvedToHaveNoSolution)
     return false;
  // std::cout << " <br>Testing whether "
@@ -3415,7 +3419,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(CandidateSSSubalgebra& other, bool
           conjugationCandidates.AddListOnTop(currentComponent);
         }
       }
-      if (this->HasConjugateHsTo(conjugationCandidates))
+      if (other.HasConjugateHsTo(conjugationCandidates))
         return true;
     }
     while(selectedOuterAutos.IncrementReturnFalseIfBackToBeginning());

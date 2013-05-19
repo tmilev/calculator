@@ -272,8 +272,8 @@ public:
   void GetHsByType
   (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
   ;
-  bool HasConjugateHsTo(List<Vector<Rational> >& other);
-  bool IsDirectSummandOf(CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
+  bool HasConjugateHsTo(List<Vector<Rational> >& other)const ;
+  bool IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
 
   void GetGenericCartanCentralizerLinearCombination
   (int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)

@@ -3305,25 +3305,25 @@ void CandidateSSSubalgebra::GetHsByType
 template <class CoefficientType>
 void WeylGroup::RaiseToMaximallyDominant
   (List<Vector<CoefficientType> >& theWeights)const
-{ for (int i=0; i<theWeights.size; i++)
-  { bool found=true;
-    while (found)
+{ bool found;
+  for (int i=0; i<theWeights.size; i++)
+    do
     { found=false;
       for (int j=0; j<this->RootsOfBorel.size; j++)
         if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[i])<0)
         { bool isGood=true;
           for (int k=0; k<i; k++)
-            if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k])<0)
+            if (this->RootScalarCartanRoot(this->RootsOfBorel[j], theWeights[k])>0)
             { isGood=false;
               break;
             }
-          if (isGood)
-          { this->ReflectBetaWRTAlpha(this->RootsOfBorel[j], theWeights[i], false, theWeights[i]);
-            found=true;
-          }
+          if (!isGood)
+            continue;
+          for (int k=0; k<theWeights.size; k++)
+            this->ReflectBetaWRTAlpha(this->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
+          found=true;
         }
-    }
-  }
+    }while (found);
 }
 
 bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)

@@ -363,6 +363,7 @@ public:
   bool isGoodForTheTop
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
+  std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringSystem(FormatExpressions* theFormat=0)const;

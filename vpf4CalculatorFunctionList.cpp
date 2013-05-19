@@ -41,6 +41,16 @@ void CommandList::initPredefinedInnerFunctions()
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
   this->AddOperationInnerHandler
+  ("WeylRaiseToMaximallyDominant", WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant, "",
+   "Raises a set of rational vectors simultaneously to maximally dominant: it raises the first vector\
+   to dominant, then each consecutive vector is raised as much as possible \
+   without changing the preceding, alrady raised,  vectors. First argument = type. \
+   Second argument = weight in simple coords. ",
+   "WeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (-1, -3, -2, 0)  ); \
+   \nWeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (0, -3, -4, -2)  );\
+   \nWeylRaiseToMaximallyDominant{}(F_4, (0, -3, -4, -2) , (3, 6, 8, 4)  );\
+   ");
+  this->AddOperationInnerHandler
   ("GenerateFiniteMultiplicativelyClosedSet", CommandList::innerGenerateMultiplicativelyClosedSet, "",
    "The first argument gives upper_bound to the number of elements of the set. \
    Generates a finite multiplicatively closed set of at most upper_bound elements, \

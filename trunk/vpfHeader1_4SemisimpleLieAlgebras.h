@@ -329,7 +329,7 @@ public:
   (const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
   ;
   bool CheckInitialization()const;
-  SemisimpleLieAlgebra& GetAmbientSS();
+  SemisimpleLieAlgebra& GetAmbientSS()const;
   WeylGroup& GetAmbientWeyl()const;
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
   void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
@@ -337,6 +337,7 @@ public:
   void GetPrimalWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)
   ;
+  bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
   ;
@@ -362,6 +363,7 @@ public:
   bool isGoodForTheTop
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
+  std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringSystem(FormatExpressions* theFormat=0)const;
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;

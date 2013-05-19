@@ -11,6 +11,9 @@ public:
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
  ;
+  static bool innerWeylRaiseToMaximallyDominant
+(CommandList& theCommands, const Expression& input, Expression& output)
+ ;
   static bool innerWeylGroupOrbitFund
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;

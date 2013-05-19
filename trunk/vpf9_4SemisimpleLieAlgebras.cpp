@@ -318,24 +318,37 @@ GlobalVariables* theGlobalVariables)
     if (!newCandidate.ComputeChar(false, theGlobalVariables))
     { theReport.Report
       ("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " doesn't have fitting chars.");
-      //std::cout << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " doesn't have fitting chars.<br>";
+      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+      std::cout << "<hr>"
+      << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
+      << newCandidate.theHs.ToString() << " has bad character.<br>";
+
       return;
     }
     if (!newCandidate.ComputeSystem(theGlobalVariables, false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " -> no system solution.");
-      //std::cout << "Candidate "
-      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " -> no system solution. ";
+      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+      std::cout << "Candidate "
+      << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
+      << newCandidate.theHs.ToString()  << " -> no system solution. ";
       return;
     }
     for (int i=0; i<this->Hcandidates.size; i++)
       if (newCandidate.theWeylNonEmbeddeD.theDynkinType==
           this->Hcandidates[i].theWeylNonEmbeddeD.theDynkinType)
       { if (newCandidate.IsDirectSummandOf(this->Hcandidates[i], true))
+        { if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+            std::cout << "<hr>Candidate "
+            << newCandidate.ToStringTypeAndHs() << " is a direct summand of  "
+            << this->Hcandidates[i].ToStringTypeAndHs() << ". ";
+
           return;
+        }
         std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
         << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
       }
-//    std::cout << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << "<b> IS GOOD</b><br>";
+    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+    std::cout << "<hr>" << newCandidate.ToStringTypeAndHs() << " <b> IS GOOD, adding.</b><br>";
     newCandidate.indexInOwner=this->Hcandidates.size;
     this->Hcandidates.AddOnTop(newCandidate);
     if (!this->Hcandidates.LastObject()->indexInOwner==this->Hcandidates.size-1)
@@ -371,7 +384,8 @@ GlobalVariables* theGlobalVariables)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStreamX;
       reportStreamX
-      << "Extending  " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
+      << "Trying to realize the last component of "
+      << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
       << numVectorsFound << " out of "
       << theNewTypE.theRank << ", desired length squared= " << desiredLengthSquared << " ."
       << " Current length is " << this->theSl2s[i].LengthHsquared;
@@ -380,7 +394,8 @@ GlobalVariables* theGlobalVariables)
       else
         reportStreamX << " which is all nice and dandy.<br>";
       theReport1.Report(reportStreamX.str());
-      //std::cout << "<br>" << reportStreamX.str();
+      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+        std::cout << "<br>" << reportStreamX.str();
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
@@ -389,12 +404,14 @@ GlobalVariables* theGlobalVariables)
     if (theGlobalVariables!=0)
     { out << "Generating orbit of " << startingVector[0].ToString() << "...";
       theReport.Report(out.str());
+      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+        std::cout << out.str();
     }
     if (indexCurrentWeight!=0)
     { if (! this->GetSSowner().theWeyl.GenerateOrbit
         (startingVector, false, theOrbit, false, 1152, &theOrbitGenerators, 100000))
       { std::cout
-        << "Failed to generate weight orbit: orbit has more than hard-coded limit of 100000 elements. "
+        << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 100000 elements. "
         << " This is not a programming error, but I am crashing in flames to let you know "
         << " you hit the computational limits. You might wanna work on improving the algorithm "
         << " for generating semisimple subalgebras. "
@@ -409,8 +426,15 @@ GlobalVariables* theGlobalVariables)
       theOrbitGenerators.AddOnTop(theId);
     }
     if (theGlobalVariables!=0)
-    { out << " done. The size of the orbit is " << theOrbit.size;
+    { out << " done. ";
+      if (indexCurrentWeight!=0)
+        out << "The size of the orbit is " << theOrbit.size;
+      else
+        out << " Orbit was in fact not generated as we are selecting the first element of "
+        << " the Cartan of the semisimple subalgebra. ";
       theReport.Report(out.str());
+      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+        std::cout << " done. The size of the orbit is " << theOrbit.size;
     }
     for (int j=0; j<theOrbit.size; j++)
     { std::stringstream out2;
@@ -418,16 +442,20 @@ GlobalVariables* theGlobalVariables)
       { out2 << "Exploring orbit element of index  " << j+1 << " out of "
         << theOrbit.size << ".";
         theReport2.Report(out2.str());
+        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+          std::cout << "<br>" << out2.str();
       }
       Hrescaled=theOrbit[j];
       Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
       Hrescaled/=2;
       if (baseCandidate.isGoodForTheTop(this->GetSSowner().theWeyl, Hrescaled))
       { if (theGlobalVariables!=0)
-        { out2 << " the candidate is good. Attempting to extend it by recursion. ";
+        { out2 << " the candidate is good. Attempting to complete the component by recursion. ";
           theReport2.Report(out2.str());
         }
-        //std::cout << "Is good!";
+        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+          std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
+          << Hrescaled.ToString() << ", is GOOD. ";
         newCandidate=baseCandidate;
         newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], i);
         this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
@@ -435,7 +463,9 @@ GlobalVariables* theGlobalVariables)
         if (theGlobalVariables!=0)
         { out2 << " the orbit candidate is no good. ";
           theReport2.Report(out2.str());
-          //std::cout << out2.str();
+          if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+            std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
+            << Hrescaled.ToString() << ", is no good. ";
         }
     }
   }
@@ -3073,6 +3103,13 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
       out << ", ";
   }
   out << " )";
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringTypeAndHs(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << this->theWeylNonEmbeddeD.theDynkinType.ToString(theFormat)
+  << ", Cartan: " << this->theHs.ToString(theFormat);
   return out.str();
 }
 

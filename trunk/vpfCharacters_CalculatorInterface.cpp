@@ -617,6 +617,29 @@ void WeylGroup::ComputeIrreducibleRepresentations
   }
 }
 
+bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (input.children.size<2)
+    return output.SetError
+    ("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
+  const Expression& theSSalgebraNode=input[1];
+  SemisimpleLieAlgebra* theSSalgebra;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
+  Vectors<Rational> theHWs;
+  theHWs.SetSize(input.children.size-2);
+  for (int i=2; i<input.children.size; i++)
+    if (!theCommands.GetVectoR<Rational>(input[i], theHWs[i-2], 0, theSSalgebra->GetRank()))
+      return output.SetError("Failed to extract rational vectors from arguments", theCommands);
+  std::stringstream out;
+  out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant ";
+  theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs);
+  out << "<br>Maximally dominant output: " << theHWs.ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool WeylGroupCalculatorFunctions::innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)

@@ -925,7 +925,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
 CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(false),
+flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(true),
 flagCentralizerIsWellChosen(false), totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
 {
 }
@@ -1309,19 +1309,19 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
   this->transformedSystem=this->theSystemToSolve;
-  std::cout << "<br>Ere i am j h.";
+//  std::cout << "<br>Ere i am j h.";
 //  return true;
   GroebnerBasisComputation<Rational> theComputation;
-  std::cout << "<hr>"
-  << "System before transformation: " << this->transformedSystem.ToString()
-  ;
+//  std::cout << "<hr>"
+//  << "System before transformation: " << this->transformedSystem.ToString()
+//  ;
   theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
-  std::cout << " <br>And after: " << this->transformedSystem.ToString();
+//  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
   this->flagSystemGroebnerBasisFound=this->flagSystemSolved;
   if (this->flagSystemSolved)
-  { std::cout << "The system was solved!!!!";
+  { //std::cout << "The system was solved!!!!";
     this->theNegGens.SetSize(this->theUnknownNegGens.size);
     this->thePosGens.SetSize(this->theUnknownPosGens.size);
     PolynomialSubstitution<Rational> theSub;
@@ -1346,10 +1346,10 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
       assert(false);
     }
   } else
-  { if (this->flagSystemProvedToHaveNoSolution)
-      std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
-    else
-      std::cout << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
+  { //if (this->flagSystemProvedToHaveNoSolution)
+    //  std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
+    //else
+    //  std::cout << "System " << this->transformedSystem.ToString() << " <b> not solved! </b>";
   }
 //  std::cout << "<hr>";
   return !this->flagSystemProvedToHaveNoSolution;
@@ -3277,7 +3277,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 }
 
 void CandidateSSSubalgebra::GetHsByType
-(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
+(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetHsByType");
   List<DynkinSimpleType> allTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(allTypes);
@@ -3365,7 +3365,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   SelectionFixedRank currentTypeSelection;
   SelectionWithMaxMultiplicity outerIsoSelector;
   List<List<Vectors<Rational> > > theHsByType;
-  this->GetHsByType(theHsByType, isoTypes);
+  other.GetHsByType(theHsByType, isoTypes);
   for (int i=0; i<isoTypes.size; i++)
   { Rational ratMult=this->theWeylNonEmbeddeD.theDynkinType.GetMonomialCoefficient(isoTypes[i]);
     int intMult;
@@ -3419,10 +3419,9 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
           conjugationCandidates.AddListOnTop(currentComponent);
         }
       }
-      if (other.HasConjugateHsTo(conjugationCandidates))
+      if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
-    }
-    while(selectedOuterAutos.IncrementReturnFalseIfBackToBeginning());
+    } while(selectedOuterAutos.IncrementReturnFalseIfBackToBeginning());
   while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
   return false;
 }
@@ -3439,6 +3438,7 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
+  std::cout << "<hr>Hooking up centralizers. ";
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indexInOwner=i;

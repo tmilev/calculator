@@ -166,283 +166,210 @@ std::string GetSelectHTMLStringTEmp
 }
 
 void PredefinedStrings(std::string& inputOutputCivilizedString)
-{ if(inputOutputCivilizedString=="PenkovProjectTest")
-    inputOutputCivilizedString="%HideLHS \
-    Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \
-    ( \
-    Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
-    (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
-    ) \
-    ), \
-    Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
-    (g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
-    g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
-    ) \
-    ))";
-  if (inputOutputCivilizedString=="PenkovProject")
+{ if (inputOutputCivilizedString=="PenkovProject")
     inputOutputCivilizedString="experimentalPrintSemisimpleSubalgebras{}(F_4)";
   if(inputOutputCivilizedString=="PenkovProjectRecomputeTest")
     inputOutputCivilizedString="%HideLHS \
     experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \
-    ( \
-    Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)), \
-    (3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14} \
-    ) \
-    ), \
-    Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)), \
-    (g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \
-    g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4})) \
-    ) \
-    ))";
+    ( \n\
+Serialization{}(LoadCandidateSubalgebra, A^{12}_{1}, {Sequence{}((4, 8, 12, 6))}, (\n\
+g_{-9}+g_{-17}+g_{-18}, 2 (g_{18})+2 (g_{9})+g_{17}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{12}_{1}, ((4, 8, 12, 6), (2, 2, 0, 2)), (\n\
+g_{-15}+2 g_{-16}+g_{-14}, g_{15}+2 g_{14}+g_{16}, g_{-1}- g_{-2}- g_{-4}, -2 g_{2}+2 g_{1}- g_{4}\n\
+))\n\
+))";
   if (inputOutputCivilizedString=="PenkovProjectRecompute")
     inputOutputCivilizedString= "\
 %HideLHS \n\
-experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}Serialization{}(LoadSemisimpleSubalgebras, (F)_{4}, \\\\\n\
-(\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{156}_{1}, ((11, 21, 30, 16)), \\\\\n\
-(\n\
-g_{-1}+3g_{-2}+2g_{-3}+4g_{-4},\n\
-4g_{4}+15g_{3}+14g_{2}+22g_{1}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{60}_{1}, ((7, 13, 18, 10)),\n\
-(\n\
-g_{-1}+2g_{-2}+3g_{-4}+4g_{-6}+5g_{-7}+6g_{-9},\n\
--83/406g_{9}+55/29g_{7}+989/406g_{6}+5/29g_{4}+1571/406g_{2}+14g_{1}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{36}_{1}, ((5, 10, 14, 8)),\n\
-(\n\
-g_{-2}+2g_{-4}+3g_{-5}+4g_{-6}+5g_{-7}+6g_{-8}+7g_{-9}+8g_{-11},\n\
--21878/2045g_{11}+45282/2045g_{9}+21997/2045g_{8}-34/5g_{7}-43943/2045g_{6}-4566/409g_{5}+21g_{4}+11004/409g_{2}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{12}_{1}, ((3, 6, 8, 4)),\n\
-(\n\
-g_{-2}+2g_{-5}+3g_{-6}+4g_{-8}+5g_{-9}+6g_{-10}+7g_{-11}+8g_{-12}+9g_{-13}+10g_{-15}+11g_{-16}+12g_{-18} ,\n\
--2115041/3639963g_{18}+2627072/3639963g_{16}-2435210/3639963g_{15}+3684764/3639963g_{13}+3149078/3639963g_{12}\n\
--49952/3639963g_{11}-3826808/3639963g_{10}+388076/3639963g_{9}+1102602/1213321g_{8}-1008096/1213321g_{6}\n\
-+9713219/3639963g_{5}-11256722/3639963g_{2}\n\
-)), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{28}_{1}, ((5, 9, 12, 6)),\n\
-(2 (g_{-16})+2 (g_{-1})+2 (g_{-6}), 3 (g_{6})+5 (g_{1})+3 (g_{16}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{4}_{1}, ((2, 3, 4, 2)),\n\
-(g_{-14}+g_{-18}, 2 (g_{18})+2 (g_{14}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{8}_{1}+(A)^{4}_{1}, ((2, 3, 4, 2), (0, 2, 4, 2)),\n\
-(g_{-18}- (g_{-20})- (g_{-11})- (g_{-14}), g_{18}- (g_{11})- (g_{20})- (g_{14}), \\\\\n\
-g_{-10}+g_{-7}- (g_{-6})+g_{-3}, \\\\\n\
-g_{3}+g_{7}- (g_{6})+g_{10})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{4}_{1}+(A)^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 1), (0, 0, -1, 0)),\n\
-(g_{-14}+g_{-18}, 2 (g_{18})+2 (g_{14}), (g_{-13}), (g_{13}), \\\\\n\
-(g_{3}), (g_{-3}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{35}_{1}, ((5, 19/2, 14, 8)),\n\
-(g_{-8}+3 (g_{-9})+2 (g_{-4}), 3 (g_{9})+5 (g_{8})+4 (g_{4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{11}_{1}, ((3, 11/2, 8, 4)),\n\
-(2g_{-8}+g_{-9}+4g_{-12}+3g_{-13}+5g_{-16},\n\
-55/182g_{16}+123/182g_{13}+3/26g_{12}-103/182g_{9}+33/26g_{8}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{10}_{1}, ((3, 5, 7, 4)),\n\
-(2 (g_{-16})+g_{-8}, 3 (g_{8})+2 (g_{16}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{9}_{1}, ((5/2, 5, 7, 4)),\n\
-(3g_{-12}+2g_{-13}+g_{-14},\n\
-g_{14}+g_{13}+2/3g_{12}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{6}_{1}, ((2, 4, 6, 3)),\n\
-(3g_{-14}+2g_{-15}+g_{-16}, 2g_{16}+1/2g_{15}+2/3g_{14}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{6}_{1}), ((2, 4, 6, 3), (1, 1, 0, 1)),\n\
-(g_{-15}+2 (g_{-16})+g_{-14}, g_{15}+2 (g_{14})+g_{16}, \\\\\n\
-g_{-1}- (g_{-2})- (g_{-4}), -2 (g_{2})+2 (g_{1})- (g_{4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{1}, ((3/2, 3, 4, 2)),\n\
-(g_{-19}+g_{-20}, g_{20}+g_{19})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{9}_{1}+(A)^{3}_{1}, ((3/2, 3, 4, 2), (1/2, 0, 2, 2)),\n\
-(g_{-19}+g_{-20}, g_{20}+g_{19}, g_{-3}- (g_{-4})+g_{-1}, \\\\\n\
-g_{1}+2 (g_{3})-2 (g_{4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{3}_{1}), ((3/2, 3, 4, 2), (1/2, 0, 1, 1))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{8}_{1}+(A)^{3}_{1}, ((3/2, 3, 4, 2), (0, 0, 2, 2)),\n\
-(g_{-19}+g_{-20}, g_{20}+g_{19}, - (g_{-4})+g_{-3}, 2 (g_{3})-2 (g_{4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{8}_{1}, ((2, 4, 6, 4)),\n\
-(g_{-12}+2g_{-13}, g_{13}+2g_{12}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{28}_{1}+(A)^{8}_{1}, ((2, 4, 6, 4), (3, 5, 6, 0)),\n\
-(g_{-12}+g_{-13}, 2 (g_{13})+2 (g_{12}), g_{-2}- (g_{-3})+g_{-1}, \\\\\n\
--6 (g_{3})+10 (g_{2})+6 (g_{1}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{8}_{1}+(A)^{1}_{2}, ((2, 4, 6, 4), (1/2, 1, 1, 0), (0, -1/2, 0, 0)),\n\
-(g_{-12}+g_{-13}, 2 (g_{13})+2 (g_{12}), (g_{-14}), (g_{14}), \\\\\n\
-(g_{2}), (g_{-2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (G)^{3}_{2}+(A)^{8}_{1}, ((2, 4, 6, 4), (1, 3/2, 2, 0), (-3/2, -3/2, -3, 0)),\n\
-(g_{-12}+g_{-13}, 2 (g_{13})+2 (g_{12}), - (g_{-9})+g_{-8}, \\\\\n\
-- (g_{9})+g_{8}, (g_{11}), (g_{-11}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{1}, ((1, 2, 3, 2)),\n\
-( g_{-21},g_{21})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{28}_{1}+(A)^{2}_{1}, ((1, 2, 3, 2), (3, 5, 6, 0))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{4}_{1}+(A)^{2}_{1}, ((1, 2, 3, 2), (1, 2, 2, 0)),\n\
-(g_{-21}, g_{21}, g_{-2}+g_{-11}, 2 (g_{11})+2 (g_{2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{10}_{1}+(A)^{2}_{1}, ((1, 2, 3, 2), (2, 3, 3, 0)),\n\
-(g_{-20}+g_{-21}, - (g_{22})+g_{21}, g_{-6}+g_{-2}+2 (g_{-9})+g_{-1}, \\\\\n\
-g_{6}+g_{9}+4 (g_{1})+2 (g_{2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{1}+(A)^{2}_{1}, ((1, 2, 3, 2), (1, 3/2, 2, 0))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{2}_{1}), ((1, 2, 3, 2), (1, 1, 1, 0)),\n\
-(g_{-21}, g_{21}, g_{-5}+g_{-11}, g_{11}+g_{5})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 3 ((A)^{2}_{1}), ((1, 2, 3, 2), (1, 1, 1, 0), (0, 1, 1, 0)),\n\
-(g_{-21}, g_{21}, g_{-5}+g_{-11}, g_{11}+g_{5}, - (g_{-9})+g_{-2}, \\\\\n\
-- (g_{9})+g_{2})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{1}+(A)^{1}_{2}, ((1, 2, 3, 2), (1/2, 1, 1, 0), (0, -1/2, 0, 0)),\n\
-( (g_{-21}), (g_{21}), (g_{-14}), (g_{14}), (g_{2}), (g_{-2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{2}+(A)^{2}_{1}, ((1, 2, 3, 2), (1/2, 1, 1, 0), (0, -1/2, -1/2, 0)),\n\
-(g_{-21}, g_{21}, (g_{-14}), (g_{14}), g_{9}+g_{2}, g_{-2}+g_{-9})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (G)^{3}_{2}+(A)^{2}_{1}, ((1, 2, 3, 2), (1, 3/2, 2, 0), (-3/2, -3/2, -3, 0))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{1}+(A)^{1}_{3}, ((1, 2, 3, 2), (1/2, 1, 1, 0), (0, -1/2, 0, 0), (-1/2, 0, 0, 0)),\n\
-( (g_{-21}), (g_{21}), (g_{-14}), (g_{14}), (g_{2}), (g_{-2}), \\\\\n\
-(g_{1}), (g_{-1}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{1}, ((1, 3/2, 2, 1)),\n\
-(\n\
- g_{-24}, g_{24})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{35}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 9/2, 8, 5)),\n\
-( (g_{-24}), (g_{24}), g_{-4}+3 (g_{-2})+2 (g_{-3}), 3 (g_{2})+5 (g_{4})+4 (g_{3}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{11}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 5/2, 4, 3)),\n\
-( (g_{-24}), (g_{24}), g_{-6}+g_{-2}+3 (g_{-7})-3/4 (g_{-9}), \\\\\n\
-g_{4}+g_{7}+4 (g_{9})+4 (g_{6}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{10}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 2, 4, 3)),\n\
-( (g_{-24}), (g_{24}), 2 (g_{-9})+g_{-4}, 3 (g_{4})+2 (g_{9}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 3/2, 2, 1)),\n\
-( (g_{-24}), (g_{24}), g_{-9}+g_{-10}, g_{10}+g_{9})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{1}+(A)^{8}_{1}+(A)^{3}_{1}, ((1, 3/2, 2, 1), (0, 3/2, 2, 1), (0, 0, 2, 2)),\n\
-( (g_{-24}), (g_{24}), g_{-9}+g_{-10}, g_{10}+g_{9}, g_{-3}+g_{-4}, \\\\\n\
-2 (g_{4})+2 (g_{3}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{8}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 2, 4, 2)),\n\
-( (g_{-24}), (g_{24}), g_{-6}+g_{-7}, 2 (g_{7})+2 (g_{6}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{1}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 1, 2, 1)),\n\
-( (g_{-24}), (g_{24}), g_{-13}, g_{13})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{1}+(A)^{3}_{1}+(A)^{2}_{1}, ((1, 3/2, 2, 1), (0, 1, 2, 1), (0, 1/2, 0, 1))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{1}_{1}), ((1, 3/2, 2, 1), (0, 1/2, 1, 1)),\n\
-(g_{-24}, g_{24}, g_{-16}, g_{16})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{1}_{1})+(A)^{10}_{1}, ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 2, 3, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), 2 (g_{-2})+g_{-3}, \\\\\n\
-3 (g_{3})+2 (g_{2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{1}_{1})+(A)^{2}_{1}, ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 1, 1, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), g_{-6}, g_{6})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 3 ((A)^{1}_{1}), ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 1/2, 1, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), (g_{-9}), (g_{9}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 4 ((A)^{1}_{1}), ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 1/2, 1, 0), (0, 1/2, 0, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), (g_{-9}), (g_{9}), \\\\\n\
-(g_{-2}), (g_{2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, 2 ((A)^{1}_{1})+(B)^{1}_{2}, ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 1/2, 1, 0), (0, 0, -1/2, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), (g_{-9}), (g_{9}), \\\\\n\
-(g_{3}), (g_{-3}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 1, 2, 1), (0, 0, -1, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-13}), (g_{13}), (g_{3}), (g_{-3}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{2}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 1/2, 1, 1), (0, 0, 0, -1/2)),\n\
-( (g_{-24}), (g_{24}), (g_{-16}), (g_{16}), (g_{4}), (g_{-4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (C)^{2}_{3}+(A)^{1}_{1}, ((1, 3/2, 2, 1), (0, 1, 2, 1), (0, 0, -1, 0), (0, -1, 0, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{-13}), (g_{13}), (g_{3}), (g_{-3}), \\\\\n\
-(g_{2}), (g_{-2}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{2}, ((3/2, 3, 4, 2), (-1/2, -3/2, -1, 0)),\n\
-(\n\
-g_{-19}+g_{-20}, g_{20}+g_{19}, g_{6}+g_{5}, g_{-5}+g_{-6}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{3}_{2}, ((3/2, 3, 4, 2), (0, -3/2, -2, -1)),\n\
-(\n\
-g_{-21}+g_{-19}+g_{-20}, g_{19}+g_{20}- (g_{17})- (g_{14}), \\\\\n\
-g_{9}+g_{16}- (g_{6})-2 (g_{2}), g_{-16}+g_{-6}+2 (g_{-9})- (g_{-2})\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}, ((1, 2, 3, 2), (0, 0, 0, -1)),\n\
-(\n\
-g_{-21},  g_{21}, g_{4},  g_{-4}\n\
-)\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{2}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0)),\n\
-(\n\
+experimentalPrintSemisimpleSubalgebrasForceRecompute{}Load{}(\n\
+Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, (\n\
+Serialization{}(LoadCandidateSubalgebra, A^{312}_{1}, {Sequence{}((22, 42, 60, 32))}, (\n\
+g_{-1}+g_{-2}+g_{-3}+g_{-4}, 42 (g_{2})+30 (g_{3})+22 (g_{1})+16 (g_{4})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{120}_{1}, {Sequence{}((14, 26, 36, 20))}, (\n\
+g_{-1}+g_{-2}+g_{-7}+g_{-9}, 18 (g_{2})+14 (g_{1})+10 (g_{7})+8 (g_{9})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{72}_{1}, {Sequence{}((10, 20, 28, 16))}, (\n\
+g_{-2}+g_{-4}+g_{-6}+g_{-11}, 10 (g_{11})+8 (g_{4})+4 (g_{7})+4 (g_{6})+2 (g_{8})+2 (g_{2})-4 (g_{5})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{24}_{1}, {Sequence{}((6, 12, 16, 8))}, (\n\
+g_{-2}+g_{-9}+g_{-11}+g_{-18}, 4 (g_{18})+4 (g_{2})+2 (g_{11})+2 (g_{9})-2 (g_{16})-2 (g_{5})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{56}_{1}, {Sequence{}((10, 18, 24, 12))}, (\n\
+2 g_{-16}+2 g_{-1}+2 g_{-6}, 3 g_{6}+5 g_{1}+3 g_{16}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{8}_{1}, {Sequence{}((4, 6, 8, 4))}, (\n\
+g_{-14}+g_{-18}, 2(g_{14}+g_{18})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{70}_{1}, {Sequence{}((10, 19, 28, 16))}, (\n\
+g_{-4}+g_{-8}+g_{-9}, 9 (g_{9})+8 (g_{4})+5 (g_{8})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{22}_{1}, {Sequence{}((6, 11, 16, 8))}, (\n\
+g_{-8}+g_{-9}+g_{-16}, 4 (g_{16})+3 (g_{8})+g_{9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{20}_{1}, {Sequence{}((6, 10, 14, 8))}, (\n\
+2 g_{-16}+g_{-8}, 3 g_{8}+2 g_{16}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{18}_{1}, {Sequence{}((5, 10, 14, 8))}, (\n\
+g_{-10}+g_{-14}+g_{-15}, 2 (g_{15})+2 (g_{10})+g_{14}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{12}_{1}, {Sequence{}((4, 8, 12, 6))}, (\n\
+g_{-9}+g_{-17}+g_{-18}, 2 (g_{18})+2 (g_{9})+g_{17}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{6}_{1}, {Sequence{}((3, 6, 8, 4))}, (\n\
+g_{-21}+g_{-14}, g_21+g_{14}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}, {Sequence{}((4, 8, 12, 8))}, (\n\
+g_{-7}+g_{-17}, 2 (g_{17})+2 (g_{7})\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}, {Sequence{}((2, 4, 6, 4))}, (\n\
+g_{-21}, g_{21}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}, {Sequence{}((2, 3, 4, 2))}, (\n\
+g_{-24}, g_{24}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{4}_{1}, ((2, 3, 4, 2), (0, 2, 4, 2)), (\n\
+g_{-24}, g_{24}, g_{-13}, g_{13}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{4}_{1}, ((2, 4, 6, 4), (2, 2, 2, 0)), (\n\
+g_{-21}, g_{21}, g_{-5}+g_{-11}, g_{11}+g_{5}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{6}_{1}, ((2, 3, 4, 2), (0, 3, 4, 2)), (\n\
+g_{-24}, g_{24}, g_{-9}+g_{-10}, g_{10}+g_{9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{6}_{1}, ((2, 4, 6, 4), (2, 3, 4, 0))),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{6}_{1}, ((3, 6, 8, 4), (1, 0, 2, 2))),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{8}_{1}, ((2, 4, 6, 4), (2, 4, 4, 0)), (\n\
+g_{-21}, g_{21}, g_{-2}+g_{-11}, 2 g_{11}+2 g_{2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{12}_{1}, ((4, 8, 12, 6), (2, 2, 0, 2)), (\n\
+g_{-15}+2 g_{-16}+g_{-14}, g_{15}+2 g_{14}+g_{16}, g_{-1}- g_{-2}- g_{-4}, -2 g_{2}+2 g_{1}- g_{4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{16}_{1}, ((2, 3, 4, 2), (0, 4, 8, 4)), (\n\
+g_{-24}, g_{24}, g_{-6}+g_{-7}, 2 g_{7}+2 g_{6}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{6}_{1}+A^{16}_{1}, ((3, 6, 8, 4), (0, 0, 4, 4)), (\n\
+g_{-19}+g_{-20}, g_{20}+g_{19}, -g_{-4}+g_{-3}, 2 g_{3}-2 g_{4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{8}_{1}+A^{16}_{1}, ((4, 6, 8, 4), (0, 4, 8, 4)), (\n\
+g_{-18}- g_{-20}- g_{-11}- g_{-14}, g_{18}- g_{11}- g_{20}- g_{14}, g_{-10}+g_{-7}- g_{-6}+g_{-3}, g_{3}+g_{7}- g_{6}+g_{10}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{6}_{1}+A^{18}_{1}, ((3, 6, 8, 4), (1, 0, 4, 4)), (\n\
+g_{-19}+g_{-20}, g_{20}+g_{19}, g_{-3}- g_{-4}+g_{-1}, g_{1}+2 g_{3}-2 g_{4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{20}_{1}, ((2, 3, 4, 2), (0, 4, 8, 6)), (\n\
+g_{-24}, g_{24}, 2g_{-9}+g_{-4}, 3g_{4}+2g_{9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{20}_{1}, ((2, 4, 6, 4), (4, 6, 6, 0)), (\n\
+g_{-20}+g_{-21}, -g_{22}+g_{21}, g_{-6}+g_{-2}+2g_{-9}+g_{-1}, g_{6}+g_{9}+4g_{1}+2g_{2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{22}_{1}, ((2, 3, 4, 2), (0, 5, 8, 6)), (\n\
+g_{-24}, g_{24}, g_{-6}+g_{-2}+3 g_{-7}-3/4 g_{-9}, g_{4}+g_{7}+4g_{9}+4 g_{6}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{56}_{1}, ((2, 4, 6, 4), (6, 10, 12, 0))),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}+A^{56}_{1}, ((4, 8, 12, 8), (6, 10, 12, 0)), (\n\
+g_{-12}+g_{-13}, 2 g_{13}+2 g_{12}, g_{-2}- g_{-3}+g_{-1}, -6 g_{3}+10 g_{2}+6 g_{1}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{70}_{1}, ((2, 3, 4, 2), (0, 9, 16, 10)), (\n\
+g_{-24}, g_{24}, g_{-4}+3g_{-2}+2g_{-3}, 3g_{2}+5 g_{4}+4g_{3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{2}, ((2, 3, 4, 2), (-1, 0, 0, 0)), (\n\
 g_{-24}, g_24, g_1, g_-1\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{2}, ((2, 4, 6, 4), (0, 0, 0, -2)), (\n\
+g_{-21}, g_21, g_4, g_{-4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{6}_{2}, ((3, 6, 8, 4), (-1, -3, -2, 0)), (\n\
+g_{-19}+g_{-20}, g_{20}+g_{19}, g_{6}+g_{5}, g_{-5}+g_{-6}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{6}_{2}, ((3, 6, 8, 4), (0, -3, -4, -2)), (\n\
+g_{-21}+g_{-19}+g_{-20}, g_{19}+g_{20}- g_{17}- g_{14}, g_{9}+g_{16}- g_{6}-2 g_{2}, g_{-16}+g_{-6}+2 g_{-9}- g_{-2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, B^{2}_{2}, ((2, 3, 4, 2), (-1, -1, -1, 0)), (\n\
+g_{-24}, g_{24}, g_{8}, g_{-8}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, B^{6}_{2}, ((3, 6, 8, 4), (-1, -3, -3, -1))),\n\
+Serialization{}(LoadCandidateSubalgebra, G^{6}_{2}, ((3, 6, 8, 4), (-3, -9, -12, -6)), (\n\
+g_{-19}+g_{-20}, g_{20}+g_{19}, g_{23}, g_{-23}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 3 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}+A^{4}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 2, 2, 0)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-6}, g_{6}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 3 A^{4}_{1}, ((2, 4, 6, 4), (2, 2, 2, 0), (0, 2, 2, 0)), (\n\
+g_{-21}, g_{21}, g_{-5}+g_{-11}, g_{11}+g_{5}, -g_{-9}+g_{-2}, -g_{9}+g_{2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{4}_{1}+A^{6}_{1}, ((2, 3, 4, 2), (0, 2, 4, 2), (0, 1, 0, 2))),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{6}_{1}+A^{16}_{1}, ((2, 3, 4, 2), (0, 3, 4, 2), (0, 0, 4, 4)), (\n\
+g_{-24}, g_{24}, g_{-9}+g_{-10}, g_{10}+g_{9}, g_{-3}+g_{-4}, 2 g_{4}+2 g_{3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+A^{20}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 4, 6, 0)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, 2g_{-2}+g_{-3}, 3g_{3}+2 g_{2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{2}_{2}, ((2, 4, 6, 4), (1, 2, 2, 0), (0, -1, 0, 0)), (\n\
+g_{-21}, g_{21}, g_{-14}, g_{14}, g_{2}, g_{-2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}+A^{2}_{2}, ((4, 8, 12, 8), (1, 2, 2, 0), (0, -1, 0, 0)), (\n\
+g_{-12}+g_{-13}, 2 g_{13}+2 g_{12}, g_{-14}, g_{14}, g_{2}, g_{-2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+A^{4}_{2}, ((2, 3, 4, 2), (0, 2, 4, 2), (0, 0, -2, 0)), (\n\
+g_{-24}, g_{24}, g_{-13}, g_{13}, g_{3}, g_{-3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{8}_{1}+A^{4}_{2}, ((4, 6, 8, 4), (0, 2, 4, 2), (0, 0, -2, 0)), (\n\
+g_{-14}+g_{-18}, 2 g_{18}+2 g_{14}, g_{-13}, g_{13}, g_{3}, g_{-3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 0, 0, -1)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, g_{4}, g_{-4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+B^{2}_{2}, ((2, 4, 6, 4), (1, 2, 2, 0), (0, -1, -1, 0)), (\n\
+g_{-21}, g_{21}, g_{-14}, g_{14}, g_{9}+g_{2}, g_{-2}+g_{-9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+G^{6}_{2}, ((2, 4, 6, 4), (2, 3, 4, 0), (-3, -3, -6, 0))),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}+G^{6}_{2}, ((4, 8, 12, 8), (2, 3, 4, 0), (-3, -3, -6, 0)), (\n\
+g_{-12}+g_{-13}, 2g_{13}+2g_{12}, -g_{-9}+g_{-8}, -g_{9}+g_{8}, g_{11}, g_{-11}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{3}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, 0, 0)), (\n\
+g_{-24},  g_{24}, g_{1}, g_{-1}, g_{2}, g_{-2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, B^{2}_{3}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, -1, 0)), (\n\
+g_{-24}, g_{24}, g_{1}, g_{-1}, g_{6}, g_{-6}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, C^{4}_{3}, ((2, 4, 6, 4), (0, 0, 0, -2), (0, -2, -4, 0)), (\n\
+g_{-21}, g_{21}, g_{4}, g_{-4}, g_{9}, g_{-9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 4A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 1, 0, 0)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{-2}, g_{2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{2}+A^{4}_{2}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, 0, 2, 2), (0, 0, 0, -2)), (\n\
+g_{-24}, g_{24}, g_{1}, g_{-1}, g_{-7}, g_{7}, g_{4}, g_{-4}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 0, -1, 0)), (\n\
+g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{3}, g_{-3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{4}_{1}+A^{2}_{3}, ((2, 4, 6, 4), (1, 2, 2, 0), (0, -1, 0, 0), (-1, 0, 0, 0)), (\n\
+g_{-21}, g_{21}, g_{-14}, g_{14}, g_{2}, g_{-2}, g_{1}, g_{-1}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, A^{2}_{1}+(C)^{4}_{3}, ((2, 3, 4, 2), (0, 2, 4, 2), (0, 0, -2, 0), (0, -2, 0, 0)), (\n\
+g_{-24}, g_{24}, g_{-13}, g_{13}, g_{3}, g_{-3}, g_{2}, g_{-2}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, D^{2}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, 0, 0), (0, -1, -2, 0)), (\n\
+g_{-24}, g_{24}, g_{1}, g_{-1}, g_{2}, g_{-2}, g_{9}, g_{-9}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, B^{2}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, 0, 0), (0, 0, -1, 0)), (\n\
+g_{-24}, g_{24}, g_{1}, g_{-1}, g_{2}, g_{-2}, g_{3}, g_{-3}\n\
+)),\n\
+Serialization{}(LoadCandidateSubalgebra, F^{2}_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, -1, 0), (0, 0, 0, -1)), (\n\
+g_{-24}, g_{24}, g_{1}, g_{-1}, g_{6}, g_{-6}, g_{4}, g_{-4}\n\
+))\n\
+\n\
+))\n\
 )\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{2}_{2}+(A)^{1}_{2}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, 0, 1, 1), (0, 0, 0, -1)),\n\
-( (g_{-24}), (g_{24}), (g_{1}), (g_{-1}), (g_{-7}), (g_{7}), \\\\\n\
-(g_{4}), (g_{-4}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{3}_{2}, ((3/2, 3, 4, 2), (-1/2, -3/2, -3/2, -1/2))), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{2}, ((1, 3/2, 2, 1), (-1/2, -1/2, -1/2, 0)),\n\
-( (g_{-24}), (g_{24}), g_{8}, g_{-8})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (G)^{3}_{2}, ((3/2, 3, 4, 2), (-3/2, -9/2, -6, -3)),\n\
-(g_{-19}+g_{-20}, g_{20}+g_{19}, (g_{23}), (g_{-23}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (A)^{1}_{3}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, -1/2, 0, 0)),\n\
-( g_{-24},  g_{24},\n\
-g_{1}, g_{-1},\n\
-g_{2}, g_{-2})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{3}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, -1/2, -1/2, 0)),\n\
-( (g_{-24}), (g_{24}), (g_{1}), (g_{-1}), g_{6}, g_{-6})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (C)^{2}_{3}, ((1, 2, 3, 2), (0, 0, 0, -1), (0, -1, -2, 0)),\n\
-( (g_{-21}), (g_{21}), (g_{4}), (g_{-4}), (g_{9}), (g_{-9}))\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (D)^{1}_{4}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, -1/2, 0, 0), (0, -1/2, -1, 0)),\n\
-(\n\
- g_{-24},  g_{24},\n\
- g_{1},  g_{-1},\n\
- g_{2},  g_{-2},\n\
- g_{9},  g_{-9})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (B)^{1}_{4}, ((1, 3/2, 2, 1), (-1/2, 0, 0, 0), (0, -1/2, 0, 0), (0, 0, -1/2, 0)),\n\
-(\n\
- g_{-24},  g_{24},\n\
- g_{1},  g_{-1},\n\
- g_{2},  g_{-2},\n\
- g_{3},  g_{-3})\n\
-), \\\\\n\
-Serialization{}(LoadCandidateSubalgebra, (F)_{4}, ((2, 3, 4, 2), (-1, 0, 0, 0), (0, -1, -1, 0), (0, 0, 0, -1)),\n\
-(\n\
- g_{-24},  g_{24},\n\
- g_{1},  g_{-1},\n\
- g_{6},  g_{-6},\n\
- g_{4},  g_{-4})\n\
-)))\n\
   ";
 
 }

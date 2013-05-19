@@ -270,7 +270,7 @@ public:
 
   CandidateSSSubalgebra();
   void GetHsByType
-  (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)
+  (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const
   ;
   bool HasConjugateHsTo(List<Vector<Rational> >& other)const ;
   bool IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);

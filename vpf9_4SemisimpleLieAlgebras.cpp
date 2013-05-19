@@ -456,7 +456,7 @@ WeylGroup& CandidateSSSubalgebra::GetAmbientWeyl()const
   return this->owner->GetSSowner().theWeyl;
 }
 
-SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()
+SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()const
 { this->CheckInitialization();
   return this->owner->GetSSowner();
 }
@@ -639,6 +639,23 @@ bool CandidateSSSubalgebra::ComputeSystem
   return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer);
 }
 
+bool CandidateSSSubalgebra::CheckGensBracketToHs()
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::CheckGensBracketToHs");
+  if (this->theNegGens.size!=this->thePosGens.size ||
+      this->theNegGens.size!=this->theWeylNonEmbeddeD.GetDim())
+    return false;
+  ElementSemisimpleLieAlgebra<Rational> goalH, lieBracket;
+  for (int i=0; i<this->theNegGens.size; i++)
+  { goalH.MakeHgenerator(this->theHsScaledToActByTwo[i], *this->owner->owneR);
+    this->GetAmbientSS().LieBracket
+    (this->thePosGens[i], this->theNegGens[i], lieBracket);
+    lieBracket-=goalH;
+    if (!lieBracket.IsEqualToZero())
+      return false;
+  }
+  return true;
+}
+
 bool CandidateSSSubalgebra::ComputeSystemPart2
 (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
@@ -755,8 +772,16 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  if (this->flagDoAttemptToSolveSystem)
-    this->AttemptToSolveSytem(theGlobalVariables);
+  this->flagSystemSolved=this->CheckGensBracketToHs();
+  if (!this->flagSystemSolved)
+  { this->flagSystemGroebnerBasisFound=false;
+    this->flagSystemProvedToHaveNoSolution=false;
+    if (this->flagDoAttemptToSolveSystem)
+      this->AttemptToSolveSytem(theGlobalVariables);
+  } else
+  { this->flagSystemGroebnerBasisFound=false;
+    this->flagSystemProvedToHaveNoSolution=false;
+  }
   if (this->flagSystemProvedToHaveNoSolution)
     return false;
   if (this->flagSystemSolved)
@@ -764,10 +789,12 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     this->theBasis.AddListOnTop(this->thePosGens);
     if (this->theBasis.size>0)
     { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
-      this->owner->owneR->GetCommonCentralizer(this->thePosGens, this->highestVectorsModules);
-      this->ComputeCartanOfCentralizer(theGlobalVariables);
-      this->ComputeCentralizinglySplitModuleDecomposition(theGlobalVariables);
+      if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+        return false;
     }
+    this->owner->owneR->GetCommonCentralizer(this->thePosGens, this->highestVectorsModules);
+    this->ComputeCartanOfCentralizer(theGlobalVariables);
+    this->ComputeCentralizinglySplitModuleDecomposition(theGlobalVariables);
   }
   return true;
 }
@@ -1280,6 +1307,13 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem
       currentPosElt.SubstitutionCoefficients(theSub);
       this->theNegGens[i]=currentNegElt;
       this->thePosGens[i]=currentPosElt;
+    }
+    if (!this->CheckGensBracketToHs())
+    { std::cout << "This is a programming error: I just solved the Serre-Like system governing the "
+      << " subalgebra embedding, but the Lie brackets of the resulting positive and negative generators "
+      << " are not what they should be. Something has gone very wrong. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
   } else
   { if (this->flagSystemProvedToHaveNoSolution)
@@ -2922,7 +2956,9 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
 }
 
 std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ if (this->flagSystemProvedToHaveNoSolution)
+    return "";
+  std::stringstream out;
   bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
   if (this->flagCentralizerIsWellChosen && this->indexMaxSSContainer!=-1)
@@ -2969,9 +3005,9 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringSystem");
   std::stringstream out;
   if (!this->flagSystemSolved)
-    out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
+    out << "<br><b> Subalgebra not realized, but it might have a solution. </b> ";
   else
-  { out << "Subalgebra realized. ";
+  { out << "<br>Subalgebra realized. ";
     if (!this->flagCentralizerIsWellChosen)
       out << "<b>However, the centralizer is not well chosen.</b>";
   }
@@ -2984,12 +3020,13 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
   }
   out << ")<br>";
   if (this->theUnknownCartanCentralizerBasis.size>0)
-  { out << "<br>Unknown splitting cartan of centralizer.";
-  for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
+  { out << "<br>Unknown splitting cartan of centralizer.<br>\n";
+    for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
     { out << this->theUnknownCartanCentralizerBasis[i].ToString();
       if (i!=this->theUnknownCartanCentralizerBasis.size-1)
         out << ", ";
     }
+    out << "<br>";
   }
   for (int i=0; i<this->theHs.size; i++)
   { out << "h: " << this->theHs[i] << ", "
@@ -3039,14 +3076,48 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
   return out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringGenerators");
+  if (this->theBasis.size==0)
+    return "";
+  bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
+  bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
+  std::stringstream out;
+  out << "<br>Dimension of subalgebra generated by predefined or computed generators: "
+  << this->theBasis.size << ". ";
+  out << "<br>Negative simple generators: ";
+  for (int i=0; i<this->theNegGens.size; i++)
+  { if (useHtml && useLaTeX)
+      out << CGI::GetHtmlMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
+    else
+      out << this->theNegGens[i].ToString(theFormat);
+    if (i!=this->theNegGens.size-1)
+      out << ", ";
+  }
+  out << "<br>Positive simple generators: ";
+  for (int i=0; i<this->thePosGens.size; i++)
+  { if (useHtml && useLaTeX)
+      out <<  CGI::GetHtmlMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
+    else
+      out << this->thePosGens[i].ToString(theFormat);
+    if (i!=this->thePosGens.size-1)
+      out << ", ";
+  }
+  return out.str();
+}
+
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
-  bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
-  bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
+  bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
+  bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   //bool writingToHD=theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   out << "Subalgebra type: " << this->owner->GetAlgebraLink(this->indexInOwner, theFormat)
   << " (click on type for detailed printout).";
+  if (this->flagSystemProvedToHaveNoSolution)
+  { out << " <b> Subalgebra candidate proved to be impossible! </b> ";
+    return out.str();
+  }
   bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   bool weightsAreCoordinated=true;
   if (this->modulesGrouppedByWeight.size!=this->weightsOfModules.size)
@@ -3084,34 +3155,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (i!=this->thePosGens.size-1)
       out << ", ";
   }*/
-  if (this->flagSystemProvedToHaveNoSolution)
-  { out << " <b> Subalgebra candidate proved to be impossible! </b> ";
-    return out.str();
-  }
-  if (this->theBasis.size!=0)
-  { out << "<br>Dimension of subalgebra generated by predefined or computed generators: "
-    << this->theBasis.size << ". ";
-    if (!shortReportOnly)
-    { out << "<br>Negative simple generators: ";
-      for (int i=0; i<this->theNegGens.size; i++)
-      { if (useHtml && useLaTeX)
-          out << CGI::GetHtmlMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
-        else
-          out << this->theNegGens[i].ToString(theFormat);
-        if (i!=this->theNegGens.size-1)
-          out << ", ";
-      }
-      out << "<br>Positive simple generators: ";
-      for (int i=0; i<this->thePosGens.size; i++)
-      { if (useHtml && useLaTeX)
-          out <<  CGI::GetHtmlMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
-        else
-          out << this->thePosGens[i].ToString(theFormat);
-        if (i!=this->thePosGens.size-1)
-          out << ", ";
-      }
-    }
-  }
+  out << this->ToStringGenerators(theFormat);
   out << "<br>Symmetric Cartan matrix scaled: ";
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
@@ -3346,10 +3390,10 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
 { if (this->flagSystemProvedToHaveNoSolution)
     return;
   this->ComputeCentralizerIsWellChosen();
-  if (!this->flagCentralizerIsWellChosen)
-  { this->ComputeSystem(theGlobalVariables, true);
-    this->ComputeCentralizerIsWellChosen();
-  }
+//  if (!this->flagCentralizerIsWellChosen)
+//  { this->ComputeSystem(theGlobalVariables, true);
+//    this->ComputeCentralizerIsWellChosen();
+//  }
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)

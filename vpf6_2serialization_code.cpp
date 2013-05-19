@@ -791,7 +791,8 @@ bool Serialization::innerLoadCandidateSA
     for (int i=1; i<theGensE.children.size; i++)
     { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
           (theCommands, theGensE[i], curGen, *owner.owneR))
-      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element";
+      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression "
+        << theGensE[i].ToString() << ". ";
         return false;
       }
       if (i%2 ==1)
@@ -817,6 +818,12 @@ bool Serialization::innerLoadCandidateSA
 //    outputSubalgebra.theCharFundCoords.MakeZero(owner.owneR);
 //    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
   }
+  if (input.children.size==5)
+    if (!outputSubalgebra.CheckGensBracketToHs())
+    { theCommands.Comments
+      << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
+      return false;
+    }
 
   //Serialization::innerLoadFromObject(theCommands,
   return output.SetError
@@ -867,7 +874,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras
     CandidateSSSubalgebra tempCandidate;
     if (!Serialization::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
     { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
-      << " number " << i << " subalgebra. <hr>";
+      << " number " << i << " of type "
+      << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
     }
 //    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;

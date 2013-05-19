@@ -318,37 +318,37 @@ GlobalVariables* theGlobalVariables)
     if (!newCandidate.ComputeChar(false, theGlobalVariables))
     { theReport.Report
       ("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " doesn't have fitting chars.");
-      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-      std::cout << "<hr>"
-      << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
-      << newCandidate.theHs.ToString() << " has bad character.<br>";
+      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+      //std::cout << "<hr>"
+      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
+      //<< newCandidate.theHs.ToString() << " has bad character.<br>";
 
       return;
     }
     if (!newCandidate.ComputeSystem(theGlobalVariables, false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() + " -> no system solution.");
-      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-      std::cout << "Candidate "
-      << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
-      << newCandidate.theHs.ToString()  << " -> no system solution. ";
+      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+      //std::cout << "Candidate "
+      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
+      //<< newCandidate.theHs.ToString()  << " -> no system solution. ";
       return;
     }
     for (int i=0; i<this->Hcandidates.size; i++)
       if (newCandidate.theWeylNonEmbeddeD.theDynkinType==
           this->Hcandidates[i].theWeylNonEmbeddeD.theDynkinType)
       { if (newCandidate.IsDirectSummandOf(this->Hcandidates[i], true))
-        { if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-            std::cout << "<hr>Candidate "
-            << newCandidate.ToStringTypeAndHs() << " is a direct summand of  "
-            << this->Hcandidates[i].ToStringTypeAndHs() << ". ";
+        { //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+            //std::cout << "<hr>Candidate "
+            //<< newCandidate.ToStringTypeAndHs() << " is a direct summand of  "
+            //<< this->Hcandidates[i].ToStringTypeAndHs() << ". ";
 
           return;
         }
-        std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
-        << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
+//        std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
+//        << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
       }
-    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-    std::cout << "<hr>" << newCandidate.ToStringTypeAndHs() << " <b> IS GOOD, adding.</b><br>";
+    //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+    //std::cout << "<hr>" << newCandidate.ToStringTypeAndHs() << " <b> IS GOOD, adding.</b><br>";
     newCandidate.indexInOwner=this->Hcandidates.size;
     this->Hcandidates.AddOnTop(newCandidate);
     if (!this->Hcandidates.LastObject()->indexInOwner==this->Hcandidates.size-1)
@@ -394,8 +394,8 @@ GlobalVariables* theGlobalVariables)
       else
         reportStreamX << " which is all nice and dandy.<br>";
       theReport1.Report(reportStreamX.str());
-      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-        std::cout << "<br>" << reportStreamX.str();
+//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+//        std::cout << "<br>" << reportStreamX.str();
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
@@ -404,8 +404,8 @@ GlobalVariables* theGlobalVariables)
     if (theGlobalVariables!=0)
     { out << "Generating orbit of " << startingVector[0].ToString() << "...";
       theReport.Report(out.str());
-      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-        std::cout << out.str();
+//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+//        std::cout << out.str();
     }
     if (indexCurrentWeight!=0)
     { if (! this->GetSSowner().theWeyl.GenerateOrbit
@@ -433,8 +433,8 @@ GlobalVariables* theGlobalVariables)
         out << " Orbit was in fact not generated as we are selecting the first element of "
         << " the Cartan of the semisimple subalgebra. ";
       theReport.Report(out.str());
-      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-        std::cout << " done. The size of the orbit is " << theOrbit.size;
+      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+        //std::cout << " done. The size of the orbit is " << theOrbit.size;
     }
     for (int j=0; j<theOrbit.size; j++)
     { std::stringstream out2;
@@ -442,8 +442,8 @@ GlobalVariables* theGlobalVariables)
       { out2 << "Exploring orbit element of index  " << j+1 << " out of "
         << theOrbit.size << ".";
         theReport2.Report(out2.str());
-        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-          std::cout << "<br>" << out2.str();
+        //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+          //std::cout << "<br>" << out2.str();
       }
       Hrescaled=theOrbit[j];
       Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
@@ -453,9 +453,9 @@ GlobalVariables* theGlobalVariables)
         { out2 << " the candidate is good. Attempting to complete the component by recursion. ";
           theReport2.Report(out2.str());
         }
-        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-          std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
-          << Hrescaled.ToString() << ", is GOOD. ";
+//        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+  //        std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
+    //      << Hrescaled.ToString() << ", is GOOD. ";
         newCandidate=baseCandidate;
         newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], i);
         this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
@@ -463,9 +463,9 @@ GlobalVariables* theGlobalVariables)
         if (theGlobalVariables!=0)
         { out2 << " the orbit candidate is no good. ";
           theReport2.Report(out2.str());
-          if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-            std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
-            << Hrescaled.ToString() << ", is no good. ";
+      //    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+        //    std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
+          //  << Hrescaled.ToString() << ", is no good. ";
         }
     }
   }
@@ -3333,15 +3333,15 @@ bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)cons
     return false;
   List<Vector<Rational> > raisedInput=input;
   List<Vector<Rational> > myVectors=this->theHs;
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-  std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with "
-  << myVectors.ToString();
+  //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+  //std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with "
+  //<< myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput);
   ambientWeyl.RaiseToMaximallyDominant(myVectors);
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-  std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
-  << myVectors.ToString();
+  //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+  //std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
+  //<< myVectors.ToString();
   return myVectors==raisedInput;
 }
 

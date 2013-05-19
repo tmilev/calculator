@@ -1071,8 +1071,8 @@ std::string CGI::GetCalculatorLink
 
 std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars)
 { std::stringstream out;
-  int dirtylittleHAckHEre;
-  upperNumChars=1;
+//  int dirtylittleHAckHEre;
+//  upperNumChars=1;
   if (input.size()< (unsigned) upperNumChars)
     out << "<span class=\"math\">" << input << "</span>";
   else

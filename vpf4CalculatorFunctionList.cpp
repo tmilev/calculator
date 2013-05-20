@@ -336,10 +336,17 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=a/b;\n X; \\det {} X");
   this->AddOperationInnerHandler
   ("\\det", this->innerDeterminant, "",
-   "Tries to convert to a matrix of ratinonals or matrix of rational \
+   "Tries to convert to a matrix of rationals or matrix of rational \
    functions and computes the determinant if\
    not too large. \
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
+  this->AddOperationInnerHandler
+  ("DeterminantPolynomial", this->innerDeterminantPolynomial, "",
+   "Attempts to converts the entries of the matrix to polynomials and computes the determinant polynomial.\
+   The matrix must not be larger than 8x8. Note that this function does not perform Gaussian elimination: it is meant \
+   to be used with multivariate polynomials with large number of variables. ",
+   "DeterminantPolynomial{}\\left(\\begin{array}{ccc}x_{11}& x_{12} \
+   & x_{13}\\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ");
 /*  this->AddOperationInnerHandler
   ("Union", this->innerUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",

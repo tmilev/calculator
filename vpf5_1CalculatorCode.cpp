@@ -487,9 +487,9 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-  << "<meta http-equiv=\"refresh\" content=\"5; url="
-  << displayFolder << theTitlePageFileNameNoPath
-  << "\">"
+  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
+  //<< displayFolder << theTitlePageFileNameNoPath
+  //<< "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
@@ -783,7 +783,7 @@ bool CommandList::innerDeterminant
   }
   if (!theCommands.GetMatrix(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
   { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
-    << " ratinoal functions or rationals, and I failed to convert your matrix to either type. "
+    << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
     << " file " << __FILE__ << ", line " << __LINE__ << ". ";
     return false;
@@ -799,6 +799,30 @@ bool CommandList::innerDeterminant
     return output.AssignValue(matRF.GetDeterminant(), theCommands);
   } else
     return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
+}
+
+bool CommandList::innerDeterminantPolynomial
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerDeterminantPolynomial");
+  Matrix<Polynomial<Rational> > matPol;
+  Expression theContext;
+  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, Serialization::innerPolynomial))
+  { theCommands.Comments << "<hr>Failed to convert the input to matrix of polynomials. ";
+    return false;
+  }
+  if (matPol.NumRows!=matPol.NumCols)
+    return output.SetError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
+  if (matPol.NumRows>8)
+  { theCommands.Comments << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
+    << matPol.NumRows << " rows. Note that you can compute determinant using the \\det "
+    << "function which does Gaussian elimination "
+    << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. "
+    ;
+    return false;
+  }
+  Polynomial<Rational> outputPoly;
+  outputPoly.MakeDeterminantFromSquareMatrix(matPol);
+  return output.AssignValueWithContext(outputPoly, theContext, theCommands);
 }
 
 bool CommandList::innerMatrixRational

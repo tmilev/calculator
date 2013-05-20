@@ -3539,12 +3539,10 @@ public:
   std::string ToStringEpsilonFormat()const
   { return this->ToStringLetterFormat("\\varepsilon");
   }
+  template <class otherType>
   static void ScalarProduct
-(const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& TheBilinearForm, CoefficientType& result)
-  { result=Vector<CoefficientType>::ScalarProduct(r1, r2, TheBilinearForm);
-  }
-  static CoefficientType ScalarProduct
-  (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& TheBilinearForm)
+(const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<otherType>& TheBilinearForm,
+ CoefficientType& result)
   { if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
     { std::cout << "This is a programming error: attempting to take a bilinear form represented by matrix with "
       << TheBilinearForm.NumRows << " rows and " << TheBilinearForm.NumCols << " columns "
@@ -3552,7 +3550,7 @@ public:
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    CoefficientType result, tempRat, accumRow;
+    CoefficientType tempRat, accumRow;
     result=0;
     for (int i=0; i<TheBilinearForm.NumRows; i++)
     { accumRow=0;
@@ -3564,8 +3562,15 @@ public:
       accumRow*=r1[i];
       result+=accumRow;
     }
+  }
+  template <class otherType>
+  static CoefficientType ScalarProduct
+  (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<otherType>& TheBilinearForm)
+  { CoefficientType result;
+    Vector<CoefficientType>::ScalarProduct(r1, r2, TheBilinearForm, result);
     return result;
   }
+
   CoefficientType ScalarProduct (const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& form) const
   { return ScalarProduct(*this,r2,form);
   }
@@ -4254,7 +4259,7 @@ class Vectors: public List<Vector<CoefficientType> >
     }
   }
   void GetGramMatrix
-  (Matrix<CoefficientType>& output, const Matrix<CoefficientType>* theBilinearForm=0)const
+  (Matrix<CoefficientType>& output, const Matrix<Rational>* theBilinearForm=0)const
   ;
   void GetMatrixRootsToRows(Matrix<Rational>& output)const
   { int tempNumCols= 0;
@@ -5411,6 +5416,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     this->GetConstantTerm(result, 0);
     return result;
   }
+  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<CoefficientType> >& theMat);
   void MakeConst(const CoefficientType& theConst, int ExpectedNumVars=0)
   {// int commentGrandMasterChecksWhenDone=-1;
     //this->GrandMasterConsistencyCheck();
@@ -8606,7 +8612,7 @@ bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndTwoExtraRoots
 
 template<class CoefficientType>
 void Vectors<CoefficientType>::GetGramMatrix
-(Matrix<CoefficientType>& output, const Matrix<CoefficientType>* theBilinearForm) const
+(Matrix<CoefficientType>& output, const Matrix<Rational>* theBilinearForm) const
 { output.Resize(this->size, this->size, false);
   for (int i=0; i<this->size; i++)
     for(int j=i; j<this->size; j++)

@@ -1417,6 +1417,9 @@ public:
   static bool innerDeterminant
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerDeterminantPolynomial
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerInvertMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;

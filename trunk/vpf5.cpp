@@ -292,7 +292,7 @@ bool CommandList::innerRootSAsAndSltwos
   out << "<a href=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\">See the result in a separate file/page. </a>";
-  out << "<meta http-equiv=\"refresh\" content=\"0; url=\""
+  out << "<meta http-equiv=\"refresh\" content=\"1; url="
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\">";
   return output.AssignValue(out.str(), theCommands);

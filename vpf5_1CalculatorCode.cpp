@@ -402,27 +402,27 @@ bool DynkinSimpleType::HasEasySubalgebras()const
 std::string DynkinSimpleType::ToStringLinksToCalculator(FormatExpressions* theFormat)const
 { std::stringstream out;
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
-  << this->theLetter << "_" << this->theRank << "\">"  << this->theLetter << this->theRank << "</a></td> ";
+  << this->theLetter << "_" << this->theRank << "\">"  << this->theLetter << this->theRank << "</a></td>\n ";
   if (this->HasEasySubalgebras())
     out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
     << this->theLetter << "_" << this->theRank << "%29\">"
-    << this->theLetter << this->theRank << " semisimple subalgebras</a></td> ";
+    << this->theLetter << this->theRank << " semisimple subalgebras</a></td>\n ";
   else
-    out << "<td>Not available</td>";
+    out << "<td>Not available</td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
   << this->theLetter << "_" << this->theRank << "%29\">"
-  << this->theLetter << this->theRank << " sl(2) triples</a></td>";
+  << this->theLetter << this->theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
   << this->theLetter  << "_" << this->theRank << "%29\">"
-  << this->theLetter << this->theRank << " root subalgebras</a></td>";
+  << this->theLetter << this->theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
 bool CommandList::innerGetLinksToSimpleLieAlgerbas
 (CommandList& theCommands, const Expression& input, Expression& output)
 { std::stringstream out;
-  out << "<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
-  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>";
+  out << "\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
   DynkinSimpleType theType;
   theType.MakeArbitrary('F', 4, 2);
   out << theType.ToStringLinksToCalculator();
@@ -448,7 +448,7 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas
   { theType.MakeArbitrary('C', i, 2);
     out << theType.ToStringLinksToCalculator();
   }
-  out << "</table>";
+  out << "</table>\n\n\n";
   return output.AssignValue(out.str(), theCommands);
 }
 

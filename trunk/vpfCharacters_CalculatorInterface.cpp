@@ -165,7 +165,7 @@ void WeylGroupRepresentation<coefficient>::Restrict
   }
   output.reset(this->OwnerGroup);
   output.vectorSpaceBasis = VectorSpaceBasisSubrep;
-  output.vectorSpaceBasis.GetGramMatrix(output.gramMatrixInverted);
+  output.vectorSpaceBasis.GetGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.Invert();
   output.theCharacter=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);

@@ -4328,6 +4328,7 @@ std::string CGI::UnCivilizeStringCGI(const std::string& input)
       case '\\': out << "%5C"; break;
       case '}': out << "%7D"; break;
       case '%': out << "%25"; break;
+      case '&': out << "%26"; break;
       case '\n': out << "%0D%0A"; break;
       case '\t': out << "%09"; break;
 //      case '': out << ""; break;

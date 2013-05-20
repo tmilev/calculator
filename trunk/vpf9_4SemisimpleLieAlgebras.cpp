@@ -686,6 +686,37 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   return true;
 }
 
+template <class CoefficientType>
+void Polynomial<CoefficientType>::MakeDeterminantFromSquareMatrix
+(const Matrix<Polynomial<CoefficientType> >& theMat)
+{ if(theMat.NumCols!=theMat.NumRows)
+    assert(false);
+  permutation thePerm;
+  thePerm.initPermutation(theMat.NumRows);
+  int numCycles=thePerm.GetNumPermutations();
+  //std::cout << "<hr>" << numCycles << " total cycles";
+  List<int> permutationIndices;
+  thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
+  Polynomial<CoefficientType> result, theMonomial;
+  result.MakeZero();
+  result.SetExpectedSize(numCycles);
+  for (int i=0; i<numCycles; i++, thePerm.incrementAndGetPermutation(permutationIndices))
+  { theMonomial.MakeOne();
+    for (int j=0; j<permutationIndices.size; j++)
+      theMonomial*=theMat(j, permutationIndices[j]);
+    //the following can be made much faster, but no need right now as it won't be a bottleneck.
+    int sign=1;
+    for(int j=0; j<permutationIndices.size; j++)
+      for (int k=j+1; k<permutationIndices.size; k++)
+        if (permutationIndices[k]<permutationIndices[j])
+          sign*=-1;
+    //std::cout << "<hr>" << permutationIndices << " sign: " << sign;
+    theMonomial*=sign;
+    result+=theMonomial;
+  }
+  *this=result;
+}
+
 bool CandidateSSSubalgebra::ComputeSystemPart2
 (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
@@ -724,39 +755,41 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   if (!AttemptToChooseCentalizer)
     this->theUnknownCartanCentralizerBasis.SetSize(0);
   else
-  { int rankCentralizer;
+  { int rankCentralizer=-1;
     bool tempB= this->centralizerRank.IsSmallInteger(&rankCentralizer);
-    if (!tempB || rankCentralizer<0)
-    { std::cout << "This is a programming error: rankCentralizer not computed when it should be. "
+    if (!tempB || rankCentralizer<0 || rankCentralizer>this->GetAmbientWeyl().GetDim())
+    { std::cout << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
+      << " Currently rankCentalizer is supposed to be " << rankCentralizer
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()*2;
+    this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()+1;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
-    Polynomial<Rational> tempP;
-    MonomialP tempM;
-    int theRank=this->GetAmbientWeyl().GetDim();
-    for (int i=0; i<rankCentralizer; i++)
-    { tempP.MakeZero();
-      for (int j=0; j<theRank; j++)
-      { tempM.MakeEi(i*theRank+this->totalNumUnknownsNoCentralizer+j, 1);
-        tempM[i*theRank+this->totalNumUnknownsNoCentralizer+rankCentralizer*theRank]=1;
-        tempP.AddMonomial(tempM, 1);
-      }
-      tempP+=-1;
-      this->theSystemToSolve.AddOnTop(tempP);
-//      std::cout << "<hr>Adding to system: " << tempP.ToString();
-    }
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
     //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
-  for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
-  { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
-//    std::cout << "<hr>Unknown generator index " << i << ": "
-//    << this->theUnknownCartanCentralizerBasis[i].ToString();
+  if (this->theUnknownCartanCentralizerBasis.size>0)
+  { Matrix<Polynomial<Rational> > theCentralizerCartanVars;
+    Vectors<Polynomial<Rational> > theCentralizerCartanElts;
+    theCentralizerCartanElts.SetSize(this->theUnknownCartanCentralizerBasis.size);
+    for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
+    { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
+      theCentralizerCartanElts[i]=this->theUnknownCartanCentralizerBasis[i].GetCartanPart();
+      std::cout << "<hr>Unknown element of centralizer cartan " << i << ": "
+      << theCentralizerCartanElts[i].ToString();
+      //std::cout << "<hr>Unknown generator index " << i << ": "
+      //    << this->theUnknownCartanCentralizerBasis[i].ToString();
+    }
+    theCentralizerCartanElts.GetGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().CartanSymmetric);
+    Polynomial<Rational> theDeterminant, theDetMultiplier;
+    theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
+    theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer-1, 1,1 );
+    theDeterminant*=theDetMultiplier;
+    theDeterminant+=-1;
+    this->theSystemToSolve.AddOnTop(theDeterminant);
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
@@ -1805,7 +1838,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   tempStreamH << "\nh= " << tempS << "";
   out << CGI::GetHtmlMathSpanPure(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne= " << this->theE.ToString(theFormat) << "\n<br>\n";
-  out << CGI::GetHtmlMathSpanPure(tempStreamE.str());
+  out << CGI::GetHtmlMathSpanPure(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.ToString(theFormat) << "\n<br>\n";
   out << CGI::GetHtmlMathSpanPure(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
@@ -3430,10 +3463,10 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
 { if (this->flagSystemProvedToHaveNoSolution)
     return;
   this->ComputeCentralizerIsWellChosen();
-//  if (!this->flagCentralizerIsWellChosen)
-//  { this->ComputeSystem(theGlobalVariables, true);
-//    this->ComputeCentralizerIsWellChosen();
-//  }
+  if (!this->flagCentralizerIsWellChosen)
+  { this->ComputeSystem(theGlobalVariables, true);
+    this->ComputeCentralizerIsWellChosen();
+  }
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)

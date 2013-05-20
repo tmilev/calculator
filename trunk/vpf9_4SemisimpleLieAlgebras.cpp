@@ -835,7 +835,9 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  this->flagSystemSolved=this->CheckGensBracketToHs();
+  this->flagSystemSolved=false;
+  if (!AttemptToChooseCentalizer)
+    this->flagSystemSolved= this->CheckGensBracketToHs();
   if (!this->flagSystemSolved)
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
@@ -3464,7 +3466,10 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
     return;
   this->ComputeCentralizerIsWellChosen();
   if (!this->flagCentralizerIsWellChosen)
-  { this->ComputeSystem(theGlobalVariables, true);
+  { std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
+    std::cout << "<br>Starting generators: " << this->ToStringGenerators();
+    this->ComputeSystem(theGlobalVariables, true);
+    std::cout << "<br>... and final generators: " << this->ToStringGenerators();
     this->ComputeCentralizerIsWellChosen();
   }
 }

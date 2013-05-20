@@ -292,9 +292,9 @@ bool CommandList::innerRootSAsAndSltwos
   out << "<a href=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\">See the result in a separate file/page. </a>";
-  out << "<iframe src=\""
+  out << "<meta http-equiv=\"refresh\" content=\"0; url=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
-  << "\" width=\"800\" height=\"600\" ></iframe>";
+  << "\">";
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -303,7 +303,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(5))
     return output.SetError
-    ("Function  fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
+    ("Function fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
   const Expression& typeNode=input[1];
   const Expression& weightNode=input[2];
   const Expression& inducingParNode=input[3];

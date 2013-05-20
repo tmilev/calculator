@@ -382,6 +382,8 @@ int main_command_input(int argc, char **argv)
     if (i<argc-1)
       theInputStream << " ";
   }
+//  std::cout << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
+//  return 0;
   theParser.inputStringRawestOfTheRaw =theInputStream.str();
   PredefinedStrings(theParser.inputStringRawestOfTheRaw);
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
@@ -411,8 +413,7 @@ int main(int argc, char **argv)
   std::string inputDisplayPath="vpf/";
   if (argc>=1)
   { getPath(argv[0], inputPatH);
-//    std::cout << "input path: " << inputPatH;
-
+//    std::cout << "input path: " << inputPatH << "\n\n";
     bool found=false;
     for (int j=inputPatH.size()-2; j>=0; j--)
     { if (inputPatH[j]=='/')
@@ -434,6 +435,7 @@ int main(int argc, char **argv)
 
   }
   std::string tempS;
+//  std::cout << "input path: " << inputDisplayPath << "\n\n";
   theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
   theParser.InitJavaScriptDisplayIndicator();
 
@@ -528,7 +530,6 @@ int main(int argc, char **argv)
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(c_3);";
   //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
   PredefinedStrings(civilizedInput);
-
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);

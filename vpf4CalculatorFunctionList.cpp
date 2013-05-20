@@ -83,6 +83,11 @@ void CommandList::initPredefinedInnerFunctions()
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true, false)
    ;
   this->AddOperationInnerHandler
+  ("GetLinks", this->innerGetLinksToSimpleLieAlgerbas, "",
+   "Gets simple Lie algebra links to the calculator.",
+   "GetLinks{}0", false, false)
+   ;
+  this->AddOperationInnerHandler
   ("ConesIntersection", this->innerConesIntersect, "",
    "Takes as input two sequences of vectors, generates two cones, \
    and intersects them using the simplex\

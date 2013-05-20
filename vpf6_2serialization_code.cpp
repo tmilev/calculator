@@ -862,7 +862,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.Hcandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
-  theSAs.flagDoComputePairingTable=false;
+  theSAs.flagDoComputePairingTable=true;
   theSAs.flagDoComputeNilradicals=false;
   if (theCandidatesE.children.size>10)
     theSAs.flagDoComputeNilradicals=false;

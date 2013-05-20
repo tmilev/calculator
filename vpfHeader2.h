@@ -1697,6 +1697,10 @@ static bool innerDrawRootSystem
   static bool fCasimir
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerGetLinksToSimpleLieAlgerbas
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   static bool innerRootSAsAndSltwos
   (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 ;

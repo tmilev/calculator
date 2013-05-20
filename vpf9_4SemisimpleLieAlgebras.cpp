@@ -2381,7 +2381,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << tooltipVDecomposition
     << "\"> Decomposition of ambient Lie algebra</td>"
     << "<td>The square of the length of the weight dual to h.</td>"
-    << "<td>Dynkin index = (previous column) *(long root length ambient algebra)^2/4</td>"
+    << "<td>Dynkin index </td>"
     << "<td>Minimal containing regular semisimple SAs</td><td title=\""
     << tooltipContainingRegular << "\">Containing regular semisimple SAs in "
     << "which the sl(2) has no centralizer</td> </tr>";

@@ -389,6 +389,69 @@ bool CommandList::innerPolynomialDivisionVerbose
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
 
+bool DynkinSimpleType::HasEasySubalgebras()const
+{ if(this->theLetter=='F')
+    return true;
+  if (this->theLetter=='G')
+    return true;
+  if (this->theLetter=='A' && (this->theRank==2 || this->theRank==3))
+    return true;
+  return false;
+}
+
+std::string DynkinSimpleType::ToStringLinksToCalculator(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
+  << this->theLetter << "_" << this->theRank << "\">"  << this->theLetter << this->theRank << "</a></td> ";
+  if (this->HasEasySubalgebras())
+    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
+    << this->theLetter << "_" << this->theRank << "%29\">"
+    << this->theLetter << this->theRank << " semisimple subalgebras</a></td> ";
+  else
+    out << "<td>Not available</td>";
+  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
+  << this->theLetter << "_" << this->theRank << "%29\">"
+  << this->theLetter << this->theRank << " sl(2) triples</a></td>";
+  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
+  << this->theLetter  << "_" << this->theRank << "%29\">"
+  << this->theLetter << this->theRank << " root subalgebras</a></td>";
+  return out.str();
+}
+
+bool CommandList::innerGetLinksToSimpleLieAlgerbas
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ std::stringstream out;
+  out << "<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>";
+  DynkinSimpleType theType;
+  theType.MakeArbitrary('F', 4, 2);
+  out << theType.ToStringLinksToCalculator();
+  for (int i=6; i<=8; i++)
+  { theType.MakeArbitrary('E', i, 2);
+    out << theType.ToStringLinksToCalculator();
+  }
+  theType.MakeArbitrary('G', 2, 2);
+  out << theType.ToStringLinksToCalculator();
+  for (int i=1; i<=8; i++)
+  { theType.MakeArbitrary('A', i, 2);
+    out << theType.ToStringLinksToCalculator();
+  }
+  for (int i=4; i<=8; i++)
+  { theType.MakeArbitrary('D', i, 2);
+    out << theType.ToStringLinksToCalculator();
+  }
+  for (int i=2; i<=8; i++)
+  { theType.MakeArbitrary('B', i, 2);
+    out << theType.ToStringLinksToCalculator();
+  }
+  for (int i=3; i<=8; i++)
+  { theType.MakeArbitrary('C', i, 2);
+    out << theType.ToStringLinksToCalculator();
+  }
+  out << "</table>";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CommandList::innerPrintSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute)
 { //bool showIndicator=true;

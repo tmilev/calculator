@@ -7191,7 +7191,7 @@ std::string MonomialChar<CoefficientType>::ToString
   }
   if (useOmega)
     out << VectorSpaceLetter << "_{"
-    << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
+    << weightFundamentalCoords.ToStringLetterFormat("\\omega", theFormat) << "}";
   else
     out << VectorSpaceLetter << "_{"
     << weightFundamentalCoords.ToStringLetterFormat

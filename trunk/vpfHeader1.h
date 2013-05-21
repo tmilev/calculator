@@ -4924,6 +4924,7 @@ public:
   std::string PathDisplayServerBaseFolder;
   List<std::string> polyAlphabeT;
   List<std::string> weylAlgebraLetters;
+  List<std::string> vectorSpaceEiBasisNames;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
   std::string GetChevalleyGletter(int index)const;
@@ -8927,6 +8928,11 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
       }
       found=true;
       out << tempS;
+      if (theFormat!=0)
+        if (theFormat->vectorSpaceEiBasisNames.size>i)
+        { out << theFormat->vectorSpaceEiBasisNames[i];
+          continue;
+        }
       out << inputLetter << "_{" << i+1<< "}";
     }
   return out.str();

@@ -778,8 +778,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
     { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
       theCentralizerCartanElts[i]=this->theUnknownCartanCentralizerBasis[i].GetCartanPart();
-      std::cout << "<hr>Unknown element of centralizer cartan " << i << ": "
-      << theCentralizerCartanElts[i].ToString();
+      //std::cout << "<hr>Unknown element of centralizer cartan " << i << ": "
+      //<< theCentralizerCartanElts[i].ToString();
       //std::cout << "<hr>Unknown generator index " << i << ": "
       //    << this->theUnknownCartanCentralizerBasis[i].ToString();
     }
@@ -922,10 +922,23 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     { this->candidateSubalgebraModules.AddOnTop(i);
       this->primalSubalgebraModules.AddOnTop(i);
     }
+  //std::cout << "<hr>Testing sa: " << this->ToStringTypeAndHs() << "<br>";
   for (int i=0; i<this->modulesGrouppedByPrimalType.size; i++)
-    if (this->modulesGrouppedByPrimalType[i].size==1 &&
-        this->modulesGrouppedByPrimalType[i][0].IsElementCartan())
+  //{ std::cout << "<br>Testing " << this->modulesGrouppedByPrimalType[i].ToString();
+    if (this->modulesGrouppedByPrimalType[i][0].IsElementCartan())
+    { for (int j=0; j<this->modulesGrouppedByPrimalType[i].size; j++)
+        if (!this->modulesGrouppedByPrimalType[i][j].IsElementCartan())
+        { std::cout << "<br>This is a programming or mathematical error. Module "
+          << this->modulesGrouppedByPrimalType[i].ToString() << " has elements of the ambient Cartan "
+          << "and elements outside of the ambient Cartan, which is not allowed. "
+          << "<br>Here is a detailed subalgebra printout. "
+          << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
       this->primalSubalgebraModules.AddOnTop(i);
+    }// else
+    //std::cout << "... aint no cartan no centralizer. ";
+  //}
   this->weightsOfModules.SetSize(this->modulesGrouppedByWeight.size);
   this->weightsOfPrimallySplitModules.SetSize(this->modulesGrouppedByWeight.size);
   Vector<Rational> theProjection, thePrimalProjection;
@@ -1674,7 +1687,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   { std::stringstream out;
     out << "\nExploring extensions of " << baseCandidate.ToString();
     theProgressReport1.Report(out.str());
-    std::cout << "Exploring extensions of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " by: ";
+//    std::cout << "Exploring extensions of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " by: ";
   }
   List<DynkinSimpleType> theTypes;
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
@@ -2875,8 +2888,13 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   primalBase = this->FKNilradicalCandidates[0];
   out << "<br>The primal extension of the semisimple subalgerba equals: "
   << primalBase.ToStringLetterFormat("V");
+  int numConeIntersections=0;
+  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+    if (this->NilradicalConesIntersect[i])
+      numConeIntersections++;
   out << "<br>Possible nilradicals extensions of the primal extension of the semisimple subalgebra: "
-  << this->FKNilradicalCandidates.size;
+  << this->FKNilradicalCandidates.size << " = " << numConeIntersections << " with intersecing cones and "
+  << this->FKNilradicalCandidates.size-numConeIntersections << " non-intersecting cones. ";
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
   { out << "<br>Subalgebra " << i+1 << ": ";
     Vector<Rational> currentNilrad;
@@ -3235,6 +3253,18 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   }*/
   out << this->ToStringGenerators(theFormat);
   out << "<br>Symmetric Cartan matrix scaled: ";
+  FormatExpressions charFormat;
+  charFormat.CustomPlusSign="\\oplus ";
+  int theRank=this->theWeylNonEmbeddeD.GetDim();
+  charFormat.vectorSpaceEiBasisNames.SetSize(theRank+this->CartanOfCentralizer.size);
+  for (int i=0; i<charFormat.vectorSpaceEiBasisNames.size; i++)
+  { std::stringstream tempStream;
+    if (i<theRank)
+      tempStream << "\\omega_{" << i+1 << "}";
+    else
+      tempStream << "\\psi_{" << i-theRank+1 << "}";
+    charFormat.vectorSpaceEiBasisNames[i]=tempStream.str();
+  }
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
@@ -3244,14 +3274,15 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
-    out << CGI::GetHtmlMathSpanPure(this->theCharFundCoords.ToString());
+    out << CGI::GetHtmlMathSpanPure(this->theCharFundCoords.ToString(&charFormat));
   else
-    out << this->theCharFundCoords.ToString();
+    out << this->theCharFundCoords.ToString(&charFormat);
   if (this->CartanOfCentralizer.size>0)
-    out << "<br>Primal decomposition of the ambient Lie algebra "
+  { out << "<br>Primal decomposition of the ambient Lie algebra "
     << "(refining the above decomposition; the order from the above decomposition is not preserved): "
-    << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->theCharOverCartanPlusCartanCentralizer.ToString(), 2000)
-    :this->theCharOverCartanPlusCartanCentralizer.ToString());
+    << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->theCharOverCartanPlusCartanCentralizer.ToString(&charFormat), 2000)
+    :this->theCharOverCartanPlusCartanCentralizer.ToString(&charFormat));
+  }
   if (!this->flagSystemSolved || !this->flagCentralizerIsWellChosen)
     out << this->ToStringSystem(theFormat);
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
@@ -3472,17 +3503,17 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
     return;
   this->ComputeCentralizerIsWellChosen();
   if (!this->flagCentralizerIsWellChosen)
-  { std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
-    std::cout << "<br>Starting generators: " << this->ToStringGenerators();
+  { //std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
+    //std::cout << "<br>Starting generators: " << this->ToStringGenerators();
     this->ComputeSystem(theGlobalVariables, true);
-    std::cout << "<br>... and final generators: " << this->ToStringGenerators();
+    //std::cout << "<br>... and final generators: " << this->ToStringGenerators();
     this->ComputeCentralizerIsWellChosen();
   }
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
-  std::cout << "<hr>Hooking up centralizers. ";
+//  std::cout << "<hr>Hooking up centralizers. ";
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
     currentSA.indexInOwner=i;

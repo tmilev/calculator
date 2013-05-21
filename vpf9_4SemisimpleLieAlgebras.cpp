@@ -1222,11 +1222,6 @@ void CandidateSSSubalgebra::ComputeCentralizinglySplitModuleDecomposition
   this->ComputeCentralizinglySplitModuleDecompositionHWVsOnly
   (theGlobalVariables, theWeightsCartanRestrictedDualCoords);
   this->ComputeCentralizinglySplitModuleDecompositionLastPart(theGlobalVariables);
-  if (this->owner->flagDoComputePairingTable)
-  { this->ComputePairingTable(theGlobalVariables);
-    if (this->owner->flagDoComputeNilradicals)
-      this->EnumerateAllNilradicals(theGlobalVariables);
-  }
 }
 
 void CandidateSSSubalgebra::GetWeightProjectionFundCoords
@@ -1333,7 +1328,7 @@ void SemisimpleSubalgebras::reset()
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
   this->flagDoComputePairingTable=true;
-  this->flagDoComputeNilradicals=false;
+  this->flagDoComputeNilradicals=true;
   this->timeComputationStartInSeconds=-1;
   this->numAdditions=-1;
   this->numMultiplications=-1;
@@ -2872,6 +2867,37 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   return out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFormat)const
+{ if (this->FKNilradicalCandidates.size==0)
+    return "";
+  std::stringstream out;
+  Vector<Rational> primalBase;
+  primalBase = this->FKNilradicalCandidates[0];
+  out << "<br>The primal extension of the semisimple subalgerba equals: "
+  << primalBase.ToStringLetterFormat("V");
+  out << "<br>Possible nilradicals extensions of the primal extension of the semisimple subalgebra: "
+  << this->FKNilradicalCandidates.size;
+  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+  { out << "<br>Subalgebra " << i+1 << ": ";
+    Vector<Rational> currentNilrad;
+    currentNilrad=this->FKNilradicalCandidates[i];
+    out << currentNilrad.ToStringLetterFormat("V");
+    if (this->NilradicalConesIntersect[i])
+      out << ". Cones intersect. ";
+    else
+      out << ". Cones don't intersect. ";
+    out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
+    << "; highest weight cone: " << this->theNonFKhws[i].ToString() << ". ";
+    if (this->NilradicalConesIntersect[i])
+      out << "Cone interseciton: " << this->ConeIntersections[i].ToStringLetterFormat("w");
+    else
+      out << "Separating hyperplane: " << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
+  }
+  if (this->nilradicalGenerationLog!="")
+    out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
+  return out.str();
+}
+
 std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFormat)const
 { if (!this->NilradicalPairingTable.size>0)
     return "";
@@ -2935,27 +2961,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
     out << "</tr>";
   }
   out << "</table>";
-  out << "<br>Possible nilradicals of Fernando-Kac subalgebras of finite type: " << this->FKNilradicalCandidates.size;
-  if (this->FKNilradicalCandidates.size>0)
-  { for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-    { out << "<br>Subalgebra " << i+1 << ": ";
-      Vector<Rational> currentNilrad;
-      currentNilrad=this->FKNilradicalCandidates[i];
-      out << currentNilrad.ToStringLetterFormat("V");
-      if (this->NilradicalConesIntersect[i])
-        out << ". Cones intersect. ";
-      else
-        out << ". Cones don't intersect. ";
-      out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
-      << "; highest weight cone: " << this->theNonFKhws[i].ToString();
-      if (this->NilradicalConesIntersect[i])
-        out << this->ConeIntersections[i].ToStringLetterFormat("w");
-      else
-        out << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
-    }
-    if (this->nilradicalGenerationLog!="")
-      out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
-  }
+  out << this->ToStringNilradicals(theFormat);
   return out.str();
 }
 
@@ -3500,6 +3506,14 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
   }
   for (int i=0; i<this->Hcandidates.size; i++)
     this->Hcandidates[i].AdjustCentralizerAndRecompute(theGlobalVariables);
+  if (this->flagDoComputePairingTable)
+    for (int i=0; i<this->Hcandidates.size; i++)
+      if (this->Hcandidates[i].flagCentralizerIsWellChosen &&
+          this->Hcandidates[i].flagSystemSolved)
+      { this->Hcandidates[i].ComputePairingTable(theGlobalVariables);
+        if (this->flagDoComputeNilradicals)
+          this->Hcandidates[i].EnumerateAllNilradicals(theGlobalVariables);
+      }
 }
 
 bool DynkinType::operator>(const DynkinType& other)const

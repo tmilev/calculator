@@ -725,7 +725,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)", false, false);
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasForceRecompute, "",
+  ("experimentalPrintSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasForceRecomputeWithNilradicals, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebrasFull{}(B_3)", false, false);

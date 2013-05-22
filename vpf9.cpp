@@ -4256,6 +4256,14 @@ void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors
     }
 }
 
+int WeylGroup::Multiply(int g, int h) const
+{ return this->theElements.GetIndex(this->theElements[g] * this->theElements[h]);
+}
+
+int WeylGroup::Invert(int g) const
+{ return this->theElements.GetIndex(this->theElements[g].Inverse());
+}
+
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
 { if (this->owner!=other.owner)
   { std::cout << "This is a programming error: attempting to multiply elements of Weyl groups "

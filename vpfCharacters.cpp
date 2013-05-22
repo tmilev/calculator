@@ -679,6 +679,15 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
   return false;
 }
 
+// This is dumb, but i couldnt figure out what else to do
+template<> // haha wat
+unsigned int VectorSpace<Rational>::HashFunction(const VectorSpace<Rational>& in)
+{ return in.fastbasis.HashFunction();
+}
+// whenever i figure out cxx i can get rid of this.  but im probably jst
+// going to define this for every other field
+
+
 template <typename coefficient>
 void MatrixInBasis(Matrix<coefficient>& out, const Matrix<coefficient>& in, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrix)
 { int d = basis.size;

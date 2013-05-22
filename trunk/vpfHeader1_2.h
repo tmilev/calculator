@@ -1053,7 +1053,7 @@ public:
   { return input.HashFunction();
   }
   void operator*=(const ElementWeylGroup& other);
-  ElementWeylGroup operator*(const ElementWeylGroup& other)
+  ElementWeylGroup operator*(const ElementWeylGroup& other) const
   { ElementWeylGroup result=*this;
     result*=other;
     return result;
@@ -1355,6 +1355,8 @@ template <class CoefficientType>
   void SimpleReflectionMinusRhoModified
   (int index, Vector<Element>& theVector)const;
   int GetRootReflection(int rootIndex);
+  int Multiply(int g, int h) const;
+  int Invert(int g) const;
   void GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const ;
   void GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const;
   void GetElementOfMatrix(Matrix<Rational>& input, ElementWeylGroup &output);

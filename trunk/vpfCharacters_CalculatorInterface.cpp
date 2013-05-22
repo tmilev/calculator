@@ -198,6 +198,41 @@ void WeylGroupRepresentation<coefficient>::Restrict
     }
   */
   output.CheckAllSimpleGensAreOK();
+  LargeIntUnsigned l,d;
+  output.GetLargestDenominatorSimpleGens(l,d);
+  while(d < 10)
+    return;
+/*
+  List<HashedList<VectorSpace<Rational> > > spaces;
+  for(int i=0; i<OwnerGroup->theElements.size; i++)
+  { output.GetElementImage(i);
+    List<VectorSpace<Rational> > spsi = GetRationalSpecialSpaces(this->theElementImages[i]);
+    for(int j=0; j<spsi.size; j++)
+    { if(spaces.size < spsi[j].rank-1)
+        spaces.SetSize(spsi[j].rank);
+      spaces[spsi[j].rank-1].AddOnTop(spsi[j]);
+    }
+    if(spaces[0].size >= VectorSpaceBasisSubrep.size)
+      goto have_enough_1spaces;
+  }
+  for(int ri=1; ri<spaces.size; ri++)
+  { for(int i=0; i<spaces[ri].size-1; i++)
+    { for(int j=i+1; j<spaces[ri].size; j++)
+      { VectorSpace<coefficient> k = spaces[ri][i].Intersection(spaces[ri][j]);
+        spaces[k.rank-1].AddOnTop(k);
+        if(spaces[0].size >= VectorSpaceBasisSubrep.size)
+          goto have_enough_1spaces;
+      }
+    }
+  }
+
+  have_enough_1spaces: // if not, we crash in two lines from here
+  Vectors<Rational> newbasis;
+  for(int i=0; i<VectorSpaceBasisSubrep.size; i++)
+   newbasis.AddOnTop(spaces[0][i].GetBasisVector(0));
+  this->Restrict(newbasis, remainingCharacter, output, theGlobalVariables);
+  */
+
 //  std::cout << "<hr>The restriction result: " << output.ToString();
 //  this->CheckRepIsMultiplicativelyClosed();
 }

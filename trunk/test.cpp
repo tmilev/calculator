@@ -9,6 +9,116 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
+
+template <typename coefficient>
+List<VectorSpace<coefficient> > GetEigenspaces(Matrix<coefficient> M)
+{ List<List<Vector<coefficient> > > es = eigenspaces(M);
+  List<VectorSpace<coefficient> > vs;
+  for(int spi=0; spi<es.size; spi++)
+  { VectorSpace<coefficient> V;
+    for(int j=0; j<es[spi].size; j++)
+      V.AddVector(es[spi][j]);
+    vs.AddOnTop(V);
+  }
+  return vs;
+}
+
+template <typename coefficient>
+List<VectorSpace<coefficient> > GetLeftEigenspaces(Matrix<coefficient> M)
+{ M.Transpose();
+  return GetEigenspaces(M);
+}
+
+// As in Schneider, 1990
+// well, so far not using any of his improvements
+template <typename somegroup>
+List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
+{ if(G.conjugacyClasses.size == 0)
+    G.ComputeConjugacyClasses();
+  HashedList<VectorSpace<Rational> > sps;
+  for(int i=0; i<G.conjugacyClasses.size; i++)
+  { Matrix<Rational> M;
+    M = GetClassMatrix(G,i);
+    std::cout << M.ToString(&testformat) << std::endl;
+    List<VectorSpace<Rational> > spsi = GetLeftEigenspaces(M);
+    for(int spi=0; spi<spsi.size; spi++)
+      sps.AddOnTop(spsi[spi]);
+  }
+  List<Vector<Rational> > chars;
+  for(int i=0; i<sps.size; i++)
+    if(sps[i].rank == 1){
+      Vector<Rational> X = sps[i].GetCanonicalBasisVector(0);
+      if(!chars.Contains(X))
+      { chars.AddOnTop(sps[i].GetCanonicalBasisVector(0));
+        if(chars.size == G.conjugacyClasses.size)
+          goto got_chars;
+      }
+    }
+  std::cout << chars << std::endl;
+  { // to scope newspaces so that the compiler doesn't complain about the goto
+    // skipping its initialization
+  List<VectorSpace<Rational> > newspaces = sps;
+  while(newspaces.size > 0)
+  { VectorSpace<Rational> sp = newspaces.PopLastObject();
+    for(int i=0; i<sps.size; i++)
+    { VectorSpace<Rational> sp2 = sp.Intersection(sps[i]);
+      if(sps.GetIndex(sp2) == -1)
+      { sps.AddOnTop(sp2);
+        newspaces.AddOnTop(sp2);
+        if(sp2.rank == 1)
+        { Vector<Rational> X = sp2.GetCanonicalBasisVector(0);
+          if(!chars.Contains(X))
+          { chars.AddOnTop(X);
+            if(chars.size == G.conjugacyClasses.size)
+            { goto got_chars;
+            }
+          }
+        }
+      }
+    }
+  }
+  }
+  got_chars:
+  std::cout << chars << std::endl;
+  for(int i=0; i<chars.size; i++)
+  { Rational x = G.GetHermitianProduct(chars[i],chars[i]);
+    int x2 = x.GetDenominator().GetUnsignedIntValueTruncated();
+    x2 = sqrt(x2);
+    chars[i] *= x2;
+    if(chars[i][0] < 0)
+      chars[i] *= -1;
+    std::cout << x2 << std::endl;
+  }
+  chars.QuickSortAscending();
+  return chars;
+}
+
+template <typename somegroup>
+Matrix<Rational> GetClassMatrix(const somegroup &G, int cci)
+{ List<int> invl;
+  invl.SetSize(G.conjugacyClasses[cci].size);
+  for(int i=0; i<G.conjugacyClasses[cci].size; i++)
+    invl[i] = G.Invert(G.conjugacyClasses[cci][i]);
+  Matrix<Rational> M;
+  M.MakeZeroMatrix(G.conjugacyClasses.size);
+  for(int t=0; t<G.conjugacyClasses.size; t++)
+    for(int xi=0; xi<invl.size; xi++)
+    { int yi = G.Multiply(invl[xi],G.conjugacyClasses[t][0]);
+      int ci;
+      for(ci=0; ci<G.conjugacyClasses.size; ci++)
+        for(int cj=0; cj<G.conjugacyClasses[ci].size; cj++)
+          if(G.conjugacyClasses[ci][cj] == yi)
+          { goto okaddit;
+          }
+      okaddit:
+      M.elements[ci][t] += 1;
+    }
+  return M;
+}
+
+
+
 template <typename element>
 class FiniteGroup
 { public:
@@ -1655,7 +1765,10 @@ int main(void)
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
    G.MakeArbitrarySimple('E',6,NULL);
-   G.ComputeIrreducibleRepresentations(&localGlobalVariables);
+   List<Vector<Rational> > chars = ComputeCharacterTable(G);
+   for(int i=0; i<chars.size; i++)
+     std::cout << chars[i] << std::endl;
+/*   G.ComputeIrreducibleRepresentations(&localGlobalVariables);
    Selection sel;
    sel.MakeFullSelection(G.CartanSymmetric.NumCols);
    sel.RemoveSelection(0);
@@ -1670,10 +1783,7 @@ int main(void)
    std::cout << H.tauSignature << std::endl;
 
    List<List<bool> > ts;
-//   std::cout << "Tau signatures of parabolic subgroups" << std::endl;
-//   AllTauSignatures(&G,ts);
-   std::cout << "Tau signatures of pseudo-parabolic subgroups" << std::endl;
-   AllTauSignatures(&G,ts);
+   AllTauSignatures(&G,ts,true);
    for(int i=0; i<G.conjugacyClasses.size; i++)
    {
 
@@ -1687,10 +1797,9 @@ int main(void)
     std::cout << std::endl;
    }
 
-  sel.init(G.CartanSymmetric.NumCols);
-  int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
 
 
+// lets print out the character table
   std::cout << "\\[ \\begin{array}{";
   for(int i=0; i<G.conjugacyClasses.size+1; i++)
     std::cout << 'c';
@@ -1717,20 +1826,13 @@ int main(void)
   }
   std::cout << "\\end{array} \\]" << std::endl;
 
-  std::cout << "hr is ";
-  ElementWeylGroup hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
-  for(int i=0; i<hr.size; i++)
-   std::cout << hr[i] << ' ';
-  std::cout << std::endl;
-
+// okay now the regular tau signatures
+  sel.init(G.CartanSymmetric.NumCols);
+  int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
   std::cout << "\\[ \\begin{array}{";
   for(int i=0; i<numCycles+1; i++)
     std::cout << 'c';
- // std::cout << '|';
- // for(int i=0; i<numCycles-1; i++)
- //   std::cout << 'c';
   std::cout << "}\n";
-  sel.init(G.CartanSymmetric.NumCols);
    for(int i=0; i<numCycles; i++)
    { std::cout << "&<";
      for(int j=0; j<sel.CardinalitySelection; j++)
@@ -1740,25 +1842,52 @@ int main(void)
      }
      std::cout << ">\t";
      sel.incrementSelection();
-   }/*
-   sel.init(G.CartanSymmetric.NumCols);
-   for(int i=0; i<numCycles-1; i++)
-   { std::cout << "&<";
-     for(int j=0; j<sel.CardinalitySelection; j++)
-       std::cout << sel.elements[j] << ' ';
-     std::cout << "hr";
-     std::cout << ">\t";
-     sel.incrementSelection();
-   }*/
+   }
+
    std::cout << "\\\\" << std::endl;
    for(int i=0; i<ts.size; i++)
-   { for(int j=0; j<ts[i].size; j++)
+   { for(int j=0; j<numCycles; j++)
       { std::cout << '&';
         std::cout << ts[i][j] << '\t';
       }
       std::cout << "\\\\\n";
    }
    std::cout << "\\end{array} \\]" << std::endl;
+
+// now the pseudo tau signatures
+  if(ts[0].size > numCycles)
+  { std::cout << "hr is ";
+    ElementWeylGroup hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
+    for(int i=0; i<hr.size; i++)
+      std::cout << hr[i] << ' ';
+    std::cout << std::endl;
+
+    std::cout << "\\[ \\begin{array}{";
+    for(int i=0; i<numCycles-1; i++)
+      std::cout << 'c';
+    std::cout << "}\n";
+
+    sel.init(G.CartanSymmetric.NumCols);
+    for(int i=0; i<numCycles-1; i++)
+    { std::cout << "&<";
+      for(int j=0; j<sel.CardinalitySelection; j++)
+        std::cout << sel.elements[j] << ' ';
+      std::cout << "hr";
+      std::cout << ">\t";
+      sel.incrementSelection();
+    }
+
+    std::cout << "\\\\" << std::endl;
+    for(int i=0; i<ts.size; i++)
+    { for(int j=0; j<numCycles; j++)
+       { std::cout << '&';
+         std::cout << ts[i][j] << '\t';
+       }
+       std::cout << "\\\\\n";
+    }
+    std::cout << "\\end{array} \\]" << std::endl;
+  }
+*/
 /*
    std::cout << "Building QG" << std::endl;
    WeylGroupRepresentation<Rational> QG;

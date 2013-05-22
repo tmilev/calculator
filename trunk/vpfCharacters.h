@@ -465,7 +465,79 @@ public:
    VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> OrthogonalComplement() const;
+   Vector<coefficient> GetBasisVector(int i) const;
+   Vector<coefficient> GetCanonicalBasisVector(int i) const;
+//   unsigned int HashFunction() const {return this->HashFunction(*this);}
+   static unsigned int HashFunction(const VectorSpace<coefficient>& input)
+   { return input.fastbasis.HashFunction();
+   }
+   bool operator==(const VectorSpace<coefficient> &other) const;
 };
+
+
+
+template <typename coefficient>
+Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const
+{ if(i>=this->rank)
+    assert(false);
+  Vector<coefficient> out;
+  if(basis.basis.NumRows > i)
+  { basis.basis.GetVectorFromRow(i,out);
+    return out;
+  }
+  fastbasis.GetVectorFromRow(i,out);
+  return out;
+}
+
+template <typename coefficient>
+Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) const
+{ if(i>=this->rank)
+    assert(false);
+  Vector<coefficient> out;
+  fastbasis.GetVectorFromRow(i,out);
+  return out;
+}
+
+template<typename coefficient>
+VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const
+{ if(this->degree != other.degree)
+    std::cout << "attempting to intersect vector spaces of different degree" << std::endl;
+
+
+  VectorSpace<coefficient> output;
+  if((this->rank==0) or (other.rank==0))
+  { output.degree = this->degree;
+    return output;
+  }
+
+  Matrix<Rational> MV = this->fastbasis;
+  List<Vector<coefficient> > Vperp;
+  MV.GetZeroEigenSpaceModifyMe(Vperp);
+
+  Matrix<coefficient> MW = other.fastbasis;
+  List<Vector<coefficient> > Wperp;
+  MW.GetZeroEigenSpaceModifyMe(Wperp);
+
+  Matrix<coefficient> M;
+  M.init(Vperp.size+Wperp.size,this->degree);
+  int i=0;
+  for(; i<Vperp.size; i++)
+    for(int j=0; j<this->degree; j++)
+      M.elements[i][j] = Vperp[i][j];
+  for(; i<Vperp.size+Wperp.size; i++)
+    for(int j=0; j<this->degree; j++)
+      M.elements[i][j] = Wperp[i-Vperp.size][j];
+  List<Vector<coefficient> > outvecs;
+  M.GetZeroEigenSpaceModifyMe(outvecs);
+  for(int i=0; i<outvecs.size; i++)
+    output.AddVector(outvecs[i]);
+  return output;
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::operator==(const VectorSpace<coefficient>& other) const
+{ return fastbasis == other.fastbasis;
+}
 
 template <typename coefficient>
 class TrixTree

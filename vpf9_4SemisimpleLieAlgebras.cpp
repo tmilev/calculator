@@ -1064,7 +1064,10 @@ void CandidateSSSubalgebra::GetTheTwoCones
 void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateAllNilradicals");
   ProgressReport theReport(theGlobalVariables);
-  theReport.Report("Enumerating recursively nilradicals...");
+  std::stringstream reportStream;
+  reportStream << "Enumerating recursively nilradicals of type " << this->ToStringTypeAndHs() << "...";
+  theReport.Report(reportStream.str());
+  std::cout << reportStream.str();
   List<int> theSel;
   this->RecursionDepthCounterForNilradicalGeneration=0;
   //0 stands for not selected, 1 for selected, 2 stands for unknown.

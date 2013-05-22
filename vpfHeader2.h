@@ -1727,7 +1727,7 @@ static bool innerDrawRootSystem
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerPrintSSsubalgebras
-  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false, bool DoNilridicals=false)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false, bool DoNilradicals=false)
 ;
   static bool innerPrintSSsubalgebrasForceRecomputeWithNilradicals
   (CommandList& theCommands, const Expression& input, Expression& output)

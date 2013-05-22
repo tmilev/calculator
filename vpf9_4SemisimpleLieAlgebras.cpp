@@ -1341,7 +1341,7 @@ void SemisimpleSubalgebras::reset()
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
   this->flagDoComputePairingTable=true;
-  this->flagDoComputeNilradicals=true;
+  this->flagDoComputeNilradicals=false;
   this->timeComputationStartInSeconds=-1;
   this->numAdditions=-1;
   this->numMultiplications=-1;
@@ -3513,9 +3513,15 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
 
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
-//  std::cout << "<hr>Hooking up centralizers. ";
+  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  std::stringstream reportStream;
+  theReport1.Report("<hr>\nHooking up centralizers ");
   for (int i=0; i<this->Hcandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->Hcandidates[i];
+    std::stringstream reportStream2;
+    reportStream2 << "Computing centralizer of subalgebra number " << i+1 << " out of "
+    << this->Hcandidates.size << ". The subalgebra is of type " << currentSA.ToStringTypeAndHs() << ". ";
+    theReport2.Report(reportStream2.str());
     currentSA.indexInOwner=i;
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
     currentSA.indexMaxSSContainer=-1;
@@ -3535,13 +3541,24 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
       }
     }
   }
+  theReport1.Report("<hr>\nCentralizers computed, ajusing centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->Hcandidates.size; i++)
+  { std::stringstream reportStream2;
+    reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of "
+    << this->Hcandidates.size << ". The subalgebra is of type " << this->Hcandidates[i].ToStringTypeAndHs() << ". ";
+    theReport2.Report(reportStream2.str());
     this->Hcandidates[i].AdjustCentralizerAndRecompute(theGlobalVariables);
+  }
+  theReport1.Report("<hr>\nComputing pairing tables.");
   if (this->flagDoComputePairingTable)
     for (int i=0; i<this->Hcandidates.size; i++)
       if (this->Hcandidates[i].flagCentralizerIsWellChosen &&
           this->Hcandidates[i].flagSystemSolved)
-      { this->Hcandidates[i].ComputePairingTable(theGlobalVariables);
+      { std::stringstream reportStream2;
+        reportStream2 << "Computing pairing table of subalgebra number " << i+1 << " out of "
+        << this->Hcandidates.size << ". The subalgebra is of type " << this->Hcandidates[i].ToStringTypeAndHs() << ". ";
+        theReport2.Report(reportStream2.str());
+        this->Hcandidates[i].ComputePairingTable(theGlobalVariables);
         if (this->flagDoComputeNilradicals)
           this->Hcandidates[i].EnumerateAllNilradicals(theGlobalVariables);
       }

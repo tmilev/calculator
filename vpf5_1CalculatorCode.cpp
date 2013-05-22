@@ -453,7 +453,7 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas
 }
 
 bool CommandList::innerPrintSSsubalgebras
-(CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute)
+(CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute, bool DoNilridicals)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   std::stringstream out;
@@ -499,6 +499,7 @@ bool CommandList::innerPrintSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
     double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
+    theSSsubalgebras.flagDoComputeNilradicals=DoNilridicals;
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
     theSSsubalgebras.timeComputationStartInSeconds

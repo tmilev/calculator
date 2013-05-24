@@ -620,15 +620,21 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
 { if(fastbasis.NumRows == 0)
-  { fastbasis.MakeZeroMatrix(v.size);
-    degree = v.size;
-    if(v.IsEqualToZero())
+  { this->fastbasis.MakeZeroMatrix(v.size);
+    this->degree = v.size;
+    int nzi=0;
+    for(; nzi<degree; nzi++)
+      if(v[nzi] != 0)
+        break;
+    if(nzi==degree)
     { rank = 0;
+      fastbasis.NumRows = 0;
       return false;
     }
     for(int i=0; i<v.size; i++)
-      fastbasis.elements[0][i] = v[i];
+      fastbasis.elements[0][i] = v[i] / v[nzi];
     rank = 1;
+    this->fastbasis.NumRows = 1;
     return true;
   }
   int jj=0;
@@ -648,6 +654,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
         fastbasis.elements[i][bj] = v[bj];
       fastbasis.GaussianEliminationByRows(fastbasis);
       rank++;
+      fastbasis.NumRows = rank;
       return true;
     }
     if(jj>j)
@@ -667,6 +674,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
   for(int j=0; j<fastbasis.NumCols; j++)
     fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
   rank++;
+  fastbasis.NumRows = rank;
   return true;
 }
 
@@ -678,6 +686,9 @@ bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
   }
   return false;
 }
+
+
+
 
 // This is dumb, but i couldnt figure out what else to do
 template<> // haha wat

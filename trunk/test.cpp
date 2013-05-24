@@ -12,7 +12,7 @@ FormatExpressions testformat;
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
 
 template <typename coefficient>
-List<VectorSpace<coefficient> > GetEigenspaces(Matrix<coefficient> M)
+List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 { List<List<Vector<coefficient> > > es = eigenspaces(M);
   List<VectorSpace<coefficient> > vs;
   for(int spi=0; spi<es.size; spi++)
@@ -36,16 +36,51 @@ template <typename somegroup>
 List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.conjugacyClasses.size == 0)
     G.ComputeConjugacyClasses();
-  HashedList<VectorSpace<Rational> > sps;
+  Matrix<Rational> invform;
+  invform.MakeZeroMatrix(G.conjugacyClasses.size);
+  Rational one = 1;
+  for(int i=0; i<G.conjugacyClasses.size; i++)
+    invform.elements[i][i] = G.conjugacyClasses[i].size;
+  List<VectorSpace<Rational> > spaces;
+  VectorSpace<Rational> bigspace;
+  bigspace.MakeFullRank(G.conjugacyClasses.size);
+  spaces.AddOnTop(bigspace);
+  for(int i=0; i<G.conjugacyClasses.size; i++)
+  { Matrix<Rational> M;
+    std::cout << "Getting class matrix " << i << std::endl;
+    M = GetClassMatrix(G,i);
+    List<VectorSpace<Rational> > es = GetEigenspaces(M);
+    for(int esi=0; esi<es.size; esi++)
+    { int spsize = spaces.size;
+      for(int spi=0; spi<spsize; spi++)
+      { if(spaces[spi].rank == 1)
+          continue;
+        VectorSpace<Rational> V = spaces[spi].Intersection(es[esi]);
+        if((V.rank > 0) and (V.rank < spaces[spi].rank))
+        { VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&invform);
+          spaces[spi] = V;
+          spaces.AddOnTop(W);
+          if(spaces.size == G.conjugacyClasses.size)
+            goto got_chars;
+        }
+      }
+    }
+  }
+  got_chars:
+  List<Vector<Rational> > chars;
+  chars.SetSize(spaces.size);
+  for(int i=0; i<spaces.size; i++)
+    chars[i] = spaces[i].GetCanonicalBasisVector(0);
+/*  HashedList<VectorSpace<Rational> > sps;
+  List<Vector<Rational> > chars;
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { Matrix<Rational> M;
     M = GetClassMatrix(G,i);
     std::cout << M.ToString(&testformat) << std::endl;
-    List<VectorSpace<Rational> > spsi = GetLeftEigenspaces(M);
+    List<VectorSpace<Rational> > spsi = GetEigenspaces(M);
     for(int spi=0; spi<spsi.size; spi++)
       sps.AddOnTop(spsi[spi]);
   }
-  List<Vector<Rational> > chars;
   for(int i=0; i<sps.size; i++)
     if(sps[i].rank == 1){
       Vector<Rational> X = sps[i].GetCanonicalBasisVector(0);
@@ -70,6 +105,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
         { Vector<Rational> X = sp2.GetCanonicalBasisVector(0);
           if(!chars.Contains(X))
           { chars.AddOnTop(X);
+            std::cout << chars.size << ' ';
             if(chars.size == G.conjugacyClasses.size)
             { goto got_chars;
             }
@@ -80,6 +116,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
   }
   }
   got_chars:
+  */
   std::cout << chars << std::endl;
   for(int i=0; i<chars.size; i++)
   { Rational x = G.GetHermitianProduct(chars[i],chars[i]);
@@ -112,7 +149,7 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci)
           { goto okaddit;
           }
       okaddit:
-      M.elements[ci][t] += 1;
+      M.elements[t][ci] += 1;
     }
   return M;
 }
@@ -1764,7 +1801,7 @@ int main(void)
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
-   G.MakeArbitrarySimple('E',6,NULL);
+   G.MakeArbitrarySimple('F',4,NULL);
    List<Vector<Rational> > chars = ComputeCharacterTable(G);
    for(int i=0; i<chars.size; i++)
      std::cout << chars[i] << std::endl;

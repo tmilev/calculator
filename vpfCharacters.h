@@ -464,7 +464,7 @@ public:
    bool Contains(const Vector<coefficient>& v) const;
    VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement() const;
+   VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* form) const;
    Vector<coefficient> GetBasisVector(int i) const;
    Vector<coefficient> GetCanonicalBasisVector(int i) const;
 //   unsigned int HashFunction() const {return this->HashFunction(*this);}
@@ -498,17 +498,18 @@ Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) con
   return out;
 }
 
+extern FormatExpressions testformat;
 template<typename coefficient>
 VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const
-{ if(this->degree != other.degree)
-    std::cout << "attempting to intersect vector spaces of different degree" << std::endl;
-
-
-  VectorSpace<coefficient> output;
-  if((this->rank==0) or (other.rank==0))
-  { output.degree = this->degree;
-    return output;
+{ // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
+  if(this->degree != other.degree && ((this->degree != -1) && (other.degree != -1)))
+  { std::cout << "attempting to intersect vector spaces of different degree" << __LINE__ << ", " << __FILE__ << std::endl;
+    assert(false);
   }
+  VectorSpace<coefficient> output;
+  output.degree = this->degree;
+  if((this->rank==0) or (other.rank==0))
+    return output;
 
   Matrix<Rational> MV = this->fastbasis;
   List<Vector<coefficient> > Vperp;
@@ -529,9 +530,59 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
       M.elements[i][j] = Wperp[i-Vperp.size][j];
   List<Vector<coefficient> > outvecs;
   M.GetZeroEigenSpaceModifyMe(outvecs);
+  output.rank = outvecs.size;
+  if(outvecs.size == 0)
+    return output;
+  output.fastbasis.init(outvecs.size,this->degree);
+  if(outvecs.size == 1)
+  { int inz = 0;
+    for(; inz<outvecs[0].size; inz++)
+      if(outvecs[0][inz] != 0)
+        break;
+    for(int i=0; i<outvecs[0].size; i++)
+      output.fastbasis.elements[0][i] = outvecs[0][i] / outvecs[0][inz];
+    return output;
+  }
   for(int i=0; i<outvecs.size; i++)
-    output.AddVector(outvecs[i]);
+    for(int j=0; j<this->degree; j++)
+      output.fastbasis.elements[i][j] = outvecs[i][j];
+  output.fastbasis.GaussianEliminationByRows(output.fastbasis);
   return output;
+}
+
+template <typename coefficient>
+VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* invform) const
+{ Matrix<coefficient> M = this->fastbasis;
+  if(invform)
+    M.MultiplyOnTheRight(*invform); // i can never tell which one is right or left :/
+  List<Vector<coefficient> > VVs;
+  // this is where 'nullspace' and 'kernel' are conceptually different
+  M.GetZeroEigenSpaceModifyMe(VVs);
+  VectorSpace<coefficient> V;
+  // this appears common enough to warrant a better method
+  for(int i=0; i<VVs.size; i++)
+    V.AddVectorDestructively(VVs[i]);
+  if(ambient)
+  { VectorSpace<coefficient> W = V.Intersection(*ambient);
+    std::cout << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << std::endl;
+    if(ambient->rank - this->rank - W.rank != 0)
+      std::cout << "*ambient is not *this (+) W" << std::endl;
+    return W;
+  }
+  std::cout << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << std::endl;
+  if(this->degree - this->rank - V.rank != 0)
+    std::cout << "Error: ranks of subspace and orthogonal complement should sum to degree" << std::endl;
+  return V;
+}
+
+// part of the point of coming up with a VectorSpace class
+// was to find a way to special case full rank spaces and not carry around
+// identity matrices everywhere...
+template <typename coefficient>
+void VectorSpace<coefficient>::MakeFullRank(int d)
+{ this->degree = d;
+  this->rank = d;
+  this->fastbasis.MakeIdMatrix(d);
 }
 
 template <typename coefficient>

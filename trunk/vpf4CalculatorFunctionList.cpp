@@ -1001,6 +1001,12 @@ void CommandList::initPredefinedStandardOperations()
    "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
 [g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opElementUEoverRF(), this->opElementUEoverRF(),
+   "Multiplies elment Universal enveloping by element universal enveloping algebra.",
+   "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
+[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
    "Multiplies rational number by a rational function",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);

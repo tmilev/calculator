@@ -290,6 +290,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyUEByAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -307,6 +308,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
   ElementUniversalEnveloping<RationalFunctionOld> result=*left;
   result*=
   rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
+  result.Simplify(*theCommands.theGlobalVariableS);
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
 //  std::cout << " to get " << result.ToString();
   return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);

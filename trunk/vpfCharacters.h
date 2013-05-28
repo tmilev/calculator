@@ -464,7 +464,7 @@ public:
    bool Contains(const Vector<coefficient>& v) const;
    VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
-   VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* form) const;
+   VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient = 0, Matrix<coefficient>* form = 0) const;
    Vector<coefficient> GetBasisVector(int i) const;
    Vector<coefficient> GetCanonicalBasisVector(int i) const;
 //   unsigned int HashFunction() const {return this->HashFunction(*this);}
@@ -551,10 +551,10 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
 }
 
 template <typename coefficient>
-VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* invform) const
+VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* form) const
 { Matrix<coefficient> M = this->fastbasis;
-  if(invform)
-    M.MultiplyOnTheRight(*invform); // i can never tell which one is right or left :/
+  if(form)
+    M.MultiplyOnTheRight(*form); // i can never tell which one is right or left :/
   List<Vector<coefficient> > VVs;
   // this is where 'nullspace' and 'kernel' are conceptually different
   M.GetZeroEigenSpaceModifyMe(VVs);

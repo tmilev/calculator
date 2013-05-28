@@ -282,7 +282,7 @@ int CoxeterGroup::operator()(int i, int j) const
 }
 
 void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
-{ const int hardcodedUpperLimit=60000;
+{ const int hardcodedUpperLimit=6000000;
   if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
   { std::cout << "I am crashing for safety reasons (this is not a programming error). "
     << " You requested to compute the conjugacy classes of a Weyl group of type "

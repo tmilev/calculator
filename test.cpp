@@ -36,11 +36,15 @@ template <typename somegroup>
 List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.conjugacyClasses.size == 0)
     G.ComputeConjugacyClasses();
-  Matrix<Rational> invform;
-  invform.MakeZeroMatrix(G.conjugacyClasses.size);
-  Rational one = 1;
+  List<int> classmap;
+  classmap.SetSize(G.theElements.size);
   for(int i=0; i<G.conjugacyClasses.size; i++)
-    invform.elements[i][i] = G.conjugacyClasses[i].size;
+    for(int j=0; j<G.conjugacyClasses[i].size; j++)
+      classmap[G.conjugacyClasses[i][j]] = i;
+  Matrix<Rational> form;
+  form.MakeZeroMatrix(G.conjugacyClasses.size);
+  for(int i=0; i<G.conjugacyClasses.size; i++)
+    form.elements[i][i] = G.conjugacyClasses[i].size;
   List<VectorSpace<Rational> > spaces;
   VectorSpace<Rational> bigspace;
   bigspace.MakeFullRank(G.conjugacyClasses.size);
@@ -48,7 +52,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { Matrix<Rational> M;
     std::cout << "Getting class matrix " << i << std::endl;
-    M = GetClassMatrix(G,i);
+    M = GetClassMatrix(G,i,&classmap);
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
     for(int esi=0; esi<es.size; esi++)
     { int spsize = spaces.size;
@@ -57,7 +61,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
           continue;
         VectorSpace<Rational> V = spaces[spi].Intersection(es[esi]);
         if((V.rank > 0) and (V.rank < spaces[spi].rank))
-        { VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&invform);
+        { VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
           spaces[spi] = V;
           spaces.AddOnTop(W);
           if(spaces.size == G.conjugacyClasses.size)
@@ -132,26 +136,33 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
 }
 
 template <typename somegroup>
-Matrix<Rational> GetClassMatrix(const somegroup &G, int cci)
+Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0)
 { List<int> invl;
   invl.SetSize(G.conjugacyClasses[cci].size);
   for(int i=0; i<G.conjugacyClasses[cci].size; i++)
     invl[i] = G.Invert(G.conjugacyClasses[cci][i]);
-  Matrix<Rational> M;
+  Matrix<int> M;
   M.MakeZeroMatrix(G.conjugacyClasses.size);
   for(int t=0; t<G.conjugacyClasses.size; t++)
     for(int xi=0; xi<invl.size; xi++)
     { int yi = G.Multiply(invl[xi],G.conjugacyClasses[t][0]);
       int ci;
-      for(ci=0; ci<G.conjugacyClasses.size; ci++)
-        for(int cj=0; cj<G.conjugacyClasses[ci].size; cj++)
-          if(G.conjugacyClasses[ci][cj] == yi)
-          { goto okaddit;
-          }
-      okaddit:
-      M.elements[t][ci] += 1;
+      if(classmap)
+        ci = (*classmap)[yi];
+      else
+      { for(ci=0; ci<G.conjugacyClasses.size; ci++)
+          for(int cj=0; cj<G.conjugacyClasses[ci].size; cj++)
+            if(G.conjugacyClasses[ci][cj] == yi)
+              goto okaddit;
+      }
+      okaddit: M.elements[t][ci] += 1;
     }
-  return M;
+  Matrix<Rational> out;
+  out.init(M.NumRows, M.NumCols);
+  for(int i=0; i<M.NumRows; i++)
+    for(int j=0; j<M.NumCols; j++)
+      out.elements[i][j] = M.elements[i][j];
+  return out;
 }
 
 
@@ -1801,7 +1812,7 @@ int main(void)
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
    WeylGroup G;
-   G.MakeArbitrarySimple('F',4,NULL);
+   G.MakeArbitrarySimple('E',7,NULL);
    List<Vector<Rational> > chars = ComputeCharacterTable(G);
    for(int i=0; i<chars.size; i++)
      std::cout << chars[i] << std::endl;

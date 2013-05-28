@@ -841,7 +841,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   if (!this->flagSystemSolved)
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
-    if (this->flagDoAttemptToSolveSystem)
+    if (this->owner->flagAttemptToSolveSystems)
       this->AttemptToSolveSytem(theGlobalVariables);
   } else
   { this->flagSystemGroebnerBasisFound=false;
@@ -973,8 +973,8 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
 CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
-flagSystemGroebnerBasisFound(false), flagDoAttemptToSolveSystem(true),
-flagCentralizerIsWellChosen(false), totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
+flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
+totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
 {
 }
 
@@ -1342,7 +1342,7 @@ void SemisimpleSubalgebras::reset()
 { this->owneR=0;
   this->theRecursionCounter=0;
   this->theSl2s.owner=0;
-  this->flagAttemptToSolveSystems=true;
+  this->flagAttemptToSolveSystems=false;
   this->flagDoComputePairingTable=true;
   this->flagDoComputeNilradicals=false;
   this->timeComputationStartInSeconds=-1;
@@ -3474,14 +3474,27 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   Matrix<Rational> currentOuterAuto;
-  //std::cout << "Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
+  //std::cout << "<hr>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
   //<< " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
   //<< " outer autos.";
   int counter=0;
+  //do
+  //{ counter++;
+  //  std::cout << "<br>Testing combination " << counter << " out of "
+  //  << selectedTypes.GetNumTotalCombinations().ToString();
+  //  std::cout << "; the combination: " << selectedTypes.ToString();
+  //  if (counter>1000)
+  //    assert(false);
+  //} while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
+
+//  counter=0;
   do
     do
     { counter++;
-      //std::cout << "Checking combination " << counter;
+      //if (counter>1000)
+      //assert(false);
+      //std::cout << "<br>Checking combination " << counter << " out of "
+      //<< (selectedTypes.GetNumTotalCombinations()*selectedOuterAutos.GetNumTotalCombinations()).ToString();
       conjugationCandidates.SetSize(0);
       for (int i=0; i<selectedTypes.theElements.size; i++)
       { Selection& currentSel=selectedTypes.theElements[i].theSelection;

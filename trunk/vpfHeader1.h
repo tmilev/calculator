@@ -2347,8 +2347,8 @@ public:
   int GetNumCombinationsFixedCardinality(int theCardinality){return MathRoutines::NChooseK(this->MaxSize, theCardinality);}
   void ShrinkMaxSize();
   void MakeSubSelection(Selection& theSelection, Selection& theSubSelection);
-  inline void incrementSelectionFixedCardinality(int card){int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore; this->incrementSelectionFixedCardinality(card, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);}
-  void incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore);
+  void initSelectionFixedCardinality(int card);
+  void incrementSelectionFixedCardinality(int card);
   void WriteToFile(std::fstream& output);
   inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);

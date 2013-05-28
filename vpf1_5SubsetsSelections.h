@@ -101,6 +101,9 @@ public:
     if (this->DesiredSubsetSize>0)
       this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
   }
+  std::string ToString()const
+  { return this->theSelection.ToString();
+  }
   bool IncrementReturnFalseIfBackToBeginning()
   { this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
     for (int i=0; i<this->DesiredSubsetSize; i++)

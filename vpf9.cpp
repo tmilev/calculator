@@ -592,7 +592,18 @@ void Selection::incrementSelection()
   this->ComputeIndicesFromSelection();
 }
 
-void Selection::incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore)
+void Selection::initSelectionFixedCardinality
+(int card)
+{ this->initNoMemoryAllocation();
+  for (int i=0; i<card; i++)
+  { this->selected[i]=true;
+    this->elements[i]=i;
+  }
+  this->CardinalitySelection=card;
+}
+
+void Selection::incrementSelectionFixedCardinality
+(int card)//, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore)
 { //example of the order of generation of all combinations when card=2 and MaxSize=5. The second column indicates the
   //state of the array at the point in code marked with *** below
   //11000     (->10000) IndexLastZeroWithOneBefore: 2 NumOnesAfterLastZeroWithOneBefore: 0
@@ -608,31 +619,25 @@ void Selection::incrementSelectionFixedCardinality(int card, int& IndexLastZeroW
   if (card>this->MaxSize)
     return;
   if (this->CardinalitySelection!=card)
-  { this->initNoMemoryAllocation();
-    for (int i=0; i<card; i++)
-    { this->selected[i]=true;
-      this->elements[i]=i;
-    }
-    IndexLastZeroWithOneBefore=0;
-    this->CardinalitySelection=card;
+  { this->initSelectionFixedCardinality(card);
     return;
   }
   if(card==this->MaxSize || card==0)
     return;
-  IndexLastZeroWithOneBefore=-1;
-  NumOnesAfterLastZeroWithOneBefore=0;
+  int IndexLastZeroWithOneBefore=-1;
+  int NumOnesAfterLastZeroWithOneBefore=0;
   for(int i=this->MaxSize-1; i>=0; i--)
-  { if (this->selected[i])
+    if (this->selected[i])
     { if (IndexLastZeroWithOneBefore==-1)
         NumOnesAfterLastZeroWithOneBefore++;
       else
         break;
-    }
-    else
+    } else
       IndexLastZeroWithOneBefore=i;
-  }
   if (IndexLastZeroWithOneBefore==0)
+  { this->initSelectionFixedCardinality(card);
     return;
+  }
   for(int i=0; i<NumOnesAfterLastZeroWithOneBefore+1; i++)
     this->selected[this->elements[this->CardinalitySelection-i-1]]=false;
   //***At this point in time the second column is recorded

@@ -242,7 +242,6 @@ public:
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
-  bool flagDoAttemptToSolveSystem;
   bool flagCentralizerIsWellChosen;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;

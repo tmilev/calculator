@@ -800,7 +800,6 @@ bool Serialization::innerLoadCandidateSA
       else
         outputSubalgebra.thePosGens.AddOnTop(curGen);
     }
-    outputSubalgebra.flagDoAttemptToSolveSystem=false;
     outputSubalgebra.flagSystemProvedToHaveNoSolution=false;
     outputSubalgebra.flagSystemSolved=true;
   }
@@ -863,6 +862,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
+  theSAs.flagAttemptToSolveSystems=false;
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;

@@ -1250,13 +1250,13 @@ out
   return out.str();
 }
 
-template<class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
+template<class coefficient>
+void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, GlobalVariables& theGlobalVariables,
-   List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
-   Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace,
-   std::stringstream* comments, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg");
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
+   Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace,
+   std::stringstream* comments, const coefficient& theRingUnit, const coefficient& theRingZero)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
   if (this->theChaR.size!=1)
   { if (comments!=0)
     { std::stringstream out;
@@ -1268,7 +1268,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   }
   std::string tempS;
 //  ReflectionSubgroupWeylGroup subWeylInLarge, subWeylStandalone;
-//  charSSAlgMod<CoefficientType> charWRTsubalgebra;
+//  charSSAlgMod<coefficient> charWRTsubalgebra;
 //  Selection LeviInSmall;
 //  this->theChaR.SplitCharOverRedSubalg
 //  (&tempS, charWRTsubalgebra, this->parabolicSelectionNonSelectedAreElementsLevi, theHmm.ImagesCartanDomain,
@@ -1284,14 +1284,14 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(tempStream1.str());
 //  std::cout << "<br>Parabolic selection: " << LeviInSmall.ToString();
-  List<List<Vector<CoefficientType> > > eigenSpacesPerSimpleGenerator;
+  List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall=LeviInSmall;
   InvertedLeviInSmall.InvertSelection();
   eigenSpacesPerSimpleGenerator.SetSize(InvertedLeviInSmall.CardinalitySelection);
-  Vectors<CoefficientType> tempSpace1, tempSpace2;
-  MemorySaving<Vectors<CoefficientType> > tempEigenVects;
-  Vectors<CoefficientType>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
+  Vectors<coefficient> tempSpace1, tempSpace2;
+  MemorySaving<Vectors<coefficient> > tempEigenVects;
+  Vectors<coefficient>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
   theFinalEigenSpace.SetSize(0);
 //  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
   if (InvertedLeviInSmall.CardinalitySelection==0)
@@ -1300,7 +1300,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   { ElementSemisimpleLieAlgebra<Rational>& currentElt=
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     //std::cout << "<br>current element is: " << currentElt.ToString();
-    MatrixTensor<CoefficientType> currentOp, tempMat;
+    MatrixTensor<coefficient> currentOp, tempMat;
     currentOp.MakeZero();
     for (int j=0; j<currentElt.size; j++)
     { //std::cout << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
@@ -1313,7 +1313,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       double timeAtStart1=theGlobalVariables.GetElapsedSeconds();
       tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
       theReport.Report(tempStream3.str());
-    Matrix<CoefficientType> currentOpMat;
+    Matrix<coefficient> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
     currentOpMat.GetZeroEigenSpace(eigenSpacesPerSimpleGenerator[i]);
       tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1
@@ -1343,17 +1343,17 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
   << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega") << "$}\\\\\n<br>";
   readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
-  Vector<CoefficientType> currentWeight;
-  Vector<CoefficientType> hwFundCoordsNilPart;
+  Vector<coefficient> currentWeight;
+  Vector<coefficient> hwFundCoordsNilPart;
   hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart-=this->theHWFDpartFundamentalCoordS;
-  ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
+  ElementUniversalEnveloping<coefficient> currentElt, tempElt;
   if (outputEigenVectors!=0)
     outputEigenVectors->SetSize(0);
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
     currentElt.MakeZero(this->GetOwner());
-    Vector<CoefficientType>& currentVect= theFinalEigenSpace[j];
+    Vector<coefficient>& currentVect= theFinalEigenSpace[j];
     int lastNonZeroIndex=-1;
     for (int i=0; i<currentVect.size; i++)
       if (!(currentVect[i].IsEqualToZero()))
@@ -1489,15 +1489,15 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
 }
 
-template<class CoefficientType>
-bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
+template<class coefficient>
+bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::FindOneVarRatRoots");
   if (this->GetMinNumVars()>1)
     return false;
   output.SetSize(0);
   if (this->GetMinNumVars()==0 ||this->IsEqualToZero())
     return true;
-  Polynomial<CoefficientType> myCopy;
+  Polynomial<coefficient> myCopy;
   myCopy=*this;
   myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
   Rational lowestTerm, highestTerm;
@@ -2030,14 +2030,14 @@ void branchingData::resetOutputData()
   this->theCharacterDifferences.Clear();
 }
 
-template<class CoefficientType>
-bool ElementSumGeneralizedVermas<CoefficientType>::
-ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& theOwner)
+template<class coefficient>
+bool ElementSumGeneralizedVermas<coefficient>::
+ExtractElementUE(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& theOwner)
 { output.MakeZero(theOwner);
-  ModuleSSalgebra<CoefficientType>* theModPtr=0;
-  MonomialUniversalEnveloping<CoefficientType> tempMon;
+  ModuleSSalgebra<coefficient>* theModPtr=0;
+  MonomialUniversalEnveloping<coefficient> tempMon;
   for (int i=0; i<this->size; i++)
-  { const MonomialGeneralizedVerma<CoefficientType>& currentMon=(*this)[i];
+  { const MonomialGeneralizedVerma<coefficient>& currentMon=(*this)[i];
     if (i==0)
       theModPtr=currentMon.owneR;
     if (currentMon.owneR!=theModPtr)
@@ -2182,8 +2182,8 @@ bool CommandList::fSplitFDpartB3overG2inner
   return output.AssignValue(out.str(), theCommands);
 }
 
-template <class CoefficientType>
-bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
+template <class coefficient>
+bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 (std::string* Report, charSSAlgMod& output, branchingData& inputData,GlobalVariables& theGlobalVariables)
 { if (this->size==0)
     return false;
@@ -2202,14 +2202,14 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
 //  std::cout << "<br>starting char: " << this->ToString();
   charSSAlgMod charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
 
-  MonomialChar<CoefficientType> tempMon, localHighest;
-  List<CoefficientType> tempMults;
-  HashedList<Vector<CoefficientType> > tempHashedRoots;
+  MonomialChar<coefficient> tempMon, localHighest;
+  List<coefficient> tempMults;
+  HashedList<Vector<coefficient> > tempHashedRoots;
   charAmbientFDWeyl.Reset();
-  CoefficientType bufferCoeff, highestCoeff;
+  coefficient bufferCoeff, highestCoeff;
 
   for (int i=0; i<this->size; i++)
-  { MonomialChar<CoefficientType>& currentMon=this->TheObjects[i];
+  { MonomialChar<coefficient>& currentMon=this->TheObjects[i];
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart
         (currentMon.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
@@ -2228,7 +2228,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
 //  std::cout << "<hr>" << tempS;
 //  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
   remainingCharDominantLevI.Reset();
-  Vectors<CoefficientType> orbitDom;
+  Vectors<coefficient> orbitDom;
   for (int i=0; i<charAmbientFDWeyl.size; i++)
   { orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated
@@ -2268,7 +2268,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
   //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   //(remainingCharDominantLevI.ToString());
   remainingCharProjected.MakeZero(&theSmallAlgebra);
-  Vector<CoefficientType> fundCoordsSmaller, theProjection, inSimpleCoords;
+  Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
   for (int i=0; i<remainingCharDominantLevI.size; i++)
   { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoords);
@@ -2283,7 +2283,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
 //  std::cout << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharProjected.ToString());
 
-  Vector<CoefficientType> simpleGeneratorBaseField;
+  Vector<coefficient> simpleGeneratorBaseField;
   while(!remainingCharProjected.IsEqualToZero())
   { localHighest=*remainingCharProjected.LastObject();
     for (bool Found=true; Found; )
@@ -2962,9 +2962,9 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
   return true;
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& thePoints, const Vector<CoefficientType>& ValuesAtThePoints)
-{ Polynomial<CoefficientType> theLagrangeInterpolator, tempP;
+template <class coefficient>
+void Polynomial<coefficient>::Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints)
+{ Polynomial<coefficient> theLagrangeInterpolator, tempP;
   this->MakeZero();
   for (int i=0; i<thePoints.size; i++)
   { theLagrangeInterpolator.MakeConst(1, 1);
@@ -2979,8 +2979,8 @@ void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& the
   }
 }
 
-template <class CoefficientType>
-bool Polynomial<CoefficientType>::
+template <class coefficient>
+bool Polynomial<coefficient>::
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
   if (this->GetMinNumVars()>1)

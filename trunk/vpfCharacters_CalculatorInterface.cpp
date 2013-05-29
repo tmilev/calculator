@@ -303,8 +303,8 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrreps
   return this->DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables);
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::AssignMinPoly(const Matrix<CoefficientType>& input)
+template <class coefficient>
+void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
 { if (input.NumCols!=input.NumRows)
   { std::cout << "Programming error: requesting the minimimal polynomial of a non-square matrix. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -312,10 +312,10 @@ void Polynomial<CoefficientType>::AssignMinPoly(const Matrix<CoefficientType>& i
   }
   int theDim = input.NumCols;
   this->MakeOne(1);
-  Vectors<CoefficientType> theBasis;
-  Vector<CoefficientType> theVectorPowers;
-  Vector<CoefficientType> firstDependentPower;
-  Polynomial<CoefficientType> currentFactor;
+  Vectors<coefficient> theBasis;
+  Vector<coefficient> theVectorPowers;
+  Vector<coefficient> firstDependentPower;
+  Polynomial<coefficient> currentFactor;
   MonomialP tempM;
   for(int col = 0; col < theDim; col++)
   { theVectorPowers.MakeEi(theDim,col);

@@ -1280,14 +1280,14 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   output=out.str();
 }
 
-template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::MakeGGenerator
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator
 (const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
 { this->MakeGenerator(inputOwner.GetGeneratorFromRoot(theRoot), inputOwner);
 }
 
-template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::AssignVectorNegRootSpacesCartanPosRootSpaces
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces
 (const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
 { //Changing RootSystem order invalidates this function!
   this->MakeZero(owner);
@@ -1299,8 +1299,8 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::AssignVectorNegRootSpacesCart
     }
 }
 
-template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
 { if (this->IsEqualToZero())
   { output.MakeZero(0);
     return;
@@ -2430,15 +2430,15 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
   output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
-template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::AssignFromCoordinateFormWRTBasis
-(List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<CoefficientType>& input,
+template <class coefficient>
+void ElementUniversalEnveloping<coefficient>::AssignFromCoordinateFormWRTBasis
+(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input,
  SemisimpleLieAlgebra& owner)
 { /*int numVars=0;
   if (theBasis.size>0)
     numVars= theBasis[0].GetNumVars();*/
   this->MakeZero(owner);
-  ElementUniversalEnveloping<CoefficientType> tempElt;
+  ElementUniversalEnveloping<coefficient> tempElt;
   for (int i=0; i<input.size; i++)
     if (!input[i].IsEqualToZero())
     { tempElt.operator=(theBasis[i]);
@@ -2527,16 +2527,16 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder
   this->init(defaultOrder, owner, theGlobalVariables);
 }
 
-template <class CoefficientType>
-bool ElementSemisimpleLieAlgebra<CoefficientType>::MustUseBracketsWhenDisplayingMeRaisedToPower()
+template <class coefficient>
+bool ElementSemisimpleLieAlgebra<coefficient>::MustUseBracketsWhenDisplayingMeRaisedToPower()
 { if (this->size==1)
     if (this->theCoeffs[0]==1)
       return false;
   return true;
 }
 
-template <class CoefficientType>
-bool ElementSemisimpleLieAlgebra<CoefficientType>::IsACoeffOneChevalleyGenerator
+template <class coefficient>
+bool ElementSemisimpleLieAlgebra<coefficient>::IsACoeffOneChevalleyGenerator
 (int& outputGenerator, SemisimpleLieAlgebra& owner)
 { if (this->size==1)
     return this->theCoeffs[0]==1;
@@ -2564,8 +2564,8 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
   tempMat.ActOnVectorsColumn(outputWeights);
 }
 
-template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::GetBasisFromSpanOfElements
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
 (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> theRootForm;
   theRootForm.SetSize(theElements.size);
@@ -2588,8 +2588,8 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::GetBasisFromSpanOfElements
 
 }
 
-template <class CoefficientType>
-bool ElementSemisimpleLieAlgebra<CoefficientType>::GetCoordsInBasis
+template <class coefficient>
+bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis
 (const List<ElementSemisimpleLieAlgebra>& theBasis,
  Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
 { Vectors<Rational> tempBasis;
@@ -2683,8 +2683,8 @@ void RationalFunctionOld::ClearDenominators
   }
 }
 
-template <class CoefficientType>
-bool ElementSemisimpleLieAlgebra<CoefficientType>::NeedsBrackets()const
+template <class coefficient>
+bool ElementSemisimpleLieAlgebra<coefficient>::NeedsBrackets()const
 { return this->size>1;
 }
 

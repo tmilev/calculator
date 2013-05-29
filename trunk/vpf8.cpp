@@ -673,9 +673,9 @@ void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne
   }
 }
 
-template<class CoefficientType>
-Vector<CoefficientType> Vector<CoefficientType>::GetProjectivizedNormal(Vector<CoefficientType>& affinePoint)
-{ Vector<CoefficientType> result=*this;
+template<class coefficient>
+Vector<coefficient> Vector<coefficient>::GetProjectivizedNormal(Vector<coefficient>& affinePoint)
+{ Vector<coefficient> result=*this;
   result.SetSize(this->size+1);
   *result.LastObject()=-affinePoint.ScalarEuclidean(*this);
   return result;
@@ -6970,23 +6970,23 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
   }
 }
 
-template<class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft
+template<class coefficient>
+void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft
 (const ElementSemisimpleLieAlgebra<Rational>& left)
 { if (this->IsEqualToZero())
   { this->MakeZero(*this->owneR);
     return;
   }
-  ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
+  ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
   tempElt1.AssignElementLieAlgebra
   (left, *this->owneR, this->theCoeffs[0].GetOne(), this->theCoeffs[0].GetZero());
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
 
-template<class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
-(const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
+template<class coefficient>
+bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
+(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output,
  GlobalVariables& theGlobalVariables)
 { output.MakeZero(*this->owneR);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
@@ -7003,13 +7003,13 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   return true;
 }
 
-template<class CoefficientType>
-bool ElementUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
-  (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
+template<class coefficient>
+bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
+  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output,
    GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
   output.MakeZero(*this->owneR);
-  ElementUniversalEnveloping<CoefficientType> summand;
+  ElementUniversalEnveloping<coefficient> summand;
   for (int i=0; i<this->size; i++)
   { if(!this->TheObjects[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
       return false;

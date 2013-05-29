@@ -168,8 +168,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   return true;
 }
 
-template <class CoefficientType>
-bool Vectors<CoefficientType>::ConesIntersect
+template <class coefficient>
+bool Vectors<coefficient>::ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
  Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal,
  GlobalVariables* theGlobalVariables)
@@ -204,7 +204,7 @@ bool Vectors<CoefficientType>::ConesIntersect
   if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
       (matA, matb, outputLinearCombo, theGlobalVariables))
   { if (outputSplittingNormal!=0)
-    { bool tempBool=Vectors<CoefficientType>::GetNormalSeparatingCones
+    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones
       (StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
       if (!tempBool)
       { std::cout << "This is an algorithmic/mathematical (hence also programming) error: "
@@ -224,10 +224,10 @@ bool Vectors<CoefficientType>::ConesIntersect
   return true;
 }
 
-template <class CoefficientType>
+template <class coefficient>
 void SemisimpleLieAlgebra::GetCommonCentralizer
-(const List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputElementsToCentralize,
- List<ElementSemisimpleLieAlgebra<CoefficientType> >& outputCentralizingElements)
+(const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize,
+ List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
 { Matrix<Rational> tempAd, commonAd;
   for (int i=0; i<inputElementsToCentralize.size; i++)
   { this->GetAd(tempAd, inputElementsToCentralize[i]);
@@ -245,13 +245,13 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
   }
 }
 
-template <class CoefficientType>
+template <class coefficient>
 void SemisimpleLieAlgebra::GetAd
-(Matrix<CoefficientType>& output, ElementSemisimpleLieAlgebra<CoefficientType>& e)
+(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
 { int NumGenerators=this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);
   output.NullifyAll();
-  ElementSemisimpleLieAlgebra<CoefficientType> theGen, theResult;
+  ElementSemisimpleLieAlgebra<coefficient> theGen, theResult;
   for (int i=0; i<NumGenerators; i++)
   { theGen.MakeGenerator(i, *this);
     this->LieBracket(e, theGen, theResult);
@@ -1281,21 +1281,21 @@ bool CommandList::innerConesIntersect
   return output.AssignValue(out.str(), theCommands);
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::GetSubFromPartialSolutionSerreLikeSystem
-(PolynomialSubstitution<CoefficientType>& outputSub)
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSystem
+(PolynomialSubstitution<coefficient>& outputSub)
 { outputSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   for (int i=0; i<this->solutionsFound.GetElement().CardinalitySelection; i++)
     outputSub[this->solutionsFound.GetElement().elements[i]]=
     this->systemSolution.GetElement()[this->solutionsFound.GetElement().elements[i]];
 }
 
-template <class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
- (List<Polynomial<CoefficientType> >& inputSystem, PolynomialSubstitution<CoefficientType>& outputSub)
+template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
+ (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub)
 { int numVars=this->systemSolution.GetElement().size;
   MonomialP tempM;
-  Polynomial<CoefficientType> tempP;
+  Polynomial<coefficient> tempP;
   for (int i=0; i<inputSystem.size; i++)
   { tempP=inputSystem[i];
     for (int j=0; j<numVars; j++)
@@ -1303,7 +1303,7 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
       int indexTempM=tempP.GetIndex(tempM);
       if (indexTempM==-1)
         continue;
-      CoefficientType tempCF=tempP.theCoeffs[indexTempM];
+      coefficient tempCF=tempP.theCoeffs[indexTempM];
       tempP.SubtractMonomial(tempM, tempCF);
       bool isGood=true;
       for (int k=0; k<tempP.size; k++)
@@ -1318,7 +1318,7 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
       outputSub[j]=tempP;
       tempCF*=-1;
       outputSub[j]/=tempCF;
-      CoefficientType theConst;
+      coefficient theConst;
 //      std::cout << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
 //      if (outputSub[j].IsAConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
@@ -1329,8 +1329,8 @@ bool GroebnerBasisComputation<CoefficientType>::HasImpliedSubstitutions
   return false;
 }
 
-template <class CoefficientType>
-int GroebnerBasisComputation<CoefficientType>::GetPreferredSerreSystemSubIndex()
+template <class coefficient>
+int GroebnerBasisComputation<coefficient>::GetPreferredSerreSystemSubIndex()
 { const MonomialP& theMon=this->theBasiS[0].GetMaxMonomial(this->theMonOrdeR);
   for (int i=0; i<theMon.GetMinNumVars(); i++)
     if (theMon(i)>0)
@@ -1338,12 +1338,12 @@ int GroebnerBasisComputation<CoefficientType>::GetPreferredSerreSystemSubIndex()
   return -1;
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoSinglePoly
- (Polynomial<CoefficientType>& thePoly, int theIndex,
-  PolynomialSubstitution<CoefficientType>& theFinalSub,
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
+ (Polynomial<coefficient>& thePoly, int theIndex,
+  PolynomialSubstitution<coefficient>& theFinalSub,
   GlobalVariables* theGlobalVariables)
-{ Polynomial<CoefficientType> tempP;
+{ Polynomial<coefficient> tempP;
   tempP.MakeMonomiaL(theIndex, 1, 1);
   if (thePoly==tempP)
     return;
@@ -1368,7 +1368,7 @@ void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoSinglePoly
       }
   if (changed)
     thePoly.Substitution(theFinalSub);
-  CoefficientType tempCF;
+  coefficient tempCF;
   if (!thePoly.IsAConstant(&tempCF))
   { std::cout << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
     << " the polynomial is not a constant, rather equals "
@@ -1379,19 +1379,19 @@ void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoSinglePoly
   this->SetSerreLikeSolutionIndex(theIndex, tempCF);
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::BackSubstituteIntoPolySystem
- (List<PolynomialSubstitution<CoefficientType> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
-{ PolynomialSubstitution<CoefficientType> FinalSub;
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::BackSubstituteIntoPolySystem
+ (List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
+{ PolynomialSubstitution<coefficient> FinalSub;
   this->GetSubFromPartialSolutionSerreLikeSystem(FinalSub);
   for (int i=theImpliedSubs.size-1; i>=0; i--)
     for (int j=0; j<theImpliedSubs[i].size; j++)
       this->BackSubstituteIntoSinglePoly(theImpliedSubs[i][j], j, FinalSub, theGlobalVariables);
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
- (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
+ (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables);
@@ -1403,8 +1403,8 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
     theReport1.Report(out.str());
   }
   bool changed=true;
-  PolynomialSubstitution<CoefficientType> theSub;
-  List<PolynomialSubstitution<CoefficientType> > theImpliedSubs;
+  PolynomialSubstitution<coefficient> theSub;
+  List<PolynomialSubstitution<coefficient> > theImpliedSubs;
   theImpliedSubs.ReservE(inputSystem.size);
   while (changed)
   { this->NumberOfComputations=0;
@@ -1449,7 +1449,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
     //}
     //std::cout << ")";
   }
-  List<Polynomial<CoefficientType> > oldSystem=inputSystem;
+  List<Polynomial<coefficient> > oldSystem=inputSystem;
   GroebnerBasisComputation newComputation;
   newComputation.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
 
@@ -1509,9 +1509,9 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystemRecursively
   inputSystem=oldSystem;
 }
 
-template <class CoefficientType>
-std::string GroebnerBasisComputation<CoefficientType>::GetCalculatorInputFromSystem
-(const List<Polynomial<CoefficientType> >& inputSystem)
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetCalculatorInputFromSystem
+(const List<Polynomial<coefficient> >& inputSystem)
 { std::stringstream out;
   out << "FindOneSolutionSerreLikePolynomialSystem{}(";
   for (int j=0; j<inputSystem.size; j++)
@@ -1523,9 +1523,9 @@ std::string GroebnerBasisComputation<CoefficientType>::GetCalculatorInputFromSys
   return out.str();
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
- (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
+ (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
@@ -1533,7 +1533,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   this->MaxNumComputations=1000;
   int numVars=0;
 //  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
-  List<Polynomial<CoefficientType> > workingSystem=inputSystem;
+  List<Polynomial<coefficient> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
   this->systemSolution.GetElement().initFillInObject(numVars, 0);
@@ -1545,7 +1545,7 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
       for (int i=0; i<this->solutionsFound.GetElement().MaxSize; i++)
         if (!this->solutionsFound.GetElement().selected[i])
           this->SetSerreLikeSolutionIndex(i, 0);
-    PolynomialSubstitution<CoefficientType> theSub;
+    PolynomialSubstitution<coefficient> theSub;
     this->GetSubFromPartialSolutionSerreLikeSystem(theSub);
     workingSystem=inputSystem;
     for (int i=0; i<workingSystem.size; i++)
@@ -1566,8 +1566,8 @@ void GroebnerBasisComputation<CoefficientType>::SolveSerreLikeSystem
   }
 }
 
-template <class CoefficientType>
-std::string GroebnerBasisComputation<CoefficientType>::ToStringSerreLikeSolution(FormatExpressions* theFormat)
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution(FormatExpressions* theFormat)
 { std::stringstream out;
   Polynomial<Rational> tempP;
   for (int i=0; i<this->systemSolution.GetElement().size; i++)
@@ -1579,9 +1579,9 @@ std::string GroebnerBasisComputation<CoefficientType>::ToStringSerreLikeSolution
   return out.str();
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::SetSerreLikeSolutionIndex
-(int theIndex, const CoefficientType& theConst)
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex
+(int theIndex, const coefficient& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   if (this->solutionsFound.GetElement().selected[theIndex])
   { std::cout << "This a programming error: attempting to set value to a variable "

@@ -55,29 +55,29 @@ class rootSubalgebra;
 class rootSubalgebras;
 class ChevalleyGenerator;
 class DynkinDiagramRootSubalgebra;
-template<class CoefficientType>
+template<class coefficient>
 class ElementSemisimpleLieAlgebra;
-template<class CoefficientType>
+template<class coefficient>
 class ElementUniversalEnveloping;
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
 class MonomialTensor;
-template<class CoefficientType>
+template<class coefficient>
 class MonomialUniversalEnveloping;
-template<class CoefficientType>
+template<class coefficient>
 class ElementSumGeneralizedVermas;
-template <class CoefficientType>
+template <class coefficient>
 class charSSAlgMod;
 class ReflectionSubgroupWeylGroup;
-template<class CoefficientType>
+template<class coefficient>
 class ModuleSSalgebra;
 class SltwoSubalgebras;
-template<class CoefficientType>
+template<class coefficient>
 class MonomialTensorGeneralizedVermas;
-template<class CoefficientType>
+template<class coefficient>
 class ElementTensorsGeneralizedVermas;
 struct branchingData;
 class quasiDiffMon;
-template<class CoefficientType>
+template<class coefficient>
 class quasiDiffOp;
 
 //classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
@@ -100,16 +100,16 @@ template <class Object>
 class Matrix;
 template <class Object, unsigned int hashFunction(const Object&)>
 class HashedList;
-template <class CoefficientType>
+template <class coefficient>
 class Vector;
-template <class CoefficientType>
+template <class coefficient>
 class Vectors;
 class MonomialP;
-template <class TemplateMonomial, class CoefficientType>
+template <class TemplateMonomial, class coefficient>
 class MonomialCollection;
-template <class CoefficientType>
+template <class coefficient>
 class Polynomial;
-template <class CoefficientType>
+template <class coefficient>
 class PolynomialSubstitution;
 
 //combinatorial classes
@@ -401,9 +401,9 @@ public:
   static bool IsPrime(int theInt);
   template <class Element>
   static void RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit);
-  template <typename CoefficientType>
-  inline static CoefficientType Maximum
-  (const CoefficientType& a, const CoefficientType& b)
+  template <typename coefficient>
+  inline static coefficient Maximum
+  (const coefficient& a, const coefficient& b)
   { if (a>b)
       return a;
     else
@@ -3474,18 +3474,18 @@ ParallelComputing::GlobalPointerCounter++;
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
 };
 
-template<class CoefficientType>
-Vector<CoefficientType> operator-(const Vector<CoefficientType>& input)
-{ Vector<CoefficientType> result;
+template<class coefficient>
+Vector<coefficient> operator-(const Vector<coefficient>& input)
+{ Vector<coefficient> result;
   result.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     result[i]=-input[i];
   return result;
 }
 
-template <class CoefficientType>
+template <class coefficient>
 std::ostream& operator<<
-(std::ostream& out, const Vector<CoefficientType>& theVector)
+(std::ostream& out, const Vector<coefficient>& theVector)
 { out  << "(";
   for (int i=0; i<theVector.size; i++)
   { out << theVector[i];
@@ -3496,17 +3496,17 @@ std::ostream& operator<<
   return out;
 }
 
-template <class CoefficientType>
-class Vector: public List<CoefficientType>
-{ friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& input);
-  friend std::ostream& operator<< <CoefficientType>(std::ostream& output, const Vector<CoefficientType>& theVector)
+template <class coefficient>
+class Vector: public List<coefficient>
+{ friend Vector<coefficient> operator-<coefficient>(const Vector<coefficient>& input);
+  friend std::ostream& operator<< <coefficient>(std::ostream& output, const Vector<coefficient>& theVector)
 ;
 public:
   Vector(){}
-  Vector(const Vector<CoefficientType>& other){*this=other;}
+  Vector(const Vector<coefficient>& other){*this=other;}
   Vector(const Selection& other) {*this=other;}
   inline static std::string GetXMLClassName()
-  { std::string result="Vector_" + CoefficientType::GetXMLClassName();
+  { std::string result="Vector_" + coefficient::GetXMLClassName();
     return result;
   }
   std::string ToString()const
@@ -3541,8 +3541,8 @@ public:
   }
   template <class otherType>
   static void ScalarProduct
-(const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<otherType>& TheBilinearForm,
- CoefficientType& result)
+(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm,
+ coefficient& result)
   { if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
     { std::cout << "This is a programming error: attempting to take a bilinear form represented by matrix with "
       << TheBilinearForm.NumRows << " rows and " << TheBilinearForm.NumCols << " columns "
@@ -3550,7 +3550,7 @@ public:
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    CoefficientType tempRat, accumRow;
+    coefficient tempRat, accumRow;
     result=0;
     for (int i=0; i<TheBilinearForm.NumRows; i++)
     { accumRow=0;
@@ -3564,14 +3564,14 @@ public:
     }
   }
   template <class otherType>
-  static CoefficientType ScalarProduct
-  (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<otherType>& TheBilinearForm)
-  { CoefficientType result;
-    Vector<CoefficientType>::ScalarProduct(r1, r2, TheBilinearForm, result);
+  static coefficient ScalarProduct
+  (const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm)
+  { coefficient result;
+    Vector<coefficient>::ScalarProduct(r1, r2, TheBilinearForm, result);
     return result;
   }
 
-  CoefficientType ScalarProduct (const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& form) const
+  coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const
   { return ScalarProduct(*this,r2,form);
   }
   bool IsPositive()
@@ -3600,8 +3600,8 @@ public:
         return false;
     return true;
   }
-  static Vector<CoefficientType> GetEi(int theDimension, int theIndex)
-  { Vector<CoefficientType> output;
+  static Vector<coefficient> GetEi(int theDimension, int theIndex)
+  { Vector<coefficient> output;
     output.MakeEi(theDimension, theIndex);
     return output;
   }
@@ -3617,18 +3617,18 @@ public:
         return false;
     return true;
   }
-  CoefficientType SumCoords()const
-  { CoefficientType result=0;
+  coefficient SumCoords()const
+  { coefficient result=0;
     for (int i=0; i<this->size; i++)
       result+=this->TheObjects[i];
     return result;
   }
-  inline CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other)const
-  { CoefficientType output;
+  inline coefficient ScalarEuclidean(const Vector<coefficient>& other)const
+  { coefficient output;
     this->ScalarEuclidean(other, output);
     return output;
   }
-  void ScalarEuclidean(const Vector<CoefficientType>& other, CoefficientType& output)const
+  void ScalarEuclidean(const Vector<coefficient>& other, coefficient& output)const
   { if (this->size!=other.size)
     { std::cout << "This is a programming error: "
       << "taking scalar product of elements of different dimensions: "
@@ -3636,7 +3636,7 @@ public:
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    CoefficientType tempElt;
+    coefficient tempElt;
     output=0;
     for (int i=0; i<this->size; i++)
     { tempElt=other[i];
@@ -3646,20 +3646,20 @@ public:
   }
 
 static void ProjectOntoHyperPlane
-(Vector<CoefficientType>& input, Vector<CoefficientType>& normal,
- Vector<CoefficientType>& ProjectionDirection, Vector<CoefficientType>& output)
-{ CoefficientType t;
-  CoefficientType tempRat;
-  Vector<CoefficientType>::ScalarEuclidean(input, normal, t);
-  Vector<CoefficientType>::ScalarEuclidean(ProjectionDirection, normal, tempRat);
+(Vector<coefficient>& input, Vector<coefficient>& normal,
+ Vector<coefficient>& ProjectionDirection, Vector<coefficient>& output)
+{ coefficient t;
+  coefficient tempRat;
+  Vector<coefficient>::ScalarEuclidean(input, normal, t);
+  Vector<coefficient>::ScalarEuclidean(ProjectionDirection, normal, tempRat);
   t/=(tempRat);
   t.Minus();
-  Vector<CoefficientType>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
+  Vector<coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
 }
   static void VectorPlusVectorTimesScalar
-  (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const CoefficientType& theCoeff,
-   Vector<CoefficientType>& output)
-  { CoefficientType tempRat;
+  (const Vector<coefficient>& r1, const Vector<coefficient>& r2, const coefficient& theCoeff,
+   Vector<coefficient>& output)
+  { coefficient tempRat;
     assert(r1.size==r2.size);
     output=r1;
     for (int i=0; i<r1.size; i++)
@@ -3675,11 +3675,11 @@ static void ProjectOntoHyperPlane
   }
   void MakeEi
   (int DesiredDimension, int NonZeroIndex,
-   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+   const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->MakeZero(DesiredDimension, theRingZero);
     (*this)[NonZeroIndex]=theRingUnit;
   }
-  inline static unsigned int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
+  inline static unsigned int HashFunction(const Vector<coefficient>& input){return input.HashFunction();}
   unsigned int HashFunction() const
   { unsigned int result=0;
     int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
@@ -3693,14 +3693,14 @@ static void ProjectOntoHyperPlane
   }
   void ScaleToFirstNonZeroCoordinatePositive();
   void MakeAffineUsingLastCoordinate()
-  { CoefficientType theElt;
+  { coefficient theElt;
     theElt=*this->LastObject();
     this->size--;
     this->operator/=(theElt);
   }
   void ScaleByPositiveRationalToIntegralMinHeight()
   ;
-  bool AssignMatDetectRowOrColumn(const Matrix<CoefficientType>& input)
+  bool AssignMatDetectRowOrColumn(const Matrix<coefficient>& input)
   { if (input.NumCols==1)
     { this->SetSize(input.NumRows);
       for (int i=0; i<this->size; i++)
@@ -3715,7 +3715,7 @@ static void ProjectOntoHyperPlane
     }
     return false;
   }
-  void MakeZero(int theDim, const CoefficientType& theRingZero=0)
+  void MakeZero(int theDim, const coefficient& theRingZero=0)
   { this->SetSize(theDim);
     for (int i=0; i<theDim; i++)
       this->TheObjects[i]=theRingZero;
@@ -3727,17 +3727,17 @@ static void ProjectOntoHyperPlane
         result++;
     return result;
   }
-  bool IsProportionalTo(const Vector<CoefficientType>& other, CoefficientType& TimesMeEqualsOther)const;
-  bool IsProportionalTo(const Vector<CoefficientType>& other)const
-  { CoefficientType TimesMeEqualsOther;
+  bool IsProportionalTo(const Vector<coefficient>& other, coefficient& TimesMeEqualsOther)const;
+  bool IsProportionalTo(const Vector<coefficient>& other)const
+  { coefficient TimesMeEqualsOther;
     return this->IsProportionalTo(other, TimesMeEqualsOther);
   }
   int FindLCMDenominatorsTruncateToInt();
   void FindLCMDenominators(LargeIntUnsigned& output);
-  inline Vector<CoefficientType> GetShiftToTheLeftOnePosition()
+  inline Vector<coefficient> GetShiftToTheLeftOnePosition()
   { return this->GetShiftToTheLeft(1);
   }
-  void MakeNormalInProjectivizationFromPointAndNormal(Vector<CoefficientType>& point, Vector<CoefficientType>& normal)
+  void MakeNormalInProjectivizationFromPointAndNormal(Vector<coefficient>& point, Vector<coefficient>& normal)
   { //the extra dimension is going to be the last dimension
     int newDimension= normal.size+1;
     this->SetSize(newDimension);
@@ -3746,7 +3746,7 @@ static void ProjectOntoHyperPlane
     for (int j=0; j<newDimension-1; j++)
       this->TheObjects[j]=normal[j];
   }
-  bool ProjectToAffineSpace(Vector<CoefficientType> &output)
+  bool ProjectToAffineSpace(Vector<coefficient> &output)
   { if (this->TheObjects[this->size-1].IsEqualToZero())
       return false;
     output.SetSize(this->size-1);
@@ -3780,8 +3780,8 @@ static void ProjectOntoHyperPlane
         return i;
     return -1;
   }
-  Vector<CoefficientType> GetShiftToTheLeft(int numPositions)
-  { Vector<CoefficientType> result;
+  Vector<coefficient> GetShiftToTheLeft(int numPositions)
+  { Vector<coefficient> result;
     assert(numPositions<=this->size);
     result.SetSize(this->size-numPositions);
     for (int i=0; i<result.size; i++)
@@ -3795,7 +3795,7 @@ static void ProjectOntoHyperPlane
       this->TheObjects[i]=this->TheObjects[i+numPositions];
     this->size-=numPositions;
   }
-  void ShiftToTheRightInsertZeroes(int numPositions, const CoefficientType& theRingZero)
+  void ShiftToTheRightInsertZeroes(int numPositions, const coefficient& theRingZero)
   { assert(numPositions>=0);
     this->SetSize(this->size+numPositions);
     for (int i=this->size-1; i>=numPositions; i--)
@@ -3804,12 +3804,12 @@ static void ProjectOntoHyperPlane
       this->TheObjects[i]=theRingZero;
   }
   bool GetIntegralCoordsInBasisIfTheyExist
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
-  Matrix<CoefficientType>& bufferMatGaussianElimination,
-  const CoefficientType& theRingUnit,
-  const CoefficientType& theRingMinusUnit,
-  const CoefficientType& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
+  Matrix<coefficient>& bufferMatGaussianEliminationCC,
+  Matrix<coefficient>& bufferMatGaussianElimination,
+  const coefficient& theRingUnit,
+  const coefficient& theRingMinusUnit,
+  const coefficient& theRingZero)
   ;
 /*  template<class OtherType>
   void operator=(const Vector<OtherType>& other)
@@ -3817,7 +3817,7 @@ static void ProjectOntoHyperPlane
     for (int i=0; i<other.size; i++)
       this->TheObjects[i]=other.TheObjects[i];
   }*/
-  void GetVectorsPerpendicularTo(Vectors<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  void GetVectorsPerpendicularTo(Vectors<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)
   { int Pivot=-1;
     if (!this->FindIndexFirstNonZeroCoordinateFromTheLeft(Pivot))
     { output.MakeEiBasis(this->size, theRingUnit, theRingZero);
@@ -3826,7 +3826,7 @@ static void ProjectOntoHyperPlane
     output.SetSize(this->size-1);
     for (int i=0; i<this->size; i++)
       if (i!=Pivot)
-      { Vector<CoefficientType>& current=output.TheObjects[i];
+      { Vector<coefficient>& current=output.TheObjects[i];
         current.MakeEi(this->size, i, theRingUnit, theRingZero);
         current.TheObjects[Pivot]-=this->TheObjects[i];
       }
@@ -3841,20 +3841,20 @@ static void ProjectOntoHyperPlane
     return false;
   }
   bool GetCoordsInBasiS
-  (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
-  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)const
+  (const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
+  Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
+  const coefficient& theRingUnit=1, const coefficient& theRingZero=0)const
    ;
   bool GetCoordsInBasiS
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
- const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)const
-  { Vectors<CoefficientType> buffer;
-    Matrix<CoefficientType> matBuffer;
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
+ const coefficient& theRingUnit=1, const coefficient& theRingZero=0)const
+  { Vectors<coefficient> buffer;
+    Matrix<coefficient> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
   }
-  Vector<CoefficientType> GetProjectivizedNormal(Vector<CoefficientType>& affinePoint);
-  Vector<CoefficientType> operator*(const CoefficientType& other)const
-  { Vector<CoefficientType> result;
+  Vector<coefficient> GetProjectivizedNormal(Vector<coefficient>& affinePoint);
+  Vector<coefficient> operator*(const coefficient& other)const
+  { Vector<coefficient> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)
     { result[i]=this->TheObjects[i];
@@ -3862,14 +3862,14 @@ static void ProjectOntoHyperPlane
     }
     return result;
   }
-  Vector<CoefficientType> operator/(const CoefficientType& other)const
+  Vector<coefficient> operator/(const coefficient& other)const
   { if (other.IsEqualToZero())
     { std::cout << "This is a programming error: division by zero. "
       << " Division by zero error are supposed to be handled at an earlier level. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    Vector<CoefficientType> result;
+    Vector<coefficient> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)
     { result[i]=this->TheObjects[i];
@@ -3877,11 +3877,11 @@ static void ProjectOntoHyperPlane
     }
     return result;
   }
-  void operator*=(const CoefficientType& other)
+  void operator*=(const coefficient& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]*=other;
   }
-  void operator/=(const CoefficientType& other)
+  void operator/=(const coefficient& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]/=other;
   }
@@ -3890,15 +3890,15 @@ static void ProjectOntoHyperPlane
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]+=other.TheObjects[i];
   }
-  inline bool operator<(const Vector<CoefficientType>& other)const
+  inline bool operator<(const Vector<coefficient>& other)const
   { return other>*this;
   }
-  bool isGreaterThanLexicographic(const Vector<CoefficientType>& other)const
-  { return this->::List<CoefficientType>::operator>(other);
+  bool isGreaterThanLexicographic(const Vector<coefficient>& other)const
+  { return this->::List<coefficient>::operator>(other);
   }
-  inline bool operator>(const Vector<CoefficientType>& other)const
+  inline bool operator>(const Vector<coefficient>& other)const
   { assert(this->size==other.size);
-    CoefficientType c1=0, c2=0;
+    coefficient c1=0, c2=0;
     for (int i=0; i<this->size; i++)
     { c1+=this->TheObjects[i];
       c2+=other.TheObjects[i];
@@ -3926,8 +3926,8 @@ static void ProjectOntoHyperPlane
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]-=other[i];
   }
-  Vector<CoefficientType> operator+(const Vector<CoefficientType>& right)const
-  { Vector<CoefficientType> result=*this;
+  Vector<coefficient> operator+(const Vector<coefficient>& right)const
+  { Vector<coefficient> result=*this;
     result+=right;
     return result;
   }
@@ -3962,7 +3962,7 @@ static void ProjectOntoHyperPlane
   }
   template <class otherType>
   void operator=(const Vector<otherType>& other)
-  { if (this==(Vector<CoefficientType>*)&other)
+  { if (this==(Vector<coefficient>*)&other)
       return;
     this->SetSize(other.size);
     for(int i=0; i<other.size; i++)
@@ -3991,7 +3991,7 @@ static void ProjectOntoHyperPlane
     for(int i=0; i<other.Multiplicities.size; i++)
       this->TheObjects[i]=other.Multiplicities[i];
   }
-  bool operator!=(const Vector<CoefficientType>& other)const
+  bool operator!=(const Vector<coefficient>& other)const
   { return ! (*this==other);
   }
   bool IsEqualToZero()const
@@ -4000,8 +4000,8 @@ static void ProjectOntoHyperPlane
         return false;
     return true;
   }
-  Vector<CoefficientType> operator-(const Vector<CoefficientType>& other)const
-  { Vector<CoefficientType> result;
+  Vector<coefficient> operator-(const Vector<coefficient>& other)const
+  { Vector<coefficient> result;
     result=*this;
     result-=other;
     return result;
@@ -4029,8 +4029,8 @@ static void ProjectOntoHyperPlane
   }
 };
 
-template <class CoefficientType>
-void Vector<CoefficientType>::ScaleByPositiveRationalToIntegralMinHeight()
+template <class coefficient>
+void Vector<coefficient>::ScaleByPositiveRationalToIntegralMinHeight()
 { LargeIntUnsigned numGCD, tempUI;
   bool foundNonZero=false;
   for (int i=0; i<this->size; i++)
@@ -4053,8 +4053,8 @@ void Vector<CoefficientType>::ScaleByPositiveRationalToIntegralMinHeight()
       *this/=(numGCD);
 }
 
-template <class CoefficientType>
-void Vector<CoefficientType>::ScaleToFirstNonZeroCoordinatePositive()
+template <class coefficient>
+void Vector<coefficient>::ScaleToFirstNonZeroCoordinatePositive()
 { for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].IsPositive())
       return;
@@ -4065,9 +4065,9 @@ void Vector<CoefficientType>::ScaleToFirstNonZeroCoordinatePositive()
   }
 }
 
-template <class CoefficientType>
-bool Vector<CoefficientType>::IsProportionalTo
-(const Vector<CoefficientType>& input, CoefficientType& outputTimesMeEqualsInput)const
+template <class coefficient>
+bool Vector<coefficient>::IsProportionalTo
+(const Vector<coefficient>& input, coefficient& outputTimesMeEqualsInput)const
 { if (this->size!= input.size)
     return false;
   int IndexFirstNonZero=-1;
@@ -4090,8 +4090,8 @@ bool Vector<CoefficientType>::IsProportionalTo
   return tempRoot==input;
 }
 
-template <class CoefficientType>
-void Vector<CoefficientType>::FindLCMDenominators(LargeIntUnsigned& output)
+template <class coefficient>
+void Vector<coefficient>::FindLCMDenominators(LargeIntUnsigned& output)
 { LargeIntUnsigned tempI, tempI2;
   output.MakeOne();
   for (int i=0; i<this->size; i++)
@@ -4102,8 +4102,8 @@ void Vector<CoefficientType>::FindLCMDenominators(LargeIntUnsigned& output)
   }
 }
 
-template <class CoefficientType>
-int Vector<CoefficientType>::FindLCMDenominatorsTruncateToInt()
+template <class coefficient>
+int Vector<coefficient>::FindLCMDenominatorsTruncateToInt()
 { int result=1;
   for (int i=0; i<this->size; i++)
   { result = MathRoutines::lcm(result, this->TheObjects[i].DenShort);
@@ -4112,8 +4112,8 @@ int Vector<CoefficientType>::FindLCMDenominatorsTruncateToInt()
   return result;
 }
 
-template <class CoefficientType>
-class Vectors: public List<Vector<CoefficientType> >
+template <class coefficient>
+class Vectors: public List<Vector<coefficient> >
 {
   public:
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable)
@@ -4154,19 +4154,19 @@ class Vectors: public List<Vector<CoefficientType> >
 (bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)const
 ;
   std::string ToString(FormatExpressions* theFormat=0)const;
-  bool LinearAlgebraForVertexComputation(Selection& theSelection, Vector<CoefficientType>& output, Matrix<CoefficientType>& buffer, Selection& NonPivotPointsBuffer)
+  bool LinearAlgebraForVertexComputation(Selection& theSelection, Vector<coefficient>& output, Matrix<coefficient>& buffer, Selection& NonPivotPointsBuffer)
   { if (this->size==0)
       return false;
     int theDimension=this->TheObjects[0].size;
     output.SetSize(theDimension);
     assert(theDimension -1== theSelection.CardinalitySelection);
-    Matrix<CoefficientType> matOutputEmpty;
+    Matrix<coefficient> matOutputEmpty;
     buffer.init((int)(theDimension-1), (int)theDimension);
     matOutputEmpty.init(-1, -1);
     for (int i =0; i<theDimension-1; i++)
       for (int j=0; j<theDimension; j++)
         buffer.elements[i][j].Assign(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
-    Matrix<CoefficientType>::GaussianEliminationByRows(buffer, matOutputEmpty, NonPivotPointsBuffer);
+    Matrix<coefficient>::GaussianEliminationByRows(buffer, matOutputEmpty, NonPivotPointsBuffer);
     if (NonPivotPointsBuffer.CardinalitySelection==1)
     { buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
       return true;
@@ -4178,12 +4178,12 @@ class Vectors: public List<Vector<CoefficientType> >
     for (int i=0; i<this->size; i++)
       output[i]=this->TheObjects[i].GetVectorDouble();
   }
-  void AssignListListCoefficientType(const List<List<CoefficientType> >& input)
+  void AssignListListCoefficientType(const List<List<coefficient> >& input)
   { this->SetSize(input.size);
     for (int i=0; i<input.size; i++)
       this->TheObjects[i]=input[i];
   }
-  void AssignListList(const List<Vectors<CoefficientType> >& input)
+  void AssignListList(const List<Vectors<coefficient> >& input)
   { int count=0;
     for (int i=0; i<input.size; i++)
       count+=input[i].size;
@@ -4205,53 +4205,53 @@ class Vectors: public List<Vector<CoefficientType> >
     return out.str();
   }
   int ArrangeFirstVectorsBeOfMaxPossibleRank
-  (Matrix<CoefficientType>& bufferMat, Selection& bufferSel)
+  (Matrix<coefficient>& bufferMat, Selection& bufferSel)
 ;
-  static unsigned int HashFunction(const Vectors<CoefficientType>& input)
+  static unsigned int HashFunction(const Vectors<coefficient>& input)
   { return input.HashFunction();
   }
   unsigned int HashFunction()const
-  { return this->::List<Vector<CoefficientType> >::HashFunction();
+  { return this->::List<Vector<coefficient> >::HashFunction();
   }
   //The below function is required to preserve the order of elements given by theSelection.elements.
-  void SubSelection(Selection& theSelection, Vectors<CoefficientType>& output)
+  void SubSelection(Selection& theSelection, Vectors<coefficient>& output)
   { assert(&output!=this);
     output.SetSize(theSelection.CardinalitySelection);
     for(int i=0; i<theSelection.CardinalitySelection; i++)
       output[i].Assign(this->TheObjects[theSelection.elements[i]]);
   }
-  bool HasAnElementWithPositiveScalarProduct(const Vector<CoefficientType>& input)const
+  bool HasAnElementWithPositiveScalarProduct(const Vector<coefficient>& input)const
   { for (int i=0; i<this->size; i++)
       if (input.ScalarEuclidean(this->TheObjects[i]).IsPositive())
         return true;
     return false;
   }
-  bool HasAnElementWithNegativeScalarProduct(const Vector<CoefficientType>& input)const
+  bool HasAnElementWithNegativeScalarProduct(const Vector<coefficient>& input)const
   { for (int i=0; i<this->size; i++)
       if (input.ScalarEuclidean(this->TheObjects[i]).IsNegative())
         return true;
     return false;
   }
-  bool HasAnElementPerpendicularTo(const Vector<CoefficientType>& input)const
+  bool HasAnElementPerpendicularTo(const Vector<coefficient>& input)const
   { for (int i=0; i<this->size; i++)
       if (input.ScalarEuclidean(this->TheObjects[i]).IsEqualToZero())
         return true;
     return false;
   }
-  bool PerturbVectorToRegular(Vector<CoefficientType>& inputOutput, GlobalVariables& theGlobalVariables);
-  void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<CoefficientType>& output)
+  bool PerturbVectorToRegular(Vector<coefficient>& inputOutput, GlobalVariables& theGlobalVariables);
+  void SelectionToMatrix(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output)
   { output.init((int)OutputDimension, (int)theSelection.CardinalitySelection);
     this->SelectionToMatrix(theSelection, OutputDimension, output, 0);
   }
-  void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<CoefficientType>& output, int StartRowIndex)
+  void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex)
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
-    { Vector<CoefficientType>& tempRoot=this->TheObjects[theSelection.elements[i]];
+    { Vector<coefficient>& tempRoot=this->TheObjects[theSelection.elements[i]];
       for (int j=0; j<OutputDimension; j++)
         output.elements[StartRowIndex+i][j]=tempRoot[j];
     }
   }
   void SelectionToMatrix
-  (Selection& theSelection, int OutputDimension, Matrix<CoefficientType>& output, int StartRowIndex)
+  (Selection& theSelection, int OutputDimension, Matrix<coefficient>& output, int StartRowIndex)
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
     { Vector<Rational>& tempRoot=this->TheObjects[theSelection.elements[i]];
       for (int j=0; j<OutputDimension; j++)
@@ -4259,7 +4259,7 @@ class Vectors: public List<Vector<CoefficientType> >
     }
   }
   void GetGramMatrix
-  (Matrix<CoefficientType>& output, const Matrix<Rational>* theBilinearForm=0)const
+  (Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm=0)const
   ;
   void GetMatrixRootsToRows(Matrix<Rational>& output)const
   { int tempNumCols= 0;
@@ -4271,24 +4271,24 @@ class Vectors: public List<Vector<CoefficientType> >
         output.elements[i][j]=this->TheObjects[i][j];
   }
   bool LinSpanContainsVector
-  (const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
+  (const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const
   ;
-  void MakeEiBasis(int theDimension, const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+  void MakeEiBasis(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->SetSize(theDimension);
     for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeEi(theDimension, i, theRingUnit, theRingZero);
   }
-  bool LinSpanContainsVector(const Vector<CoefficientType>& input)const
-  { Matrix<CoefficientType> buffer;
+  bool LinSpanContainsVector(const Vector<coefficient>& input)const
+  { Matrix<coefficient> buffer;
     Selection bufferSelection;
     return this->LinSpanContainsVector(input, buffer, bufferSelection);
   }
   static void SelectABasisInSubspace
-  (const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
+  (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output,
    Selection& outputSelectedPivots, GlobalVariables* theGlobalVariables=0)
   ;
   int GetRankOfSpanOfElements
-  (Matrix<CoefficientType>* buffer=0, Selection* bufferSelection=0)const
+  (Matrix<coefficient>* buffer=0, Selection* bufferSelection=0)const
 ;
 static bool ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
@@ -4296,32 +4296,32 @@ static bool ConesIntersect
  GlobalVariables* theGlobalVariables=0)
  ;
 static bool GetNormalSeparatingCones
-(List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
-  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
+(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
+  List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
   GlobalVariables* theGlobalVariables=0)
 ;
-  void average(Vector<CoefficientType>& output, int theDimension)
+  void average(Vector<coefficient>& output, int theDimension)
   { this->sum(output, theDimension);
     if (this->size==0)
       return;
     output/=this->size;
   }
-  void sum (Vector<CoefficientType>& output, int resultDim)const
+  void sum (Vector<coefficient>& output, int resultDim)const
   { output.MakeZero(resultDim);
     for (int i=0; i<this->size; i++)
       output+=this->TheObjects[i];
   }
   bool GetCoordsInBasis
-  (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& outputCoords,
-   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
-   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+  (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords,
+   Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
+   const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   ;
   bool GetIntegralCoordsInBasisIfTheyExist
-  (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& output,
-  const CoefficientType& theRingUnit,
-  const CoefficientType& theRingMinusUnit,
-  const CoefficientType& theRingZero)const
-  { Matrix<CoefficientType> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
+  (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& output,
+  const coefficient& theRingUnit,
+  const coefficient& theRingMinusUnit,
+  const coefficient& theRingZero)const
+  { Matrix<coefficient> bufferMatGaussianEliminationCC, bufferMatGaussianElimination;
     bool result=true;
     output.SetSize(this->size);
     for (int i=0; i<this->size; i++)
@@ -4330,12 +4330,12 @@ static bool GetNormalSeparatingCones
     return result;
   }
   bool GetIntegralCoordsInBasisIfTheyExist
-  (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& output,
-  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
-  Matrix<CoefficientType>& bufferMatGaussianElimination,
-  const CoefficientType& theRingUnit,
-  const CoefficientType& theRingMinusUnit,
-  const CoefficientType& theRingZero)const
+  (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& output,
+  Matrix<coefficient>& bufferMatGaussianEliminationCC,
+  Matrix<coefficient>& bufferMatGaussianElimination,
+  const coefficient& theRingUnit,
+  const coefficient& theRingMinusUnit,
+  const coefficient& theRingZero)const
   { bool result=true;
     output.SetSize(this->size);
     for (int i=0; i<this->size; i++)
@@ -4353,20 +4353,20 @@ static bool GetNormalSeparatingCones
     return out.str();
   }
   bool ComputeNormalExcludingIndex
-(Vector<CoefficientType>& output, int index, Matrix<CoefficientType>& bufferMatrix)
+(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
 ;
 bool ComputeNormalFromSelection
-(Vector<CoefficientType>& output, Selection& theSelection, Matrix<CoefficientType>& bufferMatrix, int theDimension)
+(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
 ;
 bool ComputeNormalFromSelectionAndExtraRoot
-(Vector<CoefficientType>& output, Vector<CoefficientType>& ExtraRoot,
- Selection& theSelection, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSel)
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot,
+ Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
   ;
   bool ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<CoefficientType>& output, Vector<CoefficientType>& ExtraRoot1, Vector<CoefficientType>& ExtraRoot2,
- Selection& theSelection, Matrix<CoefficientType>& bufferMat, Selection& bufferSel)
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2,
+ Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
  ;
-  bool ComputeNormal(Vector<CoefficientType>& output, int inputDim)
+  bool ComputeNormal(Vector<coefficient>& output, int inputDim)
   { if (this->size==0)
     { if (inputDim==1)
       { output.MakeEi(1,0);
@@ -4375,7 +4375,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
       return false;
     }
     int theDimension= this->TheObjects[0].size;
-    Matrix<CoefficientType> tempMatrix;
+    Matrix<coefficient> tempMatrix;
     Selection NonPivotPoints;
     NonPivotPoints.init(theDimension);
     output.SetSize(theDimension);
@@ -4385,16 +4385,16 @@ bool ComputeNormalFromSelectionAndExtraRoot
     tempMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
     return true;
   }
-  void GaussianEliminationForNormalComputation(Matrix<CoefficientType>& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
+  void GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool GetLinearDependence
-  (Matrix<CoefficientType>& outputTheLinearCombination, const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
+  (Matrix<coefficient>& outputTheLinearCombination, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   ;
   void GetLinearDependenceRunTheLinearAlgebra
-  (Matrix<CoefficientType>& outputTheLinearCombination, Matrix<CoefficientType>& outputTheSystem, Selection& outputNonPivotPoints)
+  (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
   ;
   bool ContainsARootNonPerpendicularTo
-(const Vector<CoefficientType>& input, Matrix<CoefficientType>& theBilinearForm)
+(const Vector<coefficient>& input, Matrix<coefficient>& theBilinearForm)
 ;
   bool ContainsOppositeRoots()
   { if (this->size<10)
@@ -4408,7 +4408,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
       }
       return false;
     }
-    HashedList<Vector<CoefficientType> > tempList;
+    HashedList<Vector<coefficient> > tempList;
     tempList.SetExpectedSize(this->size);
     tempList=*this;
     for (int i=0; i <this->size; i++)
@@ -4416,8 +4416,8 @@ bool ComputeNormalFromSelectionAndExtraRoot
         return true;
     return false;
   }
-  void AssignMatrixColumns(Matrix<CoefficientType> & mat)
-  { Vector<CoefficientType> tempRoot;
+  void AssignMatrixColumns(Matrix<coefficient> & mat)
+  { Vector<coefficient> tempRoot;
     this->SetSize(mat.NumCols);
     tempRoot.SetSize(mat.NumRows);
     for (int i=0; i<mat.NumCols; i++)
@@ -4426,7 +4426,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
       this->TheObjects[i]=tempRoot;
     }
   }
-  void AssignMatrixRows(const Matrix<CoefficientType>& mat)
+  void AssignMatrixRows(const Matrix<coefficient>& mat)
   { this->size=0;
     this->SetSize(mat.NumRows);
     for (int i=0; i<mat.NumRows; i++)
@@ -4441,14 +4441,14 @@ bool ComputeNormalFromSelectionAndExtraRoot
     return -1;
   }
   void BeefUpWithEiToLinearlyIndependentBasis
-  (int theDim, const CoefficientType& ringUnit =(CoefficientType) 1, const CoefficientType& ringZero=(CoefficientType) 0)
+  (int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero=(coefficient) 0)
   { Selection BufferSel;
-    Matrix<CoefficientType> Buffer;
+    Matrix<coefficient> Buffer;
     assert(this->size==0 || theDim==this->GetDim());
     int currentRank=this->GetRankOfSpanOfElements(Buffer, BufferSel);
     if (currentRank==theDim)
       return;
-    Vector<CoefficientType> theVect;
+    Vector<coefficient> theVect;
     for (int i=0; i<theDim && currentRank<theDim; i++)
     { theVect.MakeEi(theDim, i, ringUnit, ringZero);
       this->AddOnTop(theVect);
@@ -4462,7 +4462,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
   }
   void ChooseABasis(GlobalVariables& theGlobalVariables)
   { Vectors<Rational> output;
-    Matrix<CoefficientType> tempMat;
+    Matrix<coefficient> tempMat;
     Selection tempSel;
     for (int i=0; i<this->size; i++)
     { output.AddOnTop(this->TheObjects[i]);
@@ -4472,14 +4472,14 @@ bool ComputeNormalFromSelectionAndExtraRoot
     this->operator=(output);
   }
   static void IntersectTwoLinSpaces
-  (const List<Vector<CoefficientType> >& firstSpace, const List<Vector<CoefficientType> >& secondSpace,
-   List<Vector<CoefficientType> >& output, GlobalVariables* theGlobalVariables=0)
+  (const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace,
+   List<Vector<coefficient> >& output, GlobalVariables* theGlobalVariables=0)
      ;
   bool IsRegular
-  (Vector<CoefficientType>& r, Vector<CoefficientType>& outputFailingNormal,
+  (Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal,
     GlobalVariables& theGlobalVariables, int theDimension)
 ;
-  void operator=(const List<List<CoefficientType> >& other)
+  void operator=(const List<List<coefficient> >& other)
   { this->SetSize(other.size);
     for (int i=0; i<other.size; i++)
       this->TheObjects[i]=other.TheObjects[i];
@@ -4527,17 +4527,17 @@ public:
   }
 };
 
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)= CoefficientType::HashFunction>
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)= coefficient::HashFunction>
 class MonomialTensor
 {
   friend std::ostream& operator <<
-  (std::ostream& output, const MonomialTensor<CoefficientType, inputHashFunction>& theMon)
+  (std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon)
   { return output << theMon.ToString();
   }
 private:
 public:
   List<int> generatorsIndices;
-  List<CoefficientType> Powers;
+  List<coefficient> Powers;
   std::string ToString
   (FormatExpressions* theFormat=0)const;
   bool IsEqualToOne()const
@@ -4550,7 +4550,7 @@ public:
     for (int i=0; i<other.size; i++)
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
   }
-  void operator=(const MonomialTensor<CoefficientType, inputHashFunction>& other)
+  void operator=(const MonomialTensor<coefficient, inputHashFunction>& other)
   { this->generatorsIndices=(other.generatorsIndices);
     this->Powers=other.Powers;
   }
@@ -4569,10 +4569,10 @@ public:
   }
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
   void MultiplyByGeneratorPowerOnTheRight
-  (int theGeneratorIndex, const CoefficientType& thePower)
+  (int theGeneratorIndex, const coefficient& thePower)
   ;
   void MultiplyByGeneratorPowerOnTheLeft
-  (int theGeneratorIndexStandsToTheLeft, const CoefficientType& thePower)
+  (int theGeneratorIndexStandsToTheLeft, const coefficient& thePower)
   ;
   unsigned int HashFunction() const
   { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
@@ -4583,14 +4583,14 @@ public:
       SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
     return result;
   }
-  static inline unsigned int HashFunction(const MonomialTensor<CoefficientType, inputHashFunction>& input)
+  static inline unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input)
   { return input.HashFunction();
   }
   void MakeConst()
   { this->generatorsIndices.size=0;
     this->Powers.size=0;
   }
-  bool operator>(const MonomialTensor<CoefficientType, inputHashFunction>& other)const
+  bool operator>(const MonomialTensor<coefficient, inputHashFunction>& other)const
   { if (other.generatorsIndices.size>this->generatorsIndices.size)
       return false;
     if (other.generatorsIndices.size< this->generatorsIndices.size)
@@ -4607,14 +4607,14 @@ public:
     }
     return false;
   }
-  bool operator==(const MonomialTensor<CoefficientType, inputHashFunction>& other)const
+  bool operator==(const MonomialTensor<coefficient, inputHashFunction>& other)const
   { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
-  inline void operator*=(const MonomialTensor<CoefficientType, inputHashFunction>& standsOnTheRight)
+  inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight)
   { if (standsOnTheRight.generatorsIndices.size==0)
       return;
     if (this==&standsOnTheRight)
-    { MonomialTensor<CoefficientType, inputHashFunction> tempMon;
+    { MonomialTensor<coefficient, inputHashFunction> tempMon;
       tempMon=standsOnTheRight;
       (*this)*=(tempMon);
       return;
@@ -4834,8 +4834,8 @@ public:
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
   bool operator==(const MonomialP& other)const;
-  template <class CoefficientType>
-  void operator=(const Vector<CoefficientType>& other)
+  template <class coefficient>
+  void operator=(const Vector<coefficient>& other)
   { this->monBody=(other);
   }
   void operator=(const MonomialP& other)
@@ -4962,23 +4962,23 @@ std::iostream& operator <<(std::iostream& output, const Polynomial<Element>& inp
   return output;
 }
 
-template <class TemplateMonomial, class CoefficientType>
+template <class TemplateMonomial, class coefficient>
 std::ostream& operator<<
-(std::ostream& output, const MonomialCollection<TemplateMonomial, CoefficientType>& theCollection)
+(std::ostream& output, const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
 ;
 
-template <class TemplateMonomial, class CoefficientType>
+template <class TemplateMonomial, class coefficient>
 class MonomialCollection : public HashedList<TemplateMonomial>
 {
 private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
   void Clear();//<-to guard the now unsafe base class method
-  friend std::ostream& operator<< <TemplateMonomial, CoefficientType>
+  friend std::ostream& operator<< <TemplateMonomial, coefficient>
   (std::ostream& output,
-   const MonomialCollection<TemplateMonomial, CoefficientType>& theCollection)
+   const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
 ;
 public:
-  List<CoefficientType> theCoeffs;
+  List<coefficient> theCoeffs;
   MonomialCollection(){};
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   bool NeedsBrackets()const{return this->size>1;}
@@ -4986,7 +4986,7 @@ public:
   //BIG FAT WARNING
   //the hash function of Monomial collection must return the same value for
   // monomial collections whose monomials are permuted!
-  static unsigned int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
+  static unsigned int HashFunction(const MonomialCollection<TemplateMonomial, coefficient>& input)
   { unsigned int result=0;
     for (int i=0; i<input.size; i++)
       result+= input.theCoeffs[i].HashFunction()*input[i].HashFunction();
@@ -4996,7 +4996,7 @@ public:
   { this->RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);
   }
-  void PopMonomial(int index, TemplateMonomial& outputMon, CoefficientType& outputCoeff)
+  void PopMonomial(int index, TemplateMonomial& outputMon, coefficient& outputCoeff)
   { outputMon=this->TheObjects[index];
     outputCoeff=this->theCoeffs[index];
     this->RemoveIndexSwapWithLast(index);
@@ -5005,7 +5005,7 @@ public:
   inline int HashFunction()const
   { return this->HashFunction(*this);
   }
-  void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  void AddMonomial(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
   { this->CleanupMonIndex
     (this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
 
@@ -5020,7 +5020,7 @@ public:
     return false;
   }
   int AddMonomialNoCoeffCleanUpReturnsCoeffIndex
-  (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  (const TemplateMonomial& inputMon, const coefficient& inputCoeff)
   ;
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRows
@@ -5035,14 +5035,14 @@ public:
   { List<MonomialCollectionTemplate> listCopy=vectorSpace1;
     listCopy.AddListOnTop(vectorSpace2);
     return vectorSpace1.size+vectorSpace2.size-
-    MonomialCollection<TemplateMonomial, CoefficientType>::GetRankOfSpanOfElements
+    MonomialCollection<TemplateMonomial, coefficient>::GetRankOfSpanOfElements
     (listCopy, seedMonomials);
   }
   template <class MonomialCollectionTemplate>
   static bool VectorSpacesIntersectionIsNonTrivial
   (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
    HashedList<TemplateMonomial>* seedMonomials=0)
-  { return 0!=MonomialCollection<TemplateMonomial, CoefficientType>::GetRankIntersectionVectorSpaces
+  { return 0!=MonomialCollection<TemplateMonomial, coefficient>::GetRankIntersectionVectorSpaces
     (vectorSpace1, vectorSpace2, seedMonomials);
   }
   template <class MonomialCollectionTemplate>
@@ -5050,11 +5050,11 @@ public:
   (List<MonomialCollectionTemplate>& theList, MonomialCollectionTemplate& input,
    HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
-    MonomialCollection<TemplateMonomial, CoefficientType>::
+    MonomialCollection<TemplateMonomial, coefficient>::
     GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     int startSpanSize=listCopy.size;
     listCopy.AddOnTop(input);
-    MonomialCollection<TemplateMonomial, CoefficientType>::
+    MonomialCollection<TemplateMonomial, coefficient>::
     GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size==startSpanSize;
   }
@@ -5063,7 +5063,7 @@ public:
   static int GetRankOfSpanOfElements
   (List<MonomialCollectionTemplate>& theList, HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
-    MonomialCollection<TemplateMonomial, CoefficientType>::
+    MonomialCollection<TemplateMonomial, coefficient>::
     GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
@@ -5078,14 +5078,14 @@ public:
         theList.size--;
   }
   int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
-  (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
+  (const TemplateMonomial& inputMon, const coefficient& inputCoeff);
   void CleanUpZeroCoeffs()
   { for (int i=0; i<this->size; i++)
       if (this->CleanupMonIndex(i))
         i--;
   }
   void SubstitutionCoefficients(const List<Polynomial<Rational> >& theSub)
-  { CoefficientType newCoeff;
+  { coefficient newCoeff;
     for (int i=0; i<this->size; i++)
     { newCoeff=this->theCoeffs[i];
       newCoeff.Substitution(theSub);
@@ -5097,10 +5097,10 @@ public:
       this->theCoeffs[i]=newCoeff;
     }
   }
-  void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  void SubtractMonomial(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
   { this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
   }
-  CoefficientType GetMonomialCoefficient(const TemplateMonomial& inputMon)const
+  coefficient GetMonomialCoefficient(const TemplateMonomial& inputMon)const
   { int theIndex=this->GetIndex(inputMon);
     if (theIndex==-1)
       return 0;
@@ -5121,7 +5121,7 @@ public:
     this->theCoeffs[0].GetNumerator(result);
     for (int i=1; i<this->size; i++)
     { this->theCoeffs[i].GetNumerator(tempCF);
-      CoefficientType::gcd(result, tempCF, result);
+      coefficient::gcd(result, tempCF, result);
     }
     return result;
   }
@@ -5168,7 +5168,7 @@ public:
     return result;
   }
   static std::string GetBlendCoeffAndMon
-  (const TemplateMonomial& inputMon, CoefficientType& inputCoeff,
+  (const TemplateMonomial& inputMon, coefficient& inputCoeff,
    bool addPlusToFront, FormatExpressions* theFormat=0)
   ;
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
@@ -5214,23 +5214,23 @@ public:
       }
   }
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
-  bool operator== (const MonomialCollection<TemplateMonomial, CoefficientType>& other)const;
+  bool operator== (const MonomialCollection<TemplateMonomial, coefficient>& other)const;
   bool operator== (int x)const;
-  inline void operator+=(const MonomialCollection<TemplateMonomial, CoefficientType>& other);
-  MonomialCollection<TemplateMonomial, CoefficientType> operator*(const CoefficientType& other)const
-  { MonomialCollection<TemplateMonomial, CoefficientType> result=*this;
+  inline void operator+=(const MonomialCollection<TemplateMonomial, coefficient>& other);
+  MonomialCollection<TemplateMonomial, coefficient> operator*(const coefficient& other)const
+  { MonomialCollection<TemplateMonomial, coefficient> result=*this;
     result*=other;
     return result;
   }
 //  inline void operator+=(const TemplateMonomial& m)
 //  { this->AddMonomial(m, 1);
 //  }
-  MonomialCollection<TemplateMonomial, CoefficientType> operator+(const MonomialCollection<TemplateMonomial, CoefficientType>& other)const
-  { MonomialCollection<TemplateMonomial, CoefficientType> output=*this;
+  MonomialCollection<TemplateMonomial, coefficient> operator+(const MonomialCollection<TemplateMonomial, coefficient>& other)const
+  { MonomialCollection<TemplateMonomial, coefficient> output=*this;
     output+=other;
     return output;
   }
-  void MakeConst(const CoefficientType& coeff)
+  void MakeConst(const coefficient& coeff)
   { TemplateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, coeff);
@@ -5238,28 +5238,28 @@ public:
   void MakeOne()
   { this->MakeConst(1);
   }
-  inline void operator+=(const CoefficientType& other)
+  inline void operator+=(const coefficient& other)
   { TemplateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, other);
   }
-  inline void operator-=(const CoefficientType& other)
+  inline void operator-=(const coefficient& other)
   { TemplateMonomial tempM;
     tempM.MakeOne();
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
-  void AssignOtherType(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+  void AssignOtherType(const MonomialCollection<TemplateMonomial, coefficient>& other)
   { this->::HashedList<TemplateMonomial>::operator=(other);
     this->theCoeffs.SetSize(other.size);
     for (int i=0; i<other.size; i++)
       this->theCoeffs[i]=other.theCoeffs[i];
   }
-  inline void operator-=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+  inline void operator-=(const MonomialCollection<TemplateMonomial, coefficient>& other)
   { this->SubtractOtherTimesCoeff(other);
   }
   inline void SubtractOtherTimesCoeff
-  (const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* inputcf=0);
+  (const MonomialCollection<TemplateMonomial, coefficient>& other, coefficient* inputcf=0);
   template <class otherType>
   inline void operator/=(const otherType& other)
   { if (other==0)
@@ -5300,115 +5300,115 @@ public:
   }
 };
 
-template <class TemplateMonomial, class CoefficientType>
-class ElementMonomialAlgebra: public MonomialCollection<TemplateMonomial, CoefficientType>
+template <class TemplateMonomial, class coefficient>
+class ElementMonomialAlgebra: public MonomialCollection<TemplateMonomial, coefficient>
 {
   public:
   void MultiplyBy
-  (const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other,
-   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
+  (const ElementMonomialAlgebra<TemplateMonomial, coefficient>& other,
+   ElementMonomialAlgebra<TemplateMonomial, coefficient>& output,
+   ElementMonomialAlgebra<TemplateMonomial, coefficient>& bufferPoly, TemplateMonomial& bufferMon)const
   ;
   void MultiplyBy
-  (const TemplateMonomial& other, const CoefficientType& theCoeff,
-   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+  (const TemplateMonomial& other, const coefficient& theCoeff,
+   ElementMonomialAlgebra<TemplateMonomial, coefficient>& output,
+   ElementMonomialAlgebra<TemplateMonomial, coefficient>& bufferPoly,
    TemplateMonomial& bufferMon)const
   ;
-  void operator*=(const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other)
-  { ElementMonomialAlgebra<TemplateMonomial, CoefficientType> bufferPoly;
+  void operator*=(const ElementMonomialAlgebra<TemplateMonomial, coefficient>& other)
+  { ElementMonomialAlgebra<TemplateMonomial, coefficient> bufferPoly;
     TemplateMonomial bufferMon;
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
-  inline void operator*=(const CoefficientType& other)
-  { this->::MonomialCollection<TemplateMonomial, CoefficientType>::operator*= (other);
+  inline void operator*=(const coefficient& other)
+  { this->::MonomialCollection<TemplateMonomial, coefficient>::operator*= (other);
   }
   void RaiseToPower
-(int d, ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
+(int d, ElementMonomialAlgebra<TemplateMonomial, coefficient>& output, const coefficient& theRingUniT)
 ;
   void RaiseToPower(int d)
   { if (d==1)
       return;
-    ElementMonomialAlgebra<TemplateMonomial, CoefficientType> theOne;
+    ElementMonomialAlgebra<TemplateMonomial, coefficient> theOne;
     theOne.MakeConst(1);
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
 };
 
-template<class CoefficientType>
-class Polynomial: public ElementMonomialAlgebra<MonomialP, CoefficientType>
+template<class coefficient>
+class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient>
 {
 public:
-  friend std::iostream& operator << <CoefficientType>(std::iostream& output, const Polynomial<CoefficientType>& input);
+  friend std::iostream& operator << <coefficient>(std::iostream& output, const Polynomial<coefficient>& input);
   Polynomial(int x)
   { this->MakeConst(x, 0);
   }
   Polynomial(){}
-  Polynomial(const Polynomial<CoefficientType>& other)
+  Polynomial(const Polynomial<coefficient>& other)
   { this->operator=(other);
   }
   static bool flagAnErrorHasOccuredTimeToPanic;
   //to avoid code::blocks parsing problems (remove when code::blocks learns to parse parent classes:
-  void AddMonomial(const MonomialP& inputMon, const CoefficientType& inputCoeff)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::AddMonomial(inputMon, inputCoeff);
+  void AddMonomial(const MonomialP& inputMon, const coefficient& inputCoeff)
+  { this->::MonomialCollection<MonomialP, coefficient>::AddMonomial(inputMon, inputCoeff);
   }
   unsigned int HashFunction()const
-  { return this->::MonomialCollection<MonomialP, CoefficientType>::HashFunction();
+  { return this->::MonomialCollection<MonomialP, coefficient>::HashFunction();
   }
-  static inline unsigned int HashFunction(const Polynomial<CoefficientType>& input)
+  static inline unsigned int HashFunction(const Polynomial<coefficient>& input)
   { return input.HashFunction();
   }
   void MultiplyBy
-  (const MonomialP& other, const CoefficientType& theCoeff)
-  { Polynomial<CoefficientType> output;
+  (const MonomialP& other, const coefficient& theCoeff)
+  { Polynomial<coefficient> output;
     output.MakeZero();
     output.AddMonomial(other, theCoeff);
     *this*=output;
   }
   void MultiplyBy
-  (const MonomialP& other, const CoefficientType& theCoeff, Polynomial<CoefficientType>& output)const
+  (const MonomialP& other, const coefficient& theCoeff, Polynomial<coefficient>& output)const
   { output=*this;
     output.MultiplyBy(other, theCoeff);
   }
   //////////////////////////////////////////////
   void AssignFloor()const
   {}
-  void AssignMinPoly(const Matrix<CoefficientType>& input);
-  void AssignMonomialWithExponent(Vector<Rational>& r, const CoefficientType& theCoeff=1)
+  void AssignMinPoly(const Matrix<coefficient>& input);
+  void AssignMonomialWithExponent(Vector<Rational>& r, const coefficient& theCoeff=1)
   { MonomialP tempM=r;
     this->MakeZero(r.size);
     this->AddMonomial(r);
   }
-  void GetConstantTerm(CoefficientType& output, const CoefficientType& theRingZero=0)const;
-  CoefficientType GetConstantTerm(const CoefficientType& theRingZero=0)const
-  { CoefficientType result;
+  void GetConstantTerm(coefficient& output, const coefficient& theRingZero=0)const;
+  coefficient GetConstantTerm(const coefficient& theRingZero=0)const
+  { coefficient result;
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
 bool
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
   ;
-  void Interpolate(const Vector<CoefficientType>& thePoints, const Vector<CoefficientType>& ValuesAtThePoints);
+  void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVarRatRoots(List<Rational>& output);
-  void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
+  void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output, const coefficient& theRingZero);
   void MakeMonomiaL
-  (int LetterIndex, const Rational& Power, const CoefficientType& Coeff=1,
+  (int LetterIndex, const Rational& Power, const coefficient& Coeff=1,
    int ExpectedNumVars=0);
-  void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff);
-  void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
-  void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
+  void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
+  void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2);
+  void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm);
   void MakeLinPolyFromRootNoConstantTerm(const Vector<Rational> & r);
   void MakeLinPolyFromRootLastCoordConst(const Vector<Rational> & input);
   void MakePolyFromDirectionAndNormal
-(Vector<CoefficientType>& direction, Vector<CoefficientType>& normal, CoefficientType& Correction)
+(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction)
 ;
-  Polynomial<CoefficientType> GetOne()const
-  { Polynomial<CoefficientType> result;
+  Polynomial<coefficient> GetOne()const
+  { Polynomial<coefficient> result;
     result.MakeOne();
     return result;
   }
-  Polynomial<CoefficientType> GetZero()const
-  { Polynomial<CoefficientType> result;
+  Polynomial<coefficient> GetZero()const
+  { Polynomial<coefficient> result;
     result.MakeZero();
     return result;
   }
@@ -5417,8 +5417,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     this->GetConstantTerm(result, 0);
     return result;
   }
-  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<CoefficientType> >& theMat);
-  void MakeConst(const CoefficientType& theConst, int ExpectedNumVars=0)
+  void MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat);
+  void MakeConst(const coefficient& theConst, int ExpectedNumVars=0)
   {// int commentGrandMasterChecksWhenDone=-1;
     //this->GrandMasterConsistencyCheck();
     this->MakeZero();
@@ -5441,9 +5441,9 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
-  void DivideBy(const Polynomial<CoefficientType>& inputDivisor, Polynomial<CoefficientType>& outputQuotient, Polynomial<CoefficientType>& outputRemainder)const;
-  void DivideByConstant(const CoefficientType& r);
-  void AddConstant(const CoefficientType& theConst);
+  void DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder)const;
+  void DivideByConstant(const coefficient& r);
+  void AddConstant(const coefficient& theConst);
   void ShiftVariableIndicesToTheRight(int VarIndexShift);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   inline void SetDynamicSubtype(int newNumVars)
@@ -5456,19 +5456,19 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return result;
   }
   void ScaleToPositiveMonomials(MonomialP& outputScale);
-  void DecreaseNumVariables(int increment, Polynomial<CoefficientType>& output);
+  void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
   bool Substitution
-  (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit=1,
-   const CoefficientType& theRingZero=0)
+  (const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit=1,
+   const coefficient& theRingZero=0)
    ;
   Rational TotalDegree()const;
   bool IsEqualToOne()const
-  { CoefficientType tempC;
+  { coefficient tempC;
     if (this->IsAConstant(&tempC))
       return tempC.IsEqualToOne();
     return false;
   }
-  bool IsAConstant(CoefficientType* whichConstant=0)const
+  bool IsAConstant(coefficient* whichConstant=0)const
   { if (this->size>1)
       return false;
     if (this->size==0)
@@ -5482,7 +5482,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return theMon.IsAConstant();
   }
   bool IsNegative()const
-  { CoefficientType tempC;
+  { coefficient tempC;
     if(!this->IsAConstant(&tempC))
       return false;
     return tempC.IsNegative();
@@ -5499,7 +5499,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
         return false;
     return true;
   }
-  bool IsLinearGetRootConstantTermLastCoordinate(Vector<CoefficientType>& outputRoot, const CoefficientType& theZero)
+  bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot, const coefficient& theZero)
   { outputRoot.MakeZero(this->GetMinNumVars()+1, theZero);
     int index;
     for (int i=0; i<this->size; i++)
@@ -5512,23 +5512,23 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
           return false;
     return true;
   }
-  void RaiseToPower(int d, const CoefficientType& theRingUniT=1)
+  void RaiseToPower(int d, const coefficient& theRingUniT=1)
   { if (d==1)
       return;
-    Polynomial<CoefficientType> theOne;
+    Polynomial<coefficient> theOne;
     theOne.MakeOne(this->GetMinNumVars());
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
-  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<CoefficientType>& outputRoot, const CoefficientType& theZero= (CoefficientType) 0){return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);}
+  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot, const coefficient& theZero= (coefficient) 0){return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);}
   void Evaluate
-(const Vector<CoefficientType>& input, CoefficientType& output)
+(const Vector<coefficient>& input, coefficient& output)
   ;
-  CoefficientType Evaluate(const Vector<CoefficientType>& input)
-  { CoefficientType result;
+  coefficient Evaluate(const Vector<coefficient>& input)
+  { coefficient result;
     this->Evaluate(input, result);
     return result;
   }
-  bool IsProportionalTo(const Polynomial<CoefficientType>& other, CoefficientType& TimesMeEqualsOther, const CoefficientType& theRingUnit)const;
+  bool IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
   const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
   { return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
@@ -5543,10 +5543,10 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return result;
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest()const;
-//  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
+//  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<coefficient> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
-  bool operator<=(const CoefficientType& other)const
-  { CoefficientType constME;
+  bool operator<=(const coefficient& other)const
+  { coefficient constME;
     if (!this->IsAConstant(&constME))
     { std::cout << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
@@ -5558,8 +5558,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     }
     return constME<=other;
   }
-  bool operator<(const CoefficientType& other)const
-  { CoefficientType constME;
+  bool operator<(const coefficient& other)const
+  { coefficient constME;
     if (!this->IsAConstant(&constME))
     { std::cout << "This may or may not be a programming error: "
       << "attempting to compare a non-constant polynomial to "
@@ -5572,7 +5572,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return constME<other;
   }
 
-  bool operator>(const Polynomial<CoefficientType>& other)const
+  bool operator>(const Polynomial<coefficient>& other)const
   { if (other.size==0)
     { if (this->size==0)
         return false;
@@ -5597,13 +5597,13 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       return false;
     return false;
   }
-  bool operator<=(const Polynomial<CoefficientType>& other)const
+  bool operator<=(const Polynomial<coefficient>& other)const
   { return ! (*this>other);
   }
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic
-  (const Polynomial<CoefficientType>& left, const Polynomial<CoefficientType>& right)
+  (const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
   { if (left.IsEqualToZero())
       return right.IsEqualToZero();
     if (right.IsEqualToZero())
@@ -5613,7 +5613,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     (right[right.GetIndexMaxMonomialTotalDegThenLexicographic()]);
   }
   static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest
-  (const Polynomial<CoefficientType>& left, const Polynomial<CoefficientType>& right)
+  (const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
   { if (left.IsEqualToZero())
       return right.IsEqualToZero();
     if (right.IsEqualToZero())
@@ -5622,69 +5622,69 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     .MonomialP::IsGEQLexicographicLastVariableStrongest
     (right[right.GetIndexMaxMonomialLexicographicLastVariableStrongest()]);
   }
-  bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
+  bool IsEqualTo(const Polynomial<coefficient>& p)const{return *this==p;}
   void operator-=(int x)
   { MonomialP tempMon;
     tempMon.MakeOne();
     this->SubtractMonomial(tempMon, x);
   }
-  void operator-=(const CoefficientType& other)
+  void operator-=(const coefficient& other)
   { MonomialP tempMon;
     tempMon.MakeOne();
     this->SubtractMonomial(tempMon, other);
   }
-  void operator-=(const Polynomial<CoefficientType>& other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator-=(other);
+  void operator-=(const Polynomial<coefficient>& other)
+  { this->::MonomialCollection<MonomialP, coefficient>::operator-=(other);
   }
   void operator*=(const MonomialP& other)
-  { Polynomial<CoefficientType> otherP;
+  { Polynomial<coefficient> otherP;
     otherP.MakeZero(this->NumVars);
     otherP.AddMonomial(other, 1);
     (*this)*=otherP;
   }
-  void operator*=(const Polynomial<CoefficientType>& other)
-  { this->::ElementMonomialAlgebra<MonomialP, CoefficientType>::operator*=(other);
+  void operator*=(const Polynomial<coefficient>& other)
+  { this->::ElementMonomialAlgebra<MonomialP, coefficient>::operator*=(other);
   }
-  Polynomial<CoefficientType> operator%(const Polynomial<CoefficientType>& other)
-  { Polynomial<CoefficientType> temp;
-    Polynomial<CoefficientType> result;
+  Polynomial<coefficient> operator%(const Polynomial<coefficient>& other)
+  { Polynomial<coefficient> temp;
+    Polynomial<coefficient> result;
     this->DivideBy(other, temp, result);
     return result;
   }
-  void operator/=(const Polynomial<CoefficientType>& other)
-  { Polynomial<CoefficientType> tempMe=*this;
-    Polynomial<CoefficientType> tempRemainder;
+  void operator/=(const Polynomial<coefficient>& other)
+  { Polynomial<coefficient> tempMe=*this;
+    Polynomial<coefficient> tempRemainder;
     tempMe.DivideBy(other, *this, tempRemainder);
   }
   void operator/=(int other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator/= (other);
+  { this->::MonomialCollection<MonomialP, coefficient>::operator/= (other);
   }
-  void operator/=(const CoefficientType& other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator/= (other);
+  void operator/=(const coefficient& other)
+  { this->::MonomialCollection<MonomialP, coefficient>::operator/= (other);
   }
   template <class otherType>
   inline void operator*=(const otherType& other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator*= (other);
+  { this->::MonomialCollection<MonomialP, coefficient>::operator*= (other);
   }
-  void operator=(const Polynomial<CoefficientType>& other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator=(other);
+  void operator=(const Polynomial<coefficient>& other)
+  { this->::MonomialCollection<MonomialP, coefficient>::operator=(other);
   }
   template<class otherType>
   void operator=(const Polynomial<otherType>& other)
-  { this->::MonomialCollection<MonomialP, CoefficientType>::operator=(other);
+  { this->::MonomialCollection<MonomialP, coefficient>::operator=(other);
   }
-  void operator=(const CoefficientType& other)
+  void operator=(const coefficient& other)
   { this->MakeConst(other);
   }
   void operator=(int other)
-  { CoefficientType tempCF;
+  { coefficient tempCF;
     tempCF=other;
     this->MakeConst(tempCF);
   }
   template <class otherType>
   void AssignOtherType(const Polynomial<otherType>& other)
   { this->NumVars=other.NumVars;
-    this->::MonomialCollection<MonomialP, CoefficientType>::AssignOtherType(other);
+    this->::MonomialCollection<MonomialP, coefficient>::AssignOtherType(other);
   }
 };
 
@@ -5825,22 +5825,22 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
 //std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
 //std::iostream& operator>>(std::iostream& input, RationalFunctionOld& theRF);
 
-template<class CoefficientType>
+template<class coefficient>
 class GroebnerBasisComputation
 {
   public:
   List<MonomialP>::OrderLeftGreaterThanRight theMonOrdeR;
-  Polynomial<CoefficientType> SoPolyBuf;
-  Polynomial<CoefficientType> remainderDivision;
-  Polynomial<CoefficientType> bufPoly;
-  Polynomial<CoefficientType> bufPolyForGaussianElimination;
+  Polynomial<coefficient> SoPolyBuf;
+  Polynomial<coefficient> remainderDivision;
+  Polynomial<coefficient> bufPoly;
+  Polynomial<coefficient> bufPolyForGaussianElimination;
   MonomialP SoPolyLeftShift;
   MonomialP SoPolyRightShift;
   MonomialP bufferMoN1;
-  List<Polynomial<CoefficientType> > theBasiS;
-  List<Polynomial<CoefficientType> > basisCandidates;
+  List<Polynomial<coefficient> > theBasiS;
+  List<Polynomial<coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
-  List<CoefficientType> leadingCoeffs;
+  List<coefficient> leadingCoeffs;
   int NumberOfComputations;
   int MaxNumComputations;
   int RecursionCounterSerreLikeSystem;
@@ -5851,26 +5851,26 @@ class GroebnerBasisComputation
   bool flagSystemProvenToHaveNoSolution;
   bool flagSystemProvenToHaveSolution;
   bool flagSystemSolvedOverBaseField;
-  MemorySaving<List<Polynomial<CoefficientType> > > intermediateRemainders;
+  MemorySaving<List<Polynomial<coefficient> > > intermediateRemainders;
   MemorySaving<List<List<MonomialP> > > intermediateHighlightedMons;
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
-  MemorySaving<List<CoefficientType> > intermediateCoeffs;
-  MemorySaving<List<Polynomial<CoefficientType> > > intermediateSubtractands;
+  MemorySaving<List<coefficient> > intermediateCoeffs;
+  MemorySaving<List<Polynomial<coefficient> > > intermediateSubtractands;
   MemorySaving<List<int> > intermediateSelectedDivisors;
-  MemorySaving<Polynomial<CoefficientType> > startingPoly;
-  MemorySaving<List<CoefficientType> > systemSolution;
+  MemorySaving<Polynomial<coefficient> > startingPoly;
+  MemorySaving<List<coefficient> > systemSolution;
   MemorySaving<Selection> solutionsFound;
 
-  void SetSerreLikeSolutionIndex(int theIndex, const CoefficientType& theConst)
+  void SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst)
   ;
-  void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<CoefficientType>& outputSub)
+  void GetSubFromPartialSolutionSerreLikeSystem(PolynomialSubstitution<coefficient>& outputSub)
   ;
   std::string ToStringSerreLikeSolution
   (FormatExpressions* theFormat=0)
   ;
 
   std::string GetPolynomialStringSpacedMonomials
-  (const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+  (const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
    const std::string& extraStyle, const std::string& extraHighlightStyle, FormatExpressions* theFormat=0,
    List<MonomialP>* theHighLightedMons=0)
   ;
@@ -5880,45 +5880,45 @@ class GroebnerBasisComputation
  (GlobalVariables* theGlobalVariables)
  ;
   bool TransformToReducedGroebnerBasis
-  (List<Polynomial<CoefficientType> >& inputOutpuT,
+  (List<Polynomial<coefficient> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0)
    ;
   bool TransformToReducedGroebnerBasisImprovedAlgorithm
-  (List<Polynomial<CoefficientType> >& inputOutpuT,
+  (List<Polynomial<coefficient> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis
 ()
   ;
-  static bool IsContradictoryReducedSystem(const List<Polynomial<CoefficientType> >& input)
+  static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input)
   { if (input.size==1)
       if (input[0].IsEqualToOne())
         return true;
     return false;
   }
   void RemainderDivisionWithRespectToBasis
-(Polynomial<CoefficientType>& inputOutput,
- Polynomial<CoefficientType>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
+(Polynomial<coefficient>& inputOutput,
+ Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
  static std::string GetCalculatorInputFromSystem
- (const List<Polynomial<CoefficientType> >& inputSystem)
+ (const List<Polynomial<coefficient> >& inputSystem)
 ;
  void SolveSerreLikeSystem
- (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables=0)
+ (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables=0)
  ;
  bool HasImpliedSubstitutions
- (List<Polynomial<CoefficientType> >& inputSystem, PolynomialSubstitution<CoefficientType>& outputSub)
+ (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub)
  ;
  int GetPreferredSerreSystemSubIndex();
  void SolveSerreLikeSystemRecursively
- (List<Polynomial<CoefficientType> >& inputSystem, GlobalVariables* theGlobalVariables)
+ (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
  ;
  void BackSubstituteIntoPolySystem
- (List<PolynomialSubstitution<CoefficientType> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
+ (List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
  ;
  void BackSubstituteIntoSinglePoly
- (Polynomial<CoefficientType>& thePoly, int theIndex, PolynomialSubstitution<CoefficientType>& theFinalSub,
+ (Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub,
   GlobalVariables* theGlobalVariables)
  ;
  bool AddRemainderToBasis
@@ -5932,8 +5932,8 @@ class GroebnerBasisComputation
   ;
   void ConsistencyCheck();
 
-  void initForGroebnerComputation(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables);
-  void initForDivisionAlone(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
 };
 
 class RationalFunctionOld
@@ -6350,9 +6350,9 @@ void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRin
     output=this->theCoeffs[i];
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::GetCoeffInFrontOfLinearTermVariableIndex
-(int index, CoefficientType& output, const CoefficientType& theRingZero)
+template <class coefficient>
+void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex
+(int index, coefficient& output, const coefficient& theRingZero)
 { MonomialP tempM;
   tempM.MakeEi(index);
   int i=this->GetIndex(tempM);
@@ -6362,15 +6362,15 @@ void Polynomial<CoefficientType>::GetCoeffInFrontOfLinearTermVariableIndex
     output=this->theCoeffs[i];
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::AddConstant(const CoefficientType& theConst)
+template <class coefficient>
+void Polynomial<coefficient>::AddConstant(const coefficient& theConst)
 { MonomialP tempMon;
   tempMon.MakeOne();
   this->AddMonomial(tempMon, theConst);
 }
 
-template <class TemplateMonomial, class CoefficientType>
-inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
+template <class TemplateMonomial, class coefficient>
+inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==
 (int x)const
 { if (x==0)
     return this->size==0;
@@ -6380,9 +6380,9 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
   return false;
 }
 
-template <class TemplateMonomial, class CoefficientType>
-inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
-(const MonomialCollection<TemplateMonomial, CoefficientType>& other)const
+template <class TemplateMonomial, class coefficient>
+inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==
+(const MonomialCollection<TemplateMonomial, coefficient>& other)const
 { if (this->theCoeffs.size!=other.theCoeffs.size)
     return false;
   for (int i=0; i<this->size; i++)
@@ -6395,8 +6395,8 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
   return true;
 }
 
-template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::WriteToFile
+template <class TemplateMonomial, class coefficient>
+void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile
 (std::fstream& output)
 { output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << " numMons: " << this->size;
@@ -6412,8 +6412,8 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::WriteToFile
   output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
-template <class TemplateMonomial, class CoefficientType>
-inline bool MonomialCollection<TemplateMonomial, CoefficientType>::ReadFromFile
+template <class TemplateMonomial, class coefficient>
+inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile
 (std::fstream& input, GlobalVariables* theGlobalVariables)
 { int numReadWords, targetSize;
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
@@ -6428,7 +6428,7 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::ReadFromFile
   TemplateMonomial tempM;
   this->SetExpectedSize(targetSize);
   input.ignore();
-  CoefficientType theCoeff;
+  coefficient theCoeff;
   for (int i=0; i<targetSize; i++)
   { if (input.peek()=='+')
       input >> ReaderString;
@@ -6444,8 +6444,8 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::ReadFromFile
   return result;
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
+template <class coefficient>
+void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
   if (newNumVars>=this->GetMinNumVars())
     return;
@@ -6455,7 +6455,7 @@ void Polynomial<CoefficientType>::SetNumVariablesSubDeletedVarsByOne(int newNumV
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  Polynomial<CoefficientType> Accum;
+  Polynomial<coefficient> Accum;
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size);
   MonomialP tempM;
@@ -6468,8 +6468,8 @@ void Polynomial<CoefficientType>::SetNumVariablesSubDeletedVarsByOne(int newNumV
   this->operator=(Accum);
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::ShiftVariableIndicesToTheRight
+template <class coefficient>
+void Polynomial<coefficient>::ShiftVariableIndicesToTheRight
 (int VarIndexShift)
 { if (VarIndexShift<0)
   { std::cout << "This is a programming error. Requesting negative variable shift "
@@ -6481,7 +6481,7 @@ void Polynomial<CoefficientType>::ShiftVariableIndicesToTheRight
     return;
   int oldNumVars=this->GetMinNumVars();
   int newNumVars=oldNumVars+VarIndexShift;
-  Polynomial<CoefficientType> Accum;
+  Polynomial<coefficient> Accum;
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size);
   MonomialP tempM;
@@ -6494,11 +6494,11 @@ void Polynomial<CoefficientType>::ShiftVariableIndicesToTheRight
   *this=Accum;
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::Evaluate
-(const Vector<CoefficientType>& input, CoefficientType& output)
+template <class coefficient>
+void Polynomial<coefficient>::Evaluate
+(const Vector<coefficient>& input, coefficient& output)
 { output=0;
-  CoefficientType tempElt;
+  coefficient tempElt;
   for (int i=0; i<this->size; i++)
   { tempElt=this->theCoeffs[i];
     const MonomialP& currentMon=(*this)[i];
@@ -6530,11 +6530,11 @@ void Polynomial<CoefficientType>::Evaluate
   }
 }
 
-template <class TemplateMonomial, class CoefficientType>
-inline void ElementMonomialAlgebra<TemplateMonomial, CoefficientType>::MultiplyBy
-(const ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& other,
- ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output,
- ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+template <class TemplateMonomial, class coefficient>
+inline void ElementMonomialAlgebra<TemplateMonomial, coefficient>::MultiplyBy
+(const ElementMonomialAlgebra<TemplateMonomial, coefficient>& other,
+ ElementMonomialAlgebra<TemplateMonomial, coefficient>& output,
+ ElementMonomialAlgebra<TemplateMonomial, coefficient>& bufferPoly,
  TemplateMonomial& bufferMon)const
 { if (other.IsEqualToZero())
   { output.MakeZero();
@@ -6542,7 +6542,7 @@ inline void ElementMonomialAlgebra<TemplateMonomial, CoefficientType>::MultiplyB
   }
   int maxNumMonsFinal=this->size*other.size;
   bufferPoly.SetExpectedSize(maxNumMonsFinal);
-  CoefficientType theCoeff;
+  coefficient theCoeff;
   for (int i=0; i<other.size; i++)
     for (int j=0; j<this->size; j++)
     { bufferMon=this->TheObjects[j];
@@ -6621,9 +6621,9 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
   }
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::MakeMonomiaL
-(int LetterIndex, const Rational& Power, const CoefficientType& Coeff,
+template <class coefficient>
+void Polynomial<coefficient>::MakeMonomiaL
+(int LetterIndex, const Rational& Power, const coefficient& Coeff,
  int ExpectedNumVars)
 { if (LetterIndex<0 )
   { std::cout << "This is a programming error: the index"
@@ -6639,20 +6639,20 @@ void Polynomial<CoefficientType>::MakeMonomiaL
   this->AddMonomial(tempM, Coeff);
 }
 
-template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractOtherTimesCoeff
-(const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* inputcf)
+template <class TemplateMonomial, class coefficient>
+void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff
+(const MonomialCollection<TemplateMonomial, coefficient>& other, coefficient* inputcf)
 { if (this==&other)
   { if (inputcf==0)
     { this->MakeZero();
       return;
     }
-    MonomialCollection<TemplateMonomial, CoefficientType> otherNew=other;
+    MonomialCollection<TemplateMonomial, coefficient> otherNew=other;
     this->SubtractOtherTimesCoeff(otherNew, inputcf);
     return;
   }
   this->SetExpectedSize(other.size+this->size);
-  CoefficientType tempCF;
+  coefficient tempCF;
   for (int i=0; i<other.size; i++)
   { ParallelComputing::SafePointDontCallMeFromDestructors();
     tempCF=other.theCoeffs[i];
@@ -6662,9 +6662,9 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractOtherTimesCo
   }
 }
 
-template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::
-operator+=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+template <class TemplateMonomial, class coefficient>
+void MonomialCollection<TemplateMonomial, coefficient>::
+operator+=(const MonomialCollection<TemplateMonomial, coefficient>& other)
 { this->SetExpectedSize(other.size+this->size);
   for (int i=0; i<other.size; i++)
   { ParallelComputing::SafePointDontCallMeFromDestructors();
@@ -6811,9 +6811,9 @@ void Polynomial<Element>::TimesInteger(int a)
   this->TimesRational(r);
 }
 
-template <class TemplateMonomial, class CoefficientType>
+template <class TemplateMonomial, class coefficient>
 template <class TemplateMonomialCollection>
-void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
+void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows
   (List<TemplateMonomialCollection>& theList, bool *IvemadeARowSwitch,
    HashedList<TemplateMonomial>* seedMonomials)
 { MemorySaving<HashedList<TemplateMonomial> > bufferMons;
@@ -6839,7 +6839,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
 //    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
-  CoefficientType tempCF;
+  coefficient tempCF;
   for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
   { const TemplateMonomial& currentMon=allMons[i];
     int goodRow=currentRowIndex;
@@ -6853,7 +6853,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
       if (IvemadeARowSwitch!=0)
         *IvemadeARowSwitch=true;
     }
-    MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=
+    MonomialCollection<TemplateMonomial, coefficient>& currentPivot=
     theList[currentRowIndex];
     int colIndex=currentPivot.GetIndex(currentMon);
     if (colIndex==-1)
@@ -6869,7 +6869,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
     currentPivot/=tempCF;
     for (int j=0; j<theList.size; j++)
       if (j!=currentRowIndex)
-      { MonomialCollection<TemplateMonomial, CoefficientType>& currentOther=theList[j];
+      { MonomialCollection<TemplateMonomial, coefficient>& currentOther=theList[j];
         int otherColIndex=currentOther.GetIndex(currentMon);
         if (otherColIndex!=-1)
         { tempCF=currentOther.theCoeffs[otherColIndex];
@@ -6888,9 +6888,9 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
 //    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
-template <class TemplateMonomial, class CoefficientType>
-int MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex
-(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+template <class TemplateMonomial, class coefficient>
+int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex
+(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
@@ -6924,10 +6924,10 @@ int MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomialNoCoeffCle
   return j;
 }
 
-template <class TemplateMonomial, class CoefficientType>
-int MonomialCollection<TemplateMonomial, CoefficientType>::
+template <class TemplateMonomial, class coefficient>
+int MonomialCollection<TemplateMonomial, coefficient>::
 SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
-(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
 { if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
     return -1;
   int j= this->GetIndex(inputMon);
@@ -6941,10 +6941,10 @@ SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
   return j;
 }
 
-template <class TemplateMonomial, class CoefficientType>
-void ElementMonomialAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
-(int d, ElementMonomialAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
-{ ElementMonomialAlgebra<TemplateMonomial, CoefficientType> tempOne;
+template <class TemplateMonomial, class coefficient>
+void ElementMonomialAlgebra<TemplateMonomial, coefficient>::RaiseToPower
+(int d, ElementMonomialAlgebra<TemplateMonomial, coefficient>& output, const coefficient& theRingUniT)
+{ ElementMonomialAlgebra<TemplateMonomial, coefficient> tempOne;
   tempOne.MakeConst(theRingUniT);
   output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);
@@ -6958,18 +6958,18 @@ Rational Polynomial<Element>::TotalDegree()const
   return result;
 }
 
-template <class CoefficientType>
-bool Polynomial<CoefficientType>::Substitution
-(const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit,
- const CoefficientType& theRingZero)
-{ MacroRegisterFunctionWithName("Polynomial<CoefficientType>::Substitution");
+template <class coefficient>
+bool Polynomial<coefficient>::Substitution
+(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit,
+ const coefficient& theRingZero)
+{ MacroRegisterFunctionWithName("Polynomial<coefficient>::Substitution");
   if (TheSubstitution.size<this->GetMinNumVars())
   { std::cout << "This is a programming error: attempting to carry out a substitution"
     << "in a polynomial of " << this->GetMinNumVars() << " variables while specifying the images of only "
     << TheSubstitution.size << " of the variables. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  Polynomial<CoefficientType> Accum, TempPoly;
+  Polynomial<coefficient> Accum, TempPoly;
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
   for(int i=0; i<this->size; i++)
@@ -7606,9 +7606,9 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 	}
 }
 
-template <class CoefficientType>
-bool Vectors<CoefficientType>::LinSpanContainsVector(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
-{ Vectors<CoefficientType> tempVectors;
+template <class coefficient>
+bool Vectors<coefficient>::LinSpanContainsVector(const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const
+{ Vectors<coefficient> tempVectors;
   tempVectors=(*this);
   tempVectors.AddOnTop(input);
 //  this->ComputeDebugString();
@@ -7617,12 +7617,12 @@ bool Vectors<CoefficientType>::LinSpanContainsVector(const Vector<CoefficientTyp
   return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection)==tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
 }
 
-template <class CoefficientType>
-int Vectors<CoefficientType>::GetRankOfSpanOfElements(Matrix<CoefficientType>* buffer, Selection* bufferSelection)const
+template <class coefficient>
+int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection)const
 { if (this->size==0)
     return 0;
   int theDimension= this->TheObjects[0].size;
-  MemorySaving<Matrix<CoefficientType> > emergencyMatBuf;
+  MemorySaving<Matrix<coefficient> > emergencyMatBuf;
   MemorySaving<Selection> emergencySelBuf;
   if (buffer==0)
     buffer=&emergencyMatBuf.GetElement();
@@ -7632,18 +7632,18 @@ int Vectors<CoefficientType>::GetRankOfSpanOfElements(Matrix<CoefficientType>* b
   return (theDimension-bufferSelection->CardinalitySelection);
 }
 
-template <class CoefficientType>
-void Vectors<CoefficientType>::GaussianEliminationForNormalComputation(Matrix<CoefficientType>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
+template <class coefficient>
+void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
 { inputMatrix.init((int)this->size, (int)theDimension);
   outputNonPivotPoints.init(theDimension);
   for(int i=0; i<this->size; i++)
     for(int j=0; j<theDimension; j++)
       inputMatrix(i,j)=(*this)[i][j];
-  Matrix<CoefficientType>::GaussianEliminationByRows(inputMatrix, 0, &outputNonPivotPoints);
+  Matrix<coefficient>::GaussianEliminationByRows(inputMatrix, 0, &outputNonPivotPoints);
 }
 
-template <class CoefficientType>
-std::string Vectors<CoefficientType>::ElementsToInequalitiesString
+template <class coefficient>
+std::string Vectors<coefficient>::ElementsToInequalitiesString
 (bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)const
 { std::stringstream out;
   std::string tempS;
@@ -7679,11 +7679,11 @@ std::string Vectors<CoefficientType>::ElementsToInequalitiesString
   return out.str();
 }
 
-template <class CoefficientType>
-bool Vectors<CoefficientType>::GetCoordsInBasis
-(const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& outputCoords,
- Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+template <class coefficient>
+bool Vectors<coefficient>::GetCoordsInBasis
+(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords,
+ Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
+ const coefficient& theRingUnit, const coefficient& theRingZero)
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
@@ -7693,14 +7693,14 @@ bool Vectors<CoefficientType>::GetCoordsInBasis
   return true;
 }
 
-template <class CoefficientType>
-bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
-  Matrix<CoefficientType>& bufferMatGaussianElimination,
-  const CoefficientType& theRingUnit,
-  const CoefficientType& theRingMinusUnit,
-  const CoefficientType& theRingZero)
+template <class coefficient>
+bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
+  Matrix<coefficient>& bufferMatGaussianEliminationCC,
+  Matrix<coefficient>& bufferMatGaussianElimination,
+  const coefficient& theRingUnit,
+  const coefficient& theRingMinusUnit,
+  const coefficient& theRingZero)
 { int theDim=this->size;
   bufferMatGaussianElimination.init(inputBasis.size, theDim);
   for (int i=0; i<inputBasis.size; i++)
@@ -7710,7 +7710,7 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
   //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
   //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
-  Vector<CoefficientType> tempRoot, theCombination;
+  Vector<coefficient> tempRoot, theCombination;
   assert(this!=&output);
   output.MakeZero(inputBasis.size, theRingZero);
   theCombination=*this;
@@ -7736,11 +7736,11 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
   return true;
 }
 
-template <class CoefficientType>
-bool Vector<CoefficientType>::GetCoordsInBasiS
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
- Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+template <class coefficient>
+bool Vector<coefficient>::GetCoordsInBasiS
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
+ Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
+ const coefficient& theRingUnit, const coefficient& theRingZero)const
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
@@ -7750,7 +7750,7 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
   //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
-  CoefficientType tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
+  coefficient tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
   bufferMat/=tempCF;
   output.SetSize(bufferMat.NumRows-1);
   for (int i=0; i<bufferMat.NumRows-1; i++)
@@ -7761,9 +7761,9 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
   return true;
 }
 
-template <class CoefficientType>
-void Vectors<CoefficientType>::GetLinearDependenceRunTheLinearAlgebra
-  (Matrix<CoefficientType>& outputTheLinearCombination, Matrix<CoefficientType>& outputTheSystem, Selection& outputNonPivotPoints)
+template <class coefficient>
+void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra
+  (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
 { if (this->size==0)
     return;
   int Dimension=(int) this->TheObjects[0].size;
@@ -7772,14 +7772,14 @@ void Vectors<CoefficientType>::GetLinearDependenceRunTheLinearAlgebra
     for(int j=0; j<Dimension; j++)
       outputTheSystem.elements[j][i]=(this->TheObjects[i][j]);
   //outputTheSystem.ComputeDebugString();
-  Matrix<CoefficientType>::GaussianEliminationByRows(outputTheSystem, 0, &outputNonPivotPoints);
+  Matrix<coefficient>::GaussianEliminationByRows(outputTheSystem, 0, &outputNonPivotPoints);
   //outputTheSystem.ComputeDebugString();
 }
 
-template <class CoefficientType>
-bool Vectors<CoefficientType>::GetLinearDependence
-  (Matrix<CoefficientType>& outputTheLinearCombination, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ Matrix<CoefficientType> tempMat;
+template <class coefficient>
+bool Vectors<coefficient>::GetLinearDependence
+  (Matrix<coefficient>& outputTheLinearCombination, const coefficient& theRingUnit, const coefficient& theRingZero)
+{ Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
   //std::cout << tempMat.ToString(true, false);
@@ -8097,13 +8097,13 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
   }
 }
 
-template <class CoefficientType>
-void Vectors<CoefficientType>::SelectABasisInSubspace
-(const List<Vector<CoefficientType> >& input, List<Vector<CoefficientType> >& output,
+template <class coefficient>
+void Vectors<coefficient>::SelectABasisInSubspace
+(const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output,
  Selection& outputSelectedPivotColumns, GlobalVariables* theGlobalVariables)
 { if (&input==&output)
-  { List<Vector<CoefficientType> > inputCopy=input;
-    Vectors<CoefficientType>::SelectABasisInSubspace
+  { List<Vector<coefficient> > inputCopy=input;
+    Vectors<coefficient>::SelectABasisInSubspace
     (inputCopy, output, outputSelectedPivotColumns, theGlobalVariables);
     return;
   }
@@ -8120,7 +8120,7 @@ void Vectors<CoefficientType>::SelectABasisInSubspace
     << input.size << " generators in dimension " << theDim << "... " ;
     theReport.Report(reportStream.str());
   }
-  Matrix<CoefficientType> theMat;
+  Matrix<coefficient> theMat;
   int MaxNumRows=MathRoutines::Minimum(input.size, theDim);
   theMat.init(MaxNumRows, theDim);
   int currentRow=0;
@@ -8260,8 +8260,8 @@ class CompleX
   CompleX(double other){this->operator=(other);}
 };
 
-template<class CoefficientType>
-class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, CoefficientType>
+template<class coefficient>
+class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, coefficient>
 {
 public:
   bool CheckConsistency()const
@@ -8278,12 +8278,12 @@ public:
     return true;
   }
   bool NeedsBrackets()const;
-  Vector<CoefficientType> GetCartanPart()const;
+  Vector<coefficient> GetCartanPart()const;
   void MakeGGenerator
   (const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
   ;
   bool IsElementCartan()const;
-  void MakeHgenerator(const Vector<CoefficientType>& theH, SemisimpleLieAlgebra& inputOwners);
+  void MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator
   (int generatorIndex, SemisimpleLieAlgebra& inputOwner)
   ;
@@ -8345,7 +8345,7 @@ public:
   }
   template<class otherType>
   void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
-  { this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::operator=(other);
+  { this->::MonomialCollection<ChevalleyGenerator, coefficient>::operator=(other);
   }
 };
 
@@ -8499,17 +8499,17 @@ void Matrix<Element>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const Lar
     }
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::IsRegular
-(Vector<CoefficientType>& r, Vector<CoefficientType>& outputFailingNormal, GlobalVariables& theGlobalVariables,
+template<class coefficient>
+bool Vectors<coefficient>::IsRegular
+(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, GlobalVariables& theGlobalVariables,
  int theDimension)
 { //this function needs a complete rewrite
   Selection WallSelection=theGlobalVariables.selWallSelection.GetElement();
   WallSelection.init(this->size);
   int x= MathRoutines::NChooseK(this->size, theDimension-1);
-  Matrix<CoefficientType> bufferMat;
-  Vector<CoefficientType> tempRoot;
-  CoefficientType theScalarProduct;
+  Matrix<coefficient> bufferMat;
+  Vector<coefficient> tempRoot;
+  coefficient theScalarProduct;
   for (int i=0; i<x; i++)
   { WallSelection.incrementSelectionFixedCardinality(theDimension-1);
     if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension))
@@ -8523,9 +8523,9 @@ bool Vectors<CoefficientType>::IsRegular
   return true;
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::ComputeNormalExcludingIndex
-(Vector<CoefficientType>& output, int index, Matrix<CoefficientType>& bufferMatrix)
+template<class coefficient>
+bool Vectors<coefficient>::ComputeNormalExcludingIndex
+(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
 { Selection NonPivotPoints;
   if (this->size==0)
     return false;
@@ -8539,16 +8539,16 @@ bool Vectors<CoefficientType>::ComputeNormalExcludingIndex
       for(int j=0; j<theDimension; j++)
         bufferMatrix.elements[k][j]=(*this)[i][j];
     }
-  Matrix<CoefficientType>::GaussianEliminationByRows(bufferMatrix, 0, &NonPivotPoints);
+  Matrix<coefficient>::GaussianEliminationByRows(bufferMatrix, 0, &NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::ComputeNormalFromSelection
-(Vector<CoefficientType>& output, Selection& theSelection, Matrix<CoefficientType>& bufferMatrix, int theDimension)
+template<class coefficient>
+bool Vectors<coefficient>::ComputeNormalFromSelection
+(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
 { Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
@@ -8562,15 +8562,15 @@ bool Vectors<CoefficientType>::ComputeNormalFromSelection
   return true;
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndExtraRoot
-(Vector<CoefficientType>& output, Vector<CoefficientType>& ExtraRoot,
- Selection& theSelection, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSel)
+template<class coefficient>
+bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot,
+ Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
 { if (this->size==0)
     return false;
   int theDimension= this->TheObjects[0].size;
   output.SetSize(theDimension);
-  Matrix<CoefficientType> matOutputEmpty;
+  Matrix<coefficient> matOutputEmpty;
   Selection& NonPivotPoints=bufferSel;
   bufferMatrix.init((int)theSelection.CardinalitySelection+1, (int)theDimension);
   matOutputEmpty.init(-1, -1);
@@ -8579,17 +8579,17 @@ bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndExtraRoot
       bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
     bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot.TheObjects[j]);
   }
-  Matrix<CoefficientType>::GaussianEliminationByRows(bufferMatrix, matOutputEmpty, NonPivotPoints);
+  Matrix<coefficient>::GaussianEliminationByRows(bufferMatrix, matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
     return false;
   bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
   return true;
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<CoefficientType>& output, Vector<CoefficientType>& ExtraRoot1, Vector<CoefficientType>& ExtraRoot2,
- Selection& theSelection, Matrix<CoefficientType>& bufferMat, Selection& bufferSel)
+template<class coefficient>
+bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2,
+ Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
 { Matrix<Rational> matOutputEmpty;
   Selection& NonPivotPoints= bufferSel;
   if (this->size==0)
@@ -8611,14 +8611,14 @@ bool Vectors<CoefficientType>::ComputeNormalFromSelectionAndTwoExtraRoots
   return true;
 }
 
-template<class CoefficientType>
-void Vectors<CoefficientType>::GetGramMatrix
-(Matrix<CoefficientType>& output, const Matrix<Rational>* theBilinearForm) const
+template<class coefficient>
+void Vectors<coefficient>::GetGramMatrix
+(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm) const
 { output.Resize(this->size, this->size, false);
   for (int i=0; i<this->size; i++)
     for(int j=i; j<this->size; j++)
     { if (theBilinearForm!=0)
-        Vector<CoefficientType>::ScalarProduct
+        Vector<coefficient>::ScalarProduct
         (this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
       else
         output(i,j)=(*this)[i].ScalarEuclidean((*this)[j]);
@@ -8627,19 +8627,19 @@ void Vectors<CoefficientType>::GetGramMatrix
     }
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::ContainsARootNonPerpendicularTo
-(const Vector<CoefficientType>& input, Matrix<CoefficientType>& theBilinearForm)
-{ CoefficientType tempRat;
+template<class coefficient>
+bool Vectors<coefficient>::ContainsARootNonPerpendicularTo
+(const Vector<coefficient>& input, Matrix<coefficient>& theBilinearForm)
+{ coefficient tempRat;
   for (int i=0; i<this->size; i++)
-    if (!Vector<CoefficientType>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero())
+    if (!Vector<coefficient>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero())
       return true;
   return false;
 }
 
-template<class CoefficientType>
-int Vectors<CoefficientType>::ArrangeFirstVectorsBeOfMaxPossibleRank
-(Matrix<CoefficientType>& bufferMat, Selection& bufferSel)
+template<class coefficient>
+int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank
+(Matrix<coefficient>& bufferMat, Selection& bufferSel)
 { if (this->size==0)
     return 0;
   int theDimension= this->GetDimensionOfElements();
@@ -8663,10 +8663,10 @@ int Vectors<CoefficientType>::ArrangeFirstVectorsBeOfMaxPossibleRank
   return (oldRank);
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType> ::MakePolyFromDirectionAndNormal
-(Vector<CoefficientType>& direction, Vector<CoefficientType>& normal, CoefficientType& Correction)
-{ Rational tempRat2= Vector<CoefficientType>::ScalarEuclidean(direction, normal);
+template <class coefficient>
+void Polynomial<coefficient> ::MakePolyFromDirectionAndNormal
+(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction)
+{ Rational tempRat2= Vector<coefficient>::ScalarEuclidean(direction, normal);
   this->MakeZero(direction.size);
   MonomialP tempM;
   for (int i=0; i<direction.size; i++)
@@ -8676,10 +8676,10 @@ void Polynomial<CoefficientType> ::MakePolyFromDirectionAndNormal
   *this+=Correction;
 }
 
-template <class CoefficientType>
-bool Vectors<CoefficientType>::GetNormalSeparatingCones
-(List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
-  List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal,
+template <class coefficient>
+bool Vectors<coefficient>::GetNormalSeparatingCones
+(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
+  List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
   GlobalVariables* theGlobalVariables)
 { MemorySaving<Matrix<Rational> > tempA;
   MemorySaving<Matrix<Rational> > tempB;
@@ -8742,9 +8742,9 @@ bool Vectors<CoefficientType>::GetNormalSeparatingCones
   return result;
 }
 
-template<class CoefficientType>
-void Matrix<CoefficientType>::ComputePotentialChangeGradient
-(Matrix<CoefficientType>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex,
+template<class coefficient>
+void Matrix<coefficient>::ComputePotentialChangeGradient
+(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex,
  Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
 { hasAPotentialLeavingVariable = false;
   outputChangeGradient.MakeZero();
@@ -8777,8 +8777,8 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
   }
 }
 
-template<class CoefficientType>
-void Polynomial<CoefficientType>::ScaleToIntegralNoGCDCoeffs()
+template<class coefficient>
+void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
 { if(this->size==0)
     return;
   int indexHighestMon=0;
@@ -8848,8 +8848,8 @@ void Matrix<Element>::GetZeroEigenSpaceModifyMe(List<Vector<Element> >& output)
   }
 }
 
-template <class CoefficientType>
-std::string Vectors<CoefficientType>::ToString(FormatExpressions* theFormat)const
+template <class coefficient>
+std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   std::string tempS;
   bool useLaTeX=false;
@@ -8901,8 +8901,8 @@ void List<Object>::IntersectWith(const List<Object>& other, List<Object>& output
       output.AddOnTop(other[i]);
 }
 
-template <class CoefficientType>
-std::string Vector<CoefficientType>::ToStringLetterFormat
+template <class coefficient>
+std::string Vector<coefficient>::ToStringLetterFormat
 (const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
 { if (this->IsEqualToZero())
     return "0";
@@ -8938,13 +8938,13 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
   return out.str();
 }
 
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
-(int theGeneratorIndexStandsOnTheLeft, const CoefficientType& thePower)
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
+void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
+(int theGeneratorIndexStandsOnTheLeft, const coefficient& thePower)
 { if (thePower==0)
     return;
   List<int> newGeneratorIndices;
-  List<CoefficientType> newPowers;
+  List<coefficient> newPowers;
   newGeneratorIndices.SetExpectedSize(this->generatorsIndices.size+1);
   newPowers.SetExpectedSize(this->generatorsIndices.size+1);
   newGeneratorIndices.AddOnTop(theGeneratorIndexStandsOnTheLeft);
@@ -8956,9 +8956,9 @@ void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowe
   this->SimplifyEqualConsecutiveGenerators(0);
 }
 
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
-(int theGeneratorIndex, const CoefficientType& thePower)
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
+void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
+(int theGeneratorIndex, const coefficient& thePower)
 { if (thePower==0)
     return;
   if (this->generatorsIndices.size>0)
@@ -8970,8 +8970,8 @@ void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowe
   this->generatorsIndices.AddOnTop(theGeneratorIndex);
 }
 
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-std::string MonomialTensor<CoefficientType, inputHashFunction>::ToString(FormatExpressions* theFormat)const
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
+std::string MonomialTensor<coefficient, inputHashFunction>::ToString(FormatExpressions* theFormat)const
 { if (this->generatorsIndices.size==0)
     return "1";
   std::string theLetter= theFormat==0 ?  "g" : theFormat->chevalleyGgeneratorLetter;
@@ -8984,8 +8984,8 @@ std::string MonomialTensor<CoefficientType, inputHashFunction>::ToString(FormatE
   return out.str();
 }
 
-template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-bool MonomialTensor<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
+bool MonomialTensor<coefficient, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
 { if (this->generatorsIndices.size<1)
     return false;
   if (lowestNonReducedIndex<0)
@@ -9054,9 +9054,9 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-template <class TemplateMonomial, class CoefficientType>
-std::string MonomialCollection<TemplateMonomial, CoefficientType>::GetBlendCoeffAndMon
-(const TemplateMonomial& inputMon, CoefficientType& inputCoeff, bool addPlusToFront,
+template <class TemplateMonomial, class coefficient>
+std::string MonomialCollection<TemplateMonomial, coefficient>::GetBlendCoeffAndMon
+(const TemplateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront,
  FormatExpressions* theFormat)
 { std::stringstream out;
   std::string coeffStr=inputCoeff.ToString();
@@ -9085,8 +9085,8 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::GetBlendCoeff
   return out.str();
 }
 
-template <class TemplateMonomial, class CoefficientType>
-std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
+template <class TemplateMonomial, class coefficient>
+std::string MonomialCollection<TemplateMonomial, coefficient>::ToString
 (FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
@@ -9121,7 +9121,7 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   }
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
-    CoefficientType& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    coefficient& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
     if (currentCoeff.NeedsBrackets())
       tempS1="("+currentCoeff.ToString(theFormat)+ ")";
     else
@@ -9268,9 +9268,9 @@ void Matrix<Element>::GaussianEliminationByRows
   }
 }
 
-template <class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasis
-  (List<Polynomial<CoefficientType> >& inputOutpuT,
+template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
+  (List<Polynomial<coefficient> >& inputOutpuT,
    GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
@@ -9339,8 +9339,8 @@ bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasis
   return true;
 }
 
-template<class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::AddPolyAndReduceBasis
+template<class coefficient>
+bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis
  (GlobalVariables* theGlobalVariables)
 { bool changed=false;
   ProgressReport theReport(theGlobalVariables);
@@ -9407,8 +9407,8 @@ bool GroebnerBasisComputation<CoefficientType>::AddPolyAndReduceBasis
   return changed;
 }
 
-template<class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::MakeMinimalBasis()
+template<class coefficient>
+void GroebnerBasisComputation<coefficient>::MakeMinimalBasis()
 { MacroRegisterFunctionWithName("RationalFunctionOld::GroebnerBasisMakeMinimal");
 /*  std::cout << "<br><br> and the leading monomials are: ";
   for (int i=0; i<LeadingCoeffs.size; i++)
@@ -9433,8 +9433,8 @@ void GroebnerBasisComputation<CoefficientType>::MakeMinimalBasis()
 */
 }
 
-template<class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::CriterionCLOsh
+template<class coefficient>
+bool GroebnerBasisComputation<coefficient>::CriterionCLOsh
 (HashedListSpecialized
  <Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >&
  thePairs, List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM)
@@ -9457,9 +9457,9 @@ bool GroebnerBasisComputation<CoefficientType>::CriterionCLOsh
   return false;
 }
 
-template<class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasisImprovedAlgorithm
-(List<Polynomial<CoefficientType> >& inputOutpuT,
+template<class coefficient>
+bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImprovedAlgorithm
+(List<Polynomial<coefficient> >& inputOutpuT,
  GlobalVariables* theGlobalVariables, int upperComputationBound
 )
 { MacroRegisterFunctionWithName
@@ -9569,8 +9569,8 @@ bool GroebnerBasisComputation<CoefficientType>::TransformToReducedGroebnerBasisI
   return true;
 }
 
-template <class CoefficientType>
-std::string GroebnerBasisComputation<CoefficientType>::GetDivisionString(FormatExpressions* theFormat)
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpressions* theFormat)
 { std::stringstream out;
   List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
@@ -9653,10 +9653,10 @@ std::string GroebnerBasisComputation<CoefficientType>::GetDivisionString(FormatE
   return out.str();
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::RemainderDivisionWithRespectToBasis
-(Polynomial<CoefficientType>& inputOutput,
- Polynomial<CoefficientType>* outputRemainder, GlobalVariables* theGlobalVariables,
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
+(Polynomial<coefficient>& inputOutput,
+ Polynomial<coefficient>* outputRemainder, GlobalVariables* theGlobalVariables,
  int basisIndexToIgnore
  )
 { //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
@@ -9817,8 +9817,8 @@ void GroebnerBasisComputation<CoefficientType>::RemainderDivisionWithRespectToBa
 //  << "<hr>";
 }
 
-template <class CoefficientType>
-bool GroebnerBasisComputation<CoefficientType>::AddRemainderToBasis
+template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis
  (GlobalVariables* theGlobalVariables)
 { if (this->leadingMons.size!=this->theBasiS.size)
   { std::cout << "This is a programming error: the number of leading monomials does not equal "
@@ -9859,8 +9859,8 @@ bool GroebnerBasisComputation<CoefficientType>::AddRemainderToBasis
   return true;
 }
 
-template <class CoefficientType>
-GroebnerBasisComputation<CoefficientType>::GroebnerBasisComputation()
+template <class coefficient>
+GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
 { this->theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   this->NumberOfComputations=0;
   this->flagDoProgressReport=true;
@@ -9872,9 +9872,9 @@ GroebnerBasisComputation<CoefficientType>::GroebnerBasisComputation()
   this->MaxNumComputations=0;
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation <CoefficientType>::initForDivisionAlone
-(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+template <class coefficient>
+void GroebnerBasisComputation <coefficient>::initForDivisionAlone
+(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
   if (inputOutpuT.size<=0)
   { std::cout << "This is a programming error: I cannot transform an "
@@ -9903,9 +9903,9 @@ void GroebnerBasisComputation <CoefficientType>::initForDivisionAlone
   this->NumberOfComputations=0;
 }
 
-template <class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::initForGroebnerComputation
-(List<Polynomial<CoefficientType> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+template <class coefficient>
+void GroebnerBasisComputation<coefficient>::initForGroebnerComputation
+(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
   if (inputOutpuT.size<=0)
   { std::cout << "This is a programming error: I cannot transform an "
@@ -9923,8 +9923,8 @@ void GroebnerBasisComputation<CoefficientType>::initForGroebnerComputation
   this->NumberOfComputations=0;
 }
 
-template<class CoefficientType>
-void GroebnerBasisComputation<CoefficientType>::ConsistencyCheck()
+template<class coefficient>
+void GroebnerBasisComputation<coefficient>::ConsistencyCheck()
 { if (this->NumberOfComputations>this->MaxNumComputations+1000)
   { std::cout
     << "This may or may not be a programming error. While handling computation excess limit, "
@@ -9936,9 +9936,9 @@ void GroebnerBasisComputation<CoefficientType>::ConsistencyCheck()
   }
 }
 
-template<class CoefficientType>
-std::string GroebnerBasisComputation<CoefficientType>::GetPolynomialStringSpacedMonomials
-(const Polynomial<CoefficientType>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+template<class coefficient>
+std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomials
+(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
  const std::string& extraStyle, const std::string& extraHighlightStyle,
  FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
 { std::stringstream out;

@@ -5,10 +5,10 @@
 ProjectInformationInstance ProjectInfoVpf9_4cpp
 (__FILE__, "Implementation of semisimple subalgebra routines. ");
 
-template<class CoefficientType>
+template<class coefficient>
 void SemisimpleLieAlgebra::GenerateLieSubalgebra
-(List<ElementSemisimpleLieAlgebra<CoefficientType> >& inputOutputGenerators)
-{ ElementSemisimpleLieAlgebra<CoefficientType> theBracket;
+(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators)
+{ ElementSemisimpleLieAlgebra<coefficient> theBracket;
   HashedList<ChevalleyGenerator> seedMons;
   for (int i=0; i<inputOutputGenerators.size; i++)
     for (int j=0; j<inputOutputGenerators.size; j++)
@@ -571,10 +571,10 @@ bool CandidateSSSubalgebra::isGoodForTheTop
   return true;
 }
 
-template <class CoefficientType>
-int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
+template <class coefficient>
+int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl
 (WeylGroup& theWeyl)const
-{ HashedList<Vector<CoefficientType> > weightsSimpleCoords;
+{ HashedList<Vector<coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.SetExpectedSize(this->size);
   for (int i=0; i<this->size; i++)
     weightsSimpleCoords.AddOnTop
@@ -686,9 +686,9 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   return true;
 }
 
-template <class CoefficientType>
-void Polynomial<CoefficientType>::MakeDeterminantFromSquareMatrix
-(const Matrix<Polynomial<CoefficientType> >& theMat)
+template <class coefficient>
+void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix
+(const Matrix<Polynomial<coefficient> >& theMat)
 { if(theMat.NumCols!=theMat.NumRows)
     assert(false);
   permutation thePerm;
@@ -697,7 +697,7 @@ void Polynomial<CoefficientType>::MakeDeterminantFromSquareMatrix
   //std::cout << "<hr>" << numCycles << " total cycles";
   List<int> permutationIndices;
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
-  Polynomial<CoefficientType> result, theMonomial;
+  Polynomial<coefficient> result, theMonomial;
   result.MakeZero();
   result.SetExpectedSize(numCycles);
   for (int i=0; i<numCycles; i++, thePerm.incrementAndGetPermutation(permutationIndices))
@@ -2910,7 +2910,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
     << "; highest weight cone: " << this->theNonFKhws[i].ToString() << ". ";
     if (this->NilradicalConesIntersect[i])
-      out << "Cone interseciton: " << this->ConeIntersections[i].ToStringLetterFormat("w");
+      out << "Cone intersection: " << this->ConeIntersections[i].ToStringLetterFormat("w");
     else
       out << "Separating hyperplane: " << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
   }
@@ -3377,9 +3377,9 @@ void CandidateSSSubalgebra::GetHsByType
   }
 }
 
-template <class CoefficientType>
+template <class coefficient>
 void WeylGroup::RaiseToMaximallyDominant
-  (List<Vector<CoefficientType> >& theWeights)const
+  (List<Vector<coefficient> >& theWeights)const
 { bool found;
   for (int i=0; i<theWeights.size; i++)
     do

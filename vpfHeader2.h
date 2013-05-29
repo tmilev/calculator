@@ -1547,10 +1547,10 @@ public:
   static bool innerConesIntersect
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  template<class CoefficientType>
+  template<class coefficient>
   bool innerGetTypeHighestWeightParabolic
   (CommandList& theCommands, const Expression& input, Expression& output,
-   Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
+   Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
    Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
    Expression::FunctionAddress ConversionFun)
  ;
@@ -1666,10 +1666,10 @@ public:
   std::string* xLetter=0, std::string* partialLetter=0,
   std::string* exponentVariableLetter=0)
   ;
-  template<class CoefficientType>
+  template<class coefficient>
 static bool TypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
- Vector<CoefficientType>& outputWeight,
+ Vector<coefficient>& outputWeight,
  Selection& outputInducingSel, Expression* outputContext=0)
 ;
 static bool innerDrawRootSystem
@@ -1960,16 +1960,16 @@ static bool innerStoreObject
 (CommandList& theCommands, const TemplateList& input, Expression& output, Expression* theContext=0)
 ;
 
-template <class TemplateMonomial, typename CoefficientType>
+template <class TemplateMonomial, typename coefficient>
 static bool innerStoreMonCollection
 (CommandList& theCommands,
- const MonomialCollection<TemplateMonomial, CoefficientType>& input, Expression& output,
+ const MonomialCollection<TemplateMonomial, coefficient>& input, Expression& output,
  Expression* theContext=0)
  ;
- template <class TemplateMonomial, typename CoefficientType>
+ template <class TemplateMonomial, typename coefficient>
 static bool DeSerializeMonCollection
 (CommandList& theCommands, const Expression& input,
- MonomialCollection<TemplateMonomial, CoefficientType>& output)
+ MonomialCollection<TemplateMonomial, coefficient>& output)
  ;
 template <class TemplateMonomial>
 static bool DeSerializeMonGetContext
@@ -1997,9 +1997,9 @@ bool Serialization::innerStoreObject
   return true;
 }
 
-template <class TemplateMonomial, typename CoefficientType>
+template <class TemplateMonomial, typename coefficient>
 bool Serialization::innerStoreMonCollection
-(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
+(CommandList& theCommands, const MonomialCollection<TemplateMonomial, coefficient>& input,
  Expression& output, Expression* theContext)
 { MacroRegisterFunctionWithName("Serialization::SerializeMonCollection");
   Expression termE, coeffE, tempE;
@@ -2034,10 +2034,10 @@ bool Serialization::innerStoreMonCollection
   return true;
 }
 
-template <class TemplateMonomial, typename CoefficientType>
+template <class TemplateMonomial, typename coefficient>
 bool Serialization::DeSerializeMonCollection
 (CommandList& theCommands, const Expression& input,
- MonomialCollection<TemplateMonomial, CoefficientType>& output)
+ MonomialCollection<TemplateMonomial, coefficient>& output)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);

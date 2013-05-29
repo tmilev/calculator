@@ -1888,10 +1888,10 @@ bool CommandList::fHWTAABF
   return output.AssignValueWithContext(outputRF, finalContext, theCommands);
 }
 
-template<class CoefficientType>
+template<class coefficient>
 bool CommandList::innerGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
- Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
+ Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
  Expression::FunctionAddress ConversionFun)
 { if (!input.IsListNElements(4) && !input.IsListNElements(3))
@@ -1904,7 +1904,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
-  if (!theCommands.GetVectoR<CoefficientType>
+  if (!theCommands.GetVectoR<coefficient>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
        ConversionFun))
   { std::stringstream tempStream;
@@ -2173,8 +2173,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   (theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
 }
 
-template <class CoefficientType>
-bool ModuleSSalgebra<CoefficientType>::IsNotInParabolic
+template <class coefficient>
+bool ModuleSSalgebra<coefficient>::IsNotInParabolic
 (int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
@@ -2183,8 +2183,8 @@ bool ModuleSSalgebra<CoefficientType>::IsNotInParabolic
   return false;
 }
 
-template <class CoefficientType>
-bool ModuleSSalgebra<CoefficientType>::IsNotInLevi
+template <class coefficient>
+bool ModuleSSalgebra<coefficient>::IsNotInLevi
 (int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
@@ -2193,11 +2193,11 @@ bool ModuleSSalgebra<CoefficientType>::IsNotInLevi
   return false;
 }
 
-template <class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
+template <class coefficient>
+void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
   GlobalVariables& theGlobalVariables)
-{ List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+{ List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   RationalFunctionOld tempRF;
   output.MakeZero(*this->theAlgebras, this->indexAlgebra);
@@ -2215,10 +2215,10 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
   output.AddMonomial(tempMon, tempRF);
 }
 
-template <class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
+template <class coefficient>
+void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
 (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
-{ List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+{ List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   Polynomial<Rational> tempRF;
   output.MakeZero(*this->owneR);
@@ -2276,22 +2276,22 @@ std::string quasiDiffMon::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-template <class CoefficientType>
-class quasiDiffOp : public MonomialCollection<quasiDiffMon, CoefficientType>
+template <class coefficient>
+class quasiDiffOp : public MonomialCollection<quasiDiffMon, coefficient>
 {
 public:
   std::string ToString(FormatExpressions* theFormat=0)const
   ;
   void GenerateBasisLieAlgebra
-  (List<quasiDiffOp<CoefficientType> >& theElts,
+  (List<quasiDiffOp<coefficient> >& theElts,
  FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0)
   ;
-  void operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight);
-  void operator=(const  MonomialCollection<quasiDiffMon, CoefficientType>& other)
-  { this->MonomialCollection<quasiDiffMon, CoefficientType>::operator=(other);
+  void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
+  void operator=(const  MonomialCollection<quasiDiffMon, coefficient>& other)
+  { this->MonomialCollection<quasiDiffMon, coefficient>::operator=(other);
   }
-  void LieBracketMeOnTheRight(const MonomialCollection<quasiDiffMon, CoefficientType>& standsOnTheRight)
-  { quasiDiffOp<CoefficientType> tempRight;
+  void LieBracketMeOnTheRight(const MonomialCollection<quasiDiffMon, coefficient>& standsOnTheRight)
+  { quasiDiffOp<coefficient> tempRight;
     tempRight=standsOnTheRight;
     MathRoutines::LieBracket(*this, tempRight, *this);
   }
@@ -2326,15 +2326,15 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 //  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
 }
 
-template <class CoefficientType>
-void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
-(List<quasiDiffOp<CoefficientType> >& theElts,
+template <class coefficient>
+void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra
+(List<quasiDiffOp<coefficient> >& theElts,
  FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra");
+{ MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport (theGlobalVariables);
   HashedList<quasiDiffMon> bufferMons;
   //std::cout << "<br> the elts:" << theElts.ToString();
-  List< MonomialCollection<quasiDiffMon, CoefficientType> > theEltsConverted;
+  List< MonomialCollection<quasiDiffMon, coefficient> > theEltsConverted;
   theEltsConverted=theElts;
   //std::cout << "<br>the elts converted: " << theEltsConverted.ToString();
   this->GaussianEliminationByRows(theEltsConverted);
@@ -2384,9 +2384,9 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
 //    std::cout << "<br>" << theElts[i].ToString();
 }
 
-template <class CoefficientType>
-void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight)
-{ quasiDiffOp<CoefficientType> output;
+template <class coefficient>
+void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& standsOnTheRight)
+{ quasiDiffOp<coefficient> output;
   ElementWeylAlgebra leftElt, rightElt, tempElt;
   quasiDiffMon outputMon;
   output.MakeZero();
@@ -2408,13 +2408,13 @@ void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>
   *this=output;
 }
 
-template <class CoefficientType>
-std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)const
+template <class coefficient>
+std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)const
 { bool combineWeylPart=true;
   if (theFormat!=0)
     combineWeylPart=theFormat->flagQuasiDiffOpCombineWeylPart;
   if (!combineWeylPart)
-    return this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat);
+    return this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat);
   MatrixTensor<ElementWeylAlgebra> reordered;
   reordered.MakeZero();
   ElementWeylAlgebra tempP;
@@ -2429,7 +2429,7 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
   { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero  "
     << " quasidifferential operator "
     << " with non-properly formatted LaTeX string "
-    << this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat)
+    << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
     << ", however its properly formatted string is 0. "
     << "Probably there is something wrong with the initializations of the monomials "
     << "of the qdo. "
@@ -2439,8 +2439,8 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
   return result;
 }
 
-template <class CoefficientType>
-bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
+template <class coefficient>
+bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart
 (const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName
   ("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
@@ -2470,12 +2470,12 @@ bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
   return true;
 }
 
-template <class CoefficientType>
-bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
+template <class coefficient>
+bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
-  List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+  List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
@@ -2783,8 +2783,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-template <class CoefficientType>
-std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFormat)const
+template <class coefficient>
+std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)const
 { if (this->owneR==0)
     return "(Error: module not initialized)";
   SemisimpleLieAlgebra& theAlgebrA=*this->owneR;
@@ -2814,7 +2814,7 @@ std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFor
   ElementWeylGroup tempWelt;
   int wordCounter=0;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
+  { List<MonomialUniversalEnveloping<coefficient> >& currentList=
     this->theGeneratingWordsGrouppedByWeight[i];
     List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
     this->theGeneratingWordsIntGrouppedByWeight[i];
@@ -2845,7 +2845,7 @@ std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFor
       out << "<td>" << CGI::GetHtmlMathSpanPure(tempSSElt.ToString(theFormat)) << "</td>";
       out << "<td>";
       if (this->GetDim()<28)
-      { Matrix<CoefficientType> outputMat;
+      { Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
         //std::cout << outputMat.ToString(&latexFormat);
         out << CGI::GetHtmlMathSpanPure(outputMat.ToString(&latexFormat), 5000) << " = ";
@@ -2864,13 +2864,13 @@ std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFor
 
   bool isBad=false;
   for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
-  { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
-    Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[k];
+  { Matrix<coefficient>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
+    Matrix<coefficient>& theBFinverted= this->theBilinearFormsInverted[k];
     out << "<hr>weight in simple coords: "
     << this->theModuleWeightsSimpleCoords[k].ToString();
-    List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
+    List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
     for (int i=0; i<currentList.size; i++)
-    { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
+    { MonomialUniversalEnveloping<coefficient>& currentElt=currentList[i];
       out << "<br>monomial " << i+1 << ": "
       << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
     }
@@ -2950,12 +2950,12 @@ bool CommandList::innerHWVCommon
   (theElt, hwContext, theCommands);
 }
 
-template <class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
+template <class coefficient>
+void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
 { output.MakeZero(this->owneR);
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
-  MonomialChar<CoefficientType> tempMon;
+  MonomialChar<coefficient> tempMon;
   WeylGroup& theWeyl=this->GetOwner().theWeyl;
   for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
   { tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
@@ -3731,22 +3731,22 @@ Expression::FunctionAddress CommandList::GetInnerFunctionFromOp
   return 0;
 }
 
-template <class CoefficientType>
-void ElementTensorsGeneralizedVermas<CoefficientType>::TensorOnTheRight
-  (const ElementTensorsGeneralizedVermas<CoefficientType>& right, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+template <class coefficient>
+void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
+  (const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables,
+   const coefficient& theRingUnit, const coefficient& theRingZero
    )
-{ MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<CoefficientType>::TensorOnTheRight");
+{ MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
   if (right.IsEqualToZero())
   { this->MakeZero();
     return;
   }
   int maxNumMonsFinal=this->size*right.size;
-  ElementTensorsGeneralizedVermas<CoefficientType> output;
-  MonomialTensorGeneralizedVermas<CoefficientType> bufferMon;
+  ElementTensorsGeneralizedVermas<coefficient> output;
+  MonomialTensorGeneralizedVermas<coefficient> bufferMon;
   output.MakeZero();
   output.SetExpectedSize(maxNumMonsFinal);
-  CoefficientType theCoeff;
+  coefficient theCoeff;
   for (int i=0; i<right.size; i++)
     for (int j=0; j<this->size; j++)
     { bufferMon=this->TheObjects[j];

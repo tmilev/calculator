@@ -7,12 +7,12 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_3
 (__FILE__, "Header, math routines. ");
 
-template <class CoefficientType>
+template <class coefficient>
 class RationalFunction
 {
   public:
-  Polynomial<CoefficientType> polyForm;
-  MemorySaving<List<Polynomial<CoefficientType> > > substitutions;
+  Polynomial<coefficient> polyForm;
+  MemorySaving<List<Polynomial<coefficient> > > substitutions;
 };
 
 class MonomialDiffForm
@@ -36,19 +36,19 @@ public:
 };
 
 //The default multiplication operation is the exterior product.
-template <class CoefficientType>
-class DifferentialForm: ElementMonomialAlgebra<MonomialDiffForm, CoefficientType>
+template <class coefficient>
+class DifferentialForm: ElementMonomialAlgebra<MonomialDiffForm, coefficient>
 {
   public:
-  void operator=(const Polynomial<CoefficientType>& other);
+  void operator=(const Polynomial<coefficient>& other);
   void DifferentialMe()
   {
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  static unsigned int HashFunction(const DifferentialForm<CoefficientType>& input)
-  { return ElementMonomialAlgebra<MonomialDiffForm, CoefficientType>::HashFunction(input);
+  static unsigned int HashFunction(const DifferentialForm<coefficient>& input)
+  { return ElementMonomialAlgebra<MonomialDiffForm, coefficient>::HashFunction(input);
   }
 };
 

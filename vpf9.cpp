@@ -36,7 +36,7 @@ template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
 template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
 
-template <class ElementLeft, class ElementRight, class CoefficientType>
+template <class ElementLeft, class ElementRight, class coefficient>
 class TensorProductMonomial;
 
 std::fstream partFraction::TheBigDump;
@@ -5695,10 +5695,10 @@ bool rootSubalgebra::ConeConditionHolds
   return true;
 }
 
-template<class CoefficientType>
-bool Vectors<CoefficientType>::PerturbVectorToRegular
-(Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
-{ Vector<CoefficientType> normal;
+template<class coefficient>
+bool Vectors<coefficient>::PerturbVectorToRegular
+(Vector<coefficient>& output, GlobalVariables& theGlobalVariables)
+{ Vector<coefficient> normal;
   bool result=false;
   while (!this->IsRegular(output, normal, theGlobalVariables, output.size))
   { result=true;

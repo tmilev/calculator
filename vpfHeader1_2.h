@@ -1055,6 +1055,7 @@ public:
     result*=other;
     return result;
   }
+  Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup Inverse() const;
 
   bool operator==(const ElementWeylGroup& other)const

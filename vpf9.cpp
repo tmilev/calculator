@@ -4281,6 +4281,13 @@ void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
   this->MakeCanonical();
 }
 
+Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const
+{ Vector<Rational> out = v;
+  this->owner->ActOn(*this,out);
+  return out;
+}
+
+
 ElementWeylGroup ElementWeylGroup::Inverse() const
 { ElementWeylGroup out = *this;
   out.ReverseOrderElements();

@@ -20,11 +20,15 @@ class PermutationR2
 };
 
 void PermutationR2::GetCycleStructure(List<int>& out)
-{ for(int i=0; i<this->cycles.size; i++)
-  { if(out.size < this->cycles[i].size+1)
-      out.SetSize(this->cycles[i].size+1);
-    out[this->cycles.size] += 1;
-  }
+{ int N = 0;
+  for(int i=0; i<this->cycles.size; i++)
+    if(N < this->cycles[i].size)
+      N = this->cycles[i].size;
+  out.SetSize(N+1);
+  for(int i=0; i<out.size; i++)
+    out[i] = 0;
+  for(int i=0; i<this->cycles.size; i++)
+    out[this->cycles[i].size] += 1;
 }
 
 void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p)
@@ -41,12 +45,28 @@ void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p)
     int j = i;
     do
     { p.cycles[p.cycles.size-1].AddOnTop(j);
-      int j = g.owner->RootSystem.GetIndex(g*g.owner->RootSystem[j]);
+      accountedFor[j] = true;
+      j = g.owner->RootSystem.GetIndex(g*g.owner->RootSystem[j]);
     } while(j!=i);
     if(p.cycles[p.cycles.size-1].size == 1)
       p.cycles.SetSize(p.cycles.size-1);
   }
 }
+
+std::ostream& operator<<(std::ostream& out, const PermutationR2& p)
+{
+  for(int i=0; i<p.cycles.size; i++)
+  { out << '(';
+    for(int j=0; j<p.cycles[i].size; j++)
+    { out << p.cycles[i][j];
+      if(j!=p.cycles[i].size-1)
+        out << ' ';
+    }
+    out << ')';
+  }
+  return out;
+}
+
 
 // in particular, scalar likes to be int
 template <typename scalar>
@@ -265,10 +285,15 @@ List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc)
     WeylElementPermutesRootSystem(G.theElements[gi],pi);
     List<int> cycleType;
     pi.GetCycleStructure(cycleType);
+    std::cout << pi;
+    for(int i=1; i<cycleType.size; i++)
+      std::cout << ' ' << cycleType[i];
+    std::cout << std::endl;
     if(cycleTypes.GetIndex(cycleType) == -1)
     { cycleTypes.AddOnTop(cycleType);
       representatives.AddOnTop(gi);
-      std::cout << representatives.size << ' ';
+      //std::cout << representatives.size << ' ';
+      std::cout << "^ New cycle type, now have " << representatives.size << std::endl;
       if(representatives.size == ncc)
         break;
     }
@@ -2261,8 +2286,8 @@ int main(void)
      std::cout << chars[i] << std::endl;
 */
   WeylGroup G;
-  G.MakeArbitrarySimple('B',3);
-  std::cout << FindConjugacyClassRepresentatives(G,10);
+  G.MakeArbitrarySimple('E',6);
+  std::cout << FindConjugacyClassRepresentatives(G,25);
 
    std::cout << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
    std::cout << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;

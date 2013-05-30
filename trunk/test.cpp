@@ -9,6 +9,218 @@
 // this is one reason test.cpp isn't even compiled into the actual calculator
 FormatExpressions testformat;
 
+class PermutationR2
+{ public:
+  List<List<int> > cycles;
+
+  //void MakeCanonical();
+  //unsigned int HashFunction();
+
+  void GetCycleStructure(List<int>& out);
+};
+
+void PermutationR2::GetCycleStructure(List<int>& out)
+{ for(int i=0; i<this->cycles.size; i++)
+  { if(out.size < this->cycles[i].size+1)
+      out.SetSize(this->cycles[i].size+1);
+    out[this->cycles.size] += 1;
+  }
+}
+
+void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p)
+{ int rss = g.owner->RootSystem.size;
+  List<bool> accountedFor;
+  accountedFor.SetSize(rss);
+  for(int i=0; i<rss; i++)
+    accountedFor[i] = false;
+  for(int i=0; i<rss; i++)
+  { if(accountedFor[i])
+      continue;
+    p.cycles.SetSize(p.cycles.size+1);
+    p.cycles[p.cycles.size-1].size = 0;
+    int j = i;
+    do
+    { p.cycles[p.cycles.size-1].AddOnTop(j);
+      int j = g.owner->RootSystem.GetIndex(g*g.owner->RootSystem[j]);
+    } while(j!=i);
+    if(p.cycles[p.cycles.size-1].size == 1)
+      p.cycles.SetSize(p.cycles.size-1);
+  }
+}
+
+// in particular, scalar likes to be int
+template <typename scalar>
+class AnotherWeylGroup
+{ // compat WeylGroup
+  public:
+  Matrix<Rational> CartanSymmetric;
+  Vector<scalar> rho;
+  HashedList<Vector<scalar> > RootSystem;
+  HashedList<Vector<scalar> > rhoOrbit;
+  List<List<int> > conjugacyClasses;
+
+  int GetDim() const; // idk lol
+  void SimpleReflection(int i, const Vector<scalar>& v, Vector<scalar>& out) const;
+  void SimpleReflection(int i, Vector<scalar>& v) const;
+  void GetSimpleReflections(const Vector<scalar>& v, List<int>& out) const;
+  void ActOn(int g, Vector<scalar>& v) const;
+  void ActOn(int g, const Vector<scalar>& v, Vector<scalar>& out) const;
+  int Multiply(int g, int h) const;
+  int Invert(int g) const;
+
+  void ComputeRho();
+  void ComputeAllElements();
+  void ComputeConjugacyClasses();
+  Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
+
+  // own stuff
+  int N; // useful b/c its nice to not axcidently depend on logically stuff
+  int nGens;
+  Vector<scalar> twiceRho;
+  Matrix<scalar> unrationalCartanSymmetric;
+};
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::SimpleReflection(int i, Vector<scalar>& v) const{
+    scalar x=0;
+    for(int j=0;j<this->nGens;j++)
+        x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
+    // so, under ordinary circumstances, this is just out[i] -= x;
+    // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] !∈ {1,2}
+    // and scalar can't deal with division properly
+    // fortunately this only happens in G₂
+    v[i] -= x * 2/ unrationalCartanSymmetric.elements[i][i];
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::SimpleReflection(int i, const Vector<scalar>& v, Vector<scalar>& out) const
+{ out = v;
+  this->SimpleReflection(i,out);
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::GetSimpleReflections(const Vector<scalar>& v, List<int>& out) const
+{ Vector<scalar> w = v;
+  while(w != this->twiceRho)
+  {
+
+  }
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::ActOn(int i, Vector<scalar>& v) const
+{
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::ActOn(int i, const Vector<scalar>& v, Vector<scalar>& out) const
+{ out = v;
+  this->ActOn(i,out);
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::ComputeRho()
+{ if(unrationalCartanSymmetric.NumRows < CartanSymmetric.NumRows)
+  { unrationalCartanSymmetric.init(CartanSymmetric.NumRows, CartanSymmetric.NumCols);
+    for(int i=0; i<CartanSymmetric.NumRows; i++)
+      for(int j=0; j<CartanSymmetric.NumCols; j++)
+        unrationalCartanSymmetric.elements[i][j] = CartanSymmetric.elements[i][j]; // this will go over well
+  }
+  this->nGens = this->unrationalCartanSymmetric.NumRows;
+  Vector<scalar> v0;
+  List<int> newelts;
+  v0.MakeEi(nGens,0);
+  Vector<scalar> w;
+  this->RootSystem.AddOnTop(v0);
+  newelts.AddOnTop(this->RootSystem.GetIndex(v0));
+  while(newelts.size > 0)
+  { int i = newelts.PopLastObject();
+    for(int si=0; si<this->nGens; si++)
+    { this->SimpleReflection(si,this->RootSystem[i],w);
+      if(this->RootSystem.GetIndex(w) == -1)
+      { this->RootSystem.AddOnTop(w);
+        int j = this->RootSystem.GetIndex(w);
+        newelts.AddOnTop(j);
+      }
+    }
+  }
+  this->twiceRho.MakeZero(nGens);
+  for(int i=0; i<this->RootSystem.size; i++)
+  { bool usethis = true;
+    for(int j=0; j<this->RootSystem[i].size; j++)
+      if(this->RootSystem[i][j] < 0)
+      { usethis = false;
+        break;
+      }
+    if(usethis)
+      this->twiceRho += this->RootSystem[i];
+  }
+  this->rho = this->twiceRho/2;
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::ComputeAllElements()
+{ std::cout << "Getting elements...";
+  if(this->twiceRho.size == 0)
+    this->ComputeRho();
+  Vector<scalar> w;
+  List<int> newelts;
+  this->rhoOrbit.AddOnTop(twiceRho);
+  newelts.AddOnTop(this->rhoOrbit.GetIndex(twiceRho));
+  while(newelts.size > 0)
+  { int i = newelts.PopLastObject();
+    for(int si=0; si<this->nGens; si++)
+    { this->SimpleReflection(si,this->RootSystem[i],w);
+      if(this->RootSystem.GetIndex(w) == -1)
+      { this->RootSystem.AddOnTop(w);
+        int j = this->RootSystem.GetIndex(w);
+        newelts.AddOnTop(j);
+      }
+    }
+  }
+  this->N = this->rhoOrbit.size;
+  std::cout << this->N << std::endl;
+}
+
+template <typename scalar>
+void AnotherWeylGroup<scalar>::ComputeConjugacyClasses()
+{ std::cout << "Getting conjugacy classes...";
+  if(this->rhoOrbit.size == 0)
+    this->ComputeAllElements();
+  List<bool> Accounted;
+  Accounted.initFillInObject(this->N, false);
+  this->conjugacyClasses.SetSize(0);
+  this->conjugacyClasses.ReservE(50);
+  HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
+  theStack.SetExpectedSize(this->N);
+  int theRank=this->GetDim();
+  Vector<scalar> theRhoImage;
+  for (int i=0; i<this->N; i++)
+    if (!Accounted[i])
+    { theStack.Clear();
+      theStack.AddOnTop(i);
+      for (int j=0; j<theStack.size; j++)
+        for (int k=0; k<theRank; k++)
+        { theRhoImage=this->twiceRho;
+          this->SimpleReflection(k, theRhoImage);
+          this->ActOn(theStack[j], theRhoImage);
+          this->SimpleReflection(k, theRhoImage);
+          int accountedIndex=this->rhoOrbit.GetIndex(theRhoImage);
+          theStack.AddOnTopNoRepetition(accountedIndex);
+          Accounted[accountedIndex]=true;
+        }
+      this->conjugacyClasses.AddOnTop(theStack);
+      this->conjugacyClasses.LastObject()->QuickSortAscending();
+    }
+  this->conjugacyClasses.QuickSortAscending();
+  std::cout << conjugacyClasses.size << std::endl;
+}
+
+template <typename scalar>
+int AnotherWeylGroup<scalar>::GetDim() const
+{ return this->CartanSymmetric.NumRows;
+}
+
 List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkDivisorsOf=0);
 
 template <typename coefficient>
@@ -24,10 +236,44 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
   return vs;
 }
 
+// there are like 3 copies of this function with slightly different argument types
+template <typename scalar>
+Rational AnotherWeylGroup<scalar>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
+{ Rational acc = 0;
+  for(int i=0; i<X1.size; i++)
+    acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
+  return acc / this->N;
+}
+
 template <typename coefficient>
 List<VectorSpace<coefficient> > GetLeftEigenspaces(Matrix<coefficient> M)
 { M.Transpose();
   return GetEigenspaces(M);
+}
+
+template <typename weylgroup>
+List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc)
+{ if(G.theElements.size == 0)
+    G.ComputeAllElements();
+  std::cout << "Computing conjugacy class representatives... ";
+  // hashing these might be nice
+  // need to figure out how to pass MathRoutines::IntUnsignIdentity in
+  List<List<int> > cycleTypes;
+  List<int> representatives;
+  for(int gi=0; gi<G.theElements.size; gi++)
+  { PermutationR2 pi;
+    WeylElementPermutesRootSystem(G.theElements[gi],pi);
+    List<int> cycleType;
+    pi.GetCycleStructure(cycleType);
+    if(cycleTypes.GetIndex(cycleType) == -1)
+    { cycleTypes.AddOnTop(cycleType);
+      representatives.AddOnTop(gi);
+      std::cout << representatives.size << ' ';
+      if(representatives.size == ncc)
+        break;
+    }
+  }
+  return representatives;
 }
 
 // As in Schneider, 1990
@@ -37,7 +283,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.conjugacyClasses.size == 0)
     G.ComputeConjugacyClasses();
   List<int> classmap;
-  classmap.SetSize(G.theElements.size);
+  classmap.SetSize(G.N);
   for(int i=0; i<G.conjugacyClasses.size; i++)
     for(int j=0; j<G.conjugacyClasses[i].size; j++)
       classmap[G.conjugacyClasses[i][j]] = i;
@@ -151,11 +397,11 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
         ci = (*classmap)[yi];
       else
       { for(ci=0; ci<G.conjugacyClasses.size; ci++)
-          for(int cj=0; cj<G.conjugacyClasses[ci].size; cj++)
-            if(G.conjugacyClasses[ci][cj] == yi)
-              goto okaddit;
+          if(G.conjugacyClasses[ci].BSContains(yi))
+          { M.elements[t][ci] += 1;
+            break;
+          }
       }
-      okaddit: M.elements[t][ci] += 1;
     }
   Matrix<Rational> out;
   out.init(M.NumRows, M.NumCols);
@@ -1809,13 +2055,7 @@ int main(void)
       std::cout << sr2d[i].gens[j].ToString(&testformat) << std::endl;
    }
    */
-   GlobalVariables localGlobalVariables;
-   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
-   WeylGroup G;
-   G.MakeArbitrarySimple('E',7,NULL);
-   List<Vector<Rational> > chars = ComputeCharacterTable(G);
-   for(int i=0; i<chars.size; i++)
-     std::cout << chars[i] << std::endl;
+
 /*   G.ComputeIrreducibleRepresentations(&localGlobalVariables);
    Selection sel;
    sel.MakeFullSelection(G.CartanSymmetric.NumCols);
@@ -2010,8 +2250,19 @@ int main(void)
   std::cout << "This should be one component" << std::endl;
   std::cout << comp.ToString(&testformat) << std::endl;
 */
-
-
+   /*GlobalVariables localGlobalVariables;
+   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+   AnotherWeylGroup<Rational> G;
+   DynkinType D;
+   D.MakeSimpleType('B',3);
+   D.GetCartanSymmetric(G.CartanSymmetric);
+   List<Vector<Rational> > chars = ComputeCharacterTable(G);
+   for(int i=0; i<chars.size; i++)
+     std::cout << chars[i] << std::endl;
+*/
+  WeylGroup G;
+  G.MakeArbitrarySimple('B',3);
+  std::cout << FindConjugacyClassRepresentatives(G,10);
 
    std::cout << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
    std::cout << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;

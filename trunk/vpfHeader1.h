@@ -3509,19 +3509,7 @@ public:
   { std::string result="Vector_" + coefficient::GetXMLClassName();
     return result;
   }
-  std::string ToString()const
-  { std::stringstream out;
-    out.precision(5);
-    out << "(";
-    for(int i=0; i<this->size; i++)
-    { out << this->TheObjects[i];
-      if (i!=this->size-1)
-        out << ", ";
-    }
-    out << ")";
-    return out.str();
-  }
-  std::string ToString(FormatExpressions* theFormat)const
+  std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out.precision(5);
     out << "(";

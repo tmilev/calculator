@@ -814,7 +814,7 @@ bool Serialization::innerLoadCandidateSA
   { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra "
     << " does not decompose properly over the candidate subalgebra. ";
     return false;
-//    outputSubalgebra.theCharFundCoords.MakeZero(owner.owneR);
+//    outputSubalgebra.theCharNonPrimalFundCoords.MakeZero(owner.owneR);
 //    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
   }
   if (input.children.size==5)

@@ -223,12 +223,8 @@ public:
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
-  charSSAlgMod<Rational> theCharFundCoords;
-  //The highest weights are by definition cartan-centralizer-split
-  List<ElementSemisimpleLieAlgebra<Rational> > highestVectorsModules;
-  List<Vector<Rational> > highestWeightsCartanCentralizerSplitModules;
-
-  List<Vector<Rational> > highestWeightsModules;
+  charSSAlgMod<Rational> theCharNonPrimalFundCoords;
+  charSSAlgMod<Rational> thePrimalChar;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<Rational> > theSystemToSolve;
@@ -238,7 +234,7 @@ public:
   int indexInOwnersOfNonEmbeddedMe;
   int indexMaxSSContainer;
   List<int> indicesDirectSummandSuperAlgebra;
-  FormatExpressions theCoeffLetters;
+  MemorySaving<FormatExpressions> charFormaT;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
@@ -247,23 +243,31 @@ public:
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
   HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
+  List<std::string> FKnilradicalLogs;
   List<bool> NilradicalConesIntersect;
   Vectors<Rational> ConeIntersections;
   Vectors<Rational> ConeSeparatingNormals;
   List<Vectors<Rational> > theNilradicalWeights;
   List<Vectors<Rational> > theNonFKhws;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > highestVectorsGrouppedByWeight;
-  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > modulesGrouppedByWeight;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > modulesGrouppedByPrimalType;
-  List<Vectors<Rational> > weightsOfModules;
-  List<Vectors<Rational> > weightsOfPrimallySplitModules;
+
+  //The highest weight vectors are by definition cartan-centralizer-split
+  List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
+  List<Vector<Rational> > HighestWeightsPrimalNonSorted;
+  List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
+
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > HighestVectors;
+  List<Vector<Rational> > HighestWeightsPrimal;
+
+  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > Modules;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesIsotypicallyMerged;
+  List<Vectors<Rational> > WeightsModulesNONprimal;
+  List<Vectors<Rational> > WeightsModulesPrimal;
 
   List<List<List<int> > > NilradicalPairingTable;
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModules;
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
-  charSSAlgMod<Rational> theCharOverCartanPlusCartanCentralizer;
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
 
@@ -331,8 +335,8 @@ public:
   SemisimpleLieAlgebra& GetAmbientSS()const;
   WeylGroup& GetAmbientWeyl()const;
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
-  void ComputeCentralizinglySplitModuleDecomposition(GlobalVariables* theGlobalVariables);
-  void ComputeCentralizinglySplitModuleDecompositionLastPart(GlobalVariables* theGlobalVariables);
+  void ComputePrimalDecomposition(GlobalVariables* theGlobalVariables);
+  void ComputePrimalDecompositionLastPart(GlobalVariables* theGlobalVariables);
   void GetPrimalWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)
   ;
@@ -340,11 +344,11 @@ public:
   void GetWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
   ;
-  void ComputeCentralizinglySplitModuleDecompositionHWVsOnly
+  void ComputePrimalDecompositionHWVsOnly
   (GlobalVariables* theGlobalVariables,
    HashedList<Vector<Rational> >& inputHws)
    ;
-  void ComputeCentralizinglySplitModuleDecompositionWeightsOnly
+  void ComputePrimalDecompositionWeightsOnly
   (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
   ;
   bool ComputeSystem

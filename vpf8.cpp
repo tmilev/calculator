@@ -6505,8 +6505,10 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY, GlobalV
   if (this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)>epsilon || this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)<-epsilon)
   { this->ScaleToUnitLength(vProjection);
     this->ScaleToUnitLength(vOrthogonal);
-    out << "\nscaled vOrthogonal=" << vOrthogonal.ToString() << "->" << this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal);
-    out << "\nscaled vProjection=" << vProjection.ToString() << "->" <<this->theBilinearForm.ScalarProduct(vProjection, vProjection);
+    out << "\nscaled vOrthogonal=" << vOrthogonal << "->"
+    << this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal);
+    out << "\nscaled vProjection=" << vProjection << "->"
+    << this->theBilinearForm.ScalarProduct(vProjection, vProjection);
     out << "\ntheScalarProd: " << this->theBilinearForm.ScalarProduct(vOrthogonal, vProjection);
     this->RotateOutOfPlane(out, currentBasisPlane[0], currentBasisPlane[0], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
     this->RotateOutOfPlane(out, currentBasisPlane[1], currentBasisPlane[1], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
@@ -6516,8 +6518,8 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY, GlobalV
   this->ModifyToOrthonormalNoShiftSecond(currentBasisPlane[0], currentBasisPlane[1]);
 //  this->e1.ComputeDebugString();
 //  this->e2.ComputeDebugString();
-  out << "\ne1=" << currentBasisPlane[0].ToString();
-  out << "\ne2=" << currentBasisPlane[1].ToString();
+  out << "\ne1=" << currentBasisPlane[0];
+  out << "\ne2=" << currentBasisPlane[1];
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
   if (this->specialOperationsOnBasisChange!=0)
     this->specialOperationsOnBasisChange(*this, theGlobalVariables);

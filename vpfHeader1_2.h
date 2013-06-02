@@ -1375,7 +1375,7 @@ template <class coefficient>
   { if (r1.size!=r2.size || r1.size!=this->GetDim())
     { std::cout << "This is a programming error: attempting to take the root system scalar product of "
       << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. "
-      << "The two input vectors were " << r1.ToString() << " and " << r2.ToString()
+      << "The two input vectors were " << r1 << " and " << r2
       << " and the rank of the Weyl group is " << this->GetDim() << ". "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);

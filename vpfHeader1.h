@@ -5035,7 +5035,7 @@ public:
   }
   template <class MonomialCollectionTemplate>
   static bool LinSpanContains
-  (List<MonomialCollectionTemplate>& theList, MonomialCollectionTemplate& input,
+  (const List<MonomialCollectionTemplate>& theList, const MonomialCollectionTemplate& input,
    HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
     MonomialCollection<TemplateMonomial, coefficient>::

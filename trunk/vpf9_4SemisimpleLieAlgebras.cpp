@@ -978,27 +978,79 @@ totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
 {
 }
 
+void CandidateSSSubalgebra::ComputePairKweightElementAndModule
+(const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex,
+ List<int>& output, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairKweightElementAndModule");
+  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
+  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+  ProgressReport theReport(theGlobalVariables);
+  for (int j=0; j<rightModule.size; j++)
+  { this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
+    if (theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << "Bracketing index " << j+1 << " with input element. ";
+      theReport.Report(reportStream.str());
+    }
+    bool found=false;
+    if (!theLieBracket.IsEqualToZero())
+      for (int k=0; k<this->ModulesIsotypicallyMerged.size; k++)
+        if (theLieBracket.LinSpanContains(this->ModulesIsotypicallyMerged[k], theLieBracket))
+        { output.AddOnTopNoRepetition(k);
+          found=true;
+          break;
+        }
+      if (!found)
+      { std::cout << "This is a programming error: Lie brakcet of two k-weight vectors fails to be "
+        << "k-weight vector. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
+}
+
 void CandidateSSSubalgebra::ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSinglePair");
   output.SetSize(0);
+  List<int> tempList;
   List<ElementSemisimpleLieAlgebra<Rational> >& leftModule=this->ModulesIsotypicallyMerged[leftIndex];
-  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
-  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
   ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<leftModule.size; i++)
-    for (int j=0; j<rightModule.size; j++)
-    { this->GetAmbientSS().LieBracket(leftModule[i], rightModule[j], theLieBracket);
-      std::stringstream reportStream;
-      reportStream << "Bracketing indices " << i+1 << " and " << j+1 << ". ";
+  { if (theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << "Bracketing element number" << i+1 << " out of "
+      << leftModule.size << " with other module. ";
       theReport.Report(reportStream.str());
-      if (!theLieBracket.IsEqualToZero())
-        for (int k=0; k<this->ModulesIsotypicallyMerged.size; k++)
-          if (theLieBracket.LinSpanContains(this->ModulesIsotypicallyMerged[k], theLieBracket))
-          { output.AddOnTopNoRepetition(k);
-            break;
-          }
     }
+    this->ComputePairKweightElementAndModule(leftModule[i], rightIndex, tempList, theGlobalVariables);
+    output.AddOnTopNoRepetition(tempList);
+  }
+}
+
+void CandidateSSSubalgebra::ComputeOneSidedTable(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeOneSidedTable");
+  if (!this->owner->flagDoComputeNilradicals)
+    return;
+  ProgressReport theReport(theGlobalVariables);
+  this->OneSidedPairingTable.SetSize(this->ModulesIsotypicallyMerged.size);
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    this->OneSidedPairingTable[i].SetSize(this->ModulesIsotypicallyMerged.size);
+  List<int> tempList;
+  if (this->owner->flagDoComputeNilradicals)
+    for (int i=0; i<this->OneSidedPairingTable.size; i++)
+      for (int j=0; j<this->OneSidedPairingTable.size; j++)
+      { if (theGlobalVariables!=0)
+        { std::stringstream reportStream;
+          reportStream << "One-sided pairing of indices " << i+1 << " and " << j+1 << " out of "
+          << this->NilradicalPairingTable.size << ".";
+          theReport.Report(reportStream.str());
+        }
+        this->OneSidedPairingTable[i][j].SetSize(0);
+        for (int k=0; k<this->Modules[i].size; k++)
+        { this->ComputePairKweightElementAndModule(this->Modules[i][k][0], j, tempList, theGlobalVariables);
+          this->OneSidedPairingTable[i][j].AddOnTopNoRepetition(tempList);
+        }
+      }
 }
 
 void CandidateSSSubalgebra::ComputePairingTable
@@ -1011,14 +1063,17 @@ void CandidateSSSubalgebra::ComputePairingTable
     this->NilradicalPairingTable[i].SetSize(this->ModulesIsotypicallyMerged.size);
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
     for (int j=i; j<this->NilradicalPairingTable[i].size; j++)
-    { std::stringstream reportStream;
-      reportStream << "Pairing indices " << i+1 << " and " << j+1 << " out of "
-      << this->NilradicalPairingTable.size << ".";
-      theReport.Report(reportStream.str());
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << "Pairing indices " << i+1 << " and " << j+1 << " out of "
+        << this->NilradicalPairingTable.size << ".";
+        theReport.Report(reportStream.str());
+      }
       this->ComputeSinglePair(i, j, this->NilradicalPairingTable[i][j], theGlobalVariables);
       if (j>i)
         this->NilradicalPairingTable[j][i]=this->NilradicalPairingTable[i][j];
     }
+  this->ComputeOneSidedTable(theGlobalVariables);
   this->modulesWithZeroWeights.Clear();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
   { List<ElementSemisimpleLieAlgebra<Rational> >& currentMod=
@@ -1040,29 +1095,61 @@ void CandidateSSSubalgebra::ComputePairingTable
             this->OppositeModules[i].AddOnTopNoRepetition(j);
 }
 
+bool CandidateSSSubalgebra::IsStronglyTwoSided(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables)
+{ return true;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > >& currentModule=this->Modules[moduleIndex];
+  const List<int>& currenFKcandidate=this->FKNilradicalCandidates[nilradIndex];
+  std::stringstream out;
+  ElementSemisimpleLieAlgebra<Rational> theElt;
+  for (int i=0; i<currentModule.size; i++)
+    for (int j=0; j<currenFKcandidate.size; j++)
+      if (currenFKcandidate[j]==1 && !this->primalSubalgebraModules.Contains(i))
+        for (int k=0; k<this->ModulesIsotypicallyMerged[j].size; k++)
+        { this->GetAmbientSS().LieBracket(currentModule[i][0], this->ModulesIsotypicallyMerged[j][k], theElt);
+          int indexContainingLieBracket=-1;
+          for (int l=0; l<this->ModulesIsotypicallyMerged.size; l++)
+            if (theElt.LinSpanContains(this->ModulesIsotypicallyMerged[l], theElt))
+            { indexContainingLieBracket=l;
+              break;
+            }
+          if (indexContainingLieBracket==-1)
+          { std::cout << "This is a programming error: Lie bracket of two k-weight elements is not k-weight. "
+            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
+          if (currenFKcandidate[indexContainingLieBracket]!=1 ||
+              this->primalSubalgebraModules.Contains(indexContainingLieBracket))
+            return false;
+        }
+}
+
 void CandidateSSSubalgebra::GetTheTwoCones
-  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws)
+  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
+   Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetTheTwoCones");
   const List<int>& currentFKNilradicalCandidates= this->FKNilradicalCandidates[inputFKIndex];
   outputNilradicalWeights.SetSize(0);
   outputNonFKhws.SetSize(0);
-  std::stringstream out;
+//  std::stringstream out;
   Vector<Rational> tempV;
   for (int i=0; i<currentFKNilradicalCandidates.size; i++)
     if (!this->primalSubalgebraModules.Contains(i))
     { if (currentFKNilradicalCandidates[i]==0)
-      { outputNonFKhws.AddOnTop(this->HighestWeightsPrimal[i]);
-        out << "<br>V_" << i+1 << " h.w.: " << this->HighestWeightsPrimal[i].ToString(&this->charFormaT.GetElement());
+      { outputNonFKhws.AddOnTopNoRepetition(this->HighestWeightsPrimal[i]);
+//        out << "<br>V_" << i+1 << " h.w.: " << this->HighestWeightsPrimal[i].ToString(&this->charFormaT.GetElement());
       } else if (currentFKNilradicalCandidates[i]==1)
         for (int j=0; j<this->Modules[i][0].size; j++)
         { ElementSemisimpleLieAlgebra<Rational>& curEl=this->Modules[i][0][j];
           this->GetPrimalWeightProjectionFundCoords
           (this->GetAmbientSS().GetWeightOfGenerator(curEl[0].theGeneratorIndex), tempV);
-          outputNilradicalWeights.AddOnTop(tempV);
+          outputNilradicalWeights.AddOnTopNoRepetition(tempV);
+          if (outputStronglyTwoSidedWeights!=0)
+            if (this->IsStronglyTwoSided(inputFKIndex, i, theGlobalVariables))
+              outputStronglyTwoSidedWeights->AddOnTop(tempV);
         }
     }
-  out << "<br>";
-  this->FKnilradicalLogs[inputFKIndex]=out.str();
+//  out << "<br>";
+//  this->FKnilradicalLogs[inputFKIndex]=out.str();
 }
 
 void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
@@ -1086,15 +1173,26 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   this->ConeSeparatingNormals.initFillInObject(this->FKNilradicalCandidates.size, emptyVector);
   this->theNilradicalWeights.SetSize(this->FKNilradicalCandidates.size);
   this->theNonFKhws.SetSize(this->FKNilradicalCandidates.size);
+  this->theNonFKhwsStronglyTwoSided.SetSize(this->FKNilradicalCandidates.size);
   this->FKnilradicalLogs.SetSize(this->FKNilradicalCandidates.size);
   for (int i=0; i<this->NilradicalConesIntersect.size; i++)
-  { this->GetTheTwoCones(i, this->theNilradicalWeights[i], this->theNonFKhws[i]);
-    this->NilradicalConesIntersect[i]=this->theNilradicalWeights[i].ConesIntersect
-    (this->theNilradicalWeights[i], this->theNonFKhws[i], &this->ConeIntersections[i],
-     &this->ConeSeparatingNormals[i], theGlobalVariables);
-  }
+    this->ProcessOneNilradical(i, theGlobalVariables);
 //  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
+}
+
+void CandidateSSSubalgebra::ProcessOneNilradical(int theIndex, GlobalVariables* theGlobalVariables)
+{ this->GetTheTwoCones
+  (theIndex, this->theNilradicalWeights[theIndex], this->theNonFKhws[theIndex],
+   &this->theNonFKhwsStronglyTwoSided[theIndex], theGlobalVariables);
+  this->NilradicalConesIntersect[theIndex]=this->theNilradicalWeights[theIndex].ConesIntersect
+  (this->theNilradicalWeights[theIndex], this->theNonFKhws[theIndex], &this->ConeIntersections[theIndex],
+  &this->ConeSeparatingNormals[theIndex], theGlobalVariables);
+//  if (!this->NilradicalConesIntersect[theIndex])
+//    return;
+//  Vectors<Rational>& currentNilrad=this->theNilradicalWeights[theIndex];
+
+
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection)
@@ -1184,11 +1282,18 @@ void CandidateSSSubalgebra::ExtendNilradicalSelectionToMultFreeOverSSpartSubalge
 
 void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
 (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream)
-{ RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateNilradicalsRecursively");
+  RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
   if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size+1)
   { std::cout << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot "
     << "exceed the number of nilradicals! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
+  }
+  ProgressReport theReport(theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { std::stringstream out;
+    out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
+    theReport.Report(out.str());
   }
   if (!this->IsPossibleNilradicalCarryOutSelectionImplications(theSelection, theGlobalVariables, logStream))
     return;
@@ -2848,9 +2953,12 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   out << "Isotypic module decomposition over primal subalgebra (total "
   << this->Modules.size << " isotypic components). ";
   out << "<table border=\"1\"><tr><td>Module highest weight in fund. coords. and label</td>";
+  FormatExpressions tempCharFormat;
+  if (!this->charFormaT.IsZeroPointer())
+    tempCharFormat= this->charFormaT.GetElementConst();
   for (int i=0; i<this->thePrimalChar.size; i++)
-    out << "<td>" << "V_{" << i+1 << "}="
-    << this->thePrimalChar[i].ToString() << "</td>";
+    out << "<td>" << "V_{" << i+1 << "}->"
+    << this->thePrimalChar[i].weightFundamentalCoords.ToString(&tempCharFormat) << "</td>";
   out << "</tr><tr><td>Module elements; all elements are weight vectors w.r.t. Cartan of subalgebra</td>";
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td><table border=\"1\"><tr>";
@@ -2912,9 +3020,10 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     if (this->NilradicalConesIntersect[i])
       numConeIntersections++;
-  out << "<br>Possible isotypic nilradical extensions of the primal extension of the semisimple subalgebra: "
-  << this->FKNilradicalCandidates.size << " = " << numConeIntersections << " with intersecing cones and "
-  << this->FKNilradicalCandidates.size-numConeIntersections << " non-intersecting cones. ";
+  out << "<br>There are " << this->FKNilradicalCandidates.size
+  << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
+  << numConeIntersections << " have intersecting cones and "
+  << this->FKNilradicalCandidates.size-numConeIntersections << " have non-intersecting cones. ";
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
   { out << "<hr>Subalgebra " << i+1 << ": ";
     out << this->FKnilradicalLogs[i];
@@ -2928,8 +3037,16 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
     << "; highest weight cone: " << this->theNonFKhws[i].ToString() << ". ";
     if (this->NilradicalConesIntersect[i])
-      out << "Cone intersection: " << this->ConeIntersections[i].ToStringLetterFormat("w");
-    else
+    { out << "<br>Cone intersection: " << this->ConeIntersections[i].ToStringLetterFormat("w");
+      out << "<br> ";
+      FormatExpressions tempFormat;
+      tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeIntersections[i].size);
+      for (int j=0; j<this->theNilradicalWeights[i].size; j++)
+        tempFormat.vectorSpaceEiBasisNames[j]=this->theNilradicalWeights[i][j].ToString();
+      for (int j=0; j<this->theNonFKhws[i].size; j++)
+        tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights[i].size]=this->theNonFKhws[i][j].ToString();
+      out << this->ConeIntersections[i].ToStringLetterFormat("w", &tempFormat);
+    } else
       out << "Separating hyperplane: " << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
   }
   if (this->nilradicalGenerationLog!="")
@@ -2982,9 +3099,12 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   }
   out << theSAvector.ToStringLetterFormat("V");
   out << "<br><table><tr><td>Modules</td>";
+  FormatExpressions tempCharFormat;
+  if (!this->charFormaT.IsZeroPointer())
+    tempCharFormat= this->charFormaT.GetElementConst();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
     out << "<td><b>" << "V_{" << i+1 << "}="
-    << this->thePrimalChar[i].ToString() << "</b></td>";
+    << this->thePrimalChar[i].ToString(&tempCharFormat) << "</b></td>";
   out << "</tr>";
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
   { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
@@ -3000,7 +3120,37 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
     out << "</tr>";
   }
   out << "</table>";
-  out << this->ToStringNilradicals(theFormat);
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringOneSidedTable(FormatExpressions* theFormat)const
+{ if (!this->OneSidedPairingTable.size>0 || !this->owner->flagDoComputeNilradicals)
+    return "";
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringOneSidedTable");
+  std::stringstream out;
+  out << "<br>Below is the one-sided table. Let A, B be two isotypic components in the module decomposition<br>"
+  << "of the ambient Lie algebra over the primal subalgebra. Then we define the one-sided pairing of A and B to be "
+  << " the isotypic component spanned by the elements [a', b], as a' runs over the highest weight vectors of A and "
+  << " b runs over all elements of B.";
+  out << "<br><table><tr><td>Modules</td>";
+  for (int i=0; i<this->OneSidedPairingTable.size; i++)
+    out << "<td><b>" << "V_{" << i+1 << "}-> "
+    << this->thePrimalChar[i].weightFundamentalCoords.ToString() << "</b></td>";
+  out << "</tr>";
+  for (int i=0; i<this->OneSidedPairingTable.size; i++)
+  { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
+    for (int j=0; j<this->OneSidedPairingTable.size; j++)
+    { out << "<td>";
+      for (int k=0; k<this->OneSidedPairingTable[i][j].size; k++)
+      { out << "V_{" << this->OneSidedPairingTable[j][i][k]+1 << "}";
+        if (k!=this->OneSidedPairingTable[i][j].size-1)
+          out << ", ";
+      }
+      out << "</td>";
+    }
+    out << "</tr>";
+  }
+  out << "</table>";
   return out.str();
 }
 
@@ -3356,6 +3506,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (!shortReportOnly)
   { out << this->ToStringModuleDecompo(theFormat);
     out << this->ToStringPairingTable(theFormat);
+    out << this->ToStringOneSidedTable(theFormat);
+    out << this->ToStringNilradicals(theFormat);
+
   }
   return out.str();
 }
@@ -3577,14 +3730,14 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
   theReport1.Report("<hr>\nComputing pairing tables.");
   if (this->flagDoComputePairingTable)
     for (int i=0; i<this->Hcandidates.size; i++)
-      if (this->Hcandidates[i].flagCentralizerIsWellChosen &&
-          this->Hcandidates[i].flagSystemSolved)
+      if (this->Hcandidates[i].flagCentralizerIsWellChosen && this->Hcandidates[i].flagSystemSolved)
       { std::stringstream reportStream2;
         reportStream2 << "Computing pairing table of subalgebra number " << i+1 << " out of "
         << this->Hcandidates.size << ". The subalgebra is of type " << this->Hcandidates[i].ToStringTypeAndHs() << ". ";
         theReport2.Report(reportStream2.str());
         this->Hcandidates[i].ComputePairingTable(theGlobalVariables);
-        if (this->flagDoComputeNilradicals)
+        //int fixMe;
+        if (this->flagDoComputeNilradicals)// && this->Hcandidates[i].Modules.size<15)
           this->Hcandidates[i].EnumerateAllNilradicals(theGlobalVariables);
       }
 }

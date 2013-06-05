@@ -249,6 +249,7 @@ public:
   Vectors<Rational> ConeSeparatingNormals;
   List<Vectors<Rational> > theNilradicalWeights;
   List<Vectors<Rational> > theNonFKhws;
+  List<Vectors<Rational> > theNonFKhwsStronglyTwoSided;
 
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
@@ -264,6 +265,7 @@ public:
   List<Vectors<Rational> > WeightsModulesPrimal;
 
   List<List<List<int> > > NilradicalPairingTable;
+  List<List<List<int> > > OneSidedPairingTable;
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModules;
@@ -303,8 +305,11 @@ public:
   ;
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
 ;
+  void ProcessOneNilradical(int theIndex, GlobalVariables* theGlobalVariables);
+  bool IsStronglyTwoSided(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables);
   void GetTheTwoCones
-  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws)
+  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
+   Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
 ;
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively
@@ -321,9 +326,14 @@ public:
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
+  void ComputeOneSidedTable(GlobalVariables* theGlobalVariables);
   void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
+;
+  void ComputePairKweightElementAndModule
+(const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex,
+ List<int>& output, GlobalVariables* theGlobalVariables)
 ;
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -373,6 +383,7 @@ public:
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
+  std::string ToStringOneSidedTable(FormatExpressions* theFormat=0)const;
   std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   bool operator>(const CandidateSSSubalgebra& other)const ;

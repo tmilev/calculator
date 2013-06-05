@@ -5032,11 +5032,11 @@ bool Expression::ToStringData
   } else if (this->IsOfType<SemisimpleSubalgebras>())
   { SemisimpleSubalgebras& theSubalgebras=
     this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
-//    FormatExpressions tempFormat;
-//    tempFormat.flagUseLatex=true;
-//    tempFormat.flagUseHTML=true;
-//    tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-    out << theSubalgebras.ToString();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=true;
+    tempFormat.flagCandidateSubalgebraShortReportOnly=false;
+    out << theSubalgebras.ToString(&tempFormat);
     result=true;
   } else if (this->IsOfType<double>())
   { out << this->GetValuENonConstUseWithCaution<double>();

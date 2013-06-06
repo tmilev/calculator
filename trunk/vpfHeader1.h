@@ -11,7 +11,7 @@
 //1. C++ objects that represent mathematically equal objects
 //   are allowed to have different bit representations in RAM memory.
 //2. Mathematically equal objects must have their object::HashFunction return identical
-//   values for mathematically identical objects, even if they are bitwise different.
+//   values, even if the objects have bitwise different representations in RAM.
 //3. Mathematical objects representing 0 in an abelian group
 //   must have their hash function return 0.
 //
@@ -1979,7 +1979,7 @@ public:
     this->MultiplyOnTheLeft(temp);
   }
   void NonPivotPointsToEigenVectorMatrixForm
-  (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+  (Selection& TheNonPivotPoints, Matrix<Element>& output)
 ;
   void GetVectorsFromRows(List<Vector<Element> >& output)
   { output.SetSize(this->NumRows);
@@ -3829,17 +3829,8 @@ static void ProjectOntoHyperPlane
     return false;
   }
   bool GetCoordsInBasiS
-  (const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
-  Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
-  const coefficient& theRingUnit=1, const coefficient& theRingZero=0)const
+  (const Vectors<coefficient>& inputBasis, Vector<coefficient>& output)const
    ;
-  bool GetCoordsInBasiS
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
- const coefficient& theRingUnit=1, const coefficient& theRingZero=0)const
-  { Vectors<coefficient> buffer;
-    Matrix<coefficient> matBuffer;
-    return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
-  }
   Vector<coefficient> GetProjectivizedNormal(Vector<coefficient>& affinePoint);
   Vector<coefficient> operator*(const coefficient& other)const
   { Vector<coefficient> result;
@@ -4376,7 +4367,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
   void GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension)const;
   //the below function returns a n row 1 column matrix with the coefficients in the obvious order
   bool GetLinearDependence
-  (Matrix<coefficient>& outputTheLinearCombination, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
+  (Matrix<coefficient>& outputTheLinearCombination)
   ;
   void GetLinearDependenceRunTheLinearAlgebra
   (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
@@ -7675,8 +7666,7 @@ bool Vectors<coefficient>::GetCoordsInBasis
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
-    if (!(*this)[i].GetCoordsInBasiS
-    (inputBasis, outputCoords[i], bufferVectors, bufferMat, theRingUnit, theRingZero))
+    if (!(*this)[i].GetCoordsInBasiS(inputBasis, outputCoords[i]))
       return false;
   return true;
 }
@@ -7726,14 +7716,22 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
 
 template <class coefficient>
 bool Vector<coefficient>::GetCoordsInBasiS
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
- Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
- const coefficient& theRingUnit, const coefficient& theRingZero)const
-{ bufferVectors.size=0;
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output)const
+{ if(inputBasis.size==0)
+    return false;
+  MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
+  Vectors<coefficient> bufferVectors;
+  Matrix<coefficient> bufferMat;
+  if (this->size!=inputBasis[0].size)
+  { std::cout << "This is a programming error: asking to get coordinates of vector of " << this->size
+    << " coordinates using a basis whose first vector has " << inputBasis[0].size << " coordinates."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  }
+  bufferVectors.ReservE(inputBasis.size+1);
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
 //  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
-  if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
+  if(!bufferVectors.GetLinearDependence(bufferMat))
     return false;
   //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
@@ -7752,21 +7750,21 @@ bool Vector<coefficient>::GetCoordsInBasiS
 template <class coefficient>
 void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra
   (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
-{ if (this->size==0)
+{ MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
+  if (this->size==0)
     return;
-  int Dimension=(int) this->TheObjects[0].size;
+  int Dimension=(int) (*this)[0].size;
   outputTheSystem.init(Dimension, (int)this->size);
   for(int i=0; i<this->size; i++)
     for(int j=0; j<Dimension; j++)
-      outputTheSystem.elements[j][i]=(this->TheObjects[i][j]);
+      outputTheSystem(j,i)=(*this)[i][j];
   //outputTheSystem.ComputeDebugString();
   Matrix<coefficient>::GaussianEliminationByRows(outputTheSystem, 0, &outputNonPivotPoints);
   //outputTheSystem.ComputeDebugString();
 }
 
 template <class coefficient>
-bool Vectors<coefficient>::GetLinearDependence
-  (Matrix<coefficient>& outputTheLinearCombination, const coefficient& theRingUnit, const coefficient& theRingZero)
+bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination)
 { Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
@@ -7774,26 +7772,24 @@ bool Vectors<coefficient>::GetLinearDependence
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
 //  outputTheLinearCombination.ComputeDebugString();
-  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination, theRingUnit, theRingZero);
+  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
   //outputTheLinearCombination.ComputeDebugString();
   return true;
 }
 
 template<typename Element>
 void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm
-(Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+(Selection& TheNonPivotPoints, Matrix<Element>& output)
 { int RowCounter=0;
   output.init(this->NumCols, 1);
   for (int i=0; i<this->NumCols; i++)
-  { if (!TheNonPivotPoints.selected[i])
-    { output.elements[i][0]=theRingZero;
+    if (!TheNonPivotPoints.selected[i])
+    { output(i,0)=0;
       for (int j=0; j<TheNonPivotPoints.CardinalitySelection; j++)
-        output.elements[i][0]-=(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
+        output(i,0)-=(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
       RowCounter++;
-    }
-    else
-      output.elements[i][0]=theRingUnit;
-  }
+    } else
+      output(i,0)=1;
 }
 
 template<typename Element>
@@ -7803,13 +7799,12 @@ void Matrix<Element>::NonPivotPointsToEigenVector
   output.SetSize(this->NumCols);
   for (int i=0; i<this->NumCols; i++)
   { if (!TheNonPivotPoints.selected[i])
-    { output.TheObjects[i]=theRingZero;
+    { output[i]=theRingZero;
       for (int j=0; j<TheNonPivotPoints.CardinalitySelection; j++)
-        output.TheObjects[i]-=(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
+        output[i]-=(this->elements[RowCounter][TheNonPivotPoints.elements[j]]);
       RowCounter++;
-    }
-    else
-      output.TheObjects[i]=theRingUnit;
+    } else
+      output[i]=theRingUnit;
   }
 }
 

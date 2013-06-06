@@ -2588,19 +2588,6 @@ void ElementSemisimpleLieAlgebra<coefficient>::GetBasisFromSpanOfElements
 
 }
 
-template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis
-(const List<ElementSemisimpleLieAlgebra>& theBasis,
- Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
-{ Vectors<Rational> tempBasis;
-  Vector<Rational> tempRoot;
-  tempBasis.SetSize(theBasis.size);
-  for (int i=0 ; i<theBasis.size; i++)
-    theBasis.TheObjects[i].ElementToVectorNegativeRootSpacesFirst(tempBasis.TheObjects[i]);
-  this->ElementToVectorNegativeRootSpacesFirst(tempRoot);
-  return tempRoot.GetCoordsInBasiS(tempBasis, output, (Rational) 1, (Rational) 0);
-}
-
 bool RationalFunctionOld::gcdQuicK
 (const Polynomial<Rational>& left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
 { if (left.TotalDegree()>1 && right.TotalDegree()>1)

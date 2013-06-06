@@ -213,6 +213,8 @@ public:
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theBasis;
+  List<ElementSemisimpleLieAlgebra<Rational> > fullBasisByModules;
+  List<int> fullBasisOwnerModules;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownCartanCentralizerBasis;

@@ -9081,6 +9081,26 @@ void ModuleSSalgebra<coefficient>::GetElementsNilradical
 }
 
 template <class coefficient>
+bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis
+(const List<ElementSemisimpleLieAlgebra>& theBasis,
+ Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
+{ if (theBasis.size==0)
+    return false;
+  if (this->IsEqualToZero())
+  { output.MakeZero(theBasis.size);
+    return true;
+  }
+  MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::GetCoordsInBasis");
+  Vectors<Rational> tempBasis;
+  Vector<Rational> tempRoot;
+  tempBasis.SetSize(theBasis.size);
+  for (int i=0 ; i<theBasis.size; i++)
+    theBasis[i].ElementToVectorNegativeRootSpacesFirst(tempBasis[i]);
+  this->ElementToVectorNegativeRootSpacesFirst(tempRoot);
+  return tempRoot.GetCoordsInBasiS(tempBasis, output);
+}
+
+template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator
   (int generatorIndex, SemisimpleLieAlgebra& inputOwner)
 { //Changing RootSystem order invalidates this function!

@@ -939,6 +939,21 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     }// else
     //std::cout << "... aint no cartan no centralizer. ";
   //}
+  this->fullBasisByModules.SetSize(0);
+  this->fullBasisOwnerModules.SetSize(0);
+  this->fullBasisByModules.ReservE(this->GetAmbientSS().GetNumGenerators());
+  this->fullBasisOwnerModules.ReservE(this->GetAmbientSS().GetNumGenerators());
+  for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
+    for (int j=0; j<this->ModulesIsotypicallyMerged[i].size; j++)
+    { this->fullBasisByModules.AddOnTop(this->ModulesIsotypicallyMerged[i][j]);
+      this->fullBasisOwnerModules.AddOnTop(i);
+    }
+  if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
+  { std::cout << "This is a programming error: the full basis by modules does not have same number of elements "
+    << " as the number of generators of the ambient Lie algebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   this->WeightsModulesNONprimal.SetSize(this->Modules.size);
   this->WeightsModulesPrimal.SetSize(this->Modules.size);
   Vector<Rational> theProjection, thePrimalProjection;
@@ -985,6 +1000,13 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule
   List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
   ElementSemisimpleLieAlgebra<Rational> theLieBracket;
   ProgressReport theReport(theGlobalVariables);
+  Vector<Rational> coordsInFullBasis;
+  output.SetSize(0);
+  if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
+  { std::cout << "This is a programming error: fullBasisByModules not computed when it should be. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int j=0; j<rightModule.size; j++)
   { this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
     if (theGlobalVariables!=0)
@@ -992,20 +1014,17 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule
       reportStream << "Bracketing index " << j+1 << " with input element. ";
       theReport.Report(reportStream.str());
     }
-    bool found=false;
-    if (!theLieBracket.IsEqualToZero())
-      for (int k=0; k<this->ModulesIsotypicallyMerged.size; k++)
-        if (theLieBracket.LinSpanContains(this->ModulesIsotypicallyMerged[k], theLieBracket))
-        { output.AddOnTopNoRepetition(k);
-          found=true;
-          break;
-        }
-      if (!found)
-      { std::cout << "This is a programming error: Lie brakcet of two k-weight vectors fails to be "
-        << "k-weight vector. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+    bool tempbool=theLieBracket.GetCoordsInBasis(this->fullBasisByModules, coordsInFullBasis, *theGlobalVariables);
+    if (!tempbool)
+    { std::cout  << "This is a programming error: something has gone very wrong: my k-weight basis "
+      << this->fullBasisByModules.ToString() << " does not contain " << theLieBracket.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
+    for (int i=0; i<coordsInFullBasis.size; i++)
+      if (!coordsInFullBasis[i].IsEqualToZero())
+        output.AddOnTopNoRepetition(this->fullBasisOwnerModules[i]);
+  }
 }
 
 void CandidateSSSubalgebra::ComputeSinglePair
@@ -1056,6 +1075,8 @@ void CandidateSSSubalgebra::ComputeOneSidedTable(GlobalVariables* theGlobalVaria
 void CandidateSSSubalgebra::ComputePairingTable
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTable");
+  if (!this->flagCentralizerIsWellChosen)
+    return;
   ProgressReport theReport(theGlobalVariables);
   this->ComputePairingTablePreparation(theGlobalVariables);
   this->NilradicalPairingTable.SetSize(this->ModulesIsotypicallyMerged.size);
@@ -1090,8 +1111,7 @@ void CandidateSSSubalgebra::ComputePairingTable
     for (int j=0; j<this->NilradicalPairingTable[i].size; j++)
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
         if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
-          if (!(this->primalSubalgebraModules.Contains(i) &&
-                this->primalSubalgebraModules.Contains(j)))
+          if (!(this->primalSubalgebraModules.Contains(i) && this->primalSubalgebraModules.Contains(j)))
             this->OppositeModules[i].AddOnTopNoRepetition(j);
 }
 

@@ -686,10 +686,8 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
 { assert(&input!=&output);
   Vectors<Rational> theBasis;
   Vector<Rational> tempRoot;
-  Vectors<Rational> bufferVect;
-  Matrix<Rational> bufferMat;
   theBasis.AssignMatrixRows(this->basisRationalForm);
-  input.GetCoordsInBasiS(theBasis, tempRoot, bufferVect, bufferMat);
+  input.GetCoordsInBasiS(theBasis, tempRoot);
   tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
   Matrix<Rational>  tempMat;
   tempMat=this->basisRationalForm;
@@ -820,10 +818,9 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
 (Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
 { Vector<Rational> coordsInBasis;
   coneContainingOutputPoint.GetInternalPoint(output);
-  Vectors<Rational> basisRoots, bufferVect;
-  Matrix<Rational> bufferMat;
+  Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
-  if (!output.GetCoordsInBasiS(basisRoots, coordsInBasis, bufferVect, bufferMat))
+  if (!output.GetCoordsInBasiS(basisRoots, coordsInBasis))
     return false;
   Rational maxCoord=coordsInBasis[0];
   if (maxCoord<0)
@@ -3182,7 +3179,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)const
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
   //std::cout <<  "the basis: " << basisRoots.ToString();
-  if (!theVector.GetCoordsInBasiS(basisRoots, output, (Rational) 1, (Rational) 0))
+  if (!theVector.GetCoordsInBasiS(basisRoots, output))
   { std::cout << "oops bad!";
     assert(false);
     return false;

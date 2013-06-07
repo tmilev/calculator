@@ -810,6 +810,8 @@ class DynkinSimpleType
       inputRank=4;
     if (inputLetter=='E' && inputRank>8)
       inputRank=8;
+    if (inputRank==1)
+      inputLetter='A';
     this->theRank=inputRank;
     this->theLetter=inputLetter;
     this->lengthFirstCoRootSquared=inputLengthFirstCorRootSquared;

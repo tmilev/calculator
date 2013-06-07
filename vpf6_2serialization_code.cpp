@@ -266,6 +266,8 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
     return false;
   }
+  if (theRank==1)
+    theWeylLetter='A';
   outputMon.MakeArbitrary(theWeylLetter, theRank);
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
   return true;
@@ -430,14 +432,14 @@ bool CommandList::EvaluatePMTDtree
 bool Serialization::innerSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
-  return Serialization::innerLoadFromObject(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
+  return Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
 }
 
-bool Serialization::innerLoadFromObject
+bool Serialization::innerLoadSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output,
  SemisimpleLieAlgebra** outputPointer)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::innerLoadFromObject SemisimpleLieAlgebra");
+  MacroRegisterFunctionWithName("CommandList::innerLoadSSLieAlgebra");
   //std::cout << "<br>Now I'm here!";
   if (!Serialization::innerPolynomial(theCommands, input, output))
     return output.SetError
@@ -841,7 +843,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
     return false;
   }
   SemisimpleLieAlgebra* ownerSS;
-  if (!Serialization::innerLoadFromObject(theCommands, input[1], output, &ownerSS))
+  if (!Serialization::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
   { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple "
     << " Lie algebra. ";
     return false;

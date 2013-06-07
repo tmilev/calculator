@@ -1902,7 +1902,7 @@ static bool innerLoadFromObject
 static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, RationalFunctionOld& output)
 ;
-static bool innerLoadFromObject
+static bool innerLoadSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output,
  SemisimpleLieAlgebra** outputPointer=0)
 ;

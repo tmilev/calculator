@@ -308,7 +308,7 @@ public:
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
 ;
   void ProcessOneNilradical(int theIndex, GlobalVariables* theGlobalVariables);
-  bool IsStronglyTwoSided(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables);
+  bool IsStronglySingular(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables);
   void GetTheTwoCones
   (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
    Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)

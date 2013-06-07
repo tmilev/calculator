@@ -1115,32 +1115,14 @@ void CandidateSSSubalgebra::ComputePairingTable
             this->OppositeModules[i].AddOnTopNoRepetition(j);
 }
 
-bool CandidateSSSubalgebra::IsStronglyTwoSided(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables)
-{ return true;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > >& currentModule=this->Modules[moduleIndex];
-  const List<int>& currenFKcandidate=this->FKNilradicalCandidates[nilradIndex];
-  std::stringstream out;
-  ElementSemisimpleLieAlgebra<Rational> theElt;
-  for (int i=0; i<currentModule.size; i++)
-    for (int j=0; j<currenFKcandidate.size; j++)
-      if (currenFKcandidate[j]==1 && !this->primalSubalgebraModules.Contains(i))
-        for (int k=0; k<this->ModulesIsotypicallyMerged[j].size; k++)
-        { this->GetAmbientSS().LieBracket(currentModule[i][0], this->ModulesIsotypicallyMerged[j][k], theElt);
-          int indexContainingLieBracket=-1;
-          for (int l=0; l<this->ModulesIsotypicallyMerged.size; l++)
-            if (theElt.LinSpanContains(this->ModulesIsotypicallyMerged[l], theElt))
-            { indexContainingLieBracket=l;
-              break;
-            }
-          if (indexContainingLieBracket==-1)
-          { std::cout << "This is a programming error: Lie bracket of two k-weight elements is not k-weight. "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
-          if (currenFKcandidate[indexContainingLieBracket]!=1 ||
-              this->primalSubalgebraModules.Contains(indexContainingLieBracket))
-            return false;
-        }
+bool CandidateSSSubalgebra::IsStronglySingular(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables)
+{ const List<int>& currentFKcandidate=this->FKNilradicalCandidates[nilradIndex];
+  for (int i=0; i<currentFKcandidate.size; i++)
+    if (currentFKcandidate[i]==1 && !this->primalSubalgebraModules.Contains(i))
+      for (int j=0; j<this->OneSidedPairingTable[moduleIndex][i].size; j++)
+        if (currentFKcandidate[this->OneSidedPairingTable[moduleIndex][i][j]]!=1)
+          return false;
+  return true;
 }
 
 void CandidateSSSubalgebra::GetTheTwoCones
@@ -1151,22 +1133,16 @@ void CandidateSSSubalgebra::GetTheTwoCones
   outputNilradicalWeights.SetSize(0);
   outputNonFKhws.SetSize(0);
 //  std::stringstream out;
-  Vector<Rational> tempV;
   for (int i=0; i<currentFKNilradicalCandidates.size; i++)
     if (!this->primalSubalgebraModules.Contains(i))
     { if (currentFKNilradicalCandidates[i]==0)
       { outputNonFKhws.AddOnTopNoRepetition(this->HighestWeightsPrimal[i]);
+        if (outputStronglyTwoSidedWeights!=0)
+          if (this->IsStronglySingular(inputFKIndex, i, theGlobalVariables))
+            outputStronglyTwoSidedWeights->AddOnTop(this->HighestWeightsPrimal[i]);
 //        out << "<br>V_" << i+1 << " h.w.: " << this->HighestWeightsPrimal[i].ToString(&this->charFormaT.GetElement());
       } else if (currentFKNilradicalCandidates[i]==1)
-        for (int j=0; j<this->Modules[i][0].size; j++)
-        { ElementSemisimpleLieAlgebra<Rational>& curEl=this->Modules[i][0][j];
-          this->GetPrimalWeightProjectionFundCoords
-          (this->GetAmbientSS().GetWeightOfGenerator(curEl[0].theGeneratorIndex), tempV);
-          outputNilradicalWeights.AddOnTopNoRepetition(tempV);
-          if (outputStronglyTwoSidedWeights!=0)
-            if (this->IsStronglyTwoSided(inputFKIndex, i, theGlobalVariables))
-              outputStronglyTwoSidedWeights->AddOnTop(tempV);
-        }
+        outputNilradicalWeights.AddOnTopNoRepetition(this->WeightsModulesPrimal[i]);
     }
 //  out << "<br>";
 //  this->FKnilradicalLogs[inputFKIndex]=out.str();
@@ -3056,6 +3032,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
       out << ". Cones don't intersect. ";
     out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
     << "; highest weight cone: " << this->theNonFKhws[i].ToString() << ". ";
+    out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided[i].ToString();
     if (this->NilradicalConesIntersect[i])
     { out << "<br>Cone intersection: " << this->ConeIntersections[i].ToStringLetterFormat("w");
       out << "<br> ";

@@ -1046,32 +1046,6 @@ void CandidateSSSubalgebra::ComputeSinglePair
   }
 }
 
-void CandidateSSSubalgebra::ComputeOneSidedTable(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeOneSidedTable");
-  if (!this->owner->flagDoComputeNilradicals)
-    return;
-  ProgressReport theReport(theGlobalVariables);
-  this->OneSidedPairingTable.SetSize(this->ModulesIsotypicallyMerged.size);
-  for (int i=0; i<this->NilradicalPairingTable.size; i++)
-    this->OneSidedPairingTable[i].SetSize(this->ModulesIsotypicallyMerged.size);
-  List<int> tempList;
-  if (this->owner->flagDoComputeNilradicals)
-    for (int i=0; i<this->OneSidedPairingTable.size; i++)
-      for (int j=0; j<this->OneSidedPairingTable.size; j++)
-      { if (theGlobalVariables!=0)
-        { std::stringstream reportStream;
-          reportStream << "One-sided pairing of indices " << i+1 << " and " << j+1 << " out of "
-          << this->NilradicalPairingTable.size << ".";
-          theReport.Report(reportStream.str());
-        }
-        this->OneSidedPairingTable[i][j].SetSize(0);
-        for (int k=0; k<this->Modules[i].size; k++)
-        { this->ComputePairKweightElementAndModule(this->Modules[i][k][0], j, tempList, theGlobalVariables);
-          this->OneSidedPairingTable[i][j].AddOnTopNoRepetition(tempList);
-        }
-      }
-}
-
 void CandidateSSSubalgebra::ComputePairingTable
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTable");
@@ -1094,7 +1068,6 @@ void CandidateSSSubalgebra::ComputePairingTable
       if (j>i)
         this->NilradicalPairingTable[j][i]=this->NilradicalPairingTable[i][j];
     }
-  this->ComputeOneSidedTable(theGlobalVariables);
   this->modulesWithZeroWeights.Clear();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
   { List<ElementSemisimpleLieAlgebra<Rational> >& currentMod=
@@ -1119,8 +1092,8 @@ bool CandidateSSSubalgebra::IsStronglySingular(int nilradIndex, int moduleIndex,
 { const List<int>& currentFKcandidate=this->FKNilradicalCandidates[nilradIndex];
   for (int i=0; i<currentFKcandidate.size; i++)
     if (currentFKcandidate[i]==1 && !this->primalSubalgebraModules.Contains(i))
-      for (int j=0; j<this->OneSidedPairingTable[moduleIndex][i].size; j++)
-        if (currentFKcandidate[this->OneSidedPairingTable[moduleIndex][i][j]]!=1)
+      for (int j=0; j<this->NilradicalPairingTable[moduleIndex][i].size; j++)
+        if (currentFKcandidate[this->NilradicalPairingTable[moduleIndex][i][j]]!=1)
           return false;
   return true;
 }
@@ -2981,7 +2954,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i=0; i<this->WeightsModulesNONprimal.size; i++)
   { out << "<td>";
     for (int j=0; j<this->WeightsModulesNONprimal[i].size; j++)
-    { out << this->WeightsModulesNONprimal[i][j].ToStringLetterFormat("\\omega");
+    { out << this->WeightsModulesNONprimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat);
       if (j!=this->WeightsModulesNONprimal[i].size-1)
         out << "<br>";
     }
@@ -2993,7 +2966,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i=0; i<this->WeightsModulesPrimal.size; i++)
   { out << "<td>";
     for (int j=0; j<this->WeightsModulesPrimal[i].size; j++)
-    { out << this->WeightsModulesPrimal[i][j].ToStringLetterFormat("\\omega");
+    { out << this->WeightsModulesPrimal[i][j].ToStringLetterFormat("\\omega", &tempCharFormat);
       if (j!=this->WeightsModulesPrimal[i].size-1)
         out << "<br>";
     }
@@ -3100,8 +3073,9 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   if (!this->charFormaT.IsZeroPointer())
     tempCharFormat= this->charFormaT.GetElementConst();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-    out << "<td><b>" << "V_{" << i+1 << "}="
-    << this->thePrimalChar[i].ToString(&tempCharFormat) << "</b></td>";
+    out << "<td><b>" << "V_{" << i+1 << "}"
+//    << "=" << this->thePrimalChar[i].ToString(&tempCharFormat)
+    << "</b></td>";
   out << "</tr>";
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
   { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
@@ -3110,37 +3084,6 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
       { out << "V_{" << this->NilradicalPairingTable[j][i][k]+1 << "}";
         if (k!=this->NilradicalPairingTable[i][j].size-1)
-          out << ", ";
-      }
-      out << "</td>";
-    }
-    out << "</tr>";
-  }
-  out << "</table>";
-  return out.str();
-}
-
-std::string CandidateSSSubalgebra::ToStringOneSidedTable(FormatExpressions* theFormat)const
-{ if (!this->OneSidedPairingTable.size>0 || !this->owner->flagDoComputeNilradicals)
-    return "";
-  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringOneSidedTable");
-  std::stringstream out;
-  out << "<br>Below is the one-sided table. Let A, B be two isotypic components in the module decomposition<br>"
-  << "of the ambient Lie algebra over the primal subalgebra. Then we define the one-sided pairing of A and B to be "
-  << " the isotypic component spanned by the elements [a', b], as a' runs over the highest weight vectors of A and "
-  << " b runs over all elements of B.";
-  out << "<br><table><tr><td>Modules</td>";
-  for (int i=0; i<this->OneSidedPairingTable.size; i++)
-    out << "<td><b>" << "V_{" << i+1 << "}-> "
-    << this->thePrimalChar[i].weightFundamentalCoords.ToString() << "</b></td>";
-  out << "</tr>";
-  for (int i=0; i<this->OneSidedPairingTable.size; i++)
-  { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
-    for (int j=0; j<this->OneSidedPairingTable.size; j++)
-    { out << "<td>";
-      for (int k=0; k<this->OneSidedPairingTable[i][j].size; k++)
-      { out << "V_{" << this->OneSidedPairingTable[j][i][k]+1 << "}";
-        if (k!=this->OneSidedPairingTable[i][j].size-1)
           out << ", ";
       }
       out << "</td>";
@@ -3503,9 +3446,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (!shortReportOnly)
   { out << this->ToStringModuleDecompo(theFormat);
     out << this->ToStringPairingTable(theFormat);
-    out << this->ToStringOneSidedTable(theFormat);
     out << this->ToStringNilradicals(theFormat);
-
   }
   return out.str();
 }

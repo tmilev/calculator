@@ -267,7 +267,6 @@ public:
   List<Vectors<Rational> > WeightsModulesPrimal;
 
   List<List<List<int> > > NilradicalPairingTable;
-  List<List<List<int> > > OneSidedPairingTable;
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModules;
@@ -328,7 +327,6 @@ public:
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputeOneSidedTable(GlobalVariables* theGlobalVariables);
   void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
@@ -385,7 +383,6 @@ public:
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
-  std::string ToStringOneSidedTable(FormatExpressions* theFormat=0)const;
   std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   bool operator>(const CandidateSSSubalgebra& other)const ;

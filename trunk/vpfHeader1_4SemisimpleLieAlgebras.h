@@ -201,6 +201,36 @@ public:
 };
 
 class SemisimpleSubalgebras;
+class CandidateSSSubalgebra;
+
+class NilradicalCandidate
+{
+  public:
+  CandidateSSSubalgebra* owner;
+  std::string FKnilradicalLog;
+  bool NilradicalConesIntersect;
+  bool NilradicalConesStronlyIntersect;
+  //0->not selected; 1->selected; 2->undecided.
+  List<int> theNilradicalSelection;
+  Vector<Rational> ConeIntersection;
+  Vector<Rational> ConeStrongIntersection;
+  Vector<Rational> LInfiniteRelation;
+  Vector<Rational> ConeSeparatingNormal;
+  Vectors<Rational> theNilradicalWeights;
+  Vectors<Rational> theNonFKhws;
+  Vectors<Rational> theNonFKhwsStronglyTwoSided;
+  NilradicalCandidate():owner(0){}
+  void CheckInitialization()const;
+  bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);
+  Vector<Rational> GetConeIntersectionWeight()const;
+  bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
+  void ProcessMe(GlobalVariables* theGlobalVariables);
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  void GetTheTwoCones
+  (Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
+   Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
+  ;
+};
 
 class CandidateSSSubalgebra
 {
@@ -244,14 +274,7 @@ public:
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
-  HashedList<List<int>, MathRoutines::ListIntsHash> FKNilradicalCandidates;
-  List<std::string> FKnilradicalLogs;
-  List<bool> NilradicalConesIntersect;
-  Vectors<Rational> ConeIntersections;
-  Vectors<Rational> ConeSeparatingNormals;
-  List<Vectors<Rational> > theNilradicalWeights;
-  List<Vectors<Rational> > theNonFKhws;
-  List<Vectors<Rational> > theNonFKhwsStronglyTwoSided;
+  List<NilradicalCandidate> FKNilradicalCandidates;
 
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
@@ -275,6 +298,8 @@ public:
   Rational centralizerRank;
 
   CandidateSSSubalgebra();
+  int GetPrimalRank()const;
+
   void GetHsByType
   (List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const
   ;
@@ -305,12 +330,6 @@ public:
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
   ;
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
-;
-  void ProcessOneNilradical(int theIndex, GlobalVariables* theGlobalVariables);
-  bool IsStronglySingular(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables);
-  void GetTheTwoCones
-  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
-   Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
 ;
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively

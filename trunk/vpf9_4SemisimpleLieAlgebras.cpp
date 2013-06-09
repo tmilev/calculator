@@ -1088,34 +1088,63 @@ void CandidateSSSubalgebra::ComputePairingTable
             this->OppositeModules[i].AddOnTopNoRepetition(j);
 }
 
-bool CandidateSSSubalgebra::IsStronglySingular(int nilradIndex, int moduleIndex, GlobalVariables* theGlobalVariables)
-{ const List<int>& currentFKcandidate=this->FKNilradicalCandidates[nilradIndex];
-  for (int i=0; i<currentFKcandidate.size; i++)
-    if (currentFKcandidate[i]==1 && !this->primalSubalgebraModules.Contains(i))
-      for (int j=0; j<this->NilradicalPairingTable[moduleIndex][i].size; j++)
-        if (currentFKcandidate[this->NilradicalPairingTable[moduleIndex][i][j]]!=1)
+int CandidateSSSubalgebra::GetPrimalRank()const
+{ if (!this->flagCentralizerIsWellChosen)
+    return -1;
+  int theRank=0;
+  if (!this->centralizerRank.IsSmallInteger(&theRank))
+    return -1;
+  return theRank+this->theWeylNonEmbeddeD.GetDim();
+}
+
+void NilradicalCandidate::CheckInitialization()const
+{ if (this->owner==0)
+  { std::cout << "This is a programming error: NilradicalCandidate with non-initialized owner"
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
+Vector<Rational> NilradicalCandidate::GetConeIntersectionWeight()const
+{ Vector<Rational> theWeight;
+  theWeight.MakeZero(this->owner->GetPrimalRank());
+  for (int i=0; i<this->theNilradicalWeights.size; i++)
+    theWeight+=this->theNilradicalWeights[i]*this->ConeStrongIntersection[i];
+  return theWeight;
+}
+
+bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
+{ return false;
+}
+
+bool NilradicalCandidate::IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables)
+{ this->CheckInitialization();
+  for (int i=0; i<this->theNilradicalSelection.size; i++)
+    if (this->theNilradicalSelection[i]==1 && !this->owner->primalSubalgebraModules.Contains(i))
+      for (int j=0; j<this->owner->NilradicalPairingTable[moduleIndex][i].size; j++)
+        if (this->theNilradicalSelection[this->owner->NilradicalPairingTable[moduleIndex][i][j]]!=1)
           return false;
   return true;
 }
 
-void CandidateSSSubalgebra::GetTheTwoCones
-  (int inputFKIndex, Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
+void NilradicalCandidate::GetTheTwoCones
+  (Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
    Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetTheTwoCones");
-  const List<int>& currentFKNilradicalCandidates= this->FKNilradicalCandidates[inputFKIndex];
+{ MacroRegisterFunctionWithName("NilradicalCandidate::GetTheTwoCones");
   outputNilradicalWeights.SetSize(0);
   outputNonFKhws.SetSize(0);
+  this->CheckInitialization();
 //  std::stringstream out;
-  for (int i=0; i<currentFKNilradicalCandidates.size; i++)
-    if (!this->primalSubalgebraModules.Contains(i))
-    { if (currentFKNilradicalCandidates[i]==0)
-      { outputNonFKhws.AddOnTopNoRepetition(this->HighestWeightsPrimal[i]);
+  for (int i=0; i<this->theNilradicalSelection.size; i++)
+    if (!this->owner->primalSubalgebraModules.Contains(i))
+    { if (this->theNilradicalSelection[i]==0)
+      { outputNonFKhws.AddOnTopNoRepetition(this->owner->HighestWeightsPrimal[i]);
         if (outputStronglyTwoSidedWeights!=0)
-          if (this->IsStronglySingular(inputFKIndex, i, theGlobalVariables))
-            outputStronglyTwoSidedWeights->AddOnTop(this->HighestWeightsPrimal[i]);
+          if (this->IsStronglySingular(i, theGlobalVariables))
+            outputStronglyTwoSidedWeights->AddOnTop(this->owner->HighestWeightsPrimal[i]);
 //        out << "<br>V_" << i+1 << " h.w.: " << this->HighestWeightsPrimal[i].ToString(&this->charFormaT.GetElement());
-      } else if (currentFKNilradicalCandidates[i]==1)
-        outputNilradicalWeights.AddOnTopNoRepetition(this->WeightsModulesPrimal[i]);
+      } else if (this->theNilradicalSelection[i]==1)
+        outputNilradicalWeights.AddOnTopNoRepetition(this->owner->WeightsModulesPrimal[i]);
     }
 //  out << "<br>";
 //  this->FKnilradicalLogs[inputFKIndex]=out.str();
@@ -1136,32 +1165,26 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
     theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
-  this->NilradicalConesIntersect.SetSize(this->FKNilradicalCandidates.size);
-  Vector<Rational> emptyVector;
-  this->ConeIntersections.initFillInObject(this->FKNilradicalCandidates.size, emptyVector);
-  this->ConeSeparatingNormals.initFillInObject(this->FKNilradicalCandidates.size, emptyVector);
-  this->theNilradicalWeights.SetSize(this->FKNilradicalCandidates.size);
-  this->theNonFKhws.SetSize(this->FKNilradicalCandidates.size);
-  this->theNonFKhwsStronglyTwoSided.SetSize(this->FKNilradicalCandidates.size);
-  this->FKnilradicalLogs.SetSize(this->FKNilradicalCandidates.size);
-  for (int i=0; i<this->NilradicalConesIntersect.size; i++)
-    this->ProcessOneNilradical(i, theGlobalVariables);
+  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+    this->FKNilradicalCandidates[i].ProcessMe(theGlobalVariables);
 //  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
 }
 
-void CandidateSSSubalgebra::ProcessOneNilradical(int theIndex, GlobalVariables* theGlobalVariables)
-{ this->GetTheTwoCones
-  (theIndex, this->theNilradicalWeights[theIndex], this->theNonFKhws[theIndex],
-   &this->theNonFKhwsStronglyTwoSided[theIndex], theGlobalVariables);
-  this->NilradicalConesIntersect[theIndex]=this->theNilradicalWeights[theIndex].ConesIntersect
-  (this->theNilradicalWeights[theIndex], this->theNonFKhws[theIndex], &this->ConeIntersections[theIndex],
-  &this->ConeSeparatingNormals[theIndex], theGlobalVariables);
-//  if (!this->NilradicalConesIntersect[theIndex])
-//    return;
-//  Vectors<Rational>& currentNilrad=this->theNilradicalWeights[theIndex];
-
-
+void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
+{ this->CheckInitialization();
+  this->GetTheTwoCones
+  (this->theNilradicalWeights, this->theNonFKhws,
+   &this->theNonFKhwsStronglyTwoSided, theGlobalVariables);
+  this->NilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
+  (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection,
+  &this->ConeSeparatingNormal, theGlobalVariables);
+  if (!this->NilradicalConesIntersect)
+    return;
+  this->NilradicalConesStronlyIntersect=this->theNilradicalWeights.ConesIntersect
+  (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided,
+   &this->ConeStrongIntersection, 0, theGlobalVariables);
+  this->TryFindingLInfiniteRels(theGlobalVariables);
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection)
@@ -1282,7 +1305,10 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
     }
   if (found)
     return;
-  this->FKNilradicalCandidates.AddOnTop(theSelection);
+  NilradicalCandidate tempCandidate;
+  tempCandidate.owner=this;
+  tempCandidate.theNilradicalSelection=theSelection;
+  this->FKNilradicalCandidates.AddOnTop(tempCandidate);
 }
 
 void CandidateSSSubalgebra::ComputePrimalDecompositionWeightsOnly
@@ -2977,48 +3003,56 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   return out.str();
 }
 
+std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << this->FKnilradicalLog;
+  Vector<Rational> currentNilrad;
+  currentNilrad=this->theNilradicalSelection;
+  out << currentNilrad.ToStringLetterFormat("V");
+  if (this->NilradicalConesIntersect)
+    out << ". Cones intersect. ";
+  else
+    out << ". Cones don't intersect. ";
+  out << "Nilradical cone: " << this->theNilradicalWeights.ToString()
+  << "; highest weight cone: " << this->theNonFKhws.ToString() << ". ";
+  out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.ToString();
+  if (this->NilradicalConesIntersect)
+  { out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
+    out << "<br> ";
+    FormatExpressions tempFormat;
+    tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeIntersection.size);
+    for (int j=0; j<this->theNilradicalWeights.size; j++)
+      tempFormat.vectorSpaceEiBasisNames[j]=this->theNilradicalWeights[j].ToString();
+    for (int j=0; j<this->theNonFKhws.size; j++)
+      tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=this->theNonFKhws[j].ToString();
+    out << this->ConeIntersection.ToStringLetterFormat("w", &tempFormat);
+    if (this->NilradicalConesStronlyIntersect)
+    { out << "<br>In addition, the nilradical cones intersect strongly. ";
+      out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
+    }
+  } else
+    out << "Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
+  return out.str();
+}
+
 std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFormat)const
 { if (this->FKNilradicalCandidates.size==0)
     return "";
   std::stringstream out;
   Vector<Rational> primalBase;
-  primalBase = this->FKNilradicalCandidates[0];
+  primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
   out << "<br>The primal extension of the semisimple subalgerba equals: "
   << primalBase.ToStringLetterFormat("V");
   int numConeIntersections=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-    if (this->NilradicalConesIntersect[i])
+    if (this->FKNilradicalCandidates[i].NilradicalConesIntersect)
       numConeIntersections++;
   out << "<br>There are " << this->FKNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
   << numConeIntersections << " have intersecting cones and "
   << this->FKNilradicalCandidates.size-numConeIntersections << " have non-intersecting cones. ";
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-  { out << "<hr>Subalgebra " << i+1 << ": ";
-    out << this->FKnilradicalLogs[i];
-    Vector<Rational> currentNilrad;
-    currentNilrad=this->FKNilradicalCandidates[i];
-    out << currentNilrad.ToStringLetterFormat("V");
-    if (this->NilradicalConesIntersect[i])
-      out << ". Cones intersect. ";
-    else
-      out << ". Cones don't intersect. ";
-    out << "Nilradical cone: " << this->theNilradicalWeights[i].ToString()
-    << "; highest weight cone: " << this->theNonFKhws[i].ToString() << ". ";
-    out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided[i].ToString();
-    if (this->NilradicalConesIntersect[i])
-    { out << "<br>Cone intersection: " << this->ConeIntersections[i].ToStringLetterFormat("w");
-      out << "<br> ";
-      FormatExpressions tempFormat;
-      tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeIntersections[i].size);
-      for (int j=0; j<this->theNilradicalWeights[i].size; j++)
-        tempFormat.vectorSpaceEiBasisNames[j]=this->theNilradicalWeights[i][j].ToString();
-      for (int j=0; j<this->theNonFKhws[i].size; j++)
-        tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights[i].size]=this->theNonFKhws[i][j].ToString();
-      out << this->ConeIntersections[i].ToStringLetterFormat("w", &tempFormat);
-    } else
-      out << "Separating hyperplane: " << this->ConeSeparatingNormals[i].ToStringLetterFormat("u");
-  }
+    out << "<hr>Subalgebra " << i+1 << ": " << this->FKNilradicalCandidates[i].ToString(theFormat);
   if (this->nilradicalGenerationLog!="")
     out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
   return out.str();

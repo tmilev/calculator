@@ -209,7 +209,7 @@ class NilradicalCandidate
   CandidateSSSubalgebra* owner;
   std::string FKnilradicalLog;
   bool NilradicalConesIntersect;
-  bool NilradicalConesStronlyIntersect;
+  bool NilradicalConesStronglyIntersect;
   //0->not selected; 1->selected; 2->undecided.
   List<int> theNilradicalSelection;
   Vector<Rational> ConeIntersection;
@@ -222,7 +222,7 @@ class NilradicalCandidate
   NilradicalCandidate():owner(0){}
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);
-  Vector<Rational> GetConeIntersectionWeight()const;
+  Vector<Rational> GetConeStrongIntersectionWeight()const;
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;

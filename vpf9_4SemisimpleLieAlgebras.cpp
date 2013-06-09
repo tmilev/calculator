@@ -1105,7 +1105,7 @@ void NilradicalCandidate::CheckInitialization()const
   }
 }
 
-Vector<Rational> NilradicalCandidate::GetConeIntersectionWeight()const
+Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
 { Vector<Rational> theWeight;
   theWeight.MakeZero(this->owner->GetPrimalRank());
   for (int i=0; i<this->theNilradicalWeights.size; i++)
@@ -1114,7 +1114,16 @@ Vector<Rational> NilradicalCandidate::GetConeIntersectionWeight()const
 }
 
 bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
-{ return false;
+{ Vector<Rational> theWeight=this->GetConeStrongIntersectionWeight();
+  Rational proportionalityCoeff;
+  for (int i=0; i<this->theNilradicalWeights.size; i++)
+    if (this->theNilradicalWeights[i].IsProportionalTo(theWeight, proportionalityCoeff))
+    { for (int j=0; j<this->theNilradicalWeights.size; j++)
+        this->ConeStrongIntersection[j]=0;
+      this->ConeStrongIntersection[i]=proportionalityCoeff;
+      return true;
+    }
+  return false;
 }
 
 bool NilradicalCandidate::IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables)
@@ -1181,10 +1190,11 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   &this->ConeSeparatingNormal, theGlobalVariables);
   if (!this->NilradicalConesIntersect)
     return;
-  this->NilradicalConesStronlyIntersect=this->theNilradicalWeights.ConesIntersect
+  this->NilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided,
    &this->ConeStrongIntersection, 0, theGlobalVariables);
-  this->TryFindingLInfiniteRels(theGlobalVariables);
+  if (this->NilradicalConesStronglyIntersect)
+    this->TryFindingLInfiniteRels(theGlobalVariables);
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection)
@@ -3026,7 +3036,7 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     for (int j=0; j<this->theNonFKhws.size; j++)
       tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=this->theNonFKhws[j].ToString();
     out << this->ConeIntersection.ToStringLetterFormat("w", &tempFormat);
-    if (this->NilradicalConesStronlyIntersect)
+    if (this->NilradicalConesStronglyIntersect)
     { out << "<br>In addition, the nilradical cones intersect strongly. ";
       out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
     }

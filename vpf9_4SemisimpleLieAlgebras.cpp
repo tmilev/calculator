@@ -886,6 +886,46 @@ void CandidateSSSubalgebra::ExtendToModule
     }
 }
 
+template <class TemplateMonomial, class coefficient>
+template <class MonomialCollectionTemplate>
+void MonomialCollection<TemplateMonomial, coefficient>::IntersectVectorSpaces
+(const List<MonomialCollectionTemplate>& vectorSpace1, const List<MonomialCollectionTemplate>& vectorSpace2,
+  List<MonomialCollectionTemplate>& outputIntersection, HashedList<TemplateMonomial>* seedMonomials)
+{ List<MonomialCollectionTemplate> theVspaces=vectorSpace1;
+  List<MonomialCollectionTemplate> vectorSpace2eliminated=vectorSpace2;
+  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows
+  (vectorSpace2eliminated, 0, seedMonomials);
+  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows
+  (theVspaces, 0, seedMonomials);
+  Matrix<Rational> theLinCombiMat;
+  int firstSpaceDim=theVspaces.size;
+  theLinCombiMat.MakeIdMatrix(theVspaces.size+vectorSpace2eliminated.size);
+  theVspaces.AddListOnTop(vectorSpace2eliminated);
+  vectorSpace2eliminated=theVspaces;
+  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows
+  (theVspaces, 0, seedMonomials, &theLinCombiMat);
+  int dimResult=0;
+  for (int i=theVspaces.size-1; i>=0; i--)
+    if (theVspaces[i].IsEqualToZero())
+      dimResult++;
+    else
+      break;
+  outputIntersection.SetSize(dimResult);
+  int counter=-1;
+  MonomialCollectionTemplate tempMCT;
+  for (int i=theVspaces.size-1; i>=0; i--)
+  { if (!theVspaces[i].IsEqualToZero())
+      break;
+    counter++;
+    outputIntersection[counter]=0;
+    for (int j=0; j<firstSpaceDim; j++)
+    { tempMCT=vectorSpace2eliminated[j];
+      tempMCT*=theLinCombiMat(i,j);
+      outputIntersection[counter]+=tempMCT;
+    }
+  }
+}
+
 void CandidateSSSubalgebra::ComputePairingTablePreparation
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTablePreparation");
@@ -997,7 +1037,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule
 (const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex,
  List<int>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairKweightElementAndModule");
-  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
+  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->GetModuleIsotypicallyMergedExceptWhenK(rightIndex);
   ElementSemisimpleLieAlgebra<Rational> theLieBracket;
   ProgressReport theReport(theGlobalVariables);
   Vector<Rational> coordsInFullBasis;
@@ -1027,18 +1067,22 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule
   }
 }
 
+List<ElementSemisimpleLieAlgebra<Rational> >& CandidateSSSubalgebra::GetModuleIsotypicallyMergedExceptWhenK(int index)
+{ if (this->primalSubalgebraModules.Contains(index))
+  {}
+}
+
 void CandidateSSSubalgebra::ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSinglePair");
   output.SetSize(0);
   List<int> tempList;
-  List<ElementSemisimpleLieAlgebra<Rational> >& leftModule=this->ModulesIsotypicallyMerged[leftIndex];
+  List<ElementSemisimpleLieAlgebra<Rational> >& leftModule=this->GetModuleIsotypicallyMergedExceptWhenK(leftIndex);
   ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<leftModule.size; i++)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStream;
-      reportStream << "Bracketing element number" << i+1 << " out of "
-      << leftModule.size << " with other module. ";
+      reportStream << "Bracketing element number" << i+1 << " out of " << leftModule.size << " with other module. ";
       theReport.Report(reportStream.str());
     }
     this->ComputePairKweightElementAndModule(leftModule[i], rightIndex, tempList, theGlobalVariables);
@@ -1165,15 +1209,22 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   std::stringstream reportStream;
   reportStream << "Enumerating recursively nilradicals of type " << this->ToStringTypeAndHs() << "...";
   theReport.Report(reportStream.str());
-  std::cout << reportStream.str();
+  //std::cout << reportStream.str();
   List<int> theSel;
   this->RecursionDepthCounterForNilradicalGeneration=0;
-  //0 stands for not selected, 1 for selected, 2 stands for unknown.
+  //0 stands for not selected, 1 for selected from nilradical, 3 for selected from semisimple part, 2 stands for unknown.
   theSel.initFillInObject(this->NilradicalPairingTable.size, 2);
   for(int i=0; i<this->primalSubalgebraModules.size; i++)
     theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
+  if (this->FKNilradicalCandidates.size<1)
+  { std::cout << "This is a programming error:"
+    << " while enumerating nilradicals of " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " got 0 nilradical candidates which is impossible (the zero "
+    << " nilradical is always possible). " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     this->FKNilradicalCandidates[i].ProcessMe(theGlobalVariables);
 //  this->nilradicalGenerationLog=out.str();
@@ -1191,8 +1242,8 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   if (!this->NilradicalConesIntersect)
     return;
   this->NilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
-  (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided,
-   &this->ConeStrongIntersection, 0, theGlobalVariables);
+  (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection,
+   0, theGlobalVariables);
   if (this->NilradicalConesStronglyIntersect)
     this->TryFindingLInfiniteRels(theGlobalVariables);
 }
@@ -1240,6 +1291,8 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
   MemorySaving<List<int> > oldSelection;
   if (logStream!=0)
     oldSelection.GetElement()=theSelection;
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+    std::cout << "<hr>Ere be more problem! Nilrad sel: " << this->ToStringNilradicalSelection(theSelection) ;
   this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices, theGlobalVariables, logStream);
   for (int i=0; i<theSelection.size; i++)
     if (theSelection[i]==0 && selectedIndices.Contains(i))
@@ -1249,10 +1302,19 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
         << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
         << " we have already decided to exclude that module in one of our preceding choices. ";
       }
+      if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+        std::cout << " <br>The selection " << this->ToStringNilradicalSelection(theSelection)
+        << " is contradictory, as the only way to extend it to a subalgebra (i.e., closed under Lie bracket)"
+        << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
+        << " we have already decided to exclude that module in one of our preceding choices. ";
+
       return false;
     }
   for (int i=0; i<selectedIndices.size; i++)
     theSelection[selectedIndices[i]]=1;
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+    std::cout << "<hr>After extension, selection is: " << this->ToStringNilradicalSelection(theSelection) ;
+
   if (logStream!=0)
     if (oldSelection.GetElement()!=theSelection)
     { *logStream << "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
@@ -1266,10 +1328,16 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
         { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
           << " contains opposite modules and is therefore not allowed. ";
         }
+        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+          std::cout << "<br>"<< "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
+          << " contains opposite modules and is therefore not allowed. ";
         return false;
       }
       theSelection[this->OppositeModules[selectedIndices[i]][j]]=0;
     }
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+    std::cout << "<br>"<< "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
+    << " is all so very nice and dandy. ";
   return true;
 }
 
@@ -1292,13 +1360,22 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
     assert(false);
   }
   ProgressReport theReport(theGlobalVariables);
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+  { std::cout << "<hr>Here be problem! Selection: " << this->ToStringNilradicalSelection(theSelection);
+  }
   if (theGlobalVariables!=0)
   { std::stringstream out;
     out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
     theReport.Report(out.str());
+    if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+    { std::cout << out.str();
+    }
   }
   if (!this->IsPossibleNilradicalCarryOutSelectionImplications(theSelection, theGlobalVariables, logStream))
     return;
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
+  { std::cout << "<hr>Here be less problem";
+  }
   List<int> newSelection;
   bool found=false;
   for (int i=0; i<theSelection.size; i++)
@@ -3025,9 +3102,9 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     out << ". Cones don't intersect. ";
   out << "Nilradical cone: " << this->theNilradicalWeights.ToString()
   << "; highest weight cone: " << this->theNonFKhws.ToString() << ". ";
-  out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.ToString();
   if (this->NilradicalConesIntersect)
-  { out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
+  { out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.ToString();
+    out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
     out << "<br> ";
     FormatExpressions tempFormat;
     tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeIntersection.size);
@@ -3037,11 +3114,15 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
       tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=this->theNonFKhws[j].ToString();
     out << this->ConeIntersection.ToStringLetterFormat("w", &tempFormat);
     if (this->NilradicalConesStronglyIntersect)
-    { out << "<br>In addition, the nilradical cones intersect strongly. ";
+    { for (int j=0; j<this->theNonFKhwsStronglyTwoSided.size; j++)
+        tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=
+        this->theNonFKhwsStronglyTwoSided[j].ToString();
+      out << "<br>In addition, the nilradical cones intersect strongly "
+      << "at weight " << this->GetConeStrongIntersectionWeight().ToString();
       out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
     }
   } else
-    out << "Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
+    out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
   return out.str();
 }
 

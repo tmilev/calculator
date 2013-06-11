@@ -312,6 +312,7 @@ public:
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
+  List<ElementSemisimpleLieAlgebra<Rational> >& GetModuleIsotypicallyMergedExceptWhenK(int index);
 
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)

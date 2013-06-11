@@ -5004,9 +5004,15 @@ public:
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRows
   (List<MonomialCollectionTemplate>& theList,
-   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
+   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0, Matrix<coefficient>* carbonCopy=0
    )
    ;
+  template <class MonomialCollectionTemplate>
+  static void IntersectVectorSpaces
+(const List<MonomialCollectionTemplate>& vectorSpace1, const List<MonomialCollectionTemplate>& vectorSpace2,
+  List<MonomialCollectionTemplate>& outputIntersection, HashedList<TemplateMonomial>* seedMonomials)
+;
+
   template <class MonomialCollectionTemplate>
   static int GetRankIntersectionVectorSpaces
   (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
@@ -6793,9 +6799,17 @@ void Polynomial<Element>::TimesInteger(int a)
 template <class TemplateMonomial, class coefficient>
 template <class TemplateMonomialCollection>
 void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows
-  (List<TemplateMonomialCollection>& theList, bool *IvemadeARowSwitch,
-   HashedList<TemplateMonomial>* seedMonomials)
-{ MemorySaving<HashedList<TemplateMonomial> > bufferMons;
+(List<TemplateMonomialCollection>& theList, bool *IvemadeARowSwitch, HashedList<TemplateMonomial>* seedMonomials,
+ Matrix<coefficient>* carbonCopy)
+{ MacroRegisterFunctionWithName("MonomialCollection::GaussianEliminationByRows");
+  if (carbonCopy!=0)
+    if (carbonCopy->NumRows!=theList.size)
+    { std::cout << "This is a programming error: carbon copy matrix has " << carbonCopy->NumRows
+      << " rows, while the gaussian-eliminated list has " << theList.size
+      << " elements; the two numbers must be the same!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  MemorySaving<HashedList<TemplateMonomial> > bufferMons;
   HashedList<TemplateMonomial>& allMons = seedMonomials==0 ? bufferMons.GetElement() : *seedMonomials;
   if (seedMonomials==0)
   { int topBoundNumMons=0;
@@ -6818,22 +6832,23 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
 //    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
-  coefficient tempCF;
+  coefficient tempCF, tempCF2;
   for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
   { const TemplateMonomial& currentMon=allMons[i];
     int goodRow=currentRowIndex;
-    for (; goodRow< theList.size; goodRow++)
+    for (; goodRow < theList.size; goodRow++)
       if (theList[goodRow].Contains(currentMon))
         break;
     if (goodRow>=theList.size)
       continue;
     if (currentRowIndex!=goodRow)
     { theList.SwapTwoIndices(currentRowIndex, goodRow);
+      if (carbonCopy!=0)
+        carbonCopy->SwitchTwoRows(currentRowIndex, goodRow);
       if (IvemadeARowSwitch!=0)
         *IvemadeARowSwitch=true;
     }
-    MonomialCollection<TemplateMonomial, coefficient>& currentPivot=
-    theList[currentRowIndex];
+    MonomialCollection<TemplateMonomial, coefficient>& currentPivot= theList[currentRowIndex];
     int colIndex=currentPivot.GetIndex(currentMon);
     if (colIndex==-1)
     { std::cout << "This is a programming error. "
@@ -6846,6 +6861,11 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
     }
     tempCF=currentPivot.theCoeffs[colIndex];
     currentPivot/=tempCF;
+    if (carbonCopy!=0)
+    { tempCF2=tempCF;
+      tempCF2.Invert();
+      carbonCopy->RowTimesScalar(currentRowIndex, tempCF2);
+    }
     for (int j=0; j<theList.size; j++)
       if (j!=currentRowIndex)
       { MonomialCollection<TemplateMonomial, coefficient>& currentOther=theList[j];
@@ -6856,6 +6876,11 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
             //<< " times " << tempCF.ToString() << " from "
             //<< CGI::GetHtmlMathSpanPure(currentOther.ToString());
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
+          if (carbonCopy!=0)
+          { tempCF2=tempCF;
+            tempCF2*=-1;
+            carbonCopy->AddTwoRows(currentRowIndex, j, 0, tempCF2);
+          }
           //std::cout << "<br>to get " << CGI::GetHtmlMathSpanPure(currentOther.ToString());
         }
       }

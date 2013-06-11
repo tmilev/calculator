@@ -2546,7 +2546,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
     for (int j=i; j<numGenerators; j++)
     { rightWeight=this->GetWeightOfGenerator(j);
       if (leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeZero(*this);
+      { this->theLiebrackets.elements[i][j].MakeZero();
         continue;
       }
       if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
@@ -2570,7 +2570,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
           this->theLiebrackets.elements[i][j]*=this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else
         { if (!(leftWeight+rightWeight).IsEqualToZero())
-            this->theLiebrackets.elements[i][j].MakeZero(*this);
+            this->theLiebrackets.elements[i][j].MakeZero();
           else
           { ElementSemisimpleLieAlgebra<Rational>& current=this->theLiebrackets.elements[i][j];
             current.MakeHgenerator(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this);

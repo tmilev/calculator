@@ -417,8 +417,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat=(outputMatrixSystemToBeSolved);
   tempMatColumn=(outputSystemColumnVector);
-  outputF.MakeZero(*this);
-  outputE.MakeZero(*this);
+  outputF.MakeZero();
+  outputE.MakeZero();
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
   ChevalleyGenerator tempGen;
   if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
@@ -1290,7 +1290,7 @@ template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces
 (const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
 { //Changing RootSystem order invalidates this function!
-  this->MakeZero(owner);
+  this->MakeZero();
   ChevalleyGenerator tempGenerator;
   for (int i=0; i<input.size; i++)
     if (input[i]!=0)
@@ -1509,7 +1509,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   { tempRoot.MakeEi(theDomainDimension, i);
     for (int j=0; j<2; j++, tempRoot.Minus())
     { int index= this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
-      tempDomain[index].MakeZero(this->theDomain());
+      tempDomain[index].MakeZero();
       ChevalleyGenerator tempGen;
       tempGen.MakeGenerator(this->theDomain(), this->theDomain().GetGeneratorFromRoot(tempRoot));
       tempDomain[index].AddMonomial(tempGen, 1);

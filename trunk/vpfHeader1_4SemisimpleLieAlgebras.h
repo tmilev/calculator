@@ -286,6 +286,8 @@ public:
 
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > Modules;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesIsotypicallyMerged;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
+
   List<Vectors<Rational> > WeightsModulesNONprimal;
   List<Vectors<Rational> > WeightsModulesPrimal;
 

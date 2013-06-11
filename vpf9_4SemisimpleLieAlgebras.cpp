@@ -917,7 +917,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::IntersectVectorSpaces
   { if (!theVspaces[i].IsEqualToZero())
       break;
     counter++;
-    outputIntersection[counter]=0;
+    outputIntersection[counter].MakeZero();
     for (int j=0; j<firstSpaceDim; j++)
     { tempMCT=vectorSpace2eliminated[j];
       tempMCT*=theLinCombiMat(i,j);
@@ -956,12 +956,16 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
   }
   this->candidateSubalgebraModules.SetSize(0);
   this->primalSubalgebraModules.SetSize(0);
+  this->ModulesSemisimpleSubalgebra.SetSize(this->Modules.size);
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
     if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial
         (this->theBasis, this->ModulesIsotypicallyMerged[i]))
     { this->candidateSubalgebraModules.AddOnTop(i);
       this->primalSubalgebraModules.AddOnTop(i);
-    }
+      MonomialCollection<ChevalleyGenerator, Rational>::IntersectVectorSpaces
+        (this->theBasis, this->ModulesIsotypicallyMerged[i], this->ModulesSemisimpleSubalgebra[i]);
+    } else
+    this->ModulesSemisimpleSubalgebra[i].SetSize(0);
   //std::cout << "<hr>Testing sa: " << this->ToStringTypeAndHs() << "<br>";
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
   //{ std::cout << "<br>Testing " << this->ModulesIsotypicallyMerged[i].ToString();
@@ -1068,8 +1072,9 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule
 }
 
 List<ElementSemisimpleLieAlgebra<Rational> >& CandidateSSSubalgebra::GetModuleIsotypicallyMergedExceptWhenK(int index)
-{ if (this->primalSubalgebraModules.Contains(index))
-  {}
+{ if (this->ModulesSemisimpleSubalgebra[index].size>0)
+    return this->ModulesSemisimpleSubalgebra[index];
+  return this->ModulesIsotypicallyMerged[index];
 }
 
 void CandidateSSSubalgebra::ComputeSinglePair
@@ -1291,8 +1296,6 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
   MemorySaving<List<int> > oldSelection;
   if (logStream!=0)
     oldSelection.GetElement()=theSelection;
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-    std::cout << "<hr>Ere be more problem! Nilrad sel: " << this->ToStringNilradicalSelection(theSelection) ;
   this->ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra(selectedIndices, theGlobalVariables, logStream);
   for (int i=0; i<theSelection.size; i++)
     if (theSelection[i]==0 && selectedIndices.Contains(i))
@@ -1302,19 +1305,10 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
         << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
         << " we have already decided to exclude that module in one of our preceding choices. ";
       }
-      if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-        std::cout << " <br>The selection " << this->ToStringNilradicalSelection(theSelection)
-        << " is contradictory, as the only way to extend it to a subalgebra (i.e., closed under Lie bracket)"
-        << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
-        << " we have already decided to exclude that module in one of our preceding choices. ";
-
       return false;
     }
   for (int i=0; i<selectedIndices.size; i++)
     theSelection[selectedIndices[i]]=1;
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-    std::cout << "<hr>After extension, selection is: " << this->ToStringNilradicalSelection(theSelection) ;
-
   if (logStream!=0)
     if (oldSelection.GetElement()!=theSelection)
     { *logStream << "<br>In order to be closed w.r.t. the Lie bracket, I extend the nilradical selection "
@@ -1328,16 +1322,10 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
         { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
           << " contains opposite modules and is therefore not allowed. ";
         }
-        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-          std::cout << "<br>"<< "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
-          << " contains opposite modules and is therefore not allowed. ";
         return false;
       }
       theSelection[this->OppositeModules[selectedIndices[i]][j]]=0;
     }
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-    std::cout << "<br>"<< "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
-    << " is all so very nice and dandy. ";
   return true;
 }
 
@@ -1654,7 +1642,7 @@ void CandidateSSSubalgebra::GetGenericLinearCombination
  ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 { Polynomial<Rational> theCF;
   ElementSemisimpleLieAlgebra<Polynomial<Rational> > tempMon;
-  output.MakeZero(*this->owner->owneR);
+  output.MakeZero();
   for (int i=0; i<involvedGens.size; i++)
   { theCF.MakeDegreeOne(numVars, varOffset+i, 1);
     tempMon.MakeGenerator(involvedGens[i].theGeneratorIndex, *this->owner->owneR)
@@ -2308,15 +2296,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
 
       theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
-      theSl2.theE.MakeZero(theLieAlgebra);
-      theSl2.theF.MakeZero(theLieAlgebra);
+      theSl2.theE.MakeZero();
+      theSl2.theF.MakeZero();
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-         (theSl2.RootsWithScalar2WithH, theRootsWithZeroCharacteristic,
-          reflectedSimpleBasisK, characteristicH, theSl2.theE, theSl2.theF,
-          theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
-          theSl2.theSystemColumnVector, theGlobalVariables))
+         (theSl2.RootsWithScalar2WithH, theRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
+          theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
       { int indexIsoSl2;
         theSl2.MakeReportPrecomputations
         (theGlobalVariables, output, output.size, indexInContainer, *this);
@@ -3059,7 +3045,16 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
 //  { out << this->ModulesIsotypicallyMerged[i][j].ToString() << "<br>";
 //  }
 //  out << "</td>";
-    out << "</tr></table></td>";
+    out << "</tr></table>";
+    if (this->ModulesSemisimpleSubalgebra[i].size>0)
+    { out << "<br>Intersects the semisimple subalgebra at: <br>";
+      for (int j=0; j<this->ModulesSemisimpleSubalgebra[i].size; j++)
+      { out << this->ModulesSemisimpleSubalgebra[i][j].ToString();
+        if (j!=this->ModulesSemisimpleSubalgebra[i].size-1)
+          out << "<br>";
+      }
+    }
+    out << "</td>";
   }
   out << "</tr>";
   out << "<tr>";

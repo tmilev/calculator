@@ -147,7 +147,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   (const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
-  output.MakeZero(this->theRange());
+  output.MakeZero();
   for (int i=0; i<input.size; i++)
   { int currentIndex=input[i].theGeneratorIndex;
     output+=this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];

@@ -531,6 +531,7 @@ int main(int argc, char **argv)
   //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
 //  civilizedInput="PenkovProjectRecompute";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

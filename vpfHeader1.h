@@ -5010,9 +5010,8 @@ public:
   template <class MonomialCollectionTemplate>
   static void IntersectVectorSpaces
 (const List<MonomialCollectionTemplate>& vectorSpace1, const List<MonomialCollectionTemplate>& vectorSpace2,
-  List<MonomialCollectionTemplate>& outputIntersection, HashedList<TemplateMonomial>* seedMonomials)
+  List<MonomialCollectionTemplate>& outputIntersection, HashedList<TemplateMonomial>* seedMonomials=0)
 ;
-
   template <class MonomialCollectionTemplate>
   static int GetRankIntersectionVectorSpaces
   (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
@@ -8341,9 +8340,6 @@ public:
     return tempRoot1.IsProportionalTo(tempRoot2, outputTimesMeEqualsInput);
   }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
-  void MakeZero
-  (const SemisimpleLieAlgebra& inputOwner)
-  ;
   unsigned int HashFunction()const
   { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0]
     +this->::MonomialCollection<ChevalleyGenerator, Rational>::HashFunction()*SomeRandomPrimes[1];

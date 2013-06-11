@@ -5897,7 +5897,7 @@ void ElementUniversalEnveloping<coefficient>::MakeOneGeneratorCoeffOne
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::ConvertToLieAlgebraElementIfPossible
 (ElementSemisimpleLieAlgebra<Rational>& output)const
-{ output.MakeZero(*this->owneR);
+{ output.MakeZero();
 //  SemisimpleLieAlgebra& theOwner=this->owners->TheObjects[this->indexInOwners];
 //  int numPosRoots=theOwner.theWeyl.RootsOfBorel.size;
   Rational theConst=0;
@@ -9111,21 +9111,15 @@ void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->MakeZero(inputOwner);
+  this->MakeZero();
   ChevalleyGenerator tempGenerator;
   tempGenerator.MakeGenerator(inputOwner, generatorIndex);
   this->AddMonomial(tempGenerator, 1);
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::MakeZero(const SemisimpleLieAlgebra& inputOwner)
-{ this->::MonomialCollection<ChevalleyGenerator, coefficient>::MakeZero();
-}
-
-template <class coefficient>
 void SemisimpleLieAlgebra::LieBracket
-(const ElementSemisimpleLieAlgebra<coefficient>& g1,
- const ElementSemisimpleLieAlgebra<coefficient>& g2,
+(const ElementSemisimpleLieAlgebra<coefficient>& g1, const ElementSemisimpleLieAlgebra<coefficient>& g2,
  ElementSemisimpleLieAlgebra<coefficient>& output)
 { if (&output==&g1 || &output==&g2)
   { ElementSemisimpleLieAlgebra<coefficient> outputNew;
@@ -9133,7 +9127,7 @@ void SemisimpleLieAlgebra::LieBracket
     output=outputNew;
     return;
   }
-  output.MakeZero(*this);
+  output.MakeZero();
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
     return;
   int maxNumMonsFinal=g1.size*g2.size;
@@ -9191,7 +9185,7 @@ template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeHgenerator
 (const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwner)
 { ChevalleyGenerator tempGen;
-  this->MakeZero(inputOwner);
+  this->MakeZero();
   for (int i=0; i<theH.size; i++)
   { tempGen.MakeGenerator(inputOwner, inputOwner.GetCartanIndexFromGenerator(i));
     this->AddMonomial(tempGen, theH[i]);

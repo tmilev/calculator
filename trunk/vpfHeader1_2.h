@@ -2031,6 +2031,11 @@ public:
     this->Computed=(other.Computed);
     this->UEGeneratorOrderIncludingCartanElts=other.UEGeneratorOrderIncludingCartanElts;
   }
+  void GetGenericElementCartan
+  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar=0);
+  void GetGenericElementNegativeBorelNilradical
+  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar=0);
+
   int GetOppositeGeneratorIndex(int theIndex)
   { return this->GetNumGenerators()-theIndex-1;
   }
@@ -2092,8 +2097,8 @@ public:
     for (int i=0; i<numGens; i++)
       this->UEGeneratorOrderIncludingCartanElts[i]=i;
   }
-  int GetCartanIndexFromSimpleGeneratorIndex(int theIndex)
-  { return this->theWeyl.RootsOfBorel.size+theIndex;
+  int GetCartanGeneratorIndex(int simpleRootIndex)
+  { return this->theWeyl.RootsOfBorel.size+simpleRootIndex;
   }
   int GetGeneratorFromRoot(const Vector<Rational>& input)
   { return this->GetGeneratorFromRootIndex(this->theWeyl.RootSystem.GetIndex(input));
@@ -2166,9 +2171,14 @@ public:
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
-  bool FindComplementaryNilpotent
-  (ElementSemisimpleLieAlgebra<Rational>& e,
-   ElementSemisimpleLieAlgebra<Rational>& output, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingEtoHEFwithHinCartan
+  (ElementSemisimpleLieAlgebra<Rational>& theE, ElementSemisimpleLieAlgebra<Rational>& outputH,
+   ElementSemisimpleLieAlgebra<Rational>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0)
+   ;
+  bool AttemptExtendingHtoHEFwithHinCartan
+  (ElementSemisimpleLieAlgebra<Rational>& theH, ElementSemisimpleLieAlgebra<Rational>& outputE,
+   ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
+   ;
   bool AttemptExtendingHEtoHEFWRTSubalgebra
   (Vectors<Rational>& RootsWithCharacteristic2,
    Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,

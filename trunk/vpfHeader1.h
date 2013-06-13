@@ -2121,6 +2121,9 @@ void NonPivotPointsToEigenVector
       for (int i=0; i<this->NumCols; i++)
         this->elements[j][i]*=input;
   }
+  void operator*=(const Matrix<Element>& input)
+  { this->MultiplyOnTheRight(input);
+  }
   void LieBracketWith(Matrix<Element> & right)
   { Matrix<Element> tempMat;
     this->LieBracket(*this, right, tempMat);
@@ -2517,7 +2520,7 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, 
     for(int j=0; j< this->NumCols; j++)
     { output.elements[i][j]=theRingZero;
       for (int k=0; k<this->NumRows; k++)
-      { tempEl.Assign(standsOnTheLeft.elements[i][k]);
+      { tempEl=standsOnTheLeft(i,k);
         tempEl*=(this->elements[k][j]);
         output.elements[i][j]+=(tempEl);
       }

@@ -611,13 +611,41 @@ bool MathRoutines::IsPrime(int theInt)
   return true;
 }
 
+bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerAttemptExtendingEtoHEFwithHinCartan");
+  if (input.children.size!=3)
+    return output.SetError
+    ("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
+  SemisimpleLieAlgebra* ownerSS;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input[1], ownerSS, &errorString))
+    return output.SetError(errorString, theCommands);
+  ElementSemisimpleLieAlgebra<Rational> theE;
+  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
+        (theCommands, input[2], theE, *ownerSS))
+    return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
+  ElementSemisimpleLieAlgebra<Rational> theF, theH;
+  std::stringstream out;
+  bool success=
+  ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &out, theCommands.theGlobalVariableS);
+//  std::cout << "<br>The elts: " <<  theOperators.ToString();
+//  std::cout << "<br> The common ad: " << commonAd.ToString();
+  if (success)
+    out << "success!";
+  else
+    out << "couldn't extend E to sl(2)-triple";
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CommandList::innerAdCommonEigenSpaces
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
   if (input.children.size<3)
     return output.SetError
     ("Function ad common eigenspaces needs at least 2 arguments \
-      - type and at least one element of UE.", theCommands);
+      - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -629,7 +657,7 @@ bool CommandList::innerAdCommonEigenSpaces
   for (int i=2; i<input.children.size; i++)
   { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
         (theCommands, input[i], tempElt, *ownerSS))
-      return output.SetError("Failed to extract element of UE. ", theCommands);
+      return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
   }
   ownerSS->GetCommonCentralizer(theOperators, outputElts);

@@ -210,6 +210,7 @@ class NilradicalCandidate
   std::string FKnilradicalLog;
   bool NilradicalConesIntersect;
   bool NilradicalConesStronglyIntersect;
+  bool flagLinfiniteRelFound;
   //0->not selected; 1->selected; 2->undecided.
   List<int> theNilradicalSelection;
   Vector<Rational> ConeIntersection;
@@ -219,11 +220,14 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
   Vectors<Rational> theNonFKhwsStronglyTwoSided;
-  NilradicalCandidate():owner(0){}
+  NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);
   Vector<Rational> GetConeStrongIntersectionWeight()const;
+  Vector<Rational> GetNilradicalLinearCombi()const;
+
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
+  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
   void GetTheTwoCones
@@ -353,6 +357,7 @@ public:
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 ;
+  int GetNumModules()const;
   void ComputePairKweightElementAndModule
 (const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex,
  List<int>& output, GlobalVariables* theGlobalVariables)
@@ -479,6 +484,7 @@ public:
   void FindTheSSSubalgebras
   (SemisimpleLieAlgebra& newOwner, GlobalVariables* theGlobalVariables)
   ;
+
   void FindTheSSSubalgebrasPart2
   (GlobalVariables* theGlobalVariables)
   ;

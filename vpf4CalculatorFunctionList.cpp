@@ -131,6 +131,12 @@ void CommandList::initPredefinedInnerFunctions()
    semisimple Lie algebra. ",
    "AdCommonEigenspace{}(F_4, -5 (g_{9})+3 (g_{13})+5 (g_{16})+4 (g_{10}), g_{14}+g_{22}+g_{20})")
    ;
+  this->AddOperationInnerHandler
+("AttemptExtendingEtoHEFwithHinCartan", &this->innerAttemptExtendingEtoHEFwithHinCartan, "",
+   "Attempts to embed an element E into an sl(2)-triple over the rationals, such that the element H is in the \
+   ambient Cartan algebra. ",
+   "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)")
+   ;
 
   this->AddOperationInnerHandler
 ("gcdPoly", &this->fGCD, "",

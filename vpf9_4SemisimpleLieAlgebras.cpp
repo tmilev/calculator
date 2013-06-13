@@ -20,6 +20,90 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra
     }
 }
 
+void SemisimpleLieAlgebra::GetGenericElementCartan
+(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
+{ output.MakeZero();
+  ChevalleyGenerator theGen;
+  Polynomial<Rational> theCf;
+  for (int i=0; i<this->GetRank(); i++)
+  { theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
+    theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+    output.AddMonomial(theGen, theCf);
+  }
+}
+
+void SemisimpleLieAlgebra::GetGenericElementNegativeBorelNilradical
+(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
+{ output.MakeZero();
+  ChevalleyGenerator theGen;
+  Polynomial<Rational> theCf;
+  for (int i=0; i<this->GetNumPosRoots(); i++)
+  { theGen.MakeGenerator(*this, i);
+    theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+    output.AddMonomial(theGen, theCf);
+  }
+}
+
+bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
+(ElementSemisimpleLieAlgebra<Rational>& theE, ElementSemisimpleLieAlgebra<Rational>& outputH,
+ ElementSemisimpleLieAlgebra<Rational>& outputF, std::stringstream* logStream, GlobalVariables* theGlobalVariables)
+{ Matrix<Rational> theM;
+  this->GetAd(theM, theE);
+  MatrixTensor<Rational> theMatTensor, theId;
+  theMatTensor=theM;
+  theId.MakeId(theM.NumRows);
+  MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
+  if (!theMatTensor.IsEqualToZero())
+  { if (logStream!=0)
+      *logStream << "The input E element " << theE.ToString() << " is not nilpotent. The matrix tensor is: "
+      << theMatTensor.ToString() ;
+    return false;
+  }
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > unknownH, unknownF, knownE, mustBeZero, tempE;
+  knownE=theE;
+  this->GetGenericElementCartan(unknownH, 0);
+  this->GetGenericElementNegativeBorelNilradical(unknownF, this->GetRank());
+  List<Polynomial<Rational> > theSystem;
+  GroebnerBasisComputation<Rational> theComputation;
+  this->LieBracket(unknownH, knownE, mustBeZero);
+  mustBeZero-=knownE*2;
+  for (int i=0; i<mustBeZero.size; i++)
+    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+  this->LieBracket(unknownH, unknownF, mustBeZero);
+  mustBeZero+=unknownF*2;
+  for (int i=0; i<mustBeZero.size; i++)
+    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+  this->LieBracket(knownE, unknownF, mustBeZero);
+  mustBeZero-=unknownH;
+  for (int i=0; i<mustBeZero.size; i++)
+    theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
+  if(logStream!=0)
+  { *logStream << "The system to solve: ";
+    for (int i=0; i<theSystem.size; i++)
+      *logStream << "<br>" << theSystem[i].ToString() << " = 0 ";
+  }
+  theComputation.SolveSerreLikeSystem(theSystem, theGlobalVariables);
+  if (!theComputation.flagSystemSolvedOverBaseField)
+  { if (logStream!=0)
+    { if (theComputation.flagSystemProvenToHaveNoSolution)
+        *logStream << "<br><b>System proven to have no solution. </b>";
+      if (theComputation.flagSystemProvenToHaveSolution)
+        *logStream << "<br><b>System proven to have solution, but I failed to find it.</b> Either "
+        << "the solution lies outside of the base field, or my heuristics are not good enough.";
+    }
+    return false;
+  }
+  if (logStream!=0)
+    *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
+  PolynomialSubstitution<Rational> theSolutionSub;
+  theComputation.GetSubFromPartialSolutionSerreLikeSystem(theSolutionSub);
+  unknownF.SubstitutionCoefficients(theSolutionSub);
+  unknownH.SubstitutionCoefficients(theSolutionSub);
+  if (logStream!=0)
+    *logStream << "<br>H= " << unknownH.ToString() << "<br>E=" << knownE.ToString() << "<br>F=" << unknownF.ToString();
+  return true;
+}
+
 void WeylGroup::operator+=(const WeylGroup& other)
 { if (this==&other)
   { WeylGroup tempW;
@@ -1119,14 +1203,12 @@ void CandidateSSSubalgebra::ComputePairingTable
     }
   this->modulesWithZeroWeights.Clear();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-  { List<ElementSemisimpleLieAlgebra<Rational> >& currentMod=
-    this->ModulesIsotypicallyMerged[i];
-    for (int j=0; j<currentMod.size; j++)
-      if (this->GetAmbientSS().GetWeightOfGenerator(currentMod[j][0].theGeneratorIndex).IsEqualToZero())
+    for (int j=0; j<this->ModulesIsotypicallyMerged[i].size; j++)
+      if (this->GetAmbientSS().GetWeightOfGenerator
+          (this->ModulesIsotypicallyMerged[i][j][0].theGeneratorIndex).IsEqualToZero())
       { this->modulesWithZeroWeights.AddOnTop(i);
         break;
       }
-  }
 //  std::cout << "Nilradical pairing table size: " << this->NilradicalPairingTable.size;
   this->OppositeModules.SetSize(this->NilradicalPairingTable.size);
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
@@ -1162,8 +1244,33 @@ Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
   return theWeight;
 }
 
+bool NilradicalCandidate::IsLInfiniteRel(GlobalVariables* theGlobalVariables)
+{ Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
+  int numWeights=theNilradLinCombi.GetNumNonZeroCoords();
+  Selection theSel=theNilradLinCombi;
+
+  for (int i=0; i<theSel.CardinalitySelection; i++)
+  { Vector<Rational> theWeight=this->theNilradicalWeights[theSel.elements[i]];
+    theWeight.Minus();
+    for (int j=0; j<theSel.CardinalitySelection; j++)
+    {
+    }
+  }
+//  return false;
+}
+
+Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
+{ Vector<Rational> theNilradLinCombi=this->ConeStrongIntersection;
+  theNilradLinCombi.SetSize(this->theNilradicalWeights.size);
+  return theNilradLinCombi;
+}
+
 bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
-{ Vector<Rational> theWeight=this->GetConeStrongIntersectionWeight();
+{ MacroRegisterFunctionWithName("NilradicalCandidate::TryFindingLInfiniteRels");
+  Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
+  if(theNilradLinCombi.GetNumNonZeroCoords()==1)
+    return true;
+  Vector<Rational> theWeight=this->GetConeStrongIntersectionWeight();
   Rational proportionalityCoeff;
   for (int i=0; i<this->theNilradicalWeights.size; i++)
     if (this->theNilradicalWeights[i].IsProportionalTo(theWeight, proportionalityCoeff))
@@ -1172,6 +1279,20 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
       this->ConeStrongIntersection[i]=proportionalityCoeff;
       return true;
     }
+  Vectors<Rational> theNilradSubset;
+  Vector<Rational> betterIntersection;
+  theNilradSubset.SetSize(1);
+  for (int i=0; i<this->theNilradicalWeights.size; i++)
+  { theNilradSubset[0]=this->theNilradicalWeights[i];
+    if (theNilradSubset.ConesIntersect(theNilradSubset, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0, theGlobalVariables))
+    { for (int j=0; j<this->theNilradicalWeights.size; j++)
+        this->ConeStrongIntersection[j]=0;
+      this->ConeStrongIntersection[i]=betterIntersection[0];
+      for (int j=0; j<this->theNonFKhwsStronglyTwoSided.size; j++)
+        this->ConeStrongIntersection[j+this->theNilradicalWeights.size]=betterIntersection[j+1];
+      return true;
+    }
+  }
   return false;
 }
 
@@ -1250,7 +1371,8 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection,
    0, theGlobalVariables);
   if (this->NilradicalConesStronglyIntersect)
-    this->TryFindingLInfiniteRels(theGlobalVariables);
+  { this->flagLinfiniteRelFound= this->TryFindingLInfiniteRels(theGlobalVariables);
+  }
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicalSelection(const List<int>& theSelection)
@@ -1348,22 +1470,13 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively
     assert(false);
   }
   ProgressReport theReport(theGlobalVariables);
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-  { std::cout << "<hr>Here be problem! Selection: " << this->ToStringNilradicalSelection(theSelection);
-  }
   if (theGlobalVariables!=0)
   { std::stringstream out;
     out << "Enumerating nilradicals: " << this->FKNilradicalCandidates.size << " found so far. ";
     theReport.Report(out.str());
-    if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-    { std::cout << out.str();
-    }
   }
   if (!this->IsPossibleNilradicalCarryOutSelectionImplications(theSelection, theGlobalVariables, logStream))
     return;
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="2A^{4}_1")
-  { std::cout << "<hr>Here be less problem";
-  }
   List<int> newSelection;
   bool found=false;
   for (int i=0; i<theSelection.size; i++)
@@ -3116,8 +3229,13 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
       << "at weight " << this->GetConeStrongIntersectionWeight().ToString();
       out << "<br>" << this->ConeStrongIntersection.ToStringLetterFormat("w", &tempFormat);
     }
+    if (this->flagLinfiniteRelFound )
+      out << "<br><b>L-infinite relation exists!</b>";
+    else
+      out << "<br><span style=\"color:#FF0000\"><b>No L-infinite relation found.</b></span>";
   } else
     out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
+
   return out.str();
 }
 
@@ -3747,6 +3865,13 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
   }
 }
 
+int CandidateSSSubalgebra::GetNumModules()const
+{ int result=0;
+  for (int i=0; i<this->Modules.size; i++)
+    result+=this->Modules[i].size;
+  return result;
+}
+
 void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
 { this->Hcandidates.QuickSortAscending();
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
@@ -3795,7 +3920,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
         theReport2.Report(reportStream2.str());
         this->Hcandidates[i].ComputePairingTable(theGlobalVariables);
         //int fixMe;
-        if (this->flagDoComputeNilradicals)// && this->Hcandidates[i].Modules.size<15)
+        if (this->flagDoComputeNilradicals && this->Hcandidates[i].GetNumModules()<30)
           this->Hcandidates[i].EnumerateAllNilradicals(theGlobalVariables);
       }
 }

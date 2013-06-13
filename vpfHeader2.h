@@ -1685,6 +1685,10 @@ static bool innerDrawRootSystem
   (CommandList& theCommands, const Expression& input, Expression& output
   );
 
+static bool innerAttemptExtendingEtoHEFwithHinCartan
+  (CommandList& theCommands, const Expression& input, Expression& output
+  );
+
   static bool innerAdCommonEigenSpaces
   (CommandList& theCommands, const Expression& input, Expression& output
   );

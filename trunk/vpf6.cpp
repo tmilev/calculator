@@ -3429,9 +3429,7 @@ bool CommandList::innerPrintSSLieAlgebra
   for (int i=0; i< simplebasisEpsCoords.size; i++)
   { out << "<tr><td>"
     << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
-    << CGI::
-    GetHtmlMathFromLatexFormulA
-    (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
+    << CGI::GetHtmlMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";

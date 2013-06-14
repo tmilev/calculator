@@ -266,8 +266,6 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
     return false;
   }
-  if (theRank==1)
-    theWeylLetter='A';
   outputMon.MakeArbitrary(theWeylLetter, theRank);
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
   return true;

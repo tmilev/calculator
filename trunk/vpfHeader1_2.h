@@ -2171,6 +2171,12 @@ public:
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
+  bool AttemptFindingHEF
+  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
+   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH,
+   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0)
+   ;
+
   bool AttemptExtendingEtoHEFwithHinCartan
   (ElementSemisimpleLieAlgebra<Rational>& theE, ElementSemisimpleLieAlgebra<Rational>& outputH,
    ElementSemisimpleLieAlgebra<Rational>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0)
@@ -4630,6 +4636,7 @@ void List<Object>::SetSize(int theSize)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (theSize<0)
     theSize=0;
+  this->SetExpectedSize(theSize);
   this->ReservE(theSize);
   this->size=theSize;
 }

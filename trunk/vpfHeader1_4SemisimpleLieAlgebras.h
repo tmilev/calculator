@@ -220,6 +220,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
   Vectors<Rational> theNonFKhwsStronglyTwoSided;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElements;
   NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);
@@ -230,9 +231,7 @@ class NilradicalCandidate
   bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void GetTheTwoCones
-  (Vectors<Rational>& outputNilradicalWeights, Vectors<Rational>& outputNonFKhws,
-   Vectors<Rational>* outputStronglyTwoSidedWeights, GlobalVariables* theGlobalVariables)
+  void ComputeTheTwoCones(GlobalVariables* theGlobalVariables)
   ;
 };
 

@@ -623,24 +623,25 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
       (Serialization::innerSSLieAlgebra, input[1], ownerSS, &errorString))
     return output.SetError(errorString, theCommands);
   ElementSemisimpleLieAlgebra<Rational> theE;
-  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
-        (theCommands, input[2], theE, *ownerSS))
+  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theE, *ownerSS))
     return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theF, theH;
-  std::stringstream out;
+  std::stringstream out, logStream;
   bool success=
-  ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &out, theCommands.theGlobalVariableS);
+  ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
 //  std::cout << "<br>The elts: " <<  theOperators.ToString();
 //  std::cout << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << "success!";
+    out << CGI::GetHtmlMathSpanPure("F:="+theF.ToString() + ";") << "<br>"
+    << CGI::GetHtmlMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
+    << CGI::GetHtmlMathSpanPure("E:="+theE.ToString() + ";")
+    << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
-    out << "couldn't extend E to sl(2)-triple";
+    out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerAdCommonEigenSpaces
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
   if (input.children.size<3)
     return output.SetError
@@ -655,8 +656,7 @@ bool CommandList::innerAdCommonEigenSpaces
   theOperators.ReservE(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i=2; i<input.children.size; i++)
-  { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
-        (theCommands, input[i], tempElt, *ownerSS))
+  { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
       return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
   }
@@ -674,8 +674,7 @@ bool CommandList::innerAdCommonEigenSpaces
 }
 
 bool CommandList::innerGroebner
-(CommandList& theCommands, const Expression& input, Expression& output, bool useGr,
-   bool useRevLex, bool useModZp)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
 { MacroRegisterFunctionWithName("CommandList::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;

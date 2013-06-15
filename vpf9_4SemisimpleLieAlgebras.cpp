@@ -1229,7 +1229,8 @@ void CandidateSSSubalgebra::ComputePairingTable
 }
 
 void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables)
-{ this->CharsPrimalModules.SetSize(this->Modules.size);
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesPreparation");
+  this->CharsPrimalModules.SetSize(this->Modules.size);
   this->CharsPrimalModulesMerged.SetSize(this->Modules.size);
   MonomialChar<Rational> currentWeight;
   currentWeight.owner=0;
@@ -1242,7 +1243,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGl
       this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
-  this->OppositeModulesByChar.initFillInObject(-2, this->Modules.size);
+  this->OppositeModulesByChar.initFillInObject( this->Modules.size, -2);
   List<charSSAlgMod<Rational> > theDualMods;
   theDualMods.SetSize(this->Modules.size);
   for (int i=0; i<this->Modules.size; i++)
@@ -1274,7 +1275,8 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeElts
 bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem
 (const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
  ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
-{ ElementSemisimpleLieAlgebra<Polynomial<Rational> > Ecopy, theH, theF, tempElt;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem");
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > Ecopy, theH, theF, tempElt;
   Ecopy=theE;
   this->GetAmbientSS().GetGenericElementCartan(theH, 0);
   theF.MakeZero();
@@ -1297,10 +1299,10 @@ void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariabl
   this->ModulesSl2opposite.SetSize(this->Modules.size);
   List<ElementSemisimpleLieAlgebra<Rational> > FmustBeAlinCombiOf;
   for (int i=0; i<this->Modules.size; i++)
-  { this->ModulesSl2opposite[i].SetSize(this->ModulesSl2opposite[i].size);
+  { this->ModulesSl2opposite[i].SetSize(this->Modules[i].size);
     for (int j=0; j<this->Modules[i].size; j++)
     { this->ModulesSl2opposite[i][j].SetSize(this->Modules[i][j].size);
-      for (int k=0; k<this->ModulesSl2opposite.size; k++)
+      for (int k=0; k<this->ModulesSl2opposite[i][j].size; k++)
       { this->ComputeKsl2triplesGetOppositeElts
         (this->WeightsModulesPrimal[i][k], this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i]], FmustBeAlinCombiOf);
         if (!this->ComputeKsl2tripleSetUpAndSolveSystem

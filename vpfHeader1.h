@@ -4956,8 +4956,7 @@ private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
   void Clear();//<-to guard the now unsafe base class method
   friend std::ostream& operator<< <TemplateMonomial, coefficient>
-  (std::ostream& output,
-   const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
+  (std::ostream& output, const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
 ;
 public:
   List<coefficient> theCoeffs;
@@ -5212,6 +5211,11 @@ public:
 //  inline void operator+=(const TemplateMonomial& m)
 //  { this->AddMonomial(m, 1);
 //  }
+  MonomialCollection<TemplateMonomial, coefficient> operator-(const MonomialCollection<TemplateMonomial, coefficient>& other)const
+  { MonomialCollection<TemplateMonomial, coefficient> output=*this;
+    output-=other;
+    return output;
+  }
   MonomialCollection<TemplateMonomial, coefficient> operator+(const MonomialCollection<TemplateMonomial, coefficient>& other)const
   { MonomialCollection<TemplateMonomial, coefficient> output=*this;
     output+=other;

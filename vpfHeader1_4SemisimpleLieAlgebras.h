@@ -293,12 +293,15 @@ public:
 
   List<Vectors<Rational> > WeightsModulesNONprimal;
   List<Vectors<Rational> > WeightsModulesPrimal;
-  List<charSSAlgMod<Rational> > hCharsModulesPrimal;
+  List<charSSAlgMod<Rational> > CharsPrimalModules;
+  List<charSSAlgMod<Rational> > CharsPrimalModulesMerged;
 
   List<List<List<int> > > NilradicalPairingTable;
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
-  List<List<int> > OppositeModules;
+  List<List<int> > OppositeModulesByStructure;
+  List<List<int> > OppositeModulesByChar;
+
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
@@ -353,6 +356,7 @@ public:
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
   void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
+  void ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
   void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair

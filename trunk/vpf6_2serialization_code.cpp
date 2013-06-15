@@ -863,10 +863,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  //if (theCandidatesE.children.size<10)
-  { theSAs.flagDoComputePairingTable=true;
-    theSAs.flagDoComputeNilradicals=true;
-  }
+  theSAs.flagDoComputePairingTable=true;
+  theSAs.flagDoComputeNilradicals=false;
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;

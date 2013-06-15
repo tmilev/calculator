@@ -570,11 +570,11 @@ bool CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg
   if (!input.IsListNElements(3))
     return false;
   charSSAlgMod<Rational> leftC, rightC;
-  if (!input[1].IsOfType(& leftC))
+  if (!input[1].IsOfType(&leftC))
     return false;
   if (!input[2].IsOfType(&rightC))
     return false;
-  if (leftC.owner!=rightC.owner)
+  if (leftC.GetOwner()!=rightC.GetOwner())
   { theCommands.Comments
     << "You asked me to multiply characters over different semisimple Lie algebras. "
     << "Could this be a typo?";

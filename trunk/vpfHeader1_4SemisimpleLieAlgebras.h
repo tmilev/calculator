@@ -293,6 +293,7 @@ public:
 
   List<Vectors<Rational> > WeightsModulesNONprimal;
   List<Vectors<Rational> > WeightsModulesPrimal;
+  List<charSSAlgMod<Rational> > hCharsModulesPrimal;
 
   List<List<List<int> > > NilradicalPairingTable;
   List<int> candidateSubalgebraModules;
@@ -351,6 +352,7 @@ public:
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
+  void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
   void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair

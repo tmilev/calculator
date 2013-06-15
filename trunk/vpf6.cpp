@@ -2009,7 +2009,7 @@ bool CommandList::fDecomposeCharGenVerma
   invertedParSel.InvertSelection();
   charSSAlgMod<RationalFunctionOld> theChar, currentChar;
   MonomialChar<RationalFunctionOld> theMon;
-  theChar.MakeZero(theSSlieAlg);
+  theChar.MakeZero();
   FormatExpressions formatChars;
   formatChars.FDrepLetter="L";
   formatChars.fundamentalWeightLetter="\\omega";
@@ -2025,14 +2025,15 @@ bool CommandList::fDecomposeCharGenVerma
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    currentChar.MakeZero(theSSlieAlg);
+    currentChar.MakeZero();
+    theMon.owner=theSSlieAlg;
     for (int j=0; j< theKLpolys.theKLcoeffs[indexInWeyl].size; j++)
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero())
       { currentHW=theHWsimpCoords;
 //        currentHW+=theSub.GetRho();
         theWeyl.ActOnRhoModified(j, currentHW);
 //        currentHW-=theSub.GetRho();
-        theMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
+        theMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
         int sign= (currentElt.size- theWeyl.theElements[j].size)%2==0 ? 1 :-1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
       }
@@ -2952,13 +2953,14 @@ bool CommandList::innerHWVCommon
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
-{ output.MakeZero(this->owneR);
+{ output.MakeZero();
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
   MonomialChar<coefficient> tempMon;
+  tempMon.owner=&this->GetOwner();
   WeylGroup& theWeyl=this->GetOwner().theWeyl;
   for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
-  { tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+  { tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
     output.AddMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);
   }
 }
@@ -3085,22 +3087,22 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   tempFormat.CustomPlusSign="";
   tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter="\\bar{h}";
-  theFDLeviSplitShifteD.MakeZero(theSSalgebra);
+  theFDLeviSplitShifteD.MakeZero();
   MonomialChar<RationalFunctionOld> tempMon;
+  tempMon.owner=theSSalgebra;
   ElementUniversalEnveloping<RationalFunctionOld> currentChar;
   for (int i=0; i<theLeviEigenVectors.size; i++)
-  { tempMon.weightFundamentalCoords=theEigenVectorWeightsFund[i];
-    tempMon.weightFundamentalCoords+=theGenMod.theHWFundamentalCoordsBaseField;
+  { tempMon.weightFundamentalCoordS=theEigenVectorWeightsFund[i];
+    tempMon.weightFundamentalCoordS+=theGenMod.theHWFundamentalCoordsBaseField;
     theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
-    currentHWdualcoords=theSSalgebra->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoords);
+    currentHWdualcoords=theSSalgebra->theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoordS);
     currentChar=theCasimir;
     currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
-    out << "<tr><td>"
-    << theFDLeviSplitShifteD[i].weightFundamentalCoords.ToStringLetterFormat("\\psi")
+    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi")
     << "</td><td>" << currentChar.ToString(&tempFormat) << "</td></tr>";
     latexReport1 << " $"
-    << theFDLeviSplitShifteD[i].weightFundamentalCoords.ToStringLetterFormat("\\psi", &tempFormat) << "$"
+    << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
     << "&$p_{" << i+1 <<"}:=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";

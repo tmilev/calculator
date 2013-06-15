@@ -511,6 +511,19 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
   if((this->rank==0) or (other.rank==0))
     return output;
 
+  if(this->rank==this->degree)
+  { output.rank = other.rank;
+    output.fastbasis = other.fastbasis;
+    return output;
+  }
+
+  if(other.rank == other.degree)
+  { output.rank = this->rank;
+    output.fastbasis = this->fastbasis;
+    return output;
+  }
+
+
   Matrix<Rational> MV = this->fastbasis;
   List<Vector<coefficient> > Vperp;
   MV.GetZeroEigenSpaceModifyMe(Vperp);
@@ -552,26 +565,40 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
 
 template <typename coefficient>
 VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(VectorSpace<coefficient>* ambient, Matrix<coefficient>* form) const
-{ Matrix<coefficient> M = this->fastbasis;
+{ VectorSpace<coefficient> V;
+  V.degree = this->degree;
+  if(this->rank == this->degree)
+  { V.rank = 0;
+    return V;
+  }
+  if(this->rank == 0)
+  { if(ambient)
+    { V.rank = ambient->rank;
+      V.fastbasis = ambient->fastbasis;
+      return V;
+    }
+    V.rank = this->degree;
+    return V;
+  }
+  Matrix<coefficient> M = this->fastbasis;
   if(form)
     M.MultiplyOnTheRight(*form); // i can never tell which one is right or left :/
   List<Vector<coefficient> > VVs;
   // this is where 'nullspace' and 'kernel' are conceptually different
   M.GetZeroEigenSpaceModifyMe(VVs);
-  VectorSpace<coefficient> V;
   // this appears common enough to warrant a better method
   for(int i=0; i<VVs.size; i++)
     V.AddVectorDestructively(VVs[i]);
-  if(ambient)
+  if(ambient && ambient->rank<ambient->degree)
   { VectorSpace<coefficient> W = V.Intersection(*ambient);
-    std::cout << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << std::endl;
-    if(ambient->rank - this->rank - W.rank != 0)
-      std::cout << "*ambient is not *this (+) W" << std::endl;
+    //std::cout << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << std::endl;
+    //if(ambient->rank - this->rank - W.rank != 0)
+    //  std::cout << "*ambient is not *this (+) W" << std::endl;
     return W;
   }
-  std::cout << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << std::endl;
-  if(this->degree - this->rank - V.rank != 0)
-    std::cout << "Error: ranks of subspace and orthogonal complement should sum to degree" << std::endl;
+  //std::cout << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << std::endl;
+  //if(this->degree - this->rank - V.rank != 0)
+  //  std::cout << "Error: ranks of subspace and orthogonal complement should sum to degree" << std::endl;
   return V;
 }
 
@@ -582,7 +609,6 @@ template <typename coefficient>
 void VectorSpace<coefficient>::MakeFullRank(int d)
 { this->degree = d;
   this->rank = d;
-  this->fastbasis.MakeIdMatrix(d);
 }
 
 template <typename coefficient>

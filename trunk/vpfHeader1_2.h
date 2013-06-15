@@ -1102,6 +1102,7 @@ public:
 
   List<List<int> > conjugacyClasses;
   List<WeylGroupRepresentation<Rational> > irreps;
+  List<Vector<Rational> > characterTable;
 
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);

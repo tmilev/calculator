@@ -3234,7 +3234,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   { return input.::MonomialCollection<MonomialChar<coefficient>, coefficient>
     ::HashFunction(input);
   }
-
+  void GetDual(charSSAlgMod<coefficient>& output)const;
   void MakeFromWeight
 (const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
    ;
@@ -7880,6 +7880,22 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
     }
   }
   return true;
+}
+
+template <class coefficient>
+void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output)const
+{ if (&output==this)
+  { charSSAlgMod<coefficient> thisCopy=*this;
+    thisCopy.GetDual(output);
+    return;
+  }
+  MonomialChar<coefficient> tempM;
+  output.MakeZero();
+  for (int i=0; i<this->size; i++)
+  { tempM=(*this)[i];
+    tempM.weightFundamentalCoordS.Minus();
+    output.AddMonomial(tempM, this->theCoeffs[i]);
+  }
 }
 
 template <class coefficient>

@@ -530,7 +530,7 @@ int main(int argc, char **argv)
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(c_3);";
   //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
 //  civilizedInput="PenkovProjectRecompute";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
+  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
 //  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
   PredefinedStrings(civilizedInput);
@@ -538,11 +538,10 @@ int main(int argc, char **argv)
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
-  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
-  << theParser.DisplayNameCalculator << "\">\n" ;
-  std::cout << GetSelectHTMLStringTEmp
-  (optionsType, optionsRank, inputWeylString, inputRankString,
-   inputStringNames.Contains("checkUsePreamble"))
+  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
+  std::cout
+  << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString,inputStringNames.Contains
+  ("checkUsePreamble"))
   << tempStreamXX.str();
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
@@ -569,23 +568,20 @@ int main(int argc, char **argv)
   if (civilizedInput!="")
   { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;
-      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString
-      << "_" << inputRankString << ", i); h_{{i}}:=getCartanGenerator{}( "
-      << inputWeylString << "_" << inputRankString << ", i) ;";
+      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString << "_" << inputRankString
+      << ", i); h_{{i}}:=getCartanGenerator{}( " << inputWeylString << "_" << inputRankString << ", i) ;";
       civilizedInput=tempStream.str()+civilizedInput;
     }
     theParser.Evaluate(civilizedInput);
     ComputationComplete=true;
     if (theParser.flagProduceLatexLink)
       std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-      << CGI::GetLatexEmbeddableLinkFromCalculatorInput
-      (theParser.inputStringRawestOfTheRaw, civilizedInput);
+      << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, civilizedInput);
 
 //    std::cout << "<hr>";
     std::cout << theParser.outputString;
     if (theParser.parsingLog!="")
-      std::cout << "<b> As requested, here is a calculator parsing log</b><br>"
-      << theParser.parsingLog;
+      std::cout << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
   }
 //  theComputation.flagLogSyntaxRules=inputRankString=="2";
   std::cout << "\n\n</td>\n\n";

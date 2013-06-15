@@ -229,8 +229,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->Hcandidates.size; i++)
       if (!this->Hcandidates[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFile;
-        if (! CGI::OpenFileCreateIfNotPresent
-            (outputFile, this->GetPhysicalFileName(i, theFormat), false, true, false))
+        if (! CGI::OpenFileCreateIfNotPresent(outputFile, this->GetPhysicalFileName(i, theFormat), false, true, false))
         { std::cout << "<br>This may or may not be a programming error. "
           << "While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
@@ -776,8 +775,7 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   ElementSemisimpleLieAlgebra<Rational> goalH, lieBracket;
   for (int i=0; i<this->theNegGens.size; i++)
   { goalH.MakeHgenerator(this->theHsScaledToActByTwo[i], *this->owner->owneR);
-    this->GetAmbientSS().LieBracket
-    (this->thePosGens[i], this->theNegGens[i], lieBracket);
+    this->GetAmbientSS().LieBracket(this->thePosGens[i], this->theNegGens[i], lieBracket);
     lieBracket-=goalH;
     if (!lieBracket.IsEqualToZero())
       return false;
@@ -820,8 +818,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
 (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> >
-  lieBracketMinusGoalValue, goalValue;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
@@ -842,8 +839,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
     this->totalNumUnknownsNoCentralizer+=this->theInvolvedNegGenerators[i].size;
   if (this->theWeylNonEmbeddeD.RootSystem.size==0)
-  { std::cout << "This is a programming error: the root system of the "
-    << " candidate subalgebra has not been computed "
+  { std::cout << "This is a programming error: the root system of the candidate subalgebra has not been computed "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -920,9 +916,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
         int q;
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
-        { std::cout << "This is a programming error: the alpha-string along "
-          << posRoot1.ToString() << " through " << (-posRoot2).ToString()
-          << " does not contain any root, which is impossible. "
+        { std::cout << "This is a programming error: the alpha-string along " << posRoot1.ToString()
+          << " through " << (-posRoot2).ToString() << " does not contain any root, which is impossible. "
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
@@ -1039,10 +1034,8 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
     theFormat.flagCandidateSubalgebraShortReportOnly=false;
     std::cout << "<br><b>Something went very wrong with candidate "
     << this->theWeylNonEmbeddeD.theDynkinType.ToString() << ": dimensions DONT FIT!!! More precisely, "
-    << "I am getting total module dimension sum  " << totalDim << " instead of "
-    << this->GetAmbientSS().GetNumGenerators()
-    << ".</b> Here is a detailed subalgebra printout. "
-    << this->ToString(&theFormat)
+    << "I am getting total module dimension sum  " << totalDim << " instead of " << this->GetAmbientSS().GetNumGenerators()
+    << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat)
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     ;
     assert(false);
@@ -1225,27 +1218,49 @@ void CandidateSSSubalgebra::ComputePairingTable
         break;
       }
 //  std::cout << "Nilradical pairing table size: " << this->NilradicalPairingTable.size;
-  this->OppositeModules.SetSize(this->NilradicalPairingTable.size);
+  this->OppositeModulesByStructure.SetSize(this->NilradicalPairingTable.size);
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
     for (int j=0; j<this->NilradicalPairingTable[i].size; j++)
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
         if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
           if (!(this->primalSubalgebraModules.Contains(i) && this->primalSubalgebraModules.Contains(j)))
-            this->OppositeModules[i].AddOnTopNoRepetition(j);
+            this->OppositeModulesByStructure[i].AddOnTopNoRepetition(j);
   this->ComputeKsl2triples(theGlobalVariables);
 }
 
-void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariables)
-{ this->hCharsModulesPrimal.SetSize(this->Modules.size);
+void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables)
+{ this->CharsPrimalModules.SetSize(this->Modules.size);
+  this->CharsPrimalModulesMerged.SetSize(this->Modules.size);
   MonomialChar<Rational> currentWeight;
   currentWeight.owner=0;
-  for (int i=0; i<this->hCharsModulesPrimal.size; i++)
-  { this->hCharsModulesPrimal[i].MakeZero();
+  for (int i=0; i<this->CharsPrimalModules.size; i++)
+  { this->CharsPrimalModules[i].MakeZero();
+    this->CharsPrimalModulesMerged[i].MakeZero();
     for (int j=0; j<this->WeightsModulesPrimal[i].size; j++)
     { currentWeight.weightFundamentalCoordS=this->WeightsModulesPrimal[i][j];
-      this->hCharsModulesPrimal[i].AddMonomial(currentWeight, 1);
+      this->CharsPrimalModules[i].AddMonomial(currentWeight, 1);
+      this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
+  this->OppositeModulesByChar.SetSize(this->Modules.size);
+  List<charSSAlgMod<Rational> > theDualMods;
+  theDualMods.SetSize(this->Modules.size);
+  for (int i=0; i<this->Modules.size; i++)
+    this->CharsPrimalModules[i].GetDual(theDualMods[i]);
+  for (int i=0; i<this->Modules.size; i++)
+    for (int j=i; j<this->Modules.size; j++)
+      if ((this->CharsPrimalModules[i]-theDualMods[j]).IsEqualToZero())
+      { this->OppositeModulesByChar[i].SetSize(1);
+        this->OppositeModulesByChar[i][0]=j;
+        this->OppositeModulesByChar[j].SetSize(1);
+        this->OppositeModulesByChar[j][0]=i;
+      } //else
+        //std::cout << "<hr>" << this->CharsPrimalModules[i].ToString() << " - " << theDualMods[j].ToString()
+        //<< "= " << (this->CharsPrimalModules[i]-theDualMods[j]).ToString();
+}
+
+void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariables)
+{ this->ComputeKsl2triplesPreparation(theGlobalVariables);
 }
 
 int CandidateSSSubalgebra::GetPrimalRank()const
@@ -1483,15 +1498,15 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications
       << this->ToStringNilradicalSelection(theSelection);
     }
   for (int i=0; i<selectedIndices.size; i++)
-    for (int j=0; j<this->OppositeModules[selectedIndices[i]].size; j++)
-    { if (theSelection[this->OppositeModules[selectedIndices[i]][j]]==1)
+    for (int j=0; j<this->OppositeModulesByStructure[selectedIndices[i]].size; j++)
+    { if (theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]]==1)
       { if (logStream!=0)
         { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
           << " contains opposite modules and is therefore not allowed. ";
         }
         return false;
       }
-      theSelection[this->OppositeModules[selectedIndices[i]][j]]=0;
+      theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]]=0;
     }
   return true;
 }
@@ -2051,8 +2066,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   else
     theType=*theTypes.LastObject();
   for (; theType<myType; theType++, theType.lengthFirstCoRootSquared=-1)
-    this->ExtendOneComponentOneTypeAllLengthsRecursive
-      (baseCandidate, theType, propagateRecursion, theGlobalVariables);
+    this->ExtendOneComponentOneTypeAllLengthsRecursive(baseCandidate, theType, propagateRecursion, theGlobalVariables);
 }
 
 void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegularSAs
@@ -3176,8 +3190,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
 { if (this->Modules.size<=0)
     return "";
   std::stringstream out;
-  out << "Isotypic module decomposition over primal subalgebra (total "
-  << this->Modules.size << " isotypic components). ";
+  out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   out << "<table border=\"1\"><tr><td>Module highest weight in fund. coords. and label</td>";
   FormatExpressions tempCharFormat;
   if (!this->charFormaT.IsZeroPointer())
@@ -3240,11 +3253,20 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   }
   out << "</tr>";
   out << "<tr>";
-  out << "<td>Character over Cartan of s.a.+ Cartan of centralizer of s.a.</td>";
+  out << "<td>Single module character over Cartan of s.a.+ Cartan of centralizer of s.a.</td>";
   tempCharFormat.FDrepLetter="M";
-  for (int i=0; i<this->hCharsModulesPrimal.size; i++)
+  for (int i=0; i<this->CharsPrimalModules.size; i++)
   { out << "<td>";
-    out << CGI::GetHtmlMathSpanPure(this->hCharsModulesPrimal[i].ToString(&tempCharFormat));
+    out << CGI::GetHtmlMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+    out << "</td>";
+  }
+  out << "</tr>";
+  out << "<tr>";
+  out << "<td>Isotypic character</td>";
+  tempCharFormat.FDrepLetter="M";
+  for (int i=0; i<this->CharsPrimalModules.size; i++)
+  { out << "<td>";
+    out << CGI::GetHtmlMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
     out << "</td>";
   }
   out << "</tr>";
@@ -3320,8 +3342,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   std::stringstream out;
   Vector<Rational> primalBase;
   primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
-  out << "<br>The primal extension of the semisimple subalgerba equals: "
-  << primalBase.ToStringLetterFormat("V");
+  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("V");
   int numConeIntersections=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     if (this->FKNilradicalCandidates[i].NilradicalConesIntersect)
@@ -3358,21 +3379,35 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
     if (i!=this->modulesWithZeroWeights.size-1)
       out << ", ";
   }
-  out << "<br>Non-compatible (a.k.a. ``opposite'') modules:<br>"
-  << " <table border=\"1\"><tr>";
-  for (int i=0; i< this->OppositeModules.size; i++)
+  out << "<br>"
+  << " <table border=\"1\"><tr><td></td>";
+  for (int i=0; i< this->OppositeModulesByStructure.size; i++)
     out << "<td>V_{" << i+1 << "}" << "</td>";
-  out << "</tr><tr>";
-  for (int i=0; i< this->OppositeModules.size; i++)
+  out << "</tr>";
+  out << "<tr> <td>Non-compatible (a.k.a. ``opposite'') modules:</td>";
+  for (int i=0; i< this->OppositeModulesByStructure.size; i++)
   { out << "<td>";
-    for (int j=0; j<this->OppositeModules[i].size; j++)
-    { out << "V_{" << this->OppositeModules[i][j]+1 << "}";
-      if (j!=this->OppositeModules[i].size-1)
+    for (int j=0; j<this->OppositeModulesByStructure[i].size; j++)
+    { out << "V_{" << this->OppositeModulesByStructure[i][j]+1 << "}";
+      if (j!=this->OppositeModulesByStructure[i].size-1)
       out << ", ";
     }
     out << "</td>";
   }
-  out << "</tr></table>";
+  out << "</tr>";
+  out << "<tr> <td>Opposite modules by character:</td>";
+  for (int i=0; i< this->OppositeModulesByChar.size; i++)
+  { out << "<td>";
+    for (int j=0; j<this->OppositeModulesByChar[i].size; j++)
+    { out << "V_{" << this->OppositeModulesByChar[i][j]+1 << "}";
+      if (j!=this->OppositeModulesByChar[i].size-1)
+      out << ", ";
+    }
+    out << "</td>";
+  }
+  out << "</tr>";
+
+  out << "</table>";
   out << "<br>Modules corresponding to the semisimple subalgebra: ";
   Vector<Rational> theSAvector, tempV;
   theSAvector.MakeZero(this->NilradicalPairingTable.size);

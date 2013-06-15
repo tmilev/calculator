@@ -75,9 +75,17 @@ class JSData
   JSData& operator[](int i);
   JSData& operator[](std::string s);
 
+  // parsing
+  void ExtractScalar(std::string json, int begin, int end);
+  int AcceptString(std::string json, int begin);
+  int AcceptList(std::string json, int begin);
+  int AcceptObject(std::string json, int begin);
+
+  JSData(){type=JSNULL;}
   std::string ToString() const;
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
+  void readfile(char *filename);
 };
 
 struct JSHashData
@@ -118,34 +126,34 @@ JSData& JSData::operator[](std::string key)
   return this->obj[i].value;
 }
 
-int acceptObject(std::string json, int begin, JSData& data);
-int acceptString(std::string json, int begin, JSData& data)
-{ data.type = JSSTR;
-  int i = begin+1;
+int JSData::AcceptString(std::string json, int begin)
+{ this->type = JSSTR;
+  // i don't expect this to be bigger then 2147482647 but smaller then 4294967296
+  // the compiler whines about comparison between int i and json.size()
+  unsigned int i = begin+1;
   for(; i<json.size(); i++)
   { if(json[i] == '"')
-    { data.string = json.substr(begin+1,i-begin-1);
+    { this->string = json.substr(begin+1,i-begin-1);
       return i;
     }
   }
-  data.string = json.substr(begin+1,json.size()-begin-1);
+  std::cout << "parse error: input string ended but current data string is incomplete" << std::endl;
+  this->string = json.substr(begin+1,json.size()-begin-1);
   return json.size();
 }
 
-void extractScalar(std::string json, int begin, int end, JSData& data)
+void JSData::ExtractScalar(std::string json, int begin, int end)
 { if(begin==end)
-  { data.type = JSNULL;
     return;
-  }
   std::string sbs = json.substr(begin,end-begin);
-  data.type = JSNUM;
-  data.number = atof(sbs.c_str());
+  this->type = JSNUM;
+  this->number = atof(sbs.c_str());
 }
 
-int acceptList(std::string json, int begin, JSData& data)
-{ data.type = JSLIST;
-  int i=begin+1;
-  int curobjbgn = i;
+int JSData::AcceptList(std::string json, int begin)
+{ this->type = JSLIST;
+  unsigned int i=begin+1;
+  unsigned int curobjbgn = i;
   bool havecurobj = false;
   for(; i<json.size(); i++)
   { if(json[i] == ']')
@@ -153,46 +161,48 @@ int acceptList(std::string json, int begin, JSData& data)
       { // hack: should instead test in extractScalar for any type of reasonable
         // scalar.  don't.  no need to figure that out yet.
         if(i>curobjbgn){
-          data.list.SetSize(data.list.size+1);
-          extractScalar(json, curobjbgn, i, data.list[data.list.size-1]);
+          this->list.SetSize(this->list.size+1);
+          this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
         }
       }
       return i;
     }
     if(json[i] == '[')
-    { data.list.SetSize(data.list.size+1);
-      i = acceptList(json,i,data.list[data.list.size-1]);
+    { this->list.SetSize(this->list.size+1);
+      i = this->list[this->list.size-1].AcceptList(json,i);
       havecurobj = true;
       continue;
     }
     if(json[i] == '"')
-    { data.list.SetSize(data.list.size+1);
-      i = acceptString(json,i,data.list[data.list.size-1]);
+    { this->list.SetSize(this->list.size+1);
+      i = this->list[this->list.size-1].AcceptString(json,i);
       havecurobj = true;
       continue;
     }
     if(json[i] == '{')
-    { data.list.SetSize(data.list.size+1);
-      i = acceptObject(json,i,data.list[data.list.size-1]);
+    { this->list.SetSize(this->list.size+1);
+      i = this->list[this->list.size-1].AcceptObject(json,i);
       havecurobj = true;
       continue;
     }
     if(json[i] == ',')
     { if(!havecurobj){
-        data.list.SetSize(data.list.size+1);
-        extractScalar(json, curobjbgn, i, data.list[data.list.size-1]);
+        this->list.SetSize(this->list.size+1);
+        this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
       }
       havecurobj = false;
       curobjbgn = i+1;
       continue;
     }
   }
+  std::cout << "parse error: string ended but list is incomplete" << std::endl;
+  return i;
 }
 
-int acceptObject(std::string json, int begin, JSData& data)
-{ data.type = JSOBJ;
-  int i=begin+1;
-  int curobjbgn = i;
+int JSData::AcceptObject(std::string json, int begin)
+{ this->type = JSOBJ;
+  unsigned int i=begin+1;
+  unsigned int curobjbgn = i;
   bool isvaluetime = false;
   bool havecurobj = false;
   for(; i<json.size(); i++)
@@ -202,7 +212,7 @@ int acceptObject(std::string json, int begin, JSData& data)
         return i;
       }
       if(!havecurobj)
-        extractScalar(json, curobjbgn, i-1, data.obj[data.obj.size-1].value);
+        this->obj[this->obj.size-1].value.ExtractScalar(json,curobjbgn,i-1);
       return i;
     }
     if(json[i] == ':')
@@ -212,8 +222,8 @@ int acceptObject(std::string json, int begin, JSData& data)
         continue;
       }
       isvaluetime = true;
-      data.obj.SetSize(data.obj.size+1);
-      data.obj[data.obj.size-1].key = json.substr(curobjbgn,i-curobjbgn);
+      this->obj.SetSize(this->obj.size+1);
+      this->obj[this->obj.size-1].key = json.substr(curobjbgn,i-curobjbgn);
       curobjbgn = i+1;
       havecurobj = false;
     }
@@ -224,41 +234,43 @@ int acceptObject(std::string json, int begin, JSData& data)
         continue;
       }
       if(!havecurobj)
-        extractScalar(json, curobjbgn, i-1, data.obj[data.obj.size-1].value);
+        this->obj[this->obj.size-1].value.ExtractScalar(json, curobjbgn, i-1);
       isvaluetime = false;
       curobjbgn = i+1;
     }
     if(isvaluetime)
     { if(json[i] == '[')
-      { i = acceptList(json,i,data.obj[data.obj.size-1].value);
+      { i = this->obj[this->obj.size-1].value.AcceptList(json,i);
         havecurobj = true;
         continue;
       }
       if(json[i] == '"')
-      { i = acceptString(json,i,data.obj[data.obj.size-1].value);
+      { i = this->obj[this->obj.size-1].value.AcceptString(json,i);
         havecurobj = true;
         continue;
       }
       if(json[i] == '{')
-      { i = acceptObject(json,i,data.obj[data.obj.size-1].value);
+      { i = this->obj[this->obj.size-1].value.AcceptObject(json,i);
         havecurobj = true;
         continue;
       }
     }
   }
+  std::cout << "parse error: string ended but object is incomplete" << std::endl;
+  return i;
 }
 
-void readfile(std::string filename, JSData &data)
-{ std::ifstream ifp(filename.c_str());
+void JSData::readfile(char* filename)
+{ std::ifstream ifp(filename);
   if(!ifp.is_open())
     return;
   struct stat f;
-  stat(filename.c_str(),&f);
+  stat(filename,&f);
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
 
-  acceptObject(json,0,data);
+  this->AcceptObject(json,0);
 }
 
 template <typename somestream>
@@ -300,6 +312,9 @@ somestream& JSData::IntoStream(somestream& out) const
       out << '}';
       return out;
   }
+  //unreachable
+  assert(false);
+  return out;
 }
 
 std::string JSData::ToString() const
@@ -448,29 +463,173 @@ std::ostream& operator<<(std::ostream& out, const PermutationR2& p)
   return out;
 }
 
+template <typename scalar>
+class PackedVector
+{ public:
+  scalar data[8];
+
+  static const int size = 8;
+
+  scalar& operator[](int i);
+  scalar operator[](int i) const;
+  bool operator!=(const PackedVector<scalar>& other) const;
+  bool operator==(const PackedVector<scalar>& other) const;
+  bool operator>(const PackedVector<scalar>&other) const;
+  // passing in d for compatibility with Vector
+  void MakeZero(int d);
+  void MakeEi(int d, int i);
+  // for compatibility
+  void SetSize(int s);
+
+  PackedVector<scalar> operator*(scalar x) const;
+  PackedVector<scalar> operator+(const PackedVector<scalar>& w) const;
+  void operator+=(const PackedVector<scalar>& w);
+  scalar ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const;
+
+  unsigned int HashFunction() const;
+  static unsigned int HashFunction(const PackedVector<scalar>& in);
+};
+template <typename scalar>
+const int PackedVector<scalar>::size;
+
+template <typename scalar>
+PackedVector<scalar> PackedVector<scalar>::operator+(const PackedVector<scalar>& w) const
+{ PackedVector<scalar> out;
+  for(int i=0; i<this->size; i++)
+    out[i] = this->data[i]+w[i];
+  return out;
+}
+
+template <typename scalar>
+void PackedVector<scalar>::operator+=(const PackedVector<scalar>& w)
+{ for(int i=0; i<this->size; i++)
+    this->data[i] += w[i];
+}
+
+template <typename scalar>
+PackedVector<scalar> PackedVector<scalar>::operator*(scalar x) const
+{ PackedVector<scalar> out;
+  for(int i=0; i<this->size; i++)
+    out[i] = this->data[i]*x;
+  return out;
+}
+
+template <typename scalar>
+scalar PackedVector<scalar>::ScalarProduct(const PackedVector<scalar>& v, const Matrix<scalar>& B) const
+{ PackedVector<scalar> Bv;
+  Bv.MakeZero(B.NumRows);
+  for(int i=0; i<B.NumRows; i++)
+    for(int j=0; j<B.NumCols; j++)
+      Bv[i] += B.elements[i][j]*v[j];
+  scalar wBv = 0;
+  for(int i=0; i<B.NumRows; i++)
+    wBv += this->data[i]*Bv[i];
+  return wBv;
+}
+
+template <typename scalar>
+scalar& PackedVector<scalar>::operator[](int i)
+{ return this->data[i];
+}
+
+template <typename scalar>
+scalar PackedVector<scalar>::operator[](int i) const
+{ return this->data[i];
+}
+
+template <typename scalar>
+void PackedVector<scalar>::SetSize(int s)
+{ if(s>this->size)
+  { std::cout << "if this was intentional, recompile PackedVector with size>=" << s << std::endl;
+    assert(false);
+  }
+}
+
+template <typename scalar>
+bool PackedVector<scalar>::operator!=(const PackedVector<scalar>& w) const
+{ for(int i=0; i<this->size; i++)
+    if(w[i] != this->data[i])
+      return true;
+  return false;
+}
+
+template <typename scalar>
+bool PackedVector<scalar>::operator==(const PackedVector<scalar>& w) const
+{ return !(*this != w);
+}
+
+template <typename scalar>
+bool PackedVector<scalar>::operator>(const PackedVector<scalar>&w) const
+{ for(int i=0; i<this->size; i++)
+  { if(this->data[i] > w[i])
+      return true;
+    if(this->data[i] < w[i])
+      return false;
+  }
+  return false;
+}
+
+
+template <typename scalar>
+void PackedVector<scalar>::MakeZero(int n)
+{ for(int i=0; i<this->size; i++)
+    this->data[i] = 0;
+}
+
+template <typename scalar>
+void PackedVector<scalar>::MakeEi(int d, int ei)
+{ for(int i=0; i<this->size; i++)
+    this->data[i] = 0;
+  this->data[ei] = 1;
+}
+
+template <typename scalar>
+unsigned int PackedVector<scalar>::HashFunction(const PackedVector<scalar>& in)
+{ return in.HashFunction();
+}
+
+template <typename scalar>
+unsigned int PackedVector<scalar>::HashFunction() const
+{ unsigned int result=0;
+  for (int i=0; i<this->size; i++)
+    result+=  (unsigned int) this->data[i] *  SomeRandomPrimes[i];
+  return result;
+}
+
+template <typename scalar>
+std::ostream& operator<<(std::ostream& out, const PackedVector<scalar>& v)
+{ out << '(';
+  for(int i=0; i<v.size; i++)
+  { out << v[i];
+    if(i!=v.size-1)
+      out << ", ";
+  }
+  out << ')';
+  return out;
+}
 
 // in particular, scalar likes to be int
-template <typename scalar>
+template <typename scalar, typename vector>
 class AnotherWeylGroup
 { // compat WeylGroup
   public:
   Matrix<Rational> CartanSymmetric;
-  Vector<scalar> rho;
-  List<Vector<scalar> > RootSystem;
-  HashedList<Vector<scalar> > rhoOrbit;
+  vector rho;
+  List<vector> RootSystem;
+  HashedList<vector> rhoOrbit;
   List<List<int> > conjugacyClasses;
 
   // needed
   List<Vector<Rational> > characterTable;
 
   int GetDim() const; // idk lol
-  void SimpleReflection(int i, const Vector<scalar>& v, Vector<scalar>& out) const;
-  void SimpleReflection(int i, Vector<scalar>& v) const;
-  void GetSimpleReflections(const Vector<scalar>& v, List<int>& out) const;
+  void SimpleReflection(int i, const vector& v, vector& out) const;
+  void SimpleReflection(int i, vector& v) const;
+  void GetSimpleReflections(const vector& v, List<int>& out) const;
   void GetSimpleReflections(int i, List<int>& out) const;
-  void ApplyReflectionList(List<int> simpleReflections, Vector<scalar>& v) const;
-  void ActOn(int g, Vector<scalar>& v) const;
-  void ActOn(int g, const Vector<scalar>& v, Vector<scalar>& out) const;
+  void ApplyReflectionList(List<int> simpleReflections, vector& v) const;
+  void ActOn(int g, vector& v) const;
+  void ActOn(int g, const vector& v, vector& out) const;
   int Multiply(int g, int h) const;
   int Invert(int g) const;
 
@@ -485,14 +644,14 @@ class AnotherWeylGroup
   // own stuff
   int N; // useful b/c its nice to not axcidently depend on logically stuff
   int nGens;
-  Vector<scalar> twiceRho;
+  vector twiceRho;
   Matrix<scalar> unrationalCartanSymmetric;
 
   void PrintCharTable(const char* filename) const;
 };
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::SimpleReflection(int i, Vector<scalar>& v) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::SimpleReflection(int i, vector& v) const
 { // next i'll put some printfs in addition
   //std::cout << "Debugging simple reflections: vector " << v << " transformed by reflection " << i;
   scalar x=0;
@@ -506,15 +665,15 @@ void AnotherWeylGroup<scalar>::SimpleReflection(int i, Vector<scalar>& v) const
   //std::cout << " becomes " << v << std::endl;
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::SimpleReflection(int i, const Vector<scalar>& v, Vector<scalar>& out) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::SimpleReflection(int i, const vector& v, vector& out) const
 { out = v;
   this->SimpleReflection(i,out);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::GetSimpleReflections(const Vector<scalar>& v, List<int>& out) const
-{ Vector<scalar> w = v;
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::GetSimpleReflections(const vector& v, List<int>& out) const
+{ vector w = v;
   while(w != this->twiceRho)
   { for(int i=0; i<this->nGens; i++)
     { scalar x=0;
@@ -529,49 +688,49 @@ void AnotherWeylGroup<scalar>::GetSimpleReflections(const Vector<scalar>& v, Lis
   }
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::GetSimpleReflections(int i, List<int>& out) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::GetSimpleReflections(int i, List<int>& out) const
 { this->GetSimpleReflections(this->rhoOrbit[i], out);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ApplyReflectionList(List<int> simpleReflections, Vector<scalar>& v) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ApplyReflectionList(List<int> simpleReflections, vector& v) const
 { for(int i=simpleReflections.size-1; i>=0; i--)
     this->SimpleReflection(simpleReflections[i],v);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ActOn(int i, Vector<scalar>& v) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ActOn(int i, vector& v) const
 { List<int> simpleReflections;
   GetSimpleReflections(this->rhoOrbit[i],simpleReflections);
   this->ApplyReflectionList(simpleReflections,v);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ActOn(int i, const Vector<scalar>& v, Vector<scalar>& out) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ActOn(int i, const vector& v, vector& out) const
 { out = v;
   this->ActOn(i,out);
 }
 
-template <typename scalar>
-int AnotherWeylGroup<scalar>::Multiply(int i, int j) const
-{ Vector<scalar> v = this->rhoOrbit[j];
+template <typename scalar, typename vector>
+int AnotherWeylGroup<scalar, vector>::Multiply(int i, int j) const
+{ vector v = this->rhoOrbit[j];
   this->ActOn(i,v);
   return this->rhoOrbit.GetIndex(v);
 }
 
-template <typename scalar>
-int AnotherWeylGroup<scalar>::Invert(int i) const
+template <typename scalar, typename vector>
+int AnotherWeylGroup<scalar, vector>::Invert(int i) const
 { List<int> srsl;
   GetSimpleReflections(this->rhoOrbit[i], srsl);
-  Vector<scalar> v = twiceRho;
+  vector v = twiceRho;
   for(int i=srsl.size-1; i>=0; i--)
     this->SimpleReflection(srsl[i], v);
   return this->rhoOrbit.GetIndex(v);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ComputeRho()
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ComputeRho()
 { if(unrationalCartanSymmetric.NumRows < CartanSymmetric.NumRows)
   { int den = 1;
     for(int i=0; i<CartanSymmetric.NumRows; i++)
@@ -589,13 +748,13 @@ void AnotherWeylGroup<scalar>::ComputeRho()
   }
   this->nGens = this->unrationalCartanSymmetric.NumRows;
   for(int rvi=0; rvi<nGens; rvi++)
-  { Vector<scalar> vi;
+  { vector vi;
     vi.MakeEi(nGens,rvi);
     if(this->RootSystem.Contains(vi))
       continue;
     this->RootSystem.AddOnTop(vi);
     List<int> newelts;
-    Vector<scalar> w;
+    vector w;
     newelts.AddOnTop(this->RootSystem.GetIndex(vi));
     while(newelts.size > 0)
     { int i = newelts.PopLastObject();
@@ -626,13 +785,13 @@ void AnotherWeylGroup<scalar>::ComputeRho()
     this->rho[i] = this->twiceRho[i]/2;
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ComputeAllElements()
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ComputeAllElements()
 { std::cout << "Getting elements...";
-  if(this->twiceRho.size == 0)
+  if(this->RootSystem.size == 0)
     this->ComputeRho();
   std::cout << "(twiceRho is " << this->twiceRho << ")" << std::endl;
-  Vector<scalar> w;
+  vector w;
   List<int> newelts;
   this->rhoOrbit.AddOnTop(twiceRho);
   newelts.AddOnTop(this->rhoOrbit.GetIndex(twiceRho));
@@ -652,8 +811,8 @@ void AnotherWeylGroup<scalar>::ComputeAllElements()
 //  std::cout << rhoOrbit << std::endl;
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::ComputeConjugacyClasses()
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ComputeConjugacyClasses()
 { std::cout << "Getting conjugacy classes...";
   if(this->rhoOrbit.size == 0)
     this->ComputeAllElements();
@@ -664,7 +823,7 @@ void AnotherWeylGroup<scalar>::ComputeConjugacyClasses()
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->N);
   int theRank=this->GetDim();
-  Vector<scalar> theRhoImage;
+  vector theRhoImage;
   for (int i=0; i<this->N; i++)
     if (!Accounted[i])
     { theStack.Clear();
@@ -686,21 +845,21 @@ void AnotherWeylGroup<scalar>::ComputeConjugacyClasses()
   std::cout << conjugacyClasses.size << std::endl;
 }
 
-template <typename scalar>
-int AnotherWeylGroup<scalar>::GetDim() const
+template <typename scalar, typename vector>
+int AnotherWeylGroup<scalar, vector>::GetDim() const
 { return this->CartanSymmetric.NumRows;
 }
 
-template <typename scalar>
-int AnotherWeylGroup<scalar>::GetRootReflection(int i) const
+template <typename scalar, typename vector>
+int AnotherWeylGroup<scalar, vector>::GetRootReflection(int i) const
 { scalar x = this->RootSystem[i].ScalarProduct(this->twiceRho,this->unrationalCartanSymmetric);
   x *= -2;
   x /= this->RootSystem[i].ScalarProduct(this->RootSystem[i],this->unrationalCartanSymmetric);
   return this->rhoOrbit.GetIndexIMustContainTheObject(twiceRho+this->RootSystem[i]*x);
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::GetSignCharacter(Vector<Rational>& out)
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::GetSignCharacter(Vector<Rational>& out)
 { if(this->conjugacyClasses.size == 0)
     this->ComputeConjugacyClasses();
   out.SetSize(this->conjugacyClasses.size);
@@ -731,16 +890,16 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 }
 
 // there are like 3 copies of this function with slightly different argument types
-template <typename scalar>
-Rational AnotherWeylGroup<scalar>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
+template <typename scalar, typename vector>
+Rational AnotherWeylGroup<scalar, vector>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
 { Rational acc = 0;
   for(int i=0; i<X1.size; i++)
     acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
   return acc / this->N;
 }
 
-template <typename scalar>
-void AnotherWeylGroup<scalar>::PrintCharTable(const char *filename) const
+template <typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::PrintCharTable(const char *filename) const
 { JSData data;
   data.type = JSOBJ;
   data.obj.SetSize(3);
@@ -771,8 +930,9 @@ void AnotherWeylGroup<scalar>::PrintCharTable(const char *filename) const
   data.obj[2].value.type = JSLIST;
   data.obj[2].value.list.SetSize(this->characterTable.size);
   for(int i=0; i<this->characterTable.size; i++)
-  { data.obj[2].value.list[i].type = JSSTR;
-    data.obj[2].value.list[i].string = this->characterTable[i].ToString();
+  { for(int j=0; j<this->characterTable[i].size; j++)
+    { data["characters"][i][j] = this->characterTable[i][j].DoubleValue();
+    }
   }
   if(filename)
   { std::ofstream out;
@@ -783,8 +943,8 @@ void AnotherWeylGroup<scalar>::PrintCharTable(const char *filename) const
   }
 }
 
-template <typename scalar>
-void AddCharTable(JSData& chartable, AnotherWeylGroup<scalar>& G)
+template <typename scalar, typename vector>
+void AddCharTable(JSData& chartable, AnotherWeylGroup<scalar, vector>& G)
 { std::string sizes = "sizes";
 
   // check sizes
@@ -796,7 +956,10 @@ void AddCharTable(JSData& chartable, AnotherWeylGroup<scalar>& G)
 
   G.characterTable.SetSize(chartable["characters"].list.size);
   for(int i=0; i<chartable["characters"].list.size; i++)
-    G.characterTable[i] = chartable["characters"][i].string;
+  { G.characterTable[i].SetSize(G.conjugacyClasses.size);
+    for(int j=0; j<G.conjugacyClasses.size; j++)
+      G.characterTable[i][j] = chartable["characters"][i][j].number;
+  }
 }
 
 template <typename coefficient>
@@ -2867,9 +3030,6 @@ int main(void)
    }
    */
 
-  JSData data;
-  readfile("e7",data);
-  std::cout << data << std::endl;
 
 
 /*
@@ -2949,14 +3109,22 @@ int main(void)
 
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
-   AnotherWeylGroup<int> G;
+   AnotherWeylGroup<int, Vector<int> > G;
    DynkinType D;
    D.MakeSimpleType('F',4);
    D.GetCartanSymmetric(G.CartanSymmetric);
    G.ComputeConjugacyClasses();
-   AddCharTable(data,G);
-   G.PrintCharTable(NULL);
-   //PrettyPrintTauSignatures(G);
+   JSData data;
+   data.readfile("f4");
+   if(data.type != JSNULL)
+   { std::cout << data << std::endl;
+     AddCharTable(data,G);
+   } else
+   { ComputeCharacterTable(G);
+     G.PrintCharTable(NULL);
+     G.PrintCharTable("f4");
+   }
+   PrettyPrintTauSignatures(G);
 
 //   G.ComputeConjugacyClasses();
 //   std::cout << "Conjugacy class representatives" << std::endl;

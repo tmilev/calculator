@@ -1280,7 +1280,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   out << "<br>Parabolic selection: " << LeviInSmall.ToString();
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().GetLieAlgebraName() << "-module with highest weight in fund coords "
-  << this->theChaR[0].weightFundamentalCoords.ToString();
+  << this->theChaR[0].weightFundamentalCoordS.ToString();
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(tempStream1.str());
 //  std::cout << "<br>Parabolic selection: " << LeviInSmall.ToString();
@@ -1642,7 +1642,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theG2B3Data.WeylFD.WeylDimFormulaSimpleCoords
           (theG2B3Data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-           (theG2B3Data.theAmbientChar[0].weightFundamentalCoords)).ToString(&theG2B3Data.theFormat)
+           (theG2B3Data.theAmbientChar[0].weightFundamentalCoordS)).ToString(&theG2B3Data.theFormat)
           << "$}";
         } else
           latexTable << "&";
@@ -1661,7 +1661,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
             latexTable << multiplicity << "\\times";
           latexTable << theG2B3Data.WeylFDSmall.WeylDimFormulaSimpleCoords
           (theG2B3Data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-           (tempChar[0].weightFundamentalCoords), rfOne).ToString(&theG2B3Data.theFormat)
+           (tempChar[0].weightFundamentalCoordS), rfOne).ToString(&theG2B3Data.theFormat)
           << "$}";
         } else
           latexTable << "&";
@@ -1878,7 +1878,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     out << "<td>"
     << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords
     (theg2b3data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-    (theCharacter[0].weightFundamentalCoords)).ToString() << "</td>";
+    (theCharacter[0].weightFundamentalCoordS)).ToString() << "</td>";
     latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter= "\\psi";
     out << "<td>" << outputChar.ToString(&theg2b3data.theFormat) << "</td>";
@@ -1891,14 +1891,14 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
         out << outputChar.theCoeffs[i].ToString() << " x ";
       out << theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords
       (theg2b3data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-      (outputChar[i].weightFundamentalCoords));
+      (outputChar[i].weightFundamentalCoordS));
       if (i!=outputChar.size-1)
         out << "+";
-      leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoords);
-      leftWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoords);
+      leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
+      leftWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       for (int j=0; j<outputChar.size; j++)
-      { rightWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoords);
-        rightWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoords);
+      { rightWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
+        rightWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
 //        if (i!=j)
         if ((rightWeightSimple-leftWeightSimple).IsPositive())
         { resultChar=theCasimir;
@@ -2095,7 +2095,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.theAmbientChar.MakeFromWeight
   (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
    (theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
-  theG2B3Data.theSmallCharFDpart.MakeZero(&theG2B3Data.theHmm.theDomain());
+  theG2B3Data.theSmallCharFDpart.MakeZero();
   charSSAlgMod<RationalFunctionOld> tempMon;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
@@ -2184,10 +2184,11 @@ bool CommandList::fSplitFDpartB3overG2inner
 
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
-(std::string* Report, charSSAlgMod& output, branchingData& inputData,GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables)
 { if (this->size==0)
     return false;
-  WeylGroup& theWeyL=this->GetOwner().theWeyl;
+  this->CheckNonZeroOwner();
+  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
@@ -2205,13 +2206,11 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
   MonomialChar<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
-  charAmbientFDWeyl.Reset();
   coefficient bufferCoeff, highestCoeff;
-
   for (int i=0; i<this->size; i++)
   { MonomialChar<coefficient>& currentMon=this->TheObjects[i];
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart
-        (currentMon.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -2220,23 +2219,21 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //    << tempS << "<hr>";
     for (int j=0; j<tempHashedRoots.size; j++)
     { bufferCoeff=this->theCoeffs[i];
-      tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.owner=this->GetOwner();
       bufferCoeff*=tempMults[j];
       charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
     }
   }
 //  std::cout << "<hr>" << tempS;
 //  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
-  remainingCharDominantLevI.Reset();
   Vectors<coefficient> orbitDom;
   for (int i=0; i<charAmbientFDWeyl.size; i++)
   { orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated
-        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords),
-         orbitDom, 10000))
+        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
-      << theWeyL.GetSimpleCoordinatesFromFundamental
-      (charAmbientFDWeyl[i].weightFundamentalCoords).ToString();
+      << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
 //      std::cout << "failed to generate the complement-sub-Weyl-orbit of weight "
 //      << theWeyL.GetSimpleCoordinatesFromFundamental
 //      (charAmbientFDWeyl[i].weightFundamentalCoords).ToString();
@@ -2250,9 +2247,10 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //    for (int l=0; l<orbitDom.size; l++)
 //      std::cout <<"<br>" << orbitDom[l].ToString();
 //    std::cout << "<hr>of them dominant are: <br>";
+    tempMon.owner=this->GetOwner();
     for (int k=0; k<orbitDom.size; k++)
       if (WeylFDSmallAsSubInLarge.IsDominantWeight(orbitDom[k]))
-      { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
+      { tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevI.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
         //std::cout << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
       }// else
@@ -2262,28 +2260,28 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
   theFormat.flagUseLatex=true;
   theFormat.CustomPlusSign="\\oplus ";
   theFormat.fundamentalWeightLetter="\\omega";
-  output.MakeZero(&theSmallAlgebra);
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: "
   << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(remainingCharDominantLevI.ToString(&theFormat));
   //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   //(remainingCharDominantLevI.ToString());
-  remainingCharProjected.MakeZero(&theSmallAlgebra);
+  remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
   for (int i=0; i<remainingCharDominantLevI.size; i++)
-  { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoords);
+  { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
     for (int j=0; j<WeylFDSmall.AmbientWeyl.GetDim(); j++)
     { fundCoordsSmaller[j]=theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
       fundCoordsSmaller[j]/=WeylFDSmall.AmbientWeyl.CartanSymmetric.elements[j][j]/2;
     }
     //std::cout << "<br>insimple coords: " << inSimpleCoords.ToString() << "; fundcoordssmaller: " << fundCoordsSmaller.ToString();
-    tempMon.weightFundamentalCoords=fundCoordsSmaller;
+    tempMon.owner=&theSmallAlgebra;
+    tempMon.weightFundamentalCoordS=fundCoordsSmaller;
     remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.theCoeffs[i]);
   }
 //  std::cout << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharProjected.ToString());
-
   Vector<coefficient> simpleGeneratorBaseField;
+  output.MakeZero();
   while(!remainingCharProjected.IsEqualToZero())
   { localHighest=*remainingCharProjected.LastObject();
     for (bool Found=true; Found; )
@@ -2291,8 +2289,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
       for (int i=0; i<WeylFDSmall.RootsOfBorel.size; i++)
       { tempMon=localHighest;
         simpleGeneratorBaseField=WeylFDSmall.RootsOfBorel[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoords+=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple
-        (simpleGeneratorBaseField);
+        tempMon.weightFundamentalCoordS+=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
 //        std::cout << "<br>candidate highest mon found simple & usual coords: "
 //        << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempMon.weightFundamentalCoords).ToString()
 //        << " = " << tempMon.ToString();
@@ -2308,7 +2305,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
     highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart
-        (localHighest.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -2318,7 +2315,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //    << highestCoeff.ToString() << "<br>"
 //    << remainingCharProjected.ToString();
     for (int i=0; i<tempHashedRoots.size; i++)
-    { tempMon.weightFundamentalCoords=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+    { tempMon.owner=&theSmallAlgebra;
+      tempMon.weightFundamentalCoordS=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff=tempMults[i];
       bufferCoeff*=highestCoeff;
       remainingCharProjected.SubtractMonomial(tempMon, bufferCoeff);
@@ -2344,8 +2342,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
-    { tempRoot=WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-      (output[i].weightFundamentalCoords).GetVectorRational();
+    { tempRoot=WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
 //      smallWeyl.DrawContour
  //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;

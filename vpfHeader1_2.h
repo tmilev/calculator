@@ -3159,7 +3159,8 @@ template <class coefficient>
 class MonomialChar
 {
 public:
-  Vector<coefficient> weightFundamentalCoords;
+  SemisimpleLieAlgebra* owner;
+  Vector<coefficient> weightFundamentalCoordS;
   static const bool IsEqualToZero()
   { return false;
   }
@@ -3167,28 +3168,35 @@ public:
   { output << input.ToString();
     return output;
   }
+  MonomialChar():owner(0){}
+  void CheckNonZeroOwner()const
+  { if (this->owner!=0)
+      return;
+    std::cout << "This is a programming error: Monomial char has zero owner, which is not allowed by the current "
+    << "function call. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   void AccountSingleWeight
 (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
- WeylGroup& theWeyl, Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
+ Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
   ;
   std::string TensorAndDecompose
-(const MonomialChar<coefficient>& other, SemisimpleLieAlgebra& owner, charSSAlgMod<coefficient>& output,
- GlobalVariables& theGlobalVariables)const
+(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
    ;
   std::string ToString
   (FormatExpressions* theFormat=0)const
   ;
   inline unsigned int HashFunction()const
-  { return weightFundamentalCoords.HashFunction();
+  { return weightFundamentalCoordS.HashFunction();
   }
   static inline unsigned int HashFunction(const MonomialChar<coefficient>& input)
   { return input.HashFunction();
   }
   inline bool operator==(const MonomialChar<coefficient>& other) const
-  { return this->weightFundamentalCoords==other.weightFundamentalCoords;
+  { return this->weightFundamentalCoordS==other.weightFundamentalCoordS && this->owner==other.owner;
   }
   inline bool operator>(const MonomialChar<coefficient>& other) const
-  { return this->weightFundamentalCoords>other.weightFundamentalCoords;
+  { return this->weightFundamentalCoordS>other.weightFundamentalCoordS;
   }
 };
 
@@ -3196,20 +3204,28 @@ template <class coefficient>
 class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coefficient>
 {
   public:
-  SemisimpleLieAlgebra* owner;
-  void Reset()
-  { this->::MonomialCollection<MonomialChar<coefficient>, coefficient>::MakeZero();
-    this->owner=0;
+  void CheckConsistency()const
+  { if (this->size==0)
+      return;
+    const SemisimpleLieAlgebra* owner=(*this)[0].owner;
+    for (int i=1; i<this->size; i++)
+      if ((*this)[i].owner!=owner)
+      { std::cout << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras"
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
   }
-  void MakeZero(SemisimpleLieAlgebra* inputOwner=0)
-  { this->Reset();
-    this->owner=inputOwner;
+  void CheckNonZeroOwner()const
+  { this->CheckConsistency();
+    if (this->GetOwner()==0)
+    { std::cout << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, which is not allowed at "
+      << "by the calling function. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
   }
   bool IsEqualToZero()
   { return this->size==0;
   }
-  charSSAlgMod(): owner(0){}
-  std::string ElementToStringCharacter(List<Vector<Rational> >& theWeights, List<Rational>& theMults);
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
@@ -3250,16 +3266,14 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   void DrawMeAssumeCharIsOverCartan
 (WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
   ;
-  SemisimpleLieAlgebra& GetOwner()
-  { if (this->owner==0)
+  SemisimpleLieAlgebra* GetOwner()const
+  { if (this->size==0)
     { std::cout << "This is a programming error: requesting owner semisimple Lie algebra "
-      << " of non-initialized "
-      << " character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      << " of zero character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    return *this->owner;
+    return (*this)[0].owner;
   }
-
   bool DrawMe
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
@@ -7209,12 +7223,10 @@ std::string MonomialChar<coefficient>::ToString
     VectorSpaceLetter=theFormat->FDrepLetter;
   }
   if (useOmega)
-    out << VectorSpaceLetter << "_{"
-    << weightFundamentalCoords.ToStringLetterFormat("\\omega", theFormat) << "}";
+    out << VectorSpaceLetter << "_{" << this->weightFundamentalCoordS.ToStringLetterFormat("\\omega", theFormat) << "}";
   else
     out << VectorSpaceLetter << "_{"
-    << weightFundamentalCoords.ToStringLetterFormat
-    (theFormat->fundamentalWeightLetter, theFormat) << "}";
+    << this->weightFundamentalCoordS.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   if (theFormat!=0)
     theFormat->CustomPlusSign=oldCustomPlus;
   return out.str();
@@ -7222,14 +7234,16 @@ std::string MonomialChar<coefficient>::ToString
 
 template<class coefficient>
 bool charSSAlgMod<coefficient>::DrawMe
-(std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
-{ charSSAlgMod<coefficient> CharCartan;
+(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars,
+ int upperBoundWeights, bool useMults)
+{ MacroRegisterFunctionWithName("charSSAlgMod::DrawMe");
+  this->CheckNonZeroOwner();
+  charSSAlgMod<coefficient> CharCartan;
   bool result= this->FreudenthalEvalMeDominantWeightsOnly
   (CharCartan, upperBoundWeights, &outputDetails, &theGlobalVariables);
   std::stringstream out;
   Vectors<Rational> currentOrbit;
-  WeylGroup& theWeyl=this->owner->theWeyl;
+  WeylGroup& theWeyl=this->GetOwner()->theWeyl;
   theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
   int totalNumWeights=0;
   Vectors<coefficient> dominantWeightsNonHashed;
@@ -7239,7 +7253,7 @@ bool charSSAlgMod<coefficient>::DrawMe
   { const MonomialChar<coefficient>& currentMon=CharCartan[i];
     dominantWeightsNonHashed.size=0;
     dominantWeightsNonHashed.AddOnTop
-    (theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords));
+    (theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordS));
     bool isTrimmed=!theWeyl.GenerateOrbit
     (dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
     totalNumWeights+=finalWeights.size;
@@ -7253,7 +7267,7 @@ bool charSSAlgMod<coefficient>::DrawMe
       theDrawingVars.drawCircleAtVectorBuffer(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       if (useMults)
         theDrawingVars.drawTextAtVectorBuffer
-          (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+        (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
@@ -7275,7 +7289,7 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan
 
   actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, theGlobalVariables, false, 0, false);
   for (int j=0; j<this->size; j++)
-  { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental(this->TheObjects[j].weightFundamentalCoords);
+  { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental(this->TheObjects[j].weightFundamentalCoordS);
     actualWeightRationalPart=actualWeight.GetVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBuffer(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
     theDrawingVars.drawTextAtVectorBuffer
@@ -7452,17 +7466,17 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
  const Selection& ParSelFDInducingPart,
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
+  this->CheckNonZeroOwner();
   std::stringstream out;
   std::string tempS;
 //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
-  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
+  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
   outputWeylSub.ComputeRootSubsystem();
   ReflectionSubgroupWeylGroup complementGroup;
   Selection invertedSel;
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
-  complementGroup.MakeParabolicFromSelectionSimpleRoots
-  (this->owner->theWeyl, invertedSel, theGlobalVariables,1);
+  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, invertedSel, theGlobalVariables, 1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ToString(false);
 //  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ToString(false);
@@ -7470,19 +7484,19 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //  std::cout << out.str();
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
   ReflectionSubgroupWeylGroup theFDWeyl;
-  theFDWeyl.MakeParabolicFromSelectionSimpleRoots
-  (this->GetOwner().theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
+  theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
   MonomialChar<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
-  WeylGroup& theWeyL=this->GetOwner().theWeyl;
-  charAmbientFDWeyl.Reset();
+  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
+  charAmbientFDWeyl.MakeZero();
   coefficient bufferCoeff, highestCoeff;
   out << "Starting character: " << this->ToString();
+  tempMon.owner=this->GetOwner();
   for (int i=0; i<this->size; i++)
   { MonomialChar<coefficient>& currentMon=this->TheObjects[i];
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart
-        (currentMon.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -7491,24 +7505,23 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //    << tempS << "<hr>";
     for (int j=0; j<tempHashedRoots.size; j++)
     { bufferCoeff=this->theCoeffs[i];
-      tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
       bufferCoeff*=tempMults[j];
       charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
     }
   }
 //  std::cout << "<hr>" << tempS;
-  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
+//  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
 
-  remainingCharDominantLevi.Reset();
+  remainingCharDominantLevi.MakeZero();
   Vectors<coefficient> orbitDom;
+  tempMon.owner=this->GetOwner();
   for (int i=0; i<charAmbientFDWeyl.size; i++)
   { orbitDom.SetSize(0);
     if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated
-        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords),
-         orbitDom, 10000))
+        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
-      << this->GetOwner().theWeyl.GetSimpleCoordinatesFromFundamental
-      (charAmbientFDWeyl[i].weightFundamentalCoords).ToString();
+      << this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
       if (Report!=0)
         *Report=out.str();
       return false;
@@ -7521,14 +7534,13 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //    std::cout << "<hr>of them dominant are: <br>";
     for (int k=0; k<orbitDom.size; k++)
       if (outputWeylSub.IsDominantWeight(orbitDom[k]))
-      { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
+      { tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
 //        std::cout << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
       }
   }
-  output.Reset();
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
-  (remainingCharDominantLevi.ToString());
+  output.MakeZero();
+  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(remainingCharDominantLevi.ToString());
 //  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharDominantLevi.ToString());
 
@@ -7540,8 +7552,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
       for (int i=0; i<outputWeylSub.simpleGenerators.size; i++)
       { tempMon=localHighest;
         simpleGeneratorBaseField=outputWeylSub.simpleGenerators[i]; // <- implicit type conversion here!
-        tempMon.weightFundamentalCoords+=this->GetOwner().theWeyl.GetFundamentalCoordinatesFromSimple
-        (simpleGeneratorBaseField);
+        tempMon.weightFundamentalCoordS+=this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
         if (remainingCharDominantLevi.Contains(tempMon))
         { localHighest=tempMon;
           Found=true;
@@ -7551,7 +7562,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     highestCoeff=remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
-        (localHighest.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
@@ -7560,7 +7571,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //    << highestCoeff.ToString() << "<br>"
 //    << remainingCharDominantLevi.ToString();
     for (int i=0; i<tempHashedRoots.size; i++)
-    { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+    { tempMon.owner=this->GetOwner();
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff=tempMults[i];
       bufferCoeff*=highestCoeff;
       remainingCharDominantLevi.SubtractMonomial(tempMon, bufferCoeff);
@@ -7581,7 +7593,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
-    { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
+    { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
       outputWeylSub.DrawContour
       (tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
@@ -7709,9 +7721,10 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
 
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeTrivial(SemisimpleLieAlgebra& inputOwner)
-{ this->MakeZero(inputOwner);
+{ this->MakeZero();
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords.MakeZero(inputOwner.GetRank());
+  tempMon.owner=&inputOwner;
+  tempMon.weightFundamentalCoordS.MakeZero(inputOwner.GetRank());
   this->AddMonomial(tempMon, 1);
 }
 
@@ -7723,7 +7736,7 @@ std::string charSSAlgMod<coefficient>::operator*=(const charSSAlgMod& other)
 
 template <class coefficient>
 std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables)
-{ if (this->owner!=other.owner || this->owner==0)
+{ if (this->GetOwner()!=other.GetOwner() || this->GetOwner()==0)
   { std::cout
     << "This is a programming error: attempting to multiply characters of different or non-initialized "
     << "semisimple Lie algebras."
@@ -7732,14 +7745,14 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
   }
   this->SetExpectedSize(other.size+this->size);
   charSSAlgMod result, summand;
-  result.MakeZero(this->owner);
+  result.MakeZero();
   std::string potentialError;
   coefficient theCF;
   for (int i=0; i<this->size; i++)
     for (int j=0; j<other.size; j++)
     { const MonomialChar<Rational>& left = (*this)[i];
       const MonomialChar<Rational>& right=other[j];
-      potentialError=left.TensorAndDecompose(right, *this->owner, summand, theGlobalVariables);
+      potentialError=left.TensorAndDecompose(right, summand, theGlobalVariables);
       if (potentialError!="")
         return potentialError;
       theCF=this->theCoeffs[i];
@@ -7754,7 +7767,6 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
 template <class coefficient>
 void MonomialChar<coefficient>::AccountSingleWeight
 (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
- WeylGroup& theWeyl,
  Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J., Introduction to Lie algebras and representation theory
@@ -7762,8 +7774,10 @@ void MonomialChar<coefficient>::AccountSingleWeight
   //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
   //<< " with coefficient " << finalCoeff.ToString();
   MacroRegisterFunctionWithName("MonomialChar_CoefficientType::AccountSingleWeight");
+  this->CheckNonZeroOwner();
   Vector<Rational> dominant=currentWeightSimpleCoords;
   dominant+=otherHighestWeightSimpleCoords;
+  WeylGroup& theWeyl = this->owner->theWeyl;
   dominant+=theWeyl.rho;
   int sign;
   // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
@@ -7777,7 +7791,8 @@ void MonomialChar<coefficient>::AccountSingleWeight
   if (!theWeyl.IsDominantWeight(dominant))
     return;
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
+  tempMon.owner=this->owner;
+  tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
   coefficient coeffChange;
   coeffChange= theMult;
   coeffChange*=sign;
@@ -7788,20 +7803,20 @@ void MonomialChar<coefficient>::AccountSingleWeight
 
 template <class coefficient>
 std::string MonomialChar<coefficient>::TensorAndDecompose
-(const MonomialChar<coefficient>& other, SemisimpleLieAlgebra& owner,
- charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
+(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
   MacroRegisterFunctionWithName("MonomialChar_CoefficientType::TensorAndDecompose");
+  this->CheckNonZeroOwner();
   std::stringstream errorLog;
   std::string tempS;
-  output.MakeZero(&owner);
-  WeylGroup& theWeyl=owner.theWeyl;
+  output.MakeZero();
+  WeylGroup& theWeyl=this->owner->theWeyl;
   Vector<Rational> leftHWFundCoords;
-  leftHWFundCoords=this->weightFundamentalCoords;
+  leftHWFundCoords=this->weightFundamentalCoordS;
   Vector<Rational> rightHWFundCoords;
-  rightHWFundCoords =other.weightFundamentalCoords;
+  rightHWFundCoords =other.weightFundamentalCoordS;
 
   Rational leftTotalDim= theWeyl.WeylDimFormulaFundamentalCoords(leftHWFundCoords);
   Rational rightTotalDim= theWeyl.WeylDimFormulaFundamentalCoords(rightHWFundCoords);
@@ -7811,8 +7826,7 @@ std::string MonomialChar<coefficient>::TensorAndDecompose
   }
   HashedList<Vector<Rational> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!theWeyl.FreudenthalEval
-      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, &theGlobalVariables, 1000000))
+  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, &theGlobalVariables, 1000000))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -7831,30 +7845,10 @@ std::string MonomialChar<coefficient>::TensorAndDecompose
       return errorLog.str();
     }
     for (int j=0; j<currentOrbit.size; j++)
-      this->AccountSingleWeight
-        (currentOrbit[j], rightHWSimpleCoords, theWeyl, multsLeft[i], output);
+      this->AccountSingleWeight(currentOrbit[j], rightHWSimpleCoords, multsLeft[i], output);
   }
 //  std::cout << "<hr><hr><hr><hr>";
   return errorLog.str();
-}
-
-template <class coefficient>
-std::string charSSAlgMod<coefficient>::ElementToStringCharacter
-(List<Vector<Rational> >& theWeights, List<Rational>& theMults)
-{ std::stringstream out;
-  MonomialChar<Rational> currentSummand;
-  charSSAlgMod theMod;
-  theMod.MakeZero(*this->listOwners, this->indexInOwners);
-  theMod.Reserve(theWeights.size);
-  theMod.SetHashSizE(theWeights.size);
-  assert(theMults.size==theWeights.size);
-  for (int i=0; i<theWeights.size; i++)
-  { currentSummand.weightFundamentalCoords=
-    this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(theWeights[i]);
-    theMod.AddMonomial(currentSummand, theMults[i]);
-  }
-  out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theMod.ToString());
-  return out.str();
 }
 
 template <class coefficient>
@@ -7862,26 +7856,25 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
   std::string* outputDetails, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeFullCharacter");
+  this->CheckNonZeroOwner();
   charSSAlgMod<coefficient> domChar;
-  if (!this->FreudenthalEvalMeDominantWeightsOnly
-      (domChar, upperBoundNumDominantWeights, outputDetails, theGlobalVariables))
+  if (!this->FreudenthalEvalMeDominantWeightsOnly(domChar, upperBoundNumDominantWeights, outputDetails, theGlobalVariables))
     return false;
-  outputCharOwnerSetToZero.Reset();
+  outputCharOwnerSetToZero.MakeZero();
   Vectors<Rational> theVect;
   HashedList<Vector<Rational> > theOrbit;
   theVect.SetSize(1);
   MonomialChar<coefficient> tempMon;
+  tempMon.owner=0;
   for (int i=0; i<domChar.size; i++)
-  { theVect[0]=this->GetOwner().theWeyl.GetSimpleCoordinatesFromFundamental
-    (domChar[i].weightFundamentalCoords);
-    if (!this->GetOwner().theWeyl.GenerateOrbit(theVect, false, theOrbit, false, -1, 0, upperBoundNumDominantWeights))
+  { theVect[0]=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
+    if (!(this->GetOwner()->theWeyl.GenerateOrbit(theVect, false, theOrbit, false, -1, 0, upperBoundNumDominantWeights)))
     { if (outputDetails!=0)
         *outputDetails= "failed to generate orbit (possibly too large?)";
       return false;
     }
     for (int j=0; j<theOrbit.size; j++)
-    { tempMon.weightFundamentalCoords
-      =this->GetOwner().theWeyl.GetFundamentalCoordinatesFromSimple(theOrbit[j]);
+    { tempMon.weightFundamentalCoordS=this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(theOrbit[j]);
       outputCharOwnerSetToZero.AddMonomial(tempMon, domChar.theCoeffs[i]);
     }
   }
@@ -7893,18 +7886,24 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
   std::string* outputDetails, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeDominantWeightsOnly");
-  assert(&outputCharOwnerSetToZero!=this);
-  outputCharOwnerSetToZero.Reset();
+  if (&outputCharOwnerSetToZero==this)
+  { charSSAlgMod<coefficient> thisCopy=*this;
+    return thisCopy.FreudenthalEvalMeDominantWeightsOnly
+    (outputCharOwnerSetToZero, upperBoundNumDominantWeights, outputDetails, theGlobalVariables);
+  }
+  this->CheckNonZeroOwner();
+  outputCharOwnerSetToZero.MakeZero();
   Vector<coefficient> currentWeightFundCoords;
   List<coefficient> currentMults;
   HashedList<Vector<coefficient> > currentWeights;
   std::stringstream localErrors, localDetails;
   std::string localDetail;
   MonomialChar<coefficient> tempMon;
+  tempMon.owner=0;
   coefficient bufferCoeff;
   for (int i=0; i<this->size; i++)
-  { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoords;
-    if (!this->GetOwner().theWeyl.FreudenthalEval
+  { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoordS;
+    if (!this->GetOwner()->theWeyl.FreudenthalEval
     (currentWeightFundCoords, currentWeights, currentMults, &localDetail, theGlobalVariables, upperBoundNumDominantWeights))
     { if (outputDetails!=0)
       { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
@@ -7916,7 +7915,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
     if (localDetail!="")
       localDetails << "<br>MonomialP " << i+1 << " computation details: " << localDetail;
     for (int j=0; j<currentWeights.size; j++)
-    { tempMon.weightFundamentalCoords=this->GetOwner().theWeyl.GetFundamentalCoordinatesFromSimple(currentWeights[j]);
+    { tempMon.weightFundamentalCoordS=this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(currentWeights[j]);
       bufferCoeff=this->theCoeffs[i];
       bufferCoeff*=currentMults[j];
       outputCharOwnerSetToZero.AddMonomial(tempMon, bufferCoeff);
@@ -7984,10 +7983,9 @@ bool WeylGroup::GenerateOrbit
 
 template <class coefficient>
 bool WeylGroup::FreudenthalEval
-(Vector<coefficient>& inputHWfundamentalCoords,
- HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
- List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails,
- GlobalVariables* theGlobalVariables, int UpperBoundFreudenthal)
+(Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
+ List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, GlobalVariables* theGlobalVariables,
+ int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   MacroRegisterFunctionWithName("WeylGroup::FreudenthalEval");
   for (int i=0; i<inputHWfundamentalCoords.size; i++)
@@ -8222,13 +8220,10 @@ void ReflectionSubgroupWeylGroup::ActByElement
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionSimpleGeneratorIndex
-(int generatorIndex, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { Vector<Rational> genWeight=this->GetOwner().GetWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
-  Pair
-  <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-    MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   currentPair;
   MatrixTensor<coefficient>& outputMat= this->actionsGeneratorsMaT[generatorIndex];
   Vector<coefficient> theScalarProds;
@@ -8863,10 +8858,11 @@ const coefficient& theRingUnit, const coefficient& theRingZero,
   }
   this->theModuleWeightsSimpleCoords.Clear();
   MonomialChar<coefficient> tempCharMon;
-  this->theCharOverH.Reset();
+  tempCharMon.owner=0;
+  this->theCharOverH.MakeZero();
   for (int i=0; i<this->thePaths.size; i++)
   { this->theModuleWeightsSimpleCoords.AddOnTopNoRepetition(*this->thePaths[i].Waypoints.LastObject());
-    tempCharMon.weightFundamentalCoords= theWeyl.GetFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.LastObject());
+    tempCharMon.weightFundamentalCoordS= theWeyl.GetFundamentalCoordinatesFromSimple(*this->thePaths[i].Waypoints.LastObject());
     this->theCharOverH.AddMonomial(tempCharMon,1);
   }
 //  std::cout << "<br>character over h (i.e. the set of weights with mults): " << this->theCharOverH.ToString();
@@ -9212,19 +9208,20 @@ void ElementSemisimpleLieAlgebra<coefficient>::MakeHgenerator
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeFromWeight
 (const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
-{ this->MakeZero(inputOwner);
-  if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
+{ this->MakeZero();
+  if (inputWeightSimpleCoords.size!=inputOwner->GetRank())
   { std::cout << "This is a programming error: attempting to create a character "
     << " from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size
     << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << this->GetOwner().GetRank()
+    << " Lie algebra is of rank " << (inputOwner->GetRank())
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   MonomialChar<coefficient> theMon;
-  theMon.weightFundamentalCoords=
-  this->owner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
+  theMon.owner=inputOwner;
+  theMon.weightFundamentalCoordS=
+  inputOwner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
   this->AddMonomial(theMon, 1);
 }
 

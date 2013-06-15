@@ -532,6 +532,7 @@ int main(int argc, char **argv)
 //  civilizedInput="PenkovProjectRecompute";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
+//  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

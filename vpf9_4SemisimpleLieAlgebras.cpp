@@ -679,8 +679,7 @@ int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl
 { HashedList<Vector<coefficient> > weightsSimpleCoords;
   weightsSimpleCoords.SetExpectedSize(this->size);
   for (int i=0; i<this->size; i++)
-    weightsSimpleCoords.AddOnTop
-    (theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoords));
+    weightsSimpleCoords.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
   for (int i=0; i<weightsSimpleCoords.size; i++)
   { bool isGood=true;
     for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
@@ -700,8 +699,7 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
   //<< AmbientRootTestedForWeightSpace << " for being e-possibility for "
   //<< this->theHs[theIndex];
   for (int k=0; k<this->theHs.size; k++)
-  { Rational desiredScalarProd=
-    this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
+  { Rational desiredScalarProd=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
 //    if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
     /*{ std::cout << "<br>Desired scalar product of "
       << AmbientRootTestedForWeightSpace.ToString() << " and "
@@ -740,8 +738,7 @@ bool CandidateSSSubalgebra::ComputeSystem
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     for (int j=0; j< this->CartanSAsByComponent[i].size; j++)
     { counter++;
-      this->theHsScaledToActByTwo[counter]=
-      (this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
+      this->theHsScaledToActByTwo[counter]=(this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
     }
   this->theInvolvedNegGenerators.SetSize(this->theHsScaledToActByTwo.size);
   this->theInvolvedPosGenerators.SetSize(this->theHsScaledToActByTwo.size);
@@ -1235,6 +1232,20 @@ void CandidateSSSubalgebra::ComputePairingTable
         if (this->modulesWithZeroWeights.Contains(this->NilradicalPairingTable[i][j][k]))
           if (!(this->primalSubalgebraModules.Contains(i) && this->primalSubalgebraModules.Contains(j)))
             this->OppositeModules[i].AddOnTopNoRepetition(j);
+  this->ComputeKsl2triples(theGlobalVariables);
+}
+
+void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariables)
+{ this->hCharsModulesPrimal.SetSize(this->Modules.size);
+  MonomialChar<Rational> currentWeight;
+  currentWeight.owner=0;
+  for (int i=0; i<this->hCharsModulesPrimal.size; i++)
+  { this->hCharsModulesPrimal[i].MakeZero();
+    for (int j=0; j<this->WeightsModulesPrimal[i].size; j++)
+    { currentWeight.weightFundamentalCoordS=this->WeightsModulesPrimal[i][j];
+      this->hCharsModulesPrimal[i].AddMonomial(currentWeight, 1);
+    }
+  }
 }
 
 int CandidateSSSubalgebra::GetPrimalRank()const
@@ -1593,8 +1604,9 @@ void CandidateSSSubalgebra::ComputePrimalDecompositionLastPart
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalDecompositionLastPart");
   this->HighestWeightsPrimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   this->HighestWeightsNONprimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
-  this->thePrimalChar.MakeZero(0);
+  this->thePrimalChar.MakeZero();
   MonomialChar<Rational> theWeight;
+  theWeight.owner=0;
   for (int i=0; i< this->HighestVectorsNonSorted.size; i++)
   { Vector<Rational> currentRoot=this->GetAmbientSS().GetWeightOfGenerator
     (this->HighestVectorsNonSorted[i][0].theGeneratorIndex);
@@ -1602,7 +1614,7 @@ void CandidateSSSubalgebra::ComputePrimalDecompositionLastPart
     Vector<Rational>& currentHWPrimal=this->HighestWeightsPrimalNonSorted[i];
     this->GetWeightProjectionFundCoords(currentRoot, currentHWrelative);
     this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWPrimal);
-    theWeight.weightFundamentalCoords=currentHWPrimal;
+    theWeight.weightFundamentalCoordS=currentHWPrimal;
     this->thePrimalChar.AddMonomial(theWeight, 1);
   }
   this->HighestVectors.SetSize(this->thePrimalChar.size);
@@ -1611,10 +1623,10 @@ void CandidateSSSubalgebra::ComputePrimalDecompositionLastPart
   for (int i=0; i<this->thePrimalChar.size; i++)
   { this->HighestVectors[i].SetSize(0);
     this->Modules[i].SetSize(0);
-    this->HighestWeightsPrimal[i]=this->thePrimalChar[i].weightFundamentalCoords;
+    this->HighestWeightsPrimal[i]=this->thePrimalChar[i].weightFundamentalCoordS;
   }
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
-  { theWeight.weightFundamentalCoords=this->HighestWeightsPrimalNonSorted[i];
+  { theWeight.weightFundamentalCoordS=this->HighestWeightsPrimalNonSorted[i];
     int theModuleIndex=this->thePrimalChar.GetIndex(theWeight);
     this->HighestVectors[theModuleIndex].AddOnTop(this->HighestVectorsNonSorted[i]);
     this->Modules[theModuleIndex].SetSize(this->Modules[theModuleIndex].size+1);
@@ -1811,10 +1823,10 @@ bool CandidateSSSubalgebra::ComputeChar
   this->CheckInitialization();
   this->theWeylNonEmbeddeD.ComputeRho(true);
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords.MakeZero(this->theWeylNonEmbeddeD.GetDim());
-  this->theCharFundamentalCoordsRelativeToCartan.Reset();
-  this->theCharFundamentalCoordsRelativeToCartan.AddMonomial
-  (tempMon, this->GetAmbientSS().GetRank());
+  tempMon.weightFundamentalCoordS.MakeZero(this->theWeylNonEmbeddeD.GetDim());
+  tempMon.owner=0;
+  this->theCharFundamentalCoordsRelativeToCartan.MakeZero();
+  this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, this->GetAmbientSS().GetRank());
   List<DynkinSimpleType> theTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   //std::cout << "<br>Cartan symmetric, type  "
@@ -1825,7 +1837,7 @@ bool CandidateSSSubalgebra::ComputeChar
     for (int i=0; i<this->CartanSAsByComponent.size; i++)
       for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
       { counter++;
-        tempMon.weightFundamentalCoords[counter]=
+        tempMon.weightFundamentalCoordS[counter]=
         (this->GetAmbientWeyl().RootScalarCartanRoot
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
         /theTypes[i].GetDefaultRootLengthSquared(j))*2
@@ -1838,7 +1850,7 @@ bool CandidateSSSubalgebra::ComputeChar
 //        << (this->GetAmbientWeyl().RootScalarCartanRoot
 //        (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
 //        /theTypes[i].GetDefaultRootLengthSquared(j))*2;
-        if(!tempMon.weightFundamentalCoords[counter].IsInteger())
+        if(!tempMon.weightFundamentalCoordS[counter].IsInteger())
         { if (!allowBadCharacter)
           { std::cout << "This is a programming error: function ComputeChar called  "
             << " with Cartan that suggests non-integral characters. At the same time, an option "
@@ -1853,15 +1865,13 @@ bool CandidateSSSubalgebra::ComputeChar
   }
   charSSAlgMod<Rational> accumChar, freudenthalChar, outputChar;
   accumChar=this->theCharFundamentalCoordsRelativeToCartan;
+  SemisimpleLieAlgebra* nonEmbeddedMe= &this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe);
+  this->theCharNonPrimalFundCoords.MakeZero();
 
-  this->theCharNonPrimalFundCoords.MakeZero
-  (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe))
-  ;
 //  std::cout << "<hr>Current candidate: " << this->ToStringCartanSA();
 //  std::cout << "<br>reducing: " << accumChar.ToString();
   while (accumChar.size>0)
-  { int currentIndex=
-    accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
+  { int currentIndex=accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
     { std::cout << "This is a programming error: while decomposing ambient Lie algebra "
       << "over the candidate subalgebra, I got that there is no extreme weight. This is "
@@ -1876,18 +1886,18 @@ bool CandidateSSSubalgebra::ComputeChar
     { //std::cout << "<br>accumChar has negative coeff!";
       return false;
     }
-    for (int i=0; i<accumChar[currentIndex].weightFundamentalCoords.size; i++)
-      if (accumChar[currentIndex].weightFundamentalCoords[i]<0)
+    for (int i=0; i<accumChar[currentIndex].weightFundamentalCoordS.size; i++)
+      if (accumChar[currentIndex].weightFundamentalCoordS[i]<0)
       { //std::cout << "<br>accumChar[currentIndex].weightFundamentalCoords[i] is less than 0.";
         return false;
       }
-    freudenthalChar.MakeZero
-    (&this->owner->theSubalgebrasNonEmbedded.GetElement(this->indexInOwnersOfNonEmbeddedMe));
-    freudenthalChar.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
+    freudenthalChar.MakeZero();
+    tempMon=accumChar[currentIndex];
+    tempMon.owner=nonEmbeddedMe;
+    freudenthalChar.AddMonomial(tempMon, accumChar.theCoeffs[currentIndex]);
     this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
-    bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter
-    (outputChar, -1, &tempS, theGlobalVariables);
+    bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, theGlobalVariables);
     if (!tempBool && !allowBadCharacter)
     { std::cout << "This is a programming error: failed to evaluate full character via "
       << " the Freudenthal formula on "
@@ -1916,7 +1926,8 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   ProgressReport theProgressReport3(theGlobalVariables);
   int currentRank=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows;
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords.MakeZero(currentRank);
+  tempMon.owner=0;
+  tempMon.weightFundamentalCoordS.MakeZero(currentRank);
   Rational dimCentralizerBase=this->GetSSowner().GetNumGenerators();
   if (!baseCandidate.theCharNonPrimalFundCoords.Contains(tempMon))
   { if (currentRank>0)
@@ -3173,7 +3184,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     tempCharFormat= this->charFormaT.GetElementConst();
   for (int i=0; i<this->thePrimalChar.size; i++)
     out << "<td>" << "V_{" << i+1 << "}->"
-    << this->thePrimalChar[i].weightFundamentalCoords.ToString(&tempCharFormat) << "</td>";
+    << this->thePrimalChar[i].weightFundamentalCoordS.ToString(&tempCharFormat) << "</td>";
   out << "</tr><tr><td>Module elements; all elements are weight vectors w.r.t. Cartan of subalgebra</td>";
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td><table border=\"1\"><tr>";
@@ -3228,6 +3239,15 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     out << "</td>";
   }
   out << "</tr>";
+  out << "<tr>";
+  out << "<td>Character over Cartan of s.a.+ Cartan of centralizer of s.a.</td>";
+  tempCharFormat.FDrepLetter="M";
+  for (int i=0; i<this->hCharsModulesPrimal.size; i++)
+  { out << "<td>";
+    out << CGI::GetHtmlMathSpanPure(this->hCharsModulesPrimal[i].ToString(&tempCharFormat));
+    out << "</td>";
+  }
+  out << "</tr>";
   out << "</table>";
   return out.str();
 }
@@ -3242,8 +3262,19 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     out << ". Cones intersect. ";
   else
     out << ". Cones don't intersect. ";
-  out << "Nilradical cone: " << this->theNilradicalWeights.ToString()
-  << "; highest weight cone: " << this->theNonFKhws.ToString() << ". ";
+  if (this->theNilradicalWeights.size>0)
+  { out << "<br>Nilradical cone: ";
+    out << "<br><table border=\"1\"><tr>";
+    for (int i=0; i<this->theNilradicalWeights.size; i++)
+    { out << "<td><table><tr><td>" << this->theNilradicalWeights[i].ToString() << "</td></tr>";
+      for (int j=0; j<this->theNilradicalWeights.size; j++)
+        if (this->theNilradicalWeights[i]==this->theNilradicalWeights[j])
+          out << "<tr><td>" << this->theNilradicalElements[j].ToString() << "</td></tr>";
+      out << "</table></td>";
+    }
+    out << "</tr></table>";
+  }
+  out << "<br> Highest weight cone: " << this->theNonFKhws.ToString() << ". ";
   if (this->NilradicalConesIntersect)
   { out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.ToString();
     out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
@@ -3468,7 +3499,8 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
 { if (this->flagSystemProvedToHaveNoSolution)
     return;
   MonomialChar<Rational> theZeroWeight;
-  theZeroWeight.weightFundamentalCoords.MakeZero(this->theHs.size);
+  theZeroWeight.owner=0;
+  theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
   this->centralizerRank =this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);
   if (this->centralizerRank==0)
   { this->flagCentralizerIsWellChosen=true;

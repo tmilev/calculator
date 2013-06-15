@@ -288,6 +288,7 @@ public:
   List<Vector<Rational> > HighestWeightsPrimal;
 
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > Modules;
+  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > ModulesSl2opposite;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesIsotypicallyMerged;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
@@ -300,7 +301,7 @@ public:
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModulesByStructure;
-  List<List<int> > OppositeModulesByChar;
+  List<int> OppositeModulesByChar;
 
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   std::string nilradicalGenerationLog;
@@ -356,6 +357,14 @@ public:
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
   void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
+  void ComputeKsl2triplesGetOppositeElts
+  (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule,
+   List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+   ;
+  bool ComputeKsl2tripleSetUpAndSolveSystem
+  (const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
+   ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
+   ;
   void ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
   void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);

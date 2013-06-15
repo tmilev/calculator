@@ -44,9 +44,9 @@ void SemisimpleLieAlgebra::GetGenericElementNegativeBorelNilradical
   }
 }
 
-bool SemisimpleLieAlgebra::AttemptFindingHEF
-  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
-   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH,
+bool SemisimpleLieAlgebra::AttempTFindingHEF
+  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH,
+   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
    ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputF, std::stringstream* logStream,
    GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptFindingHEF");
@@ -114,7 +114,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
   knownE=theE;
   this->GetGenericElementCartan(unknownH, 0);
   this->GetGenericElementNegativeBorelNilradical(unknownF, this->GetRank());
-  bool success= this->AttemptFindingHEF(knownE, unknownH, unknownF, logStream, theGlobalVariables);
+  bool success= this->AttempTFindingHEF(unknownH, knownE, unknownF, logStream, theGlobalVariables);
   if (!success)
     return false;
   outputH=unknownH;
@@ -1242,7 +1242,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGl
       this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
-  this->OppositeModulesByChar.SetSize(this->Modules.size);
+  this->OppositeModulesByChar.initFillInObject(-2, this->Modules.size);
   List<charSSAlgMod<Rational> > theDualMods;
   theDualMods.SetSize(this->Modules.size);
   for (int i=0; i<this->Modules.size; i++)
@@ -1250,17 +1250,65 @@ void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGl
   for (int i=0; i<this->Modules.size; i++)
     for (int j=i; j<this->Modules.size; j++)
       if ((this->CharsPrimalModules[i]-theDualMods[j]).IsEqualToZero())
-      { this->OppositeModulesByChar[i].SetSize(1);
-        this->OppositeModulesByChar[i][0]=j;
-        this->OppositeModulesByChar[j].SetSize(1);
-        this->OppositeModulesByChar[j][0]=i;
+      { this->OppositeModulesByChar[i]=j;
+        this->OppositeModulesByChar[j]=i;
       } //else
         //std::cout << "<hr>" << this->CharsPrimalModules[i].ToString() << " - " << theDualMods[j].ToString()
         //<< "= " << (this->CharsPrimalModules[i]-theDualMods[j]).ToString();
 }
 
+void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeElts
+(const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule,
+ List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeElts");
+  Vector<Rational> otherWeight, tempV;
+  outputElts.SetSize(0);
+  for (int i=0; i<inputOppositeModule.size; i++)
+  { tempV=this->GetAmbientSS().GetWeightOfGenerator(inputOppositeModule[i][0].theGeneratorIndex);
+    this->GetPrimalWeightProjectionFundCoords(tempV, otherWeight);
+    if ((otherWeight+theElementWeight).IsEqualToZero())
+      outputElts.AddOnTop(inputOppositeModule[i]);
+  }
+}
+
+bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem
+(const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
+ ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
+{ ElementSemisimpleLieAlgebra<Polynomial<Rational> > Ecopy, theH, theF, tempElt;
+  Ecopy=theE;
+  this->GetAmbientSS().GetGenericElementCartan(theH, 0);
+  theF.MakeZero();
+  Polynomial<Rational> tempP;
+  for (int i=0; i<FisLinearCombiOf.size; i++)
+  { tempElt=FisLinearCombiOf[i];
+    tempP.MakeMonomiaL(i+this->GetAmbientSS().GetRank(), 1, 1);
+    tempElt*=tempP;
+    theF+=tempElt;
+  }
+  if (!this->GetAmbientSS().AttempTFindingHEF(theH, Ecopy, theF, 0, theGlobalVariables))
+    return false;
+  outputF=theF;
+  return true;
+}
+
 void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariables)
-{ this->ComputeKsl2triplesPreparation(theGlobalVariables);
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triples");
+  this->ComputeKsl2triplesPreparation(theGlobalVariables);
+  this->ModulesSl2opposite.SetSize(this->Modules.size);
+  List<ElementSemisimpleLieAlgebra<Rational> > FmustBeAlinCombiOf;
+  for (int i=0; i<this->Modules.size; i++)
+  { this->ModulesSl2opposite[i].SetSize(this->ModulesSl2opposite[i].size);
+    for (int j=0; j<this->Modules[i].size; j++)
+    { this->ModulesSl2opposite[i][j].SetSize(this->Modules[i][j].size);
+      for (int k=0; k<this->ModulesSl2opposite.size; k++)
+      { this->ComputeKsl2triplesGetOppositeElts
+        (this->WeightsModulesPrimal[i][k], this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i]], FmustBeAlinCombiOf);
+        if (!this->ComputeKsl2tripleSetUpAndSolveSystem
+            (this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k], theGlobalVariables))
+          this->ModulesSl2opposite[i][j][k].MakeZero();
+      }
+    }
+  }
 }
 
 int CandidateSSSubalgebra::GetPrimalRank()const
@@ -3398,11 +3446,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "<tr> <td>Opposite modules by character:</td>";
   for (int i=0; i< this->OppositeModulesByChar.size; i++)
   { out << "<td>";
-    for (int j=0; j<this->OppositeModulesByChar[i].size; j++)
-    { out << "V_{" << this->OppositeModulesByChar[i][j]+1 << "}";
-      if (j!=this->OppositeModulesByChar[i].size-1)
-      out << ", ";
-    }
+    out << "V_{" << this->OppositeModulesByChar[i]+1 << "}";
     out << "</td>";
   }
   out << "</tr>";

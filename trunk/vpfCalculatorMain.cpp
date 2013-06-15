@@ -530,7 +530,7 @@ int main(int argc, char **argv)
  // civilizedInput="WeylGroupIrrepsAndCharTable{}(c_3);";
   //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
 //  civilizedInput="PenkovProjectRecompute";
-  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}B_3";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
 //  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
   PredefinedStrings(civilizedInput);

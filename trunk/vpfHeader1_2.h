@@ -2172,9 +2172,9 @@ public:
   //returns true if returning constant, false if returning element of h
   bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
-  bool AttemptFindingHEF
-  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
-   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH,
+  bool AttempTFindingHEF
+  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH,
+   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
    ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0)
    ;
 
@@ -3570,8 +3570,8 @@ public:
   HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingWordsNonReduced;
   //Note: for some reason, the linker fails to resolve without the explicit template
   //specialization below.
-  //[Update:] mae a bug report on this in the gcc bug tracker.
-  //This issue has officially been recognized as a bug. Hope to get a fix soon.
+  //[Update:] made a bug report on this in the gcc bug tracker.
+  //This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
   HashedListSpecialized
   <MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   theGeneratingWordsNonReducedInt;
@@ -3638,47 +3638,6 @@ public:
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive())
         return true;
     return false;
-  }
-  void operator=(const ModuleSSalgebra<coefficient>& other)
-  { if (this==&other)
-      return;
-    this->NumCachedPairsBeforeSimpleGen=other.NumCachedPairsBeforeSimpleGen;
-    this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
-    =other.NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
-    this->cachedPairs=other.cachedPairs;
-    this->cachedTraces=other.cachedTraces;
-    this->actionsGeneratorsMaT=other.actionsGeneratorsMaT;
-    this->actionsGeneratorS=other.actionsGeneratorS;
-    this->ComputedGeneratorActions=other.ComputedGeneratorActions;
-    this->owneR=other.owneR;
-    this->theGeneratingWordsNonReduced= other.theGeneratingWordsNonReduced;
-    this->theGeneratingWordsNonReducedInt=other.theGeneratingWordsNonReducedInt;
-    this->theGeneratingWordsWeightsPlusWeightFDpart=other.theGeneratingWordsWeightsPlusWeightFDpart;
-    this->theGeneratingWordsGrouppedByWeight= other.theGeneratingWordsGrouppedByWeight;
-    this->theGeneratingWordsIntGrouppedByWeight=other.theGeneratingWordsIntGrouppedByWeight;
-//    this->theSimpleGens=other.theSimpleGens;
-    this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
-    this->theBilinearFormsInverted=other.theBilinearFormsInverted;
-//    this->weightsSimpleGens=other.weightsSimpleGens;
-    this->theHWFDpartDualCoords = other.theHWFDpartDualCoords;
-    this->theHWFDpartSimpleCoordS=other.theHWFDpartSimpleCoordS;
-    this->theHWFDpartFundamentalCoordS=other.theHWFDpartFundamentalCoordS;
-    this->theHWDualCoordsBaseFielD=other.theHWDualCoordsBaseFielD;
-    this->theHWSimpleCoordSBaseField=other.theHWSimpleCoordSBaseField;
-    this->theHWFundamentalCoordsBaseField= other.theHWFundamentalCoordsBaseField;
-    this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
-    this->theCharOverH=other.theCharOverH;
-    this->theChaR=other.theChaR;
-    this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
-    this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
-    this->flagIsInitialized=other.flagIsInitialized;
-    this->flagConjectureBholds=other.flagConjectureBholds;
-    this->flagConjectureCholds=other.flagConjectureCholds;
-    this->highestWeightVectorNotation=other.highestWeightVectorNotation;
-    this->thePaths=other.thePaths;
-//    std::cout << "<hr><hr><b>Copying from:</b> " << other.ToString()
-//    << "<b>Copy result:</b>" << this->ToString() << "<br><b>End of copy</b><hr><hr>";
-
   }
   int GetOffsetFromWeightIndex(int weightIndex)
   { int result=0;

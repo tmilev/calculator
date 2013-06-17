@@ -3248,14 +3248,19 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i=0; i<this->thePrimalChar.size; i++)
     out << "<td>" << "V_{" << i+1 << "}->"
     << this->thePrimalChar[i].weightFundamentalCoordS.ToString(&tempCharFormat) << "</td>";
-  out << "</tr><tr><td>Module elements; all elements are weight vectors w.r.t. Cartan of subalgebra</td>";
+  out << "</tr><tr><td>Module elements (weight vectors). Blue color = sl(2)-triple opposites</td>";
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td><table border=\"1\"><tr>";
     for (int j=0; j<this->Modules[i].size; j++)
     { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->Modules[i][j];
+      List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
       out << "<td>";
       for (int k=0; k<currentModule.size; k++)
       { out << currentModule[k].ToString();
+        if (!currentOpModule[k].IsEqualToZero())
+          out << ", <span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span>";
+        else
+          out << ", <span style=\"color:#0000FF\">-</span>";
         if (k!=currentModule.size-1)
           out << "<br>";
       }
@@ -3785,8 +3790,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
   { int numZeroWeights=0;
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus "
-    << " the dimension of the centralizer of the subalgebra "
-    << "equals " ;
+    << " the dimension of the centralizer of the subalgebra equals " ;
     for (int i=0; i<this->Modules.size; i++)
       for (int j=0; j<this->WeightsModulesNONprimal[i].size; j++)
         if(this->WeightsModulesNONprimal[i][j].IsEqualToZero())

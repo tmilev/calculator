@@ -356,10 +356,14 @@ public:
   void ExtendToModule
 (List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
   ;
+  Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<Rational>& input)const;
   void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
-  void ComputeKsl2triplesGetOppositeElts
+  void ComputeKsl2triplesGetOppositeEltsInOppositeModule
   (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule,
    List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+   ;
+  void ComputeKsl2triplesGetOppositeEltsAll
+  (const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
    ;
   bool ComputeKsl2tripleSetUpAndSolveSystem
   (const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
@@ -389,7 +393,7 @@ public:
   void ComputePrimalDecomposition(GlobalVariables* theGlobalVariables);
   void ComputePrimalDecompositionLastPart(GlobalVariables* theGlobalVariables);
   void GetPrimalWeightProjectionFundCoords
-  (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)
+  (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)const
   ;
   bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords

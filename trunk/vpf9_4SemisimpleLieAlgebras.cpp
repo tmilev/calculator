@@ -1258,18 +1258,39 @@ void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGl
         //<< "= " << (this->CharsPrimalModules[i]-theDualMods[j]).ToString();
 }
 
-void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeElts
+void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule
 (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule,
  List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeElts");
-  Vector<Rational> otherWeight, tempV;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule");
   outputElts.SetSize(0);
   for (int i=0; i<inputOppositeModule.size; i++)
-  { tempV=this->GetAmbientSS().GetWeightOfGenerator(inputOppositeModule[i][0].theGeneratorIndex);
-    this->GetPrimalWeightProjectionFundCoords(tempV, otherWeight);
-    if ((otherWeight+theElementWeight).IsEqualToZero())
+    if ((this->GetPrimalWeightFirstGen(inputOppositeModule[i])+theElementWeight).IsEqualToZero())
       outputElts.AddOnTop(inputOppositeModule[i]);
-  }
+}
+
+Vector<Rational> CandidateSSSubalgebra::GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<Rational>& input)const
+{ Vector<Rational> output;
+  Vector<Rational> tempV=this->GetAmbientSS().GetWeightOfGenerator(input[0].theGeneratorIndex);
+  this->GetPrimalWeightProjectionFundCoords(tempV, output);
+  return output;
+}
+
+void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll
+(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll");
+  Vector<Rational> otherWeight, tempV;
+  outputElts.SetSize(0);
+  for (int i=0; i<this->Modules.size; i++)
+    for (int j=0; j<this->WeightsModulesPrimal[i].size; j++)
+      if ((theElementWeight+this->WeightsModulesPrimal[i][j]).IsEqualToZero())
+        for (int k=0; k<this->Modules[i].size; k++)
+        { outputElts.AddOnTop(this->Modules[i][k][j]);
+          if (!(theElementWeight+this->GetPrimalWeightFirstGen(this->Modules[i][k][j])).IsEqualToZero())
+          { std::cout << "This is a programming error: element this->Modules[i][k][j] does not have "
+            << " the primal weight it is supposed to have. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
+        }
 }
 
 bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem
@@ -1303,11 +1324,14 @@ void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariabl
     for (int j=0; j<this->Modules[i].size; j++)
     { this->ModulesSl2opposite[i][j].SetSize(this->Modules[i][j].size);
       for (int k=0; k<this->ModulesSl2opposite[i][j].size; k++)
-      { this->ComputeKsl2triplesGetOppositeElts
+      { this->ComputeKsl2triplesGetOppositeEltsInOppositeModule
         (this->WeightsModulesPrimal[i][k], this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i]], FmustBeAlinCombiOf);
-        if (!this->ComputeKsl2tripleSetUpAndSolveSystem
+        if (this->ComputeKsl2tripleSetUpAndSolveSystem
             (this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k], theGlobalVariables))
-          this->ModulesSl2opposite[i][j][k].MakeZero();
+          continue;
+        this->ComputeKsl2triplesGetOppositeEltsAll(this->WeightsModulesPrimal[i][k], FmustBeAlinCombiOf);
+        this->ComputeKsl2tripleSetUpAndSolveSystem
+        (this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k], theGlobalVariables);
       }
     }
   }
@@ -1653,7 +1677,7 @@ void CandidateSSSubalgebra::GetWeightProjectionFundCoords
 }
 
 void CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords
-(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords");
   output.SetSize(this->theHs.size+this->CartanOfCentralizer.size);
   for (int j=0; j<this->theHs.size; j++)
@@ -3248,22 +3272,29 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i=0; i<this->thePrimalChar.size; i++)
     out << "<td>" << "V_{" << i+1 << "}->"
     << this->thePrimalChar[i].weightFundamentalCoordS.ToString(&tempCharFormat) << "</td>";
-  out << "</tr><tr><td>Module elements (weight vectors). Blue color = sl(2)-triple opposites</td>";
+  out << "</tr><tr><td>Module elements (weight vectors). "
+  << "<span style=\"color:#0000FF\">In blue - corresp. F element</span>. "
+  << "<span style=\"color:#FF0000\">In red -corresp. H element</span>. </td>";
+  ElementSemisimpleLieAlgebra<Rational> tempLieBracket;
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td><table border=\"1\"><tr>";
     for (int j=0; j<this->Modules[i].size; j++)
     { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->Modules[i][j];
       List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
       out << "<td>";
+      out << "<table>";
       for (int k=0; k<currentModule.size; k++)
-      { out << currentModule[k].ToString();
+      { out << "<tr><td>" <<  currentModule[k].ToString() << "</td>";
         if (!currentOpModule[k].IsEqualToZero())
-          out << ", <span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span>";
+        { out << "<td><span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span></td>";
+          this->GetAmbientSS().LieBracket(currentModule[k], currentOpModule[k], tempLieBracket);
+          out << "<td><span style=\"color:#FF0000\">" << tempLieBracket.ToString() << "</span></td>";
+        }
         else
-          out << ", <span style=\"color:#0000FF\">-</span>";
-        if (k!=currentModule.size-1)
-          out << "<br>";
+          out << "<td><span style=\"color:#0000FF\">-</span></td>";
+        out << "</tr>";
       }
+      out << "</table>";
       out << "</td>";
     }
 //  out << "<td>|||</td><td>Union of the isotypic components:<br>";

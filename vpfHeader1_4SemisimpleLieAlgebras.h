@@ -221,6 +221,7 @@ class NilradicalCandidate
   Vectors<Rational> theNonFKhws;
   Vectors<Rational> theNonFKhwsStronglyTwoSided;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElements;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElementOpposites;
   NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);

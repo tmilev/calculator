@@ -1108,8 +1108,7 @@ void CandidateSSSubalgebra::ComputePairingTablePreparation
         { this->WeightsModulesNONprimal[i][j]=theProjection;
           this->WeightsModulesPrimal[i][j]=thePrimalProjection;
         } else
-          if (this->WeightsModulesNONprimal[i][j]!=theProjection ||
-              this->WeightsModulesPrimal[i][j]!=thePrimalProjection)
+          if (this->WeightsModulesNONprimal[i][j]!=theProjection || this->WeightsModulesPrimal[i][j]!=thePrimalProjection)
           { std::cout << "This is a programming or mathematical error. Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), "
             << "and the same order of generation of weights, I got different order "
@@ -1368,14 +1367,25 @@ bool NilradicalCandidate::IsLInfiniteRel(GlobalVariables* theGlobalVariables)
   if (numWeights==1)
     return true;
   Selection theSel=theNilradLinCombi;
+  ElementSemisimpleLieAlgebra<Rational> mustBeZero;
   for (int i=0; i<theSel.CardinalitySelection; i++)
-  { Vector<Rational> theWeight=this->theNilradicalWeights[theSel.elements[i]];
-    theWeight.Minus();
+  { ElementSemisimpleLieAlgebra<Rational>& leftElt=this->theNilradicalElements[theSel.elements[i]];
     for (int j=0; j<theSel.CardinalitySelection; j++)
-    {
+    { if (i==j)
+        continue;
+      ElementSemisimpleLieAlgebra<Rational>& rightEltPositive=this->theNilradicalElements[theSel.elements[j]];
+      ElementSemisimpleLieAlgebra<Rational>& rightEltNegative=this->theNilradicalElementOpposites[theSel.elements[j]];
+      this->owner->GetAmbientSS().LieBracket(leftElt, rightEltPositive, mustBeZero);
+      if (!mustBeZero.IsEqualToZero())
+        return false;
+      if (rightEltNegative.IsEqualToZero())
+        return false;
+      this->owner->GetAmbientSS().LieBracket(leftElt, rightEltNegative, mustBeZero);
+      if (!mustBeZero.IsEqualToZero())
+        return false;
     }
   }
-  return false;
+  return true;
 }
 
 Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
@@ -1449,6 +1459,7 @@ void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables
   this->theNonFKhws.SetSize(0);
   this->theNonFKhwsStronglyTwoSided.SetSize(0);
   this->theNilradicalElements.SetSize(0);
+  this->theNilradicalElementOpposites.SetSize(0);
 //  std::stringstream out;
   for (int i=0; i<this->theNilradicalSelection.size; i++)
     if (!this->owner->primalSubalgebraModules.Contains(i))
@@ -1461,6 +1472,7 @@ void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables
         for (int k=0; k<this->owner->Modules[i].size; k++)
         { this->theNilradicalWeights.AddListOnTop(this->owner->WeightsModulesPrimal[i]);
           this->theNilradicalElements.AddListOnTop(this->owner->Modules[i][k]);
+          this->theNilradicalElementOpposites.AddListOnTop(this->owner->ModulesSl2opposite[i][k]);
         }
     }
 //  out << "<br>";
@@ -3404,15 +3416,17 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
       for (int i=0; i<this->theNilradicalWeights.size; i++)
         if (this->ConeStrongIntersection[i]!=0)
         { Vector<Rational>& currentNilradWeight= this->theNilradicalWeights[i];
-          out << "<td><table><tr><td>" << currentNilradWeight.ToString() << "</td></tr>";
+          out << "<td><table border=\"1\"><tr><td>" << currentNilradWeight.ToString() << "</td></tr>";
           for (int j=0; j<this->theNilradicalWeights.size; j++)
             if (currentNilradWeight==this->theNilradicalWeights[j])
-              out << "<tr><td>" << this->theNilradicalElements[j].ToString() << "</td></tr>";
+            { out << "<tr><td>" << this->theNilradicalElements[j].ToString() << "</td></tr>";
+              out << "<tr><td>" << this->theNilradicalElementOpposites[j].ToString() << "</td></tr>";
+            }
           out << "</table></td>";
         }
       out << "</tr></table>";
     }
-    if (this->flagLinfiniteRelFound )
+    if (this->flagLinfiniteRelFound)
       out << "<br><b>L-infinite relation exists!</b>";
     else
       out << "<br><span style=\"color:#FF0000\"><b>No L-infinite relation found.</b></span>";
@@ -3430,13 +3444,25 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
   out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("V");
   int numConeIntersections=0;
+  int numCasesNoLinfiniteRelationFound=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     if (this->FKNilradicalCandidates[i].NilradicalConesIntersect)
-      numConeIntersections++;
+    { numConeIntersections++;
+      if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
+        numCasesNoLinfiniteRelationFound++;
+    }
   out << "<br>There are " << this->FKNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
   << numConeIntersections << " have intersecting cones and "
   << this->FKNilradicalCandidates.size-numConeIntersections << " have non-intersecting cones. ";
+  if (numConeIntersections>0)
+  { if (numCasesNoLinfiniteRelationFound>0)
+      out << "<br><span style=\"color:#FF0000\">In " << numCasesNoLinfiniteRelationFound
+      << " cases no L-infinite relation was found. </span>.";
+    else
+      out << "<br><span style=\"color:#0000FF\"> In each of " << numConeIntersections
+      << " case(s) of intersecting cones, an L-infinite relation was found. </span>.";
+  }
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     out << "<hr>Subalgebra " << i+1 << ": " << this->FKNilradicalCandidates[i].ToString(theFormat);
   if (this->nilradicalGenerationLog!="")

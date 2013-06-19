@@ -864,7 +864,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagDoComputePairingTable=true;
-  theSAs.flagDoComputeNilradicals=false;
+  theSAs.flagDoComputeNilradicals=true;
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;

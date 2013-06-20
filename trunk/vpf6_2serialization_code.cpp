@@ -433,31 +433,29 @@ bool Serialization::innerSSLieAlgebra
   return Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
 }
 
-bool Serialization::innerLoadSSLieAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output,
- SemisimpleLieAlgebra** outputPointer)
+bool Serialization::innerLoadDynkinType
+(CommandList& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerLoadSSLieAlgebra");
   //std::cout << "<br>Now I'm here!";
-  if (!Serialization::innerPolynomial(theCommands, input, output))
-    return output.SetError
-    ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
-  if (output.IsError())
+  Expression polyE;
+  if (!Serialization::innerPolynomial(theCommands, input, polyE))
+    return false;
+  if (polyE.IsError())
     return true;
-  Polynomial<Rational> theType=output.GetValuE<Polynomial<Rational> >();
-  Expression theContext=output.GetContext();
+  Polynomial<Rational> theType=polyE.GetValuE<Polynomial<Rational> >();
+  Expression theContext=polyE.GetContext();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  SemisimpleLieAlgebra tempSSalgebra;
-  DynkinType theDynkinType;
   DynkinSimpleType simpleComponent;
-  theDynkinType.MakeZero();
+  output.MakeZero();
   for (int i=0; i<theType.size; i++)
   { const MonomialP& currentMon=theType[i];
     int variableIndex;
     if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
-      return output.SetError
-      ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat), theCommands);
+    { theCommands.Comments << "Failed to extract type from monomial " << currentMon.ToString(&theFormat);
+      return false;
+    }
     Expression typEE= theContext.ContextGetContextVariable(variableIndex);
     if (!Serialization::DeSerializeMon(theCommands, typEE, theContext, simpleComponent))
       return false;
@@ -465,24 +463,34 @@ bool Serialization::innerLoadSSLieAlgebra
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
-    { std::stringstream out;
-      out << "I failed to convert the coefficient " << theType.theCoeffs[i]
+    { theCommands.Comments << "I failed to convert the coefficient " << theType.theCoeffs[i]
       << " of " << currentMon.ToString(&theFormat) << " to a small integer";
-      return output.SetError(out.str(), theCommands);
+      return false;
     }
-    theDynkinType.AddMonomial(simpleComponent, theMultiplicity);
-    if (theDynkinType.GetRank()>20)
-    { std::stringstream out;
-      out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
-      << " If you would like to relax this limitation edit file " << __FILE__ << " line "
-      << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
-      << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
-      << " You have been warned. "
-      << " Alternatively, you may want to implement a sparse structure constant table "
-      << "(write me an email if you want to do that, I will help you). ";
-      return output.SetError(out.str(), theCommands);
-    }
+    output.AddMonomial(simpleComponent, theMultiplicity);
   }
+  return true;
+}
+
+bool Serialization::innerLoadSSLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra** outputPointer)
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  MacroRegisterFunctionWithName("CommandList::innerLoadSSLieAlgebra");
+  DynkinType theDynkinType;
+  if(!Serialization::innerLoadDynkinType(theCommands, input, theDynkinType))
+    return output.SetError("Failed to extract Dynkin type.", theCommands);
+  if (theDynkinType.GetRank()>20)
+  { std::stringstream out;
+    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+    << " If you would like to relax this limitation edit file " << __FILE__ << " line "
+    << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
+    << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
+    << " You have been warned. "
+    << " Alternatively, you may want to implement a sparse structure constant table "
+    << "(write me an email if you want to do that, I will help you). ";
+    return output.SetError(out.str(), theCommands);
+  }
+  SemisimpleLieAlgebra tempSSalgebra;
   tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
   bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);

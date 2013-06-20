@@ -897,6 +897,8 @@ public:
       return false;
     return currentType==inputType && currentRank==inputRank;
   }
+  void GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const;
+  void GetOuterAutosGenerators(List<Matrix<Rational> >& output)const;
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const
   ;
   void GetDynkinTypeWithDefaultLengths(DynkinType& output);
@@ -1099,6 +1101,7 @@ public:
   HashedList<Vector<Rational> > rhoOrbit;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
+
 
   List<List<int> > conjugacyClasses;
   List<WeylGroupRepresentation<Rational> > irreps;

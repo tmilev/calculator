@@ -3625,6 +3625,61 @@ void DynkinType::GetTypesWithMults
   }
 }
 
+void DynkinType::GetOuterAutosGeneratorsOneType
+(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const
+{ MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGeneratorsOneType");
+  output.SetSize(0);
+  Matrix<Rational> tempMat, finalMat;
+  if (theType.theLetter=='D' || (theType.theLetter=='A'&& theType.theRank>1) ||
+      (theType.theLetter=='E' && theType.theRank==6))
+  { tempMat.MakeIdMatrix(theType.theRank*(multiplicity-1));
+    int numGens=1;
+    if (theType.theLetter=='D' && theType.theRank==4)
+      numGens=2;
+    for (int i=0; i<numGens; i++)
+    { theType.GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(finalMat, i);
+      finalMat.Transpose();
+      finalMat.DirectSumWith(tempMat);
+      output.AddOnTop(finalMat);
+    }
+  }
+  if (multiplicity<2)
+    return;
+  for (int i=0; i<multiplicity-1; i++)
+  { tempMat.init(multiplicity*2, multiplicity*2);
+    tempMat.NullifyAll();
+    for (int j=0; j<theType.theRank; j++)
+    { tempMat(j, multiplicity+j)=1;
+      tempMat(multiplicity+j,j)=1;
+    }
+    finalMat.MakeIdMatrix(i*multiplicity);
+    finalMat.DirectSumWith(tempMat);
+    tempMat.MakeIdMatrix(multiplicity-2-i);
+    finalMat.DirectSumWith(tempMat);
+    output.AddOnTop(finalMat);
+  }
+}
+
+void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)const
+{ MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
+  List<Matrix<Rational> > intermediateGenerators;
+  Matrix<Rational> matrixSoFar, matrixToGo, matrixFinal;
+  int currentMult;
+  output.SetSize(0);
+  for (int i=0; i<this->size; i++)
+  { if (!this->theCoeffs[i].IsSmallInteger(&currentMult))
+      assert(false);
+    this->GetOuterAutosGeneratorsOneType(intermediateGenerators,(*this)[i], currentMult);
+    matrixToGo.MakeIdMatrix(matrixSoFar.NumRows);
+    for (int j=0; j<intermediateGenerators.size; j++)
+    { matrixFinal=matrixSoFar;
+      matrixFinal.DirectSumWith(intermediateGenerators[j]);
+      matrixFinal.DirectSumWith(matrixToGo);
+      output.AddOnTop(matrixFinal);
+    }
+  }
+}
+
 void DynkinType::GetLettersTypesMults
 (List<char>* outputLetters, List<int>* outputRanks, List<int>* outputMults,
    List<Rational>* outputFirstCoRootLengthsSquared)const

@@ -22,6 +22,9 @@ public:
   static bool innerWeylGroupOrbitFundRho
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerWeylGroupOuterAutoGeneratorsPrint
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerWeylGroupConjugacyClasses
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

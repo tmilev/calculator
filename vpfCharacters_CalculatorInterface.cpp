@@ -823,7 +823,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
   for (int i=0; i<theGens.size; i++)
-  { outCommand << "<br>s_{" << i+1 << "}:=" << theGens[i].ToString(&tempFormat) << ";";
+  { outCommand << "<br>s_{" << i+1 << "}:=MatrixRationals" << theGens[i].ToString(&tempFormat) << ";";
     out << "<br>s_" << i+1 << " = " << CGI::GetHtmlMathSpanPure(theGens[i].ToString(&tempFormat) );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";

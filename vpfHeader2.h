@@ -1731,7 +1731,8 @@ static bool innerAttemptExtendingEtoHEFwithHinCartan
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerPrintSSsubalgebras
-  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false, bool DoNilradicals=false)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false,
+   bool DoNilradicals=false, bool noSolutions=false)
 ;
   static bool innerPrintSSsubalgebrasForceRecomputeWithNilradicals
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1741,6 +1742,11 @@ static bool innerAttemptExtendingEtoHEFwithHinCartan
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true);
 }
+  static bool innerPrintSSsubalgebrasNoSolutions
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, true);
+}
+
   static bool innerPrintSSsubalgebrasRegular
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false);
@@ -1914,6 +1920,9 @@ static bool innerLoadCandidateSA
 (CommandList& theCommands, const Expression& input, Expression& output,
  CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner)
 ;
+static bool innerLoadDynkinType
+(CommandList& theCommands, const Expression& input, DynkinType& output)
+;
 static bool innerSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -2040,8 +2049,7 @@ bool Serialization::innerStoreMonCollection
 
 template <class TemplateMonomial, typename coefficient>
 bool Serialization::DeSerializeMonCollection
-(CommandList& theCommands, const Expression& input,
- MonomialCollection<TemplateMonomial, coefficient>& output)
+(CommandList& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);

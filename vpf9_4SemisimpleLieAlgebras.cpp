@@ -310,9 +310,7 @@ void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
 void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight");
   if (AutoIndex==0 || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='G' ||
-      this->theLetter=='F' ||
-      (this->theRank==1) ||
-      (this->theLetter=='E' && this->theRank!=6))
+      this->theLetter=='F' || this->theRank==1 || (this->theLetter=='E' && this->theRank!=6))
   { output.MakeIdMatrix(this->theRank);
     return;
   }
@@ -3458,10 +3456,10 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   if (numConeIntersections>0)
   { if (numCasesNoLinfiniteRelationFound>0)
       out << "<br><span style=\"color:#FF0000\">In " << numCasesNoLinfiniteRelationFound
-      << " cases no L-infinite relation was found. </span>.";
+      << " cases no L-infinite relation was found. </span>";
     else
       out << "<br><span style=\"color:#0000FF\"> In each of " << numConeIntersections
-      << " case(s) of intersecting cones, an L-infinite relation was found. </span>.";
+      << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
   }
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     out << "<hr>Subalgebra " << i+1 << ": " << this->FKNilradicalCandidates[i].ToString(theFormat);
@@ -3716,14 +3714,24 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
         out << "<br>First negative generator seed realization.<br> "
         << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
       }
-  out << "<br><b>For the calculator part 1: </b><br>FindOneSolutionSerreLikePolynomialSystem{}( ";
+  out << "<br><b>For the calculator part 1: </b>";
+  out << "<br>FindOneSolutionSerreLikePolynomialSystem{}( ";
   for (int i=0; i<this->theSystemToSolve.size; i++)
   { out << this->theSystemToSolve[i].ToString(&tempFormat);
     if (i!=this->theSystemToSolve.size-1)
       out << ", ";
   }
   out << " )";
-  out << "<br><b>For the calculator part 2: </b><br>GroebnerLexUpperLimit{}(10000, ";
+  out << "<br><b>For the calculator part 2: </b>";
+  out << "<br>(";
+  for (int i=0; i<this->theUnknownNegGens.size; i++)
+  { out << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
+    out << this->theUnknownPosGens[i].ToString(theFormat);
+    if (i!=this->theUnknownNegGens.size-1)
+      out << ", ";
+  }
+  out << ");";
+  out << "<br>GroebnerLexUpperLimit{}(10000, ";
   for (int i=0; i<this->theSystemToSolve.size; i++)
   { out << this->theSystemToSolve[i].ToString(&tempFormat);
     if (i!=this->theSystemToSolve.size-1)

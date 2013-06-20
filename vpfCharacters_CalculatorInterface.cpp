@@ -811,6 +811,32 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ DynkinType theType;
+  if (!Serialization::innerLoadDynkinType(theCommands, input, theType))
+    return output.SetError("Failed to extract Dynkin type from argument. ", theCommands);
+  std::stringstream out, outCommand;
+  List<Matrix<Rational> > theGens;
+  theType.GetOuterAutosGenerators(theGens);
+  FormatExpressions tempFormat;
+  tempFormat.flagUseLatex=true;
+  tempFormat.flagUseHTML=false;
+  for (int i=0; i<theGens.size; i++)
+  { outCommand << "<br>s_{" << i+1 << "}:=" << theGens[i].ToString(&tempFormat) << ";";
+    out << "<br>s_" << i+1 << " = " << CGI::GetHtmlMathSpanPure(theGens[i].ToString(&tempFormat) );
+  }
+  outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
+  for (int i=0; i<theGens.size; i++)
+  { outCommand << "s_{" << i+1 << "}";
+    if (i!=theGens.size-1)
+      outCommand << ", ";
+  }
+  outCommand << ");";
+  out << outCommand.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitFundRho
 (CommandList& theCommands, const Expression& input, Expression& output)
 { return WeylGroupCalculatorFunctions::innerWeylOrbit(theCommands, input, output, true, true);

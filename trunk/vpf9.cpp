@@ -3636,7 +3636,7 @@ void DynkinType::GetOuterAutosGeneratorsOneType
     int numGens=1;
     if (theType.theLetter=='D' && theType.theRank==4)
       numGens=2;
-    for (int i=0; i<numGens; i++)
+    for (int i=1; i<numGens+1; i++)
     { theType.GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(finalMat, i);
       finalMat.Transpose();
       finalMat.DirectSumWith(tempMat);
@@ -3646,15 +3646,15 @@ void DynkinType::GetOuterAutosGeneratorsOneType
   if (multiplicity<2)
     return;
   for (int i=0; i<multiplicity-1; i++)
-  { tempMat.init(multiplicity*2, multiplicity*2);
+  { tempMat.init(theType.theRank*2, theType.theRank*2);
     tempMat.NullifyAll();
     for (int j=0; j<theType.theRank; j++)
-    { tempMat(j, multiplicity+j)=1;
-      tempMat(multiplicity+j,j)=1;
+    { tempMat(j, theType.theRank+j)=1;
+      tempMat(theType.theRank+j,j)=1;
     }
-    finalMat.MakeIdMatrix(i*multiplicity);
+    finalMat.MakeIdMatrix(i*theType.theRank);
     finalMat.DirectSumWith(tempMat);
-    tempMat.MakeIdMatrix(multiplicity-2-i);
+    tempMat.MakeIdMatrix((multiplicity-2-i)*theType.theRank);
     finalMat.DirectSumWith(tempMat);
     output.AddOnTop(finalMat);
   }
@@ -3663,20 +3663,22 @@ void DynkinType::GetOuterAutosGeneratorsOneType
 void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)const
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
   List<Matrix<Rational> > intermediateGenerators;
-  Matrix<Rational> matrixSoFar, matrixToGo, matrixFinal;
+  Matrix<Rational> matrixFinal, matrixToGo;
   int currentMult;
   output.SetSize(0);
+  int numRowsSoFar=0;
   for (int i=0; i<this->size; i++)
   { if (!this->theCoeffs[i].IsSmallInteger(&currentMult))
       assert(false);
     this->GetOuterAutosGeneratorsOneType(intermediateGenerators,(*this)[i], currentMult);
-    matrixToGo.MakeIdMatrix(matrixSoFar.NumRows);
+    matrixToGo.MakeIdMatrix(this->GetRank()-numRowsSoFar-currentMult*(*this)[i].theRank);
     for (int j=0; j<intermediateGenerators.size; j++)
-    { matrixFinal=matrixSoFar;
+    { matrixFinal.MakeIdMatrix(numRowsSoFar);
       matrixFinal.DirectSumWith(intermediateGenerators[j]);
       matrixFinal.DirectSumWith(matrixToGo);
       output.AddOnTop(matrixFinal);
     }
+    numRowsSoFar+=currentMult*(*this)[i].theRank;
   }
 }
 

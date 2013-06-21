@@ -1102,7 +1102,7 @@ public:
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
 
-
+  List<Matrix<Rational> > OuterAutomorphisms;
   List<List<int> > conjugacyClasses;
   List<WeylGroupRepresentation<Rational> > irreps;
   List<Vector<Rational> > characterTable;
@@ -1118,6 +1118,7 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType)
   ;
+  void ComputeExternalAutos();
   bool CheckInitializationFDrepComputation()const;
   template <typename coefficient>
   coefficient GetHermitianProduct
@@ -1282,6 +1283,11 @@ template <class coefficient>
   { return this->RootSystem.Contains(input);
   }
   void GenerateRootSubsystem(Vectors<Rational>& theRoots);
+  template <class coefficient>
+  bool GenerateOuterOrbit
+  (Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output,
+   HashedList<ElementWeylGroup>* outputSubset=0,  int UpperLimitNumElements=-1)
+   ;
   template <class coefficient>
   bool GenerateOrbit
   (Vectors<coefficient>& theRoots, bool RhoAction, HashedList<Vector<coefficient> >& output,

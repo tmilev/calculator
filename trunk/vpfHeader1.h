@@ -5282,6 +5282,13 @@ public:
         }
     }
   }
+  void operator=(const TemplateMonomial& other)
+  { TemplateMonomial otherCopy=other; //in case other is contained as a monomial in me and gets destroyed when I call
+    //this->MakeZero(). This shouldn't yield a measurable slowdown.
+    //Further this function is to be used for non-time critical operations.
+    this->MakeZero();
+    this->AddMonomial(otherCopy, 1);
+  }
   template<class otherType>
   void operator=(const MonomialCollection<TemplateMonomial, otherType>& other)
   { this->theCoeffs=other.theCoeffs;

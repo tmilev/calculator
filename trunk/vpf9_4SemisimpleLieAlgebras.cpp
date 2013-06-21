@@ -3561,28 +3561,30 @@ void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSqu
   *this=result;
 }
 
-std::string SemisimpleSubalgebras::GetAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+void SemisimpleSubalgebras::ScaleDynkinType(DynkinType& theType)const
+{ Rational theScale =
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared
+  /
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst()
+  ;
+  theScale.Invert();
+  theType.ScaleFirstCoRootSquaredLength(theScale);
+}
+
+std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { if (ActualIndexSubalgebra<0)
     return "(non-initialized)";
   std::stringstream out;
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->Hcandidates[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
     makeLink=false;
-  DynkinType& theType=this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
-  DynkinType typeScaled=theType;
-  Rational theScale =
-  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared
-  /
-  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst()
-  ;
-  theScale.Invert();
-  typeScaled.ScaleFirstCoRootSquaredLength(theScale);
+  DynkinType typeScaled=this->Hcandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
+  this->ScaleDynkinType(typeScaled);
   if (makeLink)
     out << "<a href=\"" << this->GetDisplayFileName(ActualIndexSubalgebra, theFormat) << "\">"
-    << CGI::GetHtmlMathSpanPure
-    (theType.ToString()) << "</a> " << CGI::GetHtmlMathSpanPure("("+typeScaled.ToString()+")");
+    << CGI::GetHtmlMathSpanPure(typeScaled.ToString()) << "</a> ";
   else
-    out << theType.ToString() << " " << " (" << typeScaled.ToString() << ")";
+    out << typeScaled.ToString() << ")";
   return out.str();
 }
 
@@ -3590,14 +3592,21 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
 { std::stringstream out;
   bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
-  List<DynkinSimpleType> theTypes;
-  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
+  List<DynkinSimpleType> theSimpleTypes;
+  List<DynkinType> theTypes;
+  this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theSimpleTypes);
+  theTypes.SetSize(theSimpleTypes.size);
+  for (int i=0; i<theTypes.size; i++)
+  { theTypes[i].MakeZero();
+    theTypes[i].AddMonomial(theSimpleTypes[i],1);
+    this->owner->ScaleDynkinType(theTypes[i]);
+  }
   out << "<br>Elements Cartan by components: ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { if (useLaTeX && useHtml)
       out << CGI::GetHtmlMathSpanPure(theTypes[i].ToString(), 1000) << ": ";
     else
-      out << theTypes[i] << ":";
+      out << theTypes[i].ToString() << ":";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString() << ": "
       << this->GetAmbientWeyl().RootScalarCartanRoot
@@ -3619,6 +3628,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
   { DynkinType centralizerType =
     this->owner->Hcandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+    this->owner->ScaleDynkinType(centralizerType);
     out << "<br>Centralizer type: ";
     if (useLaTeX && useHtml)
       out << CGI::GetHtmlMathSpanPure(centralizerType.ToString());
@@ -3778,14 +3788,23 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   return out.str();
 }
 
+bool CandidateSSSubalgebra::AmRegularSA()const
+{ for (int i=0; i<this->theNegGens.size; i++)
+    if (this->theNegGens[i].size>1 || this->thePosGens[i].size>1)
+      return false;
+  return true;
+}
+
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
   std::stringstream out;
   bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   //bool writingToHD=theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
-  out << "Subalgebra type: " << this->owner->GetAlgebraLink(this->indexInOwner, theFormat)
-  << " (click on type for detailed printout).";
+  out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat);
+  out << " (click on type for detailed printout).";
+  if (this->AmRegularSA())
+    out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   if (this->flagSystemProvedToHaveNoSolution)
   { out << " <b> Subalgebra candidate proved to be impossible! </b> ";
     return out.str();
@@ -3803,7 +3822,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (this->indicesDirectSummandSuperAlgebra.size>0)
   { out << "<br>Contained up to conjugation as a direct summand of: ";
     for (int i=0; i<this->indicesDirectSummandSuperAlgebra.size; i++)
-    { out << this->owner->GetAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], theFormat);
+    { out << this->owner->ToStringAlgebraLink(this->indicesDirectSummandSuperAlgebra[i], theFormat);
       if (i!=this->indicesDirectSummandSuperAlgebra.size-1)
         out << ", ";
     }

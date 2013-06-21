@@ -4495,6 +4495,10 @@ void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational*
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
 }
 
+void WeylGroup::ComputeExternalAutos()
+{ this->theDynkinType.GetOuterAutosGenerators(this->OuterAutomorphisms);
+}
+
 void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
 { this->init();
   this->theDynkinType=inputType;

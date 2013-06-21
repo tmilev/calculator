@@ -740,12 +740,15 @@ public:
   std::string indicatorFileNamE;
   std::string indicatorFileNameDisplaY;
   std::string userLabel;
+  std::stringstream Comments;
+  FormatExpressions formatVisibleStrings;
+
   List<std::string> SystemCommands;
   std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ToStringFunctionHandlers();
-  std::stringstream Comments;
-  FormatExpressions formatVisibleStrings;
+  std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
+  std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
   void GetOutputFolders
 (const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay,
  FormatExpressions& outputFormat)

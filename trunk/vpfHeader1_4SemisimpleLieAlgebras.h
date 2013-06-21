@@ -451,6 +451,7 @@ public:
   bool flagDoComputePairingTable;
   bool flagDoComputeNilradicals;
   double timeComputationStartInSeconds;
+  double timeComputationEndInSeconds;
   int numAdditions;
   int numMultiplications;
   int GetNumPossibleSAs()const;

@@ -873,6 +873,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagDoComputePairingTable=true;
   theSAs.flagDoComputeNilradicals=true;
+  theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
     reportStream << "Loading subalgebra " << i << " out of " << theCandidatesE.children.size-1;
@@ -891,6 +892,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
 //  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
 //  std::cout << theCommands.theObjectContainer.ToString();
+  theSAs.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   return output.AssignValue(theSAs, theCommands);
 }
 

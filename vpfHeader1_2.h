@@ -856,7 +856,6 @@ class DynkinSimpleType
   Rational GetRatioLongRootToFirst()const
   { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
   }
-  std::string ToStringLinksToCalculator(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other)const

@@ -394,66 +394,98 @@ bool DynkinSimpleType::HasEasySubalgebras()const
     return true;
   if (this->theLetter=='G')
     return true;
-  if (this->theLetter=='A' && (this->theRank==2 || this->theRank==3))
+  if (this->theLetter=='A' && (this->theRank==2 || this->theRank==3 || this->theRank==4))
     return true;
-  if (this->theLetter=='B' && (this->theRank==2 || this->theRank==3))
+  if (this->theLetter=='B' && (this->theRank==2 || this->theRank==3 || this->theRank==4))
     return true;
-  if (this->theLetter=='C' && (this->theRank==3))
+  if (this->theLetter=='C' && (this->theRank==3 || this->theRank==4))
     return true;
   return false;
 }
 
-std::string DynkinSimpleType::ToStringLinksToCalculator(FormatExpressions* theFormat)const
+std::string CommandList::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
+  std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
-  << this->theLetter << "_" << this->theRank << "\">"  << this->theLetter << this->theRank << "</a></td>\n ";
-  if (this->HasEasySubalgebras())
-    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
-    << this->theLetter << "_" << this->theRank << "%29\">"
-    << this->theLetter << this->theRank << " semisimple subalgebras</a></td>\n ";
+  << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  if (theType[0].HasEasySubalgebras())
+    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/"
+    << theType.ToString() << "/" << theTitlePageFileNameNoPath << "\">"
+    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
-  << this->theLetter << "_" << this->theRank << "%29\">"
-  << this->theLetter << this->theRank << " sl(2) triples</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
-  << this->theLetter  << "_" << this->theRank << "%29\">"
-  << this->theLetter << this->theRank << " root subalgebras</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
+  return out.str();
+}
+
+std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
+{ std::stringstream out;
+  out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
+  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
+  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  if (theType[0].HasEasySubalgebras())
+    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
+    << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
+  else
+    out << "<td>Not available</td>\n";
+  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
+  out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
+  << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
 bool CommandList::innerGetLinksToSimpleLieAlgerbas
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ std::stringstream out;
-  out << "\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+{ std::stringstream out, out2;
+  out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
-  DynkinSimpleType theType;
-  theType.MakeArbitrary('F', 4, 2);
-  out << theType.ToStringLinksToCalculator();
+  out2 << "\n\n<p>\n\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
+  << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
+  DynkinType theType;
+  theType.MakeSimpleType('F', 4);
+  out << theCommands.ToStringLinksToCalculator(theType);
+  out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   for (int i=6; i<=8; i++)
-  { theType.MakeArbitrary('E', i, 2);
-    out << theType.ToStringLinksToCalculator();
+  { theType.MakeSimpleType('E', i);
+    out << theCommands.ToStringLinksToCalculator(theType);
+    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
-  theType.MakeArbitrary('G', 2, 2);
-  out << theType.ToStringLinksToCalculator();
+  theType.MakeSimpleType('G', 2);
+  out << theCommands.ToStringLinksToCalculator(theType);
   for (int i=1; i<=8; i++)
-  { theType.MakeArbitrary('A', i, 2);
-    out << theType.ToStringLinksToCalculator();
+  { theType.MakeSimpleType('A', i);
+    out << theCommands.ToStringLinksToCalculator(theType);
+    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i=4; i<=8; i++)
-  { theType.MakeArbitrary('D', i, 2);
-    out << theType.ToStringLinksToCalculator();
+  { theType.MakeSimpleType('D', i);
+    out << theCommands.ToStringLinksToCalculator(theType);
+    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i=2; i<=8; i++)
-  { theType.MakeArbitrary('B', i, 2);
-    out << theType.ToStringLinksToCalculator();
+  { theType.MakeSimpleType('B', i);
+    out << theCommands.ToStringLinksToCalculator(theType);
+    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
   for (int i=3; i<=8; i++)
-  { theType.MakeArbitrary('C', i, 2);
-    out << theType.ToStringLinksToCalculator();
+  { theType.MakeSimpleType('C', i);
+    out << theCommands.ToStringLinksToCalculator(theType);
+    out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   }
-  out << "</table>\n\n\n";
-  return output.AssignValue(out.str(), theCommands);
+  out << "</table></p>" ;
+  out2 << "</table></p>\n\n\n<br><br><p>Below are some links that cause conditional re-computation of some of the tables. "
+  << "Please do not use these links; they are meant for computer debugging purposes only. </p><br>\n" << out.str()
+  << "\n\n\n\n\n\n\n\n";
+  return output.AssignValue(out2.str(), theCommands);
 }
 
 bool CommandList::innerPrintSSsubalgebras
@@ -503,14 +535,13 @@ bool CommandList::innerPrintSSsubalgebras
     theCommands.theObjectContainer.theSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
-    double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
+    theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.flagDoComputeNilradicals=DoNilradicals;
     if (noSolutions)
       theSSsubalgebras.flagAttemptToSolveSystems=false;
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
-    theSSsubalgebras.timeComputationStartInSeconds
-    =theCommands.theGlobalVariableS->GetElapsedSeconds()-startTime;
+    theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
     theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
     Rational::TotalLargeMultiplications;
@@ -521,7 +552,9 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseHTML=true;
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
-    theFile << "<html>" << "<script src=\"" << theCommands.DisplayPathServerBase
+    theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
+    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
+    << "</title>" << "<script src=\"" << theCommands.DisplayPathServerBase
     << "jsmath/easy/load.js\"></script> " << "<body>"
     << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";

@@ -197,14 +197,11 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << ". ";
   }
   out << "The subalgebras are ordered by "
-  << "(rank, dimensions of simple constituents, Dynkin indices of simple constituents). "
-  << "The upper index stands for the length of the first co-root squared. In the parenthesis, "
-  << " the upper index equals the Dynkin index. "
-  << " In type F_4, the upper index divided by two equals the Dynkin index of the subalgebra in  "
-  << " F_4. "
+  << "rank, dimensions of simple constituents and Dynkin indices of simple constituents. "
+  << "The upper index indicates the Dynkin index, the lower index indicates the rank of the subalgebra. "
   ;
-  if (this->timeComputationStartInSeconds!=-1)
-    out << "<br>Computation time in seconds: " << this->timeComputationStartInSeconds << ".";
+  if (this->timeComputationStartInSeconds!=-1 && this->timeComputationEndInSeconds!=-1)
+    out << "<br>Computation time in seconds: " << this->timeComputationEndInSeconds - this->timeComputationStartInSeconds << ".";
   if (this->numAdditions!=-1)
     out << "<br>" << this->numAdditions+this->numMultiplications
     << " total arithmetic operations performed = " << this->numAdditions << " additions and "
@@ -1796,6 +1793,7 @@ void SemisimpleSubalgebras::reset()
   this->flagDoComputePairingTable=true;
   this->flagDoComputeNilradicals=false;
   this->timeComputationStartInSeconds=-1;
+  this->timeComputationEndInSeconds=-1;
   this->numAdditions=-1;
   this->numMultiplications=-1;
 }
@@ -3601,7 +3599,7 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
     theTypes[i].AddMonomial(theSimpleTypes[i],1);
     this->owner->ScaleDynkinType(theTypes[i]);
   }
-  out << "<br>Elements Cartan by components: ";
+  out << "<br>Elements Cartan subalgebra by components: ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { if (useLaTeX && useHtml)
       out << CGI::GetHtmlMathSpanPure(theTypes[i].ToString(), 1000) << ": ";

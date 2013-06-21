@@ -328,6 +328,7 @@ public:
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
+  bool AmRegularSA()const;
   bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void GetGenericLinearCombination
   (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
@@ -453,7 +454,8 @@ public:
   int numAdditions;
   int numMultiplications;
   int GetNumPossibleSAs()const;
-  std::string GetAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  void ScaleDynkinType(DynkinType& theType)const;
+  std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
   std::string GetPhysicalFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   std::string GetDisplayFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;

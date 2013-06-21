@@ -675,6 +675,124 @@ bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
   return output.AssignValue(out.str(), theCommands);
 }
 
+template <class coefficient>
+bool WeylGroup::GenerateOuterOrbit
+(Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output,
+ HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
+{ output.Clear();
+  for (int i=0; i<theRoots.size; i++)
+    output.AddOnTop(theRoots[i]);
+  Vector<coefficient> currentRoot;
+  ElementWeylGroup tempEW;
+  tempEW.owner=this;
+  output.SetExpectedSize(UpperLimitNumElements);
+  if (outputSubset!=0)
+  { tempEW.size=0;
+    outputSubset->SetExpectedSize(UpperLimitNumElements);
+    outputSubset->Clear();
+    outputSubset->AddOnTop(tempEW);
+  }
+  int numGens=this->GetDim()+this->OuterAutomorphisms.size;
+  for (int i=0; i<output.size; i++)
+  { if (outputSubset!=0)
+      tempEW=outputSubset->TheObjects[i];
+    for (int j=0; j<numGens; j++)
+    { currentRoot=output[i];
+      if(j<this->GetDim())
+        this->SimpleReflection(j, currentRoot);
+      else
+        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(currentRoot);
+      if (output.AddOnTopNoRepetition(currentRoot))
+        if (outputSubset!=0)
+        { tempEW.AddOnTop(j);
+          outputSubset->AddOnTop(tempEW);
+          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
+        }
+      if (UpperLimitNumElements>0)
+        if (output.size>=UpperLimitNumElements)
+          return false;
+    }
+  }
+  return true;
+}
+
+bool WeylGroupCalculatorFunctions::innerWeylOuterGroupOrbitSimple
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return output.SetError("innerWeylOrbit takes two arguments", theCommands);
+  const Expression& theSSalgebraNode=input[1];
+  const Expression& vectorNode=input[2];
+  DynkinType theType;
+  if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra>())
+    theType=theSSalgebraNode.GetValuE<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
+  else
+    if (!Serialization::innerLoadDynkinType(theCommands, theSSalgebraNode, theType))
+      return false;
+  Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
+  Expression theContext;
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), Serialization::innerPolynomial))
+    return output.SetError("Failed to extract highest weight", theCommands);
+  WeylGroup theWeyl;
+  theWeyl.MakeFromDynkinType(theType);
+  theHWsimpleCoords=theHWfundCoords;
+  theHWfundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
+  std::stringstream out, latexReport;
+  Vectors<Polynomial<Rational> > theHWs;
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+//  theFormat.fundamentalWeightLetter="\\psi";
+  theHWs.AddOnTop(theHWsimpleCoords);
+  HashedList<Vector<Polynomial<Rational> > > outputOrbit;
+  WeylGroup orbitGeneratingSet;
+  Polynomial<Rational> theExp;
+  if (theWeyl.GenerateOuterOrbit(theHWs, outputOrbit, &orbitGeneratingSet.theElements, 1921))
+    out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
+    << " elements only.";
+  else
+    out << "The orbit has " << outputOrbit.size << " elements.";
+  latexReport
+  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& "
+  << "Hw minus wt. \\\\\n<br>";
+  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> "
+  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
+  out << "</tr>";
+  MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
+  LargeInt tempInt;
+  bool useMathTag=outputOrbit.size<150;
+  Matrix<Rational> epsCoordMat;
+  theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
+  for (int i=0; i<outputOrbit.size; i++)
+  { theFormat.simpleRootLetter="\\alpha";
+    theFormat.fundamentalWeightLetter="\\psi";
+    std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
+    Vector<Polynomial<Rational> > epsVect=outputOrbit[i];
+    epsCoordMat.ActOnVectorColumn(epsVect);
+    std::string orbitEltStringEpsilonCoords=epsVect.ToStringLetterFormat("\\varepsilon", &theFormat);
+    std::string weightEltString=
+    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
+    (theFormat.fundamentalWeightLetter, &theFormat);
+    out << "<tr>" << "<td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
+    << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
+    << "</td>";
+    latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $"
+    << orbitEltStringEpsilonCoords
+    << "$ & $"
+    <<  weightEltString << "$ & $"
+    << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
+    << "$\\\\\n<br>"
+    ;
+    out << "</tr>";
+  }
+  latexReport << "\\end{longtable}";
+  out << "</table>" << "<br> " << latexReport.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool WeylGroupCalculatorFunctions::innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)

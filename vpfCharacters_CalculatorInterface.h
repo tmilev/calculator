@@ -19,6 +19,8 @@ public:
 ;
   static bool innerWeylGroupOrbitSimple
 (CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylOuterGroupOrbitSimple
+(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitFundRho
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;

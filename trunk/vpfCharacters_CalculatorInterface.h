@@ -5,21 +5,30 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceHeader
 (__FILE__, "Header file Weyl group calculator interface.");
 
-class WeylGroupCalculatorFunctions{
+class WeylGroupCalculatorFunctions
+{
 public:
   static bool innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
  ;
   static bool innerWeylRaiseToMaximallyDominant
-(CommandList& theCommands, const Expression& input, Expression& output)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useOuter)
  ;
+  static bool innerWeylOuterRaiseToMaximallyDominant
+(CommandList& theCommands, const Expression& input, Expression& output)
+ { return WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant(theCommands, input, output, true);
+ }
+  static bool innerWeylNoOuterRaiseToMaximallyDominant
+(CommandList& theCommands, const Expression& input, Expression& output)
+ { return WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
+ }
   static bool innerWeylGroupOrbitFund
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerWeylGroupOrbitSimple
 (CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerWeylOuterGroupOrbitSimple
+  static bool innerWeylGroupOrbitOuterSimple
 (CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitFundRho
 (CommandList& theCommands, const Expression& input, Expression& output)

@@ -5869,6 +5869,7 @@ void WeylGroup::GetExtremeElementInOrbit
 
 WeylGroup::WeylGroup()
 { this->flagFundamentalToSimpleMatricesAreComputed=false;
+  this->flagOuterAutosComputed=false;
 }
 
 Rational WeylGroup::GetLongestRootLengthSquared()

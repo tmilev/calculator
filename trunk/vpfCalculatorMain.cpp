@@ -534,6 +534,7 @@ int main(int argc, char **argv)
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
 //  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
 //  civilizedInput="WeylGroupGetOuterAutoGenerators{}(2D_4)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(D_4)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

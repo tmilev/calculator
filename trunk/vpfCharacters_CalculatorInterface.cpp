@@ -653,7 +653,7 @@ void WeylGroup::ComputeIrreducibleRepresentations
 }
 
 bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
-(CommandList& theCommands, const Expression& input, Expression& output)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useOuter)
 { if (input.children.size<2)
     return output.SetError
     ("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
@@ -670,7 +670,7 @@ bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
       return output.SetError("Failed to extract rational vectors from arguments", theCommands);
   std::stringstream out;
   out << "Input: " << theHWs.ToString() << ", simultaneously raising to maximally dominant ";
-  theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs);
+  theSSalgebra->theWeyl.RaiseToMaximallyDominant(theHWs, useOuter);
   out << "<br>Maximally dominant output: " << theHWs.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
@@ -679,7 +679,8 @@ template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit
 (Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output,
  HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
-{ output.Clear();
+{ this->ComputeExternalAutos();
+  output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots[i]);
   Vector<coefficient> currentRoot;
@@ -716,7 +717,7 @@ bool WeylGroup::GenerateOuterOrbit
   return true;
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylOuterGroupOrbitSimple
+bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return output.SetError("innerWeylOrbit takes two arguments", theCommands);
@@ -745,7 +746,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOuterGroupOrbitSimple
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroup orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (theWeyl.GenerateOuterOrbit(theHWs, outputOrbit, &orbitGeneratingSet.theElements, 1921))
+  if (!theWeyl.GenerateOuterOrbit(theHWs, outputOrbit, &orbitGeneratingSet.theElements, 1921*2))
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
     << " elements only.";
   else

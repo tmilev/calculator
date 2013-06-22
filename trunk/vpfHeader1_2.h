@@ -1081,6 +1081,7 @@ class WeylGroup
   Matrix<Rational> SimpleToFundamentalCoords;
   MemorySaving<Matrix<Rational> > MatrixSendsSimpleVectorsToEpsilonVectors;
   bool flagFundamentalToSimpleMatricesAreComputed;
+  bool flagOuterAutosComputed;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
       return;
@@ -1226,7 +1227,7 @@ public:
   ;
   template <class coefficient>
   void RaiseToMaximallyDominant
-  (List<Vector<coefficient> >& theWeight)const
+  (List<Vector<coefficient> >& theWeight, bool useOuterAutos)
   ;
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)

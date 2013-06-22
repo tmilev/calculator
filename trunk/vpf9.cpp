@@ -4496,7 +4496,9 @@ void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational*
 }
 
 void WeylGroup::ComputeExternalAutos()
-{ this->theDynkinType.GetOuterAutosGenerators(this->OuterAutomorphisms);
+{ if (!this->flagOuterAutosComputed)
+    this->theDynkinType.GetOuterAutosGenerators(this->OuterAutomorphisms);
+  this->flagOuterAutosComputed=true;
 }
 
 void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)

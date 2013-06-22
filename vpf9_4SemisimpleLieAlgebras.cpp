@@ -394,6 +394,48 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
   return result;
 }
 
+template <class coefficient>
+bool WeylGroup::GenerateOuterOrbit
+(Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output,
+ HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
+{ this->ComputeExternalAutos();
+  output.Clear();
+  for (int i=0; i<theRoots.size; i++)
+    output.AddOnTop(theRoots[i]);
+  Vector<coefficient> currentRoot;
+  ElementWeylGroup tempEW;
+  tempEW.owner=this;
+  output.SetExpectedSize(UpperLimitNumElements);
+  if (outputSubset!=0)
+  { tempEW.size=0;
+    outputSubset->SetExpectedSize(UpperLimitNumElements);
+    outputSubset->Clear();
+    outputSubset->AddOnTop(tempEW);
+  }
+  int numGens=this->GetDim()+this->OuterAutomorphisms.size;
+  for (int i=0; i<output.size; i++)
+  { if (outputSubset!=0)
+      tempEW=outputSubset->TheObjects[i];
+    for (int j=0; j<numGens; j++)
+    { currentRoot=output[i];
+      if(j<this->GetDim())
+        this->SimpleReflection(j, currentRoot);
+      else
+        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(currentRoot);
+      if (output.AddOnTopNoRepetition(currentRoot))
+        if (outputSubset!=0)
+        { tempEW.AddOnTop(j);
+          outputSubset->AddOnTop(tempEW);
+          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
+        }
+      if (UpperLimitNumElements>0)
+        if (output.size>=UpperLimitNumElements)
+          return false;
+    }
+  }
+  return true;
+}
+
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
 (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
 GlobalVariables* theGlobalVariables)
@@ -504,10 +546,10 @@ GlobalVariables* theGlobalVariables)
 //        std::cout << out.str();
     }
     if (indexCurrentWeight!=0)
-    { if (! this->GetSSowner().theWeyl.GenerateOrbit
-        (startingVector, false, theOrbit, false, 1152, &theOrbitGenerators, 100000))
+    { if (! this->GetSSowner().theWeyl.GenerateOuterOrbit
+        (startingVector, theOrbit, &theOrbitGenerators, 10000))
       { std::cout
-        << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 100000 elements. "
+        << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
         << " This is not a programming error, but I am crashing in flames to let you know "
         << " you hit the computational limits. You might wanna work on improving the algorithm "
         << " for generating semisimple subalgebras. "
@@ -1237,7 +1279,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGl
       this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
-  this->OppositeModulesByChar.initFillInObject( this->Modules.size, -2);
+  this->OppositeModulesByChar.initFillInObject(this->Modules.size, -2);
   List<charSSAlgMod<Rational> > theDualMods;
   theDualMods.SetSize(this->Modules.size);
   for (int i=0; i<this->Modules.size; i++)
@@ -3271,6 +3313,7 @@ void rootSubalgebra::ToString
 std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theFormat)const
 { if (this->Modules.size<=0)
     return "";
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompo");
   std::stringstream out;
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   out << "<table border=\"1\"><tr><td>Module highest weight in fund. coords. and label</td>";
@@ -3288,18 +3331,25 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   { out << "<td><table border=\"1\"><tr>";
     for (int j=0; j<this->Modules[i].size; j++)
     { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->Modules[i][j];
-      List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
       out << "<td>";
       out << "<table>";
       for (int k=0; k<currentModule.size; k++)
-      { out << "<tr><td>" <<  currentModule[k].ToString() << "</td>";
-        if (!currentOpModule[k].IsEqualToZero())
-        { out << "<td><span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span></td>";
-          this->GetAmbientSS().LieBracket(currentModule[k], currentOpModule[k], tempLieBracket);
-          out << "<td><span style=\"color:#FF0000\">" << tempLieBracket.ToString() << "</span></td>";
+      { out << "<tr><td>" << currentModule[k].ToString() << "</td>";
+        bool OpsAreGood=false;
+        if (i<this->ModulesSl2opposite.size)
+          if (j<this->ModulesSl2opposite[i].size)
+            if (k<this->ModulesSl2opposite[i][j].size)
+              OpsAreGood=true;
+        if (OpsAreGood)
+        { List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
+          if (!currentOpModule[k].IsEqualToZero())
+          { out << "<td><span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span></td>";
+            this->GetAmbientSS().LieBracket(currentModule[k], currentOpModule[k], tempLieBracket);
+            out << "<td><span style=\"color:#FF0000\">" << tempLieBracket.ToString() << "</span></td>";
+          }
+          else
+            out << "<td><span style=\"color:#0000FF\">-</span></td>";
         }
-        else
-          out << "<td><span style=\"color:#0000FF\">-</span></td>";
         out << "</tr>";
       }
       out << "</table>";
@@ -3311,14 +3361,15 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
 //  }
 //  out << "</td>";
     out << "</tr></table>";
-    if (this->ModulesSemisimpleSubalgebra[i].size>0)
-    { out << "<br>Intersects the semisimple subalgebra at: <br>";
-      for (int j=0; j<this->ModulesSemisimpleSubalgebra[i].size; j++)
-      { out << this->ModulesSemisimpleSubalgebra[i][j].ToString();
-        if (j!=this->ModulesSemisimpleSubalgebra[i].size-1)
-          out << "<br>";
+    if (i<this->ModulesSemisimpleSubalgebra.size)
+      if (this->ModulesSemisimpleSubalgebra[i].size>0)
+      { out << "<br>Intersects the semisimple subalgebra at: <br>";
+        for (int j=0; j<this->ModulesSemisimpleSubalgebra[i].size; j++)
+        { out << this->ModulesSemisimpleSubalgebra[i][j].ToString();
+          if (j!=this->ModulesSemisimpleSubalgebra[i].size-1)
+            out << "<br>";
+        }
       }
-    }
     out << "</td>";
   }
   out << "</tr>";
@@ -3960,8 +4011,9 @@ void CandidateSSSubalgebra::GetHsByType
 
 template <class coefficient>
 void WeylGroup::RaiseToMaximallyDominant
-  (List<Vector<coefficient> >& theWeights)const
+  (List<Vector<coefficient> >& theWeights, bool useOuterAutos)
 { bool found;
+  MemorySaving<Vectors<coefficient> > theWeightsCopy;
   for (int i=0; i<theWeights.size; i++)
     do
     { found=false;
@@ -3979,6 +4031,22 @@ void WeylGroup::RaiseToMaximallyDominant
             this->ReflectBetaWRTAlpha(this->RootsOfBorel[j], theWeights[k], false, theWeights[k]);
           found=true;
         }
+      if (useOuterAutos)
+      { this->ComputeExternalAutos();
+        Vector<Rational> zeroWeight;
+        zeroWeight.MakeZero(this->GetDim());
+        for (int j=0; j<this->OuterAutomorphisms.size; j++)
+        { theWeightsCopy.GetElement()=theWeights;
+          this->OuterAutomorphisms[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
+          for (int k=0; k<i; k++)
+            if (!(theWeightsCopy.GetElement()[k]-theWeights[k]).IsPositiveOrZero())
+              continue;
+          if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).isGreaterThanLexicographic(zeroWeight))
+            continue;
+          found=true;
+          theWeights=theWeightsCopy.GetElement();
+        }
+      }
     }while (found);
 }
 
@@ -3993,8 +4061,8 @@ bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)cons
   //std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with "
   //<< myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
-  ambientWeyl.RaiseToMaximallyDominant(raisedInput);
-  ambientWeyl.RaiseToMaximallyDominant(myVectors);
+  ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
+  ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
   //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
   //std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
   //<< myVectors.ToString();

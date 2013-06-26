@@ -3512,7 +3512,7 @@ public:
           this->AddMonomial(theMon, other.elements[i][j]);
         }
   }
-  void AssignTensorProduct(MatrixTensor<coefficient>& left, MatrixTensor<coefficient>& right)
+  void AssignTensorProduct(const MatrixTensor<coefficient>& left, const MatrixTensor<coefficient>& right)
   { //handle lazy programmers:
     if (this==&left || this==& right)
     { MatrixTensor<coefficient> leftCopy=left;
@@ -3590,7 +3590,9 @@ public:
     *this=output;
   }
   std::string ToStringMatForm(FormatExpressions* theFormat)const
-  { Matrix<coefficient> tempMat;
+  { if (this->IsEqualToZero())
+      return "(0)";
+    Matrix<coefficient> tempMat;
     this->GetMatrix(tempMat, this->GetMaxNumColsNumRows());
     return tempMat.ToString(theFormat);
   }

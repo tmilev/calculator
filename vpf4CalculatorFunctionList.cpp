@@ -1240,6 +1240,22 @@ void CommandList::initPredefinedStandardOperations()
    "Tensor product of two Weyl group reps. Does not decompose the tensor product. \
    If you want decomposition, use V*V instead. ",
    "V:=WeylGroupNaturalRep{}(B_3); V\\otimes V; V*V", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("\\otimes", CommandListInnerTypedFunctions::innerTensorMatRatByMatRat,
+   this->opMatRat(), this->opMatRat(),
+   "Tensor product of two matrices.",
+    "P:=((0 , 2 ),(1 , 0)); Q:=((0 , 3 ),(1 , 0)); \
+    \nX:=MatrixRationals{}P; Y:=MatrixRationals{}Q; \
+    \nZ:=MatrixRationalsTensorForm{}P; W:=MatrixRationalsTensorForm{}Q; \
+    X\\otimes Y; Z\\otimes W", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("\\otimes", CommandListInnerTypedFunctions::innerTensorMatTensorByMatTensor,
+   this->opMatTensorRat(), this->opMatTensorRat(),
+   "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
+    "P:=((0 , 2 ),(1 , 0)); Q:=((0 , 3 ),(1 , 0)); \
+    \nX:=MatrixRationals{}P; Y:=MatrixRationals{}Q; \
+    \nZ:=MatrixRationalsTensorForm{}P; W:=MatrixRationalsTensorForm{}Q; \
+    \nX\\otimes Y; Z\\otimes W", true);
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. \

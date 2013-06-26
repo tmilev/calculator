@@ -547,16 +547,17 @@ public:
   HashedListReferences<RationalFunctionOld> theRFs;
   HashedListReferences<Rational> theRationals;
   HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
-  AlgebraicNumberRegistry theAlgebraicNumberRegistry;
-  HashedListReferences<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
+  HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   ListReferences<CalculusFunctionPlot> thePlots;
+  AlgebraicClosureRationals theAlgebraicClosure;
+  HashedList<AlgebraicNumber> theAlgebraicNumbers;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
@@ -1069,7 +1070,7 @@ public:
   { return this->operations.GetIndexIMustContainTheObject("Double");
   }
   int opAlgNumber()
-  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
+  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumberOld");
   }
   int opPoly()
   { return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
@@ -1079,6 +1080,9 @@ public:
   }
   int opMatRat()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
+  }
+  int opMatTensorRat()
+  { return this->operations.GetIndexIMustContainTheObject("MatrixTensor_Rational");
   }
   int opWeylGroupRep()
   { return this->operations.GetIndexIMustContainTheObject("WeylGroupRep");
@@ -1296,6 +1300,9 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerMatrixRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerMatrixRationalTensorForm
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerMatrixRationalFunction
@@ -1636,7 +1643,7 @@ public:
   static bool fAnimateLittelmannPaths
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fSqrt
+  static bool innerSqrt
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fFactor

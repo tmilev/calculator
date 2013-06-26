@@ -535,6 +535,8 @@ int main(int argc, char **argv)
 //  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
 //  civilizedInput="WeylGroupGetOuterAutoGenerators{}(2D_4)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(D_4)";
+//  civilizedInput="\\sqrt {3}+\\sqrt 2";
+  //civilizedInput="s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

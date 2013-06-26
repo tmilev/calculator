@@ -904,7 +904,20 @@ bool CommandList::innerMatrixRational
   { theCommands.Comments << "<br>Failed to get matrix of rationals. ";
     return false;
   }
-  return output.AssignValue<Matrix<Rational> >(outputMat, theCommands);
+  return output.AssignValue(outputMat, theCommands);
+}
+
+bool CommandList::innerMatrixRationalTensorForm
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MatrixTensor<Rational> outputMat;
+  output=input;
+  if (!output.IsOfType<Matrix<Rational> >())
+    if (!theCommands.innerMatrixRational(theCommands, input, output))
+      return false;
+  if (!output.IsOfType<Matrix<Rational> >())
+    return false;
+  outputMat=output.GetValuE<Matrix<Rational> >();
+  return output.AssignValue(outputMat, theCommands);
 }
 
 bool CommandList::innerMatrixRationalFunction

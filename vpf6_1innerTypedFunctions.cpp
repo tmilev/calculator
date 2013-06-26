@@ -667,6 +667,28 @@ bool CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatr
   return output.AssignValue(result, theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrixTensor
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<MatrixTensor<Rational> >())
+    return false;
+  Rational theScalar;
+  if (leftE.IsOfType<Rational>(&theScalar))
+  { MatrixTensor<Rational> result=rightE.GetValuE<MatrixTensor<Rational> >();
+    result*=theScalar;
+    return output.AssignValue(result, theCommands);
+  }
+  if (!leftE.IsOfType<MatrixTensor<Rational> >())
+    return false;
+  const MatrixTensor<Rational>& rightMat=rightE.GetValuE<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result=leftE.GetValuE<MatrixTensor<Rational> >();
+  result*=rightMat;
+  return output.AssignValue(result, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
@@ -680,6 +702,21 @@ bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational
   if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
     return false;
   Matrix<Rational> result=leftMat;
+  result+=rightMat;
+  return output.AssignValue(result, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerAddMatrixTensorToMatrixTensor
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<MatrixTensor<Rational> >()|| !leftE.IsOfType<MatrixTensor<Rational> >())
+    return false;
+  const MatrixTensor<Rational>& rightMat=rightE.GetValuE<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& leftMat=leftE.GetValuE<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result=leftMat;
   result+=rightMat;
   return output.AssignValue(result, theCommands);
 }

@@ -33,6 +33,12 @@ int Expression::GetTypeOperation<std::string>()const
 }
 
 template < >
+int Expression::GetTypeOperation<AlgebraicNumber>()const
+{ this->CheckInitialization();
+  return this->theBoss->opAlgNumber();
+}
+
+template < >
 int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementUEoverRF();
@@ -42,6 +48,12 @@ template < >
 int Expression::GetTypeOperation<Matrix<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opMatRat();
+}
+
+template < >
+int Expression::GetTypeOperation<MatrixTensor<Rational> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opMatTensorRat();
 }
 
 template < >
@@ -99,7 +111,7 @@ int Expression::GetTypeOperation<charSSAlgMod<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<AlgebraicNumber>()const
+int Expression::GetTypeOperation<AlgebraicNumberOld>()const
 { this->CheckInitialization();
   return this->theBoss->opAlgNumber();
 }
@@ -226,6 +238,15 @@ SemisimpleLieAlgebra
 
 template < >
 int Expression::AddObjectReturnIndex(const
+AlgebraicNumber
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theAlgebraicNumbers
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>
 & inputValue)const
 { this->CheckInitialization();
@@ -266,6 +287,15 @@ Matrix<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theMatRats
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+MatrixTensor<Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theMatTensorRats
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -335,6 +365,17 @@ Rational& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<AlgebraicNumber>())
+  { std::cout << "This is a programming error: expression not of required type Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -438,20 +479,9 @@ charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<AlgebraicNumber>())
-  { std::cout << "This is a programming error: expression not of required type AlgebraicNumber. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  return this->theBoss->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
-}
-
-template < >
 SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
-  { std::cout << "This is a programming error: expression not of required type AlgebraicNumber. "
+  { std::cout << "This is a programming error: expression not of required type AlgebraicNumberOld. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -468,6 +498,17 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theMatRats.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+MatrixTensor<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<MatrixTensor<Rational> >())
+  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -3630,7 +3671,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("Double");
-  this->AddOperationBuiltInType("AlgebraicNumber");
+  this->AddOperationBuiltInType("AlgebraicNumberOld");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
@@ -3641,6 +3682,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
   this->AddOperationBuiltInType("Matrix_Rational");
+  this->AddOperationBuiltInType("MatrixTensor_Rational");
   this->AddOperationBuiltInType("Matrix_RF");
   this->AddOperationBuiltInType("CalculusPlot");
   this->AddOperationBuiltInType("SemisimpleSubalgebras");
@@ -4967,6 +5009,13 @@ bool Expression::ToStringData
     << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&tempFormat)
     << ")";
     result=true;
+  } else if (this->IsOfType<MatrixTensor<Rational> > ())
+  { FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    out << "MatrixRationalsTensorForm{}("
+    << this->GetValuE<MatrixTensor<Rational> > ().ToStringMatForm(&tempFormat) << ")";
+    result=true;
   } else if (this->IsOfType<Matrix<Rational> >())
   { FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
@@ -5040,6 +5089,9 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<double>())
   { out << this->GetValuENonConstUseWithCaution<double>();
+    result=true;
+  } else if (this->IsOfType<AlgebraicNumber>())
+  { out << this->GetValuENonConstUseWithCaution<AlgebraicNumber>().ToString();
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
   { out << this->GetValuENonConstUseWithCaution<LittelmannPath>().ToString()  ;

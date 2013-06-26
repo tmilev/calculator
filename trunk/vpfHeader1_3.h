@@ -7,58 +7,72 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_3
 (__FILE__, "Header, math routines. ");
 
-template <class coefficient>
-class RationalFunction
+class AlgebraicClosureRationals;
+class AlgebraicExtensionRationals
 {
   public:
-  Polynomial<coefficient> polyForm;
-  MemorySaving<List<Polynomial<coefficient> > > substitutions;
+  List<MatrixTensor<Rational> > AlgebraicBasisElements;
+  AlgebraicClosureRationals* owner;
+  int indexInOwner;
+  int DimOverRationals;
+  AlgebraicExtensionRationals(): owner(0), indexInOwner(-1), DimOverRationals(-1){}
+  void MakeRationals(AlgebraicClosureRationals& inputOwners);
+  inline unsigned int HashFunction()const
+  { return this->AlgebraicBasisElements.HashFunction();
+  }
+  bool operator==(const AlgebraicExtensionRationals& input)const;
+  static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
+  { return input.HashFunction();
+  }
+  std::string ToString(FormatExpressions* theFormat=0);
 };
 
-class MonomialDiffForm
+class AlgebraicClosureRationals
 {
 public:
-/*  Vector<Rational> theDiffPart;
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
+  ListReferences<AlgebraicExtensionRationals> theAlgebraicExtensions;
+  AlgebraicClosureRationals()
+  { this->theAlgebraicExtensions.SetSize(1);
+    this->theAlgebraicExtensions[0].MakeRationals(*this);
+    this->theAlgebraicExtensions[0].indexInOwner=0;
   }
-  static unsigned int HashFunction(const MonomialDiffForm& input)
-  { return
-    input.theDiffPart.HashFunction()*SomeRandomPrimes[1];
-  }
-  void operator=(const MonomialDiffForm& other)
-  { this->thePolyPart=other.thePolyPart;
-    this->theDiffPart=other.theDiffPart;
-  }
-  bool operator==(const MonomialDiffForm& other)const
-  { return this->thePolyPart==other.thePolyPart && this->theDiffPart==other.theDiffPart;
-  }*/
+  AlgebraicExtensionRationals* MergeTwoExtensions
+  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right)
+  ;
+  AlgebraicExtensionRationals* ReduceAndAdd(AlgebraicExtensionRationals& input);
+  AlgebraicExtensionRationals* GetRationals();
 };
-
-//The default multiplication operation is the exterior product.
-template <class coefficient>
-class DifferentialForm: ElementMonomialAlgebra<MonomialDiffForm, coefficient>
-{
-  public:
-  void operator=(const Polynomial<coefficient>& other);
-  void DifferentialMe()
-  {
-  }
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  static unsigned int HashFunction(const DifferentialForm<coefficient>& input)
-  { return ElementMonomialAlgebra<MonomialDiffForm, coefficient>::HashFunction(input);
-  }
-};
-
-class AlgebraicNumberRegistry;
 
 class AlgebraicNumber
 {
-  friend class List<AlgebraicNumber>;
-  friend class Matrix<AlgebraicNumber>;
-  AlgebraicNumber():rootIndex(-1),minPolyIndex(-1), theRegistry(0){}
+  public:
+  AlgebraicExtensionRationals* owner;
+  VectorSparse<Rational> theElt;
+  AlgebraicNumber():owner(0){}
+  inline unsigned int HashFunction()const
+  { if (this->owner==0)
+      return 0;
+    return this->owner->HashFunction()+this->theElt.HashFunction();
+  }
+  static inline unsigned int HashFunction(const AlgebraicNumber& input)
+  { return input.HashFunction();
+  }
+
+  void operator=(const Rational& other);
+  void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  void SqrtMeDefault();
+  void RadicalMeDefault(int theRad);
+  bool operator==(const AlgebraicNumber& other)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+};
+
+class AlgebraicNumberRegistryOld;
+
+class AlgebraicNumberOld
+{
+  friend class List<AlgebraicNumberOld>;
+  friend class Matrix<AlgebraicNumberOld>;
+  AlgebraicNumberOld():rootIndex(-1),minPolyIndex(-1), theRegistry(0){}
 
 public:
   //Format of minPoly.
@@ -73,41 +87,39 @@ public:
   int minPolyIndex;
   //  Polynomial<Rational> minPoly;
   std::string DisplayString;
-  AlgebraicNumberRegistry* theRegistry;
-  friend std::ostream& operator << (std::ostream& output, const AlgebraicNumber& theRat)
+  AlgebraicNumberRegistryOld* theRegistry;
+  friend std::ostream& operator << (std::ostream& output, const AlgebraicNumberOld& theRat)
   { output << theRat.ToString();
     return output;
   }
-  void SqrtMe();
-  void RadicalMe(int theRad);
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  static unsigned int HashFunction(const AlgebraicNumber& input)
+  static unsigned int HashFunction(const AlgebraicNumberOld& input)
   { return input.minPolyIndex*SomeRandomPrimes[0]+input.rootIndex*SomeRandomPrimes[1];
   }
-  AlgebraicNumber(AlgebraicNumberRegistry& owner) :rootIndex(-1), minPolyIndex(-1)
+  AlgebraicNumberOld(AlgebraicNumberRegistryOld& owner) :rootIndex(-1), minPolyIndex(-1)
   { this->theRegistry=&owner;
   }
-  AlgebraicNumber(const AlgebraicNumber& other)
+  AlgebraicNumberOld(const AlgebraicNumberOld& other)
   { this->operator=(other);
   }
-  void operator=(const AlgebraicNumber& other)
+  void operator=(const AlgebraicNumberOld& other)
   { this->minPolyIndex=other.minPolyIndex;
     this->rootIndex=other.rootIndex;
     this->theRegistry=other.theRegistry;
   }
   void operator=(const Rational& other);
   bool AssignOperation
-  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumber>& theOperationArguments)
+  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumberOld>& theOperationArguments)
   ;
   void ReduceMod
 (Polynomial<Rational>& toBeReduced, const List<Polynomial<Rational> >& thePolys,
  List<int>& theNs, Polynomial<Rational>& buffer
  )const
   ;
-  bool operator+=(const AlgebraicNumber& other)
-  { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
+  bool operator+=(const AlgebraicNumberOld& other)
+  { MacroRegisterFunctionWithName("AlgebraicNumberOld::operator+=");
     Polynomial<Rational> theOperation;
     theOperation.MakeZero();
     MonomialP tempM;
@@ -117,14 +129,14 @@ public:
     tempM[0]=0;
     tempM[1]=1;
     theOperation.AddMonomial(tempM, 1);
-    List<AlgebraicNumber> tempList;
+    List<AlgebraicNumberOld> tempList;
     tempList.SetSize(2);
     tempList[0]=*this;
     tempList[1]=other;
     return this->AssignOperation(theOperation, tempList);
   }
-  bool operator*=(const AlgebraicNumber& other)
-  { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
+  bool operator*=(const AlgebraicNumberOld& other)
+  { MacroRegisterFunctionWithName("AlgebraicNumberOld::operator+=");
     Polynomial<Rational> theOperation;
     theOperation.MakeZero();
     MonomialP tempM;
@@ -132,7 +144,7 @@ public:
     tempM[0]=1;
     tempM[1]=1;
     theOperation.AddMonomial(tempM, 1);
-    List<AlgebraicNumber> tempList;
+    List<AlgebraicNumberOld> tempList;
     tempList.SetSize(2);
     tempList[0]=*this;
     tempList[1]=other;
@@ -144,7 +156,7 @@ public:
   bool IsAConstant()
   { return this->GetMinPoly().TotalDegree()==1;
   }
-  bool operator==(const AlgebraicNumber& other)const
+  bool operator==(const AlgebraicNumberOld& other)const
   { if (this->theRegistry!=other.theRegistry)
     { std::cout << "This is a programming error: comparing two algebraic numbers whose "
       << " algebraic number registries are different."
@@ -156,7 +168,7 @@ public:
   inline bool IsEqualToZero()const
   { return false;
   }
-  bool operator> (const AlgebraicNumber& other) const
+  bool operator> (const AlgebraicNumberOld& other) const
   { if (this->GetMinPoly()>other.GetMinPoly())
       return true;
     if (other.GetMinPoly()>this->GetMinPoly())
@@ -165,18 +177,18 @@ public:
   }
 };
 
-class AlgebraicNumberOrigin
+class AlgebraicNumberOriginOld
 {
   public:
-  List<List<AlgebraicNumber> > theParents;
+  List<List<AlgebraicNumberOld> > theParents;
   List<Polynomial<Rational> > theOriginOperation;
 };
 
-class AlgebraicNumberRegistry
+class AlgebraicNumberRegistryOld
 {
   public:
   HashedList<Polynomial<Rational> > theMinPolys;
-  List<AlgebraicNumberOrigin> theOrigins;
+  List<AlgebraicNumberOriginOld> theOrigins;
   int RegisterRational(const Rational& theRational)
   { Polynomial<Rational> theMinP;
     theMinP.MakeDegreeOne(1,0, 1, -theRational);

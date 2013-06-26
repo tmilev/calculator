@@ -3388,6 +3388,11 @@ class MonomialMatrix
     this->dualIndex=other.dualIndex;
     this->IsId=other.IsId;
   }
+  void MakeEij(int i, int j)
+  { this->dualIndex=j;
+    this->vIndex=i;
+    this->IsId=false;
+  }
   void MakeOne()
   { this->MakeIdSpecial();
   }
@@ -3471,13 +3476,25 @@ public:
       this->AddMonomial(theMon, 1);
     }
   }
-  int GetMaxNumColsNumRows()
-  { int result=0;
+  int GetMaxNumRows()const
+  { int result=-1;
+    for (int i=0; i<this->size; i++)
+      result=MathRoutines::Maximum(result, (*this)[i].vIndex);
+    return result+1;
+  }
+  int GetMaxNumCols()const
+  { int result=-1;
+    for (int i=0; i<this->size; i++)
+      result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
+    return result+1;
+  }
+  int GetMaxNumColsNumRows()const
+  { int result=-1;
     for (int i=0; i<this->size; i++)
     { result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
       result=MathRoutines::Maximum(result, (*this)[i].vIndex);
     }
-    return result;
+    return result+1;
   }
   bool IsPositiveDefinite()
   { Matrix<coefficient> other;
@@ -3494,6 +3511,31 @@ public:
           theMon.vIndex=i;
           this->AddMonomial(theMon, other.elements[i][j]);
         }
+  }
+  void AssignTensorProduct(MatrixTensor<coefficient>& left, MatrixTensor<coefficient>& right)
+  { //handle lazy programmers:
+    if (this==&left || this==& right)
+    { MatrixTensor<coefficient> leftCopy=left;
+      MatrixTensor<coefficient> rightCopy=right;
+      this->AssignTensorProduct(leftCopy, rightCopy);
+      return;
+    }
+    //The basis of the tensor product vector space MUST be in the SAME order as the one used by Matrix::AssignTensorProduct.
+    //int leftDomainDim=left.GetMaxNumCols();
+    int rightDomainDim=right.GetMaxNumCols();
+    //int leftRangeDim=left.GetMaxNumRows();
+    int rightRangeDim=right.GetMaxNumRows();
+    MonomialMatrix tempM;
+    this->MakeZero();
+    coefficient tempCF;
+    for (int i=0; i<left.size; i++)
+      for (int j=0; j<right.size; j++)
+      { tempM.dualIndex=left[i].dualIndex* rightDomainDim+right[j].dualIndex;
+        tempM.vIndex=left[i].vIndex*rightRangeDim+right[j].vIndex;
+        tempCF=left.theCoeffs[i];
+        tempCF*=right.theCoeffs[j];
+        this->AddMonomial(tempM, tempCF);
+      }
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub)
   { MatrixTensor<coefficient> thisCopy=*this;
@@ -3547,15 +3589,27 @@ public:
       }
     *this=output;
   }
-  void GetMatrix(Matrix<coefficient>& output, int theDim)
-  { output.init(theDim, theDim);
+  std::string ToStringMatForm(FormatExpressions* theFormat)const
+  { Matrix<coefficient> tempMat;
+    this->GetMatrix(tempMat, this->GetMaxNumColsNumRows());
+    return tempMat.ToString(theFormat);
+  }
+  void GetMatrix(Matrix<coefficient>& output, int theDim)const
+  { theDim=MathRoutines::Maximum(theDim, this->GetMaxNumColsNumRows());
+    output.init(theDim, theDim);
     output.NullifyAll();
     for (int i=0; i<this->size; i++)
       if ((*this)[i].IsId)
         for (int j=0; j<theDim; j++)
-          output.elements[j][j]+= this->theCoeffs[i];
+          output(j,j)+= this->theCoeffs[i];
       else
-        output.elements[(*this)[i].vIndex][(*this)[i].dualIndex]+=this->theCoeffs[i];
+        output((*this)[i].vIndex,(*this)[i].dualIndex)+=this->theCoeffs[i];
+  }
+  inline unsigned int HashFunction()const
+  { return this->::MonomialCollection<MonomialMatrix, coefficient>::HashFunction();
+  }
+  static inline unsigned int HashFunction(const MatrixTensor<coefficient>& input)
+  { return input.HashFunction();
   }
 };
 

@@ -746,6 +746,12 @@ typename List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrd
 }
 
 template<>
+typename List<MonomialVector>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialVector>()
+{ return 0;
+}
+
+template<>
 typename List<MonomialChar<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialChar<RationalFunctionOld> >()
 { return 0;

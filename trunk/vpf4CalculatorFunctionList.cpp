@@ -354,6 +354,10 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    \ns_3:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
    \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ");
   this->AddOperationInnerHandler
+  ("MatrixRationalsTensorForm", this->innerMatrixRationalTensorForm,"",
+   "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
+   ", "s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ");
+  this->AddOperationInnerHandler
   ("MatrixRFs", this->innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of rational functions. \
    ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
@@ -800,10 +804,10 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
 //  ("Differential", & this->fDifferential, "",
 //   "Differential. ",
 //   "d{}{{a}}:=Differential{}a;\nx:=Polynomial{}x;\nd{}(x^2/(x+1))");
-//  this->AddOperationInnerHandler
-//  ("\\sqrt", & this->fSqrt, "",
-//   "Square root of a rational, implemented as algebraic extension of the rationals. ",
-//   "\\sqrt{}{3+2\\sqrt{}2}");
+  this->AddOperationInnerHandler
+  ("\\sqrt", this->innerSqrt, "",
+   "Square root of a rational, implemented as algebraic extension of the rationals. ",
+   "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2", true);
 
   this->AddOperationInnerHandler
   ("FactorOneVarPolyOverRationals", this->fFactor, "",
@@ -946,6 +950,12 @@ void CommandList::initPredefinedStandardOperations()
    "Adds two matrices.",
    " A:=MatrixRationals{}((5, 8), (3, 5)); A*A-A;"
    , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddMatrixTensorToMatrixTensor,
+   this->opMatTensorRat(), this->opMatTensorRat(),
+   "Adds two matrices.",
+   " A:=MatrixRationalsTensorForm{}((5, 8), (3, 5)); 3A*A-A;"
+   , true);
 
 
   this->AddOperationOuterHandler
@@ -991,10 +1001,20 @@ void CommandList::initPredefinedStandardOperations()
    "Multiplies matrix rational by matrix rational. ",
    "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
+   this->opMatTensorRat(), this->opMatTensorRat(),
+   "Multiplies matrix rational by matrix tensor. ",
+   "M:=MatrixRationalsTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational,
    this->opRational(), this->opMatRat(),
    "Multiplies rational by matrix rational. ",
    "M:=MatrixRationals{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrixTensor,
+   this->opRational(), this->opMatTensorRat(),
+   "Multiplies rational by matrix tensor form. ",
+   "M:=MatrixRationalsTensorForm{}((1,1), (0,1)); M; M*M; M*M*M; M*M*M*M; 2*M ", true);
    this->AddOperationBinaryInnerHandlerWithTypes
   ("*", WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps,
    this->opWeylGroupVirtualRep(), this->opWeylGroupVirtualRep(),

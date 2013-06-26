@@ -2589,6 +2589,10 @@ void Matrix<Element>::AssignTensorProduct(const Matrix<Element>& left, const Mat
   }
   this->Resize(left.NumRows*right.NumRows, left.NumCols*right.NumCols, false);
   int sr = right.NumRows; int sc = right.NumCols;
+  //The basis of the tensor product vector space  MUST be in the SAME order as the one used by MatrixTensor::AssignTensorProduct.
+  //indexing. Let the first vector space have basis v_1, ..., v_k, the second: w_1, ..., w_m.
+  //Then the basis of the tensor product is given in the order: v_1\otimes w_1, ..., v_1\otimes w_m,
+  //..., v_k\otimes w_1, ..., v_k\otimes w_m
   for(int iv = 0; iv<left.NumRows; iv++)
     for(int iw = 0; iw<right.NumRows; iw++)
       for(int jv = 0; jv<left.NumCols; jv++)
@@ -5295,6 +5299,48 @@ public:
     this->::HashedList<TemplateMonomial>::operator=(other);
 //    int commentwhendone;
  //   this->checkConsistency();
+  }
+};
+
+class MonomialVector
+{
+  int theIndex;
+  friend std::ostream& operator << (std::ostream& output, const MonomialVector& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  MonomialVector():theIndex(-1){}
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  inline unsigned int HashFunction()const
+  { return (unsigned) this->theIndex;
+  }
+  static inline unsigned int HashFunction(const MonomialVector& input)
+  { return input.HashFunction();
+  };
+  bool operator==(const MonomialVector& other)const
+  { return this->theIndex==other.theIndex;
+  }
+  void MakeEi(int inputIndex)
+  { this->theIndex=inputIndex;
+  }
+  inline static bool IsEqualToZero()
+  { return false;
+  }
+  bool operator>(const MonomialVector& other)const
+  { return this->theIndex>other.theIndex;
+  }
+};
+
+template <class coefficient>
+class VectorSparse : public MonomialCollection<MonomialVector, coefficient>
+{
+  public:
+  void MakeEi(int dummyArgumentDontUse, int NonZeroIndex, const coefficient& theCoeff=1)
+  { this->MakeZero();
+    MonomialVector theMon;
+    theMon.MakeEi(NonZeroIndex);
+    this->AddMonomial(theMon, theCoeff);
   }
 };
 

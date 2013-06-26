@@ -3116,11 +3116,13 @@ bool CommandList::innerDouble
   return output.AssignValue(ratValue.DoubleValue(), theCommands);
 }
 
-bool CommandList::fSqrt
+bool CommandList::innerSqrt
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ std::cout << "not implemented";
-  assert(false);
-  return true;
+{ if (!input.IsOfType<Rational>())
+    return false;
+  AlgebraicNumber theNumber;
+  theNumber.AssignRationalRadical(input.GetValuE<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure);
+  return output.AssignValue(theNumber, theCommands);
 }
 
 bool Expression::AssignMatrixExpressions

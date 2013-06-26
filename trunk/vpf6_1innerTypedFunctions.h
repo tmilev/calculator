@@ -12,6 +12,13 @@ public:
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerTensorMatRatByMatRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerTensorMatTensorByMatTensor
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
 static bool innerDivideRFOrPolyOrRatByRFOrPoly
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -57,7 +64,13 @@ static bool innerMultiplyMatrixSequenceByMatrixSequence
 static bool innerMultiplyMatrixRationalOrRationalByMatrixRational
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 static bool innerAddMatrixRationalToMatrixRational
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddMatrixTensorToMatrixTensor
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerAddRatToRat

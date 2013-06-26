@@ -3,29 +3,91 @@
 #include "vpfHeader1_3.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Implementation of rational radical extensions. ");
 
-void AlgebraicNumber::operator=(const Rational& other)
+std::string MonomialVector::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "e_{" << this->theIndex+1 << "}";
+  return out.str();
+}
+
+AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensions
+  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right)
+{ if (&left==&right)
+    return &this->theAlgebraicExtensions[left.indexInOwner];
+  AlgebraicExtensionRationals output;
+  output.DimOverRationals=left.DimOverRationals*right.DimOverRationals;
+  for (int i=0; i<left.AlgebraicBasisElements.size; i++)
+  {
+  }
+
+}
+
+AlgebraicExtensionRationals* AlgebraicClosureRationals::ReduceAndAdd(AlgebraicExtensionRationals& input)
+{ int theIndex=this->theAlgebraicExtensions.AddNoRepetitionOrReturnIndexFirst(input);
+  this->theAlgebraicExtensions[theIndex].indexInOwner=theIndex;
+  return &this->theAlgebraicExtensions[theIndex];
+}
+
+AlgebraicExtensionRationals* AlgebraicClosureRationals::GetRationals()
+{ return &this->theAlgebraicExtensions[0];
+}
+
+bool AlgebraicExtensionRationals::operator==(const AlgebraicExtensionRationals& other)const
+{ if (this->owner!=other.owner)
+    return false;
+  return this->indexInOwner==other.indexInOwner;
+}
+
+void AlgebraicExtensionRationals::MakeRationals(AlgebraicClosureRationals& inputOwner)
+{ this->owner=&inputOwner;
+  this->AlgebraicBasisElements.SetSize(1);
+  this->AlgebraicBasisElements[0].MakeId(1);
+  this->DimOverRationals=1;
+}
+
+void AlgebraicNumberOld::operator=(const Rational& other)
 { this->minPolyIndex=this->theRegistry->RegisterRational(other);
   this->rootIndex=0;
 }
 
-void AlgebraicNumber::SqrtMe()
-{ this->RadicalMe(2);
+void AlgebraicNumber::SqrtMeDefault()
+{ this->RadicalMeDefault(2);
 }
 
-void AlgebraicNumber::RadicalMe(int theRad)
-{ Polynomial<Rational> newMinPoly;
-  newMinPoly.MakeZero();
-  MonomialP tempM;
+void AlgebraicNumber::AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner)
+{ AlgebraicExtensionRationals theExtension;
+  theExtension.owner=&inputOwner;
+  theExtension.AlgebraicBasisElements.SetSize(1);
+  MatrixTensor<Rational> theOp;
+  theExtension.DimOverRationals=2;
+  theOp.MakeIdSpecial();
+  theExtension.AlgebraicBasisElements.AddOnTop(theOp);
+  MonomialMatrix theM;
+  theM.MakeEij(1, 0);
+  theOp.MakeZero();
+  theOp.AddMonomial(theM, 1);
+  theM.MakeEij(0, 1);
+  theOp.AddMonomial(theM, input);
+  this->theElt.MakeEi(-1, 1, 1);
+  theExtension.AlgebraicBasisElements.AddOnTop(theOp);
+  this->owner= inputOwner.ReduceAndAdd(theExtension);
+}
+
+void AlgebraicNumber::RadicalMeDefault(int theRad)
+{ std::cout << "Not implemented yet!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
+/*  MatrixTensor<Rational> theRadicalOp;
+  theRadicalOp.MakeZero();
+  MonomialTensor tempM;
   for (int i=0; i<this->GetMinPoly().size; i++)
   { tempM=this->GetMinPoly()[i];
     tempM.ExponentMeBy(theRad);
     newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
   }
   this->rootIndex=0;
-  this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);
+  this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);*/
 }
 
-std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
+std::string AlgebraicNumberOld::ToString(FormatExpressions* theFormat)const
 { if (this->DisplayString!="")
     return this->DisplayString;
   if (this->minPolyIndex==-1 || this->theRegistry==0)
@@ -35,7 +97,39 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void AlgebraicNumber::
+std::string AlgebraicExtensionRationals::ToString(FormatExpressions* theFormat)
+{ std::stringstream out;
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML=false;
+  tempFormat.flagUseLatex=true;
+  for (int i=0; i<this->AlgebraicBasisElements.size; i++)
+  { out << " \\alpha_1:=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat);
+    if (i!=this->AlgebraicBasisElements.size-1)
+      out << ",  ";
+  }
+  return out.str();
+}
+
+std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
+{ if (this->owner==0)
+    return "(non-initialized)";
+  std::stringstream out;
+  out << this->theElt.ToString() << " in~ the~ field~ " << this->owner->ToString();
+  return out.str();
+}
+
+bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
+{ if (this->owner!=other.owner)
+    return false;
+  return this->theElt==other.theElt;
+}
+
+void AlgebraicNumber::operator=(const Rational& other)
+{ this->owner=this->owner->owner->GetRationals();
+  this->theElt.MakeEi(-1, 0, other);
+}
+
+void AlgebraicNumberOld::
 ReduceMod
 (Polynomial<Rational>& toBeReduced, const List<Polynomial<Rational> >& thePolys,
  List<int>& theNs, Polynomial<Rational>& buffer
@@ -43,7 +137,7 @@ ReduceMod
 { if (toBeReduced.IsEqualToZero())
     return;
   if (toBeReduced.GetMinNumVars()!=theNs.size)
-  { std::cout << "This is a programming error: function AlgebraicNumber::ReduceModAnBm"
+  { std::cout << "This is a programming error: function AlgebraicNumberOld::ReduceModAnBm"
     << " expects as input a polynomial of  " << theNs.size << " variables, but got the "
     << toBeReduced.ToString() << " polynomial of "
     << toBeReduced.GetMinNumVars() << "variables instead. "
@@ -74,9 +168,9 @@ ReduceMod
 //  std::cout << " <br>to get:  " << toBeReduced.ToString();
 }
 
-bool AlgebraicNumber::AssignOperation
-  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumber>& theOperationArguments)
-{ MacroRegisterFunctionWithName("AlgebraicNumber::AssignOperation");
+bool AlgebraicNumberOld::AssignOperation
+  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumberOld>& theOperationArguments)
+{ MacroRegisterFunctionWithName("AlgebraicNumberOld::AssignOperation");
   List<Polynomial<Rational> > thePolys;
   List<int> theNs;
   MonomialP tempM;
@@ -155,11 +249,11 @@ bool AlgebraicNumber::AssignOperation
   return true;
 }
 
-const Polynomial<Rational>& AlgebraicNumber::GetMinPoly()const
+const Polynomial<Rational>& AlgebraicNumberOld::GetMinPoly()const
 { return this->theRegistry->theMinPolys[this->minPolyIndex];
 }
 
-bool AlgebraicNumber::AssignRadical(const LargeInt& undertheRadical, int theRadical)
+bool AlgebraicNumberOld::AssignRadical(const LargeInt& undertheRadical, int theRadical)
 { Polynomial<Rational> theMinPoly;
   MonomialP tempM;
   tempM.MakeOne(1);

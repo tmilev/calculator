@@ -643,6 +643,36 @@ bool CommandListInnerTypedFunctions::innerMultiplyMatrixSequenceByMatrixSequence
   return output.AssignMatrixExpressions(outputMat, theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerTensorMatRatByMatRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<Matrix<Rational> >() || !leftE.IsOfType<Matrix<Rational> >())
+    return false;
+//  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+//    return false;
+  Matrix<Rational> result;
+  result.AssignTensorProduct(leftE.GetValuE<Matrix<Rational> >(), rightE.GetValuE<Matrix<Rational> >());
+  return output.AssignValue(result, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerTensorMatTensorByMatTensor
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!rightE.IsOfType<MatrixTensor<Rational> >() || !leftE.IsOfType<MatrixTensor<Rational> >())
+    return false;
+//  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+//    return false;
+  MatrixTensor<Rational> result;
+  result.AssignTensorProduct(leftE.GetValuE<MatrixTensor<Rational> >(), rightE.GetValuE<MatrixTensor<Rational> >());
+  return output.AssignValue(result, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))

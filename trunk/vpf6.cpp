@@ -3628,7 +3628,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->FunctionHandlers.SetSize(0);
   this->operations.SetExpectedSize(300);
   this->FunctionHandlers.SetExpectedSize(300);
-  this->builtInTypes.SetHashSizE(30);
+  this->builtInTypes.SetExpectedSize(50);
 
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
@@ -5009,19 +5009,22 @@ bool Expression::ToStringData
     << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&tempFormat)
     << ")";
     result=true;
-  } else if (this->IsOfType<MatrixTensor<Rational> > ())
+  } else if (this->IsOfType<MatrixTensor<Rational> >())
   { FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
-    out << "MatrixRationalsTensorForm{}("
-    << this->GetValuE<MatrixTensor<Rational> > ().ToStringMatForm(&tempFormat) << ")";
+    if (this->GetValuE<MatrixTensor<Rational> >().GetMaxNumColsNumRows()<20)
+      out << "MatrixRationalsTensorForm{}("
+      << this->GetValuE<MatrixTensor<Rational> > ().ToStringMatForm(&tempFormat) << ")";
+    else
+      out << this->GetValuE<MatrixTensor<Rational> >().ToString();
     result=true;
   } else if (this->IsOfType<Matrix<Rational> >())
   { FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
     out << "innerMatrixRational{}("
-    << this->GetValuE<Matrix<Rational> > ().ToString(&tempFormat) << ")";
+    << this->GetValuE<Matrix<Rational> >().ToString(&tempFormat) << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { FormatExpressions tempFormat;
@@ -5620,10 +5623,10 @@ void CommandList::AddOperationHandler
   Function theFun
   (handler, 0, opDescription, opExample, isInner, visible, isExperimental)
   ;
-  if (theOpName=="*" || theOpName=="+" || theOpName=="/")
-    this->FunctionHandlers[indexOp].ReservE(35);
+  if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
+    this->FunctionHandlers[indexOp].ReservE(55);
   else
-    this->FunctionHandlers[indexOp].ReservE(5);
+    this->FunctionHandlers[indexOp].ReservE(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 

@@ -2753,7 +2753,11 @@ public:
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
-  inline std::string ToString()const {std::string tempS; this->ToString(tempS); return tempS;}
+  inline std::string ToString(FormatExpressions* theFormat=0)const
+  { std::string tempS;
+    this->ToString(tempS);
+    return tempS;
+  }
   void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void Add(const LargeIntUnsigned& x);
@@ -2806,7 +2810,17 @@ public:
   void MultiplyBy(const LargeIntUnsigned& right);
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
   inline void operator*=(unsigned int x){this->MultiplyByUInt(x);}
-  inline void operator+=(unsigned int x){this->AddUInt(x);}
+  inline void operator+=(unsigned int x)
+  { this->AddUInt(x);
+  }
+  LargeIntUnsigned operator+(const LargeIntUnsigned& other)
+  { LargeIntUnsigned result=*this;
+    result+=other;
+    return result;
+  }
+  inline void operator++(int)
+  { this->AddUInt(1);
+  }
   void AssignFactorial(unsigned int x){ this->AssignFactorial(x, 0);}
   void AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables);
 
@@ -3376,7 +3390,7 @@ ParallelComputing::GlobalPointerCounter++;
   inline void ReadFromFile(std::istream& input, GlobalVariables* theGlobalVariables){this->ReadFromFile(input);}
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); }
-  static Rational NChooseK(int n, int k);
+  static Rational NChooseK(const Rational& n, int k);
   static Rational Factorial(int n, GlobalVariables* theGlobalVariables);
   static Rational Factorial(int n){return Rational::Factorial(n,0);}
   static Rational TwoToTheNth(int n);

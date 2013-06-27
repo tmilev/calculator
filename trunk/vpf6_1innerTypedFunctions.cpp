@@ -16,6 +16,18 @@ bool CommandListInnerTypedFunctions::innerAddRatToRat
   return output.AssignValue(leftR+rightR, theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber");
+  if (!input.IsListNElements(3))
+    return false;
+  AlgebraicNumber leftAN, rightAN;
+  if (!input[1].IsOfType(&leftAN) || !input[2].IsOfType(&rightAN))
+    return false;
+  leftAN+=rightAN;
+  return output.AssignValue(leftAN, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerMultiplyRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatByRat");
@@ -494,7 +506,20 @@ bool CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF
   return output.AssignValueWithContext(outputUE, copyExponent.GetContext(), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat
+bool CommandListInnerTypedFunctions::innerPowerSequenceByT
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerSequenceByT");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  if (!input[1].IsSequenceNElementS())
+    return false;
+  if (!(input[2]=="t") && !(input[2]=="T"))
+    return false;
+  return theCommands.innerTranspose(theCommands, input[1], output);
+}
+
+bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -525,7 +550,7 @@ bool CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat
   return output.AssignValue(pow(baseDouble, expDouble), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat
+bool CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -544,7 +569,7 @@ bool CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat
   return output.AssignValue(leftD*rightD, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat
+bool CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -783,10 +808,29 @@ bool CommandListInnerTypedFunctions::innerAddSequenceToSequence
   output.reset(theCommands);
   output.children.ReservE(input[1].children.size);
   output.AddChildAtomOnTop(theCommands.opSequence());
+  if (input[1].format==Expression::formatMatrixRow || input[2].format==Expression::formatMatrixRow)
+    output.format=Expression::formatMatrixRow;
+  if (input[1].format==Expression::formatMatrix || input[2].format==Expression::formatMatrix)
+    output.format=Expression::formatMatrix;
   Expression tempSum;
   for (int i=1; i<input[2].children.size; i++)
   { tempSum.MakeXOX(theCommands, theCommands.opPlus(), input[1][i], input[2][i]);
     output.AddChildOnTop(tempSum);
   }
   return true;
+}
+
+bool CommandListInnerTypedFunctions::innerNChooseK
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerNChooseK");
+  if (!input.IsListNElements(3))
+    return false;
+  Rational N;
+  int K;
+  if (!input[1].IsOfType<Rational>(&N) || !input[2].IsSmallInteger(&K))
+    return false;
+  if (K<0)
+    return output.AssignValue(0, theCommands);
+  Rational result= result.NChooseK(N, K);
+  return output.AssignValue(result, theCommands);
 }

@@ -907,6 +907,18 @@ bool CommandList::innerMatrixRational
   return output.AssignValue(outputMat, theCommands);
 }
 
+bool CommandList::innerTranspose
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ //std::cout << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
+  Matrix<Expression> theMat;
+  output=input;
+  output.SetChildAtomValue(0, theCommands.opSequence());
+  theCommands.GetMatrixExpressions(output, theMat);
+  //std::cout << "<br>" << theMat.ToString();
+  theMat.Transpose();
+  return output.AssignMatrixExpressions(theMat, theCommands);
+}
+
 bool CommandList::innerMatrixRationalTensorForm
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MatrixTensor<Rational> outputMat;

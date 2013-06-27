@@ -76,6 +76,9 @@ static bool innerAddMatrixTensorToMatrixTensor
   static bool innerAddRatToRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerAddAlgebraicNumberToAlgebraicNumber
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 
 static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -95,13 +98,13 @@ static bool innerMultiplyCharSSLieAlgByCharSSLieAlg
 static bool innerDivideRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerDoubleOrRatPowerDoubleOrRat
+static bool innerPowerDoubleOrRatToDoubleOrRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerDoubleOrRatTimesDoubleOrRat
+static bool innerPowerSequenceByT
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerDoubleOrRatPlusDoubleOrRat
+static bool innerAddDoubleOrRatToDoubleOrRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
@@ -109,6 +112,9 @@ static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
 ;
 static bool innerMultiplyAnyByUE
   (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerNChooseK
+    (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
 static bool innerTensorEltTensorByEltTensor

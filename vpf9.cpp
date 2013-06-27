@@ -1080,11 +1080,11 @@ Rational Rational::TwoToTheNth(int n)
   return result;
 }
 
-Rational Rational::NChooseK(int n, int k)
+Rational Rational::NChooseK(const Rational &n, int k)
 { Rational result;
   result.MakeOne();
   for (int i=0; i<k; i++)
-  { result.MultiplyByInt(n-i);
+  { result*=n-i;
     result.DivideByInteger(i+1);
   }
   return result;
@@ -4338,8 +4338,8 @@ void WeylGroup::GetGeneratorList(int g, List<int>& out) const
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
 { if (this->owner!=other.owner)
-  { std::cout << "This is a programming error: attempting to multiply elements of Weyl groups "
-    << " with different owners. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: attempting to multiply elements  "
+    << " belonging to different Weyl groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   List<int> oldMe=*this;

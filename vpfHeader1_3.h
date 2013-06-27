@@ -12,18 +12,22 @@ class AlgebraicExtensionRationals
 {
   public:
   List<MatrixTensor<Rational> > AlgebraicBasisElements;
+  MatrixTensor<Rational> GeneratingElement;
   AlgebraicClosureRationals* owner;
   int indexInOwner;
   int DimOverRationals;
   AlgebraicExtensionRationals(): owner(0), indexInOwner(-1), DimOverRationals(-1){}
+  bool CheckNonZeroOwner()const;
   void MakeRationals(AlgebraicClosureRationals& inputOwners);
   inline unsigned int HashFunction()const
   { return this->AlgebraicBasisElements.HashFunction();
   }
+  void ChooseGeneratingElement();
   bool operator==(const AlgebraicExtensionRationals& input)const;
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
   }
+  void ReduceMe();
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
@@ -49,6 +53,7 @@ class AlgebraicNumber
   AlgebraicExtensionRationals* owner;
   VectorSparse<Rational> theElt;
   AlgebraicNumber():owner(0){}
+  bool CheckNonZeroOwner()const;
   inline unsigned int HashFunction()const
   { if (this->owner==0)
       return 0;
@@ -57,12 +62,13 @@ class AlgebraicNumber
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
   }
-
+  void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
   void operator=(const Rational& other);
   void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void SqrtMeDefault();
   void RadicalMeDefault(int theRad);
   bool operator==(const AlgebraicNumber& other)const;
+  void operator+=(const AlgebraicNumber& other);
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 

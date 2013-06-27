@@ -11,19 +11,24 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
 
 AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensions
   (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right)
-{ if (&left==&right)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
+  if (&left==&right)
     return &this->theAlgebraicExtensions[left.indexInOwner];
   AlgebraicExtensionRationals output;
   output.DimOverRationals=left.DimOverRationals*right.DimOverRationals;
+  output.AlgebraicBasisElements.SetSize(output.DimOverRationals);
   for (int i=0; i<left.AlgebraicBasisElements.size; i++)
-  {
-  }
-
+    for (int j=0; j<right.AlgebraicBasisElements.size; j++)
+      output.AlgebraicBasisElements[i*right.DimOverRationals+j].
+      AssignTensorProduct(left.AlgebraicBasisElements[i], right.AlgebraicBasisElements[j]);
+  return this->ReduceAndAdd(output);
 }
 
 AlgebraicExtensionRationals* AlgebraicClosureRationals::ReduceAndAdd(AlgebraicExtensionRationals& input)
-{ int theIndex=this->theAlgebraicExtensions.AddNoRepetitionOrReturnIndexFirst(input);
+{ input.ReduceMe();
+  int theIndex=this->theAlgebraicExtensions.AddNoRepetitionOrReturnIndexFirst(input);
   this->theAlgebraicExtensions[theIndex].indexInOwner=theIndex;
+  this->theAlgebraicExtensions[theIndex].owner=this;
   return &this->theAlgebraicExtensions[theIndex];
 }
 
@@ -32,9 +37,28 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::GetRationals()
 }
 
 bool AlgebraicExtensionRationals::operator==(const AlgebraicExtensionRationals& other)const
-{ if (this->owner!=other.owner)
-    return false;
-  return this->indexInOwner==other.indexInOwner;
+{ if (this->owner==other.owner && this->owner!=0)
+    return this->indexInOwner==other.indexInOwner;
+  return this->AlgebraicBasisElements==other.AlgebraicBasisElements;
+}
+
+void AlgebraicExtensionRationals::ChooseGeneratingElement()
+{ AlgebraicNumber theNumber;
+  MatrixTensor<Rational> theOp;
+}
+
+void AlgebraicExtensionRationals::ReduceMe()
+{ this->ChooseGeneratingElement();
+}
+
+bool AlgebraicExtensionRationals::CheckNonZeroOwner()const
+{ if (this->owner==0)
+  { std::cout << "This is a programming error: algebraic extension of rationals is not allowed to have "
+    << "zero owner in the current context. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
 }
 
 void AlgebraicExtensionRationals::MakeRationals(AlgebraicClosureRationals& inputOwner)
@@ -49,6 +73,24 @@ void AlgebraicNumberOld::operator=(const Rational& other)
   this->rootIndex=0;
 }
 
+bool AlgebraicNumber::CheckNonZeroOwner()const
+{ if (this->owner==0)
+  { std::cout << "This is a programming error: algebraic number with non-initialized owner not permitted in the "
+    << "current context." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->owner->CheckNonZeroOwner();
+  return true;
+}
+
+void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
+{ MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
+  this->CheckNonZeroOwner();
+  other.CheckNonZeroOwner();
+  this->owner= this->owner->owner->MergeTwoExtensions(*this->owner, *other.owner);
+  this->theElt.MakeZero();
+}
+
 void AlgebraicNumber::SqrtMeDefault()
 { this->RadicalMeDefault(2);
 }
@@ -56,10 +98,10 @@ void AlgebraicNumber::SqrtMeDefault()
 void AlgebraicNumber::AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner)
 { AlgebraicExtensionRationals theExtension;
   theExtension.owner=&inputOwner;
-  theExtension.AlgebraicBasisElements.SetSize(1);
+  theExtension.AlgebraicBasisElements.SetSize(0);
   MatrixTensor<Rational> theOp;
   theExtension.DimOverRationals=2;
-  theOp.MakeIdSpecial();
+  theOp.MakeId(2);
   theExtension.AlgebraicBasisElements.AddOnTop(theOp);
   MonomialMatrix theM;
   theM.MakeEij(1, 0);
@@ -103,7 +145,7 @@ std::string AlgebraicExtensionRationals::ToString(FormatExpressions* theFormat)
   tempFormat.flagUseHTML=false;
   tempFormat.flagUseLatex=true;
   for (int i=0; i<this->AlgebraicBasisElements.size; i++)
-  { out << " \\alpha_1:=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat);
+  { out << " \\alpha_{" << i+1 << "}:=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat);
     if (i!=this->AlgebraicBasisElements.size-1)
       out << ",  ";
   }
@@ -114,7 +156,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
 { if (this->owner==0)
     return "(non-initialized)";
   std::stringstream out;
-  out << this->theElt.ToString() << " in~ the~ field~ " << this->owner->ToString();
+  out << this->theElt.ToString() << "~ in~ the~ field~ " << this->owner->ToString();
   return out.str();
 }
 

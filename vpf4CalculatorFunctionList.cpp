@@ -269,7 +269,11 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
  " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
  If the argument is not a small integer, does nothing. ",
  "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
-
+  this->AddOperationInnerHandler
+("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
+ " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
+ debugging purposes. First argument =dimension, second argument=grading leve. ",
+ "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. \
@@ -367,6 +371,11 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    the second argument the number of rows, \
    the third- the number of columns.\
    ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=a/b;\n X; \\det {} X");
+  this->AddOperationInnerHandler
+  ("Transpose", this->innerTranspose, "",
+   "Transposes a matrix of expressions. \
+   ", "Transpose{}(1,2); (1,2)^t");
+
   this->AddOperationInnerHandler
   ("\\det", this->innerDeterminant, "",
    "Tries to convert to a matrix of rationals or matrix of rational \
@@ -880,6 +889,10 @@ void CommandList::initPredefinedStandardOperations()
   ("+", CommandListInnerTypedFunctions:: innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",
    "2+3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
+   "Adds two algebraic numbers. ",
+   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -898,7 +911,7 @@ void CommandList::initPredefinedStandardOperations()
    "Superimposes two plots. ",
    "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opRational(),
+  ("+", CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
@@ -921,13 +934,13 @@ void CommandList::initPredefinedStandardOperations()
    , true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opRational(), this->opDouble(),
+  ("+", CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerDoubleOrRatPlusDoubleOrRat, this->opDouble(), this->opDouble(),
+  ("+", CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
    addition, returning double. ",
    "DoubleValue{}(3.14159265358979323846)+1"
@@ -1028,6 +1041,10 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerMultiplyByOne, "",
    "Rule 1*{{anything}}=anything.",
    "x*1;x*1-x ", true);
+  this->AddOperationInnerHandler
+  ("\\choose", CommandListInnerTypedFunctions::innerNChooseK, "",
+   "Evaluates the binomial coefficient if possible.",
+   "8 \\choose 3 ", true);
 
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
@@ -1100,7 +1117,7 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opRational(), this->opDouble(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat, this->opRational(), this->opDouble(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
@@ -1109,7 +1126,7 @@ void CommandList::initPredefinedStandardOperations()
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opRational(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
@@ -1118,7 +1135,7 @@ void CommandList::initPredefinedStandardOperations()
    \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerDoubleOrRatTimesDoubleOrRat, this->opDouble(), this->opDouble(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opDouble(),
    "Multiplies rational by a double approximately using the built-in cpp multiplication \
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
@@ -1172,13 +1189,18 @@ void CommandList::initPredefinedStandardOperations()
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat, this->opRational(), this->opDouble(),
+  ("^", CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
    provided either the base or the exponent is a double, and provided that \
    the base is non-negative. ",
    "f{}{{x}}:=x^3+p x+q; \
    \nXcardano:=( -q/2+ (q^2/4+p^3/27)^(1/2))^(1/3) +( -q/2- (q^2/4+p^3/27)^(1/2))^(1/3);\
    \nq:=DoubleValue{}1; \np:=DoubleValue{}1; \nXcardano; \nf{}x; \nf{}Xcardano   ",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CommandListInnerTypedFunctions::innerPowerSequenceByT, this->opSequence(), -1, //-1= any type
+   "Provided the exponent is t or T, calls the Transpose function on the base.",
+   "X:=(1,2)^t; X-Transpose{}(1,2)  ",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
@@ -1205,7 +1227,7 @@ void CommandList::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerDoubleOrRatPowerDoubleOrRat, this->opDouble(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
    provided either the base or the exponent is a double. If the base is negative and \
    the exponent is rational with odd denominator, the exponent is evaluated to the corresponding\

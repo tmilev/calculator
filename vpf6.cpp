@@ -1749,6 +1749,8 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\otimes" && fourthToLastS=="Expression" && this->AllowsTensorInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
@@ -3659,6 +3661,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("/");
   this->AddOperationNoRepetitionAllowed("*");
   this->AddOperationNoRepetitionAllowed("\\otimes");
+  this->AddOperationNoRepetitionAllowed("\\choose");
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
@@ -5192,9 +5195,10 @@ std::string Expression::ToString
     else
       out << secondE;
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
-  { out << (*this)[1].ToString(theFormat)
-    << "\\otimes " << (*this)[2].ToString(theFormat);
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+    out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opChoose(),3) )
+    out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
     bool firstNeedsBrackets=
@@ -5243,6 +5247,8 @@ std::string Expression::ToString
     out << tempS;
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 2))
     out << "-" << (*this)[1].ToString(theFormat);
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opSqrt(), 2))
+    out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
     { std::cout << "This is a programming error: the minus function expects"
@@ -5250,8 +5256,7 @@ std::string Expression::ToString
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    out << (*this)[1].ToString(theFormat)
-    << "-" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "-" << (*this)[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
@@ -5260,28 +5265,21 @@ std::string Expression::ToString
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=false;
-        out <<  (*this)[1].ToString(theFormat)
-        << "_{" << (*this)[2].ToString(theFormat) << "}";
+        out <<  (*this)[1].ToString(theFormat) << "_{" << (*this)[2].ToString(theFormat) << "}";
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  (*this)[1].ToString
-        (theFormat)
-        << "\\cdot(" << (*this)[1].ToString(theFormat) << ")";
+        out <<  (*this)[1].ToString(theFormat) << "\\cdot(" << (*this)[1].ToString(theFormat) << ")";
         break;
       default:
-        out << (*this)[1].ToString(theFormat)
-        << "{}(" << (*this)[2].ToString(theFormat) << ")";
+        out << (*this)[1].ToString(theFormat) << "{}(" << (*this)[2].ToString(theFormat) << ")";
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
-    out << (*this)[1].ToString(theFormat)
-    << "==" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
-  { if (this->IsSequenceNElementS(1))
-      out << "{Sequence{}";
-    switch (this->format)
+  { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
         { out << (*this)[i].ToString(theFormat);
@@ -5308,6 +5306,7 @@ std::string Expression::ToString
             out << "\\right)";
         break;
       default:
+        out << "{Sequence{}";
         out << "(";
         for (int i=1; i<this->children.size; i++)
         { std::string currentChildString=(*this)[i].ToString(theFormat);
@@ -5321,23 +5320,16 @@ std::string Expression::ToString
           charCounter%=50;
         }
         out << ")";
+        out << "}";
         break;
     }
-    if (this->IsSequenceNElementS(1))
-      out << "}";
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
-    out << "[" << (*this)[1].ToString(theFormat)
-    << "," << (*this)[2].ToString(theFormat)
-    << "]";
+    out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
   else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
-    out << (*this)[1].ToString(theFormat)
-    << "\\cup " << (*this)[2].ToString(theFormat)
-    ;
+    out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
-    out << (*this)[1].ToString(theFormat)
-    << "\\sqcup " << (*this)[2].ToString(theFormat)
-    ;
+    out << (*this)[1].ToString(theFormat) << "\\sqcup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
   { if (startingExpression==0)
       out << "<table>";
@@ -5362,16 +5354,12 @@ std::string Expression::ToString
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValuE<std::string>();
-        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () ||
-                  (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
-                  (*this)[i].IsOfType<WeylGroup>() ||
-                  (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()
-                  )
+        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
+                  (*this)[i].IsOfType<WeylGroup>() || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >())
                  && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
-          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-          ((*this)[i].ToString(theFormat));
+          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL((*this)[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -5388,8 +5376,7 @@ std::string Expression::ToString
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
   { this->theBoss->NumErrors++;
     out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
-    this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
-    << ". " << (*this)[1].ToString(theFormat);
+    this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors << ". " << (*this)[1].ToString(theFormat);
   } else if (this->children.size==1)
     out << (*this)[0].ToString(theFormat);
   else if (this->children.size>=2)
@@ -5427,15 +5414,11 @@ std::string Expression::ToString
       outTrue << out.str();
     else
     { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
-      if ((this->IsOfType<std::string>() ||
-           this->IsOfType<CalculusFunctionPlot>() ||
-           this->IsOfType<SemisimpleSubalgebras>() ||
-           this->IsOfType<WeylGroup>()
-           ) && isFinal)
+      if ((this->IsOfType<std::string>() || this->IsOfType<CalculusFunctionPlot>() ||
+           this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroup>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str())
-        << "</td></tr>";
+        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();
@@ -5671,9 +5654,11 @@ bool Function::inputFitsMyInnerType(const Expression& input)
     return true;
   if (input.children.size!=3)
     return false;
-  return
-  input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData) &&
-  input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  bool argument1good=this->theArgumentTypes[0].theData==-1
+  ? true :input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
+  bool argument2good=this->theArgumentTypes[1].theData==-1
+  ? true :input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  return argument1good && argument2good;
 }
 
 std::string Function::GetString(CommandList& theBoss)

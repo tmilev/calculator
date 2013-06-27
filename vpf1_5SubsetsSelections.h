@@ -113,4 +113,36 @@ public:
   }
 };
 
+class SelectionPositiveIntegers
+{
+  public:
+  Vector<LargeIntUnsigned> theInts;
+  std::string ToString(FormatExpressions* theFormat=0)
+  { return this->theInts.ToString();
+  }
+  LargeIntUnsigned GetGrading()
+  { return this->theInts.SumCoords();
+  }
+  void init(int numIntegers)
+  { this->theInts.MakeZero(numIntegers);
+  }
+  void SetFirstInGradeLevel(const LargeIntUnsigned& inputGradingLevel)
+  { this->theInts[0]=inputGradingLevel;
+    for (int i=1; i<this->theInts.size; i++)
+      this->theInts[i]=0;
+  }
+  bool IncrementReturnFalseIfBackToBeginning()
+  { for (int i=this->theInts.size-2; i>=0; i--)
+      if (this->theInts[i]>0)
+      { this->theInts[i]--;
+        this->theInts[i+1]=*this->theInts.LastObject();
+        this->theInts[i+1]++;;
+        if (i!=this->theInts.size-2)
+          *this->theInts.LastObject()=0;
+        return true;
+      }
+    this->SetFirstInGradeLevel(this->GetGrading()+1);
+    return true;
+  }
+};
 #endif

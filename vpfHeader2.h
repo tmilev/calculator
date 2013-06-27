@@ -113,7 +113,7 @@ class Expression
   HashedList<int, MathRoutines::IntUnsignIdentity> children;
   CommandList* theBoss;
   ///////////////////////////////////////
-  //two objects are considered equal even when the the following data is different:
+  //The status of the following data has not been decided:
   int format;
 //////
   typedef bool (*FunctionAddress)
@@ -1030,6 +1030,9 @@ public:
   int opDefine()
   { return this->operations.GetIndexIMustContainTheObject(":=");
   }
+  int opSqrt()
+  { return this->operations.GetIndexIMustContainTheObject("\\sqrt");
+  }
   int opDefineConditional()
   { return this->operations.GetIndexIMustContainTheObject("if:=");
   }
@@ -1156,6 +1159,9 @@ public:
   int opTensor()
   { return this->operations.GetIndexIMustContainTheObject("\\otimes");
   }
+  int opChoose()
+  { return this->operations.GetIndexIMustContainTheObject("\\choose");
+  }
   int opLieBracket()
   { return this->operations.GetIndexIMustContainTheObject("[]");
   }
@@ -1248,6 +1254,9 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
+  static bool innerTranspose
+  (CommandList& theCommands, const Expression& input, Expression& output);
+
   static bool innerGetElementWeylGroup
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1295,7 +1304,6 @@ public:
   static bool fExpressionHasBoundVars
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-
   static bool outerLieBracket
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1686,6 +1694,9 @@ static bool innerDrawRootSystem
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerPrintGenVermaModule
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerPrintZnEnumeration
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerHWV

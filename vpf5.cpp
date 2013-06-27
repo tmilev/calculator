@@ -3125,6 +3125,29 @@ bool CommandList::innerSqrt
   return output.AssignValue(theNumber, theCommands);
 }
 
+bool CommandList::innerPrintZnEnumeration
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPrintZnEnumeration");
+  if (!input.IsListNElements(3))
+    return false;
+  int grade, dimension;
+  if (!input[2].IsSmallInteger(& grade) || !input[1].IsSmallInteger(&dimension))
+    return false;
+  if (grade>10 || dimension >5 || grade<0 || dimension<0)
+    return false;
+  SelectionPositiveIntegers theSel;
+  theSel.init(dimension);
+  std::stringstream out2, out;
+  LargeIntUnsigned gradeLarge=(unsigned) grade;
+  int counter=0;
+  for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading()==gradeLarge; theSel.IncrementReturnFalseIfBackToBeginning())
+  { out2 << theSel.ToString() << "<br>";
+    counter++;
+  }
+  out << "Total " << counter << " vectors:<br>" << out2.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool Expression::AssignMatrixExpressions
 (const Matrix<Expression>& input, CommandList& owner)
 { this->reset(owner, input.NumRows+1);
@@ -3136,8 +3159,10 @@ bool Expression::AssignMatrixExpressions
     currentRow.AddChildAtomOnTop(owner.opSequence());
     for (int j=0; j<input.NumCols; j++)
       currentRow.AddChildOnTop(input(i,j));
+    currentRow.format=this->formatMatrixRow;
     this->AddChildOnTop(currentRow);
   }
+  this->format=this->formatMatrix;
   return true;
 }
 

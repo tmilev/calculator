@@ -4332,6 +4332,10 @@ int WeylGroup::Invert(int g) const
 { return this->theElements.GetIndex(this->theElements[g].Inverse());
 }
 
+void WeylGroup::GetGeneratorList(int g, List<int>& out) const
+{ out = this->theElements[g];
+}
+
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
 { if (this->owner!=other.owner)
   { std::cout << "This is a programming error: attempting to multiply elements of Weyl groups "
@@ -4593,6 +4597,7 @@ void WeylGroup::ComputeAllElements(int UpperLimitNumElements)
   tempRoots.AddOnTop(this->rho);
   this->theElements.Clear();
   this->GenerateOrbit<Rational>(tempRoots, false, this->rhoOrbit, true, -1, &this->theElements, UpperLimitNumElements);
+  this->size = this->theElements.size; // compatible with group types that don't have a theElements
 }
 
 void WeylGroup::ComputeRho(bool Recompute)

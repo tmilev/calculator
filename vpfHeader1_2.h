@@ -1097,6 +1097,7 @@ public:
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   HashedList<ElementWeylGroup> theElements;
+  int size;
   Vector<Rational> rho;
   HashedList<Vector<Rational> > rhoOrbit;
   HashedList<Vector<Rational> > RootSystem;
@@ -1365,6 +1366,7 @@ template <class coefficient>
   void SimpleReflectionMinusRhoModified
   (int index, Vector<Element>& theVector)const;
   int GetRootReflection(int rootIndex);
+  void GetGeneratorList(int g, List<int>& out)const;
   int Multiply(int g, int h) const;
   int Invert(int g) const;
   void GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const ;

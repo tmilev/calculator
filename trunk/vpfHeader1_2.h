@@ -3591,7 +3591,7 @@ public:
       }
     *this=output;
   }
-  std::string ToStringMatForm(FormatExpressions* theFormat)const
+  std::string ToStringMatForm(FormatExpressions* theFormat=0)const
   { if (this->IsEqualToZero())
       return "(0)";
     Matrix<coefficient> tempMat;

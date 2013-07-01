@@ -994,10 +994,7 @@ Rational QuasiPolynomial::Evaluate(const Vector<Rational>& input)
   for (int i=0; i<this->LatticeShifts.size; i++)
   { testLatticeBelonging=this->LatticeShifts[i]-input;
     if (this->AmbientLatticeReduced.IsInLattice(testLatticeBelonging))
-    { Rational result;
-      this->valueOnEachLatticeShift[i].Evaluate(input, result);
-      return result;
-    }
+      return this->valueOnEachLatticeShift[i].Evaluate(input);
   }
   return 0;
 }
@@ -4328,6 +4325,7 @@ std::string CGI::UnCivilizeStringCGI(const std::string& input)
       case '&': out << "%26"; break;
       case '\n': out << "%0D%0A"; break;
       case '\t': out << "%09"; break;
+      case '~': out << "%7E"; break;
 //      case '': out << ""; break;
       default: out << input[i]; break;
     }

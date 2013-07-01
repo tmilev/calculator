@@ -1530,7 +1530,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
   for (int i=0; i<divisorsH.size; i++)
     for (int j=0; j<divisorsS.size; j++)
     { tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
-      myCopy.Evaluate(tempV, val);
+      val=myCopy.Evaluate(tempV);
 //      std::cout << "<br>" << myCopy.ToString() << " eval at "
 //      << tempV.ToString() << " equals " << val.ToString();
       if (val==0)
@@ -3009,7 +3009,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   theArgument.SetSize(1);
   for (int i=0; i<=upperBoundDegDivisors; i++)
   { theArgument[0]=thePoints[i];
-    thePoly.Evaluate(theArgument,tempRat);
+    tempRat= thePoly.Evaluate(theArgument);
     tempRat.GetNumerator(theValuesAtPoints[i]);
     std::cout << "<br>value at " << thePoints[i] << " = " << theValuesAtPoints[i].ToString();
     if(!theValuesAtPoints[i].value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
@@ -3102,9 +3102,36 @@ bool CommandList::fFactor
   return true;
 }
 
+bool CommandList::innerZmodP
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerZmodP");
+  if (!input.IsListNElements(3))
+    return false;
+  Rational left, right;
+  if (!input[1].IsOfType<Rational>(&left) || ! input[2].IsOfType<Rational>(&right))
+    return false;
+  LargeInt base;
+  if (!right.IsInteger(&base))
+    return false;
+  if (base.IsEqualToZero())
+    return false;
+  LargeIntUnsigned theDen, theNum, theGCD;
+  left.GetDenominator(theDen);
+  LargeIntUnsigned::gcd(theDen, base.value, theGCD);
+  if (theGCD>1)
+    return false;
+  left.GetNumerator(theNum);
+  ElementZmodP outputElt;
+  outputElt.theModulo=base.value;
+  outputElt=theNum;
+  return output.AssignValue(outputElt, theCommands);
+
+}
+
 bool CommandList::innerDouble
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ Rational ratValue;
+{ MacroRegisterFunctionWithName("CommandList::innerDouble");
+  Rational ratValue;
   if (input.IsOfType<double>())
   { output=input;
     return true;

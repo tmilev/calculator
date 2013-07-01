@@ -3187,6 +3187,10 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   { out << "%";
     return true;
   }
+  if (readAhead=="%7E")
+  { out << "~";
+    return true;
+  }
   if (readAhead=="%09")//tab characters are ignored, replaced by spaces
   { out << " ";
     return true;

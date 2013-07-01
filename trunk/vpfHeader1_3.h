@@ -7,17 +7,49 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_3
 (__FILE__, "Header, math routines. ");
 
+class AlgebraicExtensionRationals;
 class AlgebraicClosureRationals;
+class AlgebraicNumber
+{
+  public:
+  AlgebraicExtensionRationals* owner;
+  VectorSparse<Rational> theElt;
+  AlgebraicNumber():owner(0){}
+  bool CheckNonZeroOwner()const;
+  unsigned int HashFunction()const;
+  static inline unsigned int HashFunction(const AlgebraicNumber& input)
+  { return input.HashFunction();
+  }
+  void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
+  void operator=(const Rational& other);
+  void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  void SqrtMeDefault();
+  void RadicalMeDefault(int theRad);
+  bool operator==(const AlgebraicNumber& other)const;
+  void operator+=(const AlgebraicNumber& other);
+  std::string ToString(FormatExpressions* theFormat=0)const;
+};
+
 class AlgebraicExtensionRationals
 {
   public:
   List<MatrixTensor<Rational> > AlgebraicBasisElements;
-  MatrixTensor<Rational> GeneratingElement;
+  MatrixTensor<Rational> GeneratingElementTensorForm;
+  Matrix<Rational> GeneratingElementMatForm;
+  AlgebraicNumber GeneratingElemenT;
+  Vectors<Rational> theGeneratingElementPowersBasis;
+
   AlgebraicClosureRationals* owner;
+  Matrix<Rational> injectionFromLeftParent;
+  Matrix<Rational> injectionFromRightParent;
+  const AlgebraicExtensionRationals* leftParent;
+  const AlgebraicExtensionRationals* rightParent;
   int indexInOwner;
   int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0), indexInOwner(-1), DimOverRationals(-1){}
+  AlgebraicExtensionRationals(): owner(0), leftParent(0), rightParent(0), indexInOwner(-1), DimOverRationals(-1)
+  {}
   bool CheckNonZeroOwner()const;
+  bool CheckBasicConsistency()const;
   void MakeRationals(AlgebraicClosureRationals& inputOwners);
   inline unsigned int HashFunction()const
   { return this->AlgebraicBasisElements.HashFunction();
@@ -27,7 +59,8 @@ class AlgebraicExtensionRationals
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
   }
-  void ReduceMe();
+  void ReduceMeOnCreation();
+  void ReduceMeOnCreationPart2();
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
@@ -45,31 +78,6 @@ public:
   ;
   AlgebraicExtensionRationals* ReduceAndAdd(AlgebraicExtensionRationals& input);
   AlgebraicExtensionRationals* GetRationals();
-};
-
-class AlgebraicNumber
-{
-  public:
-  AlgebraicExtensionRationals* owner;
-  VectorSparse<Rational> theElt;
-  AlgebraicNumber():owner(0){}
-  bool CheckNonZeroOwner()const;
-  inline unsigned int HashFunction()const
-  { if (this->owner==0)
-      return 0;
-    return this->owner->HashFunction()+this->theElt.HashFunction();
-  }
-  static inline unsigned int HashFunction(const AlgebraicNumber& input)
-  { return input.HashFunction();
-  }
-  void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
-  void operator=(const Rational& other);
-  void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
-  void SqrtMeDefault();
-  void RadicalMeDefault(int theRad);
-  bool operator==(const AlgebraicNumber& other)const;
-  void operator+=(const AlgebraicNumber& other);
-  std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
 class AlgebraicNumberRegistryOld;
@@ -213,6 +221,14 @@ class ElementZmodP
 public:
   LargeIntUnsigned theModulo;
   LargeIntUnsigned theValue;
+  unsigned int HashFunction()const
+  { if (this->theValue.IsEqualToZero())
+      return 0;
+    return this->theValue.HashFunction()*SomeRandomPrimes[0]+this->theModulo.HashFunction()*SomeRandomPrimes[1];
+  }
+  static unsigned int HashFunction(const ElementZmodP& input)
+  { return input.HashFunction();
+  }
   ElementZmodP(){}
   ElementZmodP(const ElementZmodP& other){this->operator=(other);}
   void CheckIamInitialized()
@@ -223,6 +239,8 @@ public:
       assert(false);
     }
   }
+  std::string ToString(FormatExpressions* theFormat=0)const
+  ;
   bool IsEqualToZero()const
   { return this->theValue.IsEqualToZero();
   }
@@ -268,6 +286,13 @@ public:
     this->theValue*=other.theValue;
     this->theValue%=this->theModulo;
   }
+  void operator*=(const LargeInt& other)
+  { this->theValue*=other.value;
+    if (other.IsNegative())
+    { this->theValue*=this->theModulo-1;
+      this->theValue%=this->theModulo;
+    }
+  }
   void operator+=(const ElementZmodP& other)
   { if (this==&other)
     { ElementZmodP other=*this;
@@ -288,18 +313,16 @@ public:
       *this*=mOne;
     }
   }
+  bool AssignRational(const Rational& other);
   void operator=(const Rational& other)
-  { this->CheckIamInitialized();
-    *this= other.GetNumerator();
-    ElementZmodP den;
-    den.theModulo=this->theModulo;
-    den=other.GetDenominator();
-    *this/=den;
+  { bool tempB=this->AssignRational(other);
+    if (!tempB)
+    { std::cout << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
+      << " Operator= does not allow failure. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
   }
-  void operator/=(const ElementZmodP& den)
-  { std::cout << "Not implemented yet!";
-    assert(false);
-  }
+  void operator/=(const ElementZmodP& den);
   void ScaleToIntegralMinHeightAndGetPoly
   (const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output,
    const LargeIntUnsigned& newModulo)

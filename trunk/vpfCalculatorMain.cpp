@@ -489,10 +489,10 @@ int main(int argc, char **argv)
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings
   (theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-//  std::cout << "Chopped strings: ";
-//  for (int i=0; i<inputStrings.size; i++)
-//    std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
-//  std::cout << "<hr>";
+  //std::cout << "Chopped strings: ";
+  //for (int i=0; i<inputStrings.size; i++)
+  //  std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
+  //std::cout << "<hr>";
   std::string civilizedInput, inputRankString, inputWeylString;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
@@ -537,7 +537,9 @@ int main(int argc, char **argv)
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(D_4)";
 //  civilizedInput="\\sqrt {3}+\\sqrt 2";
   //civilizedInput="s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ";
-  //civilizedInput="\\sqrt 4";
+//  civilizedInput="\\sqrt 4";
+//  civilizedInput="\\sqrt 2+\\sqrt{}3";
+//civilizedInput="7 mod 5 + 3";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

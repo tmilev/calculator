@@ -149,6 +149,11 @@ void CommandList::initPredefinedInnerFunctions()
    "DoubleValue{}(3/7)", true, false)
    ;
   this->AddOperationInnerHandler
+  ("ModP", this->innerZmodP, "",
+   "Number modulo P. First argument = number, second argument = modulo.",
+   "ModP{}(7, 3)", true, false)
+   ;
+  this->AddOperationInnerHandler
 ("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
    "Computes common eigenspace of the adjoint action of semisimple Lie algebra elemets inside the \
    semisimple Lie algebra. ",
@@ -890,6 +895,14 @@ void CommandList::initPredefinedStandardOperations()
    "Adds two rational numbers. ",
    "2+3", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat, this->opRational(), this->opEltZmodP(),
+   "Adds elements of Z_p. ",
+   " (2 mod  7)+3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
+   "Adds elements of Z_p. ",
+   " (2 mod  7)+3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
    "Adds two algebraic numbers. ",
    "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
@@ -970,7 +983,6 @@ void CommandList::initPredefinedStandardOperations()
    " A:=MatrixRationalsTensorForm{}((5, 8), (3, 5)); 3A*A-A;"
    , true);
 
-
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
@@ -980,6 +992,14 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerTimesToFunctionApplication, "",
    "On condition that F is a built-int function name, replaces F*x with F{}x.",
    "plot2D(\\sin{}x+cos{}x, 0, 5) ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyEltZmodPorRatByEltZmodPorRat, this->opRational(), this->opEltZmodP(),
+   "Multiplies elements of Z_p. ",
+   " (2 mod  7)*3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyEltZmodPorRatByEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
+   "Multiplies elements of Z_p. ",
+   " (2 mod  7)*3", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
@@ -1156,6 +1176,11 @@ void CommandList::initPredefinedStandardOperations()
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",
    "((1,-1),(0,-1))((1, 0), (-1,-1))", true);
+  this->AddOperationOuterHandler
+  ("mod", this->innerZmodP, "",
+    "Same as ModP but uses the mod notation.",
+    " 7 mod 3", true);
+
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",

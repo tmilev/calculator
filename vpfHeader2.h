@@ -125,7 +125,7 @@ class Expression
   }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
-    formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
+    formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac
   };
   void reset(CommandList& newBoss, int numExpectedChildren=0)
   { this->theBoss=&newBoss;
@@ -555,6 +555,7 @@ public:
   HashedListReferences<Matrix<Rational> > theMatRats;
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
+  HashedListReferences<ElementZmodP> theEltsModP;
   ListReferences<CalculusFunctionPlot> thePlots;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -844,6 +845,7 @@ public:
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceXEEXByEXusingO(int inputOperation, int formatOptions=Expression::formatDefault);
   bool ReplaceECByC();
   bool ReplaceEXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceYXBySequenceX(int theControlIndex, int inputFormat=Expression::formatDefault)
@@ -1021,6 +1023,9 @@ public:
   int conEndProgram()
   { return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
   }
+  int opEltZmodP()
+  { return this->operations.GetIndexIMustContainTheObject("EltZmodP");
+  }
   int opApplyFunction()
   { return this->operations.GetIndexIMustContainTheObject("{}");
   }
@@ -1149,6 +1154,9 @@ public:
   }
   int opPlus()
   { return this->operations.GetIndexIMustContainTheObject("+");
+  }
+  int opMod()
+  { return this->operations.GetIndexIMustContainTheObject("mod");
   }
   int opMinus()
   { return this->operations.GetIndexIMustContainTheObject("-");
@@ -1705,6 +1713,10 @@ static bool innerDrawRootSystem
   static bool innerNot
   (CommandList& theCommands, const Expression& input, Expression& output
   );
+  static bool innerZmodP
+  (CommandList& theCommands, const Expression& input, Expression& output
+  );
+
 
 static bool innerAttemptExtendingEtoHEFwithHinCartan
   (CommandList& theCommands, const Expression& input, Expression& output

@@ -39,6 +39,12 @@ int Expression::GetTypeOperation<AlgebraicNumber>()const
 }
 
 template < >
+int Expression::GetTypeOperation<ElementZmodP>()const
+{ this->CheckInitialization();
+  return this->theBoss->opEltZmodP();
+}
+
+template < >
 int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementUEoverRF();
@@ -247,6 +253,15 @@ AlgebraicNumber
 
 template < >
 int Expression::AddObjectReturnIndex(const
+ElementZmodP
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theEltsModP
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>
 & inputValue)const
 { this->CheckInitialization();
@@ -365,6 +380,17 @@ Rational& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
+}
+
+template < >
+ElementZmodP& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<ElementZmodP>())
+  { std::cout << "This is a programming error: expression not of required type Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theEltsModP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -1300,6 +1326,8 @@ void CommandList::ParseFillDictionary
       LookAheadChar=' ';
     if (current=="\n")
       current=" ";
+    if (current=="~")
+      current=" ";
     if (this->isLeftSeparator(current[0]) ||
         this->isRightSeparator(LookAheadChar) || current==" ")
     { if (this->controlSequences.Contains(current))
@@ -1530,6 +1558,27 @@ bool CommandList::ReplaceEOEXByEX(int formatOptions)
   return true;
 }
 
+bool CommandList::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
+{ //std::cout << "<b>Here iam!</b>";
+  SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr;
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(inputOperation);
+  newExpr.AddChildOnTop(middle.theData);
+  newExpr.AddChildOnTop(right.theData);
+  newExpr.format=formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  middle=*(*this->CurrentSyntacticStacK).LastObject();
+//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
+  this->DecreaseStackExceptLast(2);
+//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
+
 bool CommandList::isSeparatorFromTheLeftGeneral(const std::string& input)
 { return input=="{" || input=="(" || input=="[" || input=="," || input==":" || input==";" || input==" "
   || input=="MatrixSeparator" || input == "MatrixRowSeparator" || input=="&";
@@ -1749,10 +1798,14 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
     return this->ReplaceOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="\\otimes" && fourthToLastS=="Expression" && this->AllowsTensorInPreceding(lastS))
     return this->ReplaceEOEXByEX();
+  if (secondToLastS=="Expression" && thirdToLastS=="Expression" && fourthToLastS=="\\frac")
+    return this->ReplaceXEEXByEXusingO(this->opDivide(), Expression::formatUseFrac);
   if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
   if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->LookAheadAllowsDivide(lastS) )
@@ -3600,7 +3653,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::init(GlobalVariables& inputGlobalVariables)
-{ //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
+{ MacroRegisterFunctionWithName("CommandList::init");
+  //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
   this->theGlobalVariableS=& inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
   this->formatVisibleStrings.flagExpressionIsFinal=true;
@@ -3660,6 +3714,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("-");
   this->AddOperationNoRepetitionAllowed("/");
   this->AddOperationNoRepetitionAllowed("*");
+  this->AddOperationNoRepetitionAllowed("mod");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
   this->AddOperationNoRepetitionAllowed("[]");
@@ -3673,6 +3728,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Sequence");
 
   this->AddOperationBuiltInType("Rational");
+  this->AddOperationBuiltInType("EltZmodP");
   this->AddOperationBuiltInType("Double");
   this->AddOperationBuiltInType("AlgebraicNumberOld");
   this->AddOperationBuiltInType("PolynomialRational");
@@ -3706,6 +3762,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop(",");
   this->controlSequences.AddOnTop(".");
   this->controlSequences.AddOnTop("if");
+  this->controlSequences.AddOnTop("\\frac");
   this->controlSequences.AddOnTop("\\cdot");
   this->controlSequences.AddOnTop("_");
   this->controlSequences.AddOnTop("(");
@@ -4985,6 +5042,9 @@ bool Expression::ToStringData
     if (this->HasNonEmptyContext())
       out << ")";
     result=true;
+  } else if (this->IsOfType<ElementZmodP>())
+  { out << this->GetValuE<ElementZmodP>().ToString();
+    result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
   { out << "Polynomial{}(";
     Expression contextE=this->GetContext();
@@ -5178,22 +5238,25 @@ std::string Expression::ToString
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
-    bool firstNeedsBrackets=
-    !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
-      (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
-    bool secondNeedsBrackets=true;
-    if ((*this)[2].IsOfType<Rational>())
-      if ((*this)[2].GetValuE<Rational>().IsInteger())
-        secondNeedsBrackets=false;
-    if (firstNeedsBrackets)
-      out << "(" << firstE << ")";
-    else
-      out << firstE;
-    out << "/";
-    if (secondNeedsBrackets)
-      out << "(" << secondE << ")";
-    else
-      out << secondE;
+    if(this->format!=this->formatUseFrac)
+    { bool firstNeedsBrackets=
+      !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
+        (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
+      bool secondNeedsBrackets=true;
+      if ((*this)[2].IsOfType<Rational>())
+        if ((*this)[2].GetValuE<Rational>().IsInteger())
+          secondNeedsBrackets=false;
+      if (firstNeedsBrackets)
+        out << "(" << firstE << ")";
+      else
+        out << firstE;
+      out << "/";
+      if (secondNeedsBrackets)
+        out << "(" << secondE << ")";
+      else
+        out << secondE;
+    } else
+      out << "\\frac{" << firstE << "}{" << secondE << "}";
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opChoose(),3) )
@@ -5326,6 +5389,8 @@ std::string Expression::ToString
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
     out << "[" << (*this)[1].ToString(theFormat) << "," << (*this)[2].ToString(theFormat) << "]";
+  else if (this->IsListStartingWithAtom(this->theBoss->opMod()))
+    out << (*this)[1].ToString(theFormat) << " mod " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
     out << (*this)[1].ToString(theFormat) << "\\cup " << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))

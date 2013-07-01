@@ -227,29 +227,6 @@ void CGI::ElementToStringTooltip(const std::string& input, const std::string& in
   output=out.str();
 }
 
-void CGI::CivilizedStringTranslationFromVPold(std::string& input, std::string& output)
-{ output.clear();
-  int oldindex=0;
-  int tempSize=(signed) input.size();
-  //std::cout << "   "<<tempSize <<" asdfdafadsfadsf";
-  //  return;
-  if (tempSize>1000)
-    return;
-  for (int i=0; i<tempSize; i++)
-    if (input[i]=='=')
-    { for (int j=oldindex; j<i; j++)
-      { if (input[j]=='&')
-          output.append(" ");
-        else
-          output.push_back(input.at(j));
-      }
-      oldindex=i+1;
-      output.append(" = ");
-    }
-  for (int j=oldindex; j<tempSize; j++)
-    output.push_back(input.at(j));
-}
-
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
   CGI::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
@@ -998,8 +975,8 @@ void Rational::Assign(const Rational& r)
     return;
   }
   this->InitExtendedFromShortIfNeeded();
-  this->Extended->num.Assign(r.Extended->num);
-  this->Extended->den.Assign(r.Extended->den);
+  this->Extended->num=(r.Extended->num);
+  this->Extended->den=(r.Extended->den);
 }
 
 void Rational::AssignFracValue()
@@ -1224,9 +1201,20 @@ void LargeIntUnsigned::Add(const LargeIntUnsigned& x)
   this->FitSize();
 }
 
+LargeIntUnsigned LargeIntUnsigned::operator-(const LargeIntUnsigned& other) const
+{ LargeIntUnsigned result;
+  result=*this;
+  result.SubtractSmallerPositive(other);
+  return result;
+}
+
 void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 { unsigned int CarryOver=0;
-  assert(this->IsGEQ(x));
+  if (!this->IsGEQ(x))
+  { std::cout << "This is a programming error: attempting to subtract a larger LargeIntUnsigned from a small one. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int i=0; i<x.size; i++)
     if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
     { this->TheObjects[i]+=LargeIntUnsigned::CarryOverBound;
@@ -1366,7 +1354,7 @@ void LargeInt::AssignInt(int x)
 //  assert(this->CheckForConsistensy());
 }
 
-void LargeInt::AddLargeIntUnsigned(LargeIntUnsigned& x)
+void LargeInt::AddLargeIntUnsigned(const LargeIntUnsigned& x)
 { if (this->sign==1)
   { this->value.Add(x);
     return;
@@ -1382,7 +1370,7 @@ void LargeInt::AddLargeIntUnsigned(LargeIntUnsigned& x)
   }
 }
 
-void LargeInt::Add(const LargeInt& x)
+void LargeInt::operator+=(const LargeInt& x)
 { if (this->sign==x.sign)
     this->value.Add(x.value);
   else
@@ -1469,7 +1457,7 @@ void LargeInt::MakeZero()
   this->sign=1;
 }
 
-void LargeInt::Assign(const LargeInt& x)
+void LargeInt::operator=(const LargeInt& x)
 { this->sign=x.sign;
   this->value=(x.value);
 //  assert(this->CheckForConsistensy());
@@ -5171,7 +5159,7 @@ void partFraction::EvaluateIntPoly
   //}
   Polynomial<Rational> tempInput;
   tempInput=input; //<-implicit type conversion here!
-  tempInput.Evaluate(values, output);
+  output=tempInput.Evaluate(values);
 }
 
 void LaTeXProcedures::beginPSTricks(std::fstream& output)

@@ -76,6 +76,13 @@ static bool innerAddMatrixTensorToMatrixTensor
   static bool innerAddRatToRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerAddEltZmodPorRatToEltZmodPorRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   static bool innerAddAlgebraicNumberToAlgebraicNumber
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

@@ -318,12 +318,18 @@ typedef void (*drawClearScreenFunction)();
 class MathRoutines
 {
 public:
-  int InvertModN(int X, int N)
-  { int q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
-    int vD[2], vP[2], temp;
+  template <class coefficient>
+  static coefficient InvertXModN(const coefficient& X, const coefficient& N)
+  { coefficient q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
+    coefficient vD[2], vP[2], temp;
     vP[0]=1; vP[1]=0; // at any given moment, p=vP[0]*N+vP[1]*X
     vD[0]=0; vD[1]=1;   // at any given moment, d=vD[0]*N+vD[1]*X
-    p=N; d=X; d%=N; if (d<0){d+=N; }
+    p=N;
+    d=X;
+    d%=N;
+    if (d<0)
+    { d+=N;
+    }
     while (d>0)
     { q=p/d;
       r=p%d;
@@ -335,7 +341,12 @@ public:
         vD[i]= temp-q*vD[i];
       }
     }
-    assert(p==1); //if d and p were relatively prime this should be so. Otherwise the function was not called properly.
+    if (!(p==1))
+    { std::cout << "This is a programming error: the invert X mod N algorithm requires "
+      << " that X and N be relatively prime, which appears to have not been the case. "
+      << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }//if d and p were relatively prime this should be so. Otherwise the function was not called properly.
     p=vP[1]%N;
     if (p<0)
       p+=N;
@@ -1098,7 +1109,6 @@ public:
   static int scale;
   static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
   static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
   static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
   static std::string UnCivilizeStringCGI(const std::string& input);
   static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
@@ -2512,8 +2522,17 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, 
 
 template <typename Element>
 void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero)
-{ assert(&output!=this && &output!=&standsOnTheLeft);
-  assert(this->NumRows==standsOnTheLeft.NumCols);
+{ if (&output==this || &output==&standsOnTheLeft)
+  { Matrix<Element> thisCopy=*this;
+    Matrix<Element> standsOnTheLeftCopy=standsOnTheLeft;
+    thisCopy.MultiplyOnTheLeft(standsOnTheLeftCopy, output, theRingZero);
+    return;
+  }
+  if (this->NumRows!=standsOnTheLeft.NumCols)
+  { std::cout << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
+    << " columns by a matrix with " << this->NumRows << "rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   Element tempEl;
   output.init(standsOnTheLeft.NumRows, this->NumCols);
   for (int i=0; i< standsOnTheLeft.NumRows; i++)
@@ -2848,6 +2867,12 @@ public:
   }
   void AssignString(const std::string& input);
   int GetUnsignedIntValueTruncated();
+  LargeIntUnsigned operator%(const LargeIntUnsigned& other)const
+  { LargeIntUnsigned result, temp;
+    this->DivPositive(other, temp, result);
+    return result;
+  }
+  LargeIntUnsigned operator-(const LargeIntUnsigned& other)const;
   int operator%(unsigned int x);
   inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
   inline void operator=(unsigned int x){ this->AssignShiftedUInt(x,0); }
@@ -2872,6 +2897,11 @@ public:
   }
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
+  LargeIntUnsigned operator*(const LargeIntUnsigned& x)const
+  { LargeIntUnsigned result;
+    this->MultiplyBy(x, result);
+    return result;
+  }
   LargeIntUnsigned(unsigned int x)
   { this->AssignShiftedUInt(x,0);
   }
@@ -2910,22 +2940,34 @@ public:
   void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
   void MultiplyByInt(int x);
   void ToString(std::string& output)const;
-  inline std::string ToString(FormatExpressions* theFormat=0)const{std::string tempS; this->ToString(tempS); return tempS;}
-  bool IsPositive()const{return this->sign==1 && (this->value.IsPositive()); }
-  bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
+  inline std::string ToString(FormatExpressions* theFormat=0)const
+  { std::string tempS;
+    this->ToString(tempS);
+    return tempS;
+  }
+  bool IsPositive()const
+  { return this->sign==1 && (this->value.IsPositive());
+  }
+  bool IsNegative()const
+  { return this->sign==-1&& (this->value.IsPositive());
+  }
   inline bool BeginsWithMinus(){return this->IsNegative();}
   inline bool IsPositiveOrZero()const{return !this->IsNegative(); }
   inline bool IsNonPositive()const{return !this->IsPositive(); }
   bool NeedsBrackets()const{return false;}
   bool IsEqualTo(const LargeInt& x)const;
   bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
-  bool IsEqualToOne()const{ return this->value.IsEqualToOne() && this->sign==1; }
-  void Assign(const LargeInt& x);
+  bool IsEqualToOne()const
+  { return this->value.IsEqualToOne() && this->sign==1;
+  }
   void AssignLargeIntUnsigned(const LargeIntUnsigned& x){this->value.Assign(x); this->sign=1;}
   void AssignInt(int x);
-  void Add(const LargeInt& x);
-  void AddLargeIntUnsigned(LargeIntUnsigned& x);
-  inline void AddInt(int x) {LargeInt tempInt; tempInt.AssignInt(x); this->Add(tempInt);}
+  void AddLargeIntUnsigned(const LargeIntUnsigned& x);
+  inline void AddInt(int x)
+  { LargeInt tempInt;
+    tempInt.AssignInt(x);
+    *this+=(tempInt);
+  }
   //bool IsGEQ(LargeInt& x);
   bool CheckForConsistensy();
   void WriteToFile(std::fstream& output);
@@ -2960,22 +3002,25 @@ public:
   double GetDoubleValue();
   int operator %(int x);
   inline void AssignFloor(){}
-  inline void operator=(const LargeInt& x)
-  { this->Assign(x);
-  }
+  void operator=(const LargeInt& x);
   inline void operator=(int x)
-  { this->Assign(x);
+  { this->AssignInt(x);
   }
   inline void operator=(const LargeIntUnsigned& other) {this->value=other; this->sign=1;}
   inline void operator*=(const LargeInt& other){this->MultiplyBy(other);}
   inline void operator*=(int x){ this->MultiplyByInt(x);}
-  inline void operator+=(int x){this->AddInt(x);}
   inline void Minus(){if (!this->IsEqualToZero()) this->sign*=-1;}
-  inline void operator+=(const LargeInt& other){ this->Add(other);}
+  void operator+=(const LargeInt& other);
+  inline void operator+=(const LargeIntUnsigned& other)
+  { this->AddLargeIntUnsigned(other);
+  }
+  inline void operator+=(int x)
+  { this->AddInt(x);
+  }
   bool operator==(const LargeInt& other)const{return this->IsEqualTo(other);}
   inline void operator-=(const LargeInt& other)
   { this->Minus();
-    this->Add(other);
+    *this+=(other);
     this->Minus();
   }
   inline bool operator<=(const LargeInt& other) const{ return ! (other<*this);}
@@ -2989,9 +3034,27 @@ public:
       return other.value< this->value;
     return false;
   }
-  inline LargeInt operator+(const LargeInt& other)const{LargeInt tempInt; tempInt.Assign(*this); tempInt.Add(other); return tempInt;}
-  inline LargeInt operator+(int x)const{LargeInt tempInt; tempInt.Assign(*this); tempInt.AddInt(x); return tempInt;}
-  LargeInt operator*(int x){ LargeInt tempInt; tempInt.Assign(*this); tempInt.MultiplyByInt(x); return tempInt;}
+  inline LargeInt operator+(const LargeInt& other)const
+  { LargeInt tempInt;
+    tempInt=(*this);
+    tempInt+=(other);
+    return tempInt;
+  }
+  inline LargeInt operator-(const LargeInt& other)const
+  { LargeInt result=*this;
+    result-=(other);
+    return result;
+  }
+  inline LargeInt operator+(int x)const
+  { LargeInt result=*this;
+    result.AddInt(x);
+    return result;
+  }
+  LargeInt operator*(int x)
+  { LargeInt result=*this;
+    result.MultiplyByInt(x);
+    return result;
+  }
   LargeInt operator/(int x)const;
   LargeInt operator/(LargeInt& x)const;
   void operator/=(const LargeInt& other)
@@ -3002,9 +3065,30 @@ public:
     this->value.DivPositive(other.value, quotient, remainder);
     this->value=quotient;
   }
-  LargeInt(const LargeInt& x){this->Assign(x);}
-  LargeInt(int x){this->AssignInt(x); }
-  LargeInt(){this->sign=1; }
+  inline bool operator>(const LargeInt& other)const
+  { return other<*this;
+  }
+  void operator%=(const LargeInt& other)
+  { if (this->IsEqualToZero())
+      return;
+    LargeIntUnsigned quotient, remainder;
+    this->value.DivPositive(other.value, quotient, remainder);
+    this->value=remainder;
+    if (this->IsNegative())
+      *this+=other.value;
+  }
+  LargeInt operator %(const LargeInt& other)const
+  { LargeInt result=*this;
+    result%=other;
+    return result;
+  }
+  LargeInt(const LargeInt& x)
+  { this->operator=(x);
+  }
+  LargeInt(int x)
+  { this->AssignInt(x);
+  }
+  LargeInt(): sign(1){}
 };
 
 class LargeRationalExtended
@@ -3241,7 +3325,7 @@ ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif
     }
-    this->Extended->num.Assign(other);
+    this->Extended->num=other;
     this->Extended->den.MakeOne();
     this->ShrinkExtendedPartIfPossible();
   }
@@ -3450,10 +3534,10 @@ ParallelComputing::GlobalPointerCounter++;
     tempRat.Assign(r);
     tempRat.InitExtendedFromShortIfNeeded();
     LargeInt tempI;
-    tempI.Assign(tempRat.Extended->num);
+    tempI=tempRat.Extended->num;
     tempI.value.MultiplyBy(this->Extended->den);
     this->Extended->num.value.MultiplyBy(tempRat.Extended->den);
-    this->Extended->num.Add(tempI);
+    this->Extended->num+=(tempI);
     this->Extended->den.MultiplyBy(tempRat.Extended->den);
     this->Simplify();
   }
@@ -5318,12 +5402,12 @@ public:
 
 class MonomialVector
 {
-  int theIndex;
   friend std::ostream& operator << (std::ostream& output, const MonomialVector& theMon)
   { output << theMon.ToString();
     return output;
   }
   public:
+  int theIndex;
   MonomialVector():theIndex(-1){}
   std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
@@ -5578,14 +5662,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
   inline bool GetRootFromLinPolyConstTermLastVariable(Vector<coefficient>& outputRoot, const coefficient& theZero= (coefficient) 0){return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);}
-  void Evaluate
-(const Vector<coefficient>& input, coefficient& output)
+  Matrix<coefficient> EvaluateUnivariatePoly
+  (const Matrix<coefficient>& input)//for univariate polynomials only
   ;
   coefficient Evaluate(const Vector<coefficient>& input)
-  { coefficient result;
-    this->Evaluate(input, result);
-    return result;
-  }
+  ;
   bool IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
   const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
@@ -6553,13 +6634,45 @@ void Polynomial<coefficient>::ShiftVariableIndicesToTheRight
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::Evaluate
-(const Vector<coefficient>& input, coefficient& output)
-{ output=0;
+Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly
+  (const Matrix<coefficient>& input)//for univariate polynomials only
+{ MacroRegisterFunctionWithName("Polynomial::EvaluateUnivariatePoly");
+  Matrix<coefficient> output, tempElt, idMat;
+  idMat.MakeIdMatrix(input.NumCols);
+  output.MakeZeroMatrix(input.NumCols);
+  for (int i=0; i<this->size; i++)
+  { const MonomialP& currentMon=(*this)[i];
+    int numCycles=0;
+    if (!currentMon(0).IsSmallInteger(&numCycles) )
+    { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose"
+      <<  i+1 << "^{th} variable is raised to the power "
+      << currentMon(0).ToString()
+      << ". Raising variables to power is allowed only if the power is a small integer. "
+      << "If the user has requested such an operation, it"
+      << " *must* be intercepted at an earlier level (and the user must be informed)."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    bool isPositive=numCycles>0;
+    if (numCycles<0)
+      numCycles=-numCycles;
+    tempElt=input;
+    MathRoutines::RaiseToPower(tempElt, numCycles, idMat);
+    if (!isPositive)
+      tempElt.Invert();
+    tempElt*=this->theCoeffs[i];
+    output+=(tempElt);
+  }
+  return output;
+}
+
+template <class coefficient>
+coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
+{ MacroRegisterFunctionWithName("Polynomial::Evaluate");
+  coefficient output=0;
   coefficient tempElt;
   for (int i=0; i<this->size; i++)
-  { tempElt=this->theCoeffs[i];
-    const MonomialP& currentMon=(*this)[i];
+  { const MonomialP& currentMon=(*this)[i];
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
     { int numCycles;
       if (!this->TheObjects[i][j].IsSmallInteger(&numCycles) )
@@ -6571,21 +6684,19 @@ void Polynomial<coefficient>::Evaluate
         << " *must* be intercepted at an earlier level (and the user must be informed)."
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
-        return;
       }
       bool isPositive=numCycles>0;
       if (numCycles<0)
         numCycles=-numCycles;
-      for (int k=0; k<numCycles; k++)
-      { if (isPositive)
-          tempElt*=input[j];
-        else
-          tempElt/=input[j];
-        ParallelComputing::SafePointDontCallMeFromDestructors();
-      }
+      tempElt=input[j];
+      MathRoutines::RaiseToPower(tempElt, numCycles, (coefficient) 1);
+      if (!isPositive)
+        tempElt.Invert();
+      tempElt*=this->theCoeffs[i];
     }
     output+=(tempElt);
   }
+  return output;
 }
 
 template <class TemplateMonomial, class coefficient>

@@ -2924,16 +2924,14 @@ bool CommandList::fDifferential
   return true;
 }
 
-bool CommandList::fMinPoly
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ std::cout << "Error: not implemented. ";
-  assert(false);
-  return true;
-}
-
 bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites)
 { if (this->size>1)
     return false;
+  if (this->IsEqualToZero())
+  { std::cout << "This is a programming error: it was requested that I factor 0, which is forbidden."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   unsigned int n=(*this)[0];
   outputPrimeFactors.size=0;
   outputMultiplicites.size=0;
@@ -2986,10 +2984,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return true;
   Polynomial<Rational> thePoly=*this;
   Rational theMultiple=thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  Rational tempRat=thePoly.TotalDegree()/2;
+  Rational tempRat=thePoly.TotalDegree();
   int upperBoundDegDivisors=0;
   if (!tempRat.IsSmallInteger(&upperBoundDegDivisors))
     return false;
+  upperBoundDegDivisors/=2;
   List<int> thePoints;
   List<List<unsigned int> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
@@ -2998,6 +2997,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   theValuesAtPoints.SetSize(upperBoundDegDivisors+1);
   thePrimeFactorsAtPoints.SetSize(upperBoundDegDivisors+1);
   thePrimeFactorsMults.SetSize(upperBoundDegDivisors+1);
+  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
   std::cout << "<br>Upper bound degree divisor: " << upperBoundDegDivisors;
   std::cout << "<br>Interpolating at: 0,";
   thePoints[0]=0;
@@ -3010,8 +3010,17 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   for (int i=0; i<=upperBoundDegDivisors; i++)
   { theArgument[0]=thePoints[i];
     tempRat= thePoly.Evaluate(theArgument);
+    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0] << " equals: " << tempRat;
+    if (tempRat.IsEqualToZero())
+    { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
+      std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
+      *this/=output;
+      std::cout << "<br>divident: " << this->ToString();
+      return true;
+    }
     tempRat.GetNumerator(theValuesAtPoints[i]);
     std::cout << "<br>value at " << thePoints[i] << " = " << theValuesAtPoints[i].ToString();
+
     if(!theValuesAtPoints[i].value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
     { if (comments!=0)
         *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
@@ -3036,10 +3045,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     thePointsForInterpolation.SetSize(i+1);
     for (int k=0; k<thePointsForInterpolation.size; k++)
       thePointsForInterpolation[k]=thePoints[k];
+    int counter=0;
     do
       do
       { std::cout << "<br>Selection: " << theDivisorSel.ToString()
-        << "<br>Sign selection: " << signSel.ToString();  ;
+        << "<br>Sign selection: " << signSel.ToString();
         for (int j=0; j<theDivisorSel.theElements.size; j++)
         { interPol[j]=1;
           for (int k=0; k<theDivisorSel[j].theElements.size; k++)
@@ -3063,6 +3073,9 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
             return true;
           }
         }
+        counter++;
+        if (counter>2000)
+          assert(false);
       }
       while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
     while (signSel.IncrementReturnFalseIfBackToBeginning());
@@ -3072,12 +3085,14 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   return true;
 }
 
-bool CommandList::fFactor
+bool CommandList::innerFactorPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fFactor");
+{ MacroRegisterFunctionWithName("CommandList::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  std::cout << "here I am .";
   if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial, input, output))
     return false;
+  std::cout << "here I am .";
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValuE<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
@@ -3094,10 +3109,12 @@ bool CommandList::fFactor
   }
   output.reset(theCommands, theFactors.size+1);
   Expression tempE;
-  tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  output.AddChildOnTop(tempE);
-  for (int i=1; i<=theFactors.size; i++)
-    output.AssignValueWithContextToChild(i, theFactors[i], theContext, theCommands);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  for (int i=0; i<theFactors.size; i++)
+  { tempE.AssignValueWithContext(theFactors[i], theContext, theCommands);
+    output.AddChildOnTop(tempE);
+  }
+  output.format=output.formatMatrix;
   std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }

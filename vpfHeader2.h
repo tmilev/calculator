@@ -1662,13 +1662,10 @@ public:
   static bool innerSqrt
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fFactor
+  static bool innerFactorPoly
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerSolveSerreLikeSystem
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool fMinPoly
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fLSPath

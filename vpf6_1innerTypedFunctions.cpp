@@ -509,9 +509,32 @@ bool CommandListInnerTypedFunctions::innerAddPlotToPlot
   return output.AssignValue(leftPlot, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerRatPowerRat
+bool CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  Polynomial<Rational> base;
+  Rational exp;
+  if(!input[1].IsOfType(&base))
+    return false;
+  if(!input[2].IsOfType(&exp))
+    return false;
+  int thePower;
+  if (!exp.IsSmallInteger(&thePower))
+    return false;
+  if (thePower<0)
+    return false;
+  if (base.IsEqualToZero() && thePower<=0)
+    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  base.RaiseToPower(thePower);
+  return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerPowerRatByRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerRatByRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -529,9 +552,9 @@ bool CommandListInnerTypedFunctions::innerRatPowerRat
   return output.AssignValue(base, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF
+bool CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;

@@ -824,7 +824,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    "\\sqrt 2+\\sqrt 3;(\\sqrt{}2+\\sqrt{}3+\\sqrt{}6)^2", true);
 
   this->AddOperationInnerHandler
-  ("FactorOneVarPolyOverRationals", this->fFactor, "",
+  ("FactorOneVarPolyOverRationals", this->innerFactorPoly, "",
    "Factors a one variable polynomial over the rationals using Kroenecker's method. \
     After clearing denominators, assume the poly has integer coefficients.\
     If looking for an integer coefficient divisor of degree k, \
@@ -832,7 +832,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
     and finds the set of all possible divisors of the value of poly at the k points.\
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
-   "FactorOneVarPolyOverRationals{}{x^2-4}", true, true);
+   "FactorOneVarPolyOverRationals{}{x^{8}-44x^{6}+438x^{4}-1292x^{2}+529}", true, false);
   this->AddOperationInnerHandler
   ("Freudenthal", this->innerFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
@@ -938,6 +938,11 @@ void CommandList::initPredefinedStandardOperations()
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opRational(),
    "Adds a polynomial to a rational. ",
    "1+Polynomial{}\\lambda; Polynomial{}\\lambda+1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly, this->opPoly(), this->opPoly(),
+   "Adds a polynomial to a polynomial. ",
+   "x:=1+Polynomial{}\\lambda; x+x"
    , true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1210,7 +1215,7 @@ void CommandList::initPredefinedStandardOperations()
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerRatPowerRat, this->opRational(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerPowerRatByRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1228,7 +1233,14 @@ void CommandList::initPredefinedStandardOperations()
    "X:=(1,2)^t; X-Transpose{}(1,2)  ",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
+  ("^", CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
+   "Raises poly to integer power. ",
+   "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
+    \n (g_1+g_2)^2+ g_1^{1/2}",
+   true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRational(),
    "Raises element of universal enveloping to integer power. \
    If the exponent is non-positive integer but the element of the UE is \
    a single generator with coefficient 1, the exponent will be carried out formally. ",
@@ -1236,7 +1248,7 @@ void CommandList::initPredefinedStandardOperations()
     \n (g_1+g_2)^2+ g_1^{1/2}",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
+  ("^", CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opPoly(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal polynomial power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary polynomial power. ",
@@ -1244,7 +1256,7 @@ void CommandList::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CommandListInnerTypedFunctions::innerElementUEPowerRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
+  ("^", CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",

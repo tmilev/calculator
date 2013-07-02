@@ -116,6 +116,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   Rational oldDeg=theMinPoly.TotalDegree();
+  std::cout << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
   bool mustBeTrue=theMinPoly.FactorMeOutputIsSmallestDivisor(smallestFactor, 0);
   if (!mustBeTrue)
   { std::cout << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString()

@@ -6670,9 +6670,9 @@ template <class coefficient>
 coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
 { MacroRegisterFunctionWithName("Polynomial::Evaluate");
   coefficient output=0;
-  coefficient tempElt;
   for (int i=0; i<this->size; i++)
   { const MonomialP& currentMon=(*this)[i];
+    coefficient tempElt=1;
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
     { int numCycles;
       if (!this->TheObjects[i][j].IsSmallInteger(&numCycles) )

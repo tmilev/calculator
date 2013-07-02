@@ -43,10 +43,13 @@ static bool innerAddRatOrPolyToRatOrPoly
 static bool innerAddPlotToPlot
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerRatPowerRat
+static bool innerPowerRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerElementUEPowerRatOrPolyOrRF
+static bool innerPowerPolyBySmallInteger
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerPowerElementUEbyRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerAddSequenceToSequence

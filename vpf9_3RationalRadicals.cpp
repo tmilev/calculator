@@ -147,7 +147,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
   for (int i=smallestFactorDegree; i<this->DimOverRationals; i++)
   { zToTheNth.MakeMonomiaL(0, i, 1, 1);
     zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
-    for (int j=0; j<remainderAfterReduction.size; j++)
+    for (int j=0; j<remainderAfterReduction.size(); j++)
     { int theIndex;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
       theProjection(theIndex, i)=remainderAfterReduction.theCoeffs[j];
@@ -165,7 +165,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
     for (int j=0; j<this->DimOverRationals; j++)
     { zToTheNth.MakeMonomiaL(0, i+j, 1, 1);
       zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
-      for (int k=0; k<remainderAfterReduction.size; k++)
+      for (int k=0; k<remainderAfterReduction.size(); k++)
       { int theIndex;
         remainderAfterReduction[k](0).IsSmallInteger(&theIndex);
         tempM.vIndex=theIndex;
@@ -212,7 +212,7 @@ void AlgebraicNumber::GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output
   this->CheckNonZeroOwner();
   output.MakeZero();
   MatrixTensor<Rational> tempMat;
-  for (int i=0; i<this->theElt.size; i++)
+  for (int i=0; i<this->theElt.size(); i++)
   { tempMat=this->owner->AlgebraicBasisElements[this->theElt[i].theIndex];
     tempMat*=this->theElt.theCoeffs[i];
     output+=tempMat;
@@ -343,7 +343,7 @@ ReduceMod
 //  std::cout << "<br>Reducing " << toBeReduced.ToString() << " mod "
 //  << "x_1^" << theN << "- (" << An.ToString() << ") (it has " << An.NumVars << " variables)  and mod "
 //  << "x_2^" << theM << "- (" << Bm.ToString() << ") (it has " << Bm.NumVars << " variables)";
-  for (int i=0; i<toBeReduced.size; i++)
+  for (int i=0; i<toBeReduced.size(); i++)
     for (int j=0; j<theNs.size; j++)
       if (toBeReduced[i](j)>=theNs[j])
       { toBeReduced.PopMonomial(i, tempM, currentCoeff);
@@ -407,7 +407,7 @@ bool AlgebraicNumberOld::AssignOperation
   this->ReduceMod(theOperationIsModified, thePolys, theNs, buffer1);
   buffer2.MakeOne(theNs.size);
   for (int i=0; i<ProductNsPlusOne; i++)
-  { for (int j=0; j<buffer2.size; j++)
+  { for (int j=0; j<buffer2.size(); j++)
     { const MonomialP& currentMon=buffer2[j];
       int theIndex=currentMon(0).NumShort;
       for (int k=1; k<theNs.size; k++)

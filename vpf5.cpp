@@ -1257,11 +1257,11 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
    Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace,
    std::stringstream* comments, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg");
-  if (this->theChaR.size!=1)
+  if (this->theChaR.size()!=1)
   { if (comments!=0)
     { std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size << " monomials)";
+      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size() << " monomials)";
       *comments << out.str();
     }
     return;
@@ -1302,7 +1302,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     //std::cout << "<br>current element is: " << currentElt.ToString();
     MatrixTensor<coefficient> currentOp, tempMat;
     currentOp.MakeZero();
-    for (int j=0; j<currentElt.size; j++)
+    for (int j=0; j<currentElt.size(); j++)
     { //std::cout << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
       tempMat=this->GetActionGeneratorIndeX
       (currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
@@ -1368,14 +1368,14 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     currentWeight+=hwFundCoordsNilPart;
     readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
     << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
-    if (currentElt.size>1)
+    if (currentElt.size()>1)
       out << "(";
     if (outputEigenVectors!=0)
       outputEigenVectors->AddOnTop(currentElt);
     if (outputWeightsFundCoords!=0)
       outputWeightsFundCoords->AddOnTop(currentWeight);
     out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
-    if (currentElt.size>1)
+    if (currentElt.size()>1)
       out << ")";
     out << " v_\\lambda";
     out << "</td><td>(weight: "
@@ -1602,7 +1602,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
     timeReport << tempExpression.GetValuE<std::string>();
     RationalFunctionOld numEigenVectors;
     numEigenVectors=rfZero;
-    for (int j=0; j<theG2B3Data.theSmallCharFDpart.size; j++)
+    for (int j=0; j<theG2B3Data.theSmallCharFDpart.size(); j++)
       numEigenVectors+=theG2B3Data.theSmallCharFDpart.theCoeffs[j];
     theG2B3Data.theFormat.CustomPlusSign="";
     int eigenIndexcounter=0;
@@ -1610,7 +1610,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
       latexTable2 << "\\hline\\multicolumn{3}{|c|}{$\\lambda="
       << theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega", &theG2B3Data.theFormat)
       << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
-    for (int k=0; k<theG2B3Data.theSmallCharFDpart.size; k++ )
+    for (int k=0; k<theG2B3Data.theSmallCharFDpart.size(); k++ )
     { charSSAlgMod<RationalFunctionOld> tempChar;
       tempChar.AddMonomial
       (theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
@@ -1718,7 +1718,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
         }
         out << "</tr>";
       }
-      if (k!=theG2B3Data.theSmallCharFDpart.size-1)
+      if (k!=theG2B3Data.theSmallCharFDpart.size()-1)
       { if (isFD)
           latexTable << "\\cline{3-5}";
         else
@@ -1886,17 +1886,17 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     theg2b3data.theFormat.CustomPlusSign="\\oplus ";
     Vector<RationalFunctionOld> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.Clear();
-    for (int i=0; i<outputChar.size; i++)
+    for (int i=0; i<outputChar.size(); i++)
     { if (!outputChar.theCoeffs[i].IsEqualToOne())
         out << outputChar.theCoeffs[i].ToString() << " x ";
       out << theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords
       (theg2b3data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental
       (outputChar[i].weightFundamentalCoordS));
-      if (i!=outputChar.size-1)
+      if (i!=outputChar.size()-1)
         out << "+";
       leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
       leftWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoordS);
-      for (int j=0; j<outputChar.size; j++)
+      for (int j=0; j<outputChar.size(); j++)
       { rightWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
         rightWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoordS);
 //        if (i!=j)
@@ -2036,7 +2036,7 @@ ExtractElementUE(ElementUniversalEnveloping<coefficient>& output, SemisimpleLieA
 { output.MakeZero(theOwner);
   ModuleSSalgebra<coefficient>* theModPtr=0;
   MonomialUniversalEnveloping<coefficient> tempMon;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   { const MonomialGeneralizedVerma<coefficient>& currentMon=(*this)[i];
     if (i==0)
       theModPtr=currentMon.owneR;
@@ -2185,7 +2185,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 (std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables)
-{ if (this->size==0)
+{ if (this->IsEqualToZero())
     return false;
   this->CheckNonZeroOwner();
   WeylGroup& theWeyL=this->GetOwner()->theWeyl;
@@ -2207,8 +2207,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
   coefficient bufferCoeff, highestCoeff;
-  for (int i=0; i<this->size; i++)
-  { MonomialChar<coefficient>& currentMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { const MonomialChar<coefficient>& currentMon=(*this)[i];
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart
         (currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
@@ -2228,7 +2228,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //  std::cout << "<hr>" << tempS;
 //  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
   Vectors<coefficient> orbitDom;
-  for (int i=0; i<charAmbientFDWeyl.size; i++)
+  for (int i=0; i<charAmbientFDWeyl.size(); i++)
   { orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated
         (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
@@ -2267,7 +2267,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
   fundCoordsSmaller.SetSize(WeylFDSmall.AmbientWeyl.GetDim());
-  for (int i=0; i<remainingCharDominantLevI.size; i++)
+  for (int i=0; i<remainingCharDominantLevI.size(); i++)
   { inSimpleCoords=theWeyL.GetSimpleCoordinatesFromFundamental(remainingCharDominantLevI[i].weightFundamentalCoordS);
     for (int j=0; j<WeylFDSmall.AmbientWeyl.GetDim(); j++)
     { fundCoordsSmaller[j]=theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
@@ -2283,7 +2283,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
   Vector<coefficient> simpleGeneratorBaseField;
   output.MakeZero();
   while(!remainingCharProjected.IsEqualToZero())
-  { localHighest=*remainingCharProjected.LastObject();
+  { localHighest=*remainingCharProjected.theMonomials.LastObject();
     for (bool Found=true; Found; )
     { Found=false;
       for (int i=0; i<WeylFDSmall.RootsOfBorel.size; i++)
@@ -2293,7 +2293,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //        std::cout << "<br>candidate highest mon found simple & usual coords: "
 //        << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempMon.weightFundamentalCoords).ToString()
 //        << " = " << tempMon.ToString();
-        if (remainingCharProjected.Contains(tempMon))
+        if (remainingCharProjected.theMonomials.Contains(tempMon))
         { localHighest=tempMon;
           Found=true;
         }
@@ -2302,7 +2302,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
 //    std::cout << "<br>The highest mon found simple & usual coords: "
 //    << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(localHighest.weightFundamentalCoords).ToString()
 //    << " = " << localHighest.ToString();
-    highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.GetIndex(localHighest)];
+    highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!WeylFDSmall.FreudenthalEvalIrrepIsWRTLeviPart
         (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
@@ -2341,7 +2341,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg
     WeylFDSmall.AmbientWeyl.ComputeAllElements(20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
-    for (int i=0; i<output.size; i++)
+    for (int i=0; i<output.size(); i++)
     { tempRoot=WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
 //      smallWeyl.DrawContour
  //     (tempRoot, theDV1, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
@@ -3057,7 +3057,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     signSel.theElements[0].initFromMults(0);
     PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
     PointsOfInterpolationRight.SetSize(degree-i+1);
-    int counter=0;
+//    int counter=0;
     valuesLeftInterpolands.SetSize(i+1);
     valuesRightInterpolands.SetSize(degree-i+1);
     for (int k=0; k<valuesLeftInterpolands.size; k++)

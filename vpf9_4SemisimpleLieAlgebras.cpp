@@ -55,15 +55,15 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   ElementSemisimpleLieAlgebra<Polynomial<Rational> > mustBeZero, tempE;
   this->LieBracket(inputOutputH, inputOutputE, mustBeZero);
   mustBeZero-=inputOutputE*2;
-  for (int i=0; i<mustBeZero.size; i++)
+  for (int i=0; i<mustBeZero.size(); i++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   this->LieBracket(inputOutputH, inputOutputF, mustBeZero);
   mustBeZero+=inputOutputF*2;
-  for (int i=0; i<mustBeZero.size; i++)
+  for (int i=0; i<mustBeZero.size(); i++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   this->LieBracket(inputOutputE, inputOutputF, mustBeZero);
   mustBeZero-=inputOutputH;
-  for (int i=0; i<mustBeZero.size; i++)
+  for (int i=0; i<mustBeZero.size(); i++)
     theSystem.AddOnTop(mustBeZero.theCoeffs[i]);
   if(logStream!=0)
   { *logStream << "The system to solve: ";
@@ -297,7 +297,7 @@ void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
   }
   output.MakeZero();
   DynkinSimpleType tempType;
-  for (int i =0; i<this->size; i++)
+  for (int i =0; i<this->size(); i++)
   { tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank);
     tempType.lengthFirstCoRootSquared=tempType.GetDefaultCoRootLengthSquared(0);
     output.AddMonomial(tempType, this->theCoeffs[i]);
@@ -369,26 +369,26 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
 }
 
 DynkinSimpleType DynkinType::GetSmallestSimpleType()const
-{ if (this->size==0)
+{ if (this->size()==0)
   { std::cout << "This is a programming error: asking for the smallest simple type "
     << " of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   DynkinSimpleType result=(*this)[0];
-  for (int i=1; i<this->size; i++)
+  for (int i=1; i<this->size(); i++)
     if ((*this)[i]<result)
       result=(*this)[i];
   return result;
 }
 
 DynkinSimpleType DynkinType::GetGreatestSimpleType()const
-{ if (this->size==0)
+{ if (this->size()==0)
   { std::cout << "This is a programming error: asking for the greatest simple type "
     << " of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   DynkinSimpleType result=(*this)[0];
-  for (int i=1; i<this->size; i++)
+  for (int i=1; i<this->size(); i++)
     if ((*this)[i]>result)
       result=(*this)[i];
   return result;
@@ -713,8 +713,8 @@ template <class coefficient>
 int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl
 (WeylGroup& theWeyl)const
 { HashedList<Vector<coefficient> > weightsSimpleCoords;
-  weightsSimpleCoords.SetExpectedSize(this->size);
-  for (int i=0; i<this->size; i++)
+  weightsSimpleCoords.SetExpectedSize(this->size());
+  for (int i=0; i<this->size(); i++)
     weightsSimpleCoords.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoordS));
   for (int i=0; i<weightsSimpleCoords.size; i++)
   { bool isGood=true;
@@ -1689,9 +1689,8 @@ void CandidateSSSubalgebra::ComputePrimalDecompositionWeightsOnly
   Vector<Rational> currentWeight, currentRootSpace;
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentVector=this->HighestVectorsNonSorted[i];
-    for (int j=0; j<currentVector.size; j++)
-    { currentRootSpace=
-      this->GetAmbientSS().GetWeightOfGenerator(currentVector[j].theGeneratorIndex);
+    for (int j=0; j<currentVector.size(); j++)
+    { currentRootSpace= this->GetAmbientSS().GetWeightOfGenerator(currentVector[j].theGeneratorIndex);
       currentWeight.SetSize(this->theHs.size+ this->CartanOfCentralizer.size);
       for (int k=0; k<this->theHs.size; k++)
         currentWeight[k]=
@@ -1755,17 +1754,17 @@ void CandidateSSSubalgebra::ComputePrimalDecompositionLastPart
     theWeight.weightFundamentalCoordS=currentHWPrimal;
     this->thePrimalChar.AddMonomial(theWeight, 1);
   }
-  this->HighestVectors.SetSize(this->thePrimalChar.size);
-  this->HighestWeightsPrimal.SetSize(this->thePrimalChar.size);
-  this->Modules.SetSize(this->thePrimalChar.size);
-  for (int i=0; i<this->thePrimalChar.size; i++)
+  this->HighestVectors.SetSize(this->thePrimalChar.size());
+  this->HighestWeightsPrimal.SetSize(this->thePrimalChar.size());
+  this->Modules.SetSize(this->thePrimalChar.size());
+  for (int i=0; i<this->thePrimalChar.size(); i++)
   { this->HighestVectors[i].SetSize(0);
     this->Modules[i].SetSize(0);
     this->HighestWeightsPrimal[i]=this->thePrimalChar[i].weightFundamentalCoordS;
   }
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
   { theWeight.weightFundamentalCoordS=this->HighestWeightsPrimalNonSorted[i];
-    int theModuleIndex=this->thePrimalChar.GetIndex(theWeight);
+    int theModuleIndex=this->thePrimalChar.theMonomials.GetIndex(theWeight);
     this->HighestVectors[theModuleIndex].AddOnTop(this->HighestVectorsNonSorted[i]);
     this->Modules[theModuleIndex].SetSize(this->Modules[theModuleIndex].size+1);
     this->Modules[theModuleIndex].LastObject()->SetSize(0);
@@ -1928,7 +1927,7 @@ void CandidateSSSubalgebra::AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
 { Polynomial<Rational> thePoly;
 //  std::cout << "<hr>I must vanish: " << elementThatMustVanish.ToString();
-  for (int i=0; i<elementThatMustVanish.size; i++)
+  for (int i=0; i<elementThatMustVanish.size(); i++)
   { thePoly=elementThatMustVanish.theCoeffs[i];
     thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
@@ -2009,7 +2008,7 @@ bool CandidateSSSubalgebra::ComputeChar
 
 //  std::cout << "<hr>Current candidate: " << this->ToStringCartanSA();
 //  std::cout << "<br>reducing: " << accumChar.ToString();
-  while (accumChar.size>0)
+  while (accumChar.size()>0)
   { int currentIndex=accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
     { std::cout << "This is a programming error: while decomposing ambient Lie algebra "
@@ -2068,12 +2067,12 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   tempMon.owner=0;
   tempMon.weightFundamentalCoordS.MakeZero(currentRank);
   Rational dimCentralizerBase=this->GetSSowner().GetNumGenerators();
-  if (!baseCandidate.theCharNonPrimalFundCoords.Contains(tempMon))
+  if (!baseCandidate.theCharNonPrimalFundCoords.theMonomials.Contains(tempMon))
   { if (currentRank>0)
       return;
   } else
-    dimCentralizerBase=
-    baseCandidate.theCharNonPrimalFundCoords.theCoeffs[baseCandidate.theCharNonPrimalFundCoords.GetIndex(tempMon)];
+    dimCentralizerBase=baseCandidate.theCharNonPrimalFundCoords.
+    theCoeffs[baseCandidate.theCharNonPrimalFundCoords.theMonomials.GetIndex(tempMon)];
   Rational baseLength=-1;
   List<DynkinSimpleType> theTypes;
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
@@ -3320,7 +3319,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   FormatExpressions tempCharFormat;
   if (!this->charFormaT.IsZeroPointer())
     tempCharFormat= this->charFormaT.GetElementConst();
-  for (int i=0; i<this->thePrimalChar.size; i++)
+  for (int i=0; i<this->thePrimalChar.size(); i++)
     out << "<td>" << "V_{" << i+1 << "}->"
     << this->thePrimalChar[i].weightFundamentalCoordS.ToString(&tempCharFormat) << "</td>";
   out << "</tr><tr><td>Module elements (weight vectors). "
@@ -3600,9 +3599,9 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
 void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy)
 { DynkinType result;
   result.MakeZero();
-  result.SetExpectedSize(this->size);
+  result.SetExpectedSize(this->size());
   DynkinSimpleType tempType;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   { tempType=(*this)[i];
     tempType.lengthFirstCoRootSquared*=multiplyCoRootSquaredLengthBy;
     result.AddMonomial(tempType, this->theCoeffs[i]);
@@ -3839,7 +3838,7 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
 
 bool CandidateSSSubalgebra::AmRegularSA()const
 { for (int i=0; i<this->theNegGens.size; i++)
-    if (this->theNegGens[i].size>1 || this->thePosGens[i].size>1)
+    if (this->theNegGens[i].size()>1 || this->thePosGens[i].size()>1)
       return false;
   return true;
 }
@@ -4078,7 +4077,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
-  for (int i=0; i<theDifference.size; i++)
+  for (int i=0; i<theDifference.size(); i++)
     if (theDifference.theCoeffs[i]<0)
     { //std::cout << " it's not because types don't match.";
       return false;
@@ -4248,7 +4247,7 @@ bool DynkinType::operator>(const DynkinType& other)const
     return false;
   DynkinSimpleType highestSimpleTypeDifference=difference[0];
   Rational maxComponentDifferenceMult=difference.theCoeffs[0];
-  for (int i=1; i<difference.size; i++)
+  for (int i=1; i<difference.size(); i++)
     if (difference[i]>highestSimpleTypeDifference)
     { maxComponentDifferenceMult=difference.theCoeffs[i];
       highestSimpleTypeDifference=difference[i];

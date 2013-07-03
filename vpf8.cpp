@@ -148,7 +148,7 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   (const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
   output.MakeZero();
-  for (int i=0; i<input.size; i++)
+  for (int i=0; i<input.size(); i++)
   { int currentIndex=input[i].theGeneratorIndex;
     output+=this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
   }
@@ -778,7 +778,7 @@ bool PiecewiseQuasipolynomial::MakeVPF
   }
   this->theBuffers=& theGlobalVariables;
   this->NumVariables=theRoots.GetDim();
-  partFractions theFracs;
+  PartFractions theFracs;
   FormatExpressions theFormat;
   std::stringstream out;
   std::string whatWentWrong;
@@ -1087,8 +1087,8 @@ void Lattice::GetDefaultFundamentalDomainInternalPoint
   output/=2;
 }
 
-bool partFractions::split(GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator)
-{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+bool PartFractions::split(GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator)
+{ //PartFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //this->flagAnErrorHasOccurredTimeToPanic=true;
   if (!this->flagInitialized)
   { this->IndexLowestNonProcessed=0;
@@ -1104,7 +1104,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, Vector<Rational>*
     //this->ComputeDebugString();
     //this->ComputeDebugString();
     this->CompareCheckSums(theGlobalVariables);
-    this->IndexLowestNonProcessed= this->size;
+    this->IndexLowestNonProcessed= this->size();
     this->MakeProgressReportSplittingMainPart(theGlobalVariables);
   }
 //  std::cout << "<br>checksum finish: " << this->EndCheckSum.ToString();
@@ -2625,7 +2625,7 @@ bool ConeComplex::findMaxLFOverConeProjective
     }
     Vector<Rational>& newWall=HyperPlanesCorrespondingToLF.TheObjects[i];
     newWall.MakeZero(theDim);
-    for (int j=0; j<currentPoly.size; j++)
+    for (int j=0; j<currentPoly.size(); j++)
       for (int k=0; k<theDim; k++)
         if (currentPoly[j](k)==1)
         { newWall[k]=currentPoly.theCoeffs[j];
@@ -3209,8 +3209,8 @@ void QuasiPolynomial::MakeZeroLatTiceZn(int theDim)
   this->valueOnEachLatticeShift.size=0;
 }
 
-void partFraction::GetRootsFromDenominator
-(partFractions& owner, Vectors<Rational>& output)
+void PartFraction::GetRootsFromDenominator
+(PartFractions& owner, Vectors<Rational>& output)const
 { output.SetSize(this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { output[i]=owner.startingVectors[this->IndicesNonZeroMults[i]];
@@ -3220,9 +3220,9 @@ void partFraction::GetRootsFromDenominator
   }
 }
 
-void partFraction::ComputePolyCorrespondingToOneMonomial
+void PartFraction::ComputePolyCorrespondingToOneMonomial
   (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
-   Lattice& theLattice, GlobalVariables& theGlobalVariables)
+   Lattice& theLattice, GlobalVariables& theGlobalVariables)const
 { Polynomial<Rational> tempP, outputPolyPart;
   Rational tempRat2;
   outputPolyPart.MakeOne(theMon.GetMinNumVars());
@@ -3231,15 +3231,14 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
     outputPolyPart*=(tempP);
   }
   outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon, theLattice, theGlobalVariables);
-  this->AlreadyAccountedForInGUIDisplay=true;
 }
 
-void partFraction::GetVectorPartitionFunction
-  (partFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+void PartFraction::GetVectorPartitionFunction
+  (PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
 { QuasiPolynomial shiftedPoly;
   Vectors<Rational> theNormals, theLatticeGenerators;
-  if (partFraction::MakingConsistencyCheck)
-    partFraction::CheckSum.MakeZero();
+  if (PartFraction::MakingConsistencyCheck)
+    PartFraction::CheckSum.MakeZero();
   this->GetRootsFromDenominator(owner, theLatticeGenerators);
   Lattice theLattice;
   theLattice.MakeFromRoots(theLatticeGenerators);
@@ -3251,7 +3250,7 @@ void partFraction::GetVectorPartitionFunction
   theNormals.AssignMatrixColumns(theNormalsMatForm);
   output.MakeZeroLatTiceZn(owner.AmbientDimension);
 
-  for (int i=0; i<theCoeff.size; i++)
+  for (int i=0; i<theCoeff.size(); i++)
   { this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, theCoeff[i], theNormals, theLattice, theGlobalVariables);
 //    output.ComputeDebugString();
 //    shiftedPoly.ComputeDebugString();
@@ -3263,29 +3262,29 @@ void partFraction::GetVectorPartitionFunction
 //    if (RecordNumMonomials)
 //    { std::stringstream out4, out3;
 //      out4 << "Current fraction: " << i+1<< " out of " << this->Coefficient.size << " processed";
-//      partFractions::NumProcessedForVPFMonomialsTotal++;
-//      out3  << " Processed " << partFractions::NumProcessedForVPFMonomialsTotal << " out of " << partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
+//      PartFractions::NumProcessedForVPFMonomialsTotal++;
+//      out3  << " Processed " << PartFractions::NumProcessedForVPFMonomialsTotal << " out of " << PartFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
 //      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
 //      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
 //      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 //    }
   }
-//  if (partFraction::MakingConsistencyCheck)
+//  if (PartFraction::MakingConsistencyCheck)
 //  { Rational tempLRat;
-//    output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
+//    output.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat);
 //    assert(tempLRat.DenShort==1);
-//    assert(tempLRat.IsEqualTo(partFraction::CheckSum));
+//    assert(tempLRat.IsEqualTo(PartFraction::CheckSum));
 //  }
 //  if (StoreToFile)
-//  { this->FileStoragePosition= partFraction::TheBigDump.tellp();
-//    output.WriteToFile(partFraction::TheBigDump);
-//    partFractions::ComputedContributionsList.flush();
+//  { this->FileStoragePosition= PartFraction::TheBigDump.tellp();
+//    output.WriteToFile(PartFraction::TheBigDump);
+//    PartFractions::ComputedContributionsList.flush();
 //  }
 
 //  Accum.ComputeDebugString();
 }
 
-bool partFractions::GetVectorPartitionFunction
+bool PartFractions::GetVectorPartitionFunction
   (QuasiPolynomial& output, Vector<Rational>& newIndicator, GlobalVariables& theGlobalVariables)
 { ProgressReport theReport(&theGlobalVariables);
   if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
@@ -3299,38 +3298,38 @@ bool partFractions::GetVectorPartitionFunction
   this->NumProcessedForVPFfractions=0;
   Rational oldCheckSum;
 //  QuasiPolynomialOld oldOutput;
-  if (partFraction::MakingConsistencyCheck)
-    partFractions::CheckSum.MakeZero();
+  if (PartFraction::MakingConsistencyCheck)
+    PartFractions::CheckSum.MakeZero();
   theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
   output.MakeZeroLatTiceZn(this->AmbientDimension);
   ///////////////////////////////////////////////
   //this->flagAnErrorHasOccurredTimeToPanic=true;
-  //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+  //PartFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //this->ComputeDebugString();
   ///////////////////////////////////////////////
   QuasiPolynomial tempQP;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   { //if (this->flagAnErrorHasOccurredTimeToPanic)
     //{ this->TheObjects[i].ComputeDebugString();
     //}
-    if (this->TheObjects[i].rootIsInFractionCone(*this, &newIndicator, theGlobalVariables))
-    { partFraction& currentPF=this->TheObjects[i];
+    if ((*this)[i].rootIsInFractionCone(*this, &newIndicator, theGlobalVariables))
+    { const PartFraction& currentPF=(*this)[i];
       currentPF.GetVectorPartitionFunction(*this, this->theCoeffs[i], tempQP, theGlobalVariables);
-/*      if(partFraction::MakingConsistencyCheck)
+/*      if(PartFraction::MakingConsistencyCheck)
       {  Rational tempLRat2, tempLRat3, tempLRat4;
         std::string tempS1, tempS2, tempS3, tempS4;
-        tempQP.Evaluate(partFraction::theVectorToBePartitioned, tempLRat2);
-        output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat3);
+        tempQP.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat2);
+        output.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat3);
         tempLRat2.ToString(tempS1);
         tempLRat3.ToString(tempS2);
         tempLRat4.Assign(tempLRat2);
         tempLRat4.Add(tempLRat3);
-        partFraction::CheckSum.ToString(tempS3);
-        partFractions::CheckSum.ToString(tempS4);
+        PartFraction::CheckSum.ToString(tempS3);
+        PartFractions::CheckSum.ToString(tempS4);
         assert(tempLRat2.den.IsEqualTo(LIOne));
         assert(tempLRat3.den.IsEqualTo(LIOne));
-        assert(tempLRat2.IsEqualTo(partFraction::CheckSum));
-        assert(tempLRat4.IsEqualTo(partFractions::CheckSum));
+        assert(tempLRat2.IsEqualTo(PartFraction::CheckSum));
+        assert(tempLRat4.IsEqualTo(PartFractions::CheckSum));
         if (i==4)
         { Stop();
           QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic=true;
@@ -3342,29 +3341,29 @@ bool partFractions::GetVectorPartitionFunction
         }
       }*/
       output+=tempQP;
-  /*    if (partFraction::MakingConsistencyCheck)
+  /*    if (PartFraction::MakingConsistencyCheck)
       {  Rational tempLRat;
-        output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
-        if ((! tempLRat.IsEqualTo(partFractions::CheckSum)) || (! tempLRat.den.IsEqualTo(LIOne)))
+        output.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat);
+        if ((! tempLRat.IsEqualTo(PartFractions::CheckSum)) || (! tempLRat.den.IsEqualTo(LIOne)))
         { std::string tempS, tempS2, tempS3, tempS4;
           Rational tempLRat2;
-          tempQP.Evaluate(partFraction::theVectorToBePartitioned, tempLRat2);
-          partFractions::CheckSum.ToString(tempS);
+          tempQP.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat2);
+          PartFractions::CheckSum.ToString(tempS);
           tempLRat.ToString(tempS2);
           oldCheckSum.ToString(tempS3);
           tempLRat2.ToString(tempS4);
-          partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+          PartFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //        assert(false);
         }
-        oldCheckSum.Assign(partFractions::CheckSum);
+        oldCheckSum.Assign(PartFractions::CheckSum);
         oldOutput.Assign(output);
       }*/
       this->MakeProgressVPFcomputation(theGlobalVariables);
     }
   }
-/*  if (partFraction::MakingConsistencyCheck)
+/*  if (PartFraction::MakingConsistencyCheck)
   { std::string tempS;
-    partFractions::CheckSum.ToString(tempS);
+    PartFractions::CheckSum.ToString(tempS);
     Stop();
   }*/
   return true;
@@ -3402,7 +3401,7 @@ void LargeInt::AssignString(const std::string& input)
       this->sign=-1;
 }
 
-std::string partFractions::DoTheFullComputationReturnLatexFileString
+std::string PartFractions::DoTheFullComputationReturnLatexFileString
 (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml)
 { std::string whatWentWrong;
   assert(false);
@@ -4253,7 +4252,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
 { if (!inputLPoly.IsLinear())
     return false;
   output.MakeZero(inputLPoly.GetMinNumVars()+1);
-  for (int i=0; i<inputLPoly.size; i++)
+  for (int i=0; i<inputLPoly.size(); i++)
   { int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex))
       output[theIndex]=inputLPoly.theCoeffs[i];
@@ -4450,15 +4449,15 @@ Vector<Rational> oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int Nu
   return output;
 }
 
-bool partFractions::RemoveRedundantShortRootsIndex
-(MonomialCollection<partFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables,
+bool PartFractions::RemoveRedundantShortRootsIndex
+(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables,
  Vector<Rational>* Indicator)
- { if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
+ { if (!(*this)[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
     return false;
   bool found=false;
-  for (int k=0; k < this->TheObjects[theIndex].IndicesNonZeroMults.size; k++)
-  { int currentIndex=this->TheObjects[theIndex].IndicesNonZeroMults.TheObjects[k];
-    oneFracWithMultiplicitiesAndElongations& currentFrac = this->TheObjects[theIndex].TheObjects[currentIndex];
+  for (int k=0; k < (*this)[theIndex].IndicesNonZeroMults.size; k++)
+  { int currentIndex=(*this)[theIndex].IndicesNonZeroMults.TheObjects[k];
+    const oneFracWithMultiplicitiesAndElongations& currentFrac = (*this)[theIndex].TheObjects[currentIndex];
     if (currentFrac.Elongations.size>1)
     { found=true;
       break;
@@ -4466,7 +4465,7 @@ bool partFractions::RemoveRedundantShortRootsIndex
   }
   if (!found)
     return false;
-  partFraction thePF;
+  PartFraction thePF;
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS, tempS1, tempS2;
   Polynomial<LargeInt> tempIP, currentCoeff;
@@ -4495,7 +4494,7 @@ bool partFractions::RemoveRedundantShortRootsIndex
         }
       }
     }
-    if (partFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
+    if (PartFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
     { //thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
       //localEndCheckSum.ToString(tempS1);
       //assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
@@ -4688,18 +4687,18 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   }
 //  std::cout << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ToString(PolyFormatLocal);
   Matrix<Rational> tempMat;
-  tempMat.init(basisMonsAll.size*2, basisMonsZeroWeight.size);
+  tempMat.init(basisMonsAll.size()*2, basisMonsZeroWeight.size());
 //  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
   Polynomial<Rational>  tempP;
   for (int l=0; l<2; l++)
-    for (int k=0; k<basisMonsZeroWeight.size; k++)
+    for (int k=0; k<basisMonsZeroWeight.size(); k++)
     { if (l==0)
         this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       else
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
-      for (int j=0; j<basisMonsAll.size; j++)
-      { int indexInResult=tempP.GetIndex(basisMonsAll[j]);
-        int currentRow=l*basisMonsAll.size+j;
+      for (int j=0; j<basisMonsAll.size(); j++)
+      { int indexInResult=tempP.theMonomials.GetIndex(basisMonsAll[j]);
+        int currentRow=l*basisMonsAll.size()+j;
         if (indexInResult==-1)
           tempMat.elements[currentRow][k]=0;
         else
@@ -4716,7 +4715,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   for (int i=0; i<output.size; i++)
   { Polynomial<Rational>& current=output[i];
     current.MakeZero();
-    for (int j=0; j<basisMonsZeroWeight.size; j++)
+    for (int j=0; j<basisMonsZeroWeight.size(); j++)
       if (!tempRoots[i][j].IsEqualToZero())
       { theMon=(basisMonsZeroWeight[j]);
         current.AddMonomial(theMon, tempRoots[i][j]);

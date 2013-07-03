@@ -179,14 +179,14 @@ public:
 
 };
 
-class partFraction: ListLight<oneFracWithMultiplicitiesAndElongations>
+class PartFraction: ListLight<oneFracWithMultiplicitiesAndElongations>
 {
 private:
   void findPivot();
   void findInitialPivot();
   //void intRootToString(std::stringstream& out, int* TheRoot, bool MinusInExponent);
-  bool rootIsInFractionCone (partFractions& owner, Vector<Rational>* theRoot, GlobalVariables& theGlobalVariables);
-  friend class partFractions;
+  bool rootIsInFractionCone (PartFractions& owner, Vector<Rational>* theRoot, GlobalVariables& theGlobalVariables)const;
+  friend class PartFractions;
   friend class partFractionPolynomialSubstitution;
 public:
   std::string DebugString;
@@ -196,16 +196,16 @@ public:
   bool IsIrrelevant;
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
-  friend std::ostream& operator << (std::ostream& output, const partFraction& input)
+  friend std::ostream& operator << (std::ostream& output, const PartFraction& input)
   { output << " Not implemented, please fix. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     return output;
   }
   static const bool IsEqualToZero(){return false;}
   bool RemoveRedundantShortRootsClassicalRootSystem
-(partFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
+(PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
-  bool RemoveRedundantShortRoots(partFractions& owner, Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
+  bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
   static bool flagAnErrorHasOccurredTimeToPanic;
 //  static  bool flagUsingPrecomputedOrlikSolomonBases;
@@ -214,10 +214,10 @@ public:
   static bool MakingConsistencyCheck;
   static Rational CheckSum, CheckSum2;
   static Vector<Rational> theVectorToBePartitioned;
-//  static ListPointers<partFraction> GlobalCollectorPartFraction;
+//  static ListPointers<PartFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial
   (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
-   Lattice& theLattice, GlobalVariables& theGlobalVariables)
+   Lattice& theLattice, GlobalVariables& theGlobalVariables)const
   ;
   static void EvaluateIntPoly
   (const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output)
@@ -226,67 +226,67 @@ public:
   (Vector<Rational>& normal, const MonomialP& shiftRational, int theMult,
    Polynomial<Rational>& output);
   void ComputeNormals
-(partFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
+(PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
   ;
   int ComputeGainingMultiplicityIndexInLinearRelation
 (bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation)
   ;
   void GetRootsFromDenominator
-  (partFractions& owner, Vectors<Rational>& output)
+  (PartFractions& owner, Vectors<Rational>& output)const
 ;
   void GetVectorPartitionFunction
-  (partFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  (PartFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
   ;
   LargeInt EvaluateIntPolyAtOne(Polynomial<LargeInt>& input);
   //void InsertNewRootIndex(int index);
   //void MultiplyMinusShiftBy (int* theRoot, int Multiplicity);
   void MultiplyCoeffBy(Rational& r);
   void decomposeAMinusNB
-(int indexA, int indexB, int n, int indexAminusNB, MonomialCollection<partFraction, Polynomial<LargeInt> >& output,
- GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, partFractions& owner)
+(int indexA, int indexB, int n, int indexAminusNB, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+ GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
    ;
   bool DecomposeFromLinRelation
-(Matrix<Rational> & theLinearRelation, MonomialCollection<partFraction, Polynomial<LargeInt> >& output,
+(Matrix<Rational> & theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
  Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
    ;
   void ComputeOneCheckSuM
-(partFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)
+(PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
   ;
   bool ReduceMeOnce
 (const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff, GlobalVariables& theGlobalVariables,
  Vector<Rational>* Indicator, Vectors<Rational>& startingVectors)
   ;
-  void ReduceMonomialByMonomial(partFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
+  void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void ApplySzenesVergneFormulA
 (List<Vector<Rational> >& startingVectors,  List<int>& theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex,
- int ElongationGainingMultiplicityIndex, MonomialCollection<partFraction, Polynomial<LargeInt> >& output,
+ int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
  GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator)
   ;
   void ApplyGeneralizedSzenesVergneFormulA
 (List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients,
  int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex,
- MonomialCollection<partFraction, Polynomial<LargeInt> >& output,
+ MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
  GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator,
  List<Vector<Rational> >& startingVectors)
    ;
   bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod
-(MonomialCollection<partFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, partFractions& owner)
+(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+ Vector<Rational>* Indicator, PartFractions& owner)
    ;
-//  void reduceOnceOrlikSolomonBasis(partFractions&Accum);
+//  void reduceOnceOrlikSolomonBasis(PartFractions&Accum);
   bool reduceOnceGeneralMethodNoOSBasis
-(partFractions& owner, MonomialCollection<partFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+(PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
  Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
    ;
   bool ReduceOnceGeneralMethod
-(partFractions& owner, MonomialCollection<partFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+(PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
  Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
   ;
-  bool AreEqual(partFraction& p);
+  bool AreEqual(PartFraction& p);
   bool IsReduced();
   unsigned int HashFunction() const;
-  static inline unsigned int HashFunction(const partFraction& input)
+  static inline unsigned int HashFunction(const PartFraction& input)
   { return input.HashFunction();
   }
   int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
@@ -297,25 +297,25 @@ public:
   //void GetNumerator(Polynomial<Rational> & output);
   //void SetNumerator(Polynomial<Rational> & input);
   void PrepareFraction
-(int indexA, int indexB, int AminusNBindex, bool indexAisNullified, partFraction& output,
+(int indexA, int indexB, int AminusNBindex, bool indexAisNullified, PartFraction& output,
  Polynomial<LargeInt>& AminusNbetaPoly, Polynomial<LargeInt>& outputCommonCoeff)
   ;
-  void Assign(const partFraction& p);
-  void AssignDenominatorOnly(const partFraction& p);
-  void AssignNoIndicesNonZeroMults(partFraction& p);
-  int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner, int minIndex);
+  void Assign(const PartFraction& p);
+  void AssignDenominatorOnly(const PartFraction& p);
+  void AssignNoIndicesNonZeroMults(PartFraction& p);
+  int getSmallestNonZeroIndexGreaterThanOrEqualTo(PartFractions& owner, int minIndex);
   int ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
   int ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
-  partFraction();
-  ~partFraction();
-  void GetPolyReduceMonomialByMonomial(partFractions& owner, GlobalVariables& theGlobalVariables, Vector<Rational>& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
+  PartFraction();
+  ~PartFraction();
+  void GetPolyReduceMonomialByMonomial(PartFractions& owner, GlobalVariables& theGlobalVariables, Vector<Rational>& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
   void ReduceMonomialByMonomialModifyOneMonomial
-(partFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
+(PartFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
  List<int>& thePowersSigned, MonomialP& input, LargeInt& inputCoeff)
   ;
   void GetAlphaMinusNBetaPoly
-  (partFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output)
+  (PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output)
   ;
   void GetNElongationPolyWithMonomialContribution
 (List<Vector<Rational> >& startingVectors, List<int>& theSelectedIndices, List<int>& theCoefficients,
@@ -326,17 +326,17 @@ public:
    Polynomial<LargeInt>& output, int theDimension)
   ;
   static void GetNElongationPoly(Vector<Rational>& exponent, int n, Polynomial<LargeInt>& output, int theDimension);
-  int GetNumProportionalVectorsClassicalRootSystems(partFractions& owner);
-  bool operator==(const partFraction& right)const;
-  void operator=(const partFraction& right);
-  bool initFromRoots(partFractions& owner, Vectors<Rational>& input);
+  int GetNumProportionalVectorsClassicalRootSystems(PartFractions& owner);
+  bool operator==(const PartFraction& right)const;
+  void operator=(const PartFraction& right);
+  bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
   std::string ToString
-(partFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
+(PartFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
  FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
    ;
-  void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  int SizeWithoutDebugString();
+  void ReadFromFile(PartFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const;
+  int SizeWithoutDebugString()const;
 };
 
 class Cone
@@ -641,10 +641,10 @@ public:
   }
 };
 
-class partFractions: public MonomialCollection<partFraction, Polynomial<LargeInt> >
+class PartFractions: public MonomialCollection<PartFraction, Polynomial<LargeInt> >
 { bool splitPartial(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void initCommon();
-  partFractions(const partFractions& other);
+  PartFractions(const PartFractions& other);
 public:
   int AmbientDimension;
   int IndexLowestNonProcessed;
@@ -720,7 +720,7 @@ public:
   void RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   bool RemoveRedundantShortRootsIndex
-(MonomialCollection<partFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables,
+(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables,
  Vector<Rational>* Indicator)
   ;
   bool splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
@@ -738,7 +738,7 @@ public:
   void PopIndexHashChooseSwapByLowestNonProcessedAndAccount(int index, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void PopIndexSwapLastHashAndAccount(int index, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void PrepareIndicatorVariables();
-  void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
+  void initFromOtherPartFractions(PartFractions& input, GlobalVariables& theGlobalVariables);
   void IncreaseHighestIndex(int increment);
   std::string ToString(GlobalVariables& theGlobalVariables, FormatExpressions& theFormat){std::string tempS; this->ToString(tempS, theGlobalVariables, theFormat);  return tempS;}
   void ToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
@@ -760,15 +760,17 @@ public:
   int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
-  void ResetRelevanceIsComputed(){for (int i=0; i<this->size; i++){this->TheObjects[i].RelevanceIsComputed=false; }; }
-  partFractions();
+  void ResetRelevanceIsComputed()
+  { std::cout << "This is not implemented yet. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  PartFractions();
   int SizeWithoutDebugString();
   bool CheckForMinimalityDecompositionWithRespectToRoot(Vector<Rational>  *theRoot, GlobalVariables& theGlobalVariables);
   void MakeProgressReportSplittingMainPart(GlobalVariables& theGlobalVariables);
   void MakeProgressReportRemovingRedundantRoots(GlobalVariables& theGlobalVariables);
   void MakeProgressReportUncoveringBrackets(GlobalVariables& theGlobalVariables);
   void MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables);
-  void operator=(const partFractions& other);
 };
 
 class DynkinSimpleType
@@ -920,7 +922,7 @@ public:
     return result;
   }
   bool IsPossibleCoRootLength(const Rational& input)const
-  { for (int i=0; i<this->size; i++)
+  { for (int i=0; i<this->size(); i++)
       if ((*this)[i].IsPossibleCoRootLength(input))
         return true;
     return false;
@@ -930,7 +932,7 @@ public:
   int GetRank()const;
   int GetRootSystemSize()const
   { Rational result=0;
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
       result+=this->theCoeffs[i]*(*this)[i].GetRootSystemSize();
     int intResult;
     if (!result.IsSmallInteger(&intResult))
@@ -942,7 +944,7 @@ public:
   }
   int GetRootSystemPlusRank()const
   { Rational result=0;
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
       result+=this->theCoeffs[i]*(*this)[i].GetRootSystemPlusRank();
     int intResult;
     if (!result.IsSmallInteger(&intResult))
@@ -1497,7 +1499,7 @@ public:
   ;
   template <class coefficient>
   bool FreudenthalEvalIrrepIsWRTLeviPart
-(Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
+(const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
  List<coefficient>& outputMultsSimpleCoordS, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
@@ -2688,7 +2690,7 @@ public:
   static inline unsigned int HashFunction(const MonomialUniversalEnveloping<coefficient>& input)
   { return input.HashFunction();
   }
-  void GetDegree(coefficient& output)
+  void GetDegree(coefficient& output)const
   { if (this->Powers.size==0)
     { output.MakeZero();
       return;
@@ -2768,7 +2770,7 @@ public:
   ;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero()const
-  { return this->size==0;
+  { return this->size()==0;
   }
   bool HWMTAbilinearForm
   (const ElementUniversalEnveloping<coefficient>&right, coefficient& output,
@@ -2889,12 +2891,11 @@ static bool GetBasisFromSpanOfElements
   ;
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()const
-  { if (this->size!=1)
+  { if (this->size()!=1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
-    MonomialUniversalEnveloping<coefficient>& tempMon=this->TheObjects[0];
-    return tempMon.generatorsIndices.size==1;
+    return (*this)[0].generatorsIndices.size==1;
   }
   void SubstitutionCoefficients
 (PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext,
@@ -2993,7 +2994,7 @@ public:
   void AssignPolynomial(const Polynomial<Rational>& input)
   { this->MakeZero();
     MonomialWeylAlgebra tempM;
-    for (int i=0; i<input.size; i++)
+    for (int i=0; i<input.size(); i++)
     { tempM.polynomialPart=input[i];
       this->AddMonomial(tempM, input.theCoeffs[i]);
     }
@@ -3217,10 +3218,10 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
 {
   public:
   void CheckConsistency()const
-  { if (this->size==0)
+  { if (this->size()==0)
       return;
     const SemisimpleLieAlgebra* owner=(*this)[0].owner;
-    for (int i=1; i<this->size; i++)
+    for (int i=1; i<this->size(); i++)
       if ((*this)[i].owner!=owner)
       { std::cout << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras"
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -3236,7 +3237,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
     }
   }
   bool IsEqualToZero()
-  { return this->size==0;
+  { return this->size()==0;
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -3279,7 +3280,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
 (WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
   ;
   SemisimpleLieAlgebra* GetOwner()const
-  { if (this->size==0)
+  { if (this->size()==0)
     { std::cout << "This is a programming error: requesting owner semisimple Lie algebra "
       << " of zero character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -3480,19 +3481,19 @@ public:
   }
   int GetMaxNumRows()const
   { int result=-1;
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
       result=MathRoutines::Maximum(result, (*this)[i].vIndex);
     return result+1;
   }
   int GetMaxNumCols()const
   { int result=-1;
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
       result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
     return result+1;
   }
   int GetMaxNumColsNumRows()const
   { int result=-1;
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
     { result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
       result=MathRoutines::Maximum(result, (*this)[i].vIndex);
     }
@@ -3530,8 +3531,8 @@ public:
     MonomialMatrix tempM;
     this->MakeZero();
     coefficient tempCF;
-    for (int i=0; i<left.size; i++)
-      for (int j=0; j<right.size; j++)
+    for (int i=0; i<left.size(); i++)
+      for (int j=0; j<right.size(); j++)
       { tempM.dualIndex=left[i].dualIndex* rightDomainDim+right[j].dualIndex;
         tempM.vIndex=left[i].vIndex*rightRangeDim+right[j].vIndex;
         tempCF=left.theCoeffs[i];
@@ -3543,7 +3544,7 @@ public:
   { MatrixTensor<coefficient> thisCopy=*this;
     this->MakeZero();
     coefficient tempCF;
-    for (int i=0; i<thisCopy.size; i++)
+    for (int i=0; i<thisCopy.size(); i++)
     { tempCF=thisCopy.theCoeffs[i];
       tempCF.Substitution(theSub);
       this->AddMonomial(thisCopy[i] , tempCF);
@@ -3575,10 +3576,10 @@ public:
     MatrixTensor<coefficient> output;
     MonomialMatrix theMon;
     output.MakeZero();
-    output.SetExpectedSize(this->size*standsOnTheLeft.size*2);
+    output.SetExpectedSize(this->size()*standsOnTheLeft.size()*2);
     coefficient tempCF;
-    for (int i=0; i<this->size; i++)
-      for (int j=0; j<standsOnTheLeft.size; j++)
+    for (int i=0; i<this->size(); i++)
+      for (int j=0; j<standsOnTheLeft.size(); j++)
       { tempCF=this->theCoeffs[i];
         tempCF*=standsOnTheLeft.theCoeffs[j];
         theMon=standsOnTheLeft[j];
@@ -3602,7 +3603,7 @@ public:
   { theDim=MathRoutines::Maximum(theDim, this->GetMaxNumColsNumRows());
     output.init(theDim, theDim);
     output.NullifyAll();
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
       if ((*this)[i].IsId)
         for (int j=0; j<theDim; j++)
           output(j,j)+= this->theCoeffs[i];
@@ -3846,7 +3847,7 @@ class MonomialGeneralizedVerma
   }
   void MultiplyMeByUEEltOnTheLefT
   (const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
    ;
   void operator=(const MonomialGeneralizedVerma<coefficient>& other)
   { this->owneR=other.owneR;
@@ -4076,7 +4077,7 @@ public:
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
-    return this->TheObjects[0].IsHWV();
+    return (*this)[0].IsHWV();
   }
 
   void MakeHWV
@@ -4099,13 +4100,13 @@ public:
     return -1;
   }
   ModuleSSalgebra<coefficient>& GetOwnerModule()const
-  { if (this->size <=0)
+  { if (this->size() <=0)
     { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
       << " This is not allowed as the index of the owner modules are stored in the monomials. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    MonomialTensorGeneralizedVermas<coefficient>& theMon=this->TheObjects[0];
+    const MonomialTensorGeneralizedVermas<coefficient>& theMon=(*this)[0];
     if (theMon.theMons.size<=0)
     { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
       << " This is not allowed: constant monomials do not have owners. "
@@ -4273,7 +4274,7 @@ public:
   List<Rational> theCoeffs;
   Vectors<Rational> theTranslationS;
   Vectors<Rational> theTranslationsProjectedBasisChanged;
-  partFractions thePfs;
+  PartFractions thePfs;
 //  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation theMaxComputation;
@@ -4586,7 +4587,7 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2)
 }
 
 template <class Object>
-int List<Object>::SizeWithoutObjects()
+int List<Object>::SizeWithoutObjects()const
 { return  sizeof(this->ActualSize)+ sizeof(this->size)+ sizeof(this->TheObjects);
 }
 
@@ -5686,15 +5687,14 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
 
 template <class TemplateMonomial, class coefficient>
 std::ostream& operator<<
-  (std::ostream& output,
-   const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
-{ if (theCollection.size==0)
+  (std::ostream& output, const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
+{ if (theCollection.size()==0)
   { output << "0";
     return output;
   }
   std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
-  sortedMons=theCollection;
+  sortedMons=theCollection.theMonomials;
   sortedMons.QuickSortDescending();
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;
@@ -5702,7 +5702,7 @@ std::ostream& operator<<
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     std::stringstream tempStream;
-    coefficient& currentCoeff=theCollection.theCoeffs[theCollection.GetIndex(currentMon)];
+    coefficient& currentCoeff=theCollection.theCoeffs[theCollection.theMonomials.GetIndex(currentMon)];
     tempStream << currentCoeff;
     tempS1=tempStream.str();
     tempS2=currentMon.ToString();
@@ -5961,8 +5961,8 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToLieAlgebraElementIfPossib
   Rational theConst=0;
   coefficient theExponent;
   ChevalleyGenerator tempChevalley;
-  for (int i=0; i<this->size; i++)
-  { MonomialUniversalEnveloping<coefficient>& tempMon= this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { const MonomialUniversalEnveloping<coefficient>& tempMon= (*this)[i];
     tempMon.GetDegree(theExponent);
     if (!theExponent.IsEqualToOne())
       return false;
@@ -5986,7 +5986,7 @@ void ElementUniversalEnveloping<coefficient>::AssignElementLieAlgebra
   tempMon.Powers.SetSize(1);
   tempMon.Powers[0]=theRingUnit;
   coefficient tempCF;
-  for (int i=0; i<input.size; i++)
+  for (int i=0; i<input.size(); i++)
   { tempCF=theRingUnit; //<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
     tempCF*=input.theCoeffs[i];//<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
     tempMon.generatorsIndices[0]=input[i].theGeneratorIndex;
@@ -6218,7 +6218,7 @@ template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::RaiseToPower(int thePower)
 { ElementUniversalEnveloping<coefficient> buffer;
   buffer=*this;
-  if (this->size==0)
+  if (this->size()==0)
     return;
   this->MakeConst(this->theCoeffs[0].GetOne(), *this->owneR);
   for (int i=0; i<thePower; i++)
@@ -6490,8 +6490,8 @@ void ElementTensorsGeneralizedVermas<coefficient>::Substitution
   MonomialTensorGeneralizedVermas<coefficient> currentMon;
   output.MakeZero();
   coefficient tempCF;
-  for (int i=0; i<this->size; i++)
-  { currentMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { currentMon=(*this)[i];
 //    std::cout << "<br>currentMon before sub: " << currentMon.ToString();
     currentMon.Substitution(theSub, theMods);
 //    std::cout << "<br>currentMon after sub: " << currentMon.ToString();
@@ -6527,8 +6527,8 @@ void ElementUniversalEnveloping<coefficient>::Substitution
   output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<coefficient> theMon;
   coefficient tempCF;
-  for (int i=0; i<this->size; i++)
-  { theMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { theMon=(*this)[i];
     theMon.Substitution(theSub);
     tempCF=this->theCoeffs[i];
     tempCF.Substitution(theSub);
@@ -6555,7 +6555,7 @@ template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::operator=(const ElementSumGeneralizedVermas<coefficient>& other)
 { this->MakeZero();
   MonomialTensorGeneralizedVermas<coefficient> theMon;
-  for (int i=0; i<other.size; i++)
+  for (int i=0; i<other.size(); i++)
   { theMon=other[i];
     this->AddMonomial(theMon, other.theCoeffs[i]);
   }
@@ -6569,12 +6569,12 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
  GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
 { ElementTensorsGeneralizedVermas<coefficient> buffer;
   output.MakeZero();
-  for (int i=0; i<theUE.size; i++)
+  for (int i=0; i<theUE.size(); i++)
   { if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
     { ElementSumGeneralizedVermas<coefficient> tempOutput;
       std::cout << "<hr>emergency mode!";
-      for (int j=0; j<this->size; j++)
-      { MonomialTensorGeneralizedVermas<coefficient> currentMon=this->TheObjects[j];
+      for (int j=0; j<this->size(); j++)
+      { const MonomialTensorGeneralizedVermas<coefficient>& currentMon=(*this)[j];
         if (currentMon.theMons.size!=1)
           return false;
         MonomialGeneralizedVerma<coefficient>& currentSingleMon=currentMon.theMons[0];
@@ -6676,8 +6676,8 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
 //  FormatExpressions tempFormat;
 //  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   coefficient currentCoeff;
-  for (int i=0; i<this->size; i++)
-  { MonomialTensorGeneralizedVermas<coefficient>& currentMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { const MonomialTensorGeneralizedVermas<coefficient>& currentMon=(*this)[i];
     accumMon.theMons.SetSize(0);
     for (int j=0; j<currentMon.theMons.size; j++)
     { tempElt.MakeZero();
@@ -6686,7 +6686,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
 //      if (tempElt.size>0)
 //        std::cout << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
-      for (int k=0; k<tempElt.size; k++)
+      for (int k=0; k<tempElt.size(); k++)
       { currentCoeff=this->theCoeffs[i];
 //        std::cout << "<br>coeff: " << currentCoeff.ToString() << " times " << tempElt.theCoeffs[k].ToString() << " equals ";
         currentCoeff*=tempElt.theCoeffs[k];
@@ -6707,13 +6707,13 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT
 (const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output,
-GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma<coefficient>::MultiplyMeByUEEltOnTheLefT");
   MonomialGeneralizedVerma<coefficient> currentMon;
   output.MakeZero();
   ElementSumGeneralizedVermas<coefficient> buffer;
   ProgressReport theReport(&theGlobalVariables);
-  for (int j=0; j<theUE.size; j++)
+  for (int j=0; j<theUE.size(); j++)
   { currentMon.theMonCoeffOne=theUE[j];
     std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
     currentMon.theMonCoeffOne*=this->theMonCoeffOne;
@@ -6724,8 +6724,8 @@ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coeff
     std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
     << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
-    reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
-    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
+    reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
+    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
     reportStream << " done.";
@@ -6747,9 +6747,9 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
   ElementSumGeneralizedVermas<coefficient> buffer, Accum;
 //std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
   Accum.MakeZero();
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   {// std::cout << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
-    this->TheObjects[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
+    (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
     //std::cout << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
     buffer*=this->theCoeffs[i];
 //    std::cout << "<br>to obtain " << buffer.ToString();
@@ -6804,14 +6804,14 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
   //<< theMod.theModuleWeightsSimpleCoords.size;
   ProgressReport theReport(&theGlobalVariables);
   coefficient theCF;
-  for (int l=0; l<theUEelt.size; l++)
+  for (int l=0; l<theUEelt.size(); l++)
   { currentMon=theUEelt[l];
     //std::cout << "<br> Processing monomial " << currentMon.ToString();
     tempMat1.MakeIdSpecial();
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.ToString() << " of index " << l+1 << " out of "
-      << theUEelt.size << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
+      << theUEelt.size() << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
       theReport.Report(reportStream.str());
       int thePower;
       if (!currentMon.Powers[k].IsSmallInteger(&thePower))
@@ -6831,7 +6831,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
     }
 //    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
-    for (int i=0; i<tempMat1.size; i++)
+    for (int i=0; i<tempMat1.size(); i++)
     { int otherIndex=-1;
       if (tempMat1[i].dualIndex==this->indexFDVector)
         otherIndex=tempMat1[i].vIndex;
@@ -7276,7 +7276,7 @@ bool charSSAlgMod<coefficient>::DrawMe
   Vectors<coefficient> dominantWeightsNonHashed;
   HashedList<Vector<coefficient> > finalWeights;
   Vector<Rational> convertor;
-  for (int i=0; i< CharCartan.size; i++)
+  for (int i=0; i< CharCartan.size(); i++)
   { const MonomialChar<coefficient>& currentMon=CharCartan[i];
     dominantWeightsNonHashed.size=0;
     dominantWeightsNonHashed.AddOnTop
@@ -7315,8 +7315,8 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan
   Vector<Rational> actualWeightRationalPart;
 
   actualAmbientWeyl.DrawRootSystem(theDrawingVars, true, theGlobalVariables, false, 0, false);
-  for (int j=0; j<this->size; j++)
-  { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental(this->TheObjects[j].weightFundamentalCoordS);
+  for (int j=0; j<this->size(); j++)
+  { actualWeight=actualAmbientWeyl.GetSimpleCoordinatesFromFundamental((*this)[j].weightFundamentalCoordS);
     actualWeightRationalPart=actualWeight.GetVectorRational(); // <-type conversion here!
     theDrawingVars.drawCircleAtVectorBuffer(actualWeightRationalPart, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
     theDrawingVars.drawTextAtVectorBuffer
@@ -7361,7 +7361,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
 
 template <class coefficient>
 bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
-(Vector<coefficient>& inputHWfundamentalCoords,
+(const Vector<coefficient>& inputHWfundamentalCoords,
  HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoordS,
  List<coefficient>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
@@ -7520,8 +7520,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   coefficient bufferCoeff, highestCoeff;
   out << "Starting character: " << this->ToString();
   tempMon.owner=this->GetOwner();
-  for (int i=0; i<this->size; i++)
-  { MonomialChar<coefficient>& currentMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { const MonomialChar<coefficient>& currentMon=(*this)[i];
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart
         (currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
@@ -7543,7 +7543,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   remainingCharDominantLevi.MakeZero();
   Vectors<coefficient> orbitDom;
   tempMon.owner=this->GetOwner();
-  for (int i=0; i<charAmbientFDWeyl.size; i++)
+  for (int i=0; i<charAmbientFDWeyl.size(); i++)
   { orbitDom.SetSize(0);
     if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated
         (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
@@ -7573,20 +7573,20 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 
   Vector<coefficient> simpleGeneratorBaseField;
   while(!remainingCharDominantLevi.IsEqualToZero())
-  { localHighest=*remainingCharDominantLevi.LastObject();
+  { localHighest=*remainingCharDominantLevi.theMonomials.LastObject();
     for (bool Found=true; Found; )
     { Found=false;
       for (int i=0; i<outputWeylSub.simpleGenerators.size; i++)
       { tempMon=localHighest;
         simpleGeneratorBaseField=outputWeylSub.simpleGenerators[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordS+=this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
-        if (remainingCharDominantLevi.Contains(tempMon))
+        if (remainingCharDominantLevi.theMonomials.Contains(tempMon))
         { localHighest=tempMon;
           Found=true;
         }
       }
     }
-    highestCoeff=remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.GetIndex(localHighest)];
+    highestCoeff=remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
     output.AddMonomial(localHighest, highestCoeff);
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
         (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
@@ -7619,7 +7619,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
-    for (int i=0; i<output.size; i++)
+    for (int i=0; i<output.size(); i++)
     { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
       outputWeylSub.DrawContour
       (tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
@@ -7639,11 +7639,11 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
    const coefficient& theRingZero, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors,
    Vectors<coefficient>* outputWeightsFundCoords, Vectors<coefficient>* outputEigenSpace, charSSAlgMod<coefficient>* outputChar)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::SplitOverLevi");
-  if (this->theChaR.size!=1)
+  if (this->theChaR.size()!=1)
   { if (Report!=0)
     { std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size << " monomials)";
+      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size() << " monomials)";
       *Report=out.str();
     }
     return;
@@ -7724,14 +7724,14 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
     currentWeight+=hwFundCoordsNilPart;
     readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
     << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
-    if (currentElt.size>1)
+    if (currentElt.size()>1)
       out << "(";
     if (outputEigenVectors!=0)
       outputEigenVectors->AddOnTop(currentElt);
     if (outputWeightsFundCoords!=0)
       outputWeightsFundCoords->AddOnTop(currentWeight);
     out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
-    if (currentElt.size>1)
+    if (currentElt.size()>1)
       out << ")";
     out << " v_\\lambda";
     out << "</td><td>(weight: "
@@ -7770,13 +7770,13 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->SetExpectedSize(other.size+this->size);
+  this->SetExpectedSize(other.size()+this->size());
   charSSAlgMod result, summand;
   result.MakeZero();
   std::string potentialError;
   coefficient theCF;
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<other.size; j++)
+  for (int i=0; i<this->size(); i++)
+    for (int j=0; j<other.size(); j++)
     { const MonomialChar<Rational>& left = (*this)[i];
       const MonomialChar<Rational>& right=other[j];
       potentialError=left.TensorAndDecompose(right, summand, theGlobalVariables);
@@ -7893,7 +7893,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
   theVect.SetSize(1);
   MonomialChar<coefficient> tempMon;
   tempMon.owner=0;
-  for (int i=0; i<domChar.size; i++)
+  for (int i=0; i<domChar.size(); i++)
   { theVect[0]=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
     if (!(this->GetOwner()->theWeyl.GenerateOrbit(theVect, false, theOrbit, false, -1, 0, upperBoundNumDominantWeights)))
     { if (outputDetails!=0)
@@ -7917,7 +7917,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output)const
   }
   MonomialChar<coefficient> tempM;
   output.MakeZero();
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   { tempM=(*this)[i];
     tempM.weightFundamentalCoordS.Minus();
     output.AddMonomial(tempM, this->theCoeffs[i]);
@@ -7944,8 +7944,8 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
   MonomialChar<coefficient> tempMon;
   tempMon.owner=0;
   coefficient bufferCoeff;
-  for (int i=0; i<this->size; i++)
-  { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoordS;
+  for (int i=0; i<this->size(); i++)
+  { currentWeightFundCoords=(*this)[i].weightFundamentalCoordS;
     if (!this->GetOwner()->theWeyl.FreudenthalEval
     (currentWeightFundCoords, currentWeights, currentMults, &localDetail, theGlobalVariables, upperBoundNumDominantWeights))
     { if (outputDetails!=0)
@@ -8374,8 +8374,8 @@ void ElementUniversalEnveloping<coefficient>::ModOutVermaRelations
   ElementUniversalEnveloping<coefficient> output;
   output.MakeZero(*this->owneR);
   coefficient acquiredCoeff;
-  for (int i=0; i<this->size; i++)
-  { tempMon= this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { tempMon= (*this)[i];
     tempMon.ModOutVermaRelations(acquiredCoeff, theContext, subHiGoesToIthElement, theRingUnit, theRingZero);
     acquiredCoeff*=this->theCoeffs[i];
 //    std::cout << "<hr><hr>Adding " << tempMon.ToString() << " times " << acquiredCoeff.ToString() << " to " << output.ToString();
@@ -8393,11 +8393,11 @@ void ElementUniversalEnveloping<coefficient>::Simplify
   MonomialUniversalEnveloping<coefficient> tempMon;
   coefficient currentCoeff;
   outpuT.MakeZero(*this->owneR);
-  for (; this->size>0; )
+  for (; this->size()>0; )
   {// FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     //std::cout << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ToString(&tempFormat);
-    this->PopMonomial(this->size-1, tempMon, currentCoeff);
+    this->PopMonomial(this->size()-1, tempMon, currentCoeff);
     bool reductionOccurred=false;
     for (int i=0; i<tempMon.generatorsIndices.size-1; i++)
       if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i+1]))
@@ -8506,7 +8506,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteAnBtoBAnPlusLowerOrder
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
   //(L_a)^n=(R_a+ad_a)^n.
   do
-  { for (int i=0; i<adAToTheIthOfB.size; i++)
+  { for (int i=0; i<adAToTheIthOfB.size(); i++)
     { int theNewGeneratorIndex=adAToTheIthOfB[i].theGeneratorIndex;
       tempMon=startMon;
       incomingAcquiredCoefficienT=acquiredCoefficienT;
@@ -8572,7 +8572,7 @@ void MonomialUniversalEnveloping<coefficient>::CommuteABntoBnAPlusLowerOrder
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
   //(L_b-ad_b)^n=R_b^n.
   do
-  { for (int i=0; i<adResult.size; i++)
+  { for (int i=0; i<adResult.size(); i++)
     { int theNewGeneratorIndex= adResult[i].theGeneratorIndex;
       tempMon=startMon;
       tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
@@ -8616,8 +8616,8 @@ bool ElementUniversalEnveloping<coefficient>::ApplyTransposeAntiAutoOnMe()
   int theRank=this->GetOwner().GetRank();
   coefficient theCoeff;
   this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
-  for (int i=0; i<this->size; i++)
-  { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
+  for (int i=0; i<this->size(); i++)
+  { const MonomialUniversalEnveloping<coefficient>& currentMon=(*this)[i];
     theCoeff=this->theCoeffs[i];
     tempMon.owneR=currentMon.owneR;
     tempMon.Powers.size=0;
@@ -8686,7 +8686,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
     *logStream << "right element after Verma rels: "
     << startingElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
   coefficient leftMonCoeff;
-  for (int j=0; j<TAleft.size; j++)
+  for (int j=0; j<TAleft.size(); j++)
   { intermediateAccum=startingElt;
     const MonomialUniversalEnveloping<coefficient>& leftMon=TAleft[j];
     leftMonCoeff=TAleft.theCoeffs[j];
@@ -8716,7 +8716,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
       }
     intermediateAccum*=leftMonCoeff;
     Accum+=intermediateAccum;
-    int theIndex= intermediateAccum.GetIndex(constMon);
+    int theIndex= intermediateAccum.theMonomials.GetIndex(constMon);
     if (theIndex!=-1)
       output+=intermediateAccum.theCoeffs[theIndex];
   }
@@ -9186,12 +9186,12 @@ void SemisimpleLieAlgebra::LieBracket
   output.MakeZero();
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
     return;
-  int maxNumMonsFinal=g1.size*g2.size;
+  int maxNumMonsFinal=g1.size()*g2.size();
   output.SetExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
   ElementSemisimpleLieAlgebra<coefficient> buffer;
-  for (int i=0; i<g1.size; i++)
-    for (int j=0; j<g2.size; j++)
+  for (int i=0; i<g1.size(); i++)
+    for (int j=0; j<g2.size(); j++)
     { buffer=this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
       theCoeff=g1.theCoeffs[i];
       theCoeff*=g2.theCoeffs[j];
@@ -9230,7 +9230,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
   result.MakeZero(theRank);
   for (int i=0; i<theRank; i++)
   { tempGen.MakeGenerator(*owner, i+numPosRoots);
-    int currentIndex=this->GetIndex(tempGen);
+    int currentIndex=this->theMonomials.GetIndex(tempGen);
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];
   }
@@ -9270,10 +9270,10 @@ void charSSAlgMod<coefficient>::MakeFromWeight
 
 template<class coefficient>
 bool ElementSemisimpleLieAlgebra<coefficient>::IsElementCartan()const
-{ if (this->size==0)
+{ if (this->size()==0)
     return true;
   SemisimpleLieAlgebra* owner= (*this)[0].owneR;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
     if (!owner->IsGeneratorFromCartan((*this)[i].theGeneratorIndex))
       return false;
   return true;

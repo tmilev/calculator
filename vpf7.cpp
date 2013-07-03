@@ -64,7 +64,7 @@ void ModuleSSalgebra<coefficient>::TestConsistency(GlobalVariables& theGlobalVar
       rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
       this->GetOwner().LieBracket(leftGen, rightGen, outputGen);
       otherOutput.MakeZero();
-      for (int k=0; k<outputGen.size; k++)
+      for (int k=0; k<outputGen.size(); k++)
       { tempMat=this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex, theGlobalVariables);
         tempMat*=outputGen.theCoeffs[k];
         otherOutput+=tempMat;
@@ -169,7 +169,7 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
   }
 }
 
-bool partFractions::ArgumentsAllowed
+bool PartFractions::ArgumentsAllowed
   (Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
 { if (theArguments.size<1)
     return false;
@@ -644,7 +644,7 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
     if (IndexCurrentGenerator>=numPosRoots)
       return false;
     ElementSemisimpleLieAlgebra<Rational>& currentElt=this->owner->theOrder[IndexCurrentGenerator];
-    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size>1)
+    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size()>1)
       return false;
     int thePower=0;
     if (!this->Powers[k].IsSmallInteger(thePower))

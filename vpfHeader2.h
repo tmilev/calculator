@@ -2048,7 +2048,7 @@ bool Serialization::innerStoreMonCollection
   Expression termE, coeffE, tempE;
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
-  for (int i=input.size-1; i>=0; i--)
+  for (int i=input.size()-1; i>=0; i--)
   { const TemplateMonomial& currentMon=input[i];
     bool isNonConst=true;
     if (!Serialization::innerStoreObject
@@ -2064,7 +2064,7 @@ bool Serialization::innerStoreMonCollection
         coeffE.AssignValue(input.theCoeffs[i], theCommands);
         termE.MakeXOX(theCommands, theCommands.opTimes(), coeffE, tempE);
       }
-    if (i==input.size-1)
+    if (i==input.size()-1)
       output=termE;
     else
     { tempE=output;
@@ -2085,7 +2085,7 @@ bool Serialization::DeSerializeMonCollection
   theCommands.CollectSummands(theCommands, input, theSum);
   Expression currentContext, finalContext;
   finalContext.MakeEmptyContext(theCommands);
-  for (int i=0; i<theSum.size; i++)
+  for (int i=0; i<theSum.size(); i++)
   { if (!Serialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
     { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
@@ -2098,7 +2098,7 @@ bool Serialization::DeSerializeMonCollection
   }
   output.MakeZero();
   TemplateMonomial tempM;
-  for (int i=0; i<theSum.size; i++)
+  for (int i=0; i<theSum.size(); i++)
   { if (!Serialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
     { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString()
       << " using monomial context " << finalContext.ToString() << ". </hr>";

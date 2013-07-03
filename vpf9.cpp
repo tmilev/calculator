@@ -1457,6 +1457,16 @@ void LargeInt::MakeZero()
   this->sign=1;
 }
 
+void LargeInt::operator=(const Rational& other)
+{ if (!other.IsInteger(this))
+  { std::cout << "This is a programming error: converting implicitly rational number "
+    << other.ToString() << " to integer is not possible as the Rational number is not integral. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+//  assert(this->CheckForConsistensy());
+}
+
 void LargeInt::operator=(const LargeInt& x)
 { this->sign=x.sign;
   this->value=(x.value);

@@ -2984,100 +2984,152 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return true;
   Polynomial<Rational> thePoly=*this;
   Rational theMultiple=thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  Rational tempRat=thePoly.TotalDegree();
-  int upperBoundDegDivisors=0;
-  if (!tempRat.IsSmallInteger(&upperBoundDegDivisors))
+  int degree=0;
+  if (!thePoly.TotalDegree().IsSmallInteger(&degree))
     return false;
-  upperBoundDegDivisors/=2;
-  List<int> thePoints;
+  int upperBoundDegDivisors=degree/2;
+  List<LargeInt> AllPointsOfEvaluation;
   List<List<unsigned int> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
-  List<LargeInt> theValuesAtPoints;
-  thePoints.SetSize(upperBoundDegDivisors+1);
-  theValuesAtPoints.SetSize(upperBoundDegDivisors+1);
+  Vector<Rational> theValuesAtPointsRat;
+  Vector<Rational> theValuesAtPointsLeft, theValuesAtPointsRight;
+  AllPointsOfEvaluation.SetSize(degree+1);
   thePrimeFactorsAtPoints.SetSize(upperBoundDegDivisors+1);
   thePrimeFactorsMults.SetSize(upperBoundDegDivisors+1);
   std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
   std::cout << "<br>Upper bound degree divisor: " << upperBoundDegDivisors;
   std::cout << "<br>Interpolating at: 0,";
-  thePoints[0]=0;
-  for (int i=1; i<thePoints.size; i++)
-  { thePoints[i]= i%2==1 ? i/2+1 : -(i/2);
-    std::cout << thePoints[i] << ", ";
+  AllPointsOfEvaluation[0]=0;
+  for (int i=1; i<AllPointsOfEvaluation.size; i++)
+  { AllPointsOfEvaluation[i]= i%2==1 ? i/2+1 : -(i/2);
+    std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
   }
   Vector<Rational> theArgument;
   theArgument.SetSize(1);
-  for (int i=0; i<=upperBoundDegDivisors; i++)
-  { theArgument[0]=thePoints[i];
-    tempRat= thePoly.Evaluate(theArgument);
-    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0] << " equals: " << tempRat;
-    if (tempRat.IsEqualToZero())
+  theValuesAtPointsRat.SetSize(AllPointsOfEvaluation.size);
+  LargeInt tempLI;
+  for (int i=0; i<AllPointsOfEvaluation.size; i++)
+  { theArgument[0]=AllPointsOfEvaluation[i];
+    theValuesAtPointsRat[i]= thePoly.Evaluate(theArgument);
+    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
+    << " equals: " << theValuesAtPointsRat[i].ToString();
+    if (theValuesAtPointsRat[i].IsEqualToZero())
     { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
       std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
       *this/=output;
       std::cout << "<br>divident: " << this->ToString();
       return true;
     }
-    tempRat.GetNumerator(theValuesAtPoints[i]);
-    std::cout << "<br>value at " << thePoints[i] << " = " << theValuesAtPoints[i].ToString();
-
-    if(!theValuesAtPoints[i].value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
-    { if (comments!=0)
-        *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-        << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
-      return false;
+    std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPointsRat[i].ToString();
+    theValuesAtPointsRat[i].IsInteger(&tempLI);
+    if (i<upperBoundDegDivisors+1)
+    { if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
+      { if (comments!=0)
+          *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
+          << tempLI.ToString() << " (most probably the integer is too large).";
+        return false;
+      }
+      std::cout << "=+/- ";
+      for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
+        for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
+          std::cout << thePrimeFactorsAtPoints[i][j] << "*";
     }
-    std::cout << "=+/- ";
-    for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
-      for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
-        std::cout << thePrimeFactorsAtPoints[i][j] << "*";
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
   Incrementable<SelectionOneItem> signSel;
-  Vector<Rational> interPol;
-  Polynomial<Rational> CandidateDivisor, candidateResult, candidateQuotient;
-  Vector<Rational> thePointsForInterpolation;
+  Vector<Rational> eiVector;
+  Polynomial<Rational> interPoly, checkRemainder;
+  Vectors<Rational> valuesLeftInterpolands, valuesRightInterpolands;
+  Vector<Rational> PointsOfInterpolationLeft, PointsOfInterpolationRight;
+  PointsOfInterpolationLeft.ReservE(upperBoundDegDivisors+1);
+  PointsOfInterpolationRight.ReservE(degree);
+  PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[0]);
+  valuesLeftInterpolands.ReservE(upperBoundDegDivisors+1);
+  Vector<Rational> theArgumentRat;
+//  Vector<Rational> linearCombiInterpolandsLeft, linearCombiInterpolandsRight;
+  Rational currentPrimePowerContribution, currentPointContribution;
+  theArgumentRat.SetSize(1);
+  for (int i=0; i<degree; i++)
+    PointsOfInterpolationRight.AddOnTop(AllPointsOfEvaluation[i]);
   for (int i=1; i<=upperBoundDegDivisors; i++)
   { theDivisorSel.initFromMults(thePrimeFactorsMults, i+1);
     signSel.initFromMults(1, upperBoundDegDivisors+1);
     signSel.theElements[0].initFromMults(0);
-    interPol.SetSize(i+1);
-    thePointsForInterpolation.SetSize(i+1);
-    for (int k=0; k<thePointsForInterpolation.size; k++)
-      thePointsForInterpolation[k]=thePoints[k];
+    PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
+    PointsOfInterpolationRight.SetSize(degree-i+1);
     int counter=0;
-    do
-      do
-      { std::cout << "<br>Selection: " << theDivisorSel.ToString()
-        << "<br>Sign selection: " << signSel.ToString();
-        for (int j=0; j<theDivisorSel.theElements.size; j++)
-        { interPol[j]=1;
-          for (int k=0; k<theDivisorSel[j].theElements.size; k++)
-          { tempRat=thePrimeFactorsAtPoints[j][k];
-            tempRat.RaiseToPower(theDivisorSel[j][k].SelectedMult);
-            interPol[j]*=tempRat;
-          }
-          if (signSel[j].SelectedMult == 1)
-            interPol[j]*=-1;
-        }
-        CandidateDivisor.Interpolate(thePointsForInterpolation, interPol);
-        if (CandidateDivisor.TotalDegree()==i)
-        { std::cout << "<br>Interpolation at  " << thePointsForInterpolation.ToString()
-          << " with target values  " << interPol.ToString() << " equals "
-          << CandidateDivisor.ToString();
-          thePoly.DivideBy(CandidateDivisor, candidateResult, candidateQuotient);
-          if (candidateQuotient.IsEqualToZero())
-          { output=CandidateDivisor;
-            output/=theMultiple;
-            *this=candidateResult;
-            return true;
-          }
-        }
-        counter++;
-        if (counter>2000)
-          assert(false);
+    valuesLeftInterpolands.SetSize(i+1);
+    valuesRightInterpolands.SetSize(degree-i+1);
+    for (int k=0; k<valuesLeftInterpolands.size; k++)
+    { eiVector.MakeEi(i+1, k);
+      interPoly.Interpolate(PointsOfInterpolationLeft, eiVector);
+      valuesLeftInterpolands[k].SetSize(AllPointsOfEvaluation.size);
+      for (int j=0; j<AllPointsOfEvaluation.size; j++)
+      { theArgumentRat[0]=AllPointsOfEvaluation[j];
+        valuesLeftInterpolands[k][j]=interPoly.Evaluate(theArgumentRat);
       }
-      while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
+    }
+    if (valuesLeftInterpolands.size!=valuesRightInterpolands.size)
+      for (int k=0; k<valuesRightInterpolands.size; k++)
+      { eiVector.MakeEi(i+1, k);
+        interPoly.Interpolate(PointsOfInterpolationRight, eiVector);
+        valuesRightInterpolands[k].SetSize(AllPointsOfEvaluation.size);
+        for (int j=0; j<AllPointsOfEvaluation.size; j++)
+        { theArgumentRat[0]=AllPointsOfEvaluation[j];
+          valuesRightInterpolands[k][j]=interPoly.Evaluate(theArgumentRat);
+        }
+      }
+    else
+      valuesLeftInterpolands=valuesRightInterpolands;
+    do do
+    { std::cout << "<br>Selection: " << theDivisorSel.ToString() << "<br>Sign selection: " << signSel.ToString();
+      theValuesAtPointsLeft.MakeZero(theValuesAtPointsRat.size);
+      for (int j=0; j<theDivisorSel.theElements.size; j++)
+      { currentPointContribution=1;
+        for (int k=0; k<theDivisorSel[j].theElements.size; k++)
+        { currentPrimePowerContribution=thePrimeFactorsAtPoints[j][k];
+          currentPrimePowerContribution.RaiseToPower(theDivisorSel[j][k].SelectedMult);
+        }
+        currentPointContribution*=currentPrimePowerContribution;
+        if (signSel[j].SelectedMult == 1)
+          currentPointContribution*=-1;
+        theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
+      }
+      theValuesAtPointsRight.MakeZero(theValuesAtPointsRat.size);
+      bool isGood=true;
+      for (int j=0; j<valuesRightInterpolands.size; j++)
+      { if (!theValuesAtPointsLeft[j].IsInteger())
+        { isGood=false;
+          break;
+        }
+        currentPointContribution=((Rational)theValuesAtPointsRat[j])/theValuesAtPointsLeft[j];
+        if (!currentPointContribution.IsInteger())
+        { isGood=false;
+          break;
+        }
+        theValuesAtPointsRight+=valuesRightInterpolands[j]*currentPointContribution;
+      }
+      if (!isGood)
+        continue;
+      for (int k=valuesRightInterpolands.size; k<theValuesAtPointsRat.size; k++)
+        if ((theValuesAtPointsLeft[k]*theValuesAtPointsRight[k])!=theValuesAtPointsRat[k])
+          continue;
+      output.MakeZero();
+      for (int k=0; k<theValuesAtPointsLeft.size; k++)
+      { eiVector.MakeEi(i+1, k);
+        interPoly.Interpolate(PointsOfInterpolationRight, eiVector);
+        output+=interPoly*theValuesAtPointsLeft[k];
+      }
+      this->DivideBy(output, interPoly, checkRemainder);
+      if (!checkRemainder.IsEqualToZero())
+      { std::cout << "This is a programming error: polynomial " << output.ToString()
+        << " was computed to be a divisor of " << this->ToString() << " but it is not. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      *this=interPoly;
+      return true;
+    } while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
     while (signSel.IncrementReturnFalseIfBackToBeginning());
   }
   output=*this;

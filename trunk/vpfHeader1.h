@@ -3002,6 +3002,7 @@ public:
   double GetDoubleValue();
   int operator %(int x);
   inline void AssignFloor(){}
+  void operator=(const Rational& x);
   void operator=(const LargeInt& x);
   inline void operator=(int x)
   { this->AssignInt(x);

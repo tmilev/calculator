@@ -539,7 +539,7 @@ int main(int argc, char **argv)
   //civilizedInput="s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ";
 //  civilizedInput="\\sqrt 4";
 //  civilizedInput="\\sqrt 2+\\sqrt{}3";
-//civilizedInput="FactorOneVarPolyOverRationals{}(x^5+x^4+x^2+x+2)";
+//civilizedInput="FactorOneVarPolyOverRationals{}(x^2-7x+12)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

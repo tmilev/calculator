@@ -6690,7 +6690,8 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
   coefficient output=0;
   for (int i=0; i<this->size(); i++)
   { const MonomialP& currentMon=(*this)[i];
-    coefficient tempElt=1;
+    coefficient accum=this->theCoeffs[i];
+    coefficient tempElt;
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
     { int numCycles;
       if (!(*this)[i](j).IsSmallInteger(&numCycles) )
@@ -6710,9 +6711,9 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
       MathRoutines::RaiseToPower(tempElt, numCycles, (coefficient) 1);
       if (!isPositive)
         tempElt.Invert();
-      tempElt*=this->theCoeffs[i];
+      accum*=tempElt;
     }
-    output+=(tempElt);
+    output+=accum;
   }
   return output;
 }

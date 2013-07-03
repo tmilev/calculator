@@ -2496,7 +2496,7 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
       outputMon.theMatMon= (*this)[i].theMatMon;
       outputMon.theMatMon*=standsOnTheRight[j].theMatMon;
       leftElt*=rightElt;
-      for (int k=0; k<leftElt.size; k++)
+      for (int k=0; k<leftElt.size(); k++)
       { outputMon.theWeylMon=leftElt[k];
         output.AddMonomial(outputMon, leftElt.theCoeffs[k]);
       }
@@ -2515,14 +2515,14 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
   MatrixTensor<ElementWeylAlgebra> reordered;
   reordered.MakeZero();
   ElementWeylAlgebra tempP;
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
   { const quasiDiffMon& currentMon=(*this)[i];
     tempP.MakeZero();
     tempP.AddMonomial(currentMon.theWeylMon, this->theCoeffs[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
   std::string result=reordered.ToString(theFormat);
-  if (result=="0" && this->size!=0)
+  if (result=="0" && this->size()!=0)
   { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero  "
     << " quasidifferential operator "
     << " with non-properly formatted LaTeX string "
@@ -2602,7 +2602,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
   Rational tempRat;
   output.MakeZero();
   Rational currentShift;
-  for (int i=0; i<result.size; i++)
+  for (int i=0; i<result.size(); i++)
   { //problemCounter++;
     const MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon=result[i];
     endoPart=idMT;
@@ -2612,7 +2612,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
         return false;
       tempMat1=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j], theGlobalVariables);
       tempMT.MakeZero();
-      for (int k=0; k<tempMat1.size; k++)
+      for (int k=0; k<tempMat1.size(); k++)
       { if (tempMat1.theCoeffs[k].expressionType==RationalFunctionOld::typeRationalFunction)
           return false;
         tempMat1.theCoeffs[k].GetNumerator(tempP1);
@@ -2646,7 +2646,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 //    std::cout << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
 //    std::cout << "<br>Exponent contribution of " << currentMon.ToString() << ": "
 //    << exponentContribution.ToString();
-    for (int l=0; l<theCoeff.size; l++)
+    for (int l=0; l<theCoeff.size(); l++)
     { //problemCounter++;
       //if (problemCounter==249)
         //std::cout << "ere be problem!";
@@ -2657,12 +2657,12 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
       weylPartSummand=exponentContribution;
       weylPartSummand*=eulerOperatorContribution;
       weylPartSummand*=theCoeff.theCoeffs[l];
-      for (int j=0; j<weylPartSummand.size; j++)
-        for (int k=0; k<endoPart.size; k++)
+      for (int j=0; j<weylPartSummand.size(); j++)
+        for (int k=0; k<endoPart.size(); k++)
         { monQDO.theMatMon=endoPart[k];
           monQDO.theWeylMon=weylPartSummand[j];
           Polynomial<Rational>& currentEndoCoeff=endoPart.theCoeffs[k];
-          for (int m=0; m<currentEndoCoeff.size; m++)
+          for (int m=0; m<currentEndoCoeff.size(); m++)
           { monQDO2=monQDO;
             monQDO2.theWeylMon.polynomialPart*=currentEndoCoeff[m];
             tempRat=currentEndoCoeff.theCoeffs[m];
@@ -2901,7 +2901,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex=true;
   latexFormat.flagUseHTML=false;
-  if (this->theCharOverH.size<100)
+  if (this->theCharOverH.size()<100)
     out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(this->theCharOverH.ToString(&latexFormat));
   else
     out << this->theCharOverH.ToString();
@@ -3843,15 +3843,15 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
   { this->MakeZero();
     return;
   }
-  int maxNumMonsFinal=this->size*right.size;
+  int maxNumMonsFinal=this->size()*right.size();
   ElementTensorsGeneralizedVermas<coefficient> output;
   MonomialTensorGeneralizedVermas<coefficient> bufferMon;
   output.MakeZero();
   output.SetExpectedSize(maxNumMonsFinal);
   coefficient theCoeff;
-  for (int i=0; i<right.size; i++)
-    for (int j=0; j<this->size; j++)
-    { bufferMon=this->TheObjects[j];
+  for (int i=0; i<right.size(); i++)
+    for (int j=0; j<this->size(); j++)
+    { bufferMon=(*this)[j];
       bufferMon*=(right[i]);
       theCoeff=this->theCoeffs[j];
       theCoeff*=right.theCoeffs[i];
@@ -4206,8 +4206,8 @@ bool CommandList::outerPlus
   if (theSum.IsEqualToZero())
     return output.AssignValue<Rational>(0, theCommands);
   List<Expression> summandsWithCoeff;
-  summandsWithCoeff.SetSize(theSum.size);
-  for (int i=0; i<theSum.size; i++)
+  summandsWithCoeff.SetSize(theSum.size());
+  for (int i=0; i<theSum.size(); i++)
   { Expression& current=summandsWithCoeff[i];
     if (theSum[i]==oneE)
       current.AssignValue(theSum.theCoeffs[i], theCommands);

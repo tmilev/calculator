@@ -173,8 +173,8 @@ void ElementWeylAlgebra::MultiplyOnTheLeft
 { ElementWeylAlgebra buffer;
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
-  for (int j=0; j<standsOnTheLeft.size; j++)
-    for (int i=0; i<this->size; i++)
+  for (int j=0; j<standsOnTheLeft.size(); j++)
+    for (int i=0; i<this->size(); i++)
     { this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
       buffer*=standsOnTheLeft.theCoeffs[j]*this->theCoeffs[i];
       Accum+=(buffer);
@@ -186,8 +186,8 @@ void ElementWeylAlgebra::operator*=(const ElementWeylAlgebra& standsOnTheRight)
 { ElementWeylAlgebra buffer;
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
-  for (int j=0; j<standsOnTheRight.size; j++)
-    for (int i=0; i<this->size; i++)
+  for (int j=0; j<standsOnTheRight.size(); j++)
+    for (int i=0; i<this->size(); i++)
     { this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
       buffer*=this->theCoeffs[i]*standsOnTheRight.theCoeffs[j];
       Accum+=(buffer);
@@ -336,8 +336,8 @@ bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
   result.MakeZero();
   MonomialP resultMon;
   Rational coeff;
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<thePoly.size; j++)
+  for (int i=0; i<this->size(); i++)
+    for (int j=0; j<thePoly.size(); j++)
     { const MonomialP& currentPolMon=thePoly[j];
       const MonomialWeylAlgebra& currentOpMon=(*this)[i];
       resultMon=currentPolMon;
@@ -491,7 +491,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   outputMatrixSystemToBeSolved.NullifyAll();
   outputSystemColumnVector.NullifyAll();
   for (int i=0; i<outputSystemToBeSolved.size; i++)
-    for (int j=0; j<outputSystemToBeSolved[i].size; j++)
+    for (int j=0; j<outputSystemToBeSolved[i].size(); j++)
     { int lowerIndex=-1; int higherIndex=-1;
       Polynomial<Rational>& currentPoly= outputSystemToBeSolved[i];
       Rational& currentCoeff=currentPoly.theCoeffs[j];
@@ -1306,7 +1306,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpaces
     return;
   }
   output.MakeZero(this->GetOwner()->GetNumGenerators());
-  for (int i=0; i<this->size; i++)
+  for (int i=0; i<this->size(); i++)
     output[(*this)[i].theGeneratorIndex]=this->theCoeffs[i];
 }
 
@@ -1629,7 +1629,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 { assert(&output!=&input);
   output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
-  for (int i=0; i<input.size; i++)
+  for (int i=0; i<input.size(); i++)
   { if(!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt, theGlobalVariables))
       return false;
     output+=tempElt;
@@ -2470,9 +2470,9 @@ void RationalFunctionOld::ScaleClearDenominator
 void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom
   (ElementSemisimpleLieAlgebra<Rational>& input, Vector<Rational>& theCoeffs)
 { theCoeffs.MakeZero(this->theOwner.GetNumGenerators());
-  for (int i=0; i<input.size; i++)
+  for (int i=0; i<input.size(); i++)
   { int theIndex=input[i].theGeneratorIndex;
-    theCoeffs.TheObjects[this->theOwner.GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
+    theCoeffs[this->theOwner.GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
   }
   int numPosRoots=this->theOwner.GetNumPosRoots();
   Vector<Rational> tempH=input.GetCartanPart();

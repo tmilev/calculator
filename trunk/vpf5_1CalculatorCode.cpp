@@ -255,7 +255,7 @@ void SemisimpleLieAlgebra::GetAd
   for (int i=0; i<NumGenerators; i++)
   { theGen.MakeGenerator(i, *this);
     this->LieBracket(e, theGen, theResult);
-    for (int j=0; j<theResult.size; j++)
+    for (int j=0; j<theResult.size(); j++)
       output(theResult[j].theGeneratorIndex, i)=theResult.theCoeffs[j];
   }
 }
@@ -754,7 +754,7 @@ bool CommandList::innerGroebner
     inputVectorZmodP.SetSize(inputVector.size);
     for (int i=0; i<inputVector.size; i++)
     { inputVectorZmodP[i].MakeZero();
-      for (int j=0; j<inputVector[i].size; j++)
+      for (int j=0; j<inputVector[i].size(); j++)
       { tempElt=inputVector[i].theCoeffs[j];
         inputVectorZmodP[i].AddMonomial(inputVector[i][j], tempElt);
       }
@@ -1388,13 +1388,13 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
   { tempP=inputSystem[i];
     for (int j=0; j<numVars; j++)
     { tempM.MakeEi(j, 1, numVars);
-      int indexTempM=tempP.GetIndex(tempM);
+      int indexTempM=tempP.theMonomials.GetIndex(tempM);
       if (indexTempM==-1)
         continue;
       coefficient tempCF=tempP.theCoeffs[indexTempM];
       tempP.SubtractMonomial(tempM, tempCF);
       bool isGood=true;
-      for (int k=0; k<tempP.size; k++)
+      for (int k=0; k<tempP.size(); k++)
         if (!(tempP[k](j)==0))
         { isGood=false;
           tempP.AddMonomial(tempM, tempCF);
@@ -1438,7 +1438,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
   //std::cout << "<hr> Back substituting in x_{" << theIndex+1 << "}:=" << thePoly.ToString();
   thePoly.Substitution(theFinalSub);
   bool changed=false;
-  for (int i=0; i<thePoly.size; i++)
+  for (int i=0; i<thePoly.size(); i++)
     for (int j=0; j<thePoly[i].GetMinNumVars(); j++)
       if (thePoly[i](j)!=0)
       { if (!this->solutionsFound.GetElement().selected[j])

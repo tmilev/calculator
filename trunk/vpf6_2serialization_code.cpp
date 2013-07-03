@@ -449,7 +449,7 @@ bool Serialization::innerLoadDynkinType
   theContext.ContextGetFormatExpressions(theFormat);
   DynkinSimpleType simpleComponent;
   output.MakeZero();
-  for (int i=0; i<theType.size; i++)
+  for (int i=0; i<theType.size(); i++)
   { const MonomialP& currentMon=theType[i];
     int variableIndex;
     if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
@@ -1013,7 +1013,7 @@ bool Serialization::innerUE
   Expression outputPolyVars;
   outputPolyVars.reset(theCommands, 1);
   outputPolyVars.AddChildAtomOnTop(theCommands.opPolynomialVariables());
-  for (int j=0; j<theP.size; j++)
+  for (int j=0; j<theP.size(); j++)
   { const MonomialP& currentMon=theP[j];
     currentSummand.MakeConst(theP.theCoeffs[j], owner);
     currentMultiplicandRFpartMon.MakeOne();

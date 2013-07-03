@@ -329,11 +329,11 @@ public:
   { Polynomial<Rational> rescaled;
     rescaled=input;
     rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    output.SetExpectedSize(input.size);
+    output.SetExpectedSize(input.size());
     ElementZmodP theCF;
     theCF.theModulo=newModulo;
     output.MakeZero();
-    for (int i=0; i<input.size; i++)
+    for (int i=0; i<input.size(); i++)
     { theCF=input.theCoeffs[i];
       output.AddMonomial(input[i], theCF);
     }

@@ -2771,7 +2771,12 @@ std::string Lattice::ToString(bool useHtml, bool useLatex)const
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
 #endif
 void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
-{ LargeIntUnsigned remainder, quotient, divisor;
+{ if (x.size==1 && this->size==1)
+  { quotientOutput.AssignShiftedUInt((*this)[0]/x[0],0);
+    remainderOutput.AssignShiftedUInt((*this)[0]%x[0],0);
+    return;
+  }
+  LargeIntUnsigned remainder, quotient, divisor;
   remainder.Assign(*this);
   divisor.Assign(x);
   assert(!divisor.IsEqualToZero());

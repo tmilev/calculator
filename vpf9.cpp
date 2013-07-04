@@ -1303,7 +1303,7 @@ void LargeIntUnsigned::ToString(std::string& output)const
   output=out.str();
 }
 
-bool LargeInt::IsEqualTo(const LargeInt& x)const
+bool LargeInt::operator==(const LargeInt& x)const
 { if (x.sign!=this->sign)
   { if (x.IsEqualToZero() && this->IsEqualToZero())
       return true;

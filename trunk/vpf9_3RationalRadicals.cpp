@@ -156,7 +156,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
   if (this->leftParent!=0)
     this->injectionFromLeftParent.MultiplyOnTheLeft(theProjection);
   if (this->rightParent!=0)
-    this->injectionFromRightParent.MultiplyOnTheRight(theProjection);
+    this->injectionFromRightParent.MultiplyOnTheLeft(theProjection);
   this->DimOverRationals=smallestFactorDegree;
   this->AlgebraicBasisElements.SetSize(this->DimOverRationals);
   MonomialMatrix tempM;

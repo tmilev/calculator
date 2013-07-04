@@ -2959,7 +2959,7 @@ public:
   inline bool IsPositiveOrZero()const{return !this->IsNegative(); }
   inline bool IsNonPositive()const{return !this->IsPositive(); }
   bool NeedsBrackets()const{return false;}
-  bool IsEqualTo(const LargeInt& x)const;
+  bool operator==(const LargeInt& x)const;
   bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
   bool IsEqualToOne()const
   { return this->value.IsEqualToOne() && this->sign==1;
@@ -3022,7 +3022,9 @@ public:
   inline void operator+=(int x)
   { this->AddInt(x);
   }
-  bool operator==(const LargeInt& other)const{return this->IsEqualTo(other);}
+  inline bool operator!=(const LargeInt& other)const
+  { return !(*this==other);
+  }
   inline void operator-=(const LargeInt& other)
   { this->Minus();
     *this+=(other);
@@ -3081,6 +3083,9 @@ public:
     this->value=remainder;
     if (this->IsNegative())
       *this+=other.value;
+  }
+  void RaiseToPower(int thePower)
+  { MathRoutines::RaiseToPower(*this, thePower, (LargeInt) 1);
   }
   LargeInt operator %(const LargeInt& other)const
   { LargeInt result=*this;
@@ -3613,7 +3618,10 @@ class Vector: public List<coefficient>
 ;
 public:
   Vector(){}
-  Vector(const Vector<coefficient>& other){*this=other;}
+  template <class otherCoeff>
+  Vector(const Vector<otherCoeff>& other)
+  { *this=other;
+  }
   Vector(const Selection& other) {*this=other;}
   inline static std::string GetXMLClassName()
   { std::string result="Vector_" + coefficient::GetXMLClassName();
@@ -5545,6 +5553,12 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
+static void
+GetValuesLagrangeInterpolandsAtConsecutivePoints
+(Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation,
+ Vectors<Rational>& outputValuesInterpolands)
+  ;
+
 bool
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
   ;

@@ -2975,6 +2975,26 @@ void Polynomial<coefficient>::Interpolate(const Vector<coefficient>& thePoints, 
 }
 
 template <class coefficient>
+void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
+(Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation, Vectors<Rational>& outputValuesInterpolands)
+{ outputValuesInterpolands.SetSize(inputConsecutivePointsOfInterpolation.size);
+  for (int i=0; i<inputConsecutivePointsOfInterpolation.size; i++)
+  { Vector<Rational>& currentInterpoland=outputValuesInterpolands[i];
+    currentInterpoland.SetSize(inputPointsOfEvaluation.size);
+    for (int j=0; j<inputConsecutivePointsOfInterpolation.size; j++)
+      currentInterpoland[j]= i==j ? 1 : 0;
+    for (int j=inputConsecutivePointsOfInterpolation.size; j<inputPointsOfEvaluation.size; j++)
+    { currentInterpoland[j]=1;
+      for (int k=0; k<inputConsecutivePointsOfInterpolation.size; k++)
+        if(i!=k)
+        { currentInterpoland[j]*=inputPointsOfEvaluation[j]-inputConsecutivePointsOfInterpolation[k];
+          currentInterpoland[j]/=inputConsecutivePointsOfInterpolation[i]-inputConsecutivePointsOfInterpolation[k];
+        }
+    }
+  }
+}
+
+template <class coefficient>
 bool Polynomial<coefficient>::
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
@@ -2989,7 +3009,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return false;
   int degreeLeft=degree/2;
   int degreeRight=degree-degreeLeft;
-  List<LargeInt> AllPointsOfEvaluation;
+  Vector<Rational> AllPointsOfEvaluation;
   List<List<unsigned int> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
   Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft, theValuesAtPointsRight;
@@ -3026,7 +3046,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
       { if (comments!=0)
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-          << tempLI.ToString() << " (most probably the integer is too large).";
+          << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
       std::cout << "=+/- ";
@@ -3055,25 +3075,9 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
 //  signSel.theElements[0].initFromMults(0);
   valuesLeftInterpolands.SetSize(degreeLeft+1);
   valuesRightInterpolands.SetSize(degreeRight+1);
-  for (int k=0; k<valuesLeftInterpolands.size; k++)
-  { eiVector.MakeEi(degreeLeft+1, k);
-    interPoly.Interpolate(PointsOfInterpolationLeft, eiVector);
-    valuesLeftInterpolands[k].SetSize(AllPointsOfEvaluation.size);
-    for (int j=0; j<AllPointsOfEvaluation.size; j++)
-    { theArgumentRat[0]=AllPointsOfEvaluation[j];
-      valuesLeftInterpolands[k][j]=interPoly.Evaluate(theArgumentRat);
-    }
-  }
+  this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands);
   if (degreeLeft!=degreeRight)
-    for (int k=0; k<valuesRightInterpolands.size; k++)
-    { eiVector.MakeEi(degreeRight+1, k);
-      interPoly.Interpolate(PointsOfInterpolationRight, eiVector);
-      valuesRightInterpolands[k].SetSize(AllPointsOfEvaluation.size);
-      for (int j=0; j<AllPointsOfEvaluation.size; j++)
-      { theArgumentRat[0]=AllPointsOfEvaluation[j];
-        valuesRightInterpolands[k][j]=interPoly.Evaluate(theArgumentRat);
-      }
-    }
+    this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationRight, AllPointsOfEvaluation, valuesRightInterpolands);
   else
     valuesRightInterpolands=valuesLeftInterpolands;
   do do
@@ -3097,7 +3101,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       else
         if (firstValue!=currentPointContribution)
           isGood=true; //<- the divisor has takes two different values, hence is non-constant.
-      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution;
+      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
       //std::cout << theValuesAtPointsLeft.ToString();
 //      std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
 //      << " to " << theValuesAtPointsLeft.ToString();
@@ -3110,7 +3114,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       continue;
     theValuesAtPointsRight.MakeZero(theValuesAtPoints.size);
     for (int j=0; j<valuesRightInterpolands.size; j++)
-    { if (!theValuesAtPointsLeft[j].IsInteger() || theValuesAtPointsLeft[j].IsEqualToZero() )
+    { if (theValuesAtPointsLeft[j].IsEqualToZero() )
       { isGood=false;
         break;
       }
@@ -3131,7 +3135,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       }
     if (!isGood)
       continue;
-    output.Interpolate(PointsOfInterpolationLeft, theValuesAtPointsLeft);
+    output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
     this->DivideBy(output, interPoly, checkRemainder);
     if (!checkRemainder.IsEqualToZero())
     { std::cout << "This is a programming error: polynomial " << output.ToString()

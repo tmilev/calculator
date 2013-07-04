@@ -832,7 +832,8 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
     and finds the set of all possible divisors of the value of poly at the k points.\
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
-   "FactorOneVarPolyOverRationals{}{x^{8}-44x^{6}+438x^{4}-1292x^{2}+529}", true, false);
+   "FactorOneVarPolyOverRationals{}(x^{8}-44x^{6}+438x^{4}-1292x^{2}+529); \
+   FactorOneVarPolyOverRationals{}(x^{8}+2x^{7}-3x^{6}-4x^{5}+6x^{4}+2x^{3}-13x^{2}+1)", true, false);
   this->AddOperationInnerHandler
   ("Freudenthal", this->innerFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \

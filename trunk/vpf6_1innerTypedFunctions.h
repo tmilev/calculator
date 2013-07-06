@@ -89,6 +89,12 @@ static bool innerAddMatrixTensorToMatrixTensor
   static bool innerAddAlgebraicNumberToAlgebraicNumber
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 
 static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)

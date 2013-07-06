@@ -3016,13 +3016,13 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   AllPointsOfEvaluation.SetSize(degree+1);
   thePrimeFactorsAtPoints.SetSize(degreeLeft+1);
   thePrimeFactorsMults.SetSize(degreeLeft+1);
-  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
-  std::cout << "<br>Degree left: " << degreeLeft;
-  std::cout << "<br>Interpolating at: 0,";
+//  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
+//  std::cout << "<br>Degree left: " << degreeLeft;
+//  std::cout << "<br>Interpolating at: 0,";
   AllPointsOfEvaluation[0]=0;
   for (int i=1; i<AllPointsOfEvaluation.size; i++)
   { AllPointsOfEvaluation[i]= i%2==1 ? i/2+1 : -(i/2);
-    std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
+//    std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
   }
   Vector<Rational> theArgument;
   theArgument.SetSize(1);
@@ -3031,16 +3031,16 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   for (int i=0; i<AllPointsOfEvaluation.size; i++)
   { theArgument[0]=AllPointsOfEvaluation[i];
     theValuesAtPoints[i]= thePoly.Evaluate(theArgument);
-    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
-    << " equals: " << theValuesAtPoints[i].ToString();
+    //std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
+    //<< " equals: " << theValuesAtPoints[i].ToString();
     if (theValuesAtPoints[i].IsEqualToZero())
     { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
-      std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
+      //std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
       *this/=output;
-      std::cout << "<br>divident: " << this->ToString();
+      //std::cout << "<br>divident: " << this->ToString();
       return true;
     }
-    std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
+//    std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
     if (i<degreeLeft+1)
     { theValuesAtPoints[i].IsInteger(&tempLI);
       if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
@@ -3049,10 +3049,10 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
           << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
-      std::cout << "=+/- ";
-      for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
-        for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
-          std::cout << thePrimeFactorsAtPoints[i][j] << "*";
+//      std::cout << "=+/- ";
+//      for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
+//        for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
+//          std::cout << thePrimeFactorsAtPoints[i][j] << "*";
     }
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
@@ -3086,7 +3086,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood=false;//<-we shall first check if the divisor is constant.
-    std::cout << "<hr>Values left candidate: ";
+//    std::cout << "<hr>Values left candidate: ";
     for (int j=0; j<theDivisorSel.theElements.size; j++)
     { currentPointContribution=1;
       for (int k=0; k<theDivisorSel[j].theElements.size; k++)
@@ -3101,15 +3101,15 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       else
         if (firstValue!=currentPointContribution)
           isGood=true; //<- the divisor has takes two different values, hence is non-constant.
-      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
+//      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
       //std::cout << theValuesAtPointsLeft.ToString();
 //      std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
 //      << " to " << theValuesAtPointsLeft.ToString();
-      std::cout.flush();
+//      std::cout.flush();
       theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
 //      std::cout << " to get " << theValuesAtPointsLeft.ToString();
     }
-    std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
+//    std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
     if (!isGood)
       continue;
     theValuesAtPointsRight.MakeZero(theValuesAtPoints.size);
@@ -3125,7 +3125,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       }
       theValuesAtPointsRight+=valuesRightInterpolands[j]*currentPointContribution;
     }
-    std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
+//    std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
     if (!isGood)
       continue;
     for (int k=valuesRightInterpolands.size; k<theValuesAtPoints.size; k++)

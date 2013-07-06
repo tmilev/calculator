@@ -63,7 +63,6 @@ bool CommandListInnerTypedFunctions::innerMultiplyEltZmodPorRatByEltZmodPorRat
   return false;
 }
 
-
 bool CommandListInnerTypedFunctions::innerAddRatToRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatToRat");
@@ -75,14 +74,70 @@ bool CommandListInnerTypedFunctions::innerAddRatToRat
   return output.AssignValue(leftR+rightR, theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat");
+  if (!input.IsListNElements(3))
+    return false;
+  AlgebraicNumber leftAN, rightAN;
+  Rational tempRat;
+  if (!input[1].IsOfType(&leftAN))
+  { if (!input[2].IsOfType(&rightAN))
+      return false;
+    if (!input[1].IsOfType<Rational>(&tempRat))
+      return false;
+    leftAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  } else if (!input[2].IsOfType(&rightAN))
+  { if (!input[2].IsOfType(&tempRat))
+      return false;
+    rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  }
+  if (rightAN.IsEqualToZero())
+    return output.SetError("Division by zero. ", theCommands);
+  leftAN/=rightAN;
+  return output.AssignValue(leftAN, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber");
+  if (!input.IsListNElements(3))
+    return false;
+  AlgebraicNumber leftAN, rightAN;
+  Rational tempRat;
+  if (!input[1].IsOfType(&leftAN))
+  { if (!input[2].IsOfType(&rightAN))
+      return false;
+    if (!input[1].IsOfType<Rational>(&tempRat))
+      return false;
+    leftAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  } else if (!input[2].IsOfType(&rightAN))
+  { if (!input[2].IsOfType(&tempRat))
+      return false;
+    rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  }
+  leftAN*=rightAN;
+  return output.AssignValue(leftAN, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber");
   if (!input.IsListNElements(3))
     return false;
   AlgebraicNumber leftAN, rightAN;
-  if (!input[1].IsOfType(&leftAN) || !input[2].IsOfType(&rightAN))
-    return false;
+  Rational tempRat;
+  if (!input[1].IsOfType(&leftAN))
+  { if (!input[2].IsOfType(&rightAN))
+      return false;
+    if (!input[1].IsOfType<Rational>(&tempRat))
+      return false;
+    leftAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  } else if (!input[2].IsOfType(&rightAN))
+  { if (!input[2].IsOfType(&tempRat))
+      return false;
+    rightAN.AssignRational(tempRat, theCommands.theObjectContainer.theAlgebraicClosure);
+  }
   leftAN+=rightAN;
   return output.AssignValue(leftAN, theCommands);
 }

@@ -833,14 +833,16 @@ public:
   }
 //  void AddOnTop(Object o);
   inline int GetNewSizeRelativeToExpectedSize(int expectedSize)const
-  { if (expectedSize==1)
+  { // <-Registering stack trace forbidden! Multithreading deadlock alert.
+    if (expectedSize==1)
       return 1;
     if (expectedSize==2)
       return 2;
     return (expectedSize*4)/3+1;
   }
   void SetExpectedSize(int theSize)
-  { if ((this->ActualSize)*5/6<theSize)
+  { // <-Registering stack trace forbidden! Multithreading deadlock alert.
+    if ((this->ActualSize)*5/6<theSize)
       this->ReservE(this->GetNewSizeRelativeToExpectedSize(theSize));
   }
   void AssignLight(const ListLight<Object>& from);
@@ -5460,7 +5462,7 @@ template <class coefficient>
 class VectorSparse : public MonomialCollection<MonomialVector, coefficient>
 {
   public:
-  void MakeEi(int dummyArgumentDontUse, int NonZeroIndex, const coefficient& theCoeff=1)
+  void MaKeEi(int NonZeroIndex, const coefficient& theCoeff=1)
   { this->MakeZero();
     MonomialVector theMon;
     theMon.MakeEi(NonZeroIndex);
@@ -9347,16 +9349,18 @@ std::string MonomialCollection<TemplateMonomial, coefficient>::ToString
     else
       tempS1=currentCoeff.ToString(theFormat);
     tempS2=currentMon.ToString(theFormat);
-    if (!useCustomTimes)
-    { if (tempS1=="1" && tempS2!="1")
-        tempS1="";
-      if (tempS1=="-1"&& tempS2!="1")
-        tempS1="-";
-      if(tempS2!="1")
+    if (tempS2!="")
+    { if (!useCustomTimes)
+      { if (tempS1=="1" && tempS2!="1")
+          tempS1="";
+        if (tempS1=="-1"&& tempS2!="1")
+          tempS1="-";
+        if(tempS2!="1")
+          tempS1+=tempS2;
+      } else
+      { tempS1+=oldCustomTimes;
         tempS1+=tempS2;
-    } else
-    { tempS1+=oldCustomTimes;
-      tempS1+=tempS2;
+      }
     }
     if (i>0)
     { if (!useCustomPlus)

@@ -907,6 +907,14 @@ void CommandList::initPredefinedStandardOperations()
   ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
    "Adds two algebraic numbers. ",
    "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opRational(),
+   "Adds two algebraic numbers. ",
+   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opRational(), this->opAlgNumber(),
+   "Adds two algebraic numbers. ",
+   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -1006,6 +1014,11 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyEltZmodPorRatByEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
    "Multiplies elements of Z_p. ",
    " (2 mod  7)*3", true);
+    this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
+   "Multiplies two algebraic numbers. ",
+   "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)", true);
+
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
@@ -1186,6 +1199,18 @@ void CommandList::initPredefinedStandardOperations()
   ("mod", this->innerZmodP, "",
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opAlgNumber(),
+   "Divides algebraic numbers. ",
+   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opRational(), this->opAlgNumber(),
+   "Divides algebraic numbers. ",
+   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opRational(),
+   "Divides algebraic numbers. ",
+   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
 
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",

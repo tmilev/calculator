@@ -3610,6 +3610,22 @@ public:
       else
         output((*this)[i].vIndex,(*this)[i].dualIndex)+=this->theCoeffs[i];
   }
+  template <class otherType>
+  void ActOnVectorColumn(VectorSparse<otherType>& inputOutput)const
+  { VectorSparse<otherType> output;
+    output.MakeZero();
+    otherType tempElt;
+    MonomialVector tempVM;
+    for (int i=0; i<this->size(); i++)
+      for (int j=0; j<inputOutput.size(); j++)
+        if((*this)[i].dualIndex==inputOutput[j].theIndex)
+        { tempVM.theIndex=(*this)[i].vIndex;
+          tempElt=inputOutput.theCoeffs[j];
+          tempElt*=this->theCoeffs[i];
+          output.AddMonomial(tempVM, tempElt);
+        }
+    inputOutput=output;
+  }
   inline unsigned int HashFunction()const
   { return this->::MonomialCollection<MonomialMatrix, coefficient>::HashFunction();
   }

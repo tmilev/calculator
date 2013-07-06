@@ -20,13 +20,21 @@ class AlgebraicNumber
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
   }
+  bool IsEqualToZero()const;
   void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
   void operator=(const Rational& other);
   void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
+
   void SqrtMeDefault();
+  void InjectMeIntoLargestOwner();
+  static void ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
   void RadicalMeDefault(int theRad);
+  void Invert();
+  void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other)const;
   void operator+=(const AlgebraicNumber& other);
+  void operator*=(const AlgebraicNumber& other);
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
@@ -40,13 +48,17 @@ class AlgebraicExtensionRationals
   Vectors<Rational> theGeneratingElementPowersBasis;
 
   AlgebraicClosureRationals* owner;
-  Matrix<Rational> injectionFromLeftParent;
-  Matrix<Rational> injectionFromRightParent;
-  const AlgebraicExtensionRationals* leftParent;
-  const AlgebraicExtensionRationals* rightParent;
+//  Matrix<Rational> injectionFromLeftParent;
+//  Matrix<Rational> injectionFromRightParent;
+  Matrix<Rational> injectionToHeirMatForm;
+  MatrixTensor<Rational> injectionToHeirTensorForm;
+  AlgebraicExtensionRationals* leftParent;
+  AlgebraicExtensionRationals* rightParent;
+  AlgebraicExtensionRationals* heir;
+  List<std::string> DisplayNamesBasisElements;
   int indexInOwner;
   int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0), leftParent(0), rightParent(0), indexInOwner(-1), DimOverRationals(-1)
+  AlgebraicExtensionRationals(): owner(0), leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
   {}
   bool CheckNonZeroOwner()const;
   bool CheckBasicConsistency()const;
@@ -74,7 +86,7 @@ public:
     this->theAlgebraicExtensions[0].indexInOwner=0;
   }
   AlgebraicExtensionRationals* MergeTwoExtensions
-  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right)
+  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
   ;
   AlgebraicExtensionRationals* ReduceAndAdd(AlgebraicExtensionRationals& input);
   AlgebraicExtensionRationals* GetRationals();

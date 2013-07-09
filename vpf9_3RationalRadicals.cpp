@@ -13,32 +13,90 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensions
-  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
-{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
+bool AlgebraicClosureRationals::CheckConsistency()const
+{ return true;
+}
+
+std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "Total " << this->theAlgebraicExtensions.size << " algebraic extensions. ";
+  for (int i=0; i<this->theAlgebraicExtensions.size; i++)
+  { out << "<br>Extension " << i+1 << ": " << this->theAlgebraicExtensions[i].ToString();
+  }
+  return out.str();
+}
+
+AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe
+(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe");
+  if (left.owner!=this || right.owner!=0 || left.indexInOwner==-1 || right.indexInOwner==-1)
+  { std::cout << "This is a programming error: I am asked to merge fields that do not belong to me. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   if (&left==&right)
     return &this->theAlgebraicExtensions[left.indexInOwner];
-  if (left.heir!=0)
-    return this->MergeTwoExtensions(*left.heir, right);
-  if (right.heir!=0)
-    return this->MergeTwoExtensions(left, *right.heir);
+  Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
+  currentPair.Object1=left.indexInOwner;
+  currentPair.Object2=right.indexInOwner;
+  int indexPairing=this->thePairs.GetIndex(currentPair);
+  if (indexPairing!=-1)
+    return &this->theAlgebraicExtensions[this->thePairPairing[indexPairing]];
+  Matrix<Rational> leftInjection, rightInjection;
   AlgebraicExtensionRationals output;
+  this->MergeTwoExtensions(left, right, output, &leftInjection, &rightInjection);
+  if (this->theAlgebraicExtensions.Contains(output))
+    return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.GetIndex(output)];
+  for (int i=0; i<this->theAlgebraicExtensions.size; i++)
+    if (output.DimOverRationals==this->theAlgebraicExtensions[i].DimOverRationals)
+    { AlgebraicExtensionRationals tempExtension;
+      Matrix<Rational> leftInjectionSecond, rightInjectionSecond, theIso;
+      this->MergeTwoExtensions(output, this->theAlgebraicExtensions[i], tempExtension, &leftInjectionSecond, &rightInjectionSecond);
+      if (tempExtension.DimOverRationals==output.DimOverRationals)
+      { theIso=rightInjectionSecond;
+        theIso.Invert();
+        theIso*=leftInjectionSecond;
+        leftInjection.MultiplyOnTheLeft(theIso);
+        rightInjection.MultiplyOnTheLeft(theIso);
+        this->thePairs.AddOnTop(currentPair);
+        this->injectionsLeftParent.AddOnTop(leftInjection);
+        this->injectionsRightParent.AddOnTop(rightInjection);
+        return &this->theAlgebraicExtensions[i];
+      }
+    }
+  this->AddMustBeNew(output);
+  this->thePairs.AddOnTop(currentPair);
+  this->injectionsLeftParent.AddOnTop(leftInjection);
+  this->injectionsRightParent.AddOnTop(rightInjection);
+  return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.size-1];
+}
+
+void AlgebraicClosureRationals::MergeTwoExtensions
+  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
+   Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
+  if (&left==&right)
+  { output=left;
+    return;
+  }
   output.DimOverRationals=left.DimOverRationals*right.DimOverRationals;
   output.AlgebraicBasisElements.SetSize(output.DimOverRationals);
   for (int i=0; i<left.AlgebraicBasisElements.size; i++)
     for (int j=0; j<right.AlgebraicBasisElements.size; j++)
       output.AlgebraicBasisElements[i*right.DimOverRationals+j].
       AssignTensorProduct(left.AlgebraicBasisElements[i], right.AlgebraicBasisElements[j]);
-  output.leftParent=&left;
-  output.rightParent=&right;
-  left.injectionToHeirMatForm.init(output.DimOverRationals, left.DimOverRationals);
-  right.injectionToHeirMatForm.init(output.DimOverRationals, right.DimOverRationals);
-  left.injectionToHeirMatForm.NullifyAll();
-  right.injectionToHeirMatForm.NullifyAll();
-  for (int i=0; i<left.AlgebraicBasisElements.size; i++)
-    left.injectionToHeirMatForm(i*right.DimOverRationals, i)=1;
-  for (int i=0; i<right.AlgebraicBasisElements.size; i++)
-    right.injectionToHeirMatForm(i, i)=1;
+  if (injectionFromLeftParent!=0)
+  { injectionFromLeftParent->init(output.DimOverRationals, left.DimOverRationals);
+    injectionFromLeftParent->NullifyAll();
+    for (int i=0; i<left.AlgebraicBasisElements.size; i++)
+      (*injectionFromLeftParent)(i*right.DimOverRationals, i)=1;
+  }
+  if (injectionFromRightParent!=0)
+  { injectionFromRightParent->init(output.DimOverRationals, right.DimOverRationals);
+    injectionFromRightParent->NullifyAll();
+    for (int i=0; i<right.AlgebraicBasisElements.size; i++)
+      (*injectionFromRightParent)(i, i)=1;
+  }
   if (left.DimOverRationals==left.DisplayNamesBasisElements.size && right.DimOverRationals==right.DisplayNamesBasisElements.size)
   { output.DisplayNamesBasisElements.SetSize(left.DisplayNamesBasisElements.size*right.DisplayNamesBasisElements.size);
     for (int i=0; i<left.AlgebraicBasisElements.size; i++)
@@ -51,34 +109,25 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensions
           output.DisplayNamesBasisElements[i*right.DimOverRationals+j]=left.DisplayNamesBasisElements[i]+right.DisplayNamesBasisElements[j];
       }
   }
-  left.injectionToHeirTensorForm=left.injectionToHeirMatForm;
-  right.injectionToHeirTensorForm=right.injectionToHeirMatForm;
-  std::cout << "<hr>left.injectionToHeirTensorForm: " << left.injectionToHeirTensorForm.ToString();
-  std::cout << "<br>right.injectionToHeirTensorForm: " << right.injectionToHeirTensorForm.ToString();
   output.ReduceMeOnCreation();
-
-  left.heir= this->ReduceAndAdd(output);
-  right.heir=left.heir;
-  return left.heir;
 }
 
-AlgebraicExtensionRationals* AlgebraicClosureRationals::ReduceAndAdd(AlgebraicExtensionRationals& input)
-{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::ReduceAndAdd");
-  int theIndex=this->theAlgebraicExtensions.AddNoRepetitionOrReturnIndexFirst(input);
+void AlgebraicClosureRationals::AddMustBeNew(AlgebraicExtensionRationals& input)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::AddMustBeNew");
+  if (this->theAlgebraicExtensions.Contains(input))
+  { std::cout << "This is a programming error: attempting to add an algebraic extension already contained in the "
+    << "list of algebraic extensions. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int theIndex=this->theAlgebraicExtensions.size;
+  this->theAlgebraicExtensions.AddOnTop(input);
   this->theAlgebraicExtensions[theIndex].indexInOwner=theIndex;
   this->theAlgebraicExtensions[theIndex].owner=this;
   this->theAlgebraicExtensions[theIndex].GeneratingElemenT.owner=&this->theAlgebraicExtensions[theIndex];
-  return &this->theAlgebraicExtensions[theIndex];
-}
-
-AlgebraicExtensionRationals* AlgebraicClosureRationals::GetRationals()
-{ return &this->theAlgebraicExtensions[0];
 }
 
 bool AlgebraicExtensionRationals::operator==(const AlgebraicExtensionRationals& other)const
-{ if (this->owner==other.owner && this->owner!=0)
-    return this->indexInOwner==other.indexInOwner;
-  return this->AlgebraicBasisElements==other.AlgebraicBasisElements;
+{ return this->AlgebraicBasisElements==other.AlgebraicBasisElements;
 }
 
 bool AlgebraicExtensionRationals::CheckBasicConsistency()const
@@ -134,11 +183,8 @@ void AlgebraicExtensionRationals::ChooseGeneratingElement()
   }
 }
 
-void AlgebraicExtensionRationals::ReduceMeOnCreationPart2()
-{
-}
-
-void AlgebraicExtensionRationals::ReduceMeOnCreation()
+void AlgebraicExtensionRationals::ReduceMeOnCreation
+(Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMeOnCreation");
   this->ChooseGeneratingElement();
   Polynomial<Rational> theMinPoly, smallestFactor;
@@ -153,21 +199,16 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
   }
   std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegree()==oldDeg)
-  { this->ReduceMeOnCreationPart2();
     return;
-  }
   std::cout << "<br>Min poly factors.";
-
   Matrix<Rational> theBasisChangeMat, theBasisChangeMatInverse;
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse=theBasisChangeMat;
   theBasisChangeMatInverse.Invert();
-  if (this->leftParent!=0)
-    this->leftParent->injectionToHeirMatForm.MultiplyOnTheLeft(theBasisChangeMatInverse);
-  if (this->rightParent!=0)
-    this->rightParent->injectionToHeirMatForm.MultiplyOnTheLeft(theBasisChangeMatInverse);
-  this->leftParent->injectionToHeirTensorForm=this->leftParent->injectionToHeirMatForm;
-  this->rightParent->injectionToHeirTensorForm=this->rightParent->injectionToHeirMatForm;
+  if (injectionFromLeftParent!=0)
+    injectionFromLeftParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
+  if (injectionFromRightParent!=0)
+    injectionFromRightParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
   Matrix<Rational> theProjection;
   int smallestFactorDegree=-1;
@@ -185,12 +226,10 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
       theProjection(theIndex, i)=remainderAfterReduction.theCoeffs[j];
     }
   }
-  if (this->leftParent!=0)
-    this->leftParent->injectionToHeirMatForm.MultiplyOnTheLeft(theProjection);
-  if (this->rightParent!=0)
-    this->rightParent->injectionToHeirMatForm.MultiplyOnTheLeft(theProjection);
-  this->leftParent->injectionToHeirTensorForm=this->leftParent->injectionToHeirMatForm;
-  this->rightParent->injectionToHeirTensorForm=this->rightParent->injectionToHeirMatForm;
+  if (injectionFromLeftParent!=0)
+    injectionFromLeftParent->MultiplyOnTheLeft(theProjection);
+  if (injectionFromRightParent!=0)
+    injectionFromRightParent->MultiplyOnTheLeft(theProjection);
 
   this->DimOverRationals=smallestFactorDegree;
   this->AlgebraicBasisElements.SetSize(this->DimOverRationals);
@@ -216,7 +255,6 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation()
     this->GeneratingElemenT.theElt.MaKeEi(0, 1);
   this->GeneratingElemenT.GetMultiplicationByMeMatrix(this->GeneratingElementTensorForm);
   this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, this->DimOverRationals);
-  this->ReduceMeOnCreationPart2();
 }
 
 bool AlgebraicExtensionRationals::CheckNonZeroOwner()const
@@ -269,42 +307,47 @@ bool AlgebraicNumber::CheckNonZeroOwner()const
   return true;
 }
 
-void AlgebraicNumber::InjectMeIntoLargestOwner()
-{ while (this->owner->heir!=0)
-  { FormatExpressions tempFMT;
-    tempFMT.flagUseHTML=false;
-    tempFMT.flagUseLatex=true;
-    std::cout << "<br>injecting " << CGI::GetHtmlMathSpanPure(this->ToString()) << " into heir field, by acting by on it by "
-    << CGI::GetHtmlMathSpanPure(this->owner->injectionToHeirMatForm.ToString(&tempFMT));
+int AlgebraicClosureRationals::GetIndexIMustContainPair
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right)
+{ Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
+  currentPair.Object1=left->indexInOwner;
+  currentPair.Object2=right->indexInOwner;
+  return this->thePairs.GetIndexIMustContainTheObject(currentPair);
+}
 
-    this->owner->injectionToHeirTensorForm.ActOnVectorColumn(this->theElt);
-    this->owner=this->owner->heir;
-    std::cout << "<br> to finally get: " << this->ToString();
-  }
+void AlgebraicClosureRationals::GetLeftAndRightInjectionsTensorForm
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
+   MatrixTensor<Rational>*& outputInjectionFromLeft, MatrixTensor<Rational>*& outputInjectionFromRight)
+{ int theIndex=this->GetIndexIMustContainPair(left, right);
+  outputInjectionFromLeft=&this->injectionsLeftParentTensorForm[theIndex];
+  outputInjectionFromRight=&this->injectionsRightParentTensorForm[theIndex];
 }
 
 void AlgebraicNumber::ConvertToCommonOwner
 (AlgebraicNumber& left, AlgebraicNumber& right)
 { MacroRegisterFunctionWithName("AlgebraicNumber::ConvertToCommonOwner");
+  if (left.owner==right.owner)
+    return;
+  if (left.owner==0)
+  { left.owner=right.owner;
+    return;
+  }
+  if (right.owner==0)
+  { right.owner=left.owner;
+    return;
+  }
   left.CheckNonZeroOwner();
   right.CheckNonZeroOwner();
-  if (left.owner==right.owner)
-    return;
-  if (left.owner->heir!=0)
-    left.InjectMeIntoLargestOwner();
-  if (right.owner->heir!=0)
-    right.InjectMeIntoLargestOwner();
-  if (left.owner==right.owner)
-    return;
-  AlgebraicExtensionRationals* newOwner= left.owner->owner->MergeTwoExtensions(*left.owner, *right.owner);
-  if (newOwner!=left.owner)
-  { left.owner->injectionToHeirTensorForm.ActOnVectorColumn(left.theElt);
-    left.owner=newOwner;
-  }
-  if (newOwner!=right.owner)
-  { right.owner->injectionToHeirTensorForm.ActOnVectorColumn(right.theElt);
-    right.owner=newOwner;
-  }
+  AlgebraicClosureRationals* theBigBadOwner=left.owner->owner;
+  AlgebraicExtensionRationals* newOwner= theBigBadOwner->MergeTwoExtensionsAddOutputToMe(*left.owner, *right.owner);
+  MatrixTensor<Rational>* leftInjection;
+  MatrixTensor<Rational>* rightInjection;
+  theBigBadOwner->GetLeftAndRightInjectionsTensorForm(left.owner, right.owner, leftInjection, rightInjection);
+  left.owner=newOwner;
+  right.owner=newOwner;
+  leftInjection->ActOnVectorColumn(left.theElt);
+  rightInjection->ActOnVectorColumn(right.theElt);
+  std::cout << "<hr>Algebraic closure: " << theBigBadOwner->ToString();
 }
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
@@ -335,6 +378,18 @@ void AlgebraicNumber::operator/=(const AlgebraicNumber& other)
 
 void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator*=");
+  if (other.owner==0)
+  { this->theElt*=other.theElt.theCoeffs[0];
+    return;
+  }
+  if (this->owner==0)
+  { Rational tempRat=this->theElt.GetMonomialCoefficient(MonomialVector(0));
+    *this=other;
+    this->theElt*=tempRat;
+    return;
+  }
+  this->CheckNonZeroOwner();
+  other.CheckNonZeroOwner();
   AlgebraicNumber otherCopy=other;
   AlgebraicNumber::ConvertToCommonOwner(*this, otherCopy);
   std::cout << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
@@ -358,7 +413,7 @@ void AlgebraicNumber::SqrtMeDefault()
 }
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)
-{ this->owner=inputOwner.GetRationals();
+{ this->owner=0;
   this->theElt.MaKeEi(0, input);
 }
 
@@ -383,7 +438,9 @@ void AlgebraicNumber::AssignRationalRadical(const Rational& input, AlgebraicClos
   theExtension.DisplayNamesBasisElements[0]="";
   theExtension.DisplayNamesBasisElements[1]="\\sqrt{" + input.ToString() + "}";
   theExtension.ReduceMeOnCreation();
-  this->owner= inputOwner.ReduceAndAdd(theExtension);
+  if (!inputOwner.theAlgebraicExtensions.Contains(theExtension))
+    inputOwner.AddMustBeNew(theExtension);
+  this->owner=&inputOwner.theAlgebraicExtensions[inputOwner.theAlgebraicExtensions.GetIndex(theExtension)];
 }
 
 void AlgebraicNumber::RadicalMeDefault(int theRad)
@@ -420,6 +477,7 @@ std::string AlgebraicExtensionRationals::ToString(FormatExpressions* theFormat)
     out << " e_{" << i+1 << "}:=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat)
     << ",  ";
   out << "~Generating ~element: " << this->GeneratingElementMatForm.ToString(&tempFormat);
+  out << " <br>Field pairings: (not implemented yet).";
   return out.str();
 }
 
@@ -444,7 +502,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 }
 
 void AlgebraicNumber::operator=(const Rational& other)
-{ this->owner=this->owner->owner->GetRationals();
+{ this->owner=0;
   this->theElt.MaKeEi(0, other);
 }
 

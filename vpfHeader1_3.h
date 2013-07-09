@@ -27,7 +27,6 @@ class AlgebraicNumber
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
 
   void SqrtMeDefault();
-  void InjectMeIntoLargestOwner();
   static void ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
   void RadicalMeDefault(int theRad);
   void Invert();
@@ -50,15 +49,17 @@ class AlgebraicExtensionRationals
   AlgebraicClosureRationals* owner;
 //  Matrix<Rational> injectionFromLeftParent;
 //  Matrix<Rational> injectionFromRightParent;
-  Matrix<Rational> injectionToHeirMatForm;
-  MatrixTensor<Rational> injectionToHeirTensorForm;
-  AlgebraicExtensionRationals* leftParent;
-  AlgebraicExtensionRationals* rightParent;
-  AlgebraicExtensionRationals* heir;
+//  Matrix<Rational> injectionFromLeftParentToMeMatForm;
+//  MatrixTensor<Rational> injectionFromLeftParentToMeTensorForm;
+//  Matrix<Rational> injectionFromRightParentToMeMatForm;
+//  MatrixTensor<Rational> injectionFromRightParentToMeTensorForm;
+//  AlgebraicExtensionRationals* leftParent;
+//  AlgebraicExtensionRationals* rightParent;
+//  AlgebraicExtensionRationals* heir;
   List<std::string> DisplayNamesBasisElements;
   int indexInOwner;
   int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0), leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
+  AlgebraicExtensionRationals(): owner(0)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
   {}
   bool CheckNonZeroOwner()const;
   bool CheckBasicConsistency()const;
@@ -71,8 +72,7 @@ class AlgebraicExtensionRationals
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
   }
-  void ReduceMeOnCreation();
-  void ReduceMeOnCreationPart2();
+  void ReduceMeOnCreation(Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0);
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
@@ -80,16 +80,36 @@ class AlgebraicClosureRationals
 {
 public:
   ListReferences<AlgebraicExtensionRationals> theAlgebraicExtensions;
-  AlgebraicClosureRationals()
-  { this->theAlgebraicExtensions.SetSize(1);
-    this->theAlgebraicExtensions[0].MakeRationals(*this);
-    this->theAlgebraicExtensions[0].indexInOwner=0;
-  }
-  AlgebraicExtensionRationals* MergeTwoExtensions
+  HashedList<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> > thePairs;
+  List<int> thePairPairing;
+  List<Matrix<Rational> > injectionsLeftParent;
+  List<Matrix<Rational> > injectionsRightParent;
+  List<MatrixTensor<Rational> > injectionsLeftParentTensorForm;
+  List<MatrixTensor<Rational> > injectionsRightParentTensorForm;
+
+  bool CheckConsistency()const;
+  AlgebraicClosureRationals(){}
+  int GetIndexIMustContainPair
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right)
+  ;
+  void GetLeftAndRightInjections
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
+   Matrix<Rational>*& outputInjectionFromLeft, Matrix<Rational>*& outputInjectionFromRight)
+   ;
+  void GetLeftAndRightInjectionsTensorForm
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
+   MatrixTensor<Rational>*& outputInjectionFromLeft, MatrixTensor<Rational>*& outputInjectionFromRight)
+   ;
+
+  void MergeTwoExtensions
+  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
+   Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0)
+  ;
+  AlgebraicExtensionRationals* MergeTwoExtensionsAddOutputToMe
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
   ;
-  AlgebraicExtensionRationals* ReduceAndAdd(AlgebraicExtensionRationals& input);
-  AlgebraicExtensionRationals* GetRationals();
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  void AddMustBeNew(AlgebraicExtensionRationals& input);
 };
 
 class AlgebraicNumberRegistryOld;

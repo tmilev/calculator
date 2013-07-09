@@ -1823,6 +1823,9 @@ bool CommandList::ApplyOneRule()
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" &&
       fourthToLastS=="Expression")
     return this->ReplaceEOEXByEX();
+  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="<" &&
+      fourthToLastS=="Expression")
+    return this->ReplaceEOEXByEX();
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
       fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" &&
       this->isSeparatorFromTheRightForDefinition(lastS))
@@ -3721,6 +3724,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
   this->AddOperationNoRepetitionAllowed(">");
+  this->AddOperationNoRepetitionAllowed("<");
   this->AddOperationNoRepetitionAllowed("==");
   this->AddOperationNoRepetitionAllowed("\\cup");
   this->AddOperationNoRepetitionAllowed("\\sqcup");
@@ -4325,6 +4329,20 @@ bool CommandList::outerGreaterThan
   if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational> (&rightRat))
     return false;
   if (leftRat>rightRat)
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
+}
+
+bool CommandList::outerLessThan
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListNElements(3))
+    return false;
+  const Expression& left=input[1];
+  const Expression& right=input[2];
+  Rational leftRat, rightRat;
+  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational> (&rightRat))
+    return false;
+  if (rightRat>leftRat)
     return output.AssignValue(1, theCommands);
   return output.AssignValue(0, theCommands);
 }
@@ -5341,6 +5359,10 @@ std::string Expression::ToString
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
     out << (*this)[1].ToString(theFormat) << "==" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->theBoss->opGreaterThan()))
+    out << (*this)[1].ToString(theFormat) << ">" << (*this)[2].ToString(theFormat);
+  else if (this->IsListStartingWithAtom(this->theBoss->opLessThan()))
+    out << (*this)[1].ToString(theFormat) << "<" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { switch (this->format)
     { case Expression::formatMatrixRow:

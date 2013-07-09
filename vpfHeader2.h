@@ -1047,6 +1047,12 @@ public:
   int opEqualEqual()
   { return this->operations.GetIndexIMustContainTheObject("==");
   }
+  int opGreaterThan()
+  { return this->operations.GetIndexIMustContainTheObject(">");
+  }
+  int opLessThan()
+  { return this->operations.GetIndexIMustContainTheObject("<");
+  }
   int opError()
   { return this->operations.GetIndexIMustContainTheObject("Error");
   }
@@ -1331,6 +1337,9 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerGreaterThan
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerLessThan
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerCombineFractions

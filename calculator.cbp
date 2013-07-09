@@ -46,18 +46,7 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="vpf1_5SubsetsSelections.h" />
-		<Unit filename="vpf4CalculatorFunctionList.cpp" />
-		<Unit filename="vpf5.cpp" />
-		<Unit filename="vpf5_1CalculatorCode.cpp" />
-		<Unit filename="vpf6.cpp" />
-		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.h" />
-		<Unit filename="vpf6_2serialization_code.cpp" />
-		<Unit filename="vpf7.cpp" />
-		<Unit filename="vpf8.cpp" />
-		<Unit filename="vpf9.cpp" />
-		<Unit filename="vpf9_1.cpp" />
-		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
 		<Unit filename="vpfCalculatorMain.cpp">

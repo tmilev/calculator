@@ -542,6 +542,7 @@ int main(int argc, char **argv)
 //civilizedInput="FactorOneVarPolyOverRationals{}(x^2-7x+12)";
  // civilizedInput="\\sqrt {}2+\\sqrt{}3+\\sqrt{}5";
 //  civilizedInput="\\sqrt{}2";
+//  civilizedInput="(1+\\sqrt 3)(\\sqrt{}3)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

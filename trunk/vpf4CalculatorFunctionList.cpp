@@ -1393,10 +1393,15 @@ void CommandList::initPredefinedStandardOperations()
   << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
 
   this->AddOperationOuterHandler
-  (">", this->outerGreaterThan, "",
+  ("<", this->outerLessThan, "",
    "If both the left hand side and the right hand side are rational, replaces the expression by \
-   1 if the left number is greater than the right, else replaces the expression by 0.",
-   "x>5; x:=3; x>3; 7>5;", true);
+   1 if the left number is less than the right, else replaces the expression by 0.",
+   "3<4; 5<4", true);
+  this->AddOperationOuterHandler
+  (">", this->outerGreaterThan, "",
+   "Greater than: has similar action to the less than sign. The following example shows an implementation of commutativity. ",
+   "x_{{i}}*x_{{j}}*{{a}}:if i>j:=x_j*x_i*a;\n x_{{i}}*x_{{j}}:if i>j:=x_j*x_i; (x_2*x_1- x_1*x_3)(x_1x_5+x_5x_4x_2); x_5x_4x_3x_2x_1", true);
+
   this->AddOperationOuterHandler
   ("==", this->outerEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \

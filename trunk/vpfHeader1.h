@@ -1217,6 +1217,10 @@ unsigned int hashFunction2(const ObjectType2&)
 >
 class Pair
 {
+  friend std::ostream& operator << (std::ostream& output, const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& thePair)
+  { output << "("  << thePair.Object1 << ", " <<  thePair.Object2 << ")";
+    return output;
+  }
 public:
   ObjectType1 Object1;
   ObjectType2 Object2;
@@ -3553,10 +3557,16 @@ ParallelComputing::GlobalPointerCounter++;
     this->Extended->den.MultiplyBy(tempRat.Extended->den);
     this->Simplify();
   }
-  inline void operator-=(const Rational& right){this->Subtract(right); }
-  inline void operator*=(const Rational& right){this->MultiplyBy(right); }
+  inline void operator-=(const Rational& right)
+  { this->Subtract(right);
+  }
+  inline void operator*=(const Rational& right)
+  { this->MultiplyBy(right);
+  }
 //  inline void operator*=(const Polynomial<Rational>& right);
-  inline void operator/=(const Rational& right){this->DivideBy(right);}
+  inline void operator/=(const Rational& right)
+  { this->DivideBy(right);
+  }
 //  inline void operator/=(const LargeInt& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
 //  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
   inline void operator+=(int right){this->AddInteger(right); }
@@ -5437,6 +5447,7 @@ class MonomialVector
   public:
   int theIndex;
   MonomialVector():theIndex(-1){}
+  MonomialVector(int inputIndex):theIndex(inputIndex){}
   std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
   { return (unsigned) this->theIndex;

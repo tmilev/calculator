@@ -1605,6 +1605,9 @@ public:
   void RemoveIndexShiftDown(int index)
   { this->::HashTemplate<Object, List<Object>, hashFunction>::RemoveIndexShiftDown(index);
   }
+  void RemoveIndexSwapWithLast(int index)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::RemoveIndexSwapWithLast(index);
+  }
   int GetIndex(const Object& o) const
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndex(o);
   }
@@ -2365,6 +2368,12 @@ public:
   }
   std::string ToString()const;
   void incrementSelection();
+  bool IncrementReturnFalseIfBackToBeginning()
+  { this->incrementSelection();
+    if (this->CardinalitySelection==0)
+      return false;
+    return true;
+  }
   int SelectionToIndex();
   void ExpandMaxSize();
   int GetNumCombinationsFixedCardinality(int theCardinality){return MathRoutines::NChooseK(this->MaxSize, theCardinality);}
@@ -2947,7 +2956,10 @@ public:
   inline static const std::string GetXMLClassName(){ return "LInt";}
   signed char sign;
   LargeIntUnsigned value;
-  void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
+  void operator*=(const LargeInt& x)
+  { this->sign*=x.sign;
+    this->value.MultiplyBy(x.value);
+  }
   void MultiplyByInt(int x);
   void ToString(std::string& output)const;
   inline std::string ToString(FormatExpressions* theFormat=0)const
@@ -2961,16 +2973,29 @@ public:
   bool IsNegative()const
   { return this->sign==-1&& (this->value.IsPositive());
   }
-  inline bool BeginsWithMinus(){return this->IsNegative();}
-  inline bool IsPositiveOrZero()const{return !this->IsNegative(); }
-  inline bool IsNonPositive()const{return !this->IsPositive(); }
-  bool NeedsBrackets()const{return false;}
+  inline bool BeginsWithMinus()
+  { return this->IsNegative();
+  }
+  inline bool IsPositiveOrZero()const
+  { return !this->IsNegative();
+  }
+  inline bool IsNonPositive()const
+  { return !this->IsPositive();
+  }
+  bool NeedsBrackets()const
+  { return false;
+  }
   bool operator==(const LargeInt& x)const;
-  bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
+  bool IsEqualToZero()const
+  { return this->value.IsEqualToZero();
+  }
   bool IsEqualToOne()const
   { return this->value.IsEqualToOne() && this->sign==1;
   }
-  void AssignLargeIntUnsigned(const LargeIntUnsigned& x){this->value.Assign(x); this->sign=1;}
+  void AssignLargeIntUnsigned(const LargeIntUnsigned& x)
+  { this->value.Assign(x);
+    this->sign=1;
+  }
   void AssignInt(int x);
   void AddLargeIntUnsigned(const LargeIntUnsigned& x);
   inline void AddInt(int x)
@@ -3000,8 +3025,14 @@ public:
       }
     return true;
   }
-  void MakeOne(){this->value.MakeOne(); this->sign=1; }
-  void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
+  void MakeOne()
+  { this->value.MakeOne();
+    this->sign=1;
+  }
+  void MakeMOne()
+  { this->value.MakeOne();
+    this->sign=-1;
+  }
   static unsigned int HashFunction (const LargeInt& input)
   { return input.HashFunction();
   }
@@ -3017,10 +3048,24 @@ public:
   inline void operator=(int x)
   { this->AssignInt(x);
   }
-  inline void operator=(const LargeIntUnsigned& other) {this->value=other; this->sign=1;}
-  inline void operator*=(const LargeInt& other){this->MultiplyBy(other);}
-  inline void operator*=(int x){ this->MultiplyByInt(x);}
-  inline void Minus(){if (!this->IsEqualToZero()) this->sign*=-1;}
+  inline void operator=(const LargeIntUnsigned& other)
+  { this->value=other;
+    this->sign=1;
+  }
+  void operator*=(const LargeIntUnsigned& other)
+  { if (other.IsEqualToZero())
+    { this->MakeZero();
+      return;
+    }
+    this->value*=other;
+  }
+  inline void operator*=(int x)
+  { this->MultiplyByInt(x);
+  }
+  inline void Minus()
+  { if (!this->IsEqualToZero())
+      this->sign*=-1;
+  }
   void operator+=(const LargeInt& other);
   inline void operator+=(const LargeIntUnsigned& other)
   { this->AddLargeIntUnsigned(other);
@@ -3036,7 +3081,9 @@ public:
     *this+=(other);
     this->Minus();
   }
-  inline bool operator<=(const LargeInt& other) const{ return ! (other<*this);}
+  inline bool operator<=(const LargeInt& other)const
+  { return !(other<*this);
+  }
   inline bool operator<(const LargeInt& other)const
   { if (other.IsPositiveOrZero())
     { if (this->IsPositiveOrZero())
@@ -3104,6 +3151,8 @@ public:
   LargeInt(int x)
   { this->AssignInt(x);
   }
+  LargeInt(const LargeIntUnsigned& other):sign(1), value(other)
+  {}
   LargeInt(): sign(1){}
 };
 
@@ -3580,12 +3629,6 @@ ParallelComputing::GlobalPointerCounter++;
 //    result*=right;
 //    return result;
 //  }
-  Rational operator*(const LargeInt& right)const
-  { Rational result;
-    result=*this;
-    result*= (Rational) right;
-    return result;
-  }
   Rational operator*(int right)const{ Rational tempRat; tempRat.Assign(*this); tempRat.MultiplyByInt(right); return tempRat;}
   Rational operator/(int right)const{ Rational tempRat; tempRat.Assign(*this); tempRat.DivideByInteger(right); return tempRat;}
   Vector<Rational>  operator*(const Vector<Rational> & right)const;

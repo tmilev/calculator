@@ -23,7 +23,7 @@ class AlgebraicNumber
   bool IsEqualToZero()const;
   void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
   void operator=(const Rational& other);
-  void AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  bool AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
 
   void SqrtMeDefault();
@@ -47,6 +47,8 @@ class AlgebraicExtensionRationals
   Vectors<Rational> theGeneratingElementPowersBasis;
 
   AlgebraicClosureRationals* owner;
+  bool flagIsQuadraticRadicalExtensionRationals;
+  HashedList<LargeInt> theQuadraticRadicals;
 //  Matrix<Rational> injectionFromLeftParent;
 //  Matrix<Rational> injectionFromRightParent;
 //  Matrix<Rational> injectionFromLeftParentToMeMatForm;
@@ -59,7 +61,7 @@ class AlgebraicExtensionRationals
   List<std::string> DisplayNamesBasisElements;
   int indexInOwner;
   int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
+  AlgebraicExtensionRationals(): owner(0), flagIsQuadraticRadicalExtensionRationals(false)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
   {}
   bool CheckNonZeroOwner()const;
   bool CheckBasicConsistency()const;
@@ -68,6 +70,9 @@ class AlgebraicExtensionRationals
   { return this->AlgebraicBasisElements.HashFunction();
   }
   void ChooseGeneratingElement();
+  void ComputeDisplayStringsFromRadicals();
+  int GetIndexFromRadicalSelection(const Selection& theSel);
+  void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
   bool operator==(const AlgebraicExtensionRationals& input)const;
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
@@ -86,9 +91,10 @@ public:
   List<Matrix<Rational> > injectionsRightParent;
   List<MatrixTensor<Rational> > injectionsLeftParentTensorForm;
   List<MatrixTensor<Rational> > injectionsRightParentTensorForm;
+  GlobalVariables* theGlobalVariables;
 
   bool CheckConsistency()const;
-  AlgebraicClosureRationals(){}
+  AlgebraicClosureRationals():theGlobalVariables(0){}
   int GetIndexIMustContainPair
   (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right)
   ;
@@ -102,6 +108,10 @@ public:
    ;
 
   void MergeTwoExtensions
+  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
+   Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0)
+  ;
+  void MergeTwoQuadraticRadicalExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
    Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0)
   ;

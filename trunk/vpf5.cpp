@@ -2933,8 +2933,8 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     assert(false);
   }
   unsigned int n=(*this)[0];
-  outputPrimeFactors.size=0;
-  outputMultiplicites.size=0;
+  outputPrimeFactors.SetSize(0);
+  outputMultiplicites.SetSize(0);
   while (n%2==0)
   { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
     n/=2;
@@ -3234,7 +3234,8 @@ bool CommandList::innerSqrt
 { if (!input.IsOfType<Rational>())
     return false;
   AlgebraicNumber theNumber;
-  theNumber.AssignRationalRadical(input.GetValuE<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure);
+  if (!theNumber.AssignRationalQuadraticRadical(input.GetValuE<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
+    return false;
   return output.AssignValue(theNumber, theCommands);
 }
 

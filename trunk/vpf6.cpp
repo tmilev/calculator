@@ -3658,7 +3658,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 void CommandList::init(GlobalVariables& inputGlobalVariables)
 { MacroRegisterFunctionWithName("CommandList::init");
   //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
-  this->theGlobalVariableS=& inputGlobalVariables;
+  this->theGlobalVariableS=&inputGlobalVariables;
+  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
   this->formatVisibleStrings.flagExpressionIsFinal=true;
   this->MaxAlgTransformationsPerExpression=100;

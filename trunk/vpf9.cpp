@@ -892,8 +892,8 @@ inline void Rational::MultiplyBy(const Rational& r)
       return;
   this->InitExtendedFromShortIfNeeded();
   if (r.Extended!=0)
-  { this->Extended->num.MultiplyBy(r.Extended->num);
-    this->Extended->den.MultiplyBy(r.Extended->den);
+  { this->Extended->num*=(r.Extended->num);
+    this->Extended->den*=(r.Extended->den);
   }
   else
   { this->Extended->num.MultiplyByInt(r.NumShort);
@@ -917,7 +917,7 @@ Rational operator-(const Rational& argument)
 
 inline void Rational::MultiplyByLargeInt(LargeInt& x)
 { this->InitExtendedFromShortIfNeeded();
-  this->Extended->num.MultiplyBy(x);
+  this->Extended->num*=(x);
   this->Simplify();
 }
 
@@ -1286,7 +1286,7 @@ void LargeInt::MultiplyByInt(int x)
 {//  if (this->value.size==0) return;
   LargeInt tempI;
   tempI.AssignInt(x);
-  this->MultiplyBy(tempI);
+  *this*=(tempI);
 }
 
 void LargeIntUnsigned::ToString(std::string& output)const

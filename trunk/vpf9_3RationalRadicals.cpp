@@ -29,7 +29,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
 AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe
 (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe");
-  if (left.owner!=this || right.owner!=0 || left.indexInOwner==-1 || right.indexInOwner==-1)
+  if (left.owner!=this || right.owner!=this || left.indexInOwner==-1 || right.indexInOwner==-1)
   { std::cout << "This is a programming error: I am asked to merge fields that do not belong to me. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -47,28 +47,168 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
   this->MergeTwoExtensions(left, right, output, &leftInjection, &rightInjection);
   if (this->theAlgebraicExtensions.Contains(output))
     return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.GetIndex(output)];
-  for (int i=0; i<this->theAlgebraicExtensions.size; i++)
-    if (output.DimOverRationals==this->theAlgebraicExtensions[i].DimOverRationals)
-    { AlgebraicExtensionRationals tempExtension;
-      Matrix<Rational> leftInjectionSecond, rightInjectionSecond, theIso;
-      this->MergeTwoExtensions(output, this->theAlgebraicExtensions[i], tempExtension, &leftInjectionSecond, &rightInjectionSecond);
-      if (tempExtension.DimOverRationals==output.DimOverRationals)
-      { theIso=rightInjectionSecond;
-        theIso.Invert();
-        theIso*=leftInjectionSecond;
-        leftInjection.MultiplyOnTheLeft(theIso);
-        rightInjection.MultiplyOnTheLeft(theIso);
-        this->thePairs.AddOnTop(currentPair);
-        this->injectionsLeftParent.AddOnTop(leftInjection);
-        this->injectionsRightParent.AddOnTop(rightInjection);
-        return &this->theAlgebraicExtensions[i];
+  if (!output.flagIsQuadraticRadicalExtensionRationals)
+    for (int i=0; i<this->theAlgebraicExtensions.size; i++)
+      if (output.DimOverRationals==this->theAlgebraicExtensions[i].DimOverRationals)
+      { AlgebraicExtensionRationals tempExtension;
+        Matrix<Rational> leftInjectionSecond, rightInjectionSecond, theIso;
+        this->MergeTwoExtensions(output, this->theAlgebraicExtensions[i], tempExtension, &leftInjectionSecond, &rightInjectionSecond);
+        if (tempExtension.DimOverRationals==output.DimOverRationals)
+        { theIso=rightInjectionSecond;
+          theIso.Invert();
+          theIso*=leftInjectionSecond;
+          leftInjection.MultiplyOnTheLeft(theIso);
+          rightInjection.MultiplyOnTheLeft(theIso);
+          this->thePairs.AddOnTop(currentPair);
+          this->injectionsLeftParent.AddOnTop(leftInjection);
+          this->injectionsRightParent.AddOnTop(rightInjection);
+          return &this->theAlgebraicExtensions[i];
+        }
       }
-    }
   this->AddMustBeNew(output);
   this->thePairs.AddOnTop(currentPair);
+  MatrixTensor<Rational> tempMat;
   this->injectionsLeftParent.AddOnTop(leftInjection);
   this->injectionsRightParent.AddOnTop(rightInjection);
+  tempMat=leftInjection;
+  this->injectionsLeftParentTensorForm.AddOnTop(tempMat);
+  tempMat=rightInjection;
+  this->injectionsRightParentTensorForm.AddOnTop(tempMat);
   return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.size-1];
+}
+
+void AlgebraicExtensionRationals::GetMultiplicativeOperatorFromRadicalSelection
+(const Selection& theSel, MatrixTensor<Rational>& outputOp)
+{ outputOp.MakeZero();
+  Selection vectorActedOnSel, resultVectorSel;
+  vectorActedOnSel.init(this->theQuadraticRadicals.size);
+  resultVectorSel.init(this->theQuadraticRadicals.size);
+  Rational theCoeff;
+  MonomialMatrix tempM;
+  do
+  { theCoeff=1;
+    for (int i=0; i<this->theQuadraticRadicals.size; i++)
+    { if (vectorActedOnSel.selected[i] && theSel.selected[i])
+      { resultVectorSel.selected[i]=false;
+        theCoeff*=this->theQuadraticRadicals[i];
+      } else if (!vectorActedOnSel.selected[i] && !theSel.selected[i])
+        resultVectorSel.selected[i]=false;
+      else
+        resultVectorSel.selected[i]=true;
+    }
+    resultVectorSel.ComputeIndicesFromSelection();
+    tempM.MakeEij(this->GetIndexFromRadicalSelection(resultVectorSel), this->GetIndexFromRadicalSelection(vectorActedOnSel));
+    outputOp.AddMonomial(tempM, theCoeff);
+  } while (vectorActedOnSel.IncrementReturnFalseIfBackToBeginning());
+}
+
+void AlgebraicExtensionRationals::ComputeDisplayStringsFromRadicals()
+{ if (!this->flagIsQuadraticRadicalExtensionRationals)
+    return;
+  this->DisplayNamesBasisElements.SetSize(this->DimOverRationals);
+  Selection theSel;
+  theSel.init(this->theQuadraticRadicals.size);
+  do
+  { std::stringstream out;
+    for (int i=0; i<theSel.CardinalitySelection; i++)
+    { const LargeInt& theRad=this->theQuadraticRadicals[theSel.elements[i]];
+      out << "\\sqrt{" << theRad.ToString() << "}";
+    }
+    this->DisplayNamesBasisElements[this->GetIndexFromRadicalSelection(theSel)]=out.str();
+  } while (theSel.IncrementReturnFalseIfBackToBeginning());
+}
+
+int AlgebraicExtensionRationals::GetIndexFromRadicalSelection(const Selection& theSel)
+{ if (theSel.MaxSize>30)
+  { std::cout << "This is a programming error: the algebraic extension is too large to be handled by the current data structures. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int result=0;
+  for (int i=theSel.MaxSize-1; i>=0; i--)
+  { result*=2;
+    if (theSel.selected[i])
+      result+=1;
+  }
+  return result;
+}
+
+void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
+  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
+   Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
+  if (!left.flagIsQuadraticRadicalExtensionRationals || !right.flagIsQuadraticRadicalExtensionRationals)
+  { std::cout << "Thi is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
+    << "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  //refine primes:
+  output.theQuadraticRadicals.Clear();
+  output.theQuadraticRadicals.AddOnTopNoRepetition(left.theQuadraticRadicals);
+  output.theQuadraticRadicals.AddOnTopNoRepetition(right.theQuadraticRadicals);
+  bool found=true;
+  LargeIntUnsigned candidateGCD, leftQuotient, rightQuotient;
+  while (found)
+  { found=false;
+    for (int i=0; i<output.theQuadraticRadicals.size; i++)
+      for (int j=i+1; j<output.theQuadraticRadicals.size; j++)
+      { if (output.theQuadraticRadicals[i]==-1 || output.theQuadraticRadicals[j]==-1)
+          continue;
+        LargeIntUnsigned::gcd(output.theQuadraticRadicals[i].value, output.theQuadraticRadicals[j].value, candidateGCD);
+        if (candidateGCD>1)
+        { leftQuotient=output.theQuadraticRadicals[i].value/candidateGCD;
+          rightQuotient=output.theQuadraticRadicals[j].value/candidateGCD;
+          output.theQuadraticRadicals.RemoveIndexSwapWithLast(j);
+          output.theQuadraticRadicals.RemoveIndexSwapWithLast(i);
+          output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) leftQuotient);
+          output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) rightQuotient);
+          output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) candidateGCD);
+          found=true;
+        }
+      }
+  }
+  output.theQuadraticRadicals.QuickSortAscending();
+  output.flagIsQuadraticRadicalExtensionRationals=true;
+  Selection largerFieldSel;
+  largerFieldSel.init(output.theQuadraticRadicals.size);
+  if (output.theQuadraticRadicals.size>16)
+  { std::cout << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
+    << "Such computations are too large for the current implementation of algberaic extensions of the rationals. I am crashing "
+    << " to let you know the computational limit is reached. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output.DimOverRationals=MathRoutines::TwoToTheNth(output.theQuadraticRadicals.size);
+  output.AlgebraicBasisElements.SetSize(output.theQuadraticRadicals.size);
+  do
+    output.GetMultiplicativeOperatorFromRadicalSelection
+    (largerFieldSel, output.AlgebraicBasisElements[output.GetIndexFromRadicalSelection(largerFieldSel)]);
+  while(largerFieldSel.IncrementReturnFalseIfBackToBeginning());
+  Selection smallerFieldSel;
+  AlgebraicExtensionRationals* smallerField=&left;
+  Matrix<Rational>* currentInjection=injectionFromLeftParent;
+  for (int i=0; i<2; i++, smallerField=&right, currentInjection=injectionFromRightParent)
+    if (currentInjection!=0)
+    { currentInjection->init(output.DimOverRationals, smallerField->DimOverRationals);
+      currentInjection->NullifyAll();
+      smallerFieldSel.init(smallerField->theQuadraticRadicals.size);
+      do
+      { largerFieldSel.initNoMemoryAllocation();
+        for (int j=0; j<smallerField->theQuadraticRadicals.size; j++)
+          if (smallerFieldSel.selected[j])
+          { if (smallerField->theQuadraticRadicals[j]==-1)
+            { largerFieldSel.AddSelectionAppendNewIndex(output.theQuadraticRadicals.GetIndex(-1));
+              continue;
+            }
+            for (int k=0; k<output.theQuadraticRadicals.size; k++)
+              if (smallerField->theQuadraticRadicals[j]%output.theQuadraticRadicals[k]==0)
+                largerFieldSel.AddSelectionAppendNewIndex(k);
+          }
+        (*currentInjection)
+        (output.GetIndexFromRadicalSelection(largerFieldSel), smallerField->GetIndexFromRadicalSelection(smallerFieldSel))=1;
+      } while (smallerFieldSel.IncrementReturnFalseIfBackToBeginning());
+    }
+  output.ComputeDisplayStringsFromRadicals();
 }
 
 void AlgebraicClosureRationals::MergeTwoExtensions
@@ -77,6 +217,10 @@ void AlgebraicClosureRationals::MergeTwoExtensions
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
   if (&left==&right)
   { output=left;
+    return;
+  }
+  if (left.flagIsQuadraticRadicalExtensionRationals && right.flagIsQuadraticRadicalExtensionRationals)
+  { this->MergeTwoQuadraticRadicalExtensions(left, right, output, injectionFromLeftParent, injectionFromRightParent);
     return;
   }
   output.DimOverRationals=left.DimOverRationals*right.DimOverRationals;
@@ -109,7 +253,13 @@ void AlgebraicClosureRationals::MergeTwoExtensions
           output.DisplayNamesBasisElements[i*right.DimOverRationals+j]=left.DisplayNamesBasisElements[i]+right.DisplayNamesBasisElements[j];
       }
   }
-  output.ReduceMeOnCreation();
+  double timeStart=0;
+  if (this->theGlobalVariables!=0)
+    timeStart = this->theGlobalVariables->GetElapsedSeconds();
+  output.ReduceMeOnCreation(injectionFromLeftParent, injectionFromRightParent);
+  if (this->theGlobalVariables!=0)
+    std::cout << "<hr> Time needed to reduce me on creation: " << this->theGlobalVariables->GetElapsedSeconds()-timeStart;
+
 }
 
 void AlgebraicClosureRationals::AddMustBeNew(AlgebraicExtensionRationals& input)
@@ -186,7 +336,17 @@ void AlgebraicExtensionRationals::ChooseGeneratingElement()
 void AlgebraicExtensionRationals::ReduceMeOnCreation
 (Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMeOnCreation");
+//  double timeStart=0;
+//  if (this->owner!=0)
+//    if (this->owner->theGlobalVariables!=0)
+//      timeStart=this->owner->theGlobalVariables->GetElapsedSeconds();
   this->ChooseGeneratingElement();
+//  if (this->owner!=0)
+//    if (this->owner->theGlobalVariables!=0)
+//      std::cout << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
+//  std::cout << "Reducing: " << this->ToString();
+  if (this->flagIsQuadraticRadicalExtensionRationals)
+    return;
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   Rational oldDeg=theMinPoly.TotalDegree();
@@ -417,8 +577,18 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
   this->theElt.MaKeEi(0, input);
 }
 
-void AlgebraicNumber::AssignRationalRadical(const Rational& input, AlgebraicClosureRationals& inputOwner)
+bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner)
 { MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
+  if (input==0)
+    return false;
+  if (input<0 && input!=-1)
+  { AlgebraicNumber i;
+    i.AssignRationalQuadraticRadical(-1, inputOwner);
+    if (!this->AssignRationalQuadraticRadical(-input, inputOwner))
+      return false;
+    *this*=i;
+    return true;
+  }
   AlgebraicExtensionRationals theExtension;
   theExtension.owner=&inputOwner;
   theExtension.AlgebraicBasisElements.SetSize(0);
@@ -431,16 +601,38 @@ void AlgebraicNumber::AssignRationalRadical(const Rational& input, AlgebraicClos
   theOp.MakeZero();
   theOp.AddMonomial(theM, 1);
   theM.MakeEij(0, 1);
-  theOp.AddMonomial(theM, input);
-  this->theElt.MaKeEi(1, 1);
+  LargeInt squareFreeInput=input.GetNumerator();
+  squareFreeInput*=input.GetDenominator();
+  List<unsigned int> primeFactors;
+  List<int> theMults;
+  if (!squareFreeInput.value.Factor(primeFactors, theMults))
+    return false;
+  squareFreeInput.value=1;
+  Rational squareRootRationalPart=1;
+  squareRootRationalPart/=input.GetDenominator();
+  for (int i=0; i<primeFactors.size; i++)
+  { if (theMults[i]%2==1)
+      squareFreeInput*=primeFactors[i];
+    Rational tempLI=primeFactors[i];
+    tempLI.RaiseToPower(theMults[i]/2);
+    squareRootRationalPart*=tempLI;
+  }
+  squareRootRationalPart*=input.GetDenominator();
+  if (squareFreeInput.IsEqualToOne())
+  { this->AssignRational(squareRootRationalPart, inputOwner);
+    return true;
+  }
+  theOp.AddMonomial(theM, squareFreeInput);
+  this->theElt.MaKeEi(1, squareRootRationalPart);
+  theExtension.theQuadraticRadicals.AddOnTop(squareFreeInput);
   theExtension.AlgebraicBasisElements.AddOnTop(theOp);
-  theExtension.DisplayNamesBasisElements.SetSize(2);
-  theExtension.DisplayNamesBasisElements[0]="";
-  theExtension.DisplayNamesBasisElements[1]="\\sqrt{" + input.ToString() + "}";
   theExtension.ReduceMeOnCreation();
+  theExtension.ComputeDisplayStringsFromRadicals();
   if (!inputOwner.theAlgebraicExtensions.Contains(theExtension))
     inputOwner.AddMustBeNew(theExtension);
-  this->owner=&inputOwner.theAlgebraicExtensions[inputOwner.theAlgebraicExtensions.GetIndex(theExtension)];
+  int theIndex=inputOwner.theAlgebraicExtensions.GetIndex(theExtension);
+  this->owner=&inputOwner.theAlgebraicExtensions[theIndex];
+  return true;
 }
 
 void AlgebraicNumber::RadicalMeDefault(int theRad)
@@ -474,10 +666,17 @@ std::string AlgebraicExtensionRationals::ToString(FormatExpressions* theFormat)
   tempFormat.flagUseHTML=false;
   tempFormat.flagUseLatex=true;
   for (int i=0; i<this->AlgebraicBasisElements.size; i++)
-    out << " e_{" << i+1 << "}:=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat)
-    << ",  ";
+  { if (i<this->DisplayNamesBasisElements.size)
+    { if (this->DisplayNamesBasisElements[i]=="")
+        out << "1";
+      else
+        out << this->DisplayNamesBasisElements[i];
+    } else
+      out << " e_{" << i+1 << "}";
+    out << ":=" << this->AlgebraicBasisElements[i].ToStringMatForm(&tempFormat) << ",  ";
+  }
   out << "~Generating ~element: " << this->GeneratingElementMatForm.ToString(&tempFormat);
-  out << " <br>Field pairings: (not implemented yet).";
+  //out << " <br>Field pairings: (not implemented yet).";
   return out.str();
 }
 
@@ -487,7 +686,10 @@ bool AlgebraicNumber::IsEqualToZero()const
 
 std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
 { if (this->owner==0)
-    return "(non-initialized)";
+  { if (this->theElt.IsEqualToZero())
+      return "0";
+    return this->theElt.theCoeffs[0].ToString();
+  }
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames=this->owner->DisplayNamesBasisElements;

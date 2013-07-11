@@ -14,7 +14,15 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
 }
 
 bool AlgebraicClosureRationals::CheckConsistency()const
-{ return true;
+{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParentTensorForm.size !=this->thePairs.size ||
+      this->injectionsRightParentTensorForm.size!=this->thePairs.size)
+  { std::cout << "This is a programming error: I have " << this->thePairs.size << " pairs, " << this->thePairPairing.size
+    << " pair pairings, " << this->injectionsLeftParentTensorForm.size << " left injections, "
+    << this->injectionsRightParentTensorForm.size << " right injections."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
 }
 
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)const
@@ -24,6 +32,29 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   { out << "<br>Extension " << i+1 << ": " << this->theAlgebraicExtensions[i].ToString();
   }
   return out.str();
+}
+
+void AlgebraicClosureRationals::AddPairWithInjection
+  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right,
+   const AlgebraicExtensionRationals& tensorProd, Matrix<Rational>& inputInjectionFromLeft, Matrix<Rational>& inputInjectionFromRight)
+{ Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
+  currentPair.Object1=left.indexInOwner;
+  currentPair.Object2=right.indexInOwner;
+  if (this->thePairs.Contains(currentPair))
+    return;
+  this->thePairs.AddOnTop(currentPair);
+  this->thePairPairing.AddOnTop(tensorProd.indexInOwner);
+//  std::cout << "<br><br>\n\n\n\n<br><br>left and right injections: "
+//  << (inputInjectionFromLeft.ToString())
+//  << " and<br><br> "
+//  << (inputInjectionFromRight.ToString());
+  this->injectionsLeftParent.AddOnTop(inputInjectionFromLeft);
+  this->injectionsRightParent.AddOnTop(inputInjectionFromRight);
+  MatrixTensor<Rational> tempMat;
+  tempMat=inputInjectionFromLeft;
+  this->injectionsLeftParentTensorForm.AddOnTop(tempMat);
+  tempMat=inputInjectionFromRight;
+  this->injectionsRightParentTensorForm.AddOnTop(tempMat);
 }
 
 AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe
@@ -36,6 +67,7 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
   }
   if (&left==&right)
     return &this->theAlgebraicExtensions[left.indexInOwner];
+  this->CheckConsistency();
   Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
   currentPair.Object1=left.indexInOwner;
   currentPair.Object2=right.indexInOwner;
@@ -46,7 +78,9 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
   AlgebraicExtensionRationals output;
   this->MergeTwoExtensions(left, right, output, &leftInjection, &rightInjection);
   if (this->theAlgebraicExtensions.Contains(output))
+  { this->AddPairWithInjection(left, right, output, leftInjection, rightInjection);
     return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.GetIndex(output)];
+  }
   if (!output.flagIsQuadraticRadicalExtensionRationals)
     for (int i=0; i<this->theAlgebraicExtensions.size; i++)
       if (output.DimOverRationals==this->theAlgebraicExtensions[i].DimOverRationals)
@@ -59,21 +93,12 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
           theIso*=leftInjectionSecond;
           leftInjection.MultiplyOnTheLeft(theIso);
           rightInjection.MultiplyOnTheLeft(theIso);
-          this->thePairs.AddOnTop(currentPair);
-          this->injectionsLeftParent.AddOnTop(leftInjection);
-          this->injectionsRightParent.AddOnTop(rightInjection);
+          this->AddPairWithInjection(left, right, this->theAlgebraicExtensions[i], leftInjection, rightInjection);
           return &this->theAlgebraicExtensions[i];
         }
       }
   this->AddMustBeNew(output);
-  this->thePairs.AddOnTop(currentPair);
-  MatrixTensor<Rational> tempMat;
-  this->injectionsLeftParent.AddOnTop(leftInjection);
-  this->injectionsRightParent.AddOnTop(rightInjection);
-  tempMat=leftInjection;
-  this->injectionsLeftParentTensorForm.AddOnTop(tempMat);
-  tempMat=rightInjection;
-  this->injectionsRightParentTensorForm.AddOnTop(tempMat);
+  this->AddPairWithInjection(left, right, this->theAlgebraicExtensions.LastObject(), leftInjection, rightInjection);
   return &this->theAlgebraicExtensions[this->theAlgebraicExtensions.size-1];
 }
 
@@ -161,8 +186,10 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
           rightQuotient=output.theQuadraticRadicals[j].value/candidateGCD;
           output.theQuadraticRadicals.RemoveIndexSwapWithLast(j);
           output.theQuadraticRadicals.RemoveIndexSwapWithLast(i);
-          output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) leftQuotient);
-          output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) rightQuotient);
+          if (leftQuotient>1)
+            output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) leftQuotient);
+          if (rightQuotient>1)
+            output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) rightQuotient);
           output.theQuadraticRadicals.AddOnTopNoRepetition((LargeInt) candidateGCD);
           found=true;
         }
@@ -179,7 +206,7 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
     assert(false);
   }
   output.DimOverRationals=MathRoutines::TwoToTheNth(output.theQuadraticRadicals.size);
-  output.AlgebraicBasisElements.SetSize(output.theQuadraticRadicals.size);
+  output.AlgebraicBasisElements.SetSize(output.DimOverRationals);
   do
     output.GetMultiplicativeOperatorFromRadicalSelection
     (largerFieldSel, output.AlgebraicBasisElements[output.GetIndexFromRadicalSelection(largerFieldSel)]);
@@ -201,19 +228,21 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
               continue;
             }
             for (int k=0; k<output.theQuadraticRadicals.size; k++)
-              if (smallerField->theQuadraticRadicals[j]%output.theQuadraticRadicals[k]==0)
+              if (smallerField->theQuadraticRadicals[j]%output.theQuadraticRadicals[k]==0 && output.theQuadraticRadicals[k]!=-1)
                 largerFieldSel.AddSelectionAppendNewIndex(k);
           }
+//        std::cout << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
         (*currentInjection)
         (output.GetIndexFromRadicalSelection(largerFieldSel), smallerField->GetIndexFromRadicalSelection(smallerFieldSel))=1;
       } while (smallerFieldSel.IncrementReturnFalseIfBackToBeginning());
     }
+//  std::cout << "<hr>Computing display strings";
   output.ComputeDisplayStringsFromRadicals();
 }
 
 void AlgebraicClosureRationals::MergeTwoExtensions
-  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
+ Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
   if (&left==&right)
   { output=left;
@@ -507,7 +536,7 @@ void AlgebraicNumber::ConvertToCommonOwner
   right.owner=newOwner;
   leftInjection->ActOnVectorColumn(left.theElt);
   rightInjection->ActOnVectorColumn(right.theElt);
-  std::cout << "<hr>Algebraic closure: " << theBigBadOwner->ToString();
+//  std::cout << "<hr>Algebraic closure: " << theBigBadOwner->ToString();
 }
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
@@ -551,21 +580,25 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   this->CheckNonZeroOwner();
   other.CheckNonZeroOwner();
   AlgebraicNumber otherCopy=other;
+//  std::cout << "Converting <hr>" << CGI::GetHtmlMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
+//  << CGI::GetHtmlMathSpanPure(otherCopy.ToString());
   AlgebraicNumber::ConvertToCommonOwner(*this, otherCopy);
-  std::cout << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
+//  std::cout << " <br><br>To get: " << CGI::GetHtmlMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
+//  << CGI::GetHtmlMathSpanPure(otherCopy.ToString()) ;
+  //std::cout << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
   FormatExpressions tempformat;
   tempformat.flagUseLatex=true;
   tempformat.flagUseHTML=false;
   this->GetMultiplicationByMeMatrix(leftMat);
   otherCopy.GetMultiplicationByMeMatrix(rightMat);
-  std::cout << " in matrix form: " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
-  << CGI::GetHtmlMathSpanPure(rightMat.ToStringMatForm(&tempformat));
+//  std::cout << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
+//  << CGI::GetHtmlMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;
   this->theElt.MaKeEi(0);
-  std::cout << "matrix " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat));
+  //std::cout << "matrix " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat));
   leftMat.ActOnVectorColumn(this->theElt);
-  std::cout << this->theElt.ToString();
+  //std::cout << this->theElt.ToString();
 }
 
 void AlgebraicNumber::SqrtMeDefault()
@@ -625,6 +658,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& input, Alge
   theOp.AddMonomial(theM, squareFreeInput);
   this->theElt.MaKeEi(1, squareRootRationalPart);
   theExtension.theQuadraticRadicals.AddOnTop(squareFreeInput);
+  theExtension.flagIsQuadraticRadicalExtensionRationals=true;
   theExtension.AlgebraicBasisElements.AddOnTop(theOp);
   theExtension.ReduceMeOnCreation();
   theExtension.ComputeDisplayStringsFromRadicals();

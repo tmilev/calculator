@@ -93,6 +93,9 @@ public:
     }
     return indexOfObject;
   }
+  Object& LastObject()const
+  { return (*this)[this->size-1];
+  }
   ListReferences():size(0)
   {}
   ~ListReferences()

@@ -61,7 +61,7 @@ class AlgebraicExtensionRationals
   List<std::string> DisplayNamesBasisElements;
   int indexInOwner;
   int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0), flagIsQuadraticRadicalExtensionRationals(false)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
+  AlgebraicExtensionRationals(): owner(0), flagIsQuadraticRadicalExtensionRationals(false), indexInOwner(-1), DimOverRationals(0)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
   {}
   bool CheckNonZeroOwner()const;
   bool CheckBasicConsistency()const;
@@ -106,6 +106,10 @@ public:
   (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
    MatrixTensor<Rational>*& outputInjectionFromLeft, MatrixTensor<Rational>*& outputInjectionFromRight)
    ;
+  void AddPairWithInjection
+  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right,
+   const AlgebraicExtensionRationals& tensorProd, Matrix<Rational>& inputInjectionFromLeft, Matrix<Rational>& inputInjectionFromRight)
+  ;
 
   void MergeTwoExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,

@@ -1018,6 +1018,10 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opAlgNumber(), this->opAlgNumber(),
    "Multiplies two algebraic numbers. ",
    "\\sqrt{}2(\\sqrt {2}* \\sqrt {3} +\\sqrt{}2)", true);
+    this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opRational(), this->opAlgNumber(),
+   "Multiplies two algebraic number by rational. ",
+   "2(\\sqrt {2}+\\sqrt{}3)", true);
 
 
   this->AddOperationBinaryInnerHandlerWithTypes

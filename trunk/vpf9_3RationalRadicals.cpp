@@ -14,11 +14,11 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
 }
 
 bool AlgebraicClosureRationals::CheckConsistency()const
-{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParentTensorForm.size !=this->thePairs.size ||
-      this->injectionsRightParentTensorForm.size!=this->thePairs.size)
+{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParenT.size !=this->thePairs.size ||
+      this->injectionsRightParenT.size!=this->thePairs.size)
   { std::cout << "This is a programming error: I have " << this->thePairs.size << " pairs, " << this->thePairPairing.size
-    << " pair pairings, " << this->injectionsLeftParentTensorForm.size << " left injections, "
-    << this->injectionsRightParentTensorForm.size << " right injections."
+    << " pair pairings, " << this->injectionsLeftParenT.size << " left injections, "
+    << this->injectionsRightParenT.size << " right injections."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -36,7 +36,8 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
 
 void AlgebraicClosureRationals::AddPairWithInjection
   (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right,
-   const AlgebraicExtensionRationals& tensorProd, Matrix<Rational>& inputInjectionFromLeft, Matrix<Rational>& inputInjectionFromRight)
+   const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
+   MatrixTensor<Rational>& inputInjectionFromRight)
 { Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
   currentPair.Object1=left.indexInOwner;
   currentPair.Object2=right.indexInOwner;
@@ -48,13 +49,8 @@ void AlgebraicClosureRationals::AddPairWithInjection
 //  << (inputInjectionFromLeft.ToString())
 //  << " and<br><br> "
 //  << (inputInjectionFromRight.ToString());
-  this->injectionsLeftParent.AddOnTop(inputInjectionFromLeft);
-  this->injectionsRightParent.AddOnTop(inputInjectionFromRight);
-  MatrixTensor<Rational> tempMat;
-  tempMat=inputInjectionFromLeft;
-  this->injectionsLeftParentTensorForm.AddOnTop(tempMat);
-  tempMat=inputInjectionFromRight;
-  this->injectionsRightParentTensorForm.AddOnTop(tempMat);
+  this->injectionsLeftParenT.AddOnTop(inputInjectionFromLeft);
+  this->injectionsRightParenT.AddOnTop(inputInjectionFromRight);
 }
 
 AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOutputToMe
@@ -74,7 +70,7 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
   int indexPairing=this->thePairs.GetIndex(currentPair);
   if (indexPairing!=-1)
     return &this->theAlgebraicExtensions[this->thePairPairing[indexPairing]];
-  Matrix<Rational> leftInjection, rightInjection;
+  MatrixTensor<Rational> leftInjection, rightInjection;
   AlgebraicExtensionRationals output;
   this->MergeTwoExtensions(left, right, output, &leftInjection, &rightInjection);
   if (this->theAlgebraicExtensions.Contains(output))
@@ -85,7 +81,7 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
     for (int i=0; i<this->theAlgebraicExtensions.size; i++)
       if (output.DimOverRationals==this->theAlgebraicExtensions[i].DimOverRationals)
       { AlgebraicExtensionRationals tempExtension;
-        Matrix<Rational> leftInjectionSecond, rightInjectionSecond, theIso;
+        MatrixTensor<Rational> leftInjectionSecond, rightInjectionSecond, theIso;
         this->MergeTwoExtensions(output, this->theAlgebraicExtensions[i], tempExtension, &leftInjectionSecond, &rightInjectionSecond);
         if (tempExtension.DimOverRationals==output.DimOverRationals)
         { theIso=rightInjectionSecond;
@@ -160,7 +156,7 @@ int AlgebraicExtensionRationals::GetIndexFromRadicalSelection(const Selection& t
 
 void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+   MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!left.flagIsQuadraticRadicalExtensionRationals || !right.flagIsQuadraticRadicalExtensionRationals)
   { std::cout << "Thi is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
@@ -213,11 +209,10 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
   while(largerFieldSel.IncrementReturnFalseIfBackToBeginning());
   Selection smallerFieldSel;
   AlgebraicExtensionRationals* smallerField=&left;
-  Matrix<Rational>* currentInjection=injectionFromLeftParent;
+  MatrixTensor<Rational>* currentInjection=injectionFromLeftParent;
   for (int i=0; i<2; i++, smallerField=&right, currentInjection=injectionFromRightParent)
     if (currentInjection!=0)
-    { currentInjection->init(output.DimOverRationals, smallerField->DimOverRationals);
-      currentInjection->NullifyAll();
+    { currentInjection->MakeZero();
       smallerFieldSel.init(smallerField->theQuadraticRadicals.size);
       do
       { largerFieldSel.initNoMemoryAllocation();
@@ -232,8 +227,9 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
                 largerFieldSel.AddSelectionAppendNewIndex(k);
           }
 //        std::cout << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
-        (*currentInjection)
-        (output.GetIndexFromRadicalSelection(largerFieldSel), smallerField->GetIndexFromRadicalSelection(smallerFieldSel))=1;
+        (*currentInjection).AddMonomial
+        (MonomialMatrix(output.GetIndexFromRadicalSelection(largerFieldSel),
+         smallerField->GetIndexFromRadicalSelection(smallerFieldSel)),1);
       } while (smallerFieldSel.IncrementReturnFalseIfBackToBeginning());
     }
 //  std::cout << "<hr>Computing display strings";
@@ -242,7 +238,7 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
 
 void AlgebraicClosureRationals::MergeTwoExtensions
 (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
- Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+ MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
   if (&left==&right)
   { output=left;
@@ -259,16 +255,14 @@ void AlgebraicClosureRationals::MergeTwoExtensions
       output.AlgebraicBasisElements[i*right.DimOverRationals+j].
       AssignTensorProduct(left.AlgebraicBasisElements[i], right.AlgebraicBasisElements[j]);
   if (injectionFromLeftParent!=0)
-  { injectionFromLeftParent->init(output.DimOverRationals, left.DimOverRationals);
-    injectionFromLeftParent->NullifyAll();
+  { injectionFromLeftParent->MakeZero();
     for (int i=0; i<left.AlgebraicBasisElements.size; i++)
-      (*injectionFromLeftParent)(i*right.DimOverRationals, i)=1;
+      injectionFromLeftParent->AddMonomial(MonomialMatrix(i*right.DimOverRationals, i),1);
   }
   if (injectionFromRightParent!=0)
-  { injectionFromRightParent->init(output.DimOverRationals, right.DimOverRationals);
-    injectionFromRightParent->NullifyAll();
+  { injectionFromRightParent->MakeZero();
     for (int i=0; i<right.AlgebraicBasisElements.size; i++)
-      (*injectionFromRightParent)(i, i)=1;
+      injectionFromRightParent->AddMonomial(MonomialMatrix(i, i),1);
   }
   if (left.DimOverRationals==left.DisplayNamesBasisElements.size && right.DimOverRationals==right.DisplayNamesBasisElements.size)
   { output.DisplayNamesBasisElements.SetSize(left.DisplayNamesBasisElements.size*right.DisplayNamesBasisElements.size);
@@ -363,7 +357,7 @@ void AlgebraicExtensionRationals::ChooseGeneratingElement()
 }
 
 void AlgebraicExtensionRationals::ReduceMeOnCreation
-(Matrix<Rational>* injectionFromLeftParent, Matrix<Rational>* injectionFromRightParent)
+(MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMeOnCreation");
 //  double timeStart=0;
 //  if (this->owner!=0)
@@ -390,7 +384,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation
   if (smallestFactor.TotalDegree()==oldDeg)
     return;
   std::cout << "<br>Min poly factors.";
-  Matrix<Rational> theBasisChangeMat, theBasisChangeMatInverse;
+  MatrixTensor<Rational> theBasisChangeMat, theBasisChangeMatInverse;
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse=theBasisChangeMat;
   theBasisChangeMatInverse.Invert();
@@ -399,20 +393,20 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation
   if (injectionFromRightParent!=0)
     injectionFromRightParent->MultiplyOnTheLeft(theBasisChangeMatInverse);
   Polynomial<Rational> zToTheNth, remainderAfterReduction, tempP;
-  Matrix<Rational> theProjection;
+  MatrixTensor<Rational> theProjection;
   int smallestFactorDegree=-1;
   smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree);
-  theProjection.init(smallestFactorDegree, this->DimOverRationals);
-  theProjection.NullifyAll();
+  //theProjection.init(smallestFactorDegree, this->DimOverRationals);
+  theProjection.MakeZero();
   for (int i=0; i<smallestFactorDegree; i++)
-    theProjection(i,i)=1;
+    theProjection.AddMonomial(MonomialMatrix(i,i),1);
   for (int i=smallestFactorDegree; i<this->DimOverRationals; i++)
   { zToTheNth.MakeMonomiaL(0, i, 1, 1);
     zToTheNth.DivideBy(smallestFactor, tempP, remainderAfterReduction);
     for (int j=0; j<remainderAfterReduction.size(); j++)
-    { int theIndex;
+    { int theIndex=-1;
       remainderAfterReduction[j](0).IsSmallInteger(&theIndex);
-      theProjection(theIndex, i)=remainderAfterReduction.theCoeffs[j];
+      theProjection.AddMonomial(MonomialMatrix(theIndex, i),remainderAfterReduction.theCoeffs[j]);
     }
   }
   if (injectionFromLeftParent!=0)
@@ -508,8 +502,8 @@ void AlgebraicClosureRationals::GetLeftAndRightInjectionsTensorForm
   (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
    MatrixTensor<Rational>*& outputInjectionFromLeft, MatrixTensor<Rational>*& outputInjectionFromRight)
 { int theIndex=this->GetIndexIMustContainPair(left, right);
-  outputInjectionFromLeft=&this->injectionsLeftParentTensorForm[theIndex];
-  outputInjectionFromRight=&this->injectionsRightParentTensorForm[theIndex];
+  outputInjectionFromLeft=&this->injectionsLeftParenT[theIndex];
+  outputInjectionFromRight=&this->injectionsRightParenT[theIndex];
 }
 
 void AlgebraicNumber::ConvertToCommonOwner

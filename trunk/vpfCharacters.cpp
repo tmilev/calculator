@@ -622,7 +622,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
           fastbasis.elements[bi][bj] = fastbasis.elements[bi-1][bj];
       for(int bj=0; bj<fastbasis.NumCols; bj++)
         fastbasis.elements[i][bj] = v[bj];
-      fastbasis.GaussianEliminationByRows(fastbasis);
+      fastbasis.GaussianEliminationByRows();
       rank++;
       fastbasis.NumRows = rank;
       return true;

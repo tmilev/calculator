@@ -3479,6 +3479,7 @@ public:
       this->AddMonomial(theMon, 1);
     }
   }
+  void Invert();
   int GetMaxNumRows()const
   { int result=-1;
     for (int i=0; i<this->size(); i++)
@@ -3499,6 +3500,7 @@ public:
     }
     return result+1;
   }
+  void GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows=-1);
   bool IsPositiveDefinite()
   { Matrix<coefficient> other;
     this->GetMatrix(other, this->GetMaxNumColsNumRows());
@@ -3611,6 +3613,23 @@ public:
         output((*this)[i].vIndex,(*this)[i].dualIndex)+=this->theCoeffs[i];
   }
   template <class otherType>
+  void AssignVectorsToColumns(const Vectors<otherType>& inputVectors)
+  { this->MakeZero();
+    for (int i=0; i<inputVectors.size; i++)
+      for (int j=0; j<inputVectors[i].size; j++)
+        this->AddMonomial(MonomialMatrix(j,i), inputVectors[i][j]);
+  }
+  template <class otherType>
+  void AssignVectorsToRows(const List<VectorSparse<otherType> >& inputVectors)
+  { this->MakeZero();
+    for (int i=0; i<inputVectors.size; i++)
+      for (int j=0; j<inputVectors[i].size(); j++)
+        this->AddMonomial(MonomialMatrix(i,inputVectors[i][j].theIndex), inputVectors[i].theCoeffs[j]);
+  }
+  void GaussianEliminationByRowsMatrix
+  (MatrixTensor<coefficient>* carbonCopyMat=0);
+
+  template <class otherType>
   void ActOnVectorColumn(VectorSparse<otherType>& inputOutput)const
   { VectorSparse<otherType> output;
     output.MakeZero();
@@ -3633,6 +3652,49 @@ public:
   { return input.HashFunction();
   }
 };
+
+template <class coefficient>
+void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows)
+{ MinNumRows=MathRoutines::Maximum(MinNumRows, this->GetMaxNumRows());
+  output.SetSize(MinNumRows);
+  for (int i=0; i<output.size; i++)
+    output[i].MakeZero();
+  for (int i=0; i<this->size(); i++)
+  { int rowIndex=(*this)[i].vIndex;
+    int colIndex=(*this)[i].dualIndex;
+    output[rowIndex].AddMonomial(MonomialVector(colIndex), this->theCoeffs[i]);
+  }
+}
+
+template <class coefficient>
+void MatrixTensor<coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat)
+{ List<VectorSparse<coefficient> > theRows, theCarbonCopyRows;
+  int numRows=this->GetMaxNumRows();
+  if (carbonCopyMat!=0)
+  { numRows=MathRoutines::Maximum(numRows, carbonCopyMat->GetMaxNumRows());
+    carbonCopyMat->GetVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numRows);
+  }
+  this->GetVectorsSparseFromRowsIncludeZeroRows(theRows, numRows);
+  List<VectorSparse<coefficient> >* theCarbonCopyPointer=carbonCopyMat==0 ? 0 : &theCarbonCopyRows;
+  VectorSparse<coefficient>::GaussianEliminationByRows(theRows, 0, 0, 0, theCarbonCopyPointer);
+  this->AssignVectorsToRows(theRows);
+  if (carbonCopyMat!=0)
+    carbonCopyMat->AssignVectorsToRows(theCarbonCopyRows);
+}
+
+template <class coefficient>
+void MatrixTensor<coefficient>::Invert()
+{ MatrixTensor<coefficient> theId;
+  theId.MakeId(this->GetMaxNumColsNumRows());
+  MatrixTensor<coefficient> result=theId;
+  this->GaussianEliminationByRowsMatrix(&result);
+  if (*this!=theId)
+  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  *this=result;
+}
 
 template <class coefficient>
 class ModuleSSalgebra

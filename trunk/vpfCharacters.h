@@ -559,7 +559,7 @@ VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpac
   for(int i=0; i<outvecs.size; i++)
     for(int j=0; j<this->degree; j++)
       output.fastbasis.elements[i][j] = outvecs[i][j];
-  output.fastbasis.GaussianEliminationByRows(output.fastbasis);
+  output.fastbasis.GaussianEliminationByRows();
   return output;
 }
 

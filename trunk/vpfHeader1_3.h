@@ -77,7 +77,7 @@ class AlgebraicExtensionRationals
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
   }
-  void ReduceMeOnCreation(Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0);
+  void ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
@@ -87,10 +87,8 @@ public:
   ListReferences<AlgebraicExtensionRationals> theAlgebraicExtensions;
   HashedList<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> > thePairs;
   List<int> thePairPairing;
-  List<Matrix<Rational> > injectionsLeftParent;
-  List<Matrix<Rational> > injectionsRightParent;
-  List<MatrixTensor<Rational> > injectionsLeftParentTensorForm;
-  List<MatrixTensor<Rational> > injectionsRightParentTensorForm;
+  List<MatrixTensor<Rational> > injectionsLeftParenT;
+  List<MatrixTensor<Rational> > injectionsRightParenT;
   GlobalVariables* theGlobalVariables;
 
   bool CheckConsistency()const;
@@ -108,16 +106,17 @@ public:
    ;
   void AddPairWithInjection
   (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right,
-   const AlgebraicExtensionRationals& tensorProd, Matrix<Rational>& inputInjectionFromLeft, Matrix<Rational>& inputInjectionFromRight)
+   const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
+   MatrixTensor<Rational>& inputInjectionFromRight)
   ;
 
   void MergeTwoExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0)
+   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0)
   ;
   void MergeTwoQuadraticRadicalExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   Matrix<Rational>* injectionFromLeftParent=0, Matrix<Rational>* injectionFromRightParent=0)
+   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0)
   ;
   AlgebraicExtensionRationals* MergeTwoExtensionsAddOutputToMe
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)

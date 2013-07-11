@@ -1206,7 +1206,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
-   "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
+   "1/(1+\\sqrt{}2+\\sqrt{}3+\\sqrt{}5+\\sqrt{}7)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opRational(), this->opAlgNumber(),
    "Divides algebraic numbers. ",

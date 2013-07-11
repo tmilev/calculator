@@ -2021,7 +2021,7 @@ void ConeComplex::GetNewVerticesAppend
     }
     for (int k=0; k<theDim; k++)
       theLinearAlgebra.elements[theDimMinusTwo][k]=killerNormal.TheObjects[k];
-    theLinearAlgebra.GaussianEliminationByRows(theLinearAlgebra, 0, &nonPivotPoints);
+    theLinearAlgebra.GaussianEliminationByRows(0, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
     { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
       tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
@@ -2221,7 +2221,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
     for (int j=0; j<theSel.CardinalitySelection; j++)
       for (int k=0; k<theDim; k++)
         theMat.elements[j][k]=this->Normals.TheObjects[theSel.elements[j]].TheObjects[k];
-    theMat.GaussianEliminationByRows(theMat, 0, &nonPivotPoints);
+    theMat.GaussianEliminationByRows(0, &nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
     { theMat.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool=this->IsInCone(tempRoot);

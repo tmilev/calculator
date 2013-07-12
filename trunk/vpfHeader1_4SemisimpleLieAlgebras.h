@@ -220,6 +220,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
   Vectors<Rational> theNonFKhwsStronglyTwoSided;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectors;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElements;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElementOpposites;
   NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
@@ -230,8 +231,10 @@ class NilradicalCandidate
 
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
   bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
+  bool IsNilradPartLInfiniteRel(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<Rational> >& theElts, const Vectors<Rational>& theWeights)const;
   void ComputeTheTwoCones(GlobalVariables* theGlobalVariables)
   ;
 };

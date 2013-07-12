@@ -4360,7 +4360,7 @@ class Vectors: public List<Vector<coefficient> >
   { assert(&output!=this);
     output.SetSize(theSelection.CardinalitySelection);
     for(int i=0; i<theSelection.CardinalitySelection; i++)
-      output[i].Assign(this->TheObjects[theSelection.elements[i]]);
+      output[i]=(*this)[theSelection.elements[i]];
   }
   bool HasAnElementWithPositiveScalarProduct(const Vector<coefficient>& input)const
   { for (int i=0; i<this->size; i++)

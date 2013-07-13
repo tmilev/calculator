@@ -924,7 +924,8 @@ public:
   bool QuickSortAscendingCustom(compareClass& theCompareror)
   { return this->QuickSortAscendingOrderCustom(0, this->size-1, theCompareror);
   }
-
+  //The below function is required to preserve the order of elements given by theSelection.elements.
+  void SubSelection(Selection& theSelection, List<Object>& output);
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
@@ -4354,13 +4355,6 @@ class Vectors: public List<Vector<coefficient> >
   }
   unsigned int HashFunction()const
   { return this->::List<Vector<coefficient> >::HashFunction();
-  }
-  //The below function is required to preserve the order of elements given by theSelection.elements.
-  void SubSelection(Selection& theSelection, Vectors<coefficient>& output)
-  { assert(&output!=this);
-    output.SetSize(theSelection.CardinalitySelection);
-    for(int i=0; i<theSelection.CardinalitySelection; i++)
-      output[i]=(*this)[theSelection.elements[i]];
   }
   bool HasAnElementWithPositiveScalarProduct(const Vector<coefficient>& input)const
   { for (int i=0; i<this->size; i++)
@@ -9168,6 +9162,14 @@ std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat)const
   if (useLaTeX && makeTable)
     out << "\\end{tabular}";
   return out.str();
+}
+
+template <class Object>
+void List<Object>::SubSelection(Selection& theSelection, List<Object>& output)
+{ assert(&output!=this);
+  output.SetSize(theSelection.CardinalitySelection);
+  for(int i=0; i<theSelection.CardinalitySelection; i++)
+    output[i]=(*this)[theSelection.elements[i]];
 }
 
 template <class Object>

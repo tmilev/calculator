@@ -14,8 +14,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra
     for (int j=0; j<inputOutputGenerators.size; j++)
     { this->LieBracket(inputOutputGenerators[i], inputOutputGenerators[j], theBracket);
       inputOutputGenerators.AddOnTop(theBracket);
-      if (theBracket.GetRankOfSpanOfElements
-          (inputOutputGenerators, &seedMons)<inputOutputGenerators.size)
+      if (theBracket.GetRankOfSpanOfElements(inputOutputGenerators, &seedMons)<inputOutputGenerators.size)
         inputOutputGenerators.RemoveLastObject();
     }
 }
@@ -1398,7 +1397,7 @@ Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
   return theWeight;
 }
 
-bool NilradicalCandidate::IsNilradPartLInfiniteRel(Selection& inputNilradSel)
+bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel)
 { if (inputNilradSel.CardinalitySelection==1)
     return true;
   ElementSemisimpleLieAlgebra<Rational> mustBeZero;
@@ -1422,12 +1421,6 @@ bool NilradicalCandidate::IsNilradPartLInfiniteRel(Selection& inputNilradSel)
   return true;
 }
 
-bool NilradicalCandidate::IsLInfiniteRel(GlobalVariables* theGlobalVariables)
-{ Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
-  Selection theSel=theNilradLinCombi;
-  return this->IsNilradPartLInfiniteRel(theSel);
-}
-
 Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
 { Vector<Rational> theNilradLinCombi=this->ConeStrongIntersection;
   theNilradLinCombi.SetSize(this->theNilradicalWeights.size);
@@ -1436,60 +1429,127 @@ Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
 
 bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("NilradicalCandidate::TryFindingLInfiniteRels");
-  Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
-  if(theNilradLinCombi.GetNumNonZeroCoords()==1)
-    return true;
-  Vectors<Rational> theNilradSubset;
+  //Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
+  //if(theNilradLinCombi.GetNumNonZeroCoords()==1)
+  //  return true;
+  Vectors<Rational> curentNilradicalCone;
   Vector<Rational> betterIntersection;
-  Selection NilradSubSel;
-  NilradSubSel.init(this->theNilradicalWeights.size);
+  this->theNilradSubsel.init(this->theNilradicalWeights.size);
   for (int i=1; i<this->theNilradicalWeights.size && i<5; i++)
   { int numcycles=MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
-    NilradSubSel.initSelectionFixedCardinality(i);
-    for (int j=0; j<numcycles; j++, NilradSubSel.incrementSelectionFixedCardinality(i))
-      if (this->IsNilradPartLInfiniteRel(NilradSubSel))
-      { this->theNilradicalWeights.SubSelection(NilradSubSel, theNilradSubset);
-        if (theNilradSubset.ConesIntersect(theNilradSubset, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0, theGlobalVariables))
+    this->theNilradSubsel.initSelectionFixedCardinality(i);
+    for (int j=0; j<numcycles; j++, this->theNilradSubsel.incrementSelectionFixedCardinality(i))
+      if (this->IsStronglyOrthogonalSelectionNilradicalElements(this->theNilradSubsel))
+      { this->theNilradicalWeights.SubSelection(this->theNilradSubsel, curentNilradicalCone);
+        if (curentNilradicalCone.ConesIntersect(curentNilradicalCone, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0, theGlobalVariables))
         { betterIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           this->ConeStrongIntersection.MakeZero(this->theNilradicalWeights.size+this->theNonFKhwsStronglyTwoSided.size);
-          for (int k=0; k<NilradSubSel.CardinalitySelection; k++)
-            this->ConeStrongIntersection[NilradSubSel.elements[k]]=betterIntersection[k];
+          for (int k=0; k<this->theNilradSubsel.CardinalitySelection; k++)
+            this->ConeStrongIntersection[this->theNilradSubsel.elements[k]]=betterIntersection[k];
           for (int k=0; k<this->theNonFKhwsStronglyTwoSided.size; k++)
             this->ConeStrongIntersection[k+this->theNilradicalWeights.size]=betterIntersection[k+i];
-          if (this->IsLInfiniteRel(theGlobalVariables))
-            return true;
+          return true;
         }
+      }
+  }
+//  this->ConeStrongIntersection.MakeZero(this->ConeStrongIntersection.size);
+  this->flagComputedRelativelyStrongIntersections=true;
+  for (int i=1; i<this->theNilradicalWeights.size+1 && i<5; i++)
+  { int numcycles=MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
+    this->theNilradSubsel.initSelectionFixedCardinality(i);
+    std::stringstream out;
+    out << "<br>" << numcycles << " cycles to process. ";
+    this->FKnilradicalLog+=out.str();
+    for (int j=0; j<numcycles; j++, this->theNilradSubsel.incrementSelectionFixedCardinality(i))
+      if (this->IsStronglyOrthogonalSelectionNilradicalElements(this->theNilradSubsel))
+      { this->ComputeTheTwoConesRelativeToNilradicalSubset();
+        if (this->theNilradicalSubsetWeights.ConesIntersect
+            (this->theNilradicalSubsetWeights, this->theNonFKhwVectorsStrongRelativeToSubsetWeights, &this->ConeRelativelyStrongIntersection, 0, theGlobalVariables))
+        { this->ConeRelativelyStrongIntersection.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+          return true;
+        } else
+          this->FKnilradicalLog+="... but the cones dont intersect. ";
       }
   }
   return false;
 }
 
-bool NilradicalCandidate::IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables)
+bool NilradicalCandidate::IsStronglySingular(int moduleIndex)
 { this->CheckInitialization();
   for (int i=0; i<this->theNilradicalSelection.size; i++)
     if (this->theNilradicalSelection[i]==1 && !this->owner->primalSubalgebraModules.Contains(i))
       for (int j=0; j<this->owner->NilradicalPairingTable[moduleIndex][i].size; j++)
-        if (this->theNilradicalSelection[this->owner->NilradicalPairingTable[moduleIndex][i][j]]!=1)
+      { if (this->theNilradicalSelection[this->owner->NilradicalPairingTable[moduleIndex][i][j]]!=1)
           return false;
+        if (this->owner->primalSubalgebraModules.Contains(this->owner->NilradicalPairingTable[moduleIndex][i][j]))
+          return false;
+      }
   return true;
+}
+
+bool NilradicalCandidate::IsStronglySingularRelativeToSubset(int nonFKweightIndex)
+{ MacroRegisterFunctionWithName("NilradicalCandidate::IsStronglySingularRelativeToSubset");
+  this->CheckInitialization();
+//  std::stringstream out;
+//  out << "<br>Checking out module index " << moduleIndex;
+  //this->FKnilradicalLog+=out.str();
+  ElementSemisimpleLieAlgebra<Rational> mustBeZero;
+  for (int j=0; j<this->theNilradSubsel.CardinalitySelection; j++)
+  { this->owner->owner->owneR->LieBracket
+    (this->theNilradicalElements[this->theNilradSubsel.elements[j]], this->theNonFKhwVectors[nonFKweightIndex], mustBeZero);
+    if (!mustBeZero.IsEqualToZero())
+      return false;
+  }
+//  this->FKnilradicalLog+= "->IS GOOD";
+  return true;
+}
+
+void NilradicalCandidate::reset()
+{ this->theNilradicalWeights.SetSize(0);
+  this->theNonFKhws.SetSize(0);
+  this->theNonFKhwsStronglyTwoSided.SetSize(0);
+  this->theNilradicalElements.SetSize(0);
+  this->theNilradicalElementOpposites.SetSize(0);
+  this->ownerModulesNilradicalElements.SetSize(0);
+  this->ownerModulestheNonFKhwVectors.SetSize(0);
+  this->theNilradSubsel.init(0);
+  this->theNilradicalSubset.SetSize(0);
+  this->theNonFKhwVectorsStrongRelativeToSubset.SetSize(0);
+  this->theNilradicalSubsetWeights.SetSize(0);
+  this->theNonFKhwVectorsStrongRelativeToSubsetWeights.SetSize(0);
+}
+
+void NilradicalCandidate::ComputeTheTwoConesRelativeToNilradicalSubset()
+{ MacroRegisterFunctionWithName("NilradicalCandidate::ComputeTheTwoConesRelativeToNilradicalSubset");
+  this->theNilradicalElements.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
+  this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
+  this->theNonFKhwVectorsStrongRelativeToSubset.SetSize(0);
+  this->theNonFKhwVectorsStrongRelativeToSubsetWeights.SetSize(0);
+  for (int i=0; i<this->theNonFKhws.size; i++)
+    if (this->IsStronglySingularRelativeToSubset(i))
+    { this->theNonFKhwVectorsStrongRelativeToSubsetWeights.AddOnTop(this->theNonFKhws[i]);
+      this->theNonFKhwVectorsStrongRelativeToSubset.AddOnTop(this->theNonFKhwVectors[i]);
+    }
+//  std::stringstream out;
+//  out << "<hr>Computed the two cones relative to the subset " << this->theNilradSubsel.ToString();
+//  out << " to get the theNonFKhwVectorsStrongRelativeToSubset: "
+//  << this->ToStringTableElementWithWeights(this->theNonFKhwVectorsStrongRelativeToSubset, this->theNonFKhwVectorsStrongRelativeToSubsetWeights);
+//  this->FKnilradicalLog+=out.str();
 }
 
 void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("NilradicalCandidate::ComputeTheTwoCones");
   this->CheckInitialization();
-  this->theNilradicalWeights.SetSize(0);
-  this->theNonFKhws.SetSize(0);
-  this->theNonFKhwsStronglyTwoSided.SetSize(0);
-  this->theNilradicalElements.SetSize(0);
-  this->theNilradicalElementOpposites.SetSize(0);
+  this->reset();
 //  std::stringstream out;
   for (int i=0; i<this->theNilradicalSelection.size; i++)
     if (!this->owner->primalSubalgebraModules.Contains(i))
     { if (this->theNilradicalSelection[i]==0)
         for (int k=0; k<this->owner->Modules[i].size; k++)
-        { this->theNonFKhws.AddOnTopNoRepetition(this->owner->HighestWeightsPrimal[i]);
+        { this->theNonFKhws.AddOnTop(this->owner->HighestWeightsPrimal[i]);
           this->theNonFKhwVectors.AddOnTop(this->owner->HighestVectors[i][k]);
-          if (this->IsStronglySingular(i, theGlobalVariables))
+          this->ownerModulestheNonFKhwVectors.AddOnTop(i);
+          if (this->IsStronglySingular(i))
             this->theNonFKhwsStronglyTwoSided.AddOnTop(this->owner->HighestWeightsPrimal[i]);
         }
       else if (this->theNilradicalSelection[i]==1)
@@ -1497,8 +1557,16 @@ void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables
         { this->theNilradicalWeights.AddListOnTop(this->owner->WeightsModulesPrimal[i]);
           this->theNilradicalElements.AddListOnTop(this->owner->Modules[i][k]);
           this->theNilradicalElementOpposites.AddListOnTop(this->owner->ModulesSl2opposite[i][k]);
+          for (int l=0; l<this->owner->Modules[i][k].size; l++)
+            this->ownerModulesNilradicalElements.AddOnTop(i);
         }
     }
+  if (this->ownerModulesNilradicalElements.size!=this->theNilradicalElements.size ||
+      this->theNonFKhws.size!=this->ownerModulestheNonFKhwVectors.size)
+  { std::cout << "This is a programming error: sizes of indexing arrasy in Fernando Kac nilradical candidate don't match. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
 //  out << "<br>";
 //  this->FKnilradicalLogs[inputFKIndex]=out.str();
 }
@@ -1533,15 +1601,16 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
 
 void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
+  this->flagComputedRelativelyStrongIntersections=false;
   this->ComputeTheTwoCones(theGlobalVariables);
-  this->NilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
+  this->flagNilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal, theGlobalVariables);
   this->flagLinfiniteRelFound=false;
-  if (!this->NilradicalConesIntersect)
+  if (!this->flagNilradicalConesIntersect)
     return;
-  this->NilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
+  this->flagNilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, 0, theGlobalVariables);
-  if (this->NilradicalConesStronglyIntersect)
+  if (this->flagNilradicalConesStronglyIntersect)
     this->flagLinfiniteRelFound= this->TryFindingLInfiniteRels(theGlobalVariables);
 }
 
@@ -3421,19 +3490,20 @@ std::string NilradicalCandidate::ToStringTableElementWithWeights
 }
 
 std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("NilradicalCandidate::ToString");
+  std::stringstream out;
   out << this->FKnilradicalLog;
   Vector<Rational> currentNilrad;
   currentNilrad=this->theNilradicalSelection;
   out << currentNilrad.ToStringLetterFormat("V");
-  if (this->NilradicalConesIntersect)
+  if (this->flagNilradicalConesIntersect)
     out << ". Cones intersect. ";
   else
     out << ". Cones don't intersect. ";
   if (this->theNilradicalWeights.size>0)
     out << "<br>Nilradical cone: <br>" << this->ToStringTableElementWithWeights(this->theNilradicalElements, this->theNilradicalWeights);
   out << "<br> Highest weight cone:<br> " << this->ToStringTableElementWithWeights(this->theNonFKhwVectors, this->theNonFKhws);
-  if (this->NilradicalConesIntersect)
+  if (this->flagNilradicalConesIntersect)
   { out << "<br>Strongly singular weights: " << this->theNonFKhwsStronglyTwoSided.ToString();
     out << "<br>Cone intersection: " << this->ConeIntersection.ToStringLetterFormat("w");
     out << "<br> ";
@@ -3444,7 +3514,7 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     for (int j=0; j<this->theNonFKhws.size; j++)
       tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=this->theNonFKhws[j].ToString();
     out << this->ConeIntersection.ToStringLetterFormat("w", &tempFormat);
-    if (this->NilradicalConesStronglyIntersect)
+    if (this->flagNilradicalConesStronglyIntersect)
     { for (int j=0; j<this->theNonFKhwsStronglyTwoSided.size; j++)
         tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalWeights.size]=this->theNonFKhwsStronglyTwoSided[j].ToString();
       out << "<br>In addition, the nilradical cones intersect strongly "
@@ -3463,6 +3533,20 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
           out << "</table></td>";
         }
       out << "</tr></table>";
+    }
+    if (this->flagComputedRelativelyStrongIntersections)
+    { tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeRelativelyStrongIntersection.size);
+      for (int j=0; j<this->theNilradicalSubset.size; j++)
+        tempFormat.vectorSpaceEiBasisNames[j]=this->theNilradicalSubsetWeights[j].ToString();
+      for (int j=0; j<this->theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+        tempFormat.vectorSpaceEiBasisNames[j+this->theNilradicalSubset.size]=this->theNonFKhwVectorsStrongRelativeToSubsetWeights[j].ToString();
+      out << "<br>In addition, strong nilradical cone intersections did not suffice, I needed to compute relatively strong intersections. ";
+      out << "<br>The nilradical subset:"
+      << this->ToStringTableElementWithWeights(this->theNilradicalSubset, this->theNilradicalSubsetWeights);
+      out << "<br>The highest weight cone consisting of elements commuting with the nilradical subset: "
+      << this->ToStringTableElementWithWeights
+      (this->theNonFKhwVectorsStrongRelativeToSubset, this->theNonFKhwVectorsStrongRelativeToSubsetWeights);
+      out << "<br>Relation: " << this->ConeRelativelyStrongIntersection.ToStringLetterFormat("w", &tempFormat);
     }
     if (this->flagLinfiniteRelFound)
       out << "<br><b>L-infinite relation exists!</b>";
@@ -3484,7 +3568,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   int numConeIntersections=0;
   int numCasesNoLinfiniteRelationFound=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-    if (this->FKNilradicalCandidates[i].NilradicalConesIntersect)
+    if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect)
     { numConeIntersections++;
       if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
         numCasesNoLinfiniteRelationFound++;

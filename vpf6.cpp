@@ -1663,7 +1663,7 @@ bool CommandList::AllowsPlusInPreceding(const std::string& lookAhead)
     lookAhead=="," || lookAhead=="=" ||
     lookAhead==")" || lookAhead==";" ||
     lookAhead=="]" || lookAhead=="}" ||
-    lookAhead==":" || lookAhead=="," ||
+    lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" ||
     lookAhead=="EndProgram" ||
     lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
     ;

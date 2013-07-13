@@ -208,35 +208,51 @@ class NilradicalCandidate
   public:
   CandidateSSSubalgebra* owner;
   std::string FKnilradicalLog;
-  bool NilradicalConesIntersect;
-  bool NilradicalConesStronglyIntersect;
+  bool flagNilradicalConesIntersect;
+  bool flagNilradicalConesStronglyIntersect;
+  bool flagComputedRelativelyStrongIntersections;
+
   bool flagLinfiniteRelFound;
   //0->not selected; 1->selected; 2->undecided.
   List<int> theNilradicalSelection;
   Vector<Rational> ConeIntersection;
   Vector<Rational> ConeStrongIntersection;
+  Vector<Rational> ConeRelativelyStrongIntersection;
   Vector<Rational> LInfiniteRelation;
   Vector<Rational> ConeSeparatingNormal;
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
   Vectors<Rational> theNonFKhwsStronglyTwoSided;
+
+  List<int> ownerModulesNilradicalElements;
+  List<int> ownerModulestheNonFKhwVectors;
+
   List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectors;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElements;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElementOpposites;
+  Selection theNilradSubsel;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalSubset;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectorsStrongRelativeToSubset;
+  Vectors<Rational> theNilradicalSubsetWeights;
+  Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
+
   NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
+  void reset();
   void CheckInitialization()const;
-  bool IsStronglySingular(int moduleIndex, GlobalVariables* theGlobalVariables);
+  bool IsStronglySingular(int moduleIndex);
+  bool IsStronglySingularRelativeToSubset(int nonFKweightIndex);
   Vector<Rational> GetConeStrongIntersectionWeight()const;
   Vector<Rational> GetNilradicalLinearCombi()const;
 
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
-  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
-  bool IsNilradPartLInfiniteRel(Selection& inputNilradSel);
+//  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
+  bool IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<Rational> >& theElts, const Vectors<Rational>& theWeights)const;
   void ComputeTheTwoCones(GlobalVariables* theGlobalVariables)
   ;
+  void ComputeTheTwoConesRelativeToNilradicalSubset();
 };
 
 class CandidateSSSubalgebra

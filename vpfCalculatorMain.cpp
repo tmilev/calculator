@@ -546,10 +546,7 @@ int main(int argc, char **argv)
   //civilizedInput="(\\sqrt{}2+\\sqrt{}3)\\sqrt{}2";
 //  civilizedInput="(1/(1+\sqrt{}2+\sqrt{}3+\sqrt{}5+\sqrt{}7))*( 179/1009\sqrt{5} -391/2018\sqrt{2}\sqrt{3}-326/3027\sqrt{3}+263/2018\sqrt{2}+289/1009)";
   //civilizedInput="(\\sqrt{}2+\\sqrt{}3)*( \\sqrt{2}\\sqrt{3})";
-//  civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, (\
-//Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2)), (g_{-24}, g_{24}, g_{-16}, g_{16})),\
-//Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 0, -1, 0)), \
-//( g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{3}, g_{-3})))))";
+//  civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, (Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2)), (g_{-24}, g_{24}, g_{-16}, g_{16})),Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 0, -1, 0)), ( g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{3}, g_{-3})))))";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;
@@ -682,8 +679,6 @@ output << " \n";
 }
 void static_html4(std::stringstream& output){
 output << " <!>\n";
-output << " <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
-output << " \n";
 output << " <script type=\"text/javascript\"> \n";
 output << " function switchMenu(obj)\n";
 output << " { var el = document.getElementById(obj);	\n";

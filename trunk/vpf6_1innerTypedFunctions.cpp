@@ -966,6 +966,7 @@ bool CommandListInnerTypedFunctions::innerNChooseK
   int K;
   if (!input[1].IsOfType<Rational>(&N) || !input[2].IsSmallInteger(&K))
     return false;
+//  std::cout << N.ToString();
   if (K<0)
     return output.AssignValue(0, theCommands);
   Rational result= result.NChooseK(N, K);

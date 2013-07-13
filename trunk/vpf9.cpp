@@ -1061,8 +1061,10 @@ Rational Rational::NChooseK(const Rational &n, int k)
 { Rational result;
   result.MakeOne();
   for (int i=0; i<k; i++)
-  { result*=n-i;
+  { //std::cout << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i+1;
+    result*=n-i;
     result.DivideByInteger(i+1);
+    //std::cout << "=" << result.ToString();
   }
   return result;
 }

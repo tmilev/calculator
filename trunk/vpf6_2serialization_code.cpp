@@ -864,9 +864,9 @@ bool Serialization::innerLoadSemisimpleSubalgebras
 //  std::cout << ownerSS->ToString();
   Expression theCandidatesE=input[2];
   theCandidatesE.Sequencefy();
-  theSAs.Hcandidates.ReservE(theCandidatesE.children.size-1);
+  theSAs.theSubalgebraCandidates.ReservE(theCandidatesE.children.size-1);
   Expression tempE;
-  theSAs.Hcandidates.SetSize(0);
+  theSAs.theSubalgebraCandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
@@ -886,7 +886,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
       return false;
     }
 //    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
-    theSAs.Hcandidates.AddOnTop(tempCandidate);
+    theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
   theSAs.HookUpCentralizers();
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
@@ -905,11 +905,11 @@ bool Serialization::innerStoreSemisimpleSubalgebras
     return false;
   output.AddChildOnTop(tempE);
   tempE.reset(theCommands);
-  tempE.children.ReservE(input.Hcandidates.size+1);
+  tempE.children.ReservE(input.theSubalgebraCandidates.size+1);
   tempE2.MakeAtom(theCommands.opSequence(), theCommands);
   tempE.AddChildOnTop(tempE2);
-  for (int i=0; i<input.Hcandidates.size; i++)
-  { if (!Serialization::innerStoreCandidateSA(theCommands, input.Hcandidates[i], candidateE))
+  for (int i=0; i<input.theSubalgebraCandidates.size; i++)
+  { if (!Serialization::innerStoreCandidateSA(theCommands, input.theSubalgebraCandidates[i], candidateE))
       return false;
     tempE.AddChildOnTop(candidateE);
   }

@@ -5825,7 +5825,7 @@ std::string ObjectContainer::ToString()
   { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theLieAlgebras.size << " total): ";
     for (int i=0; i<this->theSSsubalgebras.size; i++)
     { out << " Type " << this->theSSsubalgebras[i].owneR->GetLieAlgebraName()
-      << " with " << this->theSSsubalgebras[i].Hcandidates.size << " candidates";
+      << " with " << this->theSSsubalgebras[i].theSubalgebraCandidates.size << " candidates";
       if (i!=this->theLieAlgebras.size-1)
         out << ", ";
     }

@@ -5495,9 +5495,8 @@ void WeylGroup::GetCoxeterPlane
 }
 
 void WeylGroup::DrawRootSystem
-(DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
- bool drawWeylChamber, Vector<Rational>* bluePoint, bool LabelDynkinDiagramVertices,
- Vectors<Rational>* predefinedProjectionPlane)
+(DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables, bool drawWeylChamber, Vector<Rational>* bluePoint,
+ bool LabelDynkinDiagramVertices, Vectors<Rational>* predefinedProjectionPlane)
 { DrawOperations& output=outputDV.theBuffer;
   if (wipeCanvas)
     output.init();

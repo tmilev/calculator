@@ -451,6 +451,7 @@ public:
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
   std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
+  std::string ToStringDrawWeights(FormatExpressions* theFormat=0)const;
   bool operator>(const CandidateSSSubalgebra& other)const ;
 
 };

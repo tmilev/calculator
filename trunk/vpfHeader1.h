@@ -7822,15 +7822,27 @@ public:
   int DefaultHtmlWidth;
   int DefaultHtmlHeight;
   void initDrawingVariables(int cX1, int cY1);
-  DrawingVariables(int cx, int cy){this->initDrawingVariables(cx, cy); };
-  DrawingVariables(){this->initDrawingVariables(100, 100); };
-  void SetDrawLineFunction(drawLineFunction theFunction){ this->theDrawLineFunction=theFunction; }
-  void SetDrawTextFunction(drawTextFunction theFunction){ this->theDrawTextFunction=theFunction; }
-  void SetDrawCircleFunction(drawCircleFunction theFunction){ this->theDrawCircleFunction=theFunction; }
-  void SetDrawClearFunction(drawClearScreenFunction theFunction){ this->theDrawClearScreenFunction=theFunction; }
+  DrawingVariables(int cx, int cy)
+  { this->initDrawingVariables(cx, cy);
+  }
+  DrawingVariables()
+  { this->initDrawingVariables(100, 100);
+  }
+  void SetDrawLineFunction(drawLineFunction theFunction)
+  { this->theDrawLineFunction=theFunction;
+  }
+  void SetDrawTextFunction(drawTextFunction theFunction)
+  { this->theDrawTextFunction=theFunction;
+  }
+  void SetDrawCircleFunction(drawCircleFunction theFunction)
+  { this->theDrawCircleFunction=theFunction;
+  }
+  void SetDrawClearFunction(drawClearScreenFunction theFunction)
+  { this->theDrawClearScreenFunction=theFunction;
+  }
   int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
-  static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational> & r, double& x, double& y);
-  static void ProjectOnToHyperPlaneGraphics(Vector<Rational> & input, Vector<Rational> & output, Vectors<Rational>& directions);
+  static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
+  static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output, Vectors<Rational>& directions);
   std::string GetColorHtmlFromColorIndex(int colorIndex);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
@@ -7846,13 +7858,17 @@ public:
   void drawBufferNoIniT
 (DrawOperations& theOps)
 ;
-  void drawBufferNoIniT(){this->drawBufferNoIniT(this->theBuffer);}
+  void drawBufferNoIniT()
+  { this->drawBufferNoIniT(this->theBuffer);
+  }
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
-  inline void drawLineBetweenTwoVectorsBuffer(const Vector<Rational> & r1, const Vector<Rational> & r2, int PenStyle, int PenColor){this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);}
-  void drawTextAtVectorBuffer(const Vector<Rational> & point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
+  inline void drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& r1, const Vector<Rational>& r2, int PenStyle, int PenColor)
+  { this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);
+  }
+  void drawTextAtVectorBuffer(const Vector<Rational>& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawCircleAtVectorBuffer
-  (const Vector<Rational> & point, double radius, unsigned long thePenStyle, int theColor)
+  (const Vector<Rational>& point, double radius, unsigned long thePenStyle, int theColor)
 ;
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction=other.theDrawLineFunction;
@@ -7961,9 +7977,8 @@ std::string Vectors<coefficient>::ElementsToInequalitiesString
 
 template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
-(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords,
- Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
- const coefficient& theRingUnit, const coefficient& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors,
+ Matrix<coefficient>& bufferMat, const coefficient& theRingUnit, const coefficient& theRingZero)
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
@@ -7974,12 +7989,9 @@ bool Vectors<coefficient>::GetCoordsInBasis
 
 template <class coefficient>
 bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
-  Matrix<coefficient>& bufferMatGaussianEliminationCC,
-  Matrix<coefficient>& bufferMatGaussianElimination,
-  const coefficient& theRingUnit,
-  const coefficient& theRingMinusUnit,
-  const coefficient& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output, Matrix<coefficient>& bufferMatGaussianEliminationCC,
+ Matrix<coefficient>& bufferMatGaussianElimination, const coefficient& theRingUnit, const coefficient& theRingMinusUnit,
+ const coefficient& theRingZero)
 { int theDim=this->size;
   bufferMatGaussianElimination.init(inputBasis.size, theDim);
   for (int i=0; i<inputBasis.size; i++)

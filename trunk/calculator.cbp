@@ -49,6 +49,7 @@
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
+		<Unit filename="vpf5_2javascript_graphics.cpp" />
 		<Unit filename="vpf6.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.h" />

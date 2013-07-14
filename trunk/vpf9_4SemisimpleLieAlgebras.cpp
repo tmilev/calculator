@@ -3365,6 +3365,61 @@ void rootSubalgebra::ToString
   output=out.str();
 }
 
+std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFormat)const
+{ if (!this->flagCentralizerIsWellChosen)
+    return "";
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
+  int thePrimalRank=-1;
+  (this->centralizerRank+this->theHs.size).IsSmallInteger(&thePrimalRank);
+  if (thePrimalRank<2)
+    return "";
+  Vectors<Rational> theEiBasis;
+  theEiBasis.AssignListList(this->CartanSAsByComponent);
+  theEiBasis.AddListOnTop(this->CartanOfCentralizer);
+  for (int i=0; i<theEiBasis.size; i++)
+  { theEiBasis[i]/=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[i], theEiBasis[i]);
+  }
+  DrawingVariables theDV;
+  Matrix<Rational> theBilinearForm, theBilinearFormInverted;
+  theDV.theBuffer.theBilinearForm.init(thePrimalRank, thePrimalRank);
+  theBilinearForm.init(thePrimalRank, thePrimalRank);
+  for (int i=0; i<thePrimalRank; i++)
+    for (int j=0; j<thePrimalRank; j++)
+    { theBilinearForm(i,j)=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[i], theEiBasis[j]);
+      theDV.theBuffer.theBilinearForm(i,j)=theBilinearForm(i,j).DoubleValue();
+    }
+  theBilinearFormInverted=theBilinearForm;
+  theBilinearFormInverted.Invert();
+  Vector<Rational> currentWeight, theProjectedWeight, zeroVector;
+  theProjectedWeight.MakeZero(thePrimalRank);
+  zeroVector.MakeZero(thePrimalRank);
+  List<List<Vectors<Rational> > > theModuleProjections;
+  theModuleProjections.SetSize(this->Modules.size);
+  theDV.theBuffer.BasisToDrawCirclesAt.SetSize(theEiBasis.size);
+  for(int i=0; i<theDV.theBuffer.BasisToDrawCirclesAt.size; i++)
+  { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
+    for (int j=0; j<thePrimalRank; j++)
+      theDV.theBuffer.BasisToDrawCirclesAt[i][j]=theEiBasis[i][j].DoubleValue();
+    theDV.drawCircleAtVectorBuffer(theEiBasis[i], 3, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
+  }
+  for (int i=0; i<this->Modules.size; i++)
+  { theModuleProjections[i].SetSize(this->Modules[i].size);
+    for (int j=0; j<this->Modules[i].size; j++)
+    { theModuleProjections[i][j].SetSize(this->Modules[i][j].size);
+      for (int k=0; k<this->Modules[i][j].size; k++)
+      { const ChevalleyGenerator& currentGen=this->Modules[i][j][k][0];
+        currentWeight= this->owner->owneR->GetWeightOfGenerator(currentGen.theGeneratorIndex);
+        for (int l=0; l<theEiBasis.size; l++)
+          theProjectedWeight[l]=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[l], currentWeight);
+        theBilinearFormInverted.ActOnVectorColumn(theProjectedWeight);
+        theModuleProjections[i][j][k]=theProjectedWeight;
+        theDV.drawLineBetweenTwoVectorsBuffer(zeroVector, theProjectedWeight, theDV.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      }
+    }
+  }
+  return theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
+}
+
 std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theFormat)const
 { if (this->Modules.size<=0)
     return "";
@@ -4054,6 +4109,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   { out << this->ToStringModuleDecompo(theFormat);
     out << this->ToStringPairingTable(theFormat);
     out << this->ToStringNilradicals(theFormat);
+    out << "<br>" << this->ToStringDrawWeights(theFormat) << "<br>";
   }
   return out.str();
 }

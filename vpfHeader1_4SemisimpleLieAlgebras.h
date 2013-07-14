@@ -343,7 +343,7 @@ public:
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
   List<ElementSemisimpleLieAlgebra<Rational> >& GetModuleIsotypicallyMergedExceptWhenK(int index);
-
+  void GetExtremePrimalWeightsInModule(int moduleIndex, Vectors<Rational>& output);
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
@@ -465,7 +465,7 @@ public:
   HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
   List<SltwoSubalgebras> theSl2sOfSubalgebras;
 
-  List<CandidateSSSubalgebra> Hcandidates;
+  List<CandidateSSSubalgebra> theSubalgebraCandidates;
   int theRecursionCounter;
   bool flagAttemptToSolveSystems;
   bool flagDoComputePairingTable;

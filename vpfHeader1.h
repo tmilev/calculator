@@ -3957,6 +3957,12 @@ static void ProjectOntoHyperPlane
     for(int i=0; i<numPositions; i++)
       this->TheObjects[i]=theRingZero;
   }
+  void SetDimInsertZeroes(int newDim)
+  { int oldDim=this->size;
+    this->SetSize(newDim);
+    for (int i=oldDim; i<newDim; i++)
+      (*this)[i]=0;
+  }
   bool GetIntegralCoordsInBasisIfTheyExist
 (const Vectors<coefficient>& inputBasis, Vector<coefficient>& output,
   Matrix<coefficient>& bufferMatGaussianEliminationCC,

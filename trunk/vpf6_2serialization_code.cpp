@@ -871,8 +871,9 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagDoComputePairingTable=true;
-  theSAs.flagDoComputeNilradicals=true;
+  theSAs.flagComputePairingTable=true;
+  theSAs.flagComputeNilradicals=true;
+  theSAs.flagComputeModuleDecomposition=true;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;

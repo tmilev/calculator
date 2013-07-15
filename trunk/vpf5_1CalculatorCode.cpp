@@ -489,8 +489,9 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas
 }
 
 bool CommandList::innerPrintSSsubalgebras
-(CommandList& theCommands, const Expression& input, Expression& output, bool forceRecompute,
- bool DoNilradicals, bool noSolutions)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute,
+   bool doAttemptToSolveSystems, bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals
+   )
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   std::stringstream out;
@@ -528,7 +529,7 @@ bool CommandList::innerPrintSSsubalgebras
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!CGI::FileExists(theTitlePageFileName)|| forceRecompute)
+  if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
     input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>() :
@@ -536,9 +537,10 @@ bool CommandList::innerPrintSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
     theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
-    theSSsubalgebras.flagDoComputeNilradicals=DoNilradicals;
-    if (noSolutions)
-      theSSsubalgebras.flagAttemptToSolveSystems=false;
+    theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
+    theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
+    theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
+    theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();

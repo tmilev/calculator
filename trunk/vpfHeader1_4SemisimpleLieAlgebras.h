@@ -392,7 +392,7 @@ public:
    ;
   void ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputePairingTablePreparation(GlobalVariables* theGlobalVariables);
+  void ComputeModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 ;
@@ -468,8 +468,9 @@ public:
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
   int theRecursionCounter;
   bool flagAttemptToSolveSystems;
-  bool flagDoComputePairingTable;
-  bool flagDoComputeNilradicals;
+  bool flagComputePairingTable;
+  bool flagComputeModuleDecomposition;
+  bool flagComputeNilradicals;
   double timeComputationStartInSeconds;
   double timeComputationEndInSeconds;
   int numAdditions;

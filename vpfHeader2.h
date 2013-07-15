@@ -1770,25 +1770,26 @@ static bool innerAttemptExtendingEtoHEFwithHinCartan
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerPrintSSsubalgebras
-  (CommandList& theCommands, const Expression& input, Expression& output, bool ForceRecompute=false,
-   bool DoNilradicals=false, bool noSolutions=false)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute,
+   bool doAttemptToSolveSystems, bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals
+   )
 ;
   static bool innerPrintSSsubalgebrasForceRecomputeWithNilradicals
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true);
 }
   static bool innerPrintSSsubalgebrasForceRecompute
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false);
 }
   static bool innerPrintSSsubalgebrasNoSolutions
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, true);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, true, true, true);
 }
 
   static bool innerPrintSSsubalgebrasRegular
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false);
 }
 static bool innerDouble
   (CommandList& theCommands, const Expression& input, Expression& output)

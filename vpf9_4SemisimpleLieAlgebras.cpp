@@ -1056,7 +1056,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::IntersectVectorSpaces
   }
 }
 
-void CandidateSSSubalgebra::ComputePairingTablePreparation
+void CandidateSSSubalgebra::ComputeModuleDecomposition
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairingTablePreparation");
   int totalDim=0;
@@ -1228,7 +1228,6 @@ void CandidateSSSubalgebra::ComputePairingTable
   if (!this->flagCentralizerIsWellChosen)
     return;
   ProgressReport theReport(theGlobalVariables);
-  this->ComputePairingTablePreparation(theGlobalVariables);
   this->NilradicalPairingTable.SetSize(this->ModulesIsotypicallyMerged.size);
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
     this->NilradicalPairingTable[i].SetSize(this->ModulesIsotypicallyMerged.size);
@@ -1351,6 +1350,8 @@ bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem
 
 void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triples");
+  if (!this->owner->flagComputeNilradicals)
+    return;
   this->ComputeKsl2triplesPreparation(theGlobalVariables);
   this->ModulesSl2opposite.SetSize(this->Modules.size);
   List<ElementSemisimpleLieAlgebra<Rational> > FmustBeAlinCombiOf;
@@ -1887,8 +1888,9 @@ void SemisimpleSubalgebras::reset()
   this->theRecursionCounter=0;
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;
-  this->flagDoComputePairingTable=true;
-  this->flagDoComputeNilradicals=false;
+  this->flagComputePairingTable=true;
+  this->flagComputeModuleDecomposition=true;
+  this->flagComputeNilradicals=false;
   this->timeComputationStartInSeconds=-1;
   this->timeComputationEndInSeconds=-1;
   this->numAdditions=-1;
@@ -3438,8 +3440,8 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     for (int j=0; j<thePrimalRank; j++)
       theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].DoubleValue();
     theDV.drawCircleAtVectorBuffer(BasisToDrawCirclesAt[i], 3, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
-    theDV.drawTextAtVectorBuffer
-    (BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
+    //theDV.drawTextAtVectorBuffer
+    //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
   }
 
   return theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
@@ -4378,16 +4380,19 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
     this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(theGlobalVariables);
   }
   theReport1.Report("<hr>\nComputing pairing tables.");
-  if (this->flagDoComputePairingTable)
+  if (this->flagComputeModuleDecomposition)
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
       if (this->theSubalgebraCandidates[i].flagCentralizerIsWellChosen && this->theSubalgebraCandidates[i].flagSystemSolved)
       { std::stringstream reportStream2;
         reportStream2 << "Computing pairing table of subalgebra number " << i+1 << " out of "
         << this->theSubalgebraCandidates.size << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
         theReport2.Report(reportStream2.str());
+        this->theSubalgebraCandidates[i].ComputeModuleDecomposition(theGlobalVariables);
+        if (!this->flagComputePairingTable)
+          continue;
         this->theSubalgebraCandidates[i].ComputePairingTable(theGlobalVariables);
         //int fixMe;
-        if (this->flagDoComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<30)
+        if (this->flagComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<30)
           this->theSubalgebraCandidates[i].EnumerateAllNilradicals(theGlobalVariables);
       }
 }

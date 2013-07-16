@@ -343,7 +343,7 @@ public:
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
   List<ElementSemisimpleLieAlgebra<Rational> >& GetModuleIsotypicallyMergedExceptWhenK(int index);
-  void GetExtremePrimalWeightsInModule(int moduleIndex, Vectors<Rational>& output);
+  bool IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const;
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;

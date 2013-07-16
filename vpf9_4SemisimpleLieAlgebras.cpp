@@ -3367,12 +3367,17 @@ void rootSubalgebra::ToString
   output=out.str();
 }
 
-void CandidateSSSubalgebra::GetExtremePrimalWeightsInModule(int moduleIndex, Vectors<Rational>& output)
-{ Vectors<Rational>& currentWeights=this->WeightsModulesPrimal[moduleIndex];
-  output.SetSize(0);
-  for (int i=0; i<currentWeights.size; i++)
-  { //if (currentweight
-  }
+bool CandidateSSSubalgebra::IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const
+{ Vector<Rational>& currentWeight=this->WeightsModulesPrimal[moduleIndex][indexInIsoComponent];
+  Vectors<Rational>& currentWeights=this->WeightsModulesPrimal[moduleIndex];
+  for (int j=0; j<this->primalSubalgebraModules.size; j++)
+    for (int k=0; k<this->WeightsModulesPrimal[this->primalSubalgebraModules[j]].size; k++)
+      if (!this->WeightsModulesPrimal[this->primalSubalgebraModules[j]][k].IsEqualToZero())
+      { Vector<Rational>& currentRoot=this->WeightsModulesPrimal[this->primalSubalgebraModules[j]][k];
+        if (currentWeights.Contains(currentWeight-currentRoot) && currentWeights.Contains(currentWeight+currentRoot))
+          return false;
+      }
+  return true;
 }
 
 std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFormat)const
@@ -3409,8 +3414,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   }
   List<List<Vectors<Rational> > > theModuleProjections;
   theModuleProjections.SetSize(this->Modules.size);
+  Vectors<Rational> cornerWeights;
   for (int i=0; i<this->Modules.size; i++)
   { theModuleProjections[i].SetSize(this->Modules[i].size);
+    cornerWeights.SetSize(0);
     for (int j=0; j<this->Modules[i].size; j++)
     { theModuleProjections[i][j].SetSize(this->Modules[i][j].size);
       for (int k=0; k<this->Modules[i][j].size; k++)
@@ -3423,14 +3430,35 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
         if (j==0)
         { int color= CGI::RedGreenBlue(0,0,0);
           if (this->primalSubalgebraModules.Contains(i))
-            color=CGI::RedGreenBlue(0,250,0);
-          theDV.drawLineBetweenTwoVectorsBuffer(zeroVector, theProjectedWeight, theDV.PenStyleNormal, color);
+          { color=CGI::RedGreenBlue(0,250,0);
+            theDV.drawLineBetweenTwoVectorsBuffer(zeroVector, theProjectedWeight, theDV.PenStyleNormal, color);
+          }
+          theDV.drawCircleAtVectorBuffer(theProjectedWeight, 1, theDV.PenStyleNormal, CGI::RedGreenBlue(0, 0,0));
+          if (this->IsExtremeWeight(i, k))
+            cornerWeights.AddOnTop(theProjectedWeight);
         }
         if (k==this->Modules[i][j].size-1 && BasisToDrawCirclesAt.size<thePrimalRank)
         { BasisToDrawCirclesAt.AddOnTop(theProjectedWeight);
           if (BasisToDrawCirclesAt.GetRankOfSpanOfElements()!=BasisToDrawCirclesAt.size)
             BasisToDrawCirclesAt.RemoveLastObject();
         }
+      }
+    }
+    int color=CGI::RedGreenBlue(250, 250,0);
+    if (this->primalSubalgebraModules.Contains(i))
+      color=CGI::RedGreenBlue(0, 150, 0);
+    for (int j=0; j<cornerWeights.size; j++)
+    { Rational minDist=0;
+      for (int k=0; k<cornerWeights.size; k++)
+      { Rational tempRat=Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), theBilinearForm);
+        if (minDist==0)
+          minDist=tempRat;
+        else if (tempRat!=0)
+          minDist=MathRoutines::Minimum(tempRat, minDist);
+      }
+      for (int k=j+1; k<cornerWeights.size; k++)
+      { if (minDist==Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), theBilinearForm))
+          theDV.drawLineBetweenTwoVectorsBuffer(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
       }
     }
   }

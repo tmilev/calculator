@@ -390,7 +390,6 @@ public:
    ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
    ;
   void ComputeCharsPrimalModules();
-  void ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)

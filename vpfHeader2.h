@@ -1778,9 +1778,13 @@ static bool innerAttemptExtendingEtoHEFwithHinCartan
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true);
 }
-  static bool innerPrintSSsubalgebrasForceRecompute
+  static bool innerPrintSSsubalgebrasForceRecomputeNoPairingTable
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false);
+}
+  static bool innerPrintSSsubalgebrasForceRecomputeWithPairingTable
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, false);
 }
   static bool innerPrintSSsubalgebrasNoSolutions
   (CommandList& theCommands, const Expression& input, Expression& output)

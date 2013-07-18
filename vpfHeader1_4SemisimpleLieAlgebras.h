@@ -321,7 +321,7 @@ public:
   List<int> candidateSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModulesByStructure;
-  List<int> OppositeModulesByChar;
+  List<List<int> > OppositeModulesByChar;
 
   HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
   std::string nilradicalGenerationLog;

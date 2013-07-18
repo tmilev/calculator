@@ -5157,6 +5157,12 @@ public:
   inline int HashFunction()const
   { return this->HashFunction(*this);
   }
+  coefficient GetCoefficientsSum()const
+  { coefficient result=0;
+    for (int i=0; i<this->theCoeffs.size; i++)
+      result+=this->theCoeffs[i];
+    return result;
+  }
   void AddMonomial(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
   { this->CleanupMonIndex
     (this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));

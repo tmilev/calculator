@@ -61,7 +61,7 @@ public:
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)const;
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs
   (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const;
-  void ComputeModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
+  void ComputePrimalModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
   bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other)const;
@@ -279,7 +279,7 @@ public:
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharNonPrimalFundCoords;
-  charSSAlgMod<Rational> thePrimalChar;
+  charSSAlgMod<Rational> thePrimalChaR;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
   List<Polynomial<Rational> > theSystemToSolve;
@@ -305,12 +305,12 @@ public:
   List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
 
   List<List<ElementSemisimpleLieAlgebra<Rational> > > HighestVectors;
-  List<Vector<Rational> > HighestWeightsPrimal;
+  HashedList<Vector<Rational> > HighestWeightsPrimal;
 
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > Modules;
   List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > ModulesSl2opposite;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesIsotypicallyMerged;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
+//  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
   List<Vectors<Rational> > WeightsModulesNONprimal;
   List<Vectors<Rational> > WeightsModulesPrimal;
@@ -342,7 +342,6 @@ public:
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
-  List<ElementSemisimpleLieAlgebra<Rational> >& GetModuleIsotypicallyMergedExceptWhenK(int index);
   bool IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const;
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -390,9 +389,9 @@ public:
   (const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
    ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
    ;
+  void ComputeCharsPrimalModules();
   void ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables);
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputeModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputeSinglePair
 (int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 ;
@@ -408,24 +407,27 @@ public:
   (const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
   ;
   bool CheckInitialization()const;
+  bool CheckModuleDimensions()const;
+
   SemisimpleLieAlgebra& GetAmbientSS()const;
   WeylGroup& GetAmbientWeyl()const;
   void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
-  void ComputePrimalDecomposition(GlobalVariables* theGlobalVariables);
-  void ComputePrimalDecompositionLastPart(GlobalVariables* theGlobalVariables);
+  void ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables);
+  void ComputePrimalModuleDecompositionHWsHWVsOnly(GlobalVariables* theGlobalVariables);
+  void ComputePrimalModuleDecompositionHWVsOnly
+  (GlobalVariables* theGlobalVariables,
+   HashedList<Vector<Rational> >& inputHws)
+   ;
+  void ComputePrimalModuleDecompositionHighestWeightsOnly
+  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
+  ;
+  void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(GlobalVariables* theGlobalVariables);
   void GetPrimalWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)const
   ;
   bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
-  ;
-  void ComputePrimalDecompositionHWVsOnly
-  (GlobalVariables* theGlobalVariables,
-   HashedList<Vector<Rational> >& inputHws)
-   ;
-  void ComputePrimalDecompositionWeightsOnly
-  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
   ;
   bool ComputeSystem
 (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)

@@ -767,10 +767,15 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebras{}(A_2)", true, false);
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasForceRecompute", this->innerPrintSSsubalgebrasForceRecompute, "",
+  ("experimentalPrintSemisimpleSubalgebrasForceRecompute", this->innerPrintSSsubalgebrasForceRecomputeNoPairingTable, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)", false, false);
+  this->AddOperationInnerHandler
+  ("experimentalPrintSemisimpleSubalgebrasRecompute", this->innerPrintSSsubalgebrasForceRecomputeWithPairingTable, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+   "experimentalPrintSemisimpleSubalgebrasRecompute{}(A_2)", false, false);
   this->AddOperationInnerHandler
   ("experimentalPrintSemisimpleSubalgebrasShort", this->innerPrintSSsubalgebrasNoSolutions, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

@@ -1268,16 +1268,19 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules()
       this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
-  this->OppositeModulesByChar.initFillInObject(this->Modules.size, -2);
+  this->OppositeModulesByChar.SetSize(this->Modules.size);
   List<charSSAlgMod<Rational> > theDualMods;
   theDualMods.SetSize(this->Modules.size);
   for (int i=0; i<this->Modules.size; i++)
-    this->CharsPrimalModules[i].GetDual(theDualMods[i]);
+  { this->CharsPrimalModules[i].GetDual(theDualMods[i]);
+    this->OppositeModulesByChar[i].SetSize(0);
+  }
   for (int i=0; i<this->Modules.size; i++)
     for (int j=i; j<this->Modules.size; j++)
       if ((this->CharsPrimalModules[i]-theDualMods[j]).IsEqualToZero())
-      { this->OppositeModulesByChar[i]=j;
-        this->OppositeModulesByChar[j]=i;
+      { this->OppositeModulesByChar[i].AddOnTop(j);
+        if (i!=j)
+          this->OppositeModulesByChar[j].AddOnTop(i);
       } //else
         //std::cout << "<hr>" << this->CharsPrimalModules[i].ToString() << " - " << theDualMods[j].ToString()
         //<< "= " << (this->CharsPrimalModules[i]-theDualMods[j]).ToString();
@@ -1351,7 +1354,7 @@ void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariabl
     { this->ModulesSl2opposite[i][j].SetSize(this->Modules[i][j].size);
       for (int k=0; k<this->ModulesSl2opposite[i][j].size; k++)
       { this->ComputeKsl2triplesGetOppositeEltsInOppositeModule
-        (this->WeightsModulesPrimal[i][k], this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i]], FmustBeAlinCombiOf);
+        (this->WeightsModulesPrimal[i][k], this->ModulesIsotypicallyMerged[this->OppositeModulesByChar[i][0]], FmustBeAlinCombiOf);
         if (this->ComputeKsl2tripleSetUpAndSolveSystem
             (this->Modules[i][j][k], FmustBeAlinCombiOf, this->ModulesSl2opposite[i][j][k], theGlobalVariables))
           continue;
@@ -3833,7 +3836,11 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "<tr> <td>Opposite modules by character:</td>";
   for (int i=0; i< this->OppositeModulesByChar.size; i++)
   { out << "<td>";
-    out << "W_{" << this->OppositeModulesByChar[i]+1 << "}";
+    for (int j=0; j<this->OppositeModulesByChar[i].size; j++)
+    { out << "W_{" << this->OppositeModulesByChar[i][j]+1 << "}";
+      if (j!=this->OppositeModulesByChar[i].size-1)
+        out << ", ";
+    }
     out << "</td>";
   }
   out << "</tr>";

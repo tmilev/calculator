@@ -1268,10 +1268,6 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules()
       this->CharsPrimalModulesMerged[i].AddMonomial(currentWeight, this->Modules[i].size);
     }
   }
-}
-
-void CandidateSSSubalgebra::ComputeKsl2triplesPreparation(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesPreparation");
   this->OppositeModulesByChar.initFillInObject(this->Modules.size, -2);
   List<charSSAlgMod<Rational> > theDualMods;
   theDualMods.SetSize(this->Modules.size);
@@ -1347,7 +1343,6 @@ void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariabl
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triples");
   if (!this->owner->flagComputeNilradicals)
     return;
-  this->ComputeKsl2triplesPreparation(theGlobalVariables);
   this->ModulesSl2opposite.SetSize(this->Modules.size);
   List<ElementSemisimpleLieAlgebra<Rational> > FmustBeAlinCombiOf;
   for (int i=0; i<this->Modules.size; i++)
@@ -3811,7 +3806,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   << " We say that A and B pair to C if there exist elements a in A and b in B such that  0\\neq [a,b]\\in C. "
   << " Note that, in general, A and B may pair to multiple modules C', C'', etc. We "
   << " note that if A and B pair to C then clearly C is isomorphic to some component in "
-  << " the decomposition of A\\otimes B over g'. <br> We recall that V_{1}, V_{2}, ... are abbreviated notation "
+  << " the decomposition of A\\otimes B over g'. <br> We recall that W_{1}, W_{2}, ... are abbreviated notation "
   << " for the primal subalgebra modules indicated in the table above. ";
   out << "<br>Modules that have a zero weight (" << this->modulesWithZeroWeights.size << " total): ";
   for (int i=0; i<this->modulesWithZeroWeights.size; i++)
@@ -3822,13 +3817,13 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "<br>"
   << " <table border=\"1\"><tr><td></td>";
   for (int i=0; i< this->OppositeModulesByStructure.size; i++)
-    out << "<td>V_{" << i+1 << "}" << "</td>";
+    out << "<td>W_{" << i+1 << "}" << "</td>";
   out << "</tr>";
   out << "<tr> <td>Non-compatible (a.k.a. ``opposite'') modules:</td>";
   for (int i=0; i< this->OppositeModulesByStructure.size; i++)
   { out << "<td>";
     for (int j=0; j<this->OppositeModulesByStructure[i].size; j++)
-    { out << "V_{" << this->OppositeModulesByStructure[i][j]+1 << "}";
+    { out << "W_{" << this->OppositeModulesByStructure[i][j]+1 << "}";
       if (j!=this->OppositeModulesByStructure[i].size-1)
       out << ", ";
     }
@@ -3838,7 +3833,7 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "<tr> <td>Opposite modules by character:</td>";
   for (int i=0; i< this->OppositeModulesByChar.size; i++)
   { out << "<td>";
-    out << "V_{" << this->OppositeModulesByChar[i]+1 << "}";
+    out << "W_{" << this->OppositeModulesByChar[i]+1 << "}";
     out << "</td>";
   }
   out << "</tr>";
@@ -3857,16 +3852,16 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   if (!this->charFormaT.IsZeroPointer())
     tempCharFormat= this->charFormaT.GetElementConst();
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-    out << "<td><b>" << "V_{" << i+1 << "}"
+    out << "<td><b>" << "W_{" << i+1 << "}"
 //    << "=" << this->thePrimalChar[i].ToString(&tempCharFormat)
     << "</b></td>";
   out << "</tr>";
   for (int i=0; i<this->NilradicalPairingTable.size; i++)
-  { out << "<tr><td> <b>" << "V_{" << i+1 << "}</b></td>";
+  { out << "<tr><td> <b>" << "W_{" << i+1 << "}</b></td>";
     for (int j=0; j<this->NilradicalPairingTable.size; j++)
     { out << "<td>";
       for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
-      { out << "V_{" << this->NilradicalPairingTable[j][i][k]+1 << "}";
+      { out << "W_{" << this->NilradicalPairingTable[j][i][k]+1 << "}";
         if (k!=this->NilradicalPairingTable[i][j].size-1)
           out << ", ";
       }

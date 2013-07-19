@@ -4582,25 +4582,29 @@ void List<Object>::QuickSortAscendingOrder
 }
 
 template <class Object>
-template <class compareClass>
-bool List<Object>::QuickSortAscendingCustom
-(int BottomIndex, int TopIndex, compareClass& theCompareror)
+template <class compareClass, class carbonCopyType>
+bool List<Object>::QuickSortAscendingCustomRecursive
+(int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy)
 { if (TopIndex<=BottomIndex)
     return true;
   int HighIndex = TopIndex;
   for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
     if (theCompareror.CompareLeftGreaterThanRight
         (this->TheObjects[LowIndex],(this->TheObjects[BottomIndex])))
-    { this->SwapTwoIndices(LowIndex, HighIndex);
+    { if (carbonCopy!=0)
+        carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
+      this->SwapTwoIndices(LowIndex, HighIndex);
       LowIndex--;
       HighIndex--;
     }
   if (theCompareror.CompareLeftGreaterThanRight(this->TheObjects[HighIndex],this->TheObjects[BottomIndex]))
     HighIndex--;
+  if (carbonCopy!=0)
+    carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
   this->SwapTwoIndices(BottomIndex, HighIndex);
-  if (!this->QuickSortAscendingCustom(BottomIndex, HighIndex-1, theCompareror))
+  if (!this->QuickSortAscendingCustomRecursive(BottomIndex, HighIndex-1, theCompareror, carbonCopy))
     return false;
-  if (!this->QuickSortAscendingCustom(HighIndex+1, TopIndex, theCompareror))
+  if (!this->QuickSortAscendingCustomRecursive(HighIndex+1, TopIndex, theCompareror, carbonCopy))
     return false;
   return true;
 }

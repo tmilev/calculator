@@ -804,9 +804,9 @@ private:
   //that is why the function is private.
   void QuickSortAscendingOrder
   (int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder);
-  template <class compareClass>
-  bool QuickSortAscendingCustom
-  (int BottomIndex, int TopIndex, compareClass& theCompareror);
+  template <class compareClass, class carbonCopyType>
+  bool QuickSortAscendingCustomRecursive
+  (int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy);
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly()
   { this->TheObjects=0;
@@ -920,9 +920,9 @@ public:
     return result;
   }
   //The following function returns false if the comparison operator failed!!!!
-  template <class compareClass>
-  bool QuickSortAscendingCustom(compareClass& theCompareror)
-  { return this->QuickSortAscendingOrderCustom(0, this->size-1, theCompareror);
+  template <class compareClass, class carbonCopyType=Object>
+  bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy=0)
+  { return this->QuickSortAscendingCustomRecursive(0, this->size-1, theCompareror, carbonCopy);
   }
   //The below function is required to preserve the order of elements given by theSelection.elements.
   void SubSelection(Selection& theSelection, List<Object>& output);

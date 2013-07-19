@@ -1765,6 +1765,22 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnly
   this->ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(theGlobalVariables);
 }
 
+bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right)
+{ Vector<Rational> leftSSpart=left;
+  Vector<Rational> rightSSpart=right;
+  leftSSpart.SetSize(this->theHs.size);
+  rightSSpart.SetSize(this->theHs.size);
+  if (leftSSpart>rightSSpart)
+    return true;
+  if (rightSSpart>leftSSpart)
+    return true;
+  Vector<Rational> leftCpart=left;
+  Vector<Rational> rightCpart=right;
+  leftCpart.ShiftToTheLeft(this->theHs.size);
+  rightCpart.ShiftToTheLeft(this->theHs.size);
+  return leftCpart>rightCpart;
+}
+
 void CandidateSSSubalgebra::GetWeightProjectionFundCoords
 (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetWeightProjectionFundCoords");
@@ -1783,7 +1799,7 @@ void CandidateSSSubalgebra::GetPrimalWeightProjectionFundCoords
     this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(j,j);
   for (int j=0; j<this->CartanOfCentralizer.size; j++)
     output[j+this->theHs.size]=
-    this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->CartanOfCentralizer[j]);
+    this->GetAmbientWeyl().RootScalarCartanRoot(inputAmbientweight, this->CartanOfCentralizer[j])*2;
 }
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
@@ -1794,15 +1810,23 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
   this->thePrimalChaR.MakeZero();
   MonomialChar<Rational> theWeight;
   theWeight.owner=0;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > tempModules;
-  HashedList<Vector<Rational> > tempHWs;
-  tempModules.SetExpectedSize(this->HighestVectorsNonSorted.size);
-  tempHWs.SetExpectedSize(this->HighestVectorsNonSorted.size);
   Vector<Rational> currentRoot;
   //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString();
   //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{56/3}_1")
   //{ std::cout << "here be probs!";
   //}
+  List<Vector<Rational> > sortingWeights;
+  for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
+  { currentRoot=this->GetAmbientSS().GetWeightOfGenerator(this->HighestVectorsNonSorted[i][0].theGeneratorIndex);
+    Vector<Rational>& currentHWPrimal=this->HighestWeightsPrimalNonSorted[i];
+    this->GetPrimalWeightProjectionFundCoords(currentRoot, currentHWPrimal);
+    sortingWeights.AddOnTop(currentHWPrimal);
+  }
+  sortingWeights.QuickSortAscendingCustom(*this, &this->HighestVectorsNonSorted);
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > tempModules;
+  HashedList<Vector<Rational> > tempHWs;
+  tempModules.SetExpectedSize(this->HighestVectorsNonSorted.size);
+  tempHWs.SetExpectedSize(this->HighestVectorsNonSorted.size);
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
   { currentRoot=this->GetAmbientSS().GetWeightOfGenerator(this->HighestVectorsNonSorted[i][0].theGeneratorIndex);
     Vector<Rational>& currentHWrelative=this->HighestWeightsNONprimalNonSorted[i];

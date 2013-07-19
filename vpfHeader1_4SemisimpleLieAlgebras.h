@@ -418,7 +418,7 @@ public:
    HashedList<Vector<Rational> >& inputHws)
    ;
   void ComputePrimalModuleDecompositionHighestWeightsOnly
-  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsDualCoords)
+  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsCoords)
   ;
   void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(GlobalVariables* theGlobalVariables);
   void GetPrimalWeightProjectionFundCoords

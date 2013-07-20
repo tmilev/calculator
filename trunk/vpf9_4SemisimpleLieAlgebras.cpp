@@ -1773,7 +1773,7 @@ bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& 
   if (leftSSpart>rightSSpart)
     return true;
   if (rightSSpart>leftSSpart)
-    return true;
+    return false;
   Vector<Rational> leftCpart=left;
   Vector<Rational> rightCpart=right;
   leftCpart.ShiftToTheLeft(this->theHs.size);
@@ -3566,6 +3566,70 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   return theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
 }
 
+std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions* theFormat)const
+{ if (this->Modules.size<=0)
+    return "";
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompoLaTeX");
+  std::stringstream out;
+  //out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
+  FormatExpressions tempCharFormat;
+  if (!this->charFormaT.IsZeroPointer())
+    tempCharFormat= this->charFormaT.GetElementConst();
+  //bool useModuleIndex=false;
+
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
+  out << "<br> \\begin{longtable}{c|c|c|c|c|c}"
+  << "<br>"
+  << "\\caption{Module decomposition of $" << this->owner->owneR->theWeyl.theDynkinType.ToString()
+  << "$ over $" << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+  << " \\oplus \\mathfrak h_c$\\label{tableModuleDecompo} }\\\\"
+  << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
+  ElementSemisimpleLieAlgebra<Rational> tempLieBracket;
+  for (int i=0; i<this->Modules.size; i++)
+  { int numRowsIsoCompo=this->Modules[i].size*this->Modules[i][0].size;
+    if (numRowsIsoCompo>1)
+      out << "\\multirow{" << numRowsIsoCompo << "}{*}";
+    out << "{$W_{" << i+1 << "} $}";
+    out << "&";
+    for (int j=0; j<this->Modules[i].size; j++)
+    { if (j>0)
+        out << " & ";
+      if (this->Modules[i][j].size>1)
+        out << "\\multirow{" << this->Modules[i][j].size << "}{*}";
+      out << "{$V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "}$} ";
+      out << "&";
+      for (int k=0; k<this->Modules[i][j].size; k++)
+      { if (k>0)
+          out << "&&";
+        out << "$" << this->Modules[i][j][k].ToString(theFormat) << "$";
+        out << "&";
+        out << "$" << this->WeightsModulesPrimal[i][k].ToStringLetterFormat("\\omega", &tempCharFormat) << "$"
+        << "& ";
+        bool OpsAreGood=false;
+        if (i<this->ModulesSl2opposite.size)
+          if (j<this->ModulesSl2opposite[i].size)
+            if (k<this->ModulesSl2opposite[i][j].size)
+              OpsAreGood=true;
+        if (OpsAreGood)
+        { List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
+          if (!currentOpModule[k].IsEqualToZero())
+          { this->GetAmbientSS().LieBracket(this->Modules[i][j][k], currentOpModule[k], tempLieBracket);
+            out << "$" << tempLieBracket.ToString() << "$&";
+            out << "$" << currentOpModule[k].ToString() << "$";
+          } else
+            out << "$N/A$&N/A";
+        }
+        out << "\\\\" << " <br>";
+      }
+      out << "\\cline{2-6}";
+    }
+    out << "\\hline";
+  }
+  out << "\\end{longtable}<br>\n\\end{document}";
+  return out.str();
+}
+
+
 std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theFormat)const
 { if (this->Modules.size<=0)
     return "";
@@ -4284,6 +4348,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   }
   if (!shortReportOnly)
   { out << this->ToStringModuleDecompo(theFormat);
+    out << "LaTeX version of module decomposition: <br><br>" << this->ToStringModuleDecompoLaTeX(theFormat) << "<br><br>";
     out << this->ToStringPairingTable(theFormat);
     out << "<br>" << this->ToStringDrawWeights(theFormat) << "<br>";
     out << this->ToStringNilradicals(theFormat);

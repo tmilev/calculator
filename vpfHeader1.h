@@ -7856,6 +7856,7 @@ public:
   static void GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y);
   static void ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Vector<Rational>& output, Vectors<Rational>& directions);
   std::string GetColorHtmlFromColorIndex(int colorIndex);
+  std::string GetColorPsTricksFromColorIndex(int colorIndex);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
   inline int GetActualTextStyleFromFlagsAnd(int inputTextStyle);

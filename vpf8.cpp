@@ -4762,6 +4762,15 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
     }
 }
 
+std::string DrawingVariables::GetColorPsTricksFromColorIndex(int colorIndex)
+{ std::stringstream out;
+  int r=(colorIndex/65536)%256;
+  int g=(colorIndex/256)%256;
+  int b=colorIndex%256;
+  out << "\\\\newrgbcolor{currentColor}{" <<((double) r)/255 << ", " << ((double) g)/255 << ", " << ((double) b)/255 << "}";
+  return out.str();
+}
+
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
 { std::stringstream out;
   int r=(colorIndex/65536)%256;

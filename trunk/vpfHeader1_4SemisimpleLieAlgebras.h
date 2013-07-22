@@ -244,7 +244,10 @@ class NilradicalCandidate
   bool IsStronglySingularRelativeToSubset(int nonFKweightIndex);
   Vector<Rational> GetConeStrongIntersectionWeight()const;
   Vector<Rational> GetNilradicalLinearCombi()const;
-
+  void GetModGeneratedByNonHWVandNilradElt
+  (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<Rational> >& outputLeft,
+   List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
+  ;
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
 //  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
   bool IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel);

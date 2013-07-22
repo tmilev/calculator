@@ -1445,6 +1445,8 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
           { this->ConeStrongIntersection[this->theNilradSubsel.elements[k]]=betterIntersection[k];
             this->ConeRelativelyStrongIntersection.AddOnTop(betterIntersection[k]);
           }
+          this->theNilradical.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
+          this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
           this->theNonFKhwVectorsStrongRelativeToSubset.SetSize(0);
           this->theNonFKhwVectorsStrongRelativeToSubsetWeights.SetSize(0);
           for (int k=0; k<this->theNonFKhwsStronglyTwoSided.size; k++)
@@ -1455,7 +1457,6 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
               this->ConeRelativelyStrongIntersection.AddOnTop(betterIntersection[k+i]);
             }
           }
-          this->theNilradical.SubSelection(this->theNilradSubsel, this->theNilradicalSubset);
           return true;
         }
       }
@@ -3870,6 +3871,27 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
+void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt
+  (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<Rational> >& outputLeft,
+   List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
+{ outputBrackets.SetSize(0);
+  outputBrackets.AddOnTop(this->theNilradicalSubset[indexInNilradSubset]);
+  outputRight.SetSize(1);
+  outputLeft.SetSize(1);
+  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+  for (int i=0; i<outputBrackets.size; i++)
+    if (!outputBrackets[i].IsEqualToZero())
+      for (int j=0; j<this->theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+      { this->owner->owner->owneR->LieBracket(this->theNonFKhwVectorsStrongRelativeToSubset[j], outputBrackets[i], theLieBracket);
+        outputBrackets.AddOnTop(theLieBracket);
+        outputLeft.AddOnTop(this->theNonFKhwVectorsStrongRelativeToSubset[j]);
+        outputRight.AddOnTop(outputBrackets[i]);
+      }
+  outputLeft.PopIndexShiftDown(0);
+  outputRight.PopIndexShiftDown(0);
+  outputBrackets.PopIndexShiftDown(0);
+}
+
 std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFormat)const
 { if (this->FKNilradicalCandidates.size==0)
     return "";
@@ -3904,9 +3926,12 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   FormatExpressions tempFormat;
   if (!this->charFormaT.IsZeroPointer())
     tempFormat= this->charFormaT.GetElementConst();
+  List<ElementSemisimpleLieAlgebra<Rational> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
   { const NilradicalCandidate& currentNilrad=this->FKNilradicalCandidates[i];
     currentNilradVector=currentNilrad.theNilradicalSelection;
+    for (int j=0; j<this->primalSubalgebraModules.size; j++)
+      currentNilradVector[this->primalSubalgebraModules[j]]-=1;
     out << "\\\\\\hline<br>\n";
     out << "$" << currentNilradVector.ToStringLetterFormat("W") << "$ &";
     if (currentNilrad.flagNilradicalConesIntersect)
@@ -3915,33 +3940,74 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
       out << "no";
     out << "&";
     if (currentNilrad.flagLinfiniteRelFound)
-    { out << "$\\begin{array}{";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size+currentNilrad.theNilradicalSubset.size; j++)
+    { out << "\\begin{tabular}{l";
+      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size+currentNilrad.theNilradicalSubsetWeights.size; j++)
         out << "cc";
-      out << "}";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
-      { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubset.size+j];
+      out << "}Relation&";
+      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j++)
+      { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size+j];
         theCF.Minus();
-        if (theCF!=1)
-          out << theCF.ToString();
-        out << currentNilrad.theNonFKhwVectorsStrongRelativeToSubset[j].ToString();
+        out << "$" << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
+        << "$";
         out << " & ";
-        if (j==currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size-1)
+        if (j!=currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size-1)
           out << "+&";
         else
           out << "=&";
       }
-      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+      for (int j=0; j<currentNilrad.theNilradicalSubsetWeights.size; j++)
       { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[j];
-        if (theCF!=1)
-          out << theCF.ToString();
-        out << currentNilrad.theNilradicalSubset[j].ToString();
+        out << "$" << (currentNilrad.theNilradicalSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
+        << "$";
         out << " & ";
-        if (j!=currentNilrad.theNilradicalSubset.size-1)
+        if (j!=currentNilrad.theNilradicalSubsetWeights.size-1)
           out << "+&";
       }
-      out <<"\\end{array}$";
+      out << "\\\\<br>\n Elts.& ";
+      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+      { out << "$" << currentNilrad.theNonFKhwVectorsStrongRelativeToSubset[j].ToString() << "$";
+        out << " & &";
+      }
+      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+      { out << "$" << currentNilrad.theNilradicalSubset[j].ToString() << "$";
+        out << " & ";
+        if (j!=currentNilrad.theNilradicalSubset.size-1)
+          out << " &";
+      }
+      out << "\\\\<br>\n Opposite elts. &";
+      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+        out << " & &";
+      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+      { out << "$" << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[j]].ToString() << "$";
+        out << " & ";
+        if (j!=currentNilrad.theNilradicalSubset.size-1)
+          out << " &";
+      }
+      out << "\\end{tabular}\\\\\n<br>";
+      out << "&& Relevant Lie brackets: ";
+      ElementSemisimpleLieAlgebra<Rational> tempElt;
+      std::stringstream tempStream;
+      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+      { currentNilrad.GetModGeneratedByNonHWVandNilradElt(j, RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets);
+        for (int k=0; k<RelevantBrackets.size; k++)
+          tempStream << "$[" << RelevantBracketsLeft[k].ToString() << ", " << RelevantBracketsRight[k].ToString() << "] ="
+          << RelevantBrackets[k].ToString() << "$, ";
+      }
+      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+        for (int k=0; k<currentNilrad.theNilradicalSubset.size; k++)
+          if (k!=j)
+          { this->owner->owneR->LieBracket
+            (currentNilrad.theNilradicalSubset[j],
+             currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]], tempElt);
+            tempStream << "$[" << currentNilrad.theNilradicalSubset[j].ToString() << ", "
+            << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]].ToString()
+            << "]=" << tempElt.ToString() << ", ";
+          }
+      std::string tempS=tempStream.str();
+      tempS.resize(tempS.size()-2);
+      out << tempS;
     }
+
 //    for (int j=0; j<currentNilrad.theNonFKhws.size; j++)
 //    { out << " $" << currentNilrad.theNonFKhws[j].ToStringLetterFormat("\\omega", &tempFormat) << "$";
 //      if (j!=currentNilrad.theNonFKhws.size-1)

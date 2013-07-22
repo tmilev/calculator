@@ -228,7 +228,8 @@ class NilradicalCandidate
   List<int> ownerModulestheNonFKhwVectors;
 
   List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectors;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElements;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKHVectorsStronglyTwoSided;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNilradical;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElementOpposites;
   Selection theNilradSubsel;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalSubset;

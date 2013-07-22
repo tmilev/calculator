@@ -9191,7 +9191,11 @@ std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat)const
 
 template <class Object>
 void List<Object>::SubSelection(Selection& theSelection, List<Object>& output)
-{ assert(&output!=this);
+{ if (&output==this)
+  { List<Object> thisCopy=*this;
+    thisCopy.SubSelection(theSelection, output);
+    return;
+  }
   output.SetSize(theSelection.CardinalitySelection);
   for(int i=0; i<theSelection.CardinalitySelection; i++)
     output[i]=(*this)[theSelection.elements[i]];

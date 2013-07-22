@@ -548,6 +548,7 @@ int main(int argc, char **argv)
   //civilizedInput="(\\sqrt{}2+\\sqrt{}3)*( \\sqrt{2}\\sqrt{3})";
 //  civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, (Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2)), (g_{-24}, g_{24}, g_{-16}, g_{16})),Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 0, -1, 0)), ( g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{3}, g_{-3})))))";
   //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}g_2";
+//  civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, ( Serialization{}(LoadCandidateSubalgebra, G^{6}_{2}, ((3, 6, 8, 4), (-3, -9, -12, -6)), (g_{-19}+g_{-20}, g_{20}+g_{19}, g_{23}, g_{-23})),Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}+G^{6}_{2}, ((4, 8, 12, 8), (2, 3, 4, 0), (-3, -3, -6, 0)), (g_{-12}+g_{-13}, 2g_{13}+2g_{12}, -g_{-9}+g_{-8}, -g_{9}+g_{8}, g_{11}, g_{-11})))))";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

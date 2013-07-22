@@ -1909,7 +1909,10 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
     if (i<theRank)
       tempStream << "\\omega_{" << i+1 << "}";
     else
-      tempStream << "\\psi_{" << i-theRank+1 << "}";
+    { tempStream << "\\psi";
+      if (this->CartanOfCentralizer.size>1)
+        tempStream << "_{" << i-theRank+1 << "}";
+    }
     this->charFormaT.GetElement().vectorSpaceEiBasisNames[i]=tempStream.str();
   }
   int numMods=0;
@@ -3787,7 +3790,7 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
   out << this->FKnilradicalLog;
   Vector<Rational> currentNilrad;
   currentNilrad=this->theNilradicalSelection;
-  out << currentNilrad.ToStringLetterFormat("V");
+  out << currentNilrad.ToStringLetterFormat("W");
   if (this->flagNilradicalConesIntersect)
     out << ". Cones intersect. ";
   else
@@ -3856,7 +3859,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   std::stringstream out;
   Vector<Rational> primalBase;
   primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
-  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("V");
+  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
   int numConeIntersections=0;
   int numCasesNoLinfiniteRelationFound=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
@@ -3877,10 +3880,98 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
       out << "<br><span style=\"color:#0000FF\"> In each of " << numConeIntersections
       << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
   }
+  Vector<Rational> currentNilradVector;
+  out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
+  << "\\caption{Nilradicals\\label{tableNilrads} }\\\\ $ \\mathfrak n _{\\mathfrak l} $ & Cones intersect"
+  << " & $\\mathrm{Cone}_{\\mathbb{Q}_{\\geq 0}}(\\mathrm{Weights}(\\mathrm{Sing}(\\mathfrak g_\\mathfrak l))) $";
+  FormatExpressions tempFormat;
+  if (!this->charFormaT.IsZeroPointer())
+    tempFormat= this->charFormaT.GetElementConst();
+  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+  { const NilradicalCandidate& currentNilrad=this->FKNilradicalCandidates[i];
+    currentNilradVector=currentNilrad.theNilradicalSelection;
+    out << "\\\\\\hline<br>\n";
+    out << "$" << currentNilradVector.ToStringLetterFormat("W") << "$ &";
+    if (currentNilrad.flagNilradicalConesIntersect)
+      out << "yes";
+    else
+      out << "no";
+    out << "&";
+    for (int j=0; j<currentNilrad.theNonFKhws.size; j++)
+    { out << " $" << currentNilrad.theNonFKhws[j].ToStringLetterFormat("\\omega", &tempFormat) << "$";
+      if (j!=currentNilrad.theNonFKhws.size-1)
+        out << ", ";
+    }
+  }
+  out << "\\end{longtable}";
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     out << "<hr>Subalgebra " << i+1 << ": " << this->FKNilradicalCandidates[i].ToString(theFormat);
   if (this->nilradicalGenerationLog!="")
     out << "<br>Nilradical generation log:" << this->nilradicalGenerationLog;
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* theFormat)const
+{ if (!this->NilradicalPairingTable.size>0)
+    return "";
+  std::stringstream out;
+  out << "\\documentclass{article}\\usepackage{longtable} \\begin{document}<br>";
+  out << "Modules that have a zero weight (" << this->modulesWithZeroWeights.size << " total): ";
+  for (int i=0; i<this->modulesWithZeroWeights.size; i++)
+  { out << "$W_{" << this->modulesWithZeroWeights[i]+1 << "}$";
+    if (i!=this->modulesWithZeroWeights.size-1)
+      out << ", ";
+  }
+  out << "<br>Opposite modules <br>\n" << " \\begin{longtable}{c";
+  for (int i=0; i<this->OppositeModulesByStructure.size; i++)
+    out << "|c";
+  out << "}\\\\ ";
+  for (int i=0; i<this->OppositeModulesByStructure.size; i++)
+    out << "&$W_{" << i+1 << "}$";
+  out << "\\\\\\hline Opp. by structure:";
+
+  for (int i=0; i< this->OppositeModulesByStructure.size; i++)
+  { out << "&";
+    for (int j=0; j<this->OppositeModulesByStructure[i].size; j++)
+    { out << "$W_{" << this->OppositeModulesByStructure[i][j]+1 << "}$";
+      if (j!=this->OppositeModulesByStructure[i].size-1)
+      out << ", ";
+    }
+  }
+  out << "\\\\\\hline Opposite character";
+  for (int i=0; i< this->OppositeModulesByChar.size; i++)
+  { out << "&";
+    for (int j=0; j<this->OppositeModulesByChar[i].size; j++)
+    { out << "$W_{" << this->OppositeModulesByChar[i][j]+1 << "} $";
+      if (j!=this->OppositeModulesByChar[i].size-1)
+        out << ", ";
+    }
+  }
+  out << "\\end{longtable}";
+  out << "<br>\\begin{longtable}{c";
+  for (int i=0; i<this->Modules.size; i++)
+    out << "|c";
+  out << "} \\caption{Pairing table\\label{tablePairingTable}}\\\\<br>\n";
+  FormatExpressions tempCharFormat;
+  if (!this->charFormaT.IsZeroPointer())
+    tempCharFormat= this->charFormaT.GetElementConst();
+  out << "<br>\n";
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+    out << "&$W_{" << i+1 << "}$";
+  for (int i=0; i<this->NilradicalPairingTable.size; i++)
+  { out << "\\\\\\hline<br\n>";
+    out << "$W_{" << i+1 << "}$";
+    for (int j=0; j<this->NilradicalPairingTable.size; j++)
+    { out << "&";
+      for (int k=0; k<this->NilradicalPairingTable[i][j].size; k++)
+      { out << "$W_{" << this->NilradicalPairingTable[j][i][k]+1 << "}$";
+        if (k!=this->NilradicalPairingTable[i][j].size-1)
+          out << ", ";
+      }
+    }
+  }
+  out << "\\end{longtable}";
+  out << "<br>\\end{document}";
   return out.str();
 }
 
@@ -4348,8 +4439,11 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   }
   if (!shortReportOnly)
   { out << this->ToStringModuleDecompo(theFormat);
-    out << "LaTeX version of module decomposition: <br><br>" << this->ToStringModuleDecompoLaTeX(theFormat) << "<br><br>";
+    if (this->owner->flagProduceLaTeXtables)
+      out << "LaTeX version of module decomposition: <br><br>" << this->ToStringModuleDecompoLaTeX(theFormat) << "<br><br>";
     out << this->ToStringPairingTable(theFormat);
+    if (this->owner->flagProduceLaTeXtables)
+      out << "LaTeX version of pairing table: <br><br>" << this->ToStringPairingTableLaTeX(theFormat) << "<br><br>";
     out << "<br>" << this->ToStringDrawWeights(theFormat) << "<br>";
     out << this->ToStringNilradicals(theFormat);
   }

@@ -450,6 +450,7 @@ public:
   std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
   std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
+  std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat=0)const;
@@ -473,6 +474,7 @@ public:
   bool flagComputePairingTable;
   bool flagComputeModuleDecomposition;
   bool flagComputeNilradicals;
+  bool flagProduceLaTeXtables;
   double timeComputationStartInSeconds;
   double timeComputationEndInSeconds;
   int numAdditions;

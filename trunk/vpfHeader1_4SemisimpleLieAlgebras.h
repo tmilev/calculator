@@ -267,6 +267,8 @@ public:
   List<Vectors<Rational> > CartanSAsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
+  Matrix<Rational> BilinearFormSimplePrimal;
+  Matrix<Rational> BilinearFormFundPrimal;
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theBasis;
@@ -447,6 +449,7 @@ public:
   bool isGoodForTheTop
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
+  Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
@@ -459,6 +462,8 @@ public:
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringDrawWeights(FormatExpressions* theFormat=0)const;
+  std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat=0)const;
+
   bool operator>(const CandidateSSSubalgebra& other)const ;
 
 };

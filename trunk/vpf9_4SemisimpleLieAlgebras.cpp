@@ -1410,6 +1410,10 @@ bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Select
       this->owner->GetAmbientSS().LieBracket(leftElt, rightEltNegative, mustBeZero);
       if (!mustBeZero.IsEqualToZero())
         return false;
+      Rational tempRat=this->owner->GetScalarSA
+      (this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]]);
+      if (tempRat!=0)
+        return false;
     }
   }
   return true;
@@ -3492,7 +3496,86 @@ bool CandidateSSSubalgebra::IsExtremeWeight(int moduleIndex, int indexInIsoCompo
   return true;
 }
 
+Rational CandidateSSSubalgebra::GetScalarSA
+(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const
+{ return primalWeightLeft.ScalarProduct(primalWeightRight, this->BilinearFormFundPrimal);
+}
+
 std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFormat)const
+{ if (!this->flagCentralizerIsWellChosen)
+    return "";
+  MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
+  int thePrimalRank=-1;
+  (this->centralizerRank+this->theHs.size).IsSmallInteger(&thePrimalRank);
+  if (thePrimalRank<2)
+    return "";
+  std::stringstream out;
+  out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the subalgerba are fundamental.  "
+  << "<br>The bilinear form is therefore given relative to the fundamental coordinates.<br> ";
+  Vectors<Rational> BasisToDrawCirclesAt;
+  DrawingVariables theDV;
+  theDV.theBuffer.theBilinearForm.init(thePrimalRank, thePrimalRank);
+  for (int i=0; i<thePrimalRank; i++)
+    for (int j=0; j<thePrimalRank; j++)
+      theDV.theBuffer.theBilinearForm(i,j)=this->BilinearFormFundPrimal(i,j).DoubleValue();
+  Vector<Rational> zeroVector;
+  zeroVector.MakeZero(thePrimalRank);
+  BasisToDrawCirclesAt.MakeEiBasis(thePrimalRank);
+  Vectors<Rational> cornerWeights;
+  for (int i=0; i<this->Modules.size; i++)
+  { cornerWeights.SetSize(0);
+    for (int j=0; j<this->Modules[i].size; j++)
+      for (int k=0; k<this->Modules[i][j].size; k++)
+      { if (j==0)
+        { int color= CGI::RedGreenBlue(150,150,0);
+          if (this->primalSubalgebraModules.Contains(i))
+          { color=CGI::RedGreenBlue(0,250,0);
+            theDV.drawLineBetweenTwoVectorsBuffer(zeroVector, this->WeightsModulesPrimal[i][k], theDV.PenStyleNormal, color);
+          }
+          theDV.drawCircleAtVectorBuffer(this->WeightsModulesPrimal[i][k], 2, theDV.PenStyleNormal, color);
+          if (this->IsExtremeWeight(i, k))
+            cornerWeights.AddOnTop(this->WeightsModulesPrimal[i][k]);
+        }
+        if (k==this->Modules[i][j].size-1 && BasisToDrawCirclesAt.size<thePrimalRank)
+        { BasisToDrawCirclesAt.AddOnTop(this->WeightsModulesPrimal[i][k]);
+          if (BasisToDrawCirclesAt.GetRankOfSpanOfElements()!=BasisToDrawCirclesAt.size)
+            BasisToDrawCirclesAt.RemoveLastObject();
+        }
+      }
+    int color=CGI::RedGreenBlue(250, 250,0);
+    if (this->primalSubalgebraModules.Contains(i))
+      color=CGI::RedGreenBlue(0, 0, 250);
+    for (int j=0; j<cornerWeights.size; j++)
+    { Rational minDist=0;
+      for (int k=0; k<cornerWeights.size; k++)
+      { Rational tempRat=Vector<Rational>::ScalarProduct
+        ((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal);
+        if (minDist==0)
+          minDist=tempRat;
+        else if (tempRat!=0)
+          minDist=MathRoutines::Minimum(tempRat, minDist);
+      }
+      for (int k=j+1; k<cornerWeights.size; k++)
+        if (minDist==Vector<Rational>::ScalarProduct
+            ((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal))
+          theDV.drawLineBetweenTwoVectorsBuffer(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
+    }
+  }
+  theDV.theBuffer.BasisToDrawCirclesAt.SetSize(BasisToDrawCirclesAt.size);
+  for(int i=0; i<theDV.theBuffer.BasisToDrawCirclesAt.size; i++)
+  { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
+    for (int j=0; j<thePrimalRank; j++)
+      theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].DoubleValue();
+    theDV.drawCircleAtVectorBuffer(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
+    //theDV.drawTextAtVectorBuffer
+    //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
+  }
+  theDV.theBuffer.GraphicsUnit[0]/=sqrt(this->theWeylNonEmbeddeD.CartanSymmetric(0,0).DoubleValue());
+  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank) << this->ToStringDrawWeightsVersion2(theFormat);
+  return out.str();
+}
+
+std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions* theFormat)const
 { if (!this->flagCentralizerIsWellChosen)
     return "";
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
@@ -3512,9 +3595,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     { theBilinearForm(i,j)=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[i], theEiBasis[j]);
       theDV.theBuffer.theBilinearForm(i,j)=theBilinearForm(i,j).DoubleValue();
     }
+  std::cout << "<hr>The bilinear form version 2: " << theBilinearForm.ToString();
   theBilinearFormInverted=theBilinearForm;
   theBilinearFormInverted.Invert();
-  Vector<Rational> currentWeight, theProjectedWeight, zeroVector;
+  std::cout << "<br>The bilinear form inverted: " << theBilinearFormInverted.ToString();
+  Vector<Rational> currentWeight, theProjectedWeight, zeroVector, tempV;
   theProjectedWeight.MakeZero(thePrimalRank);
   zeroVector.MakeZero(thePrimalRank);
   BasisToDrawCirclesAt.SetSize(this->theHs.size);
@@ -3537,7 +3622,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
         currentWeight= this->owner->owneR->GetWeightOfGenerator(currentGen.theGeneratorIndex);
         for (int l=0; l<theEiBasis.size; l++)
           theProjectedWeight[l]=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[l], currentWeight);
+        std::cout << "<br>Projected dual: " << theProjectedWeight.ToString()
+        << "; projected fund: " << this->WeightsModulesPrimal[i][k].ToString();
         theBilinearFormInverted.ActOnVectorColumn(theProjectedWeight);
+
         theModuleProjections[i][j][k]=theProjectedWeight;
         if (j==0)
         { int color= CGI::RedGreenBlue(150,150,0);
@@ -3554,6 +3642,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
           if (BasisToDrawCirclesAt.GetRankOfSpanOfElements()!=BasisToDrawCirclesAt.size)
             BasisToDrawCirclesAt.RemoveLastObject();
         }
+        Rational tempRAt=theProjectedWeight.ScalarProduct(theProjectedWeight, theBilinearForm);
+        std::cout << "; final:" << theProjectedWeight.ToString() << ", length: "
+        << tempRAt.ToString();
+        std::cout << ", length by other scalar: "
+        << this->GetScalarSA(this->WeightsModulesPrimal[i][k], this->WeightsModulesPrimal[i][k]).ToString();
       }
     }
     int color=CGI::RedGreenBlue(250, 250,0);
@@ -3585,6 +3678,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   }
 
   return theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
+
 }
 
 std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions* theFormat)const
@@ -4899,4 +4993,39 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     this->CartanOfCentralizer[i]=tempElt.GetCartanPart();
     this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
   }
+//  if (this->CartanOfCentralizer.size>0)
+//    this->CartanOfCentralizer[0]*=4;
+
+  Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
+  this->BilinearFormSimplePrimal=this->theWeylNonEmbeddeD.CartanSymmetric;
+  this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owneR->theWeyl.CartanSymmetric);
+  this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
+  bilinearFormInverted=this->BilinearFormSimplePrimal;
+  bilinearFormInverted.Invert();
+  diagMat.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
+  diagMat.NullifyAll();
+  for (int i=0; i<this->BilinearFormSimplePrimal.NumRows; i++)
+    if (i<this->theHs.size)
+      diagMat(i,i)=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(i,i)/2;
+    else
+    { diagMat(i,i).AssignNumeratorAndDenominator(1,2);
+//      diagMat(i,i)/= this->BilinearFormSimplePrimal(i,i);
+    }
+  fundCoordsViaSimple=bilinearFormInverted;
+  fundCoordsViaSimple*=diagMat;
+  std::cout
+  << "<hr>diagMat=" << diagMat.ToString()
+  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
+  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
+  this->BilinearFormFundPrimal=fundCoordsViaSimple;
+  this->BilinearFormFundPrimal.Transpose();
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
+  this->BilinearFormFundPrimal*=this->BilinearFormSimplePrimal;
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
+  this->BilinearFormFundPrimal*=fundCoordsViaSimple;
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
+  << "<hr>";
 }

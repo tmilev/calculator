@@ -1410,12 +1410,19 @@ bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Select
       this->owner->GetAmbientSS().LieBracket(leftElt, rightEltNegative, mustBeZero);
       if (!mustBeZero.IsEqualToZero())
         return false;
-      Rational tempRat=this->owner->GetScalarSA
-      (this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]]);
-      if (tempRat!=0)
-        return false;
     }
   }
+  for (int i=0; i<inputNilradSel.CardinalitySelection; i++)
+    for (int j=i+1; j<inputNilradSel.CardinalitySelection; j++)
+      if (this->owner->GetScalarSA
+          (this->theNilradicalWeights[inputNilradSel.elements[i]],
+           this->theNilradicalWeights[inputNilradSel.elements[j]])!=0)
+      { std::cout << "This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
+        << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+        return false;
+      }
   return true;
 }
 
@@ -3571,11 +3578,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
     //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
   }
   theDV.theBuffer.GraphicsUnit[0]/=sqrt(this->theWeylNonEmbeddeD.CartanSymmetric(0,0).DoubleValue());
-  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank) << this->ToStringDrawWeightsVersion2(theFormat);
+  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
   return out.str();
 }
 
-std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions* theFormat)const
+/*std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions* theFormat)const
 { if (!this->flagCentralizerIsWellChosen)
     return "";
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
@@ -3595,10 +3602,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions
     { theBilinearForm(i,j)=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[i], theEiBasis[j]);
       theDV.theBuffer.theBilinearForm(i,j)=theBilinearForm(i,j).DoubleValue();
     }
-  std::cout << "<hr>The bilinear form version 2: " << theBilinearForm.ToString();
+//  std::cout << "<hr>The bilinear form version 2: " << theBilinearForm.ToString();
   theBilinearFormInverted=theBilinearForm;
   theBilinearFormInverted.Invert();
-  std::cout << "<br>The bilinear form inverted: " << theBilinearFormInverted.ToString();
+//  std::cout << "<br>The bilinear form inverted: " << theBilinearFormInverted.ToString();
   Vector<Rational> currentWeight, theProjectedWeight, zeroVector, tempV;
   theProjectedWeight.MakeZero(thePrimalRank);
   zeroVector.MakeZero(thePrimalRank);
@@ -3622,8 +3629,8 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions
         currentWeight= this->owner->owneR->GetWeightOfGenerator(currentGen.theGeneratorIndex);
         for (int l=0; l<theEiBasis.size; l++)
           theProjectedWeight[l]=this->owner->owneR->theWeyl.RootScalarCartanRoot(theEiBasis[l], currentWeight);
-        std::cout << "<br>Projected dual: " << theProjectedWeight.ToString()
-        << "; projected fund: " << this->WeightsModulesPrimal[i][k].ToString();
+//        std::cout << "<br>Projected dual: " << theProjectedWeight.ToString()
+//        << "; projected fund: " << this->WeightsModulesPrimal[i][k].ToString();
         theBilinearFormInverted.ActOnVectorColumn(theProjectedWeight);
 
         theModuleProjections[i][j][k]=theProjectedWeight;
@@ -3678,8 +3685,8 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsVersion2(FormatExpressions
   }
 
   return theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
-
 }
+*/
 
 std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions* theFormat)const
 { if (this->Modules.size<=0)
@@ -5013,19 +5020,19 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     }
   fundCoordsViaSimple=bilinearFormInverted;
   fundCoordsViaSimple*=diagMat;
-  std::cout
-  << "<hr>diagMat=" << diagMat.ToString()
-  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
-  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
+//  std::cout
+//  << "<hr>diagMat=" << diagMat.ToString()
+//  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
+//  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
   this->BilinearFormFundPrimal=fundCoordsViaSimple;
   this->BilinearFormFundPrimal.Transpose();
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=this->BilinearFormSimplePrimal;
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=fundCoordsViaSimple;
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
-  << "<hr>";
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
+//  << "<hr>";
 }

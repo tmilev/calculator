@@ -462,7 +462,7 @@ public:
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringDrawWeights(FormatExpressions* theFormat=0)const;
-  std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat=0)const;
+//  std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat=0)const;
 
   bool operator>(const CandidateSSSubalgebra& other)const ;
 

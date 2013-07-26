@@ -177,7 +177,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
 
   Create(parent, wxID_ANY, _("Frame"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
   BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalPrintSemisimpleSubalgebras{}(b_3)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalPrintSemisimpleSubalgebrasFull{}(G_2)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
   BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
   Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -219,6 +219,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
       break;
     this->thePath.resize(this->thePath.size()-1);
   }
+  this->thePath+="../";
   this->theSettingsFileName=this->thePath+"Settings.txt";
   this->ReadSettings();
   this->scalePNG=1;
@@ -233,6 +234,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   theGlobalVariables.theDefaultFormat.flagUseHTML=false;
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000000;
   this->theCommandList.init(theGlobalVariables);
+  this->theCommandList.initDefaultFolderAndFileNames(this->thePath, "vpf/", "0");
   this->indexCurrentPng=-1;
   this->bitmapH=600;
   this->bitmapW=600;

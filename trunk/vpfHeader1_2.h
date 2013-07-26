@@ -961,6 +961,9 @@ public:
   std::string GetWeylGroupName(FormatExpressions* theFormat=0)const;
   bool HasExceptionalComponent()const;
   bool operator>(const DynkinType& other)const;
+  void operator=(const MonomialCollection<DynkinSimpleType, Rational>& other)
+  { this->::MonomialCollection<DynkinSimpleType, Rational>::operator=(other);
+  }
 };
 
 template <class coefficient>

@@ -159,6 +159,62 @@ std::string SemisimpleSubalgebras::GetDisplayFileName
   return out.str();
 }
 
+std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
+  int numIsotypicallyCompleteNilrads=0;
+  int numFailingConeCondition=0;
+  int numNoLinfRelFound=0;
+  for (int i=0; i<this->theSubalgebraCandidates.size; i++)
+  { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
+    numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
+    numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
+  }
+  out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads;
+  if (numNoLinfRelFound==0)
+    out << "<br>In all " << numFailingConeCondition << " cases, an $\\mathfrak{l}$-infinite relation was found. ";
+  else
+    out << "<br>In " << numNoLinfRelFound << " cases, no L-infinite relation was found. <br>";
+  out << "\\begin{longtable}{ccp{3cm}p{3cm}cc}";
+  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToString()
+  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToString() << "}  }\\\\\n<br>\n";
+  out << "Type $\\mathfrak s$ & Centralizer &$\\mathfrak s$-Decomp. $\\mathfrak g$ & $\\mathfrak s\\oplus \\mathfrak h_c$-Decomp."
+  << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
+  DynkinType typeCentralizer;
+  FormatExpressions tempCharFormat;
+  for (int i=0; i<this->theSubalgebraCandidates.size; i++)
+  { const CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];
+    if (currentSA.flagSystemProvedToHaveNoSolution)
+      continue;
+    out << "$" << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString() << "$";
+    if (!currentSA.flagCentralizerIsWellChosen)
+      continue;
+    typeCentralizer.MakeZero();
+    if (currentSA.indexMaxSSContainer!=-1)
+      typeCentralizer=
+      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType
+      - currentSA.theWeylNonEmbeddeD.theDynkinType;
+    out << "& $ ";
+    if(!typeCentralizer.IsEqualToZero())
+    { out << typeCentralizer.ToString();
+      if (currentSA.centralizerRank!=typeCentralizer.GetRank())
+        out << "\\oplus";
+    }
+    if (currentSA.centralizerRank!=typeCentralizer.GetRank())
+      out << "\\mathfrak h_{" << (currentSA.centralizerRank-typeCentralizer.GetRank()).ToString() << "}";
+    out << "$";
+    if (!currentSA.charFormaT.IsZeroPointer())
+      tempCharFormat=currentSA.charFormaT.GetElementConst();
+    out << "&$" << currentSA.theCharNonPrimalFundCoords.ToString(&tempCharFormat) << "$ ";
+    out << "&$" << currentSA.thePrimalChaR.ToString(&tempCharFormat) << "$ ";
+    out << "& " << currentSA.FKNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
+    out << "\\\\ \\hline \n<br>\n";
+  }
+  out << "\\end{longtable}\n<br>\n";
+  out << "\\end{document}";
+  return out.str();
+}
+
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
   bool writingToHD=theFormat==0? false: theFormat->flagUseHtmlAndStoreToHD;
@@ -206,6 +262,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     << " total arithmetic operations performed = " << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
   out << "<hr> ";
+  if (this->flagProduceLaTeXtables)
+    out << "Summary in LaTeX<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "<br><br><hr>";
   if (!writingToHD)
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
     { if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
@@ -1157,7 +1215,7 @@ CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
-totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0)
+totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1)
 {
 }
 
@@ -1618,6 +1676,14 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   }
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     this->FKNilradicalCandidates[i].ProcessMe(theGlobalVariables);
+  this->NumConeIntersections=0;
+  this->NumCasesNoLinfiniteRelationFound=0;
+  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+    if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect)
+    { this->NumConeIntersections++;
+      if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
+        this->NumCasesNoLinfiniteRelationFound++;
+    }
 //  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
 }
@@ -4000,24 +4066,16 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
   Vector<Rational> primalBase;
   primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
   out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
-  int numConeIntersections=0;
-  int numCasesNoLinfiniteRelationFound=0;
-  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-    if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect)
-    { numConeIntersections++;
-      if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
-        numCasesNoLinfiniteRelationFound++;
-    }
   out << "<br>There are " << this->FKNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
-  << numConeIntersections << " have intersecting cones and "
-  << this->FKNilradicalCandidates.size-numConeIntersections << " have non-intersecting cones. ";
-  if (numConeIntersections>0)
-  { if (numCasesNoLinfiniteRelationFound>0)
-      out << "<br><span style=\"color:#FF0000\">In " << numCasesNoLinfiniteRelationFound
+  << this->NumConeIntersections << " have intersecting cones and "
+  << this->FKNilradicalCandidates.size-this->NumConeIntersections << " have non-intersecting cones. ";
+  if (this->NumConeIntersections>0)
+  { if (this->NumCasesNoLinfiniteRelationFound>0)
+      out << "<br><span style=\"color:#FF0000\">In " << this->NumCasesNoLinfiniteRelationFound
       << " cases no L-infinite relation was found. </span>";
     else
-      out << "<br><span style=\"color:#0000FF\"> In each of " << numConeIntersections
+      out << "<br><span style=\"color:#0000FF\"> In each of " << this->NumConeIntersections
       << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
   }
   Vector<Rational> currentNilradVector;

@@ -170,15 +170,18 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
     numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
   }
-  out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads;
+  out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
+  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToString()
+  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToString() << "}. ";
+  out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads << ", of them "
+  << numFailingConeCondition << " fail the cone condition.";
   if (numNoLinfRelFound==0)
     out << "<br>In all " << numFailingConeCondition << " cases, an $\\mathfrak{l}$-infinite relation was found. ";
   else
     out << "<br>In " << numNoLinfRelFound << " cases, no L-infinite relation was found. <br>";
-  out << "\\begin{longtable}{ccp{3cm}p{3cm}cc}";
-  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToString()
-  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToString() << "}  }\\\\\n<br>\n";
-  out << "Type $\\mathfrak s$ & Centralizer &$\\mathfrak s$-Decomp. $\\mathfrak g$ & $\\mathfrak s\\oplus \\mathfrak h_c$-Decomp."
+  out << "}\\\\\n<br>\n";
+  out << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over $\\mathfrak s$ "
+  << "&Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
   << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
   DynkinType typeCentralizer;
   FormatExpressions tempCharFormat;
@@ -4971,7 +4974,7 @@ void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariabl
           continue;
         this->theSubalgebraCandidates[i].ComputePairingTable(theGlobalVariables);
         //int fixMe;
-        if (this->flagComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<30)
+        if (this->flagComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<50)
           this->theSubalgebraCandidates[i].EnumerateAllNilradicals(theGlobalVariables);
       }
 }

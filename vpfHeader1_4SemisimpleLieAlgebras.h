@@ -303,8 +303,10 @@ public:
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
-  List<NilradicalCandidate> FKNilradicalCandidates;
 
+  List<NilradicalCandidate> FKNilradicalCandidates;
+  int NumConeIntersections;
+  int NumCasesNoLinfiniteRelationFound;
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;
@@ -528,6 +530,8 @@ public:
     this->initHookUpPointers(inputOwner);
   }
   std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
+
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;

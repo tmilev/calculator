@@ -24,11 +24,14 @@
 			<Add option="`wx-config --libs`" />
 		</Linker>
 		<Unit filename="vpf.h" />
+		<Unit filename="vpf1_5SubsetsSelections.h" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
+		<Unit filename="vpf5_2javascript_graphics.cpp" />
 		<Unit filename="vpf6.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
+		<Unit filename="vpf6_1innerTypedFunctions.h" />
 		<Unit filename="vpf6_2serialization_code.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
@@ -39,12 +42,16 @@
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters.h" />
+		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />
+		<Unit filename="vpfCharacters_CalculatorInterface.h" />
 		<Unit filename="vpfGraph.cpp" />
+		<Unit filename="vpfGraph.h" />
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfHeader3ListReferences.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="wxDrawPanel.cpp" />
 		<Unit filename="wxDrawPanel.h" />

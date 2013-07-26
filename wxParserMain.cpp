@@ -364,6 +364,7 @@ void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
 void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
 { this->theParserOutput->TextCtrl1->SetValue(wxString(theCommandList.outputString.c_str(), wxConvUTF8));
   this->GetButton1()->SetLabel(wxT("Go"));
+  pthread_detach(theComputationalThread.ComputationalThreadLinux);
 //  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
 //  if (theParser.theValue.ExpressionType==ParserNode::typeAnimation)
 //  { theOps.flagAnimating=true;
@@ -481,14 +482,15 @@ void RunComputationalThread()
 void* RunComputationalThread(void*ptr)
 #endif
 { theGlobalVariables.theLocalPauseController.InitComputation();
-  FormatExpressions tempFormat;
   theMainWindow->theCommandList.Evaluate(theMainWindow->theCommandList.inputString);
   theGlobalVariables.theLocalPauseController.ExitComputation();
   wxPostEvent(theMainWindow->GetEventHandler(), theMainWindow->eventComputationOver);
   //theMainWindow->frameInput->Refresh();
+  pthread_cancel(theComputationalThread.ComputationalThreadLinux);
 #ifndef WIN32
-  pthread_exit(NULL);
+//  pthread_exit(NULL);
 #endif
+  return 0;
 }
 
 void wxParserFrame::RunTheComputation()

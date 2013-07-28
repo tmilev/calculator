@@ -286,7 +286,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
     A_n or, alternatively, in the format A^k_n, \
     where the capital letter stands for the type, \
     the lower index stands for the rank, and the upper index stands for \
-    the length of the first co-root squared. \
+    the length of the first co-root squared divided by two. \
     Here, we define i^th co-root length squared as 4/(length squared of the \
     i^th simple root). \
     <br>When omitted, the upper index is substituted \
@@ -298,16 +298,16 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
     <b>Remark.</b> It is advisable to omit the upper index (i.e., use default values) \
     when computing with a single semisimple Lie algebra. \
     <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
-    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^2_4, \
-    G^2_2 in extended notation). \
+    E_6, E_7, E_8, F_4, G_2 (A^1_n, B^1_n, C^1_n, D^1_n, E^1_n, F^1_4, \
+    G^1_2 in extended notation). \
     The roots are ordered in order the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
-    By default (when the upper index is not present), the roots are scaled so that the long \
+    By default (when the upper index is not present or when it is equal to 1), the roots are scaled so that the long \
     root has squared length 2 in types \
     A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2.\
     If the upper index is present, the root length squared of the first simple root equals \
-    (upper index)*(default first root length squared)^2/4.\
+    (upper index)*(default first root length squared)^2/2.\
     ",
    "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
@@ -801,12 +801,12 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
   ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
-   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -3))\\\\\
-+Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -1)\\\\\
-+3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, -2)), \
-3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 3))\\\\\
-+6 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 1))\\\\\
-+10/3 (Serialization{}(getChevalleyGenerator, (B)^{2}_{3}, 2)))", true, true)
+   "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)_{3}, -3))\\\\\
++Serialization{}(getChevalleyGenerator, (B)_{3}, -1)\\\\\
++3 (Serialization{}(getChevalleyGenerator, (B)_{3}, -2)), \
+3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 3))\\\\\
++6 (Serialization{}(getChevalleyGenerator, (B)_{3}, 1))\\\\\
++10/3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",

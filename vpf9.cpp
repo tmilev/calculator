@@ -795,7 +795,8 @@ FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Polynomial<Rational> 
 }
 
 FormatExpressions::FormatExpressions()
-{ this->ExtraLinesCounterLatex=0;
+{ this->AmbientWeylLetter='X';
+  this->ExtraLinesCounterLatex=0;
   this->chevalleyGgeneratorLetter="g";
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
@@ -1026,6 +1027,36 @@ void Rational::Subtract(const Rational& r)
   temp.Assign(r);
   temp.Minus();
   this->operator+=(temp);
+}
+
+bool Rational::GetSquareRootIfRational(Rational& output)const
+{ if (*this<0)
+    return false;
+  LargeInt theNum=this->GetNumerator();
+  LargeIntUnsigned theDen= this->GetDenominator();
+  List<unsigned int> primeFactorsNum, primeFactorsDen;
+  List<int> multsNum, multsDen;
+  if (!theNum.value.Factor(primeFactorsNum, multsNum))
+    return false;
+  if (!theDen.Factor(primeFactorsDen, multsDen))
+    return false;
+  output=1;
+  Rational tempRat;
+  for (int i=0; i<primeFactorsNum.size; i++)
+  { if (multsNum[i]%2!=0)
+      return false;
+    tempRat=primeFactorsNum[i];
+    tempRat.RaiseToPower(multsNum[i]/2);
+    output*=tempRat;
+  }
+  for (int i=0; i<primeFactorsDen.size; i++)
+  { if (multsDen[i]%2!=0)
+      return false;
+    tempRat=primeFactorsDen[i];
+    tempRat.RaiseToPower(multsDen[i]/2);
+    output/=tempRat;
+  }
+  return true;
 }
 
 void Rational::AssignInteger(int x)
@@ -3802,14 +3833,52 @@ Rational DynkinType::GetSizeWeylGroupByFormula()const
   return result;
 }
 
+Rational DynkinSimpleType::GetLongRootLengthSquared()const
+{ switch (this->theLetter)
+  { case 'A':
+    case 'B':
+    case 'D':
+    case 'E':
+    case 'F':
+      return this->lengthFirstCoRootSquared;
+    case 'G':
+      return this->lengthFirstCoRootSquared*3;
+    case 'C':
+      return this->lengthFirstCoRootSquared*2;
+    default:
+      break;
+  }
+  std::cout << "This is a programming error: calling DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
+  return -1;
+}
+
+
 std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
   bool includeNonTechnicalNames=theFormat==0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
   if (!includeNonTechnicalNames && !includeTechnicalNames)
     includeTechnicalNames=true;
+  bool hasAmbient=false;
+  if (theFormat!=0)
+    hasAmbient=(theFormat->AmbientWeylLetter!='X');
   if (includeTechnicalNames)
-  { out << theLetter << "^{" << this->lengthFirstCoRootSquared << "}";
+  { if (!hasAmbient)
+      out << theLetter << "^{" << (this->lengthFirstCoRootSquared/2).ToString() << "}";
+    else
+    { DynkinSimpleType tempType;
+      tempType.theLetter=theFormat->AmbientWeylLetter;
+      tempType.lengthFirstCoRootSquared=theFormat->AmbientWeylLengthFirstCoRoot;
+      Rational theRatioSquared=this->GetLongRootLengthSquared()/tempType.GetLongRootLengthSquared();
+      Rational theRatio;
+      if (!theRatioSquared.GetSquareRootIfRational(theRatio))
+      { std::cout << "This is a programming error: wrong ambient dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      out << theLetter << "^{" << theRatio.ToString() << "}";
+    }
     if (this->theRank>=10)
       out << "_{" << this->theRank << "}";
     else
@@ -3890,8 +3959,7 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
   }
 }
 
-Rational DynkinSimpleType::GetDefaultRootLengthSquared
-(int rootIndex)const
+Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
 { if (rootIndex>=this->theRank)
   { std::cout << "This is a programming error: "
     << " attempting to get the squared length of simple root number " << rootIndex+1

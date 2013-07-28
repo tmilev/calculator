@@ -3439,8 +3439,7 @@ bool CommandList::innerPrintSSLieAlgebra
   std::string errorString;
   SemisimpleLieAlgebra *tempSSpointer;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, tempSSpointer, &errorString))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, tempSSpointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
@@ -3574,7 +3573,7 @@ bool CommandList::innerPrintSSLieAlgebra
     out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
     << "(computed as explained on John Stembridge's website). "
     << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
-    << "<br>The grey lines are the edges of the Weyl chamber."
+    << "<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   }
   return output.AssignValue<std::string>(out.str(), theCommands);
@@ -4186,10 +4185,10 @@ bool CommandList::outerPowerRaiseToFirst
     return false;
   if (input[2].IsEqualToOne())
   { std::string tempS;
-    if (input[1].IsOperation(&tempS))
-      if (tempS=="A" || tempS=="B" || tempS=="C" || tempS=="D" || tempS=="E" ||
-          tempS=="F" || tempS=="G")
-        return false;
+//    if (input[1].IsOperation(&tempS))
+//      if (tempS=="A" || tempS=="B" || tempS=="C" || tempS=="D" || tempS=="E" ||
+//          tempS=="F" || tempS=="G")
+//        return false;
     output=input[1];
     return true;
   }

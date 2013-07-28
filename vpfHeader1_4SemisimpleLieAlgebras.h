@@ -461,6 +461,7 @@ public:
   std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
   std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
+  std::string ToStringNilradicalsSummary(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
   std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringDrawWeights(FormatExpressions* theFormat=0)const;
@@ -494,8 +495,10 @@ public:
   void ScaleDynkinType(DynkinType& theType)const;
   std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
-  std::string GetPhysicalFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetDisplayFileName(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetDisplayFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
+  std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
 
   bool operator==(const SemisimpleSubalgebras& other)
   { if (this->owneR==other.owneR)

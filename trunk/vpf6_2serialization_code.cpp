@@ -209,7 +209,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   }
   Expression rankE=input[1];
   Expression typeLetter=input[0];
-  Rational firstCoRootSquaredLength=2;
+  Rational firstCoRootSquaredLength=1;
   if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
   { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
     { theCommands.Comments << "<hr>Couldn't extract first co-root length from "
@@ -267,6 +267,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
     return false;
   }
   outputMon.MakeArbitrary(theWeylLetter, theRank);
+  firstCoRootSquaredLength*=2;
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
   return true;
 }
@@ -436,7 +437,7 @@ bool Serialization::innerSSLieAlgebra
 bool Serialization::innerLoadDynkinType
 (CommandList& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::innerLoadSSLieAlgebra");
+  MacroRegisterFunctionWithName("CommandList::innerLoadDynkinType");
   //std::cout << "<br>Now I'm here!";
   Expression polyE;
   if (!Serialization::innerPolynomial(theCommands, input, polyE))

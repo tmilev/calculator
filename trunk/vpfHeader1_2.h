@@ -796,10 +796,8 @@ class DynkinSimpleType
   { return this->GetRootSystemSize()+this->theRank;
   }
   void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared=0)
-  { if ((inputLetter!= 'A' && inputLetter!='B' &&
-         inputLetter!= 'C' && inputLetter!='D' &&
-         inputLetter!= 'E' && inputLetter!='F' &&
-         inputLetter!= 'G') || inputRank<=0 )
+  { if ((inputLetter!= 'A' && inputLetter!='B' && inputLetter!= 'C' && inputLetter!='D' &&
+         inputLetter!= 'E' && inputLetter!='F' && inputLetter!= 'G') || inputRank<=0 )
     { std::cout << "This is a programming error. Requested to create a simple Dynkin type "
       << "of type " << inputLetter << " and rank " << inputRank << ". This is not allowed: "
       << " I only accept types A, B, C, D, E, F and G and non-negative ranks. "
@@ -839,8 +837,7 @@ class DynkinSimpleType
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int)
-    input.theLetter)*2+input.theRank
-    +SomeRandomPrimes[0]*input.lengthFirstCoRootSquared.HashFunction();
+    input.theLetter)*2+input.theRank +SomeRandomPrimes[0]*input.lengthFirstCoRootSquared.HashFunction();
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -852,6 +849,8 @@ class DynkinSimpleType
   (Matrix<Rational>& output, int AutoIndex)const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
+  Rational GetLongRootLengthSquared()const;
+
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
   bool HasEasySubalgebras()const;
@@ -911,6 +910,7 @@ public:
     out << *this;
     return out.str();
   }
+  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier)const
   { int result;

@@ -3312,6 +3312,7 @@ public:
     //return this->IsNegative();
   }
 
+  bool GetSquareRootIfRational(Rational& output)const;
   Rational GetLCMNumeratorRationalDenominators()
   { Rational result;
     this->GetDenominator(result);
@@ -5070,6 +5071,8 @@ public:
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
   std::string GetChevalleyGletter(int index)const;
+  char AmbientWeylLetter;
+  Rational AmbientWeylLengthFirstCoRoot;
   int ExtraLinesCounterLatex;
   int NumAmpersandsPerNewLineForLaTeX;
   int MaxRecursionDepthPerExpression;

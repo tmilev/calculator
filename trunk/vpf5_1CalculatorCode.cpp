@@ -265,9 +265,9 @@ bool CommandList::innerGCDOrLCM
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
-  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
-  std::cout << "<br>Input lispified: " << input.Lispify();
+//  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
+//  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+//  std::cout << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: "

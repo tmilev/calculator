@@ -905,11 +905,7 @@ public:
   DynkinSimpleType GetGreatestSimpleType()const;
   DynkinSimpleType GetSmallestSimpleType()const;
   Rational GetSizeWeylGroupByFormula()const;
-  std::string ToString(FormatExpressions* theFormat=0)const
-  { std::stringstream out;
-    out << *this;
-    return out.str();
-  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);
   int GetMult(int SimpleTypeIdentifier)const
@@ -1609,8 +1605,7 @@ public:
   List<List<int> > sameTypeComponents;
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
-  std::string ToString
-  (bool IncludeAlgebraNames=false)const;
+  std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType)const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
@@ -1636,8 +1631,6 @@ public:
 (int indexComponent, WeylGroup& theWeyl)
   ;
   int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
-  void Assign(const DynkinDiagramRootSubalgebra& right);
-  inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right); }
   bool operator==(const DynkinDiagramRootSubalgebra& right) const;
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
   Rational GetSizeCorrespondingWeylGroupByFormula();
@@ -1862,10 +1855,6 @@ public:
   void ComputeKModules();
   void ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW);
   void ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
-  inline void operator=(const rootSubalgebra& right)
-  { this->Assign(right);
-  }
-  void Assign(const rootSubalgebra& right);
   void ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW);
   void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();

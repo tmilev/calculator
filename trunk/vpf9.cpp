@@ -3854,7 +3854,6 @@ Rational DynkinSimpleType::GetLongRootLengthSquared()const
   return -1;
 }
 
-
 std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
@@ -3871,13 +3870,15 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     { DynkinSimpleType tempType;
       tempType.theLetter=theFormat->AmbientWeylLetter;
       tempType.lengthFirstCoRootSquared=theFormat->AmbientWeylLengthFirstCoRoot;
-      Rational theRatioSquared=this->GetLongRootLengthSquared()/tempType.GetLongRootLengthSquared();
-      Rational theRatio;
-      if (!theRatioSquared.GetSquareRootIfRational(theRatio))
-      { std::cout << "This is a programming error: wrong ambient dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
-      out << theLetter << "^{" << theRatio.ToString() << "}";
+      out << "[" << this->theLetter << "^{" << this->lengthFirstCoRootSquared << "}_" << this->theRank << "]";
+      Rational theDynkinIndex=(this->lengthFirstCoRootSquared/this->GetDefaultRootLengthSquared(0))*tempType.GetLongRootLengthSquared()/2;
+      //Rational theRatio;
+      //if (!theRatioSquared.GetSquareRootIfRational(theRatio))
+      //{ std::cout << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
+      //  << theRatio.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      //  assert(false);
+      //}
+      out << theLetter << "^{" << theDynkinIndex.ToString() << "}";
     }
     if (this->theRank>=10)
       out << "_{" << this->theRank << "}";
@@ -5649,20 +5650,21 @@ void rootSubalgebra::MakeProgressReportGenAutos
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
 (GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
-{ if (theGlobalVariables==0)
+{ MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
+  if (theGlobalVariables==0)
     return;
   ProgressReport report1(theGlobalVariables), report2(theGlobalVariables),
   report3(theGlobalVariables), report4(theGlobalVariables), report5(theGlobalVariables);
   if (this->flagMakingProgressReport)
   { std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting)
-    { out1 << "Counting ss part " << this->theDynkinDiagram.ToString();
+    { out1 << "Counting ss part " << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     }
     else
-    { out1 << "Computing ss part " << this->theDynkinDiagram.ToString();
+    { out1 << "Computing ss part " << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
       out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
@@ -5685,8 +5687,8 @@ void rootSubalgebra::GenerateKmodMultTable
   int numTotal= this->kModules.size* this->kModules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
-  << this->theDynkinDiagram.ToString()
-  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToString();
+  << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
+  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   ProgressReport theReport(theGlobalVariables);
   theReport.Report(out.str());
   ProgressReport theReport2(theGlobalVariables);

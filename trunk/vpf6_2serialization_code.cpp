@@ -62,7 +62,10 @@ template <>
 bool Serialization::DeSerializeMon
 (CommandList& theCommands, const Expression& input, const Expression& inputContext,
  ChevalleyGenerator& outputMon)
-{ int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
+{ MacroRegisterFunctionWithName("Serialization::DeSerializeMon");
+  std::cout << "here i am again -!. ";
+  std::cout.flush();
+  int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
   { theCommands.Comments << "<hr>Can't load Chevalley generator: "
     << " failed extract ambient algebra index from context " << inputContext.ToString();
@@ -201,15 +204,27 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
 (CommandList& theCommands, const Expression& input, const Expression& inputContext,
  DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon_DynkinSimpleType");
+    //std::cout << "here i am again. ";
+  //std::cout.flush();
+    //std::cout << "here i am again 1.001. ";
+  //std::cout.flush();
+
   if (input.children.size!=2)
-  { theCommands.Comments
+  { //    std::cout << "here i am again 1.002. ";
+  //std::cout.flush();
+
+    theCommands.Comments
     << "<hr>Error while extracting Dynkin simple type: the monomial "
     << input.ToString() << " appears not to be a Dynkin simple type<hr>";
     return false;
   }
+    //std::cout << "here i am again 1.05. ";
+  //std::cout.flush();
   Expression rankE=input[1];
   Expression typeLetter=input[0];
   Rational firstCoRootSquaredLength=1;
+    //std::cout << "here i am again 1.1. ";
+  //std::cout.flush();
   if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
   { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
     { theCommands.Comments << "<hr>Couldn't extract first co-root length from "
@@ -222,8 +237,12 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
       << input.ToString();
       return false;
     }
+    //  std::cout << "here i am again1.2. ";
+  //std::cout.flush();
     typeLetter.AssignMeMyChild(1);
   }
+  //std::cout << "here i am again1.5. ";
+  //std::cout.flush();
   std::string theTypeName;
   if (!typeLetter.IsOperation(&theTypeName))
   { theCommands.Comments << "I couldn't extract a type letter from "
@@ -237,6 +256,8 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
     << input.ToString();
     return false;
   }
+  //std::cout << "here i am again 2. ";
+  //std::cout.flush();
   char theWeylLetter=theTypeName[0];
   if (theWeylLetter=='a') theWeylLetter='A';
   if (theWeylLetter=='b') theWeylLetter='B';
@@ -266,6 +287,8 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
     return false;
   }
+  //std::cout << "here i am again 3. ";
+  //std::cout.flush();
   outputMon.MakeArbitrary(theWeylLetter, theRank);
   firstCoRootSquaredLength*=2;
   outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
@@ -438,18 +461,23 @@ bool Serialization::innerLoadDynkinType
 (CommandList& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerLoadDynkinType");
-  //std::cout << "<br>Now I'm here!";
   Expression polyE;
   if (!Serialization::innerPolynomial(theCommands, input, polyE))
     return false;
   if (polyE.IsError())
     return true;
+//  std::cout << "<br>Got de poly!";
+//  std::cout.flush();
   Polynomial<Rational> theType=polyE.GetValuE<Polynomial<Rational> >();
+//  std::cout << "<br>its " << theType.ToString();
+//  std::cout.flush();
   Expression theContext=polyE.GetContext();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   DynkinSimpleType simpleComponent;
   output.MakeZero();
+//  std::cout << "<br>context is here. theType.size()=" << theType.size();
+//  std::cout.flush();
   for (int i=0; i<theType.size(); i++)
   { const MonomialP& currentMon=theType[i];
     int variableIndex;
@@ -458,8 +486,11 @@ bool Serialization::innerLoadDynkinType
       return false;
     }
     Expression typEE= theContext.ContextGetContextVariable(variableIndex);
+
     if (!Serialization::DeSerializeMon(theCommands, typEE, theContext, simpleComponent))
       return false;
+//        std::cout << "got it!3.5";
+//    std::cout.flush();
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
@@ -469,7 +500,12 @@ bool Serialization::innerLoadDynkinType
       return false;
     }
     output.AddMonomial(simpleComponent, theMultiplicity);
+//    std::cout << "accounting monomial " << i+1 << " " << currentMon.ToString();
+//    std::cout.flush();
   }
+//  std::cout << "got it!";
+//  std::cout.flush();
+
   return true;
 }
 
@@ -478,8 +514,15 @@ bool Serialization::innerLoadSSLieAlgebra
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerLoadSSLieAlgebra");
   DynkinType theDynkinType;
+//  std::cout << "<br>Now I'm here!";
+//  std::cout.flush();
   if(!Serialization::innerLoadDynkinType(theCommands, input, theDynkinType))
+  { //  std::cout << "got to error";
+  //std::cout.flush();
     return output.SetError("Failed to extract Dynkin type.", theCommands);
+  }
+//  std::cout << "got to making the type, " << theDynkinType.ToString();
+//  std::cout.flush();
   if (theDynkinType.GetRank()>20)
   { std::stringstream out;
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
@@ -494,6 +537,9 @@ bool Serialization::innerLoadSSLieAlgebra
   SemisimpleLieAlgebra tempSSalgebra;
   tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
+  //std::cout << "processing " << theDynkinType.ToString();
+  //std::cout.flush();
+
   bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);
   if (feelsLikeTheVeryFirstTime)
   { indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
@@ -504,7 +550,9 @@ bool Serialization::innerLoadSSLieAlgebra
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
-  { theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+  { //std::cout << theSSalgebra.theWeyl.theDynkinType.ToString();
+    //assert(false);
+    theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
     theCommands.Comments << tempE.GetValuE<std::string>();
@@ -872,8 +920,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagComputePairingTable=true;
-  theSAs.flagComputeNilradicals=true;
+  theSAs.flagComputePairingTable=false;
+  theSAs.flagComputeNilradicals=false;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
@@ -1093,8 +1141,8 @@ bool Serialization::innerPolynomial
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomial");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-//  std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-//  std::cout << "<br>First elt input is:" << input[0].ToString();
+  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
+  //std::cout << "<br>First elt input is:" << input[0].ToString();
   return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
   (theCommands, input, output);
 }

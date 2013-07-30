@@ -3354,7 +3354,7 @@ bool CommandList::innerGetChevGen
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
-    output.SetError(errorString, theCommands);
+    return output.SetError(errorString, theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -3378,12 +3378,20 @@ bool CommandList::innerGetCartanGen
 { //std::cout << "<br>Here I am with input: " << input.ToString();
   if (!input.IsListNElements(3))
     return false;
-  SemisimpleLieAlgebra* theSSalg;
+  SemisimpleLieAlgebra* theSSalg=0;
   std::string errorString;
+//  std::cout << "<br>before calling inner ss: " << input.ToString();
+//  std::cout.flush();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
-    output.SetError(errorString, theCommands);
-  //std::cout << "<br>Here I am at next phase: " << input.ToString();
+    return output.SetError(errorString, theCommands);
+  if (theSSalg==0)
+  { std::cout << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a "
+    << "semisimple Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+//  std::cout << "<br>Here I am at next phase: " << input.ToString() << ", ss alg: " << theSSalg->ToString();
+//  std::cout.flush();
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -3394,6 +3402,8 @@ bool CommandList::innerGetCartanGen
   theIndex--;
   theH.MakeEi(theSSalg->GetRank(), theIndex);
   theElt.MakeHgenerator(theH, *theSSalg);
+//  std::cout << "<br>good before ue! " << input.ToString();
+//  std::cout.flush();
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
@@ -4280,7 +4290,8 @@ bool CommandList::outerStandardFunction
     return false;
   const Expression& functionNameNode =input[0];
   int theIndex;
-//  std::cout << "<br>Simplifying " << input.ToString();
+//  std::cout << "<br>Simplifying with standard fn " << input.ToString();
+//  std::cout.flush();
   if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
     if (input.children.size==2)
       if (input[1].IsSmallInteger(&theIndex))
@@ -4291,6 +4302,7 @@ bool CommandList::outerStandardFunction
   if (!functionNameNode.IsAtoM())
     return false;
 //  std::cout << "<br>Evaluating: " << input.ToString();
+//  std::cout.flush();
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
@@ -4629,10 +4641,18 @@ bool CommandList::EvaluateExpression
   Expression tempE;
   tempE.reset(*this);
   std::string beforePatternMatch;
+  //std::cout << "<br>";
+  //for (int i=0; i<this->RecursionDeptH; i++)
+    //std::cout << "&nbsp;";
+  //std::cout << "Evaluating " << input.ToString();
+  //std::cout.flush();
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
     counterNumTransformations++;
+    //std::cout << " transforming " << output.ToString();
+    //std::cout.flush();
+
     //if (this->flagLogEvaluation && counterNumTransformations>1 )
     //{ this->Comments << "<br>input: " << input.ToString() << "->"
     //  << output.ToString();
@@ -4697,11 +4717,12 @@ bool CommandList::EvaluateExpression
     if (this->flagAbortComputationASAP)
       break;
     //->/////-------Default operation handling-------
+      //std::cout << "<br>got to standard functions";
+    //std::cout.flush();
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << output.ToString()
-        << "  ->  " << tempE.ToString();
+        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString();
       output=tempE;
       continue;
     }
@@ -4710,20 +4731,23 @@ bool CommandList::EvaluateExpression
       //break;
 /////-------Evaluating children end-------
 /////-------User-defined pattern matching------
+      //std::cout << "<br>got to custom rules";
+    //std::cout.flush();
     for (int i=0; i<this->RuleStack.size && !this->flagAbortComputationASAP; i++)
     { Expression& currentPattern=this->RuleStack[i];
       this->TotalNumPatternMatchedPerformed++;
       bufferPairs.reset();
-//      std::cout << "<br>Checking whether "
-//      << output.ToString() << " matches " << currentPattern.ToString();
+      //std::cout << "<br>Checking whether "
+      //<< output.ToString() << " matches " << currentPattern.ToString();
+    //std::cout.flush();
+
       if (this->flagLogEvaluatioN)
         beforePatternMatch=output.ToString();
       if(this->ProcessOneExpressionOnePatternOneSub
          (currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch
-          << "  ->  " << output.ToString();
+          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch << "  ->  " << output.ToString();
         break;
       }
     }

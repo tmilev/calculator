@@ -5,6 +5,12 @@
 ProjectInformationInstance ProjectInfoVpf9_4cpp
 (__FILE__, "Implementation of semisimple subalgebra routines. ");
 
+template<>
+typename List<DynkinSimpleType>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<DynkinSimpleType>()
+{ return 0;
+}
+
 template<class coefficient>
 void SemisimpleLieAlgebra::GenerateLieSubalgebra
 (List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators)
@@ -175,6 +181,12 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_"
   << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
+}
+
+std::string DynkinType::ToString(FormatExpressions* theFormat)const
+{ //std::cout << "d.t. tostring called";
+
+  return this->::MonomialCollection<DynkinSimpleType, Rational>::ToString(theFormat);
 }
 
 std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat)const
@@ -2372,8 +2384,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   List<DynkinSimpleType> theTypes;
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   if (theTypes.size!=0)
-    if (theType.theRank==theTypes.LastObject()->theRank &&
-        theType.theLetter==theTypes.LastObject()->theLetter)
+    if (theType.theRank==theTypes.LastObject()->theRank && theType.theLetter==theTypes.LastObject()->theLetter)
       baseLength=theTypes.LastObject()->lengthFirstCoRootSquared;
   //if (this->GetSSowner().GetRank()-(+)
   std::stringstream consideringStream;
@@ -2492,14 +2503,15 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[i]];
-      out << "<td align=\"center\">Decomp. " << theSA.theDynkinDiagram.ToString() << "</td>";
+      out << "<td align=\"center\">Decomp. "
+      << theSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</td>";
     }
     out << "</tr>\n";
   }
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[k]];
-    tempS=theSA.theDynkinDiagram.ToString();
+    tempS=theSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     if (useHtml)
       out << "<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA[k].size; i++)
@@ -2588,8 +2600,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   if (useHtml)
     out << "<br>";
   if (this->IndicesContainingRootSAs.size>1)
-  { out << "Number of containing regular semisimple subalgebras: "
-    << this->IndicesContainingRootSAs.size;
+  { out << "Number of containing regular semisimple subalgebras: " << this->IndicesContainingRootSAs.size;
     if (useHtml)
       out << "<br>";
   }
@@ -2604,7 +2615,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
     if (useHtml)
     { out << "<a href=\"" << htmlPathServer << "../rootHtml_rootSA"
       << this->IndicesContainingRootSAs[i] << ".html\">";
-      tempS=currentSA.theDynkinDiagram.ToString();
+      tempS=currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     }
     out << tempS;
     if (useHtml)
@@ -2730,11 +2741,10 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
   for (int i=0; i<output.theRootSAs.size-1; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra "
-    << output.theRootSAs[i].theDynkinDiagram.ToString() << "(" << (i+1)
+    << output.theRootSAs[i].theDynkinDiagram.ToStringRelativeToAmbientType(inputOwner.theWeyl.theDynkinType[0]) << "(" << (i+1)
     << " out of " << output.theRootSAs.size-1 << " non-trivial)\n";
     theReport.Report(tempStream.str());
-    output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
-    (output, i, theGlobalVariables);
+    output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }
   for (int i=0; i<output.size; i++)
   { slTwoSubalgebra& theSl2= output.GetElement(i);
@@ -3240,7 +3250,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "<a href=\""
       << displayPath
       << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
-      << ".html\">" << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
+      << ".html\">" << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
@@ -3249,7 +3259,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "<a href=\""
       <<  displayPath
       << "rootHtml_rootSA" << theSl2.IndicesContainingRootSAs[j] << ".html\">"
-      << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
+      << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td></tr>\n";
@@ -3325,16 +3335,16 @@ void SltwoSubalgebras::ElementToHtml
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
-    << this->theRootSAs[0].theDynkinDiagram.ToString() << "</title>";
+    << this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</title>";
     theFile << "<script src=\"" << PathDisplayServerBaseFolder
     << "jsmath/easy/load.js\"></script> ";
     theFile << "<meta name=\"keywords\" content=\""
-    <<  this->theRootSAs[0].theDynkinDiagram.ToString()
+    <<  this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0])
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"
     << " nilpotent orbits of "
-    <<  this->theRootSAs[0].theDynkinDiagram.ToString()
+    <<  this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0])
     << ", sl(2)-triples of "
-    << this->theRootSAs[0].theDynkinDiagram.ToString()
+    << this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0])
     << " \">";
     theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
     << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n"
@@ -3385,7 +3395,7 @@ void rootSubalgebra::ToString
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter(latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  tempS=this->theDynkinDiagram.ToString();
+  tempS=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
@@ -3395,8 +3405,7 @@ void rootSubalgebra::ToString
   { out << " &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
-        out << "<a href=\"./rootHtml_rootSA"
-        << this->indicesSubalgebrasContainingK[i] << ".html\">";
+        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK[i] << ".html\">";
       out << tempS;
       if (useHtml)
         out << "</a>, ";
@@ -3416,7 +3425,7 @@ void rootSubalgebra::ToString
   tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  tempS= this->theCentralizerDiagram.ToString();
+  tempS= this->theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   if(!useLatex)
     CGI::clearDollarSigns(tempS, tempS);
   if (useLatex)
@@ -4416,10 +4425,13 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   //this->ScaleDynkinType(typeScaled);
   if (makeLink)
     out << "<a href=\"" << this->GetDisplayFileNameSubalgebra(ActualIndexSubalgebra, theFormat) << "\">"
-    << CGI::GetHtmlMathSpanPure(this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToString())
+    << CGI::GetHtmlMathSpanPure
+    (this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType
+    (this->GetSSowner().theWeyl.theDynkinType[0]))
     << "</a> ";
   else
-    out << this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToString() << "";
+    out << this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType
+    (this->GetSSowner().theWeyl.theDynkinType[0]) << "";
   return out.str();
 }
 
@@ -4437,7 +4449,7 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   { if (useLaTeX && useHtml)
       out << CGI::GetHtmlMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
     else
-      out << theSimpleTypes[i].ToString() << ":";
+      out << theSimpleTypes[i].ToString(&tempFormat) << ":";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString() << ": "
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);

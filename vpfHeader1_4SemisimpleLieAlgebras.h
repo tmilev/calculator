@@ -511,7 +511,7 @@ public:
     return *this->owneR==*other.owneR;
   }
 
-  SemisimpleLieAlgebra& GetSSowner()
+  SemisimpleLieAlgebra& GetSSowner()const
   { if (this->owneR==0)
     { std::cout << "This is a programming error: attempted to access non-initialized "
       << " semisimple Lie subalgerbas. "

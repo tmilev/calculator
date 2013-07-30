@@ -602,13 +602,13 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";
-    tempS=current.theDynkinDiagram.ToString();
+    tempS=current.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     out << tempS;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    tempS=current.theCentralizerDiagram.ToString();
+    tempS=current.theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     out << tempS;
     if (useHtml)
       out << "</td><td>";
@@ -1063,7 +1063,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       else
         out << "\\hline\\begin{tabular}{r}";
       out << "$\\Delta(\\mathfrak{k})$ is of type "
-      << currentRootSA.theDynkinDiagram.ToString() << "; ";
+      << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "; ";
       if (!includeMatrixForm)
         out << "\\\\";
       currentRootSA.GetAmbientWeyl().GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2);

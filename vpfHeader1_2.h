@@ -1416,7 +1416,9 @@ template <class coefficient>
   template <class coefficient>
   bool IsDominantWeight(const Vector<coefficient>& theWeight)
 ;
-  void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens);
+  static void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
+  static void TransformToSimpleBasisGeneratorsArbitraryCoords
+  (Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   bool operator==(const WeylGroup& other)const;
   void operator+=(const WeylGroup& other);
@@ -1617,20 +1619,28 @@ public:
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
   //simple as required!
   inline void ComputeDiagramTypeModifyInput(Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
-  { theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
-    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl);
+  { MacroRegisterFunctionWithName("ComputeDiagramTypeModifyInput");
+    theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput, theWeyl.RootSystem);
+    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl.CartanSymmetric);
   }
   //the below function is just as the above but doesn't modify simpleBasisInput
   void ComputeDiagramTypeKeepInput
-  (const Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
+  (const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
   ;
+  void ComputeDiagramTypeModifyInputRelative
+  (Vectors<Rational>& inputOutputSimpleWeightSystem, const HashedList<Vector<Rational> >& weightSystem,
+   const Matrix<Rational>& theBilinearForm)
+{ MacroRegisterFunctionWithName("ComputeDiagramTypeModifyInputRelative");
+  WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
+  this->ComputeDiagramTypeKeepInput(inputOutputSimpleWeightSystem, theBilinearForm);
+}
   void ComputeDynkinStrings
-  (WeylGroup& theWeyl)
+  (const Matrix<Rational>& theBilinearForm)
   ;
   void ComputeDynkinString
-(int indexComponent, WeylGroup& theWeyl)
+(int indexComponent, const Matrix<Rational>& theBilinearForm)
   ;
-  int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
+  int numberOfThreeValencyNodes(int indexComponent, const Matrix<Rational>& theBilinearForm);
   bool operator==(const DynkinDiagramRootSubalgebra& right) const;
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
   Rational GetSizeCorrespondingWeylGroupByFormula();

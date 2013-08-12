@@ -990,8 +990,9 @@ void DynkinDiagramRootSubalgebra::Sort()
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
-(const Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
-{ this->SimpleBasesConnectedComponents.size=0;
+(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput");
+  this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
 //  std::string tempS= simpleBasisInput.ToString();
   //if (tempS=="Num vectors: 2\n(1, 0, 0), (0, 1, 1)")
@@ -999,13 +1000,11 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
   for (int i=0; i<simpleBasisInput.size; i++)
   { int indexFirstComponentConnectedToRoot=-1;
     for (int j=0; j<this->SimpleBasesConnectedComponents.size; j++)
-      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo
-          (simpleBasisInput[i], theWeyl.CartanSymmetric))
+      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo(simpleBasisInput[i], theBilinearForm))
       { if (indexFirstComponentConnectedToRoot==-1)
         { indexFirstComponentConnectedToRoot=j;
           this->SimpleBasesConnectedComponents[j].AddOnTop(simpleBasisInput[i]);
-        }
-        else
+        } else
         { this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].AddListOnTop(this->SimpleBasesConnectedComponents[j]);
           this->SimpleBasesConnectedComponents.RemoveIndexSwapWithLast(j);
           j--;
@@ -1017,9 +1016,9 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
       this->SimpleBasesConnectedComponents.LastObject()->AddOnTop(simpleBasisInput[i]);
     }
   }
-  this->ComputeDynkinStrings(theWeyl);
+  this->ComputeDynkinStrings(theBilinearForm);
   this->Sort();
-  this->ComputeDynkinStrings(theWeyl);
+  this->ComputeDynkinStrings(theBilinearForm);
 }
 
 bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2)
@@ -1066,21 +1065,21 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(Vectors<Rational>& domai
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinStrings
-  (WeylGroup& theWeyl)
-{ this->indicesThreeNodes.SetSize(this->SimpleBasesConnectedComponents.size);
+  (const Matrix<Rational>& theBilinearForm)
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinStrings");
+  this->indicesThreeNodes.SetSize(this->SimpleBasesConnectedComponents.size);
   this->SimpleComponentTypes.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indicesEnds.SetSize(this->SimpleBasesConnectedComponents.size);
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    this->ComputeDynkinString(i, theWeyl);
+    this->ComputeDynkinString(i, theBilinearForm);
 }
 
 bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& right) const
 { if (right.SimpleBasesConnectedComponents.size!= this->SimpleBasesConnectedComponents.size)
     return false;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-  { bool tempBool=((this->SimpleBasesConnectedComponents[i].size ==
-                    right.SimpleBasesConnectedComponents[i].size) &&
-                   (this->SimpleComponentTypes[i]==right.SimpleComponentTypes[i]));
+  { bool tempBool=
+    ((this->SimpleBasesConnectedComponents[i].size ==right.SimpleBasesConnectedComponents[i].size) && (this->SimpleComponentTypes[i]==right.SimpleComponentTypes[i]));
     if (!tempBool)
       return false;
   }
@@ -1166,27 +1165,29 @@ int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram()
   return result;
 }
 
-int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl)
-{ Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
+int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, const Matrix<Rational>& theBilinearForm)
+{ Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
   int numEnds=0; int result=0;
-  this->indicesThreeNodes.TheObjects[indexComponent] =-1;
-  this->indicesEnds.TheObjects[indexComponent].size=0;
+  this->indicesThreeNodes[indexComponent] =-1;
+  this->indicesEnds[indexComponent].size=0;
   for (int i=0; i<currentComponent.size; i++)
   { int counter=0;
     for (int j=0; j<currentComponent.size; j++)
-    { Rational tempRat;
-      theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[i], currentComponent.TheObjects[j], tempRat);
-      if (tempRat.IsNegative())
+      if (currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsNegative())
         counter++;
+    if (counter>3)
+    { std::cout << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: "
+      << "the Dynkin diagram should have nodes with valency at most 3, but this diagram has node with valency " << counter << ". "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
-    assert(counter<=3);
     if (counter==3)
     { result++;
-      this->indicesThreeNodes.TheObjects[indexComponent]=i;
+      this->indicesThreeNodes[indexComponent]=i;
     }
     if (counter<=1)
     { numEnds++;
-      this->indicesEnds.TheObjects[indexComponent].AddOnTop(i);
+      this->indicesEnds[indexComponent].AddOnTop(i);
     }
   }
   assert(result<=1);

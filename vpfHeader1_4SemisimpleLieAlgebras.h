@@ -211,8 +211,11 @@ class NilradicalCandidate
   bool flagNilradicalConesIntersect;
   bool flagNilradicalConesStronglyIntersect;
   bool flagComputedRelativelyStrongIntersections;
+  bool flagStrongCentralizerConditionHolds;
+  bool flagRestrictionParabolicIsTypeAandC;
 
   bool flagLinfiniteRelFound;
+  DynkinDiagramRootSubalgebra theLeviDiagramAmbienT, theLeviDiagramSmalL;
   //0->not selected; 1->selected; 2->undecided.
   List<int> theNilradicalSelection;
   Vector<Rational> ConeIntersection;
@@ -237,7 +240,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate():owner(0),flagLinfiniteRelFound(false) {}
+  NilradicalCandidate():owner(0),flagStrongCentralizerConditionHolds(false), flagRestrictionParabolicIsTypeAandC(false), flagLinfiniteRelFound(false){}
   void reset();
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex);
@@ -249,6 +252,7 @@ class NilradicalCandidate
    List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
   ;
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
+  bool StrongCentralizerConditionHoldsProvidedConeConditionHolds(GlobalVariables* theGlobalVariables);
 //  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
   bool IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
@@ -264,6 +268,9 @@ class CandidateSSSubalgebra
 public:
   WeylGroup theWeylNonEmbeddeD;
   WeylGroup theWeylNonEmbeddeDdefaultScale;
+  DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
+  DynkinType theCentralizerType;
+
   List<Vectors<Rational> > CartanSAsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
@@ -324,9 +331,11 @@ public:
   List<Vectors<Rational> > WeightsModulesPrimal;
   List<charSSAlgMod<Rational> > CharsPrimalModules;
   List<charSSAlgMod<Rational> > CharsPrimalModulesMerged;
+  HashedList<Vector<Rational> > CentralizerRootSystemPrimalCoords;
 
   List<List<List<int> > > NilradicalPairingTable;
-  List<int> candidateSubalgebraModules;
+  List<int> subalgebraModules;
+  List<int> centralizerSubalgebraModules;
   List<int> primalSubalgebraModules;
   List<List<int> > OppositeModulesByStructure;
   List<List<int> > OppositeModulesByChar;
@@ -534,6 +543,7 @@ public:
   }
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
+  std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
 
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)

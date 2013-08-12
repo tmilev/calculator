@@ -39,7 +39,7 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
     this->simpleGenerators=(*inputGenerators);
   if (inputExternalAutos!=0)
     this->ExternalAutomorphisms=*inputExternalAutos;
-  this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
+  this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl.RootSystem);
   this->ComputeRootSubsystem();
   ElementWeylGroup tempEW;
   tempEW.size=0;

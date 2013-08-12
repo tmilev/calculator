@@ -3870,15 +3870,24 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     { DynkinSimpleType tempType;
       tempType.theLetter=theFormat->AmbientWeylLetter;
       tempType.lengthFirstCoRootSquared=theFormat->AmbientWeylLengthFirstCoRoot;
-      out << "[" << this->theLetter << "^{" << this->lengthFirstCoRootSquared << "}_" << this->theRank << "]";
-      Rational theDynkinIndex=(this->lengthFirstCoRootSquared/this->GetDefaultRootLengthSquared(0))*tempType.GetLongRootLengthSquared()/2;
+//      out << "[" << this->theLetter << "^{" << this->lengthFirstCoRootSquared << "}_" << this->theRank << "]";
+      Rational theDynkinIndex=this->lengthFirstCoRootSquared*tempType.GetRatioLongRootToFirst()/tempType.GetLongRootLengthSquared();
+      if (tempType.theLetter=='C')
+        if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
+          theDynkinIndex*=2;
+      if (tempType.theLetter=='G')
+        if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
+          theDynkinIndex*=3;
+
       //Rational theRatio;
       //if (!theRatioSquared.GetSquareRootIfRational(theRatio))
       //{ std::cout << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
       //  << theRatio.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       //  assert(false);
       //}
-      out << theLetter << "^{" << theDynkinIndex.ToString() << "}";
+      out << theLetter;
+      if (theDynkinIndex!=1)
+        out << "^{" << theDynkinIndex.ToString() << "}";
     }
     if (this->theRank>=10)
       out << "_{" << this->theRank << "}";
@@ -3888,10 +3897,10 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
   if (includeNonTechnicalNames)
     if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')
       switch (this->theLetter)
-      { case 'A':  out << "(sl(" << this->theRank+1 << "))"; break;
+      { case 'A':  out << "(sl(" <<   this->theRank+1  << "))"; break;
         case 'B':  out << "(so(" << 2*this->theRank+1 << "))"; break;
-        case 'C':  out << "(sp(" << 2*this->theRank << "))"; break;
-        case 'D':  out << "(so(" << 2*this->theRank << "))"; break;
+        case 'C':  out << "(sp(" << 2*this->theRank   << "))"; break;
+        case 'D':  out << "(so(" << 2*this->theRank   << "))"; break;
         default : break;
       }
   return out.str();
@@ -5290,7 +5299,7 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
   this->theKComponentRanks.size=0;
   this->theKEnumerations.size=0;
   this->SimpleBasisK=(this->genK);
-  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisK);
+  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisK, this->GetAmbientWeyl().RootSystem);
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
@@ -5321,14 +5330,14 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisCentralizerRoots);
+  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl().RootSystem);
 }
 
 void rootSubalgebra::init(SemisimpleLieAlgebra& inputOwner)
 { this->owneR=&inputOwner;
 }
 
-void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
+void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
 { for (int i=0; i<theGens.size; i++)
     if (!theGens[i].IsPositiveOrZero())
       theGens[i].Minus();
@@ -5344,7 +5353,7 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
         { theGens.RemoveIndexSwapWithLast(j);
           reductionOccured=true;
         }
-        if (this->RootSystem.Contains(tempRoot))
+        if (inputRootSystem.Contains(tempRoot))
         { if (!tempRoot.IsPositiveOrZero())
           { tempRoot.Minus();
             theGens[j]=(tempRoot);
@@ -5357,8 +5366,73 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
   }
 }
 
-void WeylGroup::TransformToSimpleBasisGeneratorsWRTh
-(Vectors<Rational>& theGens, const Vector<Rational>& theH)
+template <class coefficient>
+void Vector<coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors)
+{ MacroRegisterFunctionWithName("Vector::PerturbNoZeroScalarProductWithMe");
+  coefficient theScalarProdInverted;
+  for (int i=0; i<inputVectors.size; i++)
+    if (this->ScalarEuclidean(inputVectors[i])==0)
+    { coefficient theScale=1;
+      for (int j=0; j<i; j++)
+        if (inputVectors[i].ScalarEuclidean(inputVectors[j])!=0)
+        { theScalarProdInverted=(this->ScalarEuclidean(inputVectors[j])/inputVectors[i].ScalarEuclidean(inputVectors[j]))/2;
+          if (theScalarProdInverted<0)
+            theScalarProdInverted*=-1;
+          if (theScale==0)
+            theScale=theScalarProdInverted;
+          else if (theScalarProdInverted!=0)
+            theScale=MathRoutines::Minimum(theScale, theScalarProdInverted);
+        }
+      *this+=inputVectors[i]*theScale;
+    }
+  for (int i=0; i<inputVectors.size; i++)
+    if (this->ScalarEuclidean(inputVectors[i])==0)
+    { std::cout << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
+      << this->ToString() << " is orthogonal to "
+      << "input vector " << inputVectors[i].ToString() << ". The full list of vectors is "
+      << inputVectors.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+}
+
+void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords
+(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
+{ if (theGens.size==0)
+    return;
+  MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
+  std::cout << "<hr>Transforming to simple " << theGens.ToString() << " with root system " << inputRootSystem.ToString();
+  Vector<Rational> theH;
+  theH.MakeZero(theGens[0].size);
+  theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
+  for (int i=0; i<theGens.size; i++)
+    if (theGens[i].ScalarEuclidean(theH)<0)
+      theGens[i].Minus();
+  bool reductionOccured=true;
+  Vector<Rational> tempRoot;
+  while (reductionOccured)
+  { reductionOccured= false;
+    for (int i=0; i<theGens.size; i++)
+      for (int j=i+1; j<theGens.size; j++)
+      { tempRoot=(theGens[i]);
+        tempRoot-=(theGens[j]);
+        if (tempRoot.IsEqualToZero())
+        { theGens.RemoveIndexSwapWithLast(j);
+          reductionOccured=true;
+        }
+        if (inputRootSystem.Contains(tempRoot))
+        { if (tempRoot.ScalarEuclidean(theH)<0)
+          { tempRoot.Minus();
+            theGens[j]=(tempRoot);
+          } else
+            theGens[i]=(tempRoot);
+          reductionOccured=true;
+        }
+      }
+  }
+  std::cout << ". Final basis: " << theGens.ToString();
+}
+
+void WeylGroup::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH)
 { for (int i=0; i<theGens.size; i++)
     if (!this->IsPositiveOrPerpWRTh(theGens[i], theH))
       theGens[i].Minus();

@@ -179,7 +179,11 @@ bool Vectors<coefficient>::ConesIntersect
   Matrix<Rational>& matb=
   theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
   if (StrictCone.size==0)
+  { if (outputSplittingNormal!=0)
+      if (NonStrictCone.size>0)
+        outputSplittingNormal->MakeZero(NonStrictCone[0].size);
     return false;
+  }
   int theDimension= StrictCone[0].size;
   int numCols= StrictCone.size + NonStrictCone.size;
   matA.init((int)theDimension+1, (int)numCols);
@@ -540,6 +544,18 @@ bool CommandList::innerPrintSSsubalgebras
     theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
     theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
+    std::fstream theFile;
+    theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
+    if(!CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
+    { std::cout << "<br>This may or may not be a programming error. "
+      << " I requested to create file "
+      << theTitlePageFileName << " for output. However, the file failed to create. "
+      << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
+      << " folder in which the file is located. "
+      << "3. The folder does not exist for some reason lying outside of the calculator. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -547,9 +563,6 @@ bool CommandList::innerPrintSSsubalgebras
     theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
     Rational::TotalLargeMultiplications;
 
-    std::fstream theFile;
-    theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
-    CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false);
     theFormat.flagUseHTML=true;
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;

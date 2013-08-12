@@ -196,12 +196,74 @@ std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& am
   return this->ToString(&tempFormat);
 }
 
-std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat)const
 { std::stringstream out;
   out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
+  for (int i=0; i<this->theSubalgebraCandidates.size; i++)
+  { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
+    numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
+    numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
+  }
+  out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
+  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
+  (this->owneR->theWeyl.theDynkinType[0], theFormat)
+  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
+  (this->owneR->theWeyl.theDynkinType[0], theFormat) << "}. ";
+  out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads << ", of them "
+  << numFailingConeCondition << " fail the cone condition.";
+  if (numNoLinfRelFound==0)
+    out << "<br>In all " << numFailingConeCondition << " cases, an $\\mathfrak{l}$-infinite relation was found. ";
+  else
+    out << "<br>In " << numNoLinfRelFound << " cases, no L-infinite relation was found. <br>";
+  out << "}\\\\\n<br>\n";
+  out << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over $\\mathfrak s$ "
+  << "&Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
+  << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
+  DynkinType typeCentralizer;
+  FormatExpressions tempCharFormat;
+  for (int i=0; i<this->theSubalgebraCandidates.size; i++)
+  { const CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];
+    if (currentSA.flagSystemProvedToHaveNoSolution)
+      continue;
+    out << "$"
+    << currentSA.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0], theFormat) << "$";
+    if (!currentSA.flagCentralizerIsWellChosen)
+      continue;
+    typeCentralizer.MakeZero();
+    if (currentSA.indexMaxSSContainer!=-1)
+      typeCentralizer=
+      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType
+      - currentSA.theWeylNonEmbeddeD.theDynkinType;
+    out << "& $ ";
+    if(!typeCentralizer.IsEqualToZero())
+    { out << typeCentralizer.ToString();
+      if (currentSA.centralizerRank!=typeCentralizer.GetRank())
+        out << "\\oplus";
+    }
+    if (currentSA.centralizerRank!=typeCentralizer.GetRank())
+      out << "\\mathfrak h_{" << (currentSA.centralizerRank-typeCentralizer.GetRank()).ToString() << "}";
+    out << "$";
+    if (!currentSA.charFormaT.IsZeroPointer())
+      tempCharFormat=currentSA.charFormaT.GetElementConst();
+    out << "&$" << currentSA.theCharNonPrimalFundCoords.ToString(&tempCharFormat) << "$ ";
+    out << "&$" << currentSA.thePrimalChaR.ToString(&tempCharFormat) << "$ ";
+    out << "& " << currentSA.FKNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
+    out << "\\\\ \\hline \n<br>\n";
+  }
+  out << "\\end{longtable}\n<br>\n";
+  out << "\\end{document}";
+  return out.str();
+}
+
+std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  int numIsotypicallyCompleteNilrads=0;
+  int numFailingConeCondition=0;
+  int numNoLinfRelFound=0;
+  int numNonStrongCentralizer;
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
@@ -1206,7 +1268,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition
     for (int j=0; j<this->Modules[i].size; j++)
       this->ModulesIsotypicallyMerged[i].AddListOnTop(this->Modules[i][j]);
   }
-  this->candidateSubalgebraModules.SetSize(0);
+  this->subalgebraModules.SetSize(0);
   //please note: part of primalSubalgebraModules have already been computed.
   //std::cout << "<hr>Testing sa: " << this->ToStringTypeAndHs() << "<br>";
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
@@ -1222,6 +1284,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition
           assert(false);
         }
       this->primalSubalgebraModules.AddOnTop(i);
+
     }// else
     //std::cout << "... aint no cartan no centralizer. ";
   //}
@@ -1268,6 +1331,23 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition
           }
       }
     }
+  this->centralizerSubalgebraModules.SetSize(0);
+  this->CentralizerRootSystemPrimalCoords.Clear();
+//  std::cout << "<hr>Computing CentralizerRootSystemPrimalCoords type " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
+  for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
+    if (this->ModulesIsotypicallyMerged[i].size==1 || this->WeightsModulesPrimal[i][0].IsEqualToZero())
+    { this->centralizerSubalgebraModules.AddOnTop(i);
+      if (!this->WeightsModulesPrimal[i][0].IsEqualToZero())
+        this->CentralizerRootSystemPrimalCoords.AddOnTop(this->WeightsModulesPrimal[i][0]);
+    }
+  Vectors<Rational> simpleSubSystem;
+  simpleSubSystem=this->CentralizerRootSystemPrimalCoords;
+  this->theCentralizerSubDiagram.ComputeDiagramTypeModifyInputRelative
+  (simpleSubSystem, this->CentralizerRootSystemPrimalCoords, this->BilinearFormFundPrimal);
+  this->theCentralizerType.MakeZero();
+  for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
+    this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
+
   this->ComputeCharsPrimalModules();
 }
 
@@ -1550,6 +1630,43 @@ Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
   return theNilradLinCombi;
 }
 
+bool NilradicalCandidate::StrongCentralizerConditionHoldsProvidedConeConditionHolds(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("NilradicalCandidate::StrongCentralizerConditionHoldsProvidedConeConditionHolds");
+  Vectors<Rational> leviRootsAmbient, leviRootsSmall;
+  Vector<Rational> projectionRoot;
+  WeylGroup& theWeyl=this->owner->owner->owneR->theWeyl;
+  leviRootsAmbient.ReservE(theWeyl.RootSystem.size);
+  leviRootsSmall.ReservE(theWeyl.RootSystem.size);
+  std::cout << "<hr>this->ConeSeparatingNormal: " << this->ConeSeparatingNormal.ToString();
+  if (this->ConeSeparatingNormal.size==0)
+  { std::cout << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
+    << "<br>nilrad:  " << this->theNilradicalWeights.ToString() << "<br>" << "non nilrad: "
+    << this->theNonFKhws.ToString();
+    std::cout << "<br>" << this->ToString();
+  }
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { this->owner->GetPrimalWeightProjectionFundCoords(theWeyl.RootSystem[i], projectionRoot);
+    if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal)==0)
+    { leviRootsAmbient.AddOnTop(theWeyl.RootSystem[i]);
+      if (this->owner->CentralizerRootSystemPrimalCoords.Contains(projectionRoot))
+        leviRootsSmall.AddOnTop(projectionRoot);
+    }
+  }
+  this->theLeviDiagramAmbienT.ComputeDiagramTypeModifyInput(leviRootsAmbient, theWeyl);
+  std::cout << "<br>levi roots small: " << leviRootsSmall.ToString();
+  this->theLeviDiagramSmalL.ComputeDiagramTypeModifyInputRelative
+  (leviRootsSmall, this->owner->CentralizerRootSystemPrimalCoords, this->owner->BilinearFormFundPrimal);
+
+  for (int i=0; i<this->theLeviDiagramAmbienT.SimpleComponentTypes.size; i++)
+  { DynkinSimpleType& currentType=this->theLeviDiagramAmbienT.SimpleComponentTypes[i];
+    if (currentType.theLetter=='D' || currentType.theLetter=='G' || currentType.theLetter=='E' || currentType.theLetter=='E')
+      return false;
+    if (currentType.theLetter=='B' && currentType.theRank>2)
+      return false;
+  }
+  return true;
+}
+
 bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("NilradicalCandidate::TryFindingLInfiniteRels");
   //Vector<Rational> theNilradLinCombi=this->GetNilradicalLinearCombi();
@@ -1748,15 +1865,42 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   //std::cout << out.str();
 }
 
+template<class Coefficient>
+bool Vectors<Coefficient>::PerturbSplittingNormal
+(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone, Vector<Rational>& splittingNormalToBePerturbed
+ )
+{ MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
+  for (int i=0; i<StrictCone.size; i++)
+    if (splittingNormalToBePerturbed.ScalarEuclidean(StrictCone[i]).IsNonPositive())
+    { std::cout << "This is a programming error: the splitting normal " << splittingNormalToBePerturbed.ToString()
+      << " is supposed to have positive scalar product with the vector " << StrictCone[i].ToString() << ", but it doesn't."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  for (int i=0; i<NonStrictCone.size; i++)
+    if (splittingNormalToBePerturbed.ScalarEuclidean(NonStrictCone[i])>0)
+    { std::cout << "This is a programming error: the splitting normal " << splittingNormalToBePerturbed.ToString()
+      << " is supposed to have non-negative scalar product with the vector " << NonStrictCone[i].ToString() << ", but it doesn't."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+
+}
+
 void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
   this->flagComputedRelativelyStrongIntersections=false;
+  this->flagStrongCentralizerConditionHolds=false;
   this->ComputeTheTwoCones(theGlobalVariables);
   this->flagNilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal, theGlobalVariables);
   this->flagLinfiniteRelFound=false;
   if (!this->flagNilradicalConesIntersect)
+  { if (this->theNonFKhws.size==0 && this->theNilradicalWeights.size==0)
+      return;
+    this->flagStrongCentralizerConditionHolds=this->StrongCentralizerConditionHoldsProvidedConeConditionHolds(theGlobalVariables);
     return;
+  }
   this->flagNilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhwsStronglyTwoSided, &this->ConeStrongIntersection, 0, theGlobalVariables);
   if (this->flagNilradicalConesStronglyIntersect)
@@ -2056,6 +2200,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
       }
     }
   }
+  this->subalgebraModules=this->primalSubalgebraModules;
   this->charFormaT.GetElement().CustomPlusSign="\\oplus ";
   int theRank=this->theWeylNonEmbeddeD.GetDim();
   this->charFormaT.GetElement().vectorSpaceEiBasisNames.SetSize(theRank+this->CartanOfCentralizer.size);
@@ -3002,25 +3147,20 @@ void slTwoSubalgebra::MakeReportPrecomputations
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
   tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
-  (tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
+  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl.CartanSymmetric);
   this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
-  (tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
+  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl.CartanSymmetric);
   this->preferredAmbientSimpleBasis=tempRoots;
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
     this->hCharacteristic[i]=
-    this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
-    (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
-  this->LengthHsquared=
-  this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
-  (this->theH.GetCartanPart(), this->theH.GetCartanPart());
+    this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
+  this->LengthHsquared=this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot(this->theH.GetCartanPart(), this->theH.GetCartanPart());
   //this->hCharacteristic.ComputeDebugString();
 //  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
@@ -4087,8 +4227,16 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     else
       out << "<br><span style=\"color:#FF0000\"><b>No L-infinite relation found.</b></span>";
   } else
+  { if (this->flagStrongCentralizerConditionHolds)
+      out << "<br>In addition, strong centralizer condition holds. ";
+    else
+      out << "<br><span style=\"color:#FF0000\"><b>Strong centralizer condition not proven to hold.</b></span>";
+    out << "<br>Levi components in centralizer: "
+    << this->theLeviDiagramSmalL.ToStringRelativeToAmbientType(this->owner->owner->owneR->theWeyl.theDynkinType[0])
+    << "<br>Levi components containing parabolic: "
+    << this->theLeviDiagramAmbienT.ToStringRelativeToAmbientType(this->owner->owner->owneR->theWeyl.theDynkinType[0]);
     out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
-
+  }
   return out.str();
 }
 
@@ -4360,8 +4508,8 @@ std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFo
   out << "<br>Modules corresponding to the semisimple subalgebra: ";
   Vector<Rational> theSAvector, tempV;
   theSAvector.MakeZero(this->NilradicalPairingTable.size);
-  for (int i=0; i<this->candidateSubalgebraModules.size; i++)
-  { tempV.MakeEi(this->NilradicalPairingTable.size, this->candidateSubalgebraModules[i]);
+  for (int i=0; i<this->subalgebraModules.size; i++)
+  { tempV.MakeEi(this->NilradicalPairingTable.size, this->subalgebraModules[i]);
     theSAvector+=tempV;
   }
   out << theSAvector.ToStringLetterFormat("V");
@@ -4469,16 +4617,12 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
   FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
   tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].lengthFirstCoRootSquared;
-
   if (this->flagCentralizerIsWellChosen && this->indexMaxSSContainer!=-1)
-  { DynkinType centralizerType =
-    this->owner->theSubalgebraCandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
-    centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
-    out << "<br>Centralizer type: ";
+  { out << "<br>Centralizer type: ";
     if (useLaTeX && useHtml)
-      out << CGI::GetHtmlMathSpanPure(centralizerType.ToString(&tempFormat));
+      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToString(&tempFormat));
     else
-      out << CGI::GetHtmlMathSpanPure(centralizerType.ToString(&tempFormat));
+      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToString(&tempFormat));
     out << ". ";
   }
   if (!this->flagCentralizerIsWellChosen)
@@ -4507,6 +4651,14 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
     this->owner->theSubalgebraCandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
+    if (this->CentralizerRootSystemPrimalCoords.size>0)
+      if (centralizerType!=this->theCentralizerType)
+      { std::cout << "This is a programming error: two different methods for computing the centralizer type yield different results: "
+        << "by sub-diagram I computed the type as  " << this->theCentralizerType.ToString() << " but looking at subalgerba containing the "
+        << " current one I got centralizer type " << centralizerType.ToString()
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
   }
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size );
 }

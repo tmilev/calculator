@@ -3725,7 +3725,7 @@ public:
     Vector<coefficient>::ScalarProduct(r1, r2, TheBilinearForm, result);
     return result;
   }
-
+  void PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors);
   coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const
   { return ScalarProduct(*this,r2,form);
   }
@@ -4438,6 +4438,10 @@ static bool ConesIntersect
  Vector<Rational>* outputLinearCombo=0, Vector<Rational>* outputSplittingNormal=0,
  GlobalVariables* theGlobalVariables=0)
  ;
+static bool PerturbSplittingNormal
+(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone, Vector<Rational>& splittingNormalToBePerturbed
+ )
+ ;
 static bool GetNormalSeparatingCones
 (List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
   List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
@@ -4537,7 +4541,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
   (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
   ;
   bool ContainsARootNonPerpendicularTo
-(const Vector<coefficient>& input, Matrix<coefficient>& theBilinearForm)
+(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm)
 ;
   bool ContainsOppositeRoots()
   { if (this->size<10)
@@ -5416,6 +5420,9 @@ public:
   { TemplateMonomial tempM;
     tempM.MakeOne();
     this->AddMonomial(tempM, other);
+  }
+  inline void operator+=(const TemplateMonomial& other)
+  { this->AddMonomial(other, 1);
   }
   inline void operator-=(const coefficient& other)
   { TemplateMonomial tempM;
@@ -8936,9 +8943,8 @@ void Vectors<coefficient>::GetGramMatrix
 
 template<class coefficient>
 bool Vectors<coefficient>::ContainsARootNonPerpendicularTo
-(const Vector<coefficient>& input, Matrix<coefficient>& theBilinearForm)
-{ coefficient tempRat;
-  for (int i=0; i<this->size; i++)
+(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm)
+{ for (int i=0; i<this->size; i++)
     if (!Vector<coefficient>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero())
       return true;
   return false;
@@ -8999,7 +9005,10 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
   theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
   int theDimension=coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size==0)
+  { if (coneNonNegativeCoeffs.size>0)
+      outputNormal.MakeZero(coneNonNegativeCoeffs[0].size);
     return true;
+  }
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
   matA.init((int)numRows, (int)theDimension*2+numRows);
   matA.NullifyAll();

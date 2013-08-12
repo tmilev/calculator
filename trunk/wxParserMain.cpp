@@ -63,6 +63,10 @@ public:
 #endif
 };
 
+void CallSystemWrapper(const std::string& theCommand)
+{ system(theCommand.c_str());
+}
+
 wxParserFrame* theMainWindow;
 WorkThreadClass theComputationalThread;
 GlobalVariables theGlobalVariables;
@@ -233,6 +237,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   theGlobalVariables.theDefaultFormat.flagUseLatex=true;
   theGlobalVariables.theDefaultFormat.flagUseHTML=false;
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000000;
+  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   this->theCommandList.init(theGlobalVariables);
   this->theCommandList.initDefaultFolderAndFileNames(this->thePath, "vpf/", "0");
   this->indexCurrentPng=-1;

@@ -1274,12 +1274,20 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinString
-(int indexComponent, WeylGroup& theWeyl)
-{ assert(indexComponent<this->SimpleBasesConnectedComponents.size);
+(int indexComponent, const Matrix<Rational>& theBilinearForm)
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
+  assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds=this->indicesEnds[indexComponent];
-  if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
+  if (currentComponent.size<1)
+  { std::cout << "This is a programming error: currentComponent is empty "
+    << " which is impossible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+//  std::cout << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
+//  << theBilinearForm.ToString();
+  if (this->numberOfThreeValencyNodes(indexComponent, theBilinearForm)==1)
   {//type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
     // the long string is oriented with the end that is connected to the triple node having
@@ -1295,7 +1303,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     tempRoots=(currentComponent);
     tempRoots.RemoveIndexSwapWithLast(tripleNodeindex);
     DynkinDiagramRootSubalgebra tempDiagram;
-    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl);
+    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theBilinearForm);
     assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
     List<int> indicesLongComponents;
     indicesLongComponents.size=0;
@@ -1303,9 +1311,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     for (int i=0; i<3; i++)
     { if(tempDiagram.SimpleBasesConnectedComponents[i].size>1)
         indicesLongComponents.AddOnTop(i);
-      if (theWeyl.RootScalarCartanRoot
-          (tempDiagram.SimpleBasesConnectedComponents[i][0],
-           currentComponent[tripleNodeindex]).IsEqualToZero())
+      if (tempDiagram.SimpleBasesConnectedComponents[i][0].ScalarProduct(currentComponent[tripleNodeindex], theBilinearForm).IsEqualToZero())
         tempDiagram.SimpleBasesConnectedComponents[i].ReverseOrderElements();
     }
     for(int i=0; i<3; i++)
@@ -1320,7 +1326,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     for (int i=0; i<3; i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents[i]);
     Rational theCoRootLength=4;
-    theCoRootLength/=theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0]);
+    theCoRootLength/=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
       outputType.MakeArbitrary('D', currentComponent.size, theCoRootLength);
     else
@@ -1328,15 +1334,15 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
   } else
   { Rational length1, length2, tempRat;
     Rational colength1, colength2;
-    theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0], length1);
+    length1=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
     int numLength1=1;
     int numLength2=0;
     for(int i=1; i<currentComponent.size; i++)
-      if (theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[i])==length1)
+      if (currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm)==length1)
         numLength1++;
       else
       { numLength2++;
-        length2=theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[i]);
+        length2=currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm);
       }
     if (numLength2==0 )
     { //type A
@@ -1357,7 +1363,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       }
       colength1=(Rational) 4/length1;
       colength2=(Rational) 4/length2;
-      if (greaterlength>theWeyl.RootScalarCartanRoot(currentComponent[currentEnds[0]], currentComponent[currentEnds[0]]))
+      if (greaterlength>currentComponent[currentEnds[0]].ScalarProduct(currentComponent[currentEnds[0]], theBilinearForm))
         currentEnds.SwapTwoIndices(0, 1);
       if (numLength1==numLength2)
       {//B2, C2, F4 or G2
@@ -1384,12 +1390,10 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     currentComponent.SwapTwoIndices(0, currentEnds[0]);
     for (int i=0; i<currentComponent.size; i++)
       for (int j=i+1; j<currentComponent.size; j++)
-      { theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[j], tempRat);
-        if (!tempRat.IsEqualToZero())
+        if (!currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsEqualToZero())
         { currentComponent.SwapTwoIndices(i+1, j);
           break;
         }
-      }
   }
 }
 
@@ -6303,7 +6307,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     for (int i=0; i<this->simpleGenerators.size; i++)
       DisplayIndicesSimpleGenerators[i]=i+1;
   DynkinDiagramRootSubalgebra tempDyn;
-  tempDyn.ComputeDiagramTypeKeepInput(this->simpleGenerators, this->AmbientWeyl);
+  tempDyn.ComputeDiagramTypeKeepInput(this->simpleGenerators, this->AmbientWeyl.CartanSymmetric);
   out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
   << tempDyn.ToStringRelativeToAmbientType(this->AmbientWeyl.theDynkinType[0]);
   out << "<br>Simple roots:\n<br>\n ";

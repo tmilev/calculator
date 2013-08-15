@@ -3726,6 +3726,10 @@ public:
     return result;
   }
   void PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors);
+  void PerturbSplittingNormal
+(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone)
+ ;
+
   coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const
   { return ScalarProduct(*this,r2,form);
   }
@@ -4437,10 +4441,6 @@ static bool ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
  Vector<Rational>* outputLinearCombo=0, Vector<Rational>* outputSplittingNormal=0,
  GlobalVariables* theGlobalVariables=0)
- ;
-static bool PerturbSplittingNormal
-(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone, Vector<Rational>& splittingNormalToBePerturbed
- )
  ;
 static bool GetNormalSeparatingCones
 (List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,

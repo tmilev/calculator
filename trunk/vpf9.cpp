@@ -5400,7 +5400,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords
 { if (theGens.size==0)
     return;
   MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
-  std::cout << "<hr>Transforming to simple " << theGens.ToString() << " with root system " << inputRootSystem.ToString();
+//  std::cout << "<hr>Transforming to simple " << theGens.ToString() << " with root system " << inputRootSystem.ToString();
   Vector<Rational> theH;
   theH.MakeZero(theGens[0].size);
   theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
@@ -5429,7 +5429,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords
         }
       }
   }
-  std::cout << ". Final basis: " << theGens.ToString();
+//  std::cout << ". Final basis: " << theGens.ToString();
 }
 
 void WeylGroup::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH)

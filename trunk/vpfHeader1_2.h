@@ -2656,7 +2656,7 @@ public:
   }
   static const bool IsEqualToZero(){return false;}
   bool AdjointRepresentationAction
-  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables)
+  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables=0)const
   ;
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other)
@@ -2666,6 +2666,19 @@ public:
   }
   SemisimpleLieAlgebra& GetOwner()const
   { return *this->owneR;
+  }
+  void MakeGenerator
+(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
+  { if (generatorIndex<0 || generatorIndex>inputOwner.GetNumGenerators())
+    { std::cout << "This is a programming error: attempting to assign impossible index to monomial UE. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->owneR=&inputOwner;
+    this->generatorsIndices.SetSize(1);
+    this->generatorsIndices[0]=generatorIndex;
+    this->Powers.SetSize(1);
+    this->Powers[0]=1;
   }
   void MakeZero
 (int numVars, SemisimpleLieAlgebra& inputOwner)
@@ -2768,7 +2781,7 @@ private:
 public:
   SemisimpleLieAlgebra* owneR;
   bool AdjointRepresentationAction
-  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables& theGlobalVariables)
+  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables=0)const
   ;
   bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
   bool IsEqualToZero()const
@@ -2828,6 +2841,10 @@ public:
   { this->MakeOneGeneratorCoeffOne
     (inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit, theRingZero);
   }
+  coefficient GetKillingFormProduct
+  (const ElementUniversalEnveloping<coefficient>& right)const
+  ;
+
   void MakeZero(SemisimpleLieAlgebra& inputOwner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
@@ -2838,8 +2855,7 @@ public:
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify
-  (GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
+  (GlobalVariables* theGlobalVariables=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
    ;
   int GetMinNumVars()const
   { int result=0;
@@ -5968,7 +5984,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimir
 //      }
 //    }
 //  }
-  this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
+  this->Simplify(&theGlobalVariables, theRingUnit, theRingZero);
 }
 
 template <class coefficient>
@@ -6877,7 +6893,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe
   theUEelt.MakeZero(*this->GetOwner().owneR);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
 //  std::cout << " <br>the monomial:" << this->ToString();
-  theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+  theUEelt.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
 //  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<coefficient> currentMon;
@@ -8469,9 +8485,58 @@ void ElementUniversalEnveloping<coefficient>::ModOutVermaRelations
   this->operator=(output);
 }
 
+template<class coefficient>
+void ElementUniversalEnveloping<coefficient>::LieBracketOnTheLeft
+(const ElementSemisimpleLieAlgebra<Rational>& left)
+{ if (this->IsEqualToZero())
+  { this->MakeZero(*this->owneR);
+    return;
+  }
+  ElementUniversalEnveloping<coefficient> tempElt1, tempElt2;
+  tempElt1.AssignElementLieAlgebra
+  (left, *this->owneR, this->theCoeffs[0].GetOne(), this->theCoeffs[0].GetZero());
+  tempElt2=*this;
+  tempElt2.LieBracketOnTheRight(tempElt1, *this);
+}
+
+template<class coefficient>
+bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
+(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output,
+ GlobalVariables* theGlobalVariables)const
+{ output.MakeZero(*this->owneR);
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  output=input;
+  for (int i=this->generatorsIndices.size-1; i>=0; i--)
+  { int nextCycleSize;
+    if (!this->Powers[i].IsSmallInteger(&nextCycleSize))
+      return false;
+    for (int j=0; j<nextCycleSize; j++)
+    { tempElt.MakeGenerator(this->generatorsIndices[i], *this->owneR) ;
+      output.LieBracketOnTheLeft(tempElt);
+    }
+  }
+  return true;
+}
+
+template<class coefficient>
+bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
+  (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output,
+   GlobalVariables* theGlobalVariables)const
+{ assert(&input!=&output);
+  output.MakeZero(*this->owneR);
+  ElementUniversalEnveloping<coefficient> summand;
+  for (int i=0; i<this->size(); i++)
+  { if(!(*this)[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
+      return false;
+    summand*=this->theCoeffs[i];
+    output+=summand;
+  }
+  return true;
+}
+
 template <class coefficient>
 void ElementUniversalEnveloping<coefficient>::Simplify
-(GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+(GlobalVariables* theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { ElementUniversalEnveloping<coefficient> buffer;
   ElementUniversalEnveloping<coefficient> outpuT;
   MonomialUniversalEnveloping<coefficient> tempMon;
@@ -8490,16 +8555,14 @@ void ElementUniversalEnveloping<coefficient>::Simplify
           reductionOccurred=true;
           break;
         }
-        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed
-            (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
+        if (tempMon.CommutingAnBtoBAnPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
         { tempMon.CommuteAnBtoBAnPlusLowerOrder(i, buffer, theRingUnit, theRingZero);
           buffer*=currentCoeff;
           *this+=buffer;
           reductionOccurred=true;
           break;
         }
-        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed
-            (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
+        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed(tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
         { tempMon.CommuteABntoBnAPlusLowerOrder(i, buffer, theRingUnit, theRingZero);
           buffer*=currentCoeff;
           *this+=buffer;
@@ -8761,7 +8824,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
     *logStream << "right element: " << right.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
   }
   startingElt=right;
-  startingElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+  startingElt.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
   if (logStream!=0)
     *logStream << "right element after simplification: "
     << startingElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
@@ -8787,7 +8850,7 @@ bool ElementUniversalEnveloping<coefficient>::HWTAAbilinearForm
           intermediateAccum*=(tempElt);
           if (logStream!=0)
             *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
-          intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+          intermediateAccum.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
           if (logStream!=0)
             *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
           intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);

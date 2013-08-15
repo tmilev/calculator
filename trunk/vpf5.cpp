@@ -489,7 +489,7 @@ bool CommandList::fEmbedG2inB3
   if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
     return output.SetError("Failed to apply homomorphism for unspecified reason", theCommands);
 //  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
-  outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
+  outputUE.Simplify(theCommands.theGlobalVariableS, 1, 0);
   return output.AssignValue(outputUE, theCommands);
 }
 

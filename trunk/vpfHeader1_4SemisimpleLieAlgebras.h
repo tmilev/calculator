@@ -211,8 +211,8 @@ class NilradicalCandidate
   bool flagNilradicalConesIntersect;
   bool flagNilradicalConesStronglyIntersect;
   bool flagComputedRelativelyStrongIntersections;
-  bool flagStrongCentralizerConditionHolds;
-  bool flagRestrictionParabolicIsTypeAandC;
+  bool flagStrongCentralizerConditionHoldS;
+  bool flagParabolicACextendsToParabolicAC;
 
   bool flagLinfiniteRelFound;
   DynkinDiagramRootSubalgebra theLeviDiagramAmbienT, theLeviDiagramSmalL;
@@ -230,6 +230,9 @@ class NilradicalCandidate
   List<int> ownerModulesNilradicalElements;
   List<int> ownerModulestheNonFKhwVectors;
 
+  Vectors<Rational> leviRootsAmbienT;
+  Vectors<Rational> leviRootsSmallPrimalFundCoords;
+
   List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectors;
   List<ElementSemisimpleLieAlgebra<Rational> > theNonFKHVectorsStronglyTwoSided;
   List<ElementSemisimpleLieAlgebra<Rational> > theNilradical;
@@ -240,7 +243,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate():owner(0),flagStrongCentralizerConditionHolds(false), flagRestrictionParabolicIsTypeAandC(false), flagLinfiniteRelFound(false){}
+  NilradicalCandidate():owner(0),flagStrongCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
   void reset();
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex);
@@ -252,7 +255,7 @@ class NilradicalCandidate
    List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
   ;
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
-  bool StrongCentralizerConditionHoldsProvidedConeConditionHolds(GlobalVariables* theGlobalVariables);
+  void ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables);
 //  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
   bool IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
@@ -314,6 +317,8 @@ public:
   List<NilradicalCandidate> FKNilradicalCandidates;
   int NumConeIntersections;
   int NumCasesNoLinfiniteRelationFound;
+  int NumBadParabolics;
+  int NumCentralizerConditionFails;
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;
@@ -331,7 +336,8 @@ public:
   List<Vectors<Rational> > WeightsModulesPrimal;
   List<charSSAlgMod<Rational> > CharsPrimalModules;
   List<charSSAlgMod<Rational> > CharsPrimalModulesMerged;
-  HashedList<Vector<Rational> > CentralizerRootSystemPrimalCoords;
+  HashedList<Vector<Rational> > RootSystemCentralizerPrimalCoords;
+  HashedList<Vector<Rational> > RootSystemSubalgebraPrimalCoords;
 
   List<List<List<int> > > NilradicalPairingTable;
   List<int> subalgebraModules;

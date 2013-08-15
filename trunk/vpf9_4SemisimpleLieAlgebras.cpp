@@ -198,15 +198,22 @@ std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& am
 
 std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
+  int numNonCentralizerCondition=0;
+  int numBadParabolics=0;
+
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
     numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
+    numNonCentralizerCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFails;
+    numBadParabolics+=this->theSubalgebraCandidates[i].NumBadParabolics;
   }
+  if (numBadParabolics>0)
+    out << "<br><span style=\"color:#FF0000\">There are " << numBadParabolics << " bad parabolic subalgebras!</span><br>";
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
   out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
   out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
   (this->owneR->theWeyl.theDynkinType[0], theFormat)
@@ -259,16 +266,25 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
 }
 
 std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringSSsumaryLaTeX");
+  if (!this->flagComputeNilradicals)
+    return "";
+  std::stringstream out;
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
-  int numNonStrongCentralizer;
+  int numNonCentralizerCondition=0;
+  int numBadParabolics=0;
+
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
     numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
+    numNonCentralizerCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFails;
+    numBadParabolics+=this->theSubalgebraCandidates[i].NumBadParabolics;
   }
+  if (numBadParabolics>0)
+    out << "<br><span style=\"color:#FF0000\">There are " << numBadParabolics << " bad parabolic subalgebras!</span><br>";
   out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
   out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
   (this->owneR->theWeyl.theDynkinType[0], theFormat)
@@ -1268,7 +1284,6 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition
     for (int j=0; j<this->Modules[i].size; j++)
       this->ModulesIsotypicallyMerged[i].AddListOnTop(this->Modules[i][j]);
   }
-  this->subalgebraModules.SetSize(0);
   //please note: part of primalSubalgebraModules have already been computed.
   //std::cout << "<hr>Testing sa: " << this->ToStringTypeAndHs() << "<br>";
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
@@ -1332,18 +1347,22 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition
       }
     }
   this->centralizerSubalgebraModules.SetSize(0);
-  this->CentralizerRootSystemPrimalCoords.Clear();
-//  std::cout << "<hr>Computing CentralizerRootSystemPrimalCoords type " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
+  this->RootSystemCentralizerPrimalCoords.Clear();
+//  std::cout << "<hr>Computing RootSystemCentralizerPrimalCoords type " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
   for (int i=0; i<this->ModulesIsotypicallyMerged.size; i++)
     if (this->ModulesIsotypicallyMerged[i].size==1 || this->WeightsModulesPrimal[i][0].IsEqualToZero())
     { this->centralizerSubalgebraModules.AddOnTop(i);
       if (!this->WeightsModulesPrimal[i][0].IsEqualToZero())
-        this->CentralizerRootSystemPrimalCoords.AddOnTop(this->WeightsModulesPrimal[i][0]);
+        this->RootSystemCentralizerPrimalCoords.AddOnTop(this->WeightsModulesPrimal[i][0]);
     }
+  for (int i=0; i<this->subalgebraModules.size; i++)
+    for (int j=0; j<this->WeightsModulesPrimal[this->subalgebraModules[i]].size; j++)
+      if (!this->WeightsModulesPrimal[this->subalgebraModules[i]][j].IsEqualToZero())
+        this->RootSystemSubalgebraPrimalCoords.AddOnTop(this->WeightsModulesPrimal[this->subalgebraModules[i]][j]);
   Vectors<Rational> simpleSubSystem;
-  simpleSubSystem=this->CentralizerRootSystemPrimalCoords;
+  simpleSubSystem=this->RootSystemCentralizerPrimalCoords;
   this->theCentralizerSubDiagram.ComputeDiagramTypeModifyInputRelative
-  (simpleSubSystem, this->CentralizerRootSystemPrimalCoords, this->BilinearFormFundPrimal);
+  (simpleSubSystem, this->RootSystemCentralizerPrimalCoords, this->BilinearFormFundPrimal);
   this->theCentralizerType.MakeZero();
   for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
     this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
@@ -1355,7 +1374,8 @@ CandidateSSSubalgebra::CandidateSSSubalgebra():
 owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
-totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1)
+totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1),
+NumBadParabolics(0), NumCentralizerConditionFails(0)
 {
 }
 
@@ -1613,10 +1633,17 @@ bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Select
   for (int i=0; i<inputNilradSel.CardinalitySelection; i++)
     for (int j=i+1; j<inputNilradSel.CardinalitySelection; j++)
       if (this->owner->GetScalarSA
-          (this->theNilradicalWeights[inputNilradSel.elements[i]],
-           this->theNilradicalWeights[inputNilradSel.elements[j]])!=0)
+          (this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]])!=0)
       { std::cout << "This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
         << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
+        << "The bad elements are: "
+        << this->theNilradical[inputNilradSel.elements[i]].ToString() << " of weight "
+        << this->theNilradicalWeights[inputNilradSel.elements[i]].ToString()
+        << " and "
+        << this->theNilradical[inputNilradSel.elements[j]].ToString() << " of weight "
+        << this->theNilradicalWeights[inputNilradSel.elements[j]].ToString() << ". "
+        << "The bilinear form is: " << this->owner->BilinearFormFundPrimal.ToString() << ". "
+        << " and the subalgebra in play is: " << this->owner->ToString() << ". "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
         return false;
@@ -1630,41 +1657,84 @@ Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
   return theNilradLinCombi;
 }
 
-bool NilradicalCandidate::StrongCentralizerConditionHoldsProvidedConeConditionHolds(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("NilradicalCandidate::StrongCentralizerConditionHoldsProvidedConeConditionHolds");
-  Vectors<Rational> leviRootsAmbient, leviRootsSmall;
+void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
+(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("NilradicalCandidate::ComputeParabolicACextendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroup& theWeyl=this->owner->owner->owneR->theWeyl;
-  leviRootsAmbient.ReservE(theWeyl.RootSystem.size);
-  leviRootsSmall.ReservE(theWeyl.RootSystem.size);
-  std::cout << "<hr>this->ConeSeparatingNormal: " << this->ConeSeparatingNormal.ToString();
-  if (this->ConeSeparatingNormal.size==0)
-  { std::cout << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
-    << "<br>nilrad:  " << this->theNilradicalWeights.ToString() << "<br>" << "non nilrad: "
-    << this->theNonFKhws.ToString();
-    std::cout << "<br>" << this->ToString();
-  }
+  this->leviRootsAmbienT.ReservE(theWeyl.RootSystem.size);
+  this->leviRootsSmallPrimalFundCoords.ReservE(theWeyl.RootSystem.size);
+//  std::cout << "<hr>this->ConeSeparatingNormal: " << this->ConeSeparatingNormal.ToString();
+ // if (this->ConeSeparatingNormal.size==0)
+  //{ std::cout << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
+  //  << "<br>nilrad:  " << this->theNilradicalWeights.ToString() << "<br>" << "non nilrad: "
+  //  << this->theNonFKhws.ToString();
+  //  std::cout << "<br>separating normal: " << this->ConeSeparatingNormal.ToString();
+  //}
+  Vectors<Rational> thePosWeights;
+  thePosWeights.AddListOnTop(this->theNilradicalWeights);
+  thePosWeights.AddListOnTop(this->owner->RootSystemSubalgebraPrimalCoords);
+  //{ std::cout << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
+  //  << "<br>nilrad:  " << this->theNilradicalWeights.ToString() << "<br>" << "non nilrad: "
+  //  << this->theNonFKhws.ToString();
+  //  std::cout << "<br>separating normal: " << this->ConeSeparatingNormal.ToString();
+  //  std::cout << "<br> this->owner->RootSystemSubalgebraPrimalCoords:" << this->owner->RootSystemSubalgebraPrimalCoords.ToString();
+  //  std::cout << "<br>The pos weights: " << thePosWeights.ToString();
+  //}
+
+  this->ConeSeparatingNormal.PerturbNoZeroScalarProductWithMe(thePosWeights);
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { this->owner->GetPrimalWeightProjectionFundCoords(theWeyl.RootSystem[i], projectionRoot);
     if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal)==0)
-    { leviRootsAmbient.AddOnTop(theWeyl.RootSystem[i]);
-      if (this->owner->CentralizerRootSystemPrimalCoords.Contains(projectionRoot))
-        leviRootsSmall.AddOnTop(projectionRoot);
+    { this->leviRootsAmbienT.AddOnTop(theWeyl.RootSystem[i]);
+      if (this->owner->RootSystemCentralizerPrimalCoords.Contains(projectionRoot))
+        this->leviRootsSmallPrimalFundCoords.AddOnTop(projectionRoot);
     }
   }
-  this->theLeviDiagramAmbienT.ComputeDiagramTypeModifyInput(leviRootsAmbient, theWeyl);
-  std::cout << "<br>levi roots small: " << leviRootsSmall.ToString();
+  this->theLeviDiagramAmbienT.ComputeDiagramTypeModifyInput(this->leviRootsAmbienT, theWeyl);
+//  std::cout << "<br>levi roots small: " << this->leviRootsSmallPrimalFundCoords.ToString();
   this->theLeviDiagramSmalL.ComputeDiagramTypeModifyInputRelative
-  (leviRootsSmall, this->owner->CentralizerRootSystemPrimalCoords, this->owner->BilinearFormFundPrimal);
-
+  (this->leviRootsSmallPrimalFundCoords, this->owner->RootSystemCentralizerPrimalCoords, this->owner->BilinearFormFundPrimal);
+  bool ambientLeviHasBDGE=false;
   for (int i=0; i<this->theLeviDiagramAmbienT.SimpleComponentTypes.size; i++)
   { DynkinSimpleType& currentType=this->theLeviDiagramAmbienT.SimpleComponentTypes[i];
     if (currentType.theLetter=='D' || currentType.theLetter=='G' || currentType.theLetter=='E' || currentType.theLetter=='E')
-      return false;
+    { ambientLeviHasBDGE=true;
+      break;
+    }
     if (currentType.theLetter=='B' && currentType.theRank>2)
-      return false;
+    { ambientLeviHasBDGE=true;
+      break;
+    }
   }
-  return true;
+  bool smallLeviHasBDGE=false;
+  for (int i=0; i<this->theLeviDiagramSmalL.SimpleComponentTypes.size; i++)
+  { DynkinSimpleType& currentType=this->theLeviDiagramSmalL.SimpleComponentTypes[i];
+    if (currentType.theLetter=='D' || currentType.theLetter=='G' || currentType.theLetter=='E' || currentType.theLetter=='E')
+    { smallLeviHasBDGE=true;
+      break;
+    }
+    if (currentType.theLetter=='B' && currentType.theRank>2)
+    { smallLeviHasBDGE=true;
+      break;
+    }
+  }
+  if (!smallLeviHasBDGE)
+  { this->flagParabolicACextendsToParabolicAC=!ambientLeviHasBDGE;
+    if (this->flagParabolicACextendsToParabolicAC)
+      this->flagStrongCentralizerConditionHoldS=true;
+  }
+  if (smallLeviHasBDGE)
+  { this->flagStrongCentralizerConditionHoldS=false;
+    this->flagParabolicACextendsToParabolicAC=true;
+    if (!ambientLeviHasBDGE)
+    { std::cout << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
+      << " of type A and C, but intesects the centralizer in components of type B and D. This must be impossible according to "
+      << "the PSZ paper and the restriction of Fernando's theorem to the centralizer. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
 }
 
 bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables)
@@ -1708,14 +1778,16 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
       }
   }
 //  this->ConeStrongIntersection.MakeZero(this->ConeStrongIntersection.size);
+  ProgressReport theReport(theGlobalVariables);
   this->flagComputedRelativelyStrongIntersections=true;
   for (int i=1; i<this->theNilradicalWeights.size+1 && i<5; i++)
   { int numcycles=MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
-    std::stringstream out;
-    out << "<br>" << numcycles << " cycles to process. ";
-    this->FKnilradicalLog+=out.str();
+//    this->FKnilradicalLog+=out.str();
     for (int j=0; j<numcycles; j++, this->theNilradSubsel.incrementSelectionFixedCardinality(i))
+    { std::stringstream out;
+      out << "<br>Trying " << i+1 << "-tuples (up to 5-tuples): " << j+1 << " out of " << numcycles << " cycles to process. ";
+      theReport.Report(out.str());
       if (this->IsStronglyOrthogonalSelectionNilradicalElements(this->theNilradSubsel))
       { this->ComputeTheTwoConesRelativeToNilradicalSubset();
         if (this->theNilradicalSubsetWeights.ConesIntersect
@@ -1725,6 +1797,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
         } else
           this->FKnilradicalLog+="... but the cones dont intersect. ";
       }
+    }
   }
   return false;
 }
@@ -1832,6 +1905,8 @@ void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables
 void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateAllNilradicals");
   ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport2(theGlobalVariables);
+
   std::stringstream reportStream;
   reportStream << "Enumerating recursively nilradicals of type " << this->ToStringTypeAndHs() << "...";
   theReport.Report(reportStream.str());
@@ -1852,45 +1927,95 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
     assert(false);
   }
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+  { std::stringstream reportStream2;
+    reportStream2 << "Processing nilradical: " << i+1 << " out of " << this->FKNilradicalCandidates.size;
+    theReport2.Report(reportStream2.str());
     this->FKNilradicalCandidates[i].ProcessMe(theGlobalVariables);
+  }
   this->NumConeIntersections=0;
   this->NumCasesNoLinfiniteRelationFound=0;
+  this->NumBadParabolics=0;
+  this->NumCentralizerConditionFails=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect)
     { this->NumConeIntersections++;
       if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
         this->NumCasesNoLinfiniteRelationFound++;
+      if (!this->FKNilradicalCandidates[i].flagParabolicACextendsToParabolicAC)
+        this->NumBadParabolics++;
+      if (!this->FKNilradicalCandidates[i].flagStrongCentralizerConditionHoldS)
+        this->NumCentralizerConditionFails++;
     }
 //  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
 }
 
-template<class Coefficient>
-bool Vectors<Coefficient>::PerturbSplittingNormal
-(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone, Vector<Rational>& splittingNormalToBePerturbed
- )
+template<class coefficient>
+void Vector<coefficient>::PerturbSplittingNormal
+(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone)
 { MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
   for (int i=0; i<StrictCone.size; i++)
-    if (splittingNormalToBePerturbed.ScalarEuclidean(StrictCone[i]).IsNonPositive())
-    { std::cout << "This is a programming error: the splitting normal " << splittingNormalToBePerturbed.ToString()
+    if (this->ScalarEuclidean(StrictCone[i]).IsNonPositive())
+    { std::cout << "This is a programming error: the splitting normal " << this->ToString()
       << " is supposed to have positive scalar product with the vector " << StrictCone[i].ToString() << ", but it doesn't."
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   for (int i=0; i<NonStrictCone.size; i++)
-    if (splittingNormalToBePerturbed.ScalarEuclidean(NonStrictCone[i])>0)
-    { std::cout << "This is a programming error: the splitting normal " << splittingNormalToBePerturbed.ToString()
+    if (this->ScalarEuclidean(NonStrictCone[i])>0)
+    { std::cout << "This is a programming error: the splitting normal " << this->ToString()
       << " is supposed to have non-negative scalar product with the vector " << NonStrictCone[i].ToString() << ", but it doesn't."
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-
+  coefficient scalarEdges;
+  coefficient scalarThis;
+  coefficient theScale;
+  for (int i=0; i<NonStrictCone.size; i++)
+    if (this->ScalarEuclidean(NonStrictCone[i])==0)
+    { theScale=-1;
+      for (int j=0; j<NonStrictCone.size; j++)
+      { scalarEdges=NonStrictCone[i].ScalarEuclidean(NonStrictCone[j]);
+        if (scalarEdges>0)
+        { scalarThis=this->ScalarEuclidean(NonStrictCone[j]);
+          if (scalarThis==0)
+          { theScale=0;
+            break;
+          }
+          theScale=MathRoutines::Maximum(theScale, (scalarThis/scalarEdges)/2);
+        }
+      }
+      if (theScale!=0)
+        for (int j=0; j<StrictCone.size; j++)
+        { scalarEdges=NonStrictCone[i].ScalarEuclidean(StrictCone[j]);
+          scalarThis=this->ScalarEuclidean(StrictCone[j]);
+          if (scalarEdges>0)
+            theScale=MathRoutines::Maximum(theScale, -(scalarThis/scalarEdges)/2);
+        }
+      *this+=NonStrictCone[i]*theScale;
+    }
+  for (int i=0; i<StrictCone.size; i++)
+    if (this->ScalarEuclidean(StrictCone[i]).IsNonPositive())
+    { std::cout << "This is a programming error: after perturbing, the splitting normal " << this->ToString()
+      << " is supposed to have positive scalar product with the vector " << StrictCone[i].ToString() << ", but it doesn't."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  for (int i=0; i<NonStrictCone.size; i++)
+    if (this->ScalarEuclidean(NonStrictCone[i])>0)
+    { std::cout << "This is a programming error: after perturbing, the splitting normal " << this->ToString()
+      << " is supposed to have non-negative scalar product with the vector " << NonStrictCone[i].ToString() << ", but it doesn't."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+//  return true;
 }
 
 void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
   this->flagComputedRelativelyStrongIntersections=false;
-  this->flagStrongCentralizerConditionHolds=false;
+  this->flagStrongCentralizerConditionHoldS=false;
+  this->flagParabolicACextendsToParabolicAC=true;
   this->ComputeTheTwoCones(theGlobalVariables);
   this->flagNilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
   (this->theNilradicalWeights, this->theNonFKhws, &this->ConeIntersection, &this->ConeSeparatingNormal, theGlobalVariables);
@@ -1898,7 +2023,7 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   if (!this->flagNilradicalConesIntersect)
   { if (this->theNonFKhws.size==0 && this->theNilradicalWeights.size==0)
       return;
-    this->flagStrongCentralizerConditionHolds=this->StrongCentralizerConditionHoldsProvidedConeConditionHolds(theGlobalVariables);
+    this->ComputeParabolicACextendsToParabolicAC(theGlobalVariables);
     return;
   }
   this->flagNilradicalConesStronglyIntersect=this->theNilradicalWeights.ConesIntersect
@@ -2151,6 +2276,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
   this->HighestWeightsPrimal.Clear();
   this->Modules.SetSize(0);
   this->primalSubalgebraModules.SetSize(0);
+//  std::cout << "<hr><hr>Type: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " The basis: " << this->theBasis.ToString();
   for (int i=0; i<tempModules.size; i++)
   { this->Modules.SetSize(this->Modules.size+1);
     this->HighestVectors.SetSize(this->Modules.size);
@@ -2201,6 +2327,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart
     }
   }
   this->subalgebraModules=this->primalSubalgebraModules;
+//  std::cout << "<br>Subalgebra modules: " << this->subalgebraModules;
   this->charFormaT.GetElement().CustomPlusSign="\\oplus ";
   int theRank=this->theWeylNonEmbeddeD.GetDim();
   this->charFormaT.GetElement().vectorSpaceEiBasisNames.SetSize(theRank+this->CartanOfCentralizer.size);
@@ -4058,7 +4185,11 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td>";
     if (this->primalSubalgebraModules.Contains(i))
-      out << "Primal subalgebra component. ";
+    { if (this->subalgebraModules.Contains(i))
+        out << "Semisimple subalgebra component. ";
+      else
+        out << "Cartan of centralizer component. ";
+    }
     out << "<table border=\"1\"><tr>";
     for (int j=0; j<this->Modules[i].size; j++)
     { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->Modules[i][j];
@@ -4145,6 +4276,15 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
       out << "<td>Not computed.</td>";
   out << "</tr>";
   out << "</table>";
+  Vector<Rational> semisimpleSAv, centralizerV;
+  semisimpleSAv.MakeZero(this->Modules.size);
+  centralizerV.MakeZero(this->Modules.size);
+  for (int i=0; i<this->subalgebraModules.size; i++)
+    semisimpleSAv[this->subalgebraModules[i]]+=1;
+  for (int i=0; i<this->centralizerSubalgebraModules.size; i++)
+    centralizerV[this->centralizerSubalgebraModules[i]]+=1;
+  out << "<br>Semisimple subalgebra: " << semisimpleSAv.ToStringLetterFormat("W");
+  out << "<br>Centralizer extension: " << centralizerV.ToStringLetterFormat("W");
   return out.str();
 }
 
@@ -4227,12 +4367,14 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
     else
       out << "<br><span style=\"color:#FF0000\"><b>No L-infinite relation found.</b></span>";
   } else
-  { if (this->flagStrongCentralizerConditionHolds)
-      out << "<br>In addition, strong centralizer condition holds. ";
-    else
+  { if (!this->flagParabolicACextendsToParabolicAC)
       out << "<br><span style=\"color:#FF0000\"><b>Strong centralizer condition not proven to hold.</b></span>";
-    out << "<br>Levi components in centralizer: "
+    if (this->flagStrongCentralizerConditionHoldS)
+      out << "<br>The centralizer condition holds. ";
+    out << "<br>Levi roots primal fundamental coordinates: " << this->leviRootsSmallPrimalFundCoords.ToString()
+    << "<br>Levi components in centralizer: "
     << this->theLeviDiagramSmalL.ToStringRelativeToAmbientType(this->owner->owner->owneR->theWeyl.theDynkinType[0])
+    << "<br>Levi roots containing parabolic: " << this->leviRootsAmbienT.ToString()
     << "<br>Levi components containing parabolic: "
     << this->theLeviDiagramAmbienT.ToStringRelativeToAmbientType(this->owner->owner->owneR->theWeyl.theDynkinType[0]);
     out << "<br>Separating hyperplane: " << this->ConeSeparatingNormal.ToStringLetterFormat("u");
@@ -4651,7 +4793,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
     this->owner->theSubalgebraCandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
-    if (this->CentralizerRootSystemPrimalCoords.size>0)
+    if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
       { std::cout << "This is a programming error: two different methods for computing the centralizer type yield different results: "
         << "by sub-diagram I computed the type as  " << this->theCentralizerType.ToString() << " but looking at subalgerba containing the "
@@ -5293,24 +5435,22 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     if (i<this->theHs.size)
       diagMat(i,i)=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(i,i)/2;
     else
-    { diagMat(i,i).AssignNumeratorAndDenominator(1,2);
-//      diagMat(i,i)/= this->BilinearFormSimplePrimal(i,i);
-    }
+      diagMat(i,i).AssignNumeratorAndDenominator(1,2);
   fundCoordsViaSimple=bilinearFormInverted;
   fundCoordsViaSimple*=diagMat;
-//  std::cout
-//  << "<hr>diagMat=" << diagMat.ToString()
-//  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
-//  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
+  std::cout
+  << "<hr>diagMat=" << diagMat.ToString()
+  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
+  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
   this->BilinearFormFundPrimal=fundCoordsViaSimple;
   this->BilinearFormFundPrimal.Transpose();
-//  std::cout
-//  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=this->BilinearFormSimplePrimal;
-//  std::cout
-//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=fundCoordsViaSimple;
-//  std::cout
-//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
-//  << "<hr>";
+  std::cout
+  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
+  << "<hr>";
 }

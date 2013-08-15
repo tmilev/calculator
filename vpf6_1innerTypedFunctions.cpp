@@ -434,7 +434,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
   ElementUniversalEnveloping<RationalFunctionOld> result=*left;
   result*=
   rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
-  result.Simplify(*theCommands.theGlobalVariableS);
+  result.Simplify(theCommands.theGlobalVariableS);
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
 //  std::cout << " to get " << result.ToString();
   return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);

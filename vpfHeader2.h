@@ -1482,6 +1482,10 @@ public:
   static bool innerFreudenthalFull
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerKillingForm
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+
     static bool innerGCDOrLCM
   (CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
   ;

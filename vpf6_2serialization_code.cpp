@@ -846,8 +846,7 @@ bool Serialization::innerLoadCandidateSA
     theGensE.Sequencefy();
     ElementSemisimpleLieAlgebra<Rational> curGen;
     for (int i=1; i<theGensE.children.size; i++)
-    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
-          (theCommands, theGensE[i], curGen, *owner.owneR))
+    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theGensE[i], curGen, *owner.owneR))
       { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression "
         << theGensE[i].ToString() << ". ";
         return false;
@@ -920,8 +919,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras
   theSAs.initHookUpPointers(*ownerSS);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagComputePairingTable=false;
-  theSAs.flagComputeNilradicals=false;
+  theSAs.flagComputePairingTable=true;
+  theSAs.flagComputeNilradicals=true;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
@@ -1195,8 +1194,7 @@ bool CommandList::innerElementUniversalEnvelopingAlgebra
   { output=input;
     return true;
   }
-  if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >
-      (theCommands, input, output))
+  if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >(theCommands, input, output))
     return output.SetError
     ("Failed to convert " +input.ToString() + " to element universal enveloping.", theCommands);
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -1204,7 +1202,7 @@ bool CommandList::innerElementUniversalEnvelopingAlgebra
     return output.SetError("Failed to convert to element universal enveloping.", theCommands);
 //  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
 //  << output.GetContext().ToString();
-  outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
+  outputUE.Simplify(theCommands.theGlobalVariableS, 1, 0);
   return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
 }
 
@@ -1237,13 +1235,11 @@ bool Serialization::innerStoreObject
   Polynomial<Rational> theDenominator;
   input.GetDenominator(theDenominator);
   Expression denE, numE;
-  if (!Serialization::innerStoreMonCollection
-      (theCommands, theNumerator, numE, theContext))
+  if (!Serialization::innerStoreMonCollection(theCommands, theNumerator, numE, theContext))
   { theCommands.Comments << "<hr>Failed to serialize numerator of rational function. ";
     return false;
   }
-  if (!Serialization::innerStoreMonCollection
-      (theCommands, theDenominator, denE, theContext))
+  if (!Serialization::innerStoreMonCollection(theCommands, theDenominator, denE, theContext))
   { theCommands.Comments << "<hr>Failed to serialize denominator of rational function. ";
     return false;
   }

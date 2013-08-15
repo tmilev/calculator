@@ -2584,11 +2584,11 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
   result.AssignElementLieAlgebra(inputElt, *this->owneR, 1, 0);
   std::stringstream out;
 //  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
-  theGenElt.Simplify(theGlobalVariables);
+  theGenElt.Simplify(&theGlobalVariables);
 //  std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
 //  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
   result*=(theGenElt);
-  result.Simplify(theGlobalVariables);
+  result.Simplify(&theGlobalVariables);
 //  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
@@ -2819,7 +2819,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
         ;
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-        actionOnGenericElt.Simplify(*theCommands.theGlobalVariableS);
+        actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
         out << "<td>" << CGI::GetHtmlMathSpanPure
         ("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}")
@@ -3328,17 +3328,18 @@ bool CommandList::innerFunctionToMatrix
   output.reset(theCommands, numRows+1);
   output.AddChildAtomOnTop(theCommands.opSequence());
   output.format=output.formatMatrix;
-  Expression theIndices, currentRow, currentE;
+  Expression theIndices, currentRow, currentE, leftIE, rightIE;
   for (int i=0; i<numRows; i++)
   { currentRow.reset(theCommands, numCols+1);
     currentRow.AddChildAtomOnTop(theCommands.opSequence());
     currentRow.format=currentRow.formatMatrixRow;
     for (int j=0; j<numCols; j++)
-    { theIndices.reset(theCommands, 3);
-      theIndices.AddChildAtomOnTop(theCommands.opSequence());
-      theIndices.AddChildValueOnTop((Rational)(i+1));
-      theIndices.AddChildValueOnTop((Rational)(j+1));
-      currentE.MakeFunction(theCommands, leftE, theIndices);
+    { leftIE.AssignValue(i+1, theCommands);
+      rightIE.AssignValue(j+1, theCommands);
+      currentE.reset(theCommands, 3);
+      currentE.AddChildOnTop(leftE);
+      currentE.AddChildOnTop(leftIE);
+      currentE.AddChildOnTop(rightIE);
       currentRow.AddChildOnTop(currentE);
     }
     output.AddChildOnTop(currentRow);
@@ -4393,7 +4394,7 @@ bool CommandList::outerLieBracket
     leftCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >()
     .LieBracketOnTheRight
     (rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
-    result.Simplify(*theCommands.theGlobalVariableS);
+    result.Simplify(theCommands.theGlobalVariableS);
     return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);
   }
   return false;

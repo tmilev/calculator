@@ -555,6 +555,7 @@ int main(int argc, char **argv)
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}c^2_3";
   //civilizedInput="printSemisimpleLieAlgebra{}(c^{2}_4)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}G_2";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}a_2";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

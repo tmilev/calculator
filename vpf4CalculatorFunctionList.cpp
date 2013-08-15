@@ -375,7 +375,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    "Creates a matrix from a function. The first argument gives the function, \
    the second argument the number of rows, \
    the third- the number of columns.\
-   ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=a/b;\n X; \\det {} X");
+   ", "X:=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}}):=a/b;\n X; \\det {} X");
   this->AddOperationInnerHandler
   ("Transpose", this->innerTranspose, "",
    "Transposes a matrix of expressions. \
@@ -386,7 +386,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    "Tries to convert to a matrix of rationals or matrix of rational \
    functions and computes the determinant if\
    not too large. \
-   ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
+   ", "X:=FunctionToMatrix{}(A,5,5);\n A{}({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
   this->AddOperationInnerHandler
   ("DeterminantPolynomial", this->innerDeterminantPolynomial, "",
    "Attempts to converts the entries of the matrix to polynomials and computes the determinant polynomial.\
@@ -846,6 +846,13 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    the semisimple Lie algebra type, the second argument gives the highest weight in \
    fundamental coordinates. ",
    "Freudenthal{}(B_3, (2,2,2))", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("Killing", this->innerKillingForm, "",
+   "Computes the Killing form product of two elements of semisimple Lie algebra. ",
+   "h_{{i}}:=getCartanGenerator{}(F_1, i);\
+KF{}({{i}},{{j}}):=Killing{}(h_i, h_j);\
+FunctionToMatrix(KF, 4, 4)", true, false)
    ;
   this->AddOperationInnerHandler
   ("FreudenthalFull", this->innerFreudenthalFull, "",

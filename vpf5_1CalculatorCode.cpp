@@ -1757,3 +1757,53 @@ bool CommandList::innerSolveSerreLikeSystem
   }
   return output.AssignValue(out.str(), theCommands);
 }
+
+template <class coefficient>
+coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
+  (const ElementUniversalEnveloping<coefficient>& right)const
+{ MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
+  if (this->IsEqualToZero())
+    return 0;
+  coefficient result=0;
+  ElementUniversalEnveloping<coefficient> adadAppliedToMon, tempElt;
+  SemisimpleLieAlgebra* theOwner;
+  theOwner=&this->GetOwner();
+  MonomialUniversalEnveloping<coefficient> baseGen;
+  std::cout << "<hr>";
+  for (int i=0; i<theOwner->GetNumGenerators(); i++)
+  { baseGen.MakeGenerator(i, *theOwner);
+    adadAppliedToMon.MakeZero(*theOwner);
+    adadAppliedToMon.AddMonomial(baseGen,1);
+    right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
+    tempElt.Simplify();
+    std::cout << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString()
+    << " to get " << tempElt.ToString();
+    this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
+    adadAppliedToMon.Simplify();
+    std::cout << " acting by " << this->ToString() << " on " << tempElt.ToString()
+    << " to get " << adadAppliedToMon.ToString();
+    std::cout << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
+    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
+  }
+  return result;
+}
+
+bool CommandList::innerKillingForm
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerKillingForm");
+  if (!input.IsListNElements(3))
+    return false;
+  Expression leftE=input[1];
+  Expression rightE=input[2];
+  if (!Expression::MergeContexts(leftE, rightE))
+    return false;
+  ElementUniversalEnveloping<RationalFunctionOld > left, right;
+  if (!leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) ||
+      !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right))
+    return false;
+  if (left.IsEqualToZero() || right.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  if (&left.GetOwner()!=&right.GetOwner())
+    return false;
+  return output.AssignValue(left.GetKillingFormProduct(right), theCommands);
+}

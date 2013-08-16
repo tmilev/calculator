@@ -2157,13 +2157,18 @@ public:
   void ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
   ;
-  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
-  //then the below function computes n_{-\epsilon, -\zeta}
+  template<class coefficient>
+  coefficient GetKillingForm
+  (const ElementSemisimpleLieAlgebra<coefficient>& left,
+   const ElementSemisimpleLieAlgebra<coefficient>& right)
+   ;
   template<class coefficient>
   void LieBracket
   (const ElementSemisimpleLieAlgebra<coefficient>& g1,
    const ElementSemisimpleLieAlgebra<coefficient>& g2,
    ElementSemisimpleLieAlgebra<coefficient>& output);
+  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
+  //then the below function computes n_{-\epsilon, -\zeta}
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
@@ -2514,7 +2519,7 @@ public:
   bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping
   (ElementUniversalEnveloping<coefficient>& output, SemisimpleLieAlgebra& inputOwner);
-  bool ConvertToLieAlgebraElementIfPossible
+  bool GetLieAlgebraElementIfPossible
   (ElementSemisimpleLieAlgebra<Rational>& output)const;
   void SubstitutionCoefficients
 (PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext)
@@ -2846,7 +2851,7 @@ public:
   ;
 
   void MakeZero(SemisimpleLieAlgebra& inputOwner);
-  bool ConvertToLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
+  bool GetLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
   void MakeConst(const coefficient& coeff, SemisimpleLieAlgebra& inputOwner)
   { this->MakeZero(inputOwner);
@@ -6053,7 +6058,7 @@ void ElementUniversalEnveloping<coefficient>::MakeOneGeneratorCoeffOne
 }
 
 template <class coefficient>
-bool ElementUniversalEnveloping<coefficient>::ConvertToLieAlgebraElementIfPossible
+bool ElementUniversalEnveloping<coefficient>::GetLieAlgebraElementIfPossible
 (ElementSemisimpleLieAlgebra<Rational>& output)const
 { output.MakeZero();
 //  SemisimpleLieAlgebra& theOwner=this->owners->TheObjects[this->indexInOwners];

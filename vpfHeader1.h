@@ -3439,12 +3439,21 @@ ParallelComputing::GlobalPointerCounter++;
     { d=-d;
       n=-n;
     }
-    this->NumShort=n; this->DenShort=d; this->FreeExtended(); this->Simplify();
+    this->NumShort=n;
+    this->DenShort=d;
+    this->FreeExtended();
+    this->Simplify();
   }
   void DivideBy(const Rational& r);
   void DivideByInteger(int x)
   { int tempDen; signed char tempSign;
-    if (x<0) {tempDen=(-x); tempSign=-1; } else {tempDen=x; tempSign=1; }
+    if (x<0)
+    { tempDen=(-x);
+      tempSign=-1;
+    } else
+    { tempDen=x;
+      tempSign=1;
+    }
     if (this->TryToMultiplyQuickly(tempSign, tempDen))
       return;
     this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyByUInt(((unsigned int)tempDen));
@@ -3541,12 +3550,31 @@ ParallelComputing::GlobalPointerCounter++;
   void RaiseToPower(int x);
   //don't ever call the below manually or you can get memory leak (extended must be nullified here by
   //default!
-  Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n, d); ParallelComputing::SafePointDontCallMeFromDestructors();}
-  Rational(const LargeInt& other){this->Extended=0; *this=other;}
-  Rational(const LargeIntUnsigned& other){this->Extended=0; *this=other;}
-  Rational(): NumShort(0), DenShort(0), Extended(0){ ParallelComputing::SafePointDontCallMeFromDestructors();}
-  Rational(int n){this->Extended=0; this->AssignNumeratorAndDenominator(n, 1); ParallelComputing::SafePointDontCallMeFromDestructors(); }
-  Rational(const Rational& right){this->Extended=0; this->Assign(right); ParallelComputing::SafePointDontCallMeFromDestructors();}
+  Rational(int n, int d)
+  { this->Extended=0;
+    this->AssignNumeratorAndDenominator(n, d);
+    ParallelComputing::SafePointDontCallMeFromDestructors();
+  }
+  Rational(const LargeInt& other)
+  { this->Extended=0;
+    *this=other;
+  }
+  Rational(const LargeIntUnsigned& other)
+  { this->Extended=0;
+    *this=other;
+  }
+  Rational(): NumShort(0), DenShort(0), Extended(0)
+  { ParallelComputing::SafePointDontCallMeFromDestructors();
+  }
+  Rational(int n)
+  { this->Extended=0;
+    this->AssignNumeratorAndDenominator(n, 1);
+    ParallelComputing::SafePointDontCallMeFromDestructors();
+  }
+  Rational(const Rational& right)
+  { this->Extended=0; this->Assign(right);
+    ParallelComputing::SafePointDontCallMeFromDestructors();
+  }
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
   ~Rational(){this->FreeExtended();}
   //the below must be called only with positive arguments!
@@ -3561,15 +3589,25 @@ ParallelComputing::GlobalPointerCounter++;
       b*=-1;
     return Rational::gcd(a, b);
   }
-  inline bool CheckForElementSanity(){ return this->Extended==0;}
-  inline bool checkConsistency(){ return this->ConsistencyCheck();}
+  inline bool CheckForElementSanity()
+  { return this->Extended==0;
+  }
+  inline bool checkConsistency()
+  { return this->ConsistencyCheck();
+  }
   inline bool ConsistencyCheck()
   { if (this->Extended==0)
       return this->DenShort>0;
     return true;
   }
-  inline void operator=(const LargeIntUnsigned& right){LargeInt tempI; tempI=right; this->operator=(tempI); }
-  inline void operator=(const Rational& right){this->Assign(right); }
+  inline void operator=(const LargeIntUnsigned& right)
+  { LargeInt tempI;
+    tempI=right;
+    this->operator=(tempI);
+  }
+  inline void operator=(const Rational& right)
+  { this->Assign(right);
+  }
   void operator=(const Polynomial<Rational>& other);
   inline bool operator==(const int other)
   { if (other==0)
@@ -3612,30 +3650,67 @@ ParallelComputing::GlobalPointerCounter++;
   }
 //  inline void operator/=(const LargeInt& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
 //  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
-  inline void operator+=(int right){this->AddInteger(right); }
-  inline void operator-=(int right){Rational tempRat=right; this->Subtract(tempRat);}
+  inline void operator+=(int right)
+  { this->AddInteger(right);
+  }
+  inline void operator-=(int right)
+  { Rational tempRat=right;
+    this->Subtract(tempRat);
+  }
 //  inline bool operator==(int right){Rational tempRat; tempRat.AssignInteger(right); return this->IsEqualTo(tempRat); }
-  inline void operator=(int right){this->AssignInteger(right); }
-  inline void operator=(const LargeInt& other){this->AssignLargeInteger(other);}
+  inline void operator=(int right)
+  { this->AssignInteger(right);
+  }
+  inline void operator=(const LargeInt& other)
+  { this->AssignLargeInteger(other);
+  }
   Rational operator*(const Rational& right)const
   ;
 //  { Rational result=*this;
 //    result*=right;
 //    return result;
 //  }
-  Rational operator*(int right)const{ Rational tempRat; tempRat.Assign(*this); tempRat.MultiplyByInt(right); return tempRat;}
-  Rational operator/(int right)const{ Rational tempRat; tempRat.Assign(*this); tempRat.DivideByInteger(right); return tempRat;}
+  Rational operator*(int right)const
+  { Rational tempRat;
+    tempRat.Assign(*this);
+    tempRat.MultiplyByInt(right);
+    return tempRat;
+  }
+  Rational operator/(int right)const
+  { Rational tempRat;
+    tempRat.Assign(*this);
+    tempRat.DivideByInteger(right);
+    return tempRat;
+  }
   Vector<Rational>  operator*(const Vector<Rational> & right)const;
   Rational operator+(const Rational& right)const;
   Rational operator-(const Rational& right)const;
   Rational operator/(const Rational& right)const;
-  inline bool operator!=(const Rational& right)const{ return !this->IsEqualTo(right);}
-  inline bool operator!=(const int& right)const{ return !((*this)==right);}
-  inline bool operator>(const Rational& right)const{return this->IsGreaterThan(right); }
-  inline bool operator<(const Rational& right)const{return right.IsGreaterThan(*this); }
-  inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat); }
-  inline bool operator>=(const Rational& right)const{return this->IsGreaterThanOrEqualTo(right); }
-  inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
+  inline bool operator!=(const Rational& right)const
+  { return !this->IsEqualTo(right);
+  }
+  inline bool operator!=(const int& right)const
+  { return !((*this)==right);
+  }
+  inline bool operator>(const Rational& right)const
+  { return this->IsGreaterThan(right);
+  }
+  inline bool operator<(const Rational& right)const
+  { return right.IsGreaterThan(*this);
+  }
+  inline bool operator>(const int right)const
+  { Rational tempRat;
+    tempRat.AssignInteger(right);
+    return this->IsGreaterThan(tempRat);
+  }
+  inline bool operator>=(const Rational& right)const
+  { return this->IsGreaterThanOrEqualTo(right);
+  }
+  inline bool operator<(const int right)const
+  { Rational tempRat;
+    tempRat.AssignInteger(right);
+    return tempRat.IsGreaterThan(*this);
+  }
 };
 
 template<class coefficient>
@@ -3803,18 +3878,17 @@ public:
       output+=tempElt;
     }
   }
-
-static void ProjectOntoHyperPlane
-(Vector<coefficient>& input, Vector<coefficient>& normal,
- Vector<coefficient>& ProjectionDirection, Vector<coefficient>& output)
-{ coefficient t;
-  coefficient tempRat;
-  Vector<coefficient>::ScalarEuclidean(input, normal, t);
-  Vector<coefficient>::ScalarEuclidean(ProjectionDirection, normal, tempRat);
-  t/=(tempRat);
-  t.Minus();
-  Vector<coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
-}
+  static void ProjectOntoHyperPlane
+  (Vector<coefficient>& input, Vector<coefficient>& normal,
+   Vector<coefficient>& ProjectionDirection, Vector<coefficient>& output)
+  { coefficient t;
+    coefficient tempRat;
+    Vector<coefficient>::ScalarEuclidean(input, normal, t);
+    Vector<coefficient>::ScalarEuclidean(ProjectionDirection, normal, tempRat);
+    t/=(tempRat);
+    t.Minus();
+    Vector<coefficient>::VectorPlusVectorTimesScalar(input, ProjectionDirection, t, output);
+  }
   static void VectorPlusVectorTimesScalar
   (const Vector<coefficient>& r1, const Vector<coefficient>& r2, const coefficient& theCoeff,
    Vector<coefficient>& output)
@@ -4053,7 +4127,12 @@ static void ProjectOntoHyperPlane
   { return this->::List<coefficient>::operator>(other);
   }
   inline bool operator>(const Vector<coefficient>& other)const
-  { assert(this->size==other.size);
+  { if (this->size!=other.size)
+    { std::cout << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
+      << this->ToString() << " and " << other.ToString() << ". "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     coefficient c1=0, c2=0;
     for (int i=0; i<this->size; i++)
     { c1+=this->TheObjects[i];
@@ -4319,7 +4398,7 @@ class Vectors: public List<Vector<coefficient> >
     buffer.init((int)(theDimension-1), (int)theDimension);
     for (int i =0; i<theDimension-1; i++)
       for (int j=0; j<theDimension; j++)
-        buffer.elements[i][j].Assign(this->Externalwalls.TheObjects[theSelection.elements[i]].normal.TheObjects[j]);
+        buffer.elements[i][j]=(this->Externalwalls[theSelection.elements[i]].normal[j]);
     buffer.GaussianEliminationByRows(0, NonPivotPointsBuffer);
     if (NonPivotPointsBuffer.CardinalitySelection==1)
     { buffer.NonPivotPointsToEigenVector(NonPivotPointsBuffer, output);
@@ -4725,9 +4804,7 @@ public:
   { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
     unsigned int result=0;
     for (int i=0; i<top; i++)
-      result+=
-      SomeRandomPrimes[i]*this->generatorsIndices[i] +
-      SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
+      result+=SomeRandomPrimes[i]*this->generatorsIndices[i] + SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
     return result;
   }
   static inline unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input)
@@ -4832,7 +4909,9 @@ public:
       return 0;
     return this->monBody[i];
   }
-  inline static std::string GetXMLClassName(){ return "MonomialP"; }
+  inline static std::string GetXMLClassName()
+  { return "MonomialP";
+  }
   unsigned  int HashFunction() const
   { return this->monBody.HashFunction();
   }
@@ -5171,9 +5250,7 @@ public:
     return result;
   }
   void AddMonomial(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
-  { this->CleanupMonIndex
-    (this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
-
+  { this->CleanupMonIndex(this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
   }
   inline bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
@@ -5206,27 +5283,23 @@ public:
   { List<MonomialCollectionTemplate> listCopy=vectorSpace1;
     listCopy.AddListOnTop(vectorSpace2);
     return vectorSpace1.size+vectorSpace2.size-
-    MonomialCollection<TemplateMonomial, coefficient>::GetRankOfSpanOfElements
-    (listCopy, seedMonomials);
+    MonomialCollection<TemplateMonomial, coefficient>::GetRankOfSpanOfElements(listCopy, seedMonomials);
   }
   template <class MonomialCollectionTemplate>
   static bool VectorSpacesIntersectionIsNonTrivial
   (List<MonomialCollectionTemplate>& vectorSpace1, List<MonomialCollectionTemplate>& vectorSpace2,
    HashedList<TemplateMonomial>* seedMonomials=0)
-  { return 0!=MonomialCollection<TemplateMonomial, coefficient>::GetRankIntersectionVectorSpaces
-    (vectorSpace1, vectorSpace2, seedMonomials);
+  { return 0!=MonomialCollection<TemplateMonomial, coefficient>::GetRankIntersectionVectorSpaces(vectorSpace1, vectorSpace2, seedMonomials);
   }
   template <class MonomialCollectionTemplate>
   static bool LinSpanContains
   (const List<MonomialCollectionTemplate>& theList, const MonomialCollectionTemplate& input,
    HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
-    MonomialCollection<TemplateMonomial, coefficient>::
-    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     int startSpanSize=listCopy.size;
     listCopy.AddOnTop(input);
-    MonomialCollection<TemplateMonomial, coefficient>::
-    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size==startSpanSize;
   }
 
@@ -5234,16 +5307,14 @@ public:
   static int GetRankOfSpanOfElements
   (List<MonomialCollectionTemplate>& theList, HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
-    MonomialCollection<TemplateMonomial, coefficient>::
-    GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
+    MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size;
   }
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRowsDeleteZeroRows
   (List<MonomialCollectionTemplate >& theList,
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0)
-  { MonomialCollectionTemplate::GaussianEliminationByRows
-    (theList, IvemadeARowSwitch, seedMonomials);
+  { MonomialCollectionTemplate::GaussianEliminationByRows(theList, IvemadeARowSwitch, seedMonomials);
     for (int j=theList.size-1; j>=0; j--)
       if (theList[j].IsEqualToZero())
         theList.size--;

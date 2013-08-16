@@ -221,7 +221,7 @@ class NilradicalCandidate
   Vector<Rational> ConeIntersection;
   Vector<Rational> ConeStrongIntersection;
   Vector<Rational> ConeRelativelyStrongIntersection;
-  Vector<Rational> LInfiniteRelation;
+//  Vector<Rational> LInfiniteRelation;
   Vector<Rational> ConeSeparatingNormal;
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
@@ -257,7 +257,7 @@ class NilradicalCandidate
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
   void ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables);
 //  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
-  bool IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel);
+  bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<Rational> >& theElts, const Vectors<Rational>& theWeights)const;

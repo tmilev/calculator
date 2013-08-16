@@ -937,7 +937,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras
 //    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
-  theSAs.HookUpCentralizers();
+  theSAs.HookUpCentralizers(theCommands.theGlobalVariableS);
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
 //  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
 //  std::cout << theCommands.theObjectContainer.ToString();
@@ -1027,7 +1027,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
     return false;
   }
   curGenUErf=genE.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> > ();
-  if (!curGenUErf.ConvertToLieAlgebraElementIfPossible(output))
+  if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
   { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString()
     << " to an honest Lie algebra element. ";
     return false;

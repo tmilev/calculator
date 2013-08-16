@@ -197,7 +197,10 @@ std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& am
 }
 
 std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToStringSSsumaryHTML");
+  if (!this->flagComputeNilradicals)
+    return "";
+  std::stringstream out;
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
@@ -211,57 +214,32 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
     numNonCentralizerCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFails;
     numBadParabolics+=this->theSubalgebraCandidates[i].NumBadParabolics;
   }
+ out << "<br>There are " << numIsotypicallyCompleteNilrads
+  << " possible isotypic nilradical extensions of the primal subalgebras. Of them "
+  << numFailingConeCondition << " have intersecting cones. Of the remaining "
+  << numIsotypicallyCompleteNilrads-numFailingConeCondition << " nilradical extensions with non-intersecting cones, "
+  << numIsotypicallyCompleteNilrads-numNonCentralizerCondition
+  << " satisfy the centralizer condition and "
+  << numNonCentralizerCondition-numFailingConeCondition << " fail the centralizer condition.";
   if (numBadParabolics>0)
-    out << "<br><span style=\"color:#FF0000\">There are " << numBadParabolics << " bad parabolic subalgebras!</span><br>";
-  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{multirow}\\begin{document}" ;
-  out << "\n<br>\n\\begin{longtable}{ccp{3cm}p{3cm}cc}";
-  out << "\\caption{Semisimple subalgebras in type $" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
-  (this->owneR->theWeyl.theDynkinType[0], theFormat)
-  << "$ \\label{tableSSSubalgerbas" << this->owneR->theWeyl.theDynkinType.ToStringRelativeToAmbientType
-  (this->owneR->theWeyl.theDynkinType[0], theFormat) << "}. ";
-  out << "Number of isotypically complete nilradicals: " << numIsotypicallyCompleteNilrads << ", of them "
-  << numFailingConeCondition << " fail the cone condition.";
-  if (numNoLinfRelFound==0)
-    out << "<br>In all " << numFailingConeCondition << " cases, an $\\mathfrak{l}$-infinite relation was found. ";
+    out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
+    << numBadParabolics << " have centralizer parabolics do not extend to  "
+    << " parabolics of the ambiend Lie algebra with Levi types A and C. For these subalgebras the PSZ construction is not proven to "
+    << "hold."
+    << " </span>";
   else
-    out << "<br>In " << numNoLinfRelFound << " cases, no L-infinite relation was found. <br>";
-  out << "}\\\\\n<br>\n";
-  out << "Type $\\mathfrak s$ & Centralizer &Decomp. $\\mathfrak g$ over $\\mathfrak s$ "
-  << "&Decomp. $\\mathfrak g$ over $\\mathfrak s\\oplus \\mathfrak h_c$"
-  << "&\\#$\\mathfrak n_\\mathfrak l$& \\# cone failures\\\\\\hline\n<br>\n";
-  DynkinType typeCentralizer;
-  FormatExpressions tempCharFormat;
-  for (int i=0; i<this->theSubalgebraCandidates.size; i++)
-  { const CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];
-    if (currentSA.flagSystemProvedToHaveNoSolution)
-      continue;
-    out << "$"
-    << currentSA.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0], theFormat) << "$";
-    if (!currentSA.flagCentralizerIsWellChosen)
-      continue;
-    typeCentralizer.MakeZero();
-    if (currentSA.indexMaxSSContainer!=-1)
-      typeCentralizer=
-      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType
-      - currentSA.theWeylNonEmbeddeD.theDynkinType;
-    out << "& $ ";
-    if(!typeCentralizer.IsEqualToZero())
-    { out << typeCentralizer.ToString();
-      if (currentSA.centralizerRank!=typeCentralizer.GetRank())
-        out << "\\oplus";
-    }
-    if (currentSA.centralizerRank!=typeCentralizer.GetRank())
-      out << "\\mathfrak h_{" << (currentSA.centralizerRank-typeCentralizer.GetRank()).ToString() << "}";
-    out << "$";
-    if (!currentSA.charFormaT.IsZeroPointer())
-      tempCharFormat=currentSA.charFormaT.GetElementConst();
-    out << "&$" << currentSA.theCharNonPrimalFundCoords.ToString(&tempCharFormat) << "$ ";
-    out << "&$" << currentSA.thePrimalChaR.ToString(&tempCharFormat) << "$ ";
-    out << "& " << currentSA.FKNilradicalCandidates.size << "&" << currentSA.NumConeIntersections;
-    out << "\\\\ \\hline \n<br>\n";
+    out << "<br><span style=\"color:#0000FF\"> In each of "
+    << numIsotypicallyCompleteNilrads-numNonCentralizerCondition
+    << " case(s) when the centralizer condition holds, the parabolic subalgebra in the centralizer with Levi types A and C extends "
+    << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
+  if (numFailingConeCondition>0)
+  { if (numNoLinfRelFound>0)
+      out << "<br><span style=\"color:#FF0000\">In " << numNoLinfRelFound << " cases no L-infinite relation was found. </span>";
+    else
+      out << "<br><span style=\"color:#0000FF\"> In each of " << numFailingConeCondition
+      << " case(s) of intersecting cones, an L-infinite relation was found. </span>";
   }
-  out << "\\end{longtable}\n<br>\n";
-  out << "\\end{document}";
+
   return out.str();
 }
 
@@ -313,8 +291,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
     typeCentralizer.MakeZero();
     if (currentSA.indexMaxSSContainer!=-1)
       typeCentralizer=
-      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType
-      - currentSA.theWeylNonEmbeddeD.theDynkinType;
+      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType - currentSA.theWeylNonEmbeddeD.theDynkinType;
     out << "& $ ";
     if(!typeCentralizer.IsEqualToZero())
     { out << typeCentralizer.ToString();
@@ -357,8 +334,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   << "as we are confident in the accuracy of all tables.  "
   << " If you see any errors in the tables, we would be very grateful if "
   << "you email us with a simple explanation of the issue!</b><br>";
-  candidatesNotRealizedNotProvenImpossible=
-  this->theSubalgebraCandidates.size-candidatesRealized- candidatesProvenImpossible;
+  candidatesNotRealizedNotProvenImpossible=  this->theSubalgebraCandidates.size-candidatesRealized- candidatesProvenImpossible;
   if (!writingToHD)
   { out << candidatesRealized << " subalgebras realized.";
     out << "<br>Total, there are " << this->theSubalgebraCandidates.size << " = " << candidatesRealized
@@ -383,6 +359,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     << " total arithmetic operations performed = " << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
   out << "<hr> ";
+  out << "Summary:" << this->ToStringSSsumaryHTML(theFormat) << "<hr>";
   if (this->flagProduceLaTeXtables)
     out << "Summary in LaTeX<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "<br><br><hr>";
   if (!writingToHD)
@@ -557,8 +534,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
   Rational tempRat=output.GetDeterminant();
   if (tempRat!=1 && tempRat!=-1)
   { std::cout << "This is a programming error: the determinant of the automorphism matrix of the Dynkin "
-    << "graph must be +/-1, it is instead " << tempRat << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
+    << "graph must be +/-1, it is instead " << tempRat << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
     assert(false);
   }
 }
@@ -809,7 +785,6 @@ bool CandidateSSSubalgebra::CheckInitialization()const
     << " candidate. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-
   return true;
 }
 
@@ -868,20 +843,17 @@ bool CandidateSSSubalgebra::isGoodForTheTop
   int counter=-1;
   int indexHnewInSmallType=this->CartanSAsByComponent.LastObject()->size;
   DynkinSimpleType currentType=this->theWeylNonEmbeddeD.theDynkinType.GetGreatestSimpleType();
-  int indexHnew=
-  this->theWeylNonEmbeddeD.CartanSymmetric.NumRows-currentType.theRank+indexHnewInSmallType;
+  int indexHnew= this->theWeylNonEmbeddeD.CartanSymmetric.NumRows-currentType.theRank+indexHnewInSmallType;
 
   for (int k=0; k<this->CartanSAsByComponent.size; k++)
     for (int l=0; l<this->CartanSAsByComponent[k].size; l++)
     { counter++;
-      theScalarProd= ownerWeyl.RootScalarCartanRoot
-      (HneW, this->CartanSAsByComponent[k][l]);
+      theScalarProd= ownerWeyl.RootScalarCartanRoot(HneW, this->CartanSAsByComponent[k][l]);
       if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHnew, counter))
         return false;
     }
   for (int i=0; i<this->PosRootsPerpendicularPrecedingWeights.size; i++)
-    if (ownerWeyl.RootScalarCartanRoot
-        (HneW, this->PosRootsPerpendicularPrecedingWeights[i])<0)
+    if (ownerWeyl.RootScalarCartanRoot(HneW, this->PosRootsPerpendicularPrecedingWeights[i])<0)
       return false;
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     if (this->CartanSAsByComponent[i].Contains(HneW))
@@ -1000,8 +972,7 @@ bool CandidateSSSubalgebra::ComputeSystem
 
 bool CandidateSSSubalgebra::CheckGensBracketToHs()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CheckGensBracketToHs");
-  if (this->theNegGens.size!=this->thePosGens.size ||
-      this->theNegGens.size!=this->theWeylNonEmbeddeD.GetDim())
+  if (this->theNegGens.size!=this->thePosGens.size || this->theNegGens.size!=this->theWeylNonEmbeddeD.GetDim())
     return false;
   ElementSemisimpleLieAlgebra<Rational> goalH, lieBracket;
   for (int i=0; i<this->theNegGens.size; i++)
@@ -1112,7 +1083,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     theCentralizerCartanElts.GetGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().CartanSymmetric);
     Polynomial<Rational> theDeterminant, theDetMultiplier;
     theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
-    theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer-1, 1,1 );
+    theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer-1, 1, 1);
     theDeterminant*=theDetMultiplier;
     theDeterminant+=-1;
     this->theSystemToSolve.AddOnTop(theDeterminant);
@@ -1609,7 +1580,7 @@ Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
   return theWeight;
 }
 
-bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Selection& inputNilradSel)
+bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inputNilradSel)
 { if (inputNilradSel.CardinalitySelection==1)
     return true;
   ElementSemisimpleLieAlgebra<Rational> mustBeZero;
@@ -1633,8 +1604,8 @@ bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Select
   for (int i=0; i<inputNilradSel.CardinalitySelection; i++)
     for (int j=i+1; j<inputNilradSel.CardinalitySelection; j++)
       if (this->owner->GetScalarSA
-          (this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]])!=0)
-      { std::cout << "This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
+          (this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]])<0)
+      { /*std::cout << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
         << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
         << "The bad elements are: "
         << this->theNilradical[inputNilradSel.elements[i]].ToString() << " of weight "
@@ -1642,10 +1613,11 @@ bool NilradicalCandidate::IsStronglyOrthogonalSelectionNilradicalElements(Select
         << " and "
         << this->theNilradical[inputNilradSel.elements[j]].ToString() << " of weight "
         << this->theNilradicalWeights[inputNilradSel.elements[j]].ToString() << ". "
-        << "The bilinear form is: " << this->owner->BilinearFormFundPrimal.ToString() << ". "
-        << " and the subalgebra in play is: " << this->owner->ToString() << ". "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
+        //<< "The bilinear form is: " << this->owner->BilinearFormFundPrimal.ToString() << ". "
+        //<< " and the subalgebra in play is: " << this->owner->ToString() << ". "
+        //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__)
+        ;
+        //assert(false);*/
         return false;
       }
   return true;
@@ -1750,7 +1722,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
   { int numcycles=MathRoutines::NChooseK(this->theNilradicalWeights.size, i);
     this->theNilradSubsel.initSelectionFixedCardinality(i);
     for (int j=0; j<numcycles; j++, this->theNilradSubsel.incrementSelectionFixedCardinality(i))
-      if (this->IsStronglyOrthogonalSelectionNilradicalElements(this->theNilradSubsel))
+      if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel))
       { this->theNilradicalWeights.SubSelection(this->theNilradSubsel, this->theNilradicalSubsetWeights);
         if (this->theNilradicalSubsetWeights.ConesIntersect
             (this->theNilradicalSubsetWeights, this->theNonFKhwsStronglyTwoSided, &betterIntersection, 0, theGlobalVariables))
@@ -1773,6 +1745,9 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
               this->ConeRelativelyStrongIntersection.AddOnTop(betterIntersection[k+i]);
             }
           }
+//          this->LInfiniteRelation.MakeZero(this->owner->GetPrimalRank());
+//          for (int k=0; k<this->theNilradicalWeights.size; k++)
+//            this->LInfiniteRelation+=this->theNilradicalWeights[k]*this->ConeStrongIntersection[k];
           return true;
         }
       }
@@ -1788,7 +1763,7 @@ bool NilradicalCandidate::TryFindingLInfiniteRels(GlobalVariables* theGlobalVari
     { std::stringstream out;
       out << "<br>Trying " << i+1 << "-tuples (up to 5-tuples): " << j+1 << " out of " << numcycles << " cycles to process. ";
       theReport.Report(out.str());
-      if (this->IsStronglyOrthogonalSelectionNilradicalElements(this->theNilradSubsel))
+      if (this->IsCommutingSelectionNilradicalElements(this->theNilradSubsel))
       { this->ComputeTheTwoConesRelativeToNilradicalSubset();
         if (this->theNilradicalSubsetWeights.ConesIntersect
             (this->theNilradicalSubsetWeights, this->theNonFKhwVectorsStrongRelativeToSubsetWeights, &this->ConeRelativelyStrongIntersection, 0, theGlobalVariables))
@@ -2414,6 +2389,7 @@ void SemisimpleSubalgebras::reset()
   this->flagComputeNilradicals=false;
   this->timeComputationStartInSeconds=-1;
   this->timeComputationEndInSeconds=-1;
+  this->flagProduceLaTeXtables=false;
   this->numAdditions=-1;
   this->numMultiplications=-1;
 }
@@ -4344,11 +4320,15 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
             { out << "<tr><td>" << this->theNilradical[j].ToString() << "</td></tr>";
               out << "<tr><td>" << this->theNilradicalElementOpposites[j].ToString() << "</td></tr>";
             }
-          out << "</table></td>";
+          out << "<tr><td>Scal. prod. <br> L-inf. rel.: "
+          << this->owner->GetScalarSA(currentNilradWeight, this->GetConeStrongIntersectionWeight())
+          << "</td></td>";
+          out << "</table>";
+          out << "</td>";
         }
       out << "</tr></table>";
     }
-    if (this->flagComputedRelativelyStrongIntersections)
+    if (this->flagComputedRelativelyStrongIntersections && this->flagLinfiniteRelFound)
     { tempFormat.vectorSpaceEiBasisNames.SetSize(this->ConeRelativelyStrongIntersection.size);
       for (int j=0; j<this->theNilradicalSubset.size; j++)
         tempFormat.vectorSpaceEiBasisNames[j]=this->theNilradicalSubsetWeights[j].ToString();
@@ -4412,8 +4392,22 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
   out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
   out << "<br>There are " << this->FKNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
-  << this->NumConeIntersections << " have intersecting cones and "
-  << this->FKNilradicalCandidates.size-this->NumConeIntersections << " have non-intersecting cones. ";
+  << this->NumConeIntersections << " have intersecting cones. Of the remaining "
+  << this->FKNilradicalCandidates.size-this->NumConeIntersections << " nilradical extensions with non-intersecting cones, "
+  << this->FKNilradicalCandidates.size-this->NumCentralizerConditionFails
+  << " satisfy the centralizer condition and "
+  << this->NumCentralizerConditionFails-this->NumConeIntersections << " fail the centralizer condition.";
+  if (this->NumBadParabolics>0)
+    out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
+    << this->NumBadParabolics << " have centralizer parabolics do not extend to  "
+    << " parabolics of the ambiend Lie algebra with Levi types A and C. For these subalgebras the PSZ construction is not proven to "
+    << "hold."
+    << " </span>";
+  else
+    out << "<br><span style=\"color:#0000FF\"> In each of "
+    << this->FKNilradicalCandidates.size-this->NumCentralizerConditionFails
+    << " case(s) when the centralizer condition holds, the parabolic subalgebra in the centralizer with Levi types A and C extends "
+    << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
   if (this->NumConeIntersections>0)
   { if (this->NumCasesNoLinfiniteRelationFound>0)
       out << "<br><span style=\"color:#FF0000\">In " << this->NumCasesNoLinfiniteRelationFound
@@ -4430,102 +4424,104 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     return "";
   std::stringstream out;
   out << this->ToStringNilradicalsSummary(theFormat);
-  Vector<Rational> currentNilradVector;
-  out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
-  << "\\caption{Nilradicals\\label{tableNilrads} }\\\\ $ \\mathfrak n _{\\mathfrak l} $ & Cones intersect"
-  << " & Cone intersection ";
-  FormatExpressions tempFormat;
-  if (!this->charFormaT.IsZeroPointer())
-    tempFormat= this->charFormaT.GetElementConst();
-  List<ElementSemisimpleLieAlgebra<Rational> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
-  for (int i=0; i<this->FKNilradicalCandidates.size; i++)
-  { const NilradicalCandidate& currentNilrad=this->FKNilradicalCandidates[i];
-    currentNilradVector=currentNilrad.theNilradicalSelection;
-    for (int j=0; j<this->primalSubalgebraModules.size; j++)
-      currentNilradVector[this->primalSubalgebraModules[j]]-=1;
-    out << "\\\\\\hline<br>\n";
-    out << "$" << currentNilradVector.ToStringLetterFormat("W") << "$ &";
-    if (currentNilrad.flagNilradicalConesIntersect)
-      out << "yes";
-    else
-      out << "no";
-    out << "&";
-    if (currentNilrad.flagLinfiniteRelFound)
-    { out << "\\begin{tabular}{l";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size+currentNilrad.theNilradicalSubsetWeights.size; j++)
-        out << "cc";
-      out << "}Relation&";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j++)
-      { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size+j];
-        theCF.Minus();
-        out << "$" << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
-        << "$";
-        out << " & ";
-        if (j!=currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size-1)
-          out << "+&";
-        else
-          out << "=&";
+  if (this->owner->flagProduceLaTeXtables)
+  { Vector<Rational> currentNilradVector;
+    out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
+    << "\\caption{Nilradicals\\label{tableNilrads} }\\\\ $ \\mathfrak n _{\\mathfrak l} $ & Cones intersect"
+    << " & Cone intersection ";
+    FormatExpressions tempFormat;
+    if (!this->charFormaT.IsZeroPointer())
+      tempFormat= this->charFormaT.GetElementConst();
+    List<ElementSemisimpleLieAlgebra<Rational> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
+    for (int i=0; i<this->FKNilradicalCandidates.size; i++)
+    { const NilradicalCandidate& currentNilrad=this->FKNilradicalCandidates[i];
+      currentNilradVector=currentNilrad.theNilradicalSelection;
+      for (int j=0; j<this->primalSubalgebraModules.size; j++)
+        currentNilradVector[this->primalSubalgebraModules[j]]-=1;
+      out << "\\\\\\hline<br>\n";
+      out << "$" << currentNilradVector.ToStringLetterFormat("W") << "$ &";
+      if (currentNilrad.flagNilradicalConesIntersect)
+        out << "yes";
+      else
+        out << "no";
+      out << "&";
+      if (currentNilrad.flagLinfiniteRelFound)
+      { out << "\\begin{tabular}{l";
+        for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size+currentNilrad.theNilradicalSubsetWeights.size; j++)
+          out << "cc";
+        out << "}Relation&";
+        for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size; j++)
+        { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[currentNilrad.theNilradicalSubsetWeights.size+j];
+          theCF.Minus();
+          out << "$" << (currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
+          << "$";
+          out << " & ";
+          if (j!=currentNilrad.theNonFKhwVectorsStrongRelativeToSubsetWeights.size-1)
+            out << "+&";
+          else
+            out << "=&";
+        }
+        for (int j=0; j<currentNilrad.theNilradicalSubsetWeights.size; j++)
+        { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[j];
+          out << "$" << (currentNilrad.theNilradicalSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
+          << "$";
+          out << " & ";
+          if (j!=currentNilrad.theNilradicalSubsetWeights.size-1)
+            out << "+&";
+        }
+        out << "\\\\<br>\n Elts.& ";
+        for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+        { out << "$" << currentNilrad.theNonFKhwVectorsStrongRelativeToSubset[j].ToString() << "$";
+          out << " & &";
+        }
+        for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+        { out << "$" << currentNilrad.theNilradicalSubset[j].ToString() << "$";
+          out << " & ";
+          if (j!=currentNilrad.theNilradicalSubset.size-1)
+            out << " &";
+        }
+        out << "\\\\<br>\n Opposite elts. &";
+        for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
+          out << " & &";
+        for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+        { out << "$" << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[j]].ToString() << "$";
+          out << " & ";
+          if (j!=currentNilrad.theNilradicalSubset.size-1)
+            out << " &";
+        }
+        out << "\\end{tabular}\\\\\n<br>";
+        out << "&& Relevant Lie brackets: ";
+        ElementSemisimpleLieAlgebra<Rational> tempElt;
+        std::stringstream tempStream;
+        for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+        { currentNilrad.GetModGeneratedByNonHWVandNilradElt(j, RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets);
+          for (int k=0; k<RelevantBrackets.size; k++)
+            tempStream << "$[" << RelevantBracketsLeft[k].ToString() << ", " << RelevantBracketsRight[k].ToString() << "] ="
+            << RelevantBrackets[k].ToString() << "$, ";
+        }
+        for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
+          for (int k=0; k<currentNilrad.theNilradicalSubset.size; k++)
+            if (k!=j)
+            { this->owner->owneR->LieBracket
+              (currentNilrad.theNilradicalSubset[j],
+               currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]], tempElt);
+              tempStream << "$[" << currentNilrad.theNilradicalSubset[j].ToString() << ", "
+              << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]].ToString()
+              << "]=" << tempElt.ToString() << ", ";
+            }
+        std::string tempS=tempStream.str();
+        tempS.resize(tempS.size()-2);
+        out << tempS;
       }
-      for (int j=0; j<currentNilrad.theNilradicalSubsetWeights.size; j++)
-      { Rational theCF=currentNilrad.ConeRelativelyStrongIntersection[j];
-        out << "$" << (currentNilrad.theNilradicalSubsetWeights[j]*theCF).ToStringLetterFormat("\\omega", &tempFormat)
-        << "$";
-        out << " & ";
-        if (j!=currentNilrad.theNilradicalSubsetWeights.size-1)
-          out << "+&";
-      }
-      out << "\\\\<br>\n Elts.& ";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
-      { out << "$" << currentNilrad.theNonFKhwVectorsStrongRelativeToSubset[j].ToString() << "$";
-        out << " & &";
-      }
-      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
-      { out << "$" << currentNilrad.theNilradicalSubset[j].ToString() << "$";
-        out << " & ";
-        if (j!=currentNilrad.theNilradicalSubset.size-1)
-          out << " &";
-      }
-      out << "\\\\<br>\n Opposite elts. &";
-      for (int j=0; j<currentNilrad.theNonFKhwVectorsStrongRelativeToSubset.size; j++)
-        out << " & &";
-      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
-      { out << "$" << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[j]].ToString() << "$";
-        out << " & ";
-        if (j!=currentNilrad.theNilradicalSubset.size-1)
-          out << " &";
-      }
-      out << "\\end{tabular}\\\\\n<br>";
-      out << "&& Relevant Lie brackets: ";
-      ElementSemisimpleLieAlgebra<Rational> tempElt;
-      std::stringstream tempStream;
-      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
-      { currentNilrad.GetModGeneratedByNonHWVandNilradElt(j, RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets);
-        for (int k=0; k<RelevantBrackets.size; k++)
-          tempStream << "$[" << RelevantBracketsLeft[k].ToString() << ", " << RelevantBracketsRight[k].ToString() << "] ="
-          << RelevantBrackets[k].ToString() << "$, ";
-      }
-      for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
-        for (int k=0; k<currentNilrad.theNilradicalSubset.size; k++)
-          if (k!=j)
-          { this->owner->owneR->LieBracket
-            (currentNilrad.theNilradicalSubset[j],
-             currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]], tempElt);
-            tempStream << "$[" << currentNilrad.theNilradicalSubset[j].ToString() << ", "
-            << currentNilrad.theNilradicalElementOpposites[currentNilrad.theNilradSubsel.elements[k]].ToString()
-            << "]=" << tempElt.ToString() << ", ";
-          }
-      std::string tempS=tempStream.str();
-      tempS.resize(tempS.size()-2);
-      out << tempS;
-    }
 
-//    for (int j=0; j<currentNilrad.theNonFKhws.size; j++)
-//    { out << " $" << currentNilrad.theNonFKhws[j].ToStringLetterFormat("\\omega", &tempFormat) << "$";
-//      if (j!=currentNilrad.theNonFKhws.size-1)
-//        out << ", ";
-//    }
+  //    for (int j=0; j<currentNilrad.theNonFKhws.size; j++)
+  //    { out << " $" << currentNilrad.theNonFKhws[j].ToStringLetterFormat("\\omega", &tempFormat) << "$";
+  //      if (j!=currentNilrad.theNonFKhws.size-1)
+  //        out << ", ";
+  //    }
+    }
+    out << "\\end{longtable}";
   }
-  out << "\\end{longtable}";
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     out << "<hr>Subalgebra " << i+1 << ": " << this->FKNilradicalCandidates[i].ToString(theFormat);
   if (this->nilradicalGenerationLog!="")
@@ -5422,9 +5418,32 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   }
 //  if (this->CartanOfCentralizer.size>0)
 //    this->CartanOfCentralizer[0]*=4;
-
-  Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
+/*  Matrix<Rational> basisChangeMatrix;
+  Vectors<Rational> aBasisProjection, aBasisPreimages;
+  Vector<Rational> projection, preimage;
+  for (int i=0; i<this->owner->owneR->GetRank(); i++)
+  { preimage.MakeEi(this->owner->owneR->GetRank(), i);
+    this->GetPrimalWeightProjectionFundCoords(preimage, projection);
+    aBasisProjection.AddOnTop(projection);
+    if (aBasisProjection.size==aBasisProjection.GetRankOfSpanOfElements())
+      aBasisPreimages.AddOnTop(preimage);
+    else
+      aBasisProjection.RemoveLastObject();
+  }
+  aBasisPreimages.GetGramMatrix(this->BilinearFormFundPrimal, &this->owner->owneR->theWeyl.CartanSymmetric);
+  std::cout << "<hr>aBasisPreimages: " << aBasisPreimages.ToString();
+  basisChangeMatrix.AssignVectorsToColumns(aBasisProjection);
+  basisChangeMatrix.Invert();
+  std::cout << "<br>basisChangeMatrix: " << basisChangeMatrix.ToString();
+  std::cout << "<br>BilinearFormFundPrimal: " << this->BilinearFormFundPrimal.ToString();
+  this->BilinearFormFundPrimal*=basisChangeMatrix;
+  basisChangeMatrix.Transpose();
+  this->BilinearFormFundPrimal.MultiplyOnTheLeft(basisChangeMatrix);
+  std::cout << "<br>final bilinear form fund primal: " << this->BilinearFormFundPrimal.ToString();
+*/
+  ////////////////
   this->BilinearFormSimplePrimal=this->theWeylNonEmbeddeD.CartanSymmetric;
+  Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
   this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owneR->theWeyl.CartanSymmetric);
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted=this->BilinearFormSimplePrimal;
@@ -5438,19 +5457,19 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
       diagMat(i,i).AssignNumeratorAndDenominator(1,2);
   fundCoordsViaSimple=bilinearFormInverted;
   fundCoordsViaSimple*=diagMat;
-  std::cout
-  << "<hr>diagMat=" << diagMat.ToString()
-  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
-  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
+//  std::cout
+//  << "<br>diagMat=" << diagMat.ToString()
+//  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
+//  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
   this->BilinearFormFundPrimal=fundCoordsViaSimple;
   this->BilinearFormFundPrimal.Transpose();
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=this->BilinearFormSimplePrimal;
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=fundCoordsViaSimple;
-  std::cout
-  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
-  << "<hr>";
+//  std::cout
+//  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
+//  << "<hr>";
 }

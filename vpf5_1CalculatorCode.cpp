@@ -539,7 +539,8 @@ bool CommandList::innerPrintSSsubalgebras
     theCommands.theObjectContainer.theSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
-    theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
+    if (!isAlreadySubalgebrasObject)
+      theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
     theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
@@ -1788,6 +1789,25 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
   return result;
 }
 
+template <class coefficient>
+coefficient SemisimpleLieAlgebra::GetKillingForm
+  (const ElementSemisimpleLieAlgebra<coefficient>& left,
+   const ElementSemisimpleLieAlgebra<coefficient>& right)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
+  coefficient result=0;
+  ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
+  ChevalleyGenerator baseGen;
+  for (int i=0; i<this->GetNumGenerators(); i++)
+  { baseGen.MakeGenerator(*this, i);
+    adadAppliedToMon.MakeZero();
+    adadAppliedToMon.AddMonomial(baseGen, 1);
+    this->LieBracket(right, adadAppliedToMon, tempElt);
+    this->LieBracket(left, tempElt, adadAppliedToMon);
+    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
+  }
+  return result;
+}
+
 bool CommandList::innerKillingForm
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerKillingForm");
@@ -1797,7 +1817,8 @@ bool CommandList::innerKillingForm
   Expression rightE=input[2];
   if (!Expression::MergeContexts(leftE, rightE))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld > left, right;
+  Expression theContext=leftE.GetContext();
+  ElementUniversalEnveloping<RationalFunctionOld> left, right;
   if (!leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) ||
       !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right))
     return false;
@@ -1805,5 +1826,8 @@ bool CommandList::innerKillingForm
     return output.AssignValue(0, theCommands);
   if (&left.GetOwner()!=&right.GetOwner())
     return false;
-  return output.AssignValue(left.GetKillingFormProduct(right), theCommands);
+  ElementSemisimpleLieAlgebra<Rational> leftEltSS, rightEltSS;
+  if (left.GetLieAlgebraElementIfPossible(leftEltSS) && right.GetLieAlgebraElementIfPossible(rightEltSS))
+    return output.AssignValue(leftEltSS.GetOwner()->GetKillingForm(leftEltSS, rightEltSS), theCommands);
+  return output.AssignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
 }

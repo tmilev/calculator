@@ -575,7 +575,7 @@ bool CommandList::innerPrintSSsubalgebras
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theFile << theSSE.ToString();
+    theFile << "Load{}" << theSSE.ToString();
     theFile << "</body></html>";
   }
   return output.AssignValue(out.str(), theCommands);

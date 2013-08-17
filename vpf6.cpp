@@ -5416,7 +5416,8 @@ std::string Expression::ToString
             out << "\\right)";
         break;
       default:
-        out << "{Sequence{}";
+        if (this->children.size==2)
+          out << "{Sequence{}";
         out << "(";
         for (int i=1; i<this->children.size; i++)
         { std::string currentChildString=(*this)[i].ToString(theFormat);
@@ -5430,7 +5431,8 @@ std::string Expression::ToString
           charCounter%=50;
         }
         out << ")";
-        out << "}";
+        if (this->children.size==2)
+          out << "}";
         break;
     }
   }

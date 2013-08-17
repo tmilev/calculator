@@ -1779,7 +1779,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.innerGetTypeHighestWeightParabolic
+  if(!theCommands.GetTypeHighestWeightParabolic
     (theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer,
      theCommands.innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);

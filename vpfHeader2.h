@@ -1583,11 +1583,15 @@ public:
   static bool innerPrintSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
+  static bool innerRootSubsystem
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   static bool innerConesIntersect
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   template<class coefficient>
-  bool innerGetTypeHighestWeightParabolic
+  bool GetTypeHighestWeightParabolic
   (CommandList& theCommands, const Expression& input, Expression& output,
    Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
    Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,

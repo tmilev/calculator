@@ -556,12 +556,6 @@ int main(int argc, char **argv)
   //civilizedInput="printSemisimpleLieAlgebra{}(c^{2}_4)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}G_2";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}a_2";
-//  civilizedInput="%HideLHS Load{}(Serialization{}(LoadSemisimpleSubalgebras, F^{1}_{4}, (Serialization{}(LoadCandidateSubalgebra, A^{3}_{1}, {Sequence{}((3, 6, 8, 4))}, (\
-//g_{-21}+g_{-14}, g_21+g_{14})), Serialization{}(LoadCandidateSubalgebra, A^{1}_{1}+A^{8}_{1}, ((2, 3, 4, 2), (0, 4, 8, 4)), (\
-//g_{-24}, g_{24}, g_{-6}+g_{-7}, 2 g_{7}+2 g_{6})),\
-//Serialization{}(LoadCandidateSubalgebra, A^{1}_{1}+A^{3}_{1}+A^{8}_{1}, ((2, 3, 4, 2), (0, 3, 4, 2), (0, 0, 4, 4)), ( \
-//g_{-24}, g_{24}, g_{-9}+g_{-10}, g_{10}+g_{9}, g_{-3}+g_{-4}, 2 g_{4}+2 g_{3}\
-//)))))";
 /*  civilizedInput="%HideLHS \
 experimentalPrintSemisimpleSubalgebrasFull{}Load{}(\
 Serialization{}(LoadSemisimpleSubalgebras, F_{4}, (\

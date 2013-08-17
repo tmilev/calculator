@@ -305,7 +305,7 @@ bool Serialization::innerStoreObject
   std::string letterS;
   letterS=input.theLetter;
   letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
-  indexE.AssignValue(input.lengthFirstCoRootSquared, theCommands);
+  indexE.AssignValue(input.lengthFirstCoRootSquared/2, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
   output.reset(theCommands);

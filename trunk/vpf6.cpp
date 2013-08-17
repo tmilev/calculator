@@ -1988,7 +1988,7 @@ bool CommandList::fHWTAABF
 }
 
 template<class coefficient>
-bool CommandList::innerGetTypeHighestWeightParabolic
+bool CommandList::GetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
@@ -2037,7 +2037,7 @@ bool CommandList::innerGetTypeHighestWeightParabolic
   }
   int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
-//  std::cout << "final context of innerGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
+//  std::cout << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 
@@ -2050,7 +2050,7 @@ bool CommandList::fDecomposeCharGenVerma
   Selection parSel, invertedParSel;
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
-  if (!theCommands.innerGetTypeHighestWeightParabolic<RationalFunctionOld>
+  if (!theCommands.GetTypeHighestWeightParabolic<RationalFunctionOld>
       (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg,
        theCommands.innerRationalFunction))
    return false;
@@ -2159,7 +2159,7 @@ bool CommandList::innerPrintGenVermaModule
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.innerGetTypeHighestWeightParabolic
+  if(!theCommands.GetTypeHighestWeightParabolic
       (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
        theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
@@ -2184,7 +2184,7 @@ bool CommandList::innerHWV
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.innerGetTypeHighestWeightParabolic
+  if(!theCommands.GetTypeHighestWeightParabolic
       (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
        theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
@@ -6307,7 +6307,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators
     for (int i=0; i<numEltsToCut; i++)
       truncatedInput.children.RemoveLastObject();
   }
-  if (!theCommands.innerGetTypeHighestWeightParabolic<Polynomial<Rational> >
+  if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
       (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra,
        Serialization::innerPolynomial))
     return output.SetError
@@ -6340,7 +6340,7 @@ bool CommandList::innerFreudenthalFull
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
-  if (!theCommands.innerGetTypeHighestWeightParabolic<Rational>
+  if (!theCommands.GetTypeHighestWeightParabolic<Rational>
       (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
@@ -6365,8 +6365,7 @@ bool CommandList::innerFreudenthalEval
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
-  if (!theCommands.innerGetTypeHighestWeightParabolic<Rational>
-      (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
+  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;

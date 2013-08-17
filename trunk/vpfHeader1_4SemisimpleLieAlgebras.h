@@ -211,7 +211,7 @@ class NilradicalCandidate
   bool flagNilradicalConesIntersect;
   bool flagNilradicalConesStronglyIntersect;
   bool flagComputedRelativelyStrongIntersections;
-  bool flagStrongCentralizerConditionHoldS;
+  bool flagRestrictedCentralizerConditionHoldS;
   bool flagParabolicACextendsToParabolicAC;
 
   bool flagLinfiniteRelFound;
@@ -243,7 +243,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate():owner(0),flagStrongCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
+  NilradicalCandidate():owner(0),flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
   void reset();
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex);
@@ -318,7 +318,7 @@ public:
   int NumConeIntersections;
   int NumCasesNoLinfiniteRelationFound;
   int NumBadParabolics;
-  int NumCentralizerConditionFails;
+  int NumCentralizerConditionFailsConeConditionHolds;
   //The highest weight vectors are by definition cartan-centralizer-split
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;

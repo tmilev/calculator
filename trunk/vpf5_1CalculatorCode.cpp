@@ -1300,8 +1300,7 @@ bool CommandList::innerCharacterSSLieAlgFD
   Selection parSel;
   SemisimpleLieAlgebra* ownerSSLiealg;
   Expression tempE, tempE2;
-  if (!theCommands.innerGetTypeHighestWeightParabolic
-      (theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, 0))
+  if (!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, 0))
     return false;
   if (output.IsError())
     return true;
@@ -1830,4 +1829,37 @@ bool CommandList::innerKillingForm
   if (left.GetLieAlgebraElementIfPossible(leftEltSS) && right.GetLieAlgebraElementIfPossible(rightEltSS))
     return output.AssignValue(leftEltSS.GetOwner()->GetKillingForm(leftEltSS, rightEltSS), theCommands);
   return output.AssignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
+}
+
+bool CommandList::innerRootSubsystem
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerRootSubsystem");
+  if (input.children.size<3)
+    return false;
+  SemisimpleLieAlgebra* theSSlieAlg=0;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (Serialization::innerSSLieAlgebra, input[1], theSSlieAlg, &errorString))
+    return output.SetError(errorString, theCommands);
+  int theRank=theSSlieAlg->GetRank();
+  Vector<Rational> currentRoot;
+  Vectors<Rational> outputRoots;
+  WeylGroup& theWeyl=theSSlieAlg->theWeyl;
+  if (!theWeyl.theDynkinType.IsSimple())
+  { theCommands.Comments << "<hr>Function root subsystem works for simple ambient types only.";
+    return false;
+  }
+  for (int i=2; i<input.children.size; i++)
+  { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
+      return false;
+    if (!theWeyl.RootSystem.Contains(currentRoot))
+      return output.SetError("Input vector "+ currentRoot.ToString() + " is not a root. ", theCommands);
+    outputRoots.AddOnTop(currentRoot);
+  }
+  std::stringstream out;
+  DynkinDiagramRootSubalgebra theDiagram;
+  theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
+  theDiagram.ComputeDiagramTypeKeepInput(outputRoots, theWeyl.CartanSymmetric);
+  out << "Diagram final: " << theDiagram.ToStringRelativeToAmbientType(theWeyl.theDynkinType[0]);
+  return output.AssignValue(out.str(), theCommands);
 }

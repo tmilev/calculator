@@ -204,23 +204,23 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
-  int numNonCentralizerCondition=0;
+  int numNonCentralizerConditionWithConeCondition=0;
   int numBadParabolics=0;
 
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
     numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
-    numNonCentralizerCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFails;
+    numNonCentralizerConditionWithConeCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFailsConeConditionHolds;
     numBadParabolics+=this->theSubalgebraCandidates[i].NumBadParabolics;
   }
  out << "<br>There are " << numIsotypicallyCompleteNilrads
   << " possible isotypic nilradical extensions of the primal subalgebras. Of them "
   << numFailingConeCondition << " have intersecting cones. Of the remaining "
   << numIsotypicallyCompleteNilrads-numFailingConeCondition << " nilradical extensions with non-intersecting cones, "
-  << numIsotypicallyCompleteNilrads-numNonCentralizerCondition
+  << numIsotypicallyCompleteNilrads-numFailingConeCondition- numNonCentralizerConditionWithConeCondition
   << " satisfy the centralizer condition and "
-  << numNonCentralizerCondition-numFailingConeCondition << " fail the centralizer condition.";
+  << numNonCentralizerConditionWithConeCondition << " fail(s) the centralizer condition.";
   if (numBadParabolics>0)
     out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
     << numBadParabolics << " have centralizer parabolics do not extend to  "
@@ -229,7 +229,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
     << " </span>";
   else
     out << "<br><span style=\"color:#0000FF\"> In each of "
-    << numIsotypicallyCompleteNilrads-numNonCentralizerCondition
+    << numIsotypicallyCompleteNilrads-numFailingConeCondition- numNonCentralizerConditionWithConeCondition
     << " case(s) when the centralizer condition holds, the parabolic subalgebra in the centralizer with Levi types A and C extends "
     << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
   if (numFailingConeCondition>0)
@@ -251,14 +251,14 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
   int numIsotypicallyCompleteNilrads=0;
   int numFailingConeCondition=0;
   int numNoLinfRelFound=0;
-  int numNonCentralizerCondition=0;
+  int numNonCentralizerConditionWithConeCondition=0;
   int numBadParabolics=0;
 
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { numIsotypicallyCompleteNilrads+=this->theSubalgebraCandidates[i].FKNilradicalCandidates.size;
     numFailingConeCondition+=this->theSubalgebraCandidates[i].NumConeIntersections;
     numNoLinfRelFound+=this->theSubalgebraCandidates[i].NumCasesNoLinfiniteRelationFound;
-    numNonCentralizerCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFails;
+    numNonCentralizerConditionWithConeCondition+=this->theSubalgebraCandidates[i].NumCentralizerConditionFailsConeConditionHolds;
     numBadParabolics+=this->theSubalgebraCandidates[i].NumBadParabolics;
   }
   if (numBadParabolics>0)
@@ -1346,7 +1346,7 @@ owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
 totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1),
-NumBadParabolics(0), NumCentralizerConditionFails(0)
+NumBadParabolics(0), NumCentralizerConditionFailsConeConditionHolds(0)
 {
 }
 
@@ -1663,7 +1663,8 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
         this->leviRootsSmallPrimalFundCoords.AddOnTop(projectionRoot);
     }
   }
-  this->theLeviDiagramAmbienT.ComputeDiagramTypeModifyInput(this->leviRootsAmbienT, theWeyl);
+  Vectors<Rational> tempVs=this->leviRootsAmbienT;
+  this->theLeviDiagramAmbienT.ComputeDiagramTypeModifyInput(tempVs, theWeyl);
 //  std::cout << "<br>levi roots small: " << this->leviRootsSmallPrimalFundCoords.ToString();
   this->theLeviDiagramSmalL.ComputeDiagramTypeModifyInputRelative
   (this->leviRootsSmallPrimalFundCoords, this->owner->RootSystemCentralizerPrimalCoords, this->owner->BilinearFormFundPrimal);
@@ -1691,14 +1692,11 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
       break;
     }
   }
+  this->flagRestrictedCentralizerConditionHoldS=!smallLeviHasBDGE;
   if (!smallLeviHasBDGE)
-  { this->flagParabolicACextendsToParabolicAC=!ambientLeviHasBDGE;
-    if (this->flagParabolicACextendsToParabolicAC)
-      this->flagStrongCentralizerConditionHoldS=true;
-  }
+    this->flagParabolicACextendsToParabolicAC=!ambientLeviHasBDGE;
   if (smallLeviHasBDGE)
-  { this->flagStrongCentralizerConditionHoldS=false;
-    this->flagParabolicACextendsToParabolicAC=true;
+  { this->flagParabolicACextendsToParabolicAC=true;
     if (!ambientLeviHasBDGE)
     { std::cout << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
       << " of type A and C, but intesects the centralizer in components of type B and D. This must be impossible according to "
@@ -1910,16 +1908,17 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   this->NumConeIntersections=0;
   this->NumCasesNoLinfiniteRelationFound=0;
   this->NumBadParabolics=0;
-  this->NumCentralizerConditionFails=0;
+  this->NumCentralizerConditionFailsConeConditionHolds=0;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     if (this->FKNilradicalCandidates[i].flagNilradicalConesIntersect)
     { this->NumConeIntersections++;
       if (!this->FKNilradicalCandidates[i].flagLinfiniteRelFound)
         this->NumCasesNoLinfiniteRelationFound++;
-      if (!this->FKNilradicalCandidates[i].flagParabolicACextendsToParabolicAC)
+    } else
+    { if (!this->FKNilradicalCandidates[i].flagParabolicACextendsToParabolicAC)
         this->NumBadParabolics++;
-      if (!this->FKNilradicalCandidates[i].flagStrongCentralizerConditionHoldS)
-        this->NumCentralizerConditionFails++;
+      if (!this->FKNilradicalCandidates[i].flagRestrictedCentralizerConditionHoldS)
+        this->NumCentralizerConditionFailsConeConditionHolds++;
     }
 //  this->nilradicalGenerationLog=out.str();
   //std::cout << out.str();
@@ -1989,7 +1988,7 @@ void Vector<coefficient>::PerturbSplittingNormal
 void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
   this->flagComputedRelativelyStrongIntersections=false;
-  this->flagStrongCentralizerConditionHoldS=false;
+  this->flagRestrictedCentralizerConditionHoldS=false;
   this->flagParabolicACextendsToParabolicAC=true;
   this->ComputeTheTwoCones(theGlobalVariables);
   this->flagNilradicalConesIntersect=this->theNilradicalWeights.ConesIntersect
@@ -1997,7 +1996,10 @@ void NilradicalCandidate::ProcessMe(GlobalVariables* theGlobalVariables)
   this->flagLinfiniteRelFound=false;
   if (!this->flagNilradicalConesIntersect)
   { if (this->theNonFKhws.size==0 && this->theNilradicalWeights.size==0)
+    { this->flagRestrictedCentralizerConditionHoldS=true;
+      this->flagParabolicACextendsToParabolicAC=true;
       return;
+    }
     this->ComputeParabolicACextendsToParabolicAC(theGlobalVariables);
     return;
   }
@@ -4349,7 +4351,7 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
   } else
   { if (!this->flagParabolicACextendsToParabolicAC)
       out << "<br><span style=\"color:#FF0000\"><b>Strong centralizer condition not proven to hold.</b></span>";
-    if (this->flagStrongCentralizerConditionHoldS)
+    if (this->flagRestrictedCentralizerConditionHoldS)
       out << "<br>The centralizer condition holds. ";
     out << "<br>Levi roots primal fundamental coordinates: " << this->leviRootsSmallPrimalFundCoords.ToString()
     << "<br>Levi components in centralizer: "
@@ -4394,9 +4396,9 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
   << this->NumConeIntersections << " have intersecting cones. Of the remaining "
   << this->FKNilradicalCandidates.size-this->NumConeIntersections << " nilradical extensions with non-intersecting cones, "
-  << this->FKNilradicalCandidates.size-this->NumCentralizerConditionFails
+  << this->FKNilradicalCandidates.size-this->NumConeIntersections-this->NumCentralizerConditionFailsConeConditionHolds
   << " satisfy the centralizer condition and "
-  << this->NumCentralizerConditionFails-this->NumConeIntersections << " fail the centralizer condition.";
+  << this->NumCentralizerConditionFailsConeConditionHolds << " fail the centralizer condition.";
   if (this->NumBadParabolics>0)
     out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
     << this->NumBadParabolics << " have centralizer parabolics do not extend to  "
@@ -4405,7 +4407,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
     << " </span>";
   else
     out << "<br><span style=\"color:#0000FF\"> In each of "
-    << this->FKNilradicalCandidates.size-this->NumCentralizerConditionFails
+    << this->FKNilradicalCandidates.size-this->NumConeIntersections-this->NumCentralizerConditionFailsConeConditionHolds
     << " case(s) when the centralizer condition holds, the parabolic subalgebra in the centralizer with Levi types A and C extends "
     << "to parabolic subalgebra of the ambient Lie algebra whose Levi types are A and C only. </span>";
   if (this->NumConeIntersections>0)

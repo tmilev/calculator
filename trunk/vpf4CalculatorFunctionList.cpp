@@ -281,16 +281,11 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
  "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
-   "Creates a semisimple Lie algebra. \
-    The type of the semisimple Lie algebra is given in the format\
-    A_n or, alternatively, in the format A^k_n, \
-    where the capital letter stands for the type, \
+   "Creates a semisimple Lie algebra. The type of the semisimple Lie algebra is given in the format\
+    A_n or, alternatively, in the format A^k_n, where the capital letter stands for the type, \
     the lower index stands for the rank, and the upper index stands for \
-    the length of the first co-root squared divided by two. \
-    Here, we define i^th co-root length squared as 4/(length squared of the \
-    i^th simple root). \
-    <br>When omitted, the upper index is substituted \
-    with a default value. \
+    the length of the first root squared divided by two. \
+    <br>Omitting the upper index is means that the upper index is 1.\
     <br>The upper index determines the scaling of \
     the symmetric Cartan matrix.  A non-default value for the upper index \
     will result in rescaling the structure constants of the corresponding \
@@ -303,11 +298,9 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
     The roots are ordered in order the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
-    By default (when the upper index is not present or when it is equal to 1), the roots are scaled so that the long \
+    By default (when the upper index is equal to 1), the roots are scaled so that the long \
     root has squared length 2 in types \
-    A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2.\
-    If the upper index is present, the root length squared of the first simple root equals \
-    (upper index)*(default first root length squared)^2/2.\
+    A_n, B_n, D_n, E_6, E_7, E_8, and F_4, length 4 in C_n, and length 6 in type G_2.\
     ",
    "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
@@ -580,6 +573,12 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    all times, unlike\
    the other more efficient implementations).",
    "KLcoeffs{}(B_3)");
+  this->AddOperationInnerHandler
+  ("RootSubsystem", this->innerRootSubsystem, "",
+   "Generates a root subsystem of a simple type. First argument indicates simple type, second, third,... arguments \
+   give the generating roots. ",
+   "RootSubsystem(F_4, (0,1,0,0), (0,0,1,0), (1,1,2,2))");
+
   this->AddOperationInnerHandler
   ("printRootSubalgebras", this->fprintRootSAs, "",
    "Prints sl(2) subalgebras and root subalgebras. \

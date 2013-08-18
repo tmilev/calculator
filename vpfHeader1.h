@@ -2019,8 +2019,7 @@ void NonPivotPointsToEigenVector
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<Element>& inputColumn, Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
-  bool Invert(GlobalVariables& theGlobalVariables){return this->Invert();}
-  bool Invert(const Element& theRingUnit=1, const Element& theRingZero=0);
+  bool Invert(GlobalVariables* theGlobalVariables=0);
   void NullifyAll(const Element& theRingZero=0);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
@@ -2505,7 +2504,7 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
 }
 
 template <typename Element>
-bool Matrix<Element>::Invert(const Element& theRingUnit, const Element& theRingZero)
+bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
 { if (this->NumCols!=this->NumRows)
   { std::cout << "This is a programming error: requesting to invert a non-square matrix of "
     << this->NumRows << " rows and " << this->NumCols << " columns. "
@@ -2518,7 +2517,7 @@ bool Matrix<Element>::Invert(const Element& theRingUnit, const Element& theRingZ
   Matrix theInverse;
   theInverse.MakeIdMatrix(this->NumRows);
   Selection NonPivotCols;
-  this->GaussianEliminationByRows(&theInverse, &NonPivotCols);
+  this->GaussianEliminationByRows(&theInverse, &NonPivotCols, 0, theGlobalVariables);
   if(NonPivotCols.CardinalitySelection!=0)
     return false;
   *this=theInverse;
@@ -3296,12 +3295,12 @@ public:
   //changed it back to int. Grrrrr.
   int DenShort;
   LargeRationalExtended *Extended;
-  static unsigned TotalSmallAdditions;
-  static unsigned TotalLargeAdditions;
-  static unsigned TotalSmallMultiplications;
-  static unsigned TotalLargeMultiplications;
-  static unsigned TotalSmallGCDcalls;
-  static unsigned TotalLargeGCDcalls;
+  static unsigned long long TotalSmallAdditions;
+  static unsigned long long TotalLargeAdditions;
+  static unsigned long long TotalSmallMultiplications;
+  static unsigned long long TotalLargeMultiplications;
+  static unsigned long long TotalSmallGCDcalls;
+  static unsigned long long TotalLargeGCDcalls;
   void GetDenominator(Rational& output)
   { LargeIntUnsigned tempInt;
     this->GetDenominator(tempInt);
@@ -3801,8 +3800,9 @@ public:
     return result;
   }
   void PerturbNoZeroScalarProductWithMe(const List<Vector<coefficient> >& inputVectors);
-  void PerturbSplittingNormal
-(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone)
+  void PerturbNormalRelativeToVectorsInGeneralPosition
+(const Vectors<Rational>& NonStrictConeNonPositiveScalar, const List<Vector<Rational> >& VectorsToBeInGeneralPosition)
+
  ;
 
   coefficient ScalarProduct (const Vector<coefficient>& r2, const Matrix<coefficient>& form) const
@@ -4495,6 +4495,11 @@ class Vectors: public List<Vector<coefficient> >
     for (int i=0; i<this->size; i++)
       for (int j=0; j<tempNumCols; j++)
         output.elements[i][j]=this->TheObjects[i][j];
+  }
+  void GetOrthogonalComplement(Vectors<coefficient>& output)
+  { Matrix<coefficient> tempMat;
+    tempMat.AssignVectorsToRows(*this);
+    tempMat.GetZeroEigenSpaceModifyMe(output);
   }
   bool LinSpanContainsVector
   (const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const
@@ -8242,8 +8247,6 @@ public:
   MemorySaving<Selection> selGetNewVerticesAppend;
   MemorySaving<Selection> selGetNewVerticesAppend2;
   MemorySaving<Selection> selSplitChamber;
-  MemorySaving<Selection> selEliminateFakeNormalsUsingVertices;
-  MemorySaving<Selection> selCreateFromVertices;
 
   MemorySaving<HashedList<Selection> > hashedSelSimplexAlg;
 
@@ -8263,10 +8266,6 @@ public:
   MemorySaving<Matrix<Rational> > matSimplexAlgorithm3;
   MemorySaving<Matrix<Rational> > matGetNewVerticesAppend;
   MemorySaving<Matrix<Rational> > matSplitChamberBuff;
-  MemorySaving<Matrix<Rational> > matComputeNormalFromSelection;
-  MemorySaving<Matrix<Rational> > matEliminateFakeNormalsUsingVertices;
-  MemorySaving<Matrix<Rational> > matCreateFromVertices;
-
 
   MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer5;
   MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer6;
@@ -8295,8 +8294,6 @@ public:
   MemorySaving<Vectors<Rational> > rootsComputeEpsCoordsWRTk2;
   MemorySaving<Vectors<Rational> > rootsComputeEpsCoordsWRTk;
   MemorySaving<Vectors<Rational> > rootsGetEpsilonCoords;
-  MemorySaving<Vectors<Rational> > rootsEliminateFakeNormalsUsingVertices;
-  MemorySaving<Vectors<Rational> > rootsCreateFromVertices;
   MemorySaving<Vectors<Rational> > rootsConeWriteToFileBuffer;
 
   MemorySaving<HashedList<Vector<Rational> > > hashedRootsComputeSubGroupFromGeneratingReflections;

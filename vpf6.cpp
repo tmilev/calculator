@@ -3579,6 +3579,12 @@ bool CommandList::innerPrintSSLieAlgebra
       << "</td></tr>";
     }
     out << "</table>";
+    out << "Comma delimited list of roots: ";
+    for (int i=0; i<theWeyl.RootSystem.size; i++)
+    { out << theWeyl.RootSystem[i].ToString();
+      if (i!=theWeyl.RootSystem.size-1)
+        out << ", ";
+    }
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
     out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "

@@ -62,12 +62,12 @@ bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 //DrawingVariables TDV(200, 400);
 int rootSubalgebras::ProblemCounter=0;
 
-unsigned int Rational::TotalLargeAdditions=0;
-unsigned int Rational::TotalLargeGCDcalls=0;
-unsigned int Rational::TotalLargeMultiplications=0;
-unsigned int Rational::TotalSmallAdditions=0;
-unsigned int Rational::TotalSmallGCDcalls=0;
-unsigned int Rational::TotalSmallMultiplications=0;
+unsigned long long Rational::TotalLargeAdditions=0;
+unsigned long long Rational::TotalLargeGCDcalls=0;
+unsigned long long Rational::TotalLargeMultiplications=0;
+unsigned long long Rational::TotalSmallAdditions=0;
+unsigned long long Rational::TotalSmallGCDcalls=0;
+unsigned long long Rational::TotalSmallMultiplications=0;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
@@ -1824,7 +1824,7 @@ bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* 
   { int tempI= this->IndicesNonZeroMults.TheObjects[i];
     tempRoots.AddOnTop(owner.startingVectors[tempI]);
   }
-  tempCone.CreateFromVertices(tempRoots, theGlobalVariables);
+  tempCone.CreateFromVertices(tempRoots, &theGlobalVariables);
   return !this->IsIrrelevant;
 }
 

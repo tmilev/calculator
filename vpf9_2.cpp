@@ -1591,7 +1591,7 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan
 (Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
 { Matrix<Rational>  invertedSmallCartan;
   invertedSmallCartan=this->theDomain().theWeyl.CartanSymmetric;
-  invertedSmallCartan.Invert(theGlobalVariables);
+  invertedSmallCartan.Invert(&theGlobalVariables);
   int theSmallDimension=this->theDomain().theWeyl.CartanSymmetric.NumRows;
   output.MakeZero(theSmallDimension);
   for (int i=0; i<theSmallDimension; i++)
@@ -1701,7 +1701,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   int rankSA=this->theDomain().theWeyl.GetDim();
   Matrix<Rational>  tempMat;
   tempMat=(this->theDomain().theWeyl.CartanSymmetric);
-  tempMat.Invert(theGlobalVariables);
+  tempMat.Invert(&theGlobalVariables);
   int numPosRootsDomain=this->theDomain().theWeyl.RootsOfBorel.size;
   output.SetSize(theRootSystem.size);
   Vector<Rational> theScalarProducts;

@@ -278,7 +278,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   if (this->SimpleBasisK.size>0)
   { this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix, &this->GetAmbientWeyl().CartanSymmetric);
 //  std::cout << "<br>The gram matrix is: " << InvertedGramMatrix.ToString();
-    InvertedGramMatrix.Invert(theGlobalVariables);
+    InvertedGramMatrix.Invert(&theGlobalVariables);
   }
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
   for(int i=0; i<this->kModules.size; i++)
@@ -639,7 +639,7 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational> &domain, Vectors<Rational
   //  range.ComputeDebugString();
   //  matB.ComputeDebugString();
   //}
-  matB.Invert(theGlobalVariables);
+  matB.Invert(&theGlobalVariables);
   Rational tempRat2;
   for (int k=0; k<theDimension; k++)
     for (int i=0; i<theDimension; i++)
@@ -1206,7 +1206,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   out2 << this->ToString() << "\n";
   Matrix<Rational>  tempMat;
   this->SimpleBasisK.GetMatrixRootsToRows(tempMat);
-  tempMat.Invert(theGlobalVariables);
+  tempMat.Invert(&theGlobalVariables);
   int counter=0;
   HashedList<Vector<Rational> >& AllRoots= this->GetAmbientWeyl().RootSystem;
   for(int i=0; i<AllRoots.size; i++)
@@ -1260,7 +1260,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
       tempRoots[l]=(tempRoot);
       Matrix<Rational> tempMat;
       tempRoots.GetMatrixRootsToRows(tempMat);
-      tempMat.Invert(theGlobalVariables);
+      tempMat.Invert(&theGlobalVariables);
       for(int i=0; i<AllRoots.size; i++)
       { Vector<Rational> linComb;
         if (this->AllRootsK.GetIndex(AllRoots.TheObjects[i])==-1)
@@ -1383,7 +1383,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
     counter+=this->theKComponentRanks.TheObjects[i];
   }
   //tempMat.ComputeDebugString();
-  if (tempMat.Invert(theGlobalVariables))
+  if (tempMat.Invert(&theGlobalVariables))
   { //tempMat.ComputeDebugString();
     for (int l=0; l<this->TestedRootsAlpha.size; l++)
     { Vector<Rational> linComb;

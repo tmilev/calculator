@@ -1586,8 +1586,10 @@ public:
   static bool innerRootSubsystem
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-
   static bool innerConesIntersect
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerPerturbSplittingNormal
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   template<class coefficient>

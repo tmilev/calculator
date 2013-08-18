@@ -174,7 +174,7 @@ bool PartFractions::ArgumentsAllowed
 { if (theArguments.size<1)
     return false;
   Cone tempCone;
-  bool result=tempCone.CreateFromVertices(theArguments, theGlobalVariables);
+  bool result=tempCone.CreateFromVertices(theArguments, &theGlobalVariables);
   if (tempCone.IsTheEntireSpace())
   { outputWhatWentWrong="Error: the vectors you gave as input span the entire space.";
     return false;

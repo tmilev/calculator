@@ -341,8 +341,8 @@ public:
 
 class Cone
 {
-  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
-  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables);
+  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables* theGlobalVariables=0);
+  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables=0);
 public:
   inline static const std::string GetXMLClassName(){ return "Cone";}
   bool flagIsTheZeroCone;
@@ -357,6 +357,8 @@ public:
   ;
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  void GetLinesContainedInCone(Vectors<Rational>& output);
+//  void GetOrthogonalComplementCone(Cone& output, GlobalVariables* theGlobalVariables=0);
   void TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector);
   bool IsAnHonest1DEdgeAffine(const Vector<Rational>& vertex1, const Vector<Rational>& vertex2)const
   { int numCommonWalls=0;
@@ -408,17 +410,18 @@ public:
   (Vector<Rational>& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
 ;
   bool CreateFromNormalS
-  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices,
+   GlobalVariables* theGlobalVariables=0)
   ;
   //returns false if the cone is non-proper, i.e. when either
   //1) the cone is empty or is of smaller dimension than it should be
   //2) the resulting cone is the entire space
   bool CreateFromNormals
-  (Vectors<Rational>& inputNormals, GlobalVariables& theGlobalVariables)
+  (Vectors<Rational>& inputNormals, GlobalVariables* theGlobalVariables=0)
   { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
   }
   bool CreateFromVertices
-  (Vectors<Rational>& inputVertices, GlobalVariables& theGlobalVariables)
+  (const Vectors<Rational>& inputVertices, GlobalVariables* theGlobalVariables=0)
   ;
   void GetInternalPoint(Vector<Rational>& output)const
   { if (this->Vertices.size<=0)
@@ -9244,7 +9247,7 @@ void ModuleSSalgebra<coefficient>::IntermediateStepForMakeFromHW
     tempMat.ComputeDeterminantOverwriteMatrix(tempRat, theRingUnit, theRingZero);
     if (!tempRat.IsEqualToZero())
     { this->theBilinearFormsInverted[l]=currentBF;
-      this->theBilinearFormsInverted[l].Invert(theRingUnit, theRingZero);
+      this->theBilinearFormsInverted[l].Invert();
 //      if (!currentBF.IsPositiveDefinite())
 //        this->flagConjectureCholds=false;
       if (!currentBF.IsNonNegativeAllEntries())

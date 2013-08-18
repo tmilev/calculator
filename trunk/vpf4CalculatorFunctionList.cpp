@@ -9,6 +9,27 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 void CommandList::initPredefinedInnerFunctions()
 {
   this->AddOperationInnerHandler
+  ("PerturbSplittingNormal", CommandList::innerPerturbSplittingNormal, "",
+   "Takes 3 arguments: normal, cone and general vectors. Attempts to perturb the normal so that the cone \
+   stays on one side of the normal and so that the general vectors \
+   have as little zero scalar products with the normal as possible.",
+   "PerturbSplittingNormal{}((0,0,0,0), ( \
+   (-1, -2, -2, -2), (-1, -1, -2, -2), (0, -1, -2, -2), (-1, -1, -1, -1), (0, -1, -1, -1), \
+   (0, 0, -1, -1), (-1, -1, 0, 0), (0, -1, 0, 0), (-1, 0, 0, 0), (1, 0, 0, 0), (0, 1, 0, 0), (1, 1, 0, 0), \
+   (0, 0, 1, 1), (0, 1, 1, 1), (1, 1, 1, 1), (0, 1, 2, 2), (1, 1, 2, 2), (1, 2, 2, 2)\
+   ),\
+   ( \
+   (-2, -3, -4, -2), (-1, -3, -4, -2), (-1, -2, -4, -2), (-1, -2, -3, -2), (-1, -2, -2, -2), (-1, -2, -3, -1), \
+   (-1, -1, -2, -2), (-1, -2, -2, -1), (0, -1, -2, -2), (-1, -1, -2, -1), (-1, -2, -2, 0), \
+   (0, -1, -2, -1), (-1, -1, -1, -1), (-1, -1, -2, 0), (0, -1, -1, -1), (0, -1, -2, 0), (-1, -1, -1, 0), \
+   (0, 0, -1, -1), (0, -1, -1, 0), (-1, -1, 0, 0), (0, 0, 0, -1), (0, 0, -1, 0), (0, -1, 0, 0), (-1, 0, 0, 0), \
+   (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1), (1, 1, 0, 0), (0, 1, 1, 0), (0, 0, 1, 1), (1, 1, 1, 0), \
+   (0, 1, 2, 0), (0, 1, 1, 1), (1, 1, 2, 0), (1, 1, 1, 1), (0, 1, 2, 1), (1, 2, 2, 0), (1, 1, 2, 1), (0, 1, 2, 2), (1, 2, 2, 1), \
+   (1, 1, 2, 2), (1, 2, 3, 1), (1, 2, 2, 2), (1, 2, 3, 2), (1, 2, 4, 2), (1, 3, 4, 2), (2, 3, 4, 2)\
+   )\
+    )", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("MakeWeylGroupElement", WeylGroupCalculatorFunctions::innerCoxeterElement, "",
    "Needs a group name and a list of generators",
    "s_{{i}}:=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)

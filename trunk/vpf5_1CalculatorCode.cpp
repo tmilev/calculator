@@ -528,9 +528,9 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
-  //<< displayFolder << theTitlePageFileNameNoPath
-  //<< "\">"
+  << "<meta http-equiv=\"refresh\" content=\"5; url="
+  << displayFolder << theTitlePageFileNameNoPath
+  << "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
@@ -1853,13 +1853,47 @@ bool CommandList::innerRootSubsystem
   { if (!theCommands.GetVectoR(input[i], currentRoot, 0, theRank, 0))
       return false;
     if (!theWeyl.RootSystem.Contains(currentRoot))
-      return output.SetError("Input vector "+ currentRoot.ToString() + " is not a root. ", theCommands);
+      return output.SetError("Input vector " + currentRoot.ToString() + " is not a root. ", theCommands);
     outputRoots.AddOnTop(currentRoot);
   }
   std::stringstream out;
   DynkinDiagramRootSubalgebra theDiagram;
   theWeyl.TransformToSimpleBasisGenerators(outputRoots, theWeyl.RootSystem);
   theDiagram.ComputeDiagramTypeKeepInput(outputRoots, theWeyl.CartanSymmetric);
-  out << "Diagram final: " << theDiagram.ToStringRelativeToAmbientType(theWeyl.theDynkinType[0]);
+  out << "Diagram final: " << theDiagram.ToStringRelativeToAmbientType(theWeyl.theDynkinType[0])
+  << ". Simple basis: " << theDiagram.SimpleBasesConnectedComponents.ToString();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerPerturbSplittingNormal
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPerturbSplittingNormal");
+  std::stringstream out;
+  if (input.children.size!=4)
+  { out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "
+    << "Instead I got " << input.children.size-1 << ". ";
+    return output.SetError(out.str(), theCommands);
+  }
+  Vector<Rational> splittingNormal;
+  if (!theCommands.GetVectoR(input[1], splittingNormal, 0))
+    return output.SetError("Failed to extract normal from first argument. ", theCommands);
+  Matrix<Rational> theMat;
+  Vectors<Rational> NonStrictCone, VectorsToPerturbRelativeTo;
+  if (!theCommands.GetMatrix(input[2], theMat, 0, splittingNormal.size, 0))
+    return output.SetError("Failed to extract matrix from second argument. ", theCommands);
+  NonStrictCone.AssignMatrixRows(theMat);
+  if (!theCommands.GetMatrix(input[3], theMat, 0, splittingNormal.size, 0))
+    return output.SetError("Failed to extract matrix from third argument. ", theCommands);
+  VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
+  for (int i =0; i<NonStrictCone.size; i++)
+    if (splittingNormal.ScalarEuclidean(NonStrictCone[i])<0)
+      return output.SetError
+      ("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " +
+       NonStrictCone[i].ToString(), theCommands);
+
+  out << "Perturbing " << splittingNormal.ToString() << " relative to cone " << NonStrictCone.ToString() << " and vectors "
+  << VectorsToPerturbRelativeTo.ToString();
+  splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
+  out << "<br>End result: " << splittingNormal.ToString();
   return output.AssignValue(out.str(), theCommands);
 }

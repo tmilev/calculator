@@ -222,9 +222,10 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
   << " satisfy the centralizer condition and "
   << numNonCentralizerConditionWithConeCondition << " fail(s) the centralizer condition.";
   if (numBadParabolics>0)
-    out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
-    << numBadParabolics << " have centralizer parabolics do not extend to  "
-    << " parabolics of the ambiend Lie algebra with Levi types A and C. For these subalgebras the PSZ construction is not proven to "
+    out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition there are  "
+    << numBadParabolics << " pabolic subalgebra(s) that do not extend to  "
+    << " parabolic subalgebra(s) of the ambient Lie algebra with Levi types A and C. "
+    << " For these subalgebras the PSZ construction is not proven to "
     << "hold."
     << " </span>";
   else
@@ -1643,9 +1644,9 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
   //  << this->theNonFKhws.ToString();
   //  std::cout << "<br>separating normal: " << this->ConeSeparatingNormal.ToString();
   //}
-  Vectors<Rational> thePosWeights;
-  thePosWeights.AddListOnTop(this->theNilradicalWeights);
-  thePosWeights.AddListOnTop(this->owner->RootSystemSubalgebraPrimalCoords);
+//  Vectors<Rational> thePosWeights;
+//  thePosWeights.AddListOnTop(this->theNilradicalWeights);
+//  thePosWeights.AddListOnTop(this->owner->RootSystemSubalgebraPrimalCoords);
   //{ std::cout << this->owner->theWeylNonEmbeddeD.theDynkinType.ToString()
   //  << "<br>nilrad:  " << this->theNilradicalWeights.ToString() << "<br>" << "non nilrad: "
   //  << this->theNonFKhws.ToString();
@@ -1653,8 +1654,15 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
   //  std::cout << "<br> this->owner->RootSystemSubalgebraPrimalCoords:" << this->owner->RootSystemSubalgebraPrimalCoords.ToString();
   //  std::cout << "<br>The pos weights: " << thePosWeights.ToString();
   //}
-
-  this->ConeSeparatingNormal.PerturbNoZeroScalarProductWithMe(thePosWeights);
+  Vectors<Rational> rootSystemProjections;
+  Vectors<Rational> conesCombination;
+  rootSystemProjections.SetSize(theWeyl.RootSystem.size);
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+    this->owner->GetPrimalWeightProjectionFundCoords(theWeyl.RootSystem[i], rootSystemProjections[i]);
+  conesCombination=this->theNilradicalWeights;
+  for (int i=0; i<this->theNonFKhws.size; i++)
+    conesCombination.AddOnTop(-this->theNonFKhws[i]);
+  this->ConeSeparatingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(conesCombination, rootSystemProjections);
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { this->owner->GetPrimalWeightProjectionFundCoords(theWeyl.RootSystem[i], projectionRoot);
     if (projectionRoot.ScalarEuclidean(this->ConeSeparatingNormal)==0)
@@ -1924,63 +1932,71 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   //std::cout << out.str();
 }
 
+void Cone::GetLinesContainedInCone(Vectors<Rational>& output)
+{ output.SetSize(0);
+  for (int i=0; i<this->Vertices.size; i++)
+    for (int j=i+1; j<this->Vertices.size; j++)
+      if (this->Vertices[i]==-this->Vertices[j])
+        output.AddOnTop(this->Vertices[i]);
+}
+
 template<class coefficient>
-void Vector<coefficient>::PerturbSplittingNormal
-(const List<Vector<Rational> >& StrictCone, const List<Vector<Rational> >& NonStrictCone)
+void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition
+(const Vectors<Rational>& NonStrictConeNonPositiveScalar, const List<Vector<Rational> >& VectorsToBeInGeneralPosition)
 { MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
-  for (int i=0; i<StrictCone.size; i++)
-    if (this->ScalarEuclidean(StrictCone[i]).IsNonPositive())
+  for (int i=0; i<NonStrictConeNonPositiveScalar.size; i++)
+    if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])<0)
     { std::cout << "This is a programming error: the splitting normal " << this->ToString()
-      << " is supposed to have positive scalar product with the vector " << StrictCone[i].ToString() << ", but it doesn't."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
+      << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-  for (int i=0; i<NonStrictCone.size; i++)
-    if (this->ScalarEuclidean(NonStrictCone[i])>0)
-    { std::cout << "This is a programming error: the splitting normal " << this->ToString()
-      << " is supposed to have non-negative scalar product with the vector " << NonStrictCone[i].ToString() << ", but it doesn't."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-  coefficient scalarEdges;
+  Vector<Rational> oldThis=*this;
+  Cone theCone, orthognalCone;
+  theCone.CreateFromVertices(NonStrictConeNonPositiveScalar);
+//  std::cout << "<br>Cone normals: " << theCone.Normals.ToString();
   coefficient scalarThis;
+  coefficient scalarOther;
   coefficient theScale;
-  for (int i=0; i<NonStrictCone.size; i++)
-    if (this->ScalarEuclidean(NonStrictCone[i])==0)
-    { theScale=-1;
-      for (int j=0; j<NonStrictCone.size; j++)
-      { scalarEdges=NonStrictCone[i].ScalarEuclidean(NonStrictCone[j]);
-        if (scalarEdges>0)
-        { scalarThis=this->ScalarEuclidean(NonStrictCone[j]);
-          if (scalarThis==0)
-          { theScale=0;
-            break;
-          }
-          theScale=MathRoutines::Maximum(theScale, (scalarThis/scalarEdges)/2);
+  Vector<Rational> currentModifier;
+  Vectors<Rational> allVectors=theCone.Vertices;
+  allVectors.AddListOnTop(VectorsToBeInGeneralPosition);
+  for (int i=0; i<VectorsToBeInGeneralPosition.size; i++)
+    if (this->ScalarEuclidean(VectorsToBeInGeneralPosition[i])==0)
+    { bool foundModifier=false;
+      for (int j=0; j<theCone.Normals.size; j++)
+        if (theCone.Normals[j].ScalarEuclidean(VectorsToBeInGeneralPosition[i])!=0)
+        { foundModifier=true;
+          currentModifier=theCone.Normals[j];
+          break;
         }
+      if (!foundModifier)
+        continue;
+      theScale=1;
+      for (int j=0; j<VectorsToBeInGeneralPosition.size; j++)
+      { scalarThis= this->ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
+        scalarOther= currentModifier.ScalarEuclidean(VectorsToBeInGeneralPosition[j]);
+        if (scalarOther*scalarThis<0)
+          theScale=MathRoutines::Minimum(theScale, -(scalarThis/scalarOther)/2);
       }
-      if (theScale!=0)
-        for (int j=0; j<StrictCone.size; j++)
-        { scalarEdges=NonStrictCone[i].ScalarEuclidean(StrictCone[j]);
-          scalarThis=this->ScalarEuclidean(StrictCone[j]);
-          if (scalarEdges>0)
-            theScale=MathRoutines::Maximum(theScale, -(scalarThis/scalarEdges)/2);
-        }
-      *this+=NonStrictCone[i]*theScale;
-    }
-  for (int i=0; i<StrictCone.size; i++)
-    if (this->ScalarEuclidean(StrictCone[i]).IsNonPositive())
-    { std::cout << "This is a programming error: after perturbing, the splitting normal " << this->ToString()
-      << " is supposed to have positive scalar product with the vector " << StrictCone[i].ToString() << ", but it doesn't."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-  for (int i=0; i<NonStrictCone.size; i++)
-    if (this->ScalarEuclidean(NonStrictCone[i])>0)
-    { std::cout << "This is a programming error: after perturbing, the splitting normal " << this->ToString()
-      << " is supposed to have non-negative scalar product with the vector " << NonStrictCone[i].ToString() << ", but it doesn't."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+//    std::cout << ( mustGoNegative ? "<br>must go negative" : "<br> must go positive");
+//    std::cout << "<br>currentModifier: " << currentModifier.ToString() << " * " << theScale.ToString() << "; *this="
+//    << this->ToString();
+    *this+=currentModifier*theScale;
+//    std::cout << "<br> *this=" << this->ToString();
+    for (int i=0; i<NonStrictConeNonPositiveScalar.size; i++)
+      if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])<0)
+      { std::cout << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+        << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
+        << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      } else
+      if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])==0 && oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i])>0)
+      { std::cout << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+        << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString()
+        << "." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
     }
 //  return true;
 }
@@ -4389,9 +4405,6 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
 { if (this->FKNilradicalCandidates.size==0)
     return "";
   std::stringstream out;
-  Vector<Rational> primalBase;
-  primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
-  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
   out << "<br>There are " << this->FKNilradicalCandidates.size
   << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
   << this->NumConeIntersections << " have intersecting cones. Of the remaining "
@@ -4426,6 +4439,9 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     return "";
   std::stringstream out;
   out << this->ToStringNilradicalsSummary(theFormat);
+  Vector<Rational> primalBase;
+  primalBase = this->FKNilradicalCandidates[0].theNilradicalSelection;
+  out << "<br>The primal extension of the semisimple subalgerba equals: " << primalBase.ToStringLetterFormat("W");
   if (this->owner->flagProduceLaTeXtables)
   { Vector<Rational> currentNilradVector;
     out << "<br><br>A summary in LaTeX <br>\\begin{longtable}{c|c|c|c }"
@@ -4983,6 +4999,14 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (i!=this->thePosGens.size-1)
       out << ", ";
   }*/
+  bool displayNilradSummary=(this->owner->flagComputeNilradicals && this->flagCentralizerIsWellChosen && this->flagSystemSolved);
+  if (displayNilradSummary)
+    displayNilradSummary=!shortReportOnly || (this->NumBadParabolics>0);
+  if (displayNilradSummary)
+  { out << "<hr>" << this->ToStringNilradicalsSummary(theFormat);
+    out << "<a href=\"" << this->owner->GetDisplayFileNameFKFTNilradicals(this->indexInOwner, theFormat)
+    << "\"> Detailed information on isotypical nilradicals. </a><hr>";
+  }
   out << this->ToStringGenerators(theFormat);
   out << "<br>Symmetric Cartan matrix scaled: ";
   FormatExpressions tempFormat;
@@ -5071,11 +5095,6 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     if (this->owner->flagProduceLaTeXtables)
       out << "LaTeX version of pairing table: <br><br>" << this->ToStringPairingTableLaTeX(theFormat) << "<br><br>";
     out << "<br>" << this->ToStringDrawWeights(theFormat) << "<br>";
-    if (this->owner->flagComputeNilradicals)
-    { out << this->ToStringNilradicalsSummary(theFormat);
-      out << "<a href=\"" << this->owner->GetDisplayFileNameFKFTNilradicals(this->indexInOwner, theFormat)
-      << "\"> Detailed information on isotypical nilradicals. </a>";
-    }
   }
   return out.str();
 }

@@ -108,7 +108,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
       this->TransformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
     tempRoots.AddListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
     theReport.Report(tempRoots.ToString());
-    currentProjectiveCone.CreateFromNormals(tempRoots, theGlobalVariables);
+    currentProjectiveCone.CreateFromNormals(tempRoots, &theGlobalVariables);
     projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone, theGlobalVariables);
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
@@ -204,7 +204,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
   Matrix<Rational>  tempMat;
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert(theGlobalVariables);
+  tempMat.Invert(&theGlobalVariables);
 //  tempMat.ActOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.ToString();
   this->preferredBasiS.SetSize(2);
@@ -348,7 +348,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, (Rational) 0);
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat=theWeYl.CartanSymmetric;
-  tempMat.Invert(theGlobalVariables);
+  tempMat.Invert(&theGlobalVariables);
   Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
   { tempMat.GetVectorFromRow(i, tempRoot);
@@ -364,7 +364,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ToString(false, false);
-  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, &theGlobalVariables);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
@@ -374,7 +374,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     this->PreimageWeylChamberLargerAlgebra.Normals[i]=tempRoot;
   }
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
-  tempMat.Invert(theGlobalVariables);
+  tempMat.Invert(&theGlobalVariables);
   tempRoots.size=0;
   Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
@@ -389,7 +389,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ToString();
   this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.ToString();
-  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
+  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, &theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n"
@@ -668,7 +668,7 @@ void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
       newNormals[j]= this->TheObjects[i].Normals[j].GetProjectivizedNormal(affinePoint);
     newNormals.LastObject()->MakeEi(theAffineDim+1, theAffineDim);
-    tempCone.CreateFromNormals(newNormals, theGlobalVariables);
+    tempCone.CreateFromNormals(newNormals, &theGlobalVariables);
     output.AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
   }
 }
@@ -803,7 +803,7 @@ bool PiecewiseQuasipolynomial::MakeVPF
   Lattice baseLattice;
   baseLattice.MakeFromRoots(theRoots);
   Cone baseCone;
-  baseCone.CreateFromVertices(theRoots, theGlobalVariables);
+  baseCone.CreateFromVertices(theRoots, &theGlobalVariables);
   Vector<Rational> shiftRoot;
   baseLattice.GetInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone, theGlobalVariables);
   shiftRoot.Minus();
@@ -1117,7 +1117,7 @@ void Cone::ChangeBasis
 { //Vectors<Rational> newNormals;
 //  Matrix<Rational> tempMat=theLinearMap;
   theLinearMap.ActOnVectorsColumn(this->Normals);
-  this->CreateFromNormals(this->Normals, theGlobalVariables);
+  this->CreateFromNormals(this->Normals, &theGlobalVariables);
 }
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
@@ -1184,7 +1184,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     if(this->ParabolicSelectionSmallerAlgebra.selected[i])
       tempVertices.AddOnTop(-tempRoot);
   }
-  smallWeylChamber.CreateFromVertices(tempVertices, theGlobalVariables);
+  smallWeylChamber.CreateFromVertices(tempVertices, &theGlobalVariables);
   tempMat.init(2,2);
   tempMat.elements[0][0]=1; tempMat.elements[0][1]=0;
   tempMat.elements[1][0]=1; tempMat.elements[1][1]=1;
@@ -1414,7 +1414,7 @@ void WeylGroup::GetWeylChamber
   tempMat.Invert();
   Vectors<Rational> tempRoots;
   tempRoots.AssignMatrixRows(tempMat);
-  output.CreateFromVertices(tempRoots, theGlobalVariables);
+  output.CreateFromVertices(tempRoots, &theGlobalVariables);
 //  output.CreateFromNormals(tempRoots, theGlobalVariables);
 }
 
@@ -1839,7 +1839,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
     newNormals[i]+=preferredNormal*firstCoordNewNormal;
   }
   //bool tempBool=
-  tempCLS.theProjectivizedCone.CreateFromNormals(newNormals, theGlobalVariables);
+  tempCLS.theProjectivizedCone.CreateFromNormals(newNormals, &theGlobalVariables);
   tempCLS.theShift=this->theShift;
   tempCLS.theShift.ShiftToTheLeftOnePos();
   this->theLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
@@ -1960,7 +1960,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       assert(tempCLS.theProjectivizedCone.Normals.size>0);
       Vectors<Rational> tempTempRoots=tempCLS.theProjectivizedCone.Normals;
       //bool tempBool=
-      tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
+      tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, &theGlobalVariables);
       /*if (!tempBool)
       { std::stringstream tempStream;
         tempStream << "The bad starting cone (cone number " << i+1 << "):" << this->ToString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.ToString(theFormat);
@@ -2040,7 +2040,8 @@ void ConeComplex::GetNewVerticesAppend
 }
 
 bool ConeComplex::SplitChamber
-(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal,
+ GlobalVariables& theGlobalVariables)
 { Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
 /*  if (!myDyingCone.flagHasSufficientlyManyVertices)
   { this->flagChambersHaveTooFewVertices=true;
@@ -2099,8 +2100,8 @@ bool ConeComplex::SplitChamber
 */
   this->PopChamberSwapWithLast(indexChamberBeingRefined);
   if (needToRecomputeVertices)
-  { newPlusCone.CreateFromNormals(newPlusCone.Normals, theGlobalVariables);
-    newMinusCone.CreateFromNormals(newMinusCone.Normals, theGlobalVariables);
+  { newPlusCone.CreateFromNormals(newPlusCone.Normals, &theGlobalVariables);
+    newMinusCone.CreateFromNormals(newMinusCone.Normals, &theGlobalVariables);
   }
   this->AddNonRefinedChamberOnTopNoRepetition(newPlusCone, theGlobalVariables);
   this->AddNonRefinedChamberOnTopNoRepetition(newMinusCone, theGlobalVariables);
@@ -2123,7 +2124,7 @@ bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVa
   Vectors<Rational> newVertices;
   newVertices.AddListOnTop(other.Vertices);
   newVertices.AddListOnTop(this->Vertices);
-  this->CreateFromVertices(newVertices, theGlobalVariables);
+  this->CreateFromVertices(newVertices, &theGlobalVariables);
   return true;
 }
 
@@ -2158,7 +2159,7 @@ void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
 void ConeComplex::InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors, GlobalVariables& theGlobalVariables)
 { this->init();
   Cone startingCone;
-  startingCone.CreateFromVertices(inputVectors, theGlobalVariables);
+  startingCone.CreateFromVertices(inputVectors, &theGlobalVariables);
   this->AddNonRefinedChamberOnTopNoRepetition(startingCone, theGlobalVariables);
   this->slicingDirections.AddListOnTop(inputVectors);
   this->Refine(theGlobalVariables);
@@ -2189,7 +2190,7 @@ void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
 }
 
 void Cone::ComputeVerticesFromNormalsNoFakeVertices
-(GlobalVariables& theGlobalVariables)
+(GlobalVariables* theGlobalVariables)
 { this->Vertices.size=0;
   Selection theSel, nonPivotPoints;
   for (int i=0; i<this->Normals.size; i++)
@@ -2216,7 +2217,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
     }
     return;
   }
-  Matrix<Rational>& theMat=theGlobalVariables.matComputeNormalFromSelection.GetElement();
+  Matrix<Rational> theMat;
   Vector<Rational> tempRoot;
   theMat.init(theDim-1, theDim);
   for (int i=0; i<numCycles; i++)
@@ -2241,13 +2242,13 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
 }
 
 bool Cone::EliminateFakeNormalsUsingVertices
-(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables)
+(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables)
 { if(this->Vertices.size==0)
   { this->flagIsTheZeroCone=true;
     this->Normals.SetSize(0);
     return false;
   }
-  Vectors<Rational>& verticesOnWall=theGlobalVariables.rootsEliminateFakeNormalsUsingVertices.GetElement();
+  Vectors<Rational> verticesOnWall;
   if (numAddedFakeWalls!=0)
   { //we modify the normals so that they lie in the subspace spanned by the vertices
     Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
@@ -2283,8 +2284,8 @@ bool Cone::EliminateFakeNormalsUsingVertices
       }
     }
   }
-  Matrix<Rational>& tempMatX=theGlobalVariables.matEliminateFakeNormalsUsingVertices.GetElement();
-  Selection& tempSelX=theGlobalVariables.selEliminateFakeNormalsUsingVertices.GetElement();
+  Matrix<Rational> tempMatX;
+  Selection tempSelX;
   int DesiredRank=this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
   if (DesiredRank>1)
     for (int i=0; i<this->Normals.size; i++)
@@ -2344,7 +2345,7 @@ bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection
   return true;
 }
 
-bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables& theGlobalVariables)
+bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices, GlobalVariables* theGlobalVariables)
 { this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
  // std::cout << inputVertices.ToString();
@@ -2356,11 +2357,11 @@ bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables&
     return false;
   }
   this->Normals.size=0;
-  Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
-  Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
+  Matrix<Rational> tempMat;
+  Selection tempSel;
   int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(&tempMat, &tempSel);
   int theDim=inputVertices.GetDim();
-  Vectors<Rational>& extraVertices=theGlobalVariables.rootsCreateFromVertices.GetElement();
+  Vectors<Rational> extraVertices;
   extraVertices.SetSize(0);
   if (rankVerticesSpan<theDim)
   { Matrix<Rational>  tempMat;
@@ -2405,7 +2406,7 @@ bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables&
 
 bool Cone::CreateFromNormalS
   (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices,
-   GlobalVariables& theGlobalVariables)
+   GlobalVariables* theGlobalVariables)
 { this->flagIsTheZeroCone=false;
   this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
@@ -2419,8 +2420,8 @@ bool Cone::CreateFromNormalS
       i--;
     }
   int numAddedFakeWalls=0;
-  Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
-  Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
+  Matrix<Rational> tempMat;
+  Selection tempSel;
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
     for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel)<theDim; i++)
     { Vector<Rational> tempRoot;
@@ -2464,7 +2465,7 @@ void ConeComplex::initFromCones
   theReport.Report(NormalsOfCones.ToString());
 //  for (int i=0; i<10000000; i++){int j=i*i*i;}
   for (int i=0; i<NormalsOfCones.size; i++)
-  { if (tempCone.CreateFromNormalS(NormalsOfCones[i], UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, theGlobalVariables))
+  { if (tempCone.CreateFromNormalS(NormalsOfCones[i], UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, &theGlobalVariables))
       this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
     std::stringstream out;
     out << "Initializing cone " << i+1 << " out of " << NormalsOfCones.size;
@@ -3846,12 +3847,7 @@ bool Cone::ReadFromFile
       return false;
     }
   bool result;
-  if (theGlobalVariables!=0)
-    result=this->CreateFromNormals(buffer, *theGlobalVariables);
-  else
-  { GlobalVariables tempGlobalVariables;
-    result=this->CreateFromNormals(buffer, tempGlobalVariables);
-  }
+  result=this->CreateFromNormals(buffer, theGlobalVariables);
   result= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
 //  assert(tempBool);
   return result;
@@ -4250,7 +4246,7 @@ void Cone::IntersectAHyperplane
   theProjection.Resize(theDimension-1, theDimension, false);
   Vectors<Rational> newNormals=this->Normals;
   theProjection.ActOnVectorsColumn(newNormals);
-  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, theGlobalVariables);
+  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, &theGlobalVariables);
   assert(!tempBool);
 
 }

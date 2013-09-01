@@ -1137,7 +1137,6 @@ public:
   static std::string GetCalculatorLink
   (const std::string& DisplayNameCalculator, const std::string& input)
   ;
-  static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc);
   static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
@@ -9424,7 +9423,7 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
   { if (useHtml)
       out << "<tr>";
     for (int j=0; j<this->NumCols; j++)
-    { tempS=this->elements[i][j].ToString();
+    { tempS=(*this)(i,j).ToString(theFormat);
       if (useHtml)
         out << "<td>";
       out << tempS;

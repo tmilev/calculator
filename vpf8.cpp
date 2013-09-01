@@ -5958,10 +5958,7 @@ class ImpreciseDouble
   double precision;
   double theValue;
   public:
-  void ToString(std::string& output)
-  { output=this->ToString();
-  }
-  std::string ToString()
+  std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out << this->theValue;
     return out.str();

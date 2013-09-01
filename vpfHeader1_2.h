@@ -4190,20 +4190,11 @@ public:
   void Substitution
   (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
   ;
-  void SetNumVariables
-  (int GoalNumVars)
+  void SetNumVariables(int GoalNumVars)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].SetNumVariables(GoalNumVars);
   }
-  int GetIndexLieAlgebra()const
-  { for (int i=0; i<this->size; i++)
-    { MonomialTensorGeneralizedVermas<coefficient>& theMon=this->TheObjects[i];
-      if (theMon.theMons.size>0)
-        return theMon.theMons[0].owneR->TheObjects[theMon.theMons[0].indexInOwner].indexAlgebra;
-    }
-    return -1;
-  }
-  ModuleSSalgebra<coefficient>& GetOwnerModule()const
+  SemisimpleLieAlgebra& GetOwnerSS()const
   { if (this->size() <=0)
     { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
       << " This is not allowed as the index of the owner modules are stored in the monomials. "
@@ -4218,15 +4209,7 @@ public:
       assert(false);
     }
     MonomialGeneralizedVerma<coefficient>& theGmon=theMon.theMons[0];
-    return *theGmon.owneR;
-  }
-  int GetIndexOwnerModule()const
-  { for (int i=0; i<this->size; i++)
-    { MonomialTensorGeneralizedVermas<coefficient>& theMon=this->TheObjects[i];
-      if (theMon.theMons.size>0)
-        return theMon.theMons[0].indexInOwner;
-    }
-    return -1;
+    return theGmon.owneR->GetOwner();
   }
   int GetNumVars()
   { if (this->size==0)
@@ -6671,9 +6654,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::operator=(const ElementSumGen
 
 template <class coefficient>
 bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
-(const ElementUniversalEnveloping<coefficient>& theUE,
- ElementTensorsGeneralizedVermas<coefficient>& output,
- SemisimpleLieAlgebra& ownerAlgebra,
+(const ElementUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
  GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
 { ElementTensorsGeneralizedVermas<coefficient> buffer;
   output.MakeZero();
@@ -6703,7 +6684,7 @@ bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
 //      buffer.theCoeffs[k].checkConsistency();
     }
     buffer*=theUE.theCoeffs[i];
-    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
+//    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
     output+=buffer;
   }
   return true;
@@ -6823,28 +6804,27 @@ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coeff
   ProgressReport theReport(&theGlobalVariables);
   for (int j=0; j<theUE.size(); j++)
   { currentMon.theMonCoeffOne=theUE[j];
-    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
+//    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
     currentMon.theMonCoeffOne*=this->theMonCoeffOne;
-    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
+//    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
     currentMon.owneR=this->owneR;
     currentMon.indexFDVector=this->indexFDVector;
     currentMon.owneR=this->owneR;
-    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
-    << " times " << theUE[j].ToString() << " on " << this->ToString();
+//    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString() << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
-    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
+//    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
     reportStream << " done.";
-    std::cout << " done.";
+//    std::cout << " done.";
     theReport.Report(reportStream.str());
-    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
+//    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
-    std::cout << " equals: " << buffer.ToString();
+//    std::cout << " equals: " << buffer.ToString();
   }
-  std::cout << "<br>result: " << this->ToString();
+//  std::cout << "<br>result: " << this->ToString();
 }
 
 template <class coefficient>

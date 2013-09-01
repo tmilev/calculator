@@ -219,7 +219,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryHTML(FormatExpressions* theFo
   << numFailingConeCondition << " have intersecting cones. Of the remaining "
   << numIsotypicallyCompleteNilrads-numFailingConeCondition << " nilradical extensions with non-intersecting cones, "
   << numIsotypicallyCompleteNilrads-numFailingConeCondition- numNonCentralizerConditionWithConeCondition
-  << " satisfy the centralizer condition and "
+  << " satisfy(ies) the centralizer condition and "
   << numNonCentralizerConditionWithConeCondition << " fail(s) the centralizer condition.";
   if (numBadParabolics>0)
     out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition there are  "
@@ -4413,9 +4413,9 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
   << " satisfy the centralizer condition and "
   << this->NumCentralizerConditionFailsConeConditionHolds << " fail the centralizer condition.";
   if (this->NumBadParabolics>0)
-    out << "<br><span style=\"color:#FF0000\">Of the subalgebras satisfying the centralizer condition,  "
-    << this->NumBadParabolics << " have centralizer parabolics do not extend to  "
-    << " parabolics of the ambiend Lie algebra with Levi types A and C. For these subalgebras the PSZ construction is not proven to "
+    out << "<br><span style=\"color:#FF0000\">Of the subalgebra(s) satisfying the centralizer condition,  "
+    << this->NumBadParabolics << " have (has) centralizer parabolics that do not extend to  "
+    << " parabolics of the ambient Lie algebra with Levi types A and C. For these subalgebras the PSZ construction is not proven to "
     << "hold."
     << " </span>";
   else

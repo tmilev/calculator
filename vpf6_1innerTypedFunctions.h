@@ -9,13 +9,28 @@ static ProjectInformationInstance ProjectInfoVpf6_1Header
 class CommandListInnerTypedFunctions
 {
 public:
+  template <class theType>
+  static bool innerMultiplyTypeByType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  template <class theType>
+  static bool innerAddTypeToType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  template <class theType>
+  static bool innerDivideTypeByType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerLieBracketRatOrUEbyRatOrUE
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerTensorMatRatByMatRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool innerTensorMatTensorByMatTensor
+  static bool innerTensorMatByMatTensor
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
@@ -28,6 +43,7 @@ static bool innerMultiplyRatOrPolyByRatOrPoly
 static bool innerAddUEToAny
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+
 static bool innerMultiplyLRObyLRO
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -139,8 +155,51 @@ static bool innerTensorEltTensorByEltTensor
 static bool innerMultiplyAnyByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-
-
 };
+
+template <class theType>
+bool CommandListInnerTypedFunctions::innerMultiplyTypeByType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyTypeByType");
+  if (input.children.size!=3)
+    return false;
+  Expression inputContextsMerged;
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+    return false;
+//  std::cout << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+  theType result=inputContextsMerged[1].GetValue<theType>();
+  result*=inputContextsMerged[2].GetValue<theType>();
+  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+}
+
+template <class theType>
+bool CommandListInnerTypedFunctions::innerAddTypeToType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
+  if (input.children.size!=3)
+    return false;
+  Expression inputContextsMerged;
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+    return false;
+  theType result=inputContextsMerged[1].GetValue<theType>();
+  result+=inputContextsMerged[2].GetValue<theType>();
+  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+}
+
+template <class theType>
+bool CommandListInnerTypedFunctions::innerDivideTypeByType
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
+  if (input.children.size!=3)
+    return false;
+  Expression inputContextsMerged;
+  if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
+    return false;
+  if (inputContextsMerged[2].GetValue<theType>().IsEqualToZero())
+    return output.SetError("Division by zero. ", theCommands);
+  theType result=inputContextsMerged[1].GetValue<theType>();
+  result/=inputContextsMerged[2].GetValue<theType>();
+  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
+}
 
 #endif

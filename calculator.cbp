@@ -38,9 +38,6 @@
 		<Linker>
 			<Add library="libpthread" />
 		</Linker>
-		<Unit filename="test.cpp">
-			<Option target="test" />
-		</Unit>
 		<Unit filename="vpf.h">
 			<Option compile="1" />
 			<Option weight="0" />

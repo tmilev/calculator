@@ -183,6 +183,7 @@ class Expression
       return true;
     return this->theData==desiredDataUseMinusOneForAny;
   }
+  bool HasSameContextArgumentsNoLog()const;
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
@@ -205,15 +206,15 @@ class Expression
       return false;
     if (whichElement==0)
       return true;
-    *whichElement=this->GetValuE<theType>();
+    *whichElement=this->GetValue<theType>();
     return true;
   }
   template <class theType>
-  const theType& GetValuE()const
-  { return this->GetValuENonConstUseWithCaution<theType>();
+  const theType& GetValue()const
+  { return this->GetValueNonConst<theType>();
   }
   template <class theType>
-  theType& GetValuENonConstUseWithCaution()const;
+  theType& GetValueNonConst()const;
 
   template<class theType>
   int GetTypeOperation()const;
@@ -222,22 +223,12 @@ class Expression
 
   //note: the following always returns true:
   template <class theType>
-  bool AssignValue(const theType& inputValue, CommandList& owner)
-  { Expression tempE;
-    tempE.MakeEmptyContext(owner);
-    this->AssignValueWithContext(inputValue, tempE, owner);
-    return true;
-  }
+  bool AssignValue(const theType& inputValue, CommandList& owner);
   //note: the following always returns true:
   template <class theType>
   bool AssignValueWithContext
-  (const theType& inputValue, const Expression& theContext, CommandList& owner)
-  { this->reset(owner, 3);
-    int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
-    this->AddChildOnTop(theContext);
-    return this->AddChildAtomOnTop(theIndex);
-  }
+  (const theType& inputValue, const Expression& theContext, CommandList& owner);
+
   template <class theType>
   bool AddChildValueOnTop(const theType& inputValue)
   { this->CheckInitialization();
@@ -259,9 +250,9 @@ class Expression
   bool HasNonEmptyContext()const;
   Expression GetContext()const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
-
-  template<class dataType>
-  bool GetContextForConversionIgnoreMyContext(Expression& output)const;
+  bool MergeContextsMyAruments(Expression& output)const;
+  template <class theType>
+  bool MergeContextsMyArumentsAndConvertThem(Expression& output)const;
 
   Expression ContextGetContextVariable(int variableIndex) const;
   int ContextGetIndexAmbientSSalg()const;
@@ -269,16 +260,7 @@ class Expression
   int ContextGetNumContextVariables()const;
   static bool ContextMergeContexts
   (const Expression& leftContext, const Expression& rightContext, Expression& outputContext);
-  static bool ContextConvertBothToCommonContext
-  (Expression& leftE, Expression& rightE, Expression& outputContext)
-  { if (!Expression::ContextMergeContexts(leftE.GetContext(), rightE.GetContext(), outputContext))
-      return false;
-    if (!leftE.SetContextAtLeastEqualTo(outputContext))
-      return false;
-    if (!rightE.SetContextAtLeastEqualTo(outputContext))
-      return false;
-    return true;
-  }
+
   bool ContextGetPolySubFromSuperContext
   (const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
   ;
@@ -335,16 +317,24 @@ class Expression
     tempE.MakeXOX(owner, theOp, left, right);
     this->SetChilD(childIndex, tempE);
   }
+  bool MakeContextWithOnePolyVar
+  (CommandList& owner, const std::string& inputPolyVarName)
+  ;
+  bool MakeContextWithOnePolyVar
+  (CommandList& owner, const Expression& inputPolyVarE)
+  ;
+  bool MakeContextSSLieAlg
+  (CommandList& owner, const SemisimpleLieAlgebra& theSSLiealg)
+  ;
   bool MakeEmptyContext
   (CommandList& owner)
   ;
   std::string Lispify
   ()const
   ;
-  bool ToStringData
-  (std::string& output, FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
+  bool ToStringData(std::string& output, FormatExpressions* theFormat=0)const;
   std::string ToStringFull()const;
-  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
+  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, Expression* Context=0)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }
@@ -388,6 +378,7 @@ class Expression
     }
     return true;
   }
+  bool CheckConsistency()const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool HasBoundVariables()const;
@@ -599,14 +590,7 @@ struct ExpressionTripleCrunchers
 };
 
 class CommandList
-{ template <class dataType>
-  bool EvaluatePMTDtree
-(const Expression& inputContext, const Expression& input, Expression& output)
-  ;
-  template <class dataType>
-  static bool innerExtractPMTDtreeContext
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
+{
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
   HashedList<std::string, MathRoutines::hashString> operations;
@@ -632,20 +616,19 @@ public:
 //
 //Suppose the calculator is reducing Expression X.
 //1. Outer functions ("laws").
-//1.1. An outer function is called on X if the first child of X
-//     is an atom equal to the name of the outer function.
-//1.2. If the outer function returns true but its output is identically equal to the
-//     starting expression X, nothing is done (the action of the outer function is ignored).
-//1.3. If an outer function returns true and its output is different from X,
+//1.1. Let X be expression whose first child is an atom equal to the name of the outer function.
+//1.2  Call the outer function with input argument equal to X.
+//1.3. If the outer function returns true but the output argument is identically equal to
+//     X, nothing is done (the action of the outer function is ignored).
+//1.4. If an outer function returns true and the output argument is different from X,
 //     X is replaced by this output.
 //2. Inner functions ("functions").
-//2.1. If the first child of X is an atom equal to the name of the inner function,
-//     we define Argument as follows.
+//2.1. Let X be expression whose first child is an atom equal to the name of the inner function. We define Argument as follows.
 //2.1.1. If X has two children, Argument is set to the second child of X.
 //2.1.2. If X does not have two children, Argument is set to be equal to the entire X.
-//2.2. The inner function is called on Argument.
+//2.2. The inner function is called with input argument equal to Argument.
 //2.3. If the inner function returns true, X is substituted with
-//     the output of the inner function, else nothing is done.
+//     the output argument of the inner function, else nothing is done.
 //
 //As explained above, the distinction between inner functions and outer functions
 //is only practical. The notions of inner and outer functions do not apply to user-defined
@@ -1143,7 +1126,7 @@ public:
   int opPolynomialVariables()
   { return this->operations.GetIndexIMustContainTheObject("PolyVars");
   }
-  int opContext()
+  int opContexT()
   { return this->operations.GetIndexIMustContainTheObject("Context");
   }
   int opWeylGroupElement()
@@ -1214,32 +1197,30 @@ public:
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   template <class theType>
-  bool CallConversionFunctionReturnsNonConstUseCarefully
-  (Expression::FunctionAddress theFun, const Expression& input, theType*& outputData,
-   std::string* outputError=0)
-  { MacroRegisterFunctionWithName("CommandList::CallConversionFunctionReturnsNonConstUseCarefully");
+  bool ConvertToTypeUsingFunction
+  (Expression::FunctionAddress theFun, const Expression& input, Expression& output)
+  { MacroRegisterFunctionWithName("CommandList::ConvertToTypeUsingFunction");
     if (input.IsOfType<theType>())
-    { outputData=&input.GetValuENonConstUseWithCaution<theType>();
+    { output=input;
       return true;
     }
-    Expression tempE;
-    if (!theFun(*this, input, tempE))
-    { if (outputError!=0)
-        *outputError="I was unsuccessful in calling the conversion function.";
+    if (!theFun(*this, input, output))
+    { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
       return false;
     }
-    if (tempE.IsOfType<theType>())
-    { outputData=&tempE.GetValuENonConstUseWithCaution<theType>();
-      return true;
-    }
-    if (outputError!=0)
-      *outputError=
-      "Successfully called the conversion function but did not get the desired type, instead got "
-      + tempE.ToString();
-    return false;
+    return output.IsOfType<theType>();
   }
-  bool CallCalculatorFunction
-  (Expression::FunctionAddress theFun, const Expression& input, Expression& output)
+  template <class theType>
+  bool CallConversionFunctionReturnsNonConstUseCarefully
+  (Expression::FunctionAddress theFun, const Expression& input, theType*& outputData)
+  { MacroRegisterFunctionWithName("CommandList::CallConversionFunctionReturnsNonConstUseCarefully");
+    Expression tempE;
+    if (!this->ConvertToTypeUsingFunction<theType>(theFun, input, tempE))
+      return false;
+    outputData=&tempE.GetValueNonConst<theType>();
+    return true;
+  }
+  bool CallCalculatorFunction(Expression::FunctionAddress theFun, const Expression& input, Expression& output)
   { if (&input==&output)
     { Expression inputCopy=input;
       return this->CallCalculatorFunction(theFun, inputCopy, output);
@@ -1264,6 +1245,12 @@ public:
   static bool outerUnionNoRepetition
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerOperationBinary
+  (CommandList& theCommands, const Expression& input, Expression& output, int theOp)
+  ;
+  static bool innerInterpolatePoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerTimes
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
@@ -1274,16 +1261,6 @@ public:
   static bool innerGetElementWeylGroup
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool innerOperationBinary
-  (CommandList& theCommands, const Expression& input, Expression& output,
-   int theOp)
-  { for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)
-      if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input))
-        if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output))
-          return true;
-    return false;
-  }
-
   static bool innerUnion
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1316,9 +1293,6 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fExpressionHasBoundVars
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
-  static bool outerLieBracket
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerMatrixRational
@@ -1414,14 +1388,13 @@ public:
   }
   template<class theType>
   bool GetMatrix
-  (const Expression& theExpression, Matrix<theType>& outputMat,
+  (const Expression& input, Matrix<theType>& outputMat,
    Expression* inputOutputStartingContext=0,
    int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
   ;
   template <class theType>
   bool GetVectorFromFunctionArguments
-  (const Expression& input, Vector<theType>& output,
-   Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
+  (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
    Expression::FunctionAddress conversionFunction=0)
   { Expression tempE=input;
     if (tempE.IsLisT())
@@ -1431,18 +1404,16 @@ public:
     }
     return this->GetVectoR(tempE, output, inputOutputStartingContext, targetDimNonMandatory, conversionFunction);
   }
+  bool GetVectorExpressions
+  (const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1)
+  ;
+  bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0)
+  ;
   template <class theType>
   bool GetVectoR
-  (const Expression& input, Vector<theType>& output,
-   Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
+  (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
    Expression::FunctionAddress conversionFunction=0)
   ;
-
-  template <class dataType>
-  static bool outerExtractAndEvaluatePMTDtree
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
-
   static bool innerFunctionToMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1569,9 +1540,6 @@ public:
   static bool fSplitFDpartB3overG2CharsOnly
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool innerElementUniversalEnvelopingAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
   static bool innerPrintSSLieAlgebraShort
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
@@ -1650,7 +1618,7 @@ public:
   static bool fSplitFDpartB3overG2
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fSplitGenericGenVermaTensorFD
+  static bool innerSplitGenericGenVermaTensorFD
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSplitFDpartB3overG2inner
@@ -1663,10 +1631,7 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
-  static bool fHWTAABF
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool fElementSSAlgebra
+  static bool innerHWTAABF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fWeylDimFormula
@@ -1747,10 +1712,10 @@ static bool innerAttemptExtendingEtoHEFwithHinCartan
   static bool innerWriteGenVermaModAsDiffOperators
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fEmbedG2inB3
+  static bool innerEmbedG2inB3
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fCasimir
+  static bool innerCasimir
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerGetLinksToSimpleLieAlgerbas
@@ -1838,8 +1803,7 @@ static bool innerDouble
    const std::string& opDescription, const std::string& opExample,
    bool visible=true, bool experimental=false)
   { this->AddOperationHandler
-    (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
-     opExample, true, visible, experimental);
+    (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, true, visible, experimental);
   }
   void AddOperationOuterHandler
   (const std::string& theOpName, Expression::FunctionAddress outerHandler,
@@ -1847,11 +1811,8 @@ static bool innerDouble
    const std::string& opDescription, const std::string& opExample,
    bool visible=true, bool experimental=false)
   { this->AddOperationHandler
-    (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
-     opExample, false, visible, experimental);
+    (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental);
   }
-
-
   void init(GlobalVariables& inputGlobalVariables);
 
   void initPredefinedStandardOperations();
@@ -1912,7 +1873,7 @@ public:
   static bool innerPolynomial
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool innerUE
+  static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   (CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
   ;
   static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs
@@ -2138,187 +2099,105 @@ bool Serialization::DeSerializeMonCollection
 
 template <class theType>
 bool CommandList::GetVectoR
-(const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext,
- int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
+(const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext, int targetDimNonMandatory,
+ Expression::FunctionAddress conversionFunction)
 { MacroRegisterFunctionWithName("CommandList::GetVector");
-  MemorySaving<Expression> tempContext;
-  Expression& startContext=
-  inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
-  if (!startContext.IsContext())
-    startContext.MakeEmptyContext(*this);
-  if (!input.IsSequenceNElementS())
-  { if (targetDimNonMandatory>0)
-      if (targetDimNonMandatory!=1)
-      { this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory
-        << " but the input " << input.ToString() << " can only be interpretted as a single element";
-        return false;
-      }
-    Expression theConverted=input;
-    if (!input.IsOfType<theType>())
-    { if (conversionFunction==0)
-      { this->Comments
-        << "<hr>GetVector failure: input is not of desired type and there is no conversion function. <hr>";
-        return false;
-      }
-      this->CallCalculatorFunction(conversionFunction, input, theConverted);
-      if (!theConverted.IsOfType<theType>())
-      { this->Comments << "<hr> GetVector failure: I did call a conversion function on "
-        << theConverted.ToString() << " but the output was not of the desired type. ";
-        return false;
-      }
-    }
-    Expression tempContext=theConverted.GetContext();
-    if (!tempContext.ContextMergeContexts(tempContext, startContext, startContext))
-    { this->Comments << "<hr>GetVector failure: failed to merge starting context with "
-      << " context obtained by using the conversion function, i.e., failed to merge "
-      << tempContext.ToString() << " with " << startContext.ToString() << ". <hr>";
+  List<Expression> nonConvertedEs;
+  if (!this->GetVectorExpressions(input, nonConvertedEs, targetDimNonMandatory))
+    return false;
+  List<Expression> convertedEs;
+  convertedEs.SetSize(nonConvertedEs.size);
+  for (int i=0; i<nonConvertedEs.size; i++)
+    if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs[i], convertedEs[i]))
       return false;
-    }
-    if (!theConverted.SetContextAtLeastEqualTo(startContext))
-    { this->Comments << "<hr>GetVector failure: failed to set context  " << startContext.ToString()
-      << " onto  " << theConverted.ToString();
-      return false;
-    }
-    output.SetSize(1);
-    output[0]=theConverted.GetValuE<theType>();
-    startContext=theConverted.GetContext();
-    return true;
-  }
-  if (targetDimNonMandatory>0)
-    if (targetDimNonMandatory!=input.children.size-1)
-    { this->Comments << "<hr>Failed to GetVector: the input is required to have "
-      << targetDimNonMandatory << " columns but "
-      << " it has " << input.children.size-1 << " columns instead. <hr>";
-      return false;
-    }
-  targetDimNonMandatory=input.children.size-1;
-  Expression currentContext;
-  List<Expression> convertedExpressions;
-  convertedExpressions.SetSize(targetDimNonMandatory);
-  //Conversion has several phases. I am not sure these phases are the best choice,
-  //but they appear to handle every conversion I think should be assumed implicit.
-  //1. Extract all contexts of all expressions and merge them into the starting context.
-  //2. Check types of expressions, if bad call conversion function.
-  //3. Merge the contexts obtained in 1.
-  //4. Set contexts of converted expressions to the new common context.
-
-  //1. Extract all contexts of all expressions and merge them into the starting context.
-  for (int i=0; i<targetDimNonMandatory; i++)
-  { convertedExpressions[i]=input[i+1];
-    currentContext=convertedExpressions[i].GetContext();
-    if (!currentContext.ContextMergeContexts(currentContext, startContext, startContext))
-    { this->Comments << "<hr>GetVector() failed: failed to merge contexts "
-      << currentContext.ToString() << " and " << startContext.ToString();
-      return false;
-    }
-  }
-  //2. Check types of expressions, if bad call conversion function.
-  for (int i=0; i<targetDimNonMandatory; i++)
-    if (!convertedExpressions[i].IsOfType<theType>())
-    { if (conversionFunction==0)
-        return false;
-      if (!this->CallCalculatorFunction
-          (conversionFunction, convertedExpressions[i], convertedExpressions[i]))
-      { this->Comments << "<hr>GetVector() failed: conversion function called on "
-        << convertedExpressions[i] << " did not return successfully.<hr> ";
-        return false;
-      }
-      if (!convertedExpressions[i].IsOfType<theType>())
-      { this->Comments << "<br>Converting function evaluated on " << convertedExpressions[i].ToString()
-        << " returned true, but the output of the function is not of the desired type. "
-        << "Instead, the function output is " << convertedExpressions[i].ToString();
-        return false;
-      }
-    }
-  //3. Merge contexts of converted expressions into a common context.
-  for (int i=0; i<targetDimNonMandatory; i++)
-    if (!Expression::ContextMergeContexts
-        (startContext, convertedExpressions[i].GetContext(), startContext))
-    { this->Comments << "<br>Failed to merge context " << startContext.ToString()
-      << " with context " << convertedExpressions[i].GetContext().ToString();
-      return false;
-    }
-  //4. Set contexts of converted expressions to the new common context.
-  output.SetSize(targetDimNonMandatory);
-  for (int i=0; i<targetDimNonMandatory; i++)
-  { //std::cout << "<br>Setting context " << startContext.ToString()
-    //<< " onto " << convertedExpressions[i].ToString() << ".";
-    if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
-    { this->Comments << "<hr>Failed to set context  " << startContext.ToString()
-      << " in " << convertedExpressions[i].ToString() << "<hr>";
-      return false;
-    }
-    //std::cout << "<br>Context conversion successful with output "
-    //<< convertedExpressions[i].ToString();
-    output[i]=convertedExpressions[i].GetValuE<theType>();
-  }
+  if (!this->ConvertExpressionsToCommonContext(convertedEs, inputOutputStartingContext))
+    return false;
+  output.SetSize(convertedEs.size);
+  for (int i=0; i<convertedEs.size; i++)
+    output[i]=convertedEs[i].GetValue<theType>();
   return true;
 }
 
 template <class theType>
 bool CommandList::GetMatrix
-(const Expression& theExpression, Matrix<theType>& outputMat,
- Expression* inputOutputStartingContext,
+(const Expression& input, Matrix<theType>& outputMat, Expression* inputOutputStartingContext,
  int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
-{ MemorySaving<Expression> tempContext;
-  Expression& startContext=
-  inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
-  Expression theConverted;
-//  std::cout << "<br>extracting matrix from: " << theExpression.ToStringFull();
-  if (!theExpression.IsSequenceNElementS())
-  { if (targetNumColsNonMandatory>0)
-      if (targetNumColsNonMandatory!=1)
-        return false;
-    theConverted=theExpression;
-    if (!theConverted.IsOfType<theType>())
-    { if (conversionFunction!=0)
-        if (!this->CallCalculatorFunction(conversionFunction, theExpression, theConverted))
-          return false;
-      if (!theConverted.IsOfType<theType>())
-        return false;
-    }
-    if (!theConverted.SetContextAtLeastEqualTo(startContext))
-      return false;
-    outputMat.init(1,1);
-    outputMat(0,0)=theConverted.GetValuE<theType>();
-    return true;
+{ MacroRegisterFunctionWithName("CommandList::GetMatrix");
+  Matrix<Expression> nonConvertedEs;
+  if (!this->GetMatrixExpressions(input, nonConvertedEs, -1, targetNumColsNonMandatory))
+  { this->Comments << "Failed to extract matrix of expressions from " << input.ToString();
+    return false;
   }
-  Vector<theType> currentRow;
-  Expression currentContext;
-  currentContext.MakeEmptyContext(*this);
-  if (!startContext.IsContext())
-    startContext.MakeEmptyContext(*this);
-  int numRows=theExpression.children.size-1;
-  for (int i=0; i<numRows; i++)
-  { const Expression& currentE=theExpression[i+1];
-    if (!this->GetVectoR
-        (currentE, currentRow, &currentContext, targetNumColsNonMandatory, conversionFunction))
-    { this->Comments << "<hr>Failed to GetVector() while extracting context from expression "
-      << currentE.ToString() << " with context " << currentContext.ToString() << "<hr>";
-      return false;
+  Matrix<Expression> convertedEs;
+  convertedEs.init(nonConvertedEs.NumRows, nonConvertedEs.NumCols);
+  Expression theContext;
+  theContext.MakeEmptyContext(*this);
+  if (inputOutputStartingContext!=0)
+    if (inputOutputStartingContext->IsContext())
+      theContext=*inputOutputStartingContext;
+  for (int i=0; i<nonConvertedEs.NumRows; i++)
+    for (int j=0; j<nonConvertedEs.NumCols; j++)
+    { if (!this->ConvertToTypeUsingFunction<theType>(conversionFunction, nonConvertedEs(i,j), convertedEs(i,j)))
+        return false;
+      theContext.ContextMergeContexts(theContext, convertedEs(i,j).GetContext(), theContext);
     }
-//    std::cout << "<hr>Merging " << currentContext.ToString() << " with " << startContext.ToString();
-    if (!currentContext.ContextMergeContexts(currentContext, startContext, startContext))
-    { this->Comments << "<hr>Failed to merge context "
-      << currentContext.ToString() << " with context " << startContext.ToString() << "<hr>";
-      return false;
-    }
+  for (int i=0; i<convertedEs.NumRows; i++)
+    for (int j=0; j<convertedEs.NumCols; j++)
+      if (!convertedEs(i,j).::Expression::SetContextAtLeastEqualTo(theContext))
+        return false;
+  outputMat.init(convertedEs.NumRows, convertedEs.NumCols);
+  for (int i=0; i<convertedEs.NumRows; i++)
+    for (int j=0; j<convertedEs.NumCols; j++)
+      outputMat(i,j)=convertedEs(i,j).GetValue<theType>();
+  if (inputOutputStartingContext!=0)
+    *inputOutputStartingContext=theContext;
+  return true;
+
+}
+
+template <class theType>
+bool Expression::AssignValueWithContext(const theType& inputValue, const Expression& theContext, CommandList& owner)
+{ this->reset(owner, 3);
+  this->AddChildAtomOnTop(this->GetTypeOperation<theType>());
+  this->AddChildOnTop(theContext);
+  return this->AddChildAtomOnTop(this->AddObjectReturnIndex(inputValue));
+}
+
+template <class theType>
+bool Expression::AssignValue(const theType& inputValue, CommandList& owner)
+{ Expression tempE;
+  tempE.theBoss=&owner;
+  int curType=tempE.GetTypeOperation<theType>();
+  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() ||
+      curType==owner.opElementUEoverRF() || curType==owner.opMatRF())
+  { std::cout << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
+    << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
-//  std::cout << "<hr>The context from all rows is: " << startContext.ToString();
-  for (int i=0; i<numRows; i++)
-  { const Expression& currentE=theExpression[i+1];
-    if (!this->GetVectoR
-        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
-    { this->Comments << "<hr>Failed to GetVector() while converting expression " <<
-      currentE.ToString() << " with context " << startContext.ToString() << "<hr>";
+  Expression emptyContext;
+  emptyContext.MakeEmptyContext(owner);
+  return this->AssignValueWithContext(inputValue, emptyContext, owner);
+}
+
+template <class theType>
+bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
+{ MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
+  //std::cout << "<hr>Merging context arguments of " << this->ToString();
+  this->CheckInitialization();
+  Expression mergedContexts;
+  if (!this->MergeContextsMyAruments(mergedContexts))
+    return false;
+  //std::cout << "<br> continuing to merge " << mergedContexts.ToString();
+  output.reset(*this->theBoss, this->children.size);
+  output.AddChildOnTop((*this)[0]);
+  Expression convertedE;
+  for (int i=1; i<mergedContexts.children.size; i++)
+  { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
+    { this->theBoss->Comments << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }
-    if (i==0)
-    { targetNumColsNonMandatory=currentRow.size;
-      outputMat.init(numRows, targetNumColsNonMandatory);
-    }
-    for (int j=0; j<targetNumColsNonMandatory; j++)
-      outputMat(i,j)=currentRow[j];
+    output.AddChildOnTop(convertedE);
   }
   return true;
 }

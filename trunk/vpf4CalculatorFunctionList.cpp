@@ -218,6 +218,12 @@ void CommandList::initPredefinedInnerFunctions()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddOperationInnerHandler
+("Interpolate", &this->innerInterpolatePoly, "",
+   "Constructs the one-variable polynomial of minimal degree that passes through the points. Points are given in the form \
+   ((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
+   "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3)); Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))", true, false)
+   ;
+  this->AddOperationInnerHandler
 ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
@@ -357,13 +363,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
   this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial, "",
    "Creates a polynomial expression. ",
-   "Polynomial{}((x-2y+z-1)^2(x+y-z))");
-  this->AddOperationInnerHandler
-  ("UE", this->innerElementUniversalEnvelopingAlgebra, "",
-   "Creates an atomic representation of an element of a universal enveloping algebra.",
-   "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
-   \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
-   \nUE{}(g_1g_2-g_2g_1+g_3^2)");
+   "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
   this->AddOperationInnerHandler
   ("RF", this->innerRationalFunction, "",
    "Creates a built-in rational function.",
@@ -439,7 +439,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
    "printModule{} (G_2, (2,0),(0,0))");
   this->AddOperationInnerHandler
-  ("hwTAAbf", this->fHWTAABF, "",
+  ("hwTAAbf", this->innerHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
    Let M be a Verma module with highest weight vector v given in \
    fundamental coordinates. Let P:M->M\
@@ -463,22 +463,18 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
   this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
    this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
-   "Decomposes the inducing module of a generalized Verma module over the \
-   Levi part of a parabolic smaller than the inducing one.\
-   The first argument gives the type of the algebra. The second argument \
-   gives the highest weight of the module in \
-   fundamental coordinates. The third argument gives the parabolic \
-   subalgebra with respect to which we induce. \
+   "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
+   The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
+   fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
    The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
   this->AddOperationInnerHandler
-  ("Casimir", this->fCasimir, "",
+  ("Casimir", this->innerCasimir, "",
    "Gives the Casimir element. ",
    "Casimir{}(G_2)");
   this->AddOperationInnerHandler
-  ("hmmG2inB3", this->fEmbedG2inB3, "",
-   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in\
-    a paper by McGovern.",
+  ("hmmG2inB3", this->innerEmbedG2inB3, "",
+   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
    "g_{{a}}:=getChevalleyGenerator{} (G_2, a); hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddOperationInnerHandler
   ("drawRootSystem", this->innerDrawRootSystem, "",
@@ -542,7 +538,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
    "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))", true, true);
   this->AddOperationInnerHandler
-  ("SplitFDTensorGenericGeneralizedVerma", this->fSplitGenericGenVermaTensorFD, "",
+  ("SplitFDTensorGenericGeneralizedVerma", this->innerSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
   this->AddOperationInnerHandler
@@ -554,7 +550,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    The non-zero entries of the highest weight give the\
    root spaces outside of the Levi part of the parabolic. \
    The second argument gives the weight level to which the computation should be carried out",
-   "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, x_3)); ");
+   "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ");
   this->AddOperationInnerHandler
   ("EmbedSSalgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
    "Experimental, please don't use. Embeds a Lie algebra \
@@ -942,12 +938,12 @@ void CommandList::initPredefinedStandardOperations()
    "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opAlgNumber(), this->opRational(),
-   "Adds two algebraic numbers. ",
-   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
+   "Adds algebraic number to rational. ",
+   "1/(\\sqrt {2}+ 1+\\sqrt{3}+\\sqrt{6})", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddAlgebraicNumberToAlgebraicNumber, this->opRational(), this->opAlgNumber(),
-   "Adds two algebraic numbers. ",
-   "\\sqrt {2}+ \\sqrt {3} + \\sqrt{6}", true);
+   "Adds rational to algebraic number. ",
+   "1/(1+\\sqrt {2}+\\sqrt{}6)", true);
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -1117,11 +1113,6 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerMultiplyByOne, "",
    "Rule 1*{{anything}}=anything.",
    "x*1;x*1-x ", true);
-  this->AddOperationInnerHandler
-  ("\\choose", CommandListInnerTypedFunctions::innerNChooseK, "",
-   "Evaluates the binomial coefficient if possible.",
-   "8 \\choose 3 ", true);
-
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
@@ -1198,8 +1189,12 @@ void CommandList::initPredefinedStandardOperations()
    returning double. The cpp multiplication is supposed to call the system's \
    hardware double multiplication routine. ",
    "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((101)^{20});\
-   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
+   \nz:=101^20;\
+   \nDoubleValue{}(z);\
+   \nDoubleValue{}(z)+DoubleValue{}(1)-DoubleValue{}(z); \
+   \n(z+1)-z;\
+   \n y:=101^200;\
+   \nDoubleValue(y)"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
@@ -1232,10 +1227,17 @@ void CommandList::initPredefinedStandardOperations()
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",
    "((1,-1),(0,-1))((1, 0), (-1,-1))", true);
+
+  this->AddOperationInnerHandler
+  ("\\choose", CommandListInnerTypedFunctions::innerNChooseK, "",
+   "Evaluates the binomial coefficient if possible.",
+   "8 \\choose 3 ", true);
+
   this->AddOperationOuterHandler
   ("mod", this->innerZmodP, "",
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
@@ -1356,6 +1358,11 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
+  this->AddOperationInnerHandler
+  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatOrUEbyRatOrUE, "",
+   "Lie bracket. ",
+   "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", WeylGroupCalculatorFunctions::innerTensorWeylReps,
    this->opWeylGroupRep(), this->opWeylGroupRep(),
@@ -1371,7 +1378,7 @@ void CommandList::initPredefinedStandardOperations()
     \nZ:=MatrixRationalsTensorForm{}P; W:=MatrixRationalsTensorForm{}Q; \
     X\\otimes Y; Z\\otimes W", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("\\otimes", CommandListInnerTypedFunctions::innerTensorMatTensorByMatTensor,
+  ("\\otimes", CommandListInnerTypedFunctions::innerTensorMatByMatTensor,
    this->opMatTensorRat(), this->opMatTensorRat(),
    "Same as tensor product of matrices but uses class MatrixTensor instead of class Matrix.",
     "P:=((0 , 2 ),(1 , 0)); Q:=((0 , 3 ),(1 , 0)); \
@@ -1387,11 +1394,6 @@ void CommandList::initPredefinedStandardOperations()
    \nv:=hwv{}(X, (1,0),(0,0));\
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v); ", true);
-
-  this->AddOperationOuterHandler
-  ("[]", this->outerLieBracket, "",
-   "Lie bracket. ",
-   "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
   this->AddOperationOuterHandler
   (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
    The expression a:=:b always reduces to \

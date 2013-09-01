@@ -555,7 +555,7 @@ void AlgebraicNumber::operator/=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator/=");
   AlgebraicNumber otherCopy=other;
   otherCopy.Invert();
-  std::cout << "<hr>other: " << other.theElt.ToString() << " inverted: " << otherCopy.ToString();
+//  std::cout << "<hr>other: " << other.theElt.ToString() << " inverted: " << otherCopy.ToString();
   *this*=otherCopy;
 }
 

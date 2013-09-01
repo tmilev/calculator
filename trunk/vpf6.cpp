@@ -370,9 +370,9 @@ ElementWeylGroup
 
 //Expression::AddObjectReturnIndex specializations end
 
-//start Expression::GetValuENonConstUseWithCaution specializations.
+//start Expression::GetValueNonConst specializations.
 template < >
-Rational& Expression::GetValuENonConstUseWithCaution()const
+Rational& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Rational>())
   { std::cout << "This is a programming error: expression not of required type Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -383,7 +383,7 @@ Rational& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-ElementZmodP& Expression::GetValuENonConstUseWithCaution()const
+ElementZmodP& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementZmodP>())
   { std::cout << "This is a programming error: expression not of required type Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -394,7 +394,7 @@ ElementZmodP& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
+AlgebraicNumber& Expression::GetValueNonConst()const
 { if (!this->IsOfType<AlgebraicNumber>())
   { std::cout << "This is a programming error: expression not of required type Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -405,7 +405,7 @@ AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-double& Expression::GetValuENonConstUseWithCaution()const
+double& Expression::GetValueNonConst()const
 { if (!this->IsOfType<double>())
   { std::cout << "This is a programming error: expression not of required type Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -416,7 +416,7 @@ double& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-std::string& Expression::GetValuENonConstUseWithCaution()const
+std::string& Expression::GetValueNonConst()const
 { if (!this->IsOfType<std::string>())
   { std::cout << "This is a programming error: expression not of required type std::string. "
     << " The expression equals " << this->ToString() << "."
@@ -427,7 +427,7 @@ std::string& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
+RationalFunctionOld& Expression::GetValueNonConst()const
 { if (!this->IsOfType<RationalFunctionOld>())
   { std::cout << "This is a programming error: expression not of required type RationalFunctionOld."
     << " The expression equals " << this->ToString() << "."
@@ -438,7 +438,7 @@ RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
+ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
   { std::cout << "This is a programming error: expression not of required"
     << " type ElementUniversalEnveloping_RationalFunctionOld."
@@ -450,7 +450,7 @@ ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValuENonConstUse
 }
 
 template < >
-Polynomial<Rational>& Expression::GetValuENonConstUseWithCaution()const
+Polynomial<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Polynomial<Rational> >())
   { std::cout << "This is a programming error: expression not of required type Polynomial_Rational."
     << " The expression equals " << this->ToString() << "."
@@ -461,7 +461,7 @@ Polynomial<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-LittelmannPath& Expression::GetValuENonConstUseWithCaution()const
+LittelmannPath& Expression::GetValueNonConst()const
 { if (!this->IsOfType<LittelmannPath>())
   { std::cout << "This is a programming error: expression not of required type LittelmannPath."
     << " The expression equals " << this->ToString() << "."
@@ -472,7 +472,7 @@ LittelmannPath& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValuENonConstUseWithCaution()const
+MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
   { std::cout << "This is a programming error: expression not of required type MonomialTensor_int."
     << " The expression equals " << this->ToString() << "."
@@ -483,7 +483,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValuENonCon
 }
 
 template < >
-ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
+ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { std::cout << "This is a programming error: expression not of required type ElementTensorsGeneralizedVermas_RationalFunction."
     << " The expression equals " << this->ToString() << "."
@@ -494,7 +494,7 @@ ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValuENonCon
 }
 
 template < >
-charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
+charSSAlgMod<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<charSSAlgMod<Rational> >())
   { std::cout << "This is a programming error: expression not of required type charSSAlgMod_Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -505,7 +505,7 @@ charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
+SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
   { std::cout << "This is a programming error: expression not of required type AlgebraicNumberOld. "
     << " The expression equals " << this->ToString() << "."
@@ -516,7 +516,7 @@ SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
+Matrix<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<Rational> >())
   { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -527,7 +527,7 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-MatrixTensor<Rational>& Expression::GetValuENonConstUseWithCaution()const
+MatrixTensor<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MatrixTensor<Rational> >())
   { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -538,7 +538,7 @@ MatrixTensor<Rational>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-Matrix<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
+Matrix<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<RationalFunctionOld> >())
   { std::cout << "This is a programming error: expression not of required type Matrix_RF. "
     << " The expression equals " << this->ToString() << "."
@@ -549,7 +549,7 @@ Matrix<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-SemisimpleSubalgebras& Expression::GetValuENonConstUseWithCaution()const
+SemisimpleSubalgebras& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleSubalgebras>())
   { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
     << " The expression equals " << this->ToString() << "."
@@ -560,7 +560,7 @@ SemisimpleSubalgebras& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
+CalculusFunctionPlot& Expression::GetValueNonConst()const
 { if (!this->IsOfType<CalculusFunctionPlot>())
   { std::cout << "This is a programming error: expression not of required type CalculusPlot. "
     << " The expression equals " << this->ToString() << "."
@@ -571,7 +571,7 @@ CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-WeylGroup& Expression::GetValuENonConstUseWithCaution()const
+WeylGroup& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroup>())
   { std::cout << "This is a programming error: expression not of required type WeylGroup. "
     << " The expression equals " << this->ToString() << "."
@@ -582,7 +582,7 @@ WeylGroup& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-WeylGroupRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()const
+WeylGroupRepresentation<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupRepresentation<Rational> >())
   { std::cout << "This is a programming error: expression not of required type WeylGroupRepresentation. "
     << " The expression equals " << this->ToString() << "."
@@ -593,7 +593,7 @@ WeylGroupRepresentation<Rational>& Expression::GetValuENonConstUseWithCaution()c
 }
 
 template < >
-ElementWeylGroup& Expression::GetValuENonConstUseWithCaution()const
+ElementWeylGroup& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementWeylGroup>())
   { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
     << " The expression equals " << this->ToString() << "."
@@ -604,7 +604,7 @@ ElementWeylGroup& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-WeylGroupVirtualRepresentation& Expression::GetValuENonConstUseWithCaution()const
+WeylGroupVirtualRepresentation& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupVirtualRepresentation>())
   { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
     << " The expression equals " << this->ToString() << "."
@@ -614,40 +614,22 @@ WeylGroupVirtualRepresentation& Expression::GetValuENonConstUseWithCaution()cons
   return this->theBoss->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
 
-//end Expression::GetValuENonConstUseWithCaution specializations.
-//start Expression::ContextGetPolynomialMonomial specializations.
+//end Expression::GetValueNonConst specializations.
+//start Expression::ConvertToType specializations.
 template< >
 bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { Polynomial<Rational> resultP;
-    resultP.MakeConst(this->GetValuE<Rational>());
+    resultP.MakeConst(this->GetValue<Rational>());
     return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { output=*this;
     return true;
   }
-//  std::cout << "<hr>My mark!";
-//  std::cout << " this: " << this->Lispify();
-  if (!this->HasContext())
-    return false;
-  Expression expressionRemovedContext=*this;
-  expressionRemovedContext.RemoveContext();
-//  std::cout << "<br>Converting to polynomial: " << this->ToString()
-//  << ", without context: " << expressionRemovedContext.ToString();
-  Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.GetIndexChild(expressionRemovedContext);
-//  std::cout << "<br>Expression without context " << expressionRemovedContext.ToString()
-//  << " (Lisp: " << expressionRemovedContext.Lispify()
-//  << ") has index " << indexInPolyVars << " in " << myPolyVars.ToString()
-//  << ". Lisp: " << myPolyVars.Lispify();
-  if (indexInPolyVars==-1)
-    return false;
-  Polynomial<Rational> resultP;
-  resultP.MakeMonomiaL(indexInPolyVars-1, 1, 1);
-  return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  return false;
 }
 
 template< >
@@ -656,111 +638,112 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
   { RationalFunctionOld resultRF;
-    resultRF.MakeConst(this->GetValuE<Rational>(), this->theBoss->theGlobalVariableS);
+    resultRF.MakeConst(this->GetValue<Rational>(), this->theBoss->theGlobalVariableS);
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { RationalFunctionOld resultRF;
     resultRF.context=this->theBoss->theGlobalVariableS;
-    resultRF=this->GetValuE<Polynomial<Rational> >();
+    resultRF=this->GetValue<Polynomial<Rational> >();
     return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
   { output=*this;
     return true;
   }
-  if (!this->HasContext())
-  { this->theBoss->Comments << "Failed to convert " << this->ToString()
-    << " to RF because the expression had no context. ";
-    return false;
-  }
-  Expression expressionRemovedContext=*this;
-  expressionRemovedContext.RemoveContext();
-  //std::cout << "<hr>Converting to rational function: " << this->ToString()
-  //<< ", without context: " << expressionRemovedContext.ToString() << "<br>";
-  //std::cout << "The stack trace, master: "
-  //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << "<hr>";
-
-  Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.GetIndexChild(expressionRemovedContext);
-  if (indexInPolyVars==-1)
-  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString()
-    << " to RF because my context " << this->GetContext()
-    << " did not contain have my context-stripped value "
-    << expressionRemovedContext.ToString() << ". <hr>";
-    return false;
-  }
-  RationalFunctionOld resultRF;
-  resultRF.MakeOneLetterMoN(indexInPolyVars-1, 1, *this->theBoss->theGlobalVariableS);
-  return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
+  return false;
 }
 
 template< >
-bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
-(Expression& output)const
-{ MacroRegisterFunctionWithName
-  ("Expression::ConvertToType_ElementUniversalEnveloping_RationalFunctionOld");
+bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  //std::cout << "<hr>convert to ue called on: " << this->ToString();
   this->CheckInitialization();
+  if (!this->IsBuiltInType())
+    return false;
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
   { output=*this;
     return true;
   }
-  int algebraIndex=this->GetContext().ContextGetIndexAmbientSSalg();
-  if (algebraIndex==-1)
+//  std::cout << "<hr>Getting ue from: " << this->ToString();
+  SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
+  if (theOwner==0)
+  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString()
+    << " to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
-  if (!this->ConvertToType<RationalFunctionOld>(output))
-    return false;
-  RationalFunctionOld tempRF=output.GetValuE<RationalFunctionOld>();
-  ElementUniversalEnveloping<RationalFunctionOld> resultElt;
-  resultElt.MakeConst
-  (tempRF, this->theBoss->theObjectContainer.theLieAlgebras[algebraIndex]);
-  return output.AssignValueWithContext(resultElt, this->GetContext(), *this->theBoss);
+  }
+  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  if (this->IsOfType<Rational>())
+  { outputUE.MakeConst(this->GetValue<Rational>(), *theOwner);
+    return output.AssignValueWithContext(outputUE, this->GetContext(), *this->theBoss);
+  } else if (this->IsOfType<Polynomial<Rational> >())
+  { RationalFunctionOld tempRF;
+    tempRF=this->GetValue<Polynomial<Rational> >();
+    outputUE.MakeConst(tempRF, *theOwner);
+    return output.AssignValueWithContext(outputUE, this->GetContext(), *this->theBoss);
+  } else if (this->IsOfType<RationalFunctionOld>())
+  { outputUE.MakeConst(this->GetValue<RationalFunctionOld>(), *theOwner);
+    return output.AssignValueWithContext(outputUE, this->GetContext(), *this->theBoss);
+  }
+  this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  I don't know how. ";
+  return false;
 }
 
-//end Expression::ContextGetPolynomialMonomial specializations.
-//begin Expression::GetContextForConversionIgnoreMyContext specializations.
-template <>
-bool Expression::GetContextForConversionIgnoreMyContext<Polynomial<Rational> >
-(Expression& output)const
-{ this->CheckInitialization();
-  if (this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >())
-    return output.MakeEmptyContext(*this->theBoss);
-  output.reset(*this->theBoss, 2);
-  output.AddChildAtomOnTop(this->theBoss->opContext());
-  Expression tempE;
-  tempE.reset(*this->theBoss, 2);
-  tempE.AddChildAtomOnTop(this->theBoss->opPolynomialVariables());
-  tempE.AddChildOnTop(*this);
-  output.AddChildOnTop(tempE);
-//  std::cout << "<br>Output context without mine: " << output.ToString();
+template< >
+bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  this->CheckInitialization();
+  if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+  { output=*this;
+    return true;
+  }
+  return false;
+}
+//end Expression::ConvertToType specializations.
+
+bool Expression::CheckConsistency()const
+{ MacroRegisterFunctionWithName("Expression::CheckConsistency");
+  this->CheckInitialization();
+  if (this->children.size==0)
+    return false;
+  if (this->IsBuiltInType())
+  { if (this->children.size!=3)
+    { std::cout << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
+      << "children: type, context, and index in CommandList. The expression is " << this->ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    const Expression& mustBeTheContext=(*this)[1];
+    if (!mustBeTheContext.IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
+    { std::cout << "This is a programming error. At the moment of writing,  "
+      << "the second child of a built-in type must be a context. It is instead " << mustBeTheContext.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    for (int i=1; i<mustBeTheContext.children.size; i++)
+    { bool isGood=false;
+      const Expression& currentE=mustBeTheContext[i];
+      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+        isGood=true;
+      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg()))
+        isGood=true;
+      if (!isGood)
+      { std::cout << "This is a programming error. The context " << mustBeTheContext.ToString()
+        << " has an entry which I do not recognize, namely, " << currentE.ToString() << ". "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
+  }
   return true;
 }
-
-template <>
-bool Expression::GetContextForConversionIgnoreMyContext<RationalFunctionOld>
-(Expression& output)const
-{ if (this->IsOfType<RationalFunctionOld>())
-    return output.MakeEmptyContext(*this->theBoss);
-  return this->GetContextForConversionIgnoreMyContext<Polynomial<Rational> >(output);
-}
-
-template <>
-bool Expression::GetContextForConversionIgnoreMyContext
-<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output)const
-{ if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    return output.MakeEmptyContext(*this->theBoss);
-  return this->GetContextForConversionIgnoreMyContext<RationalFunctionOld>(output);
-}
-//end Expression::GetContextForConversionIgnoreMyContext specializations.
 
 const Expression& Expression::operator[](int n)const
 { this->CheckInitialization();
   int childIndex=this->children[n];
   if (childIndex<0)
-  { std::cout << "<hr>This is a programming error: the child of position " << n
-    << " out of " << this->children.size-1
-    << " is not contained in the expression container. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "<hr>This is a programming error: the child of position " << n << " out of " << this->children.size-1
+    << " is not contained in the expression container. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return this->theBoss->theExpressionContainer[childIndex];
@@ -812,11 +795,10 @@ bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
 int Expression::ContextGetNumContextVariables()const
 { if (this->theBoss==0)
     return 0;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContext()))
+  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
     return 0;
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom
-        (this->theBoss->opPolynomialVariables()))
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
       return (*this)[i].children.size-1;
   return 0;
 }
@@ -824,9 +806,13 @@ int Expression::ContextGetNumContextVariables()const
 bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 { MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
+  if (!this->IsBuiltInType())
+  { std::cout << "This is a programming error: calling Expression::SetContextAtLeastEqualTo on an expression that is not of built-in type. "
+    << "Contexts are reserved for built-in data types. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   if (!inputOutputMinContext.IsContext())
-  { this->theBoss->Comments << "<br>Warning: non-initialized input context in "
-    << "Expression::SetContextAtLeastEqualTo. Stack trace:"
+  { this->theBoss->Comments << "<br>Warning: non-initialized input context in Expression::SetContextAtLeastEqualTo. Stack trace: "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     inputOutputMinContext.MakeEmptyContext(*this->theBoss);
   }
@@ -843,25 +829,23 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   PolynomialSubstitution<Rational> polySub;
   bool mustBeTrue= myOldContext.ContextGetPolySubFromSuperContext(newContext, polySub);
   if (!mustBeTrue)
-  { std::cout << "This is a programming error: I was not able to extract a polynomial "
-    << " substitution from what is supposed to be a super-context. Something is wrong. "
+  { std::cout << "This is a programming error: I was not able to extract a polynomial substitution from what is supposed to be a super-context. Something is wrong. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (this->IsOfType<Rational>())
-  { if (this->children.size==2)
-      this->AddChildOnTop((*this)[1]);
+  { //std::cout << "HERE i am!";
     this->SetChilD(1, inputOutputMinContext);
     return true;
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
   { ElementUniversalEnveloping<RationalFunctionOld> newUE=
-    this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
+    this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
     newUE.Substitution(polySub);
     return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
-  { Polynomial<Rational> newPoly=this->GetValuE<Polynomial<Rational> >();
+  { Polynomial<Rational> newPoly=this->GetValue<Polynomial<Rational> >();
     //std::cout << "<br>Subbing " << polySub.ToString() << " in "
     //<< newPoly.ToString();
     if (!newPoly.Substitution(polySub))
@@ -869,25 +853,18 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
-  { RationalFunctionOld newRF=this->GetValuE<RationalFunctionOld>();
+  { RationalFunctionOld newRF=this->GetValue<RationalFunctionOld>();
     newRF.Substitution(polySub);
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV
-    =this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+    =this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
     newETGV.Substitution(polySub, this->theBoss->theObjectContainer.theCategoryOmodules);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->theBoss);
   }
-  if (this->IsBuiltInType())
-  { this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type "
-    << " but is not handled by Expression::SetContextAtLeastEqualTo";
-    //return false;
-  }
-  Expression tempE=*this;
-  this->reset(*this->theBoss, 2);
-  this->AddChildOnTop(tempE);
-  return this->AddChildOnTop(inputOutputMinContext);
+  this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo";
+  return false;
 }
 
 bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
@@ -915,8 +892,7 @@ Expression Expression::ContextGetContextVariable(int variableIndex)const
 
 bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
 { if (!this->IsContext())
-  { std::cout << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
-    << "on a non-context expression. "
+  { std::cout << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA on a non-context expression. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -925,22 +901,21 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
     return false;
   if (index==indexInOwners)
     return true;
-  Expression tempE;
-  tempE.reset(owner, 2);
-  tempE.AddChildAtomOnTop(owner.opSSLieAlg());
-  tempE.AddChildAtomOnTop(indexInOwners);
-  this->AddChildOnTop(tempE);
-  return true;
+  Expression LieAlgContextE;
+  LieAlgContextE.reset(owner, 2);
+  LieAlgContextE.AddChildAtomOnTop(owner.opSSLieAlg());
+  LieAlgContextE.AddChildAtomOnTop(indexInOwners);
+  return this->AddChildOnTop(LieAlgContextE);
 }
 
 Expression Expression::ContextGetPolynomialVariables()const
 { MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
   this->CheckInitialization();
   if (!this->IsContext())
-  { std::cout << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
-    << " on a non-context expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { //std::cout << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
+    //<< " on a non-context expression. "
+    //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    //assert(false);
   }
   for (int i=1; i<this->children.size; i++)
     if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
@@ -967,6 +942,7 @@ bool Expression::ContextMergeContexts
     rightSSindex=leftSSindex;
   if (leftSSindex!=rightSSindex)
     return false;
+//  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
 //  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
@@ -983,7 +959,7 @@ bool Expression::ContextMergeContexts
   for (int i=0; i<varUnion.size; i++)
     varUnionIndices[i]=owner.theExpressionContainer.GetIndex(varUnion[i]);
   outputContext.reset(owner, 5+varUnion.size);
-  outputContext.AddChildAtomOnTop(owner.opContext());
+  outputContext.AddChildAtomOnTop(owner.opContexT());
   if (varUnion.size>0)
   { Expression polyVarsE;
     polyVarsE.reset(owner, varUnion.size+1);
@@ -1007,7 +983,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
   output.polyDefaultLetter="x";
   if (this->theBoss==0)
     return;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContext()))
+  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
     return;
   Expression thePolyE=this->ContextGetPolynomialVariables();
   output.polyAlphabeT.SetSize(thePolyE.children.size-1);
@@ -1018,7 +994,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
 bool Expression::IsContext()const
 { if (this->theBoss==0)
     return false;
-  return this->IsListNElementsStartingWithAtom(this->theBoss->opContext());
+  return this->IsListNElementsStartingWithAtom(this->theBoss->opContexT());
 }
 
 bool Expression::IsError(std::string* outputErrorMessage)const
@@ -1044,11 +1020,13 @@ bool Expression::IsEqualToOne()const
 
 bool Expression::IsEqualToZero()const
 { if (this->IsOfType<Rational>())
-    return this->GetValuE<Rational>().IsEqualToZero();
+    return this->GetValue<Rational>().IsEqualToZero();
+  if (this->IsOfType<Rational>())
+    return this->GetValue<Rational>().IsEqualToZero();
   if (this->IsOfType<Polynomial<Rational> >())
-    return this->GetValuE<Polynomial<Rational> >().IsEqualToZero();
+    return this->GetValue<Polynomial<Rational> >().IsEqualToZero();
   if (this->IsOfType<RationalFunctionOld>())
-    return this->GetValuE<RationalFunctionOld>().IsEqualToZero();
+    return this->GetValue<RationalFunctionOld>().IsEqualToZero();
   return false;
 }
 
@@ -1069,24 +1047,20 @@ std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory="
-  << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
+  systemCommand1 << " latex -output-directory=" << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
 //  std::cout << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());
   if (useLatexDviPSpsTopdf)
-  { systemCommand2 << " dvips -o " <<  fileName.str() << ".ps "
-    << fileName.str() << ".dvi";
+  { systemCommand2 << " dvips -o " <<  fileName.str() << ".ps " << fileName.str() << ".dvi";
 //    std::cout << "<br>system command:<br>" << systemCommand2.str();
     this->SystemCommands.AddOnTop(systemCommand2.str());
-    systemCommand3 << " convert " << fileName.str() << ".ps "
-    << fileName.str() << ".png";
+    systemCommand3 << " convert " << fileName.str() << ".ps " << fileName.str() << ".png";
 //    std::cout << "<br>system command:<br>" << systemCommand3.str();
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
-  out << "<img src=\"" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\">"
-  << "</img><a href=\""<< this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\">"
-  << "output png</a>";
+  out << "<img src=\"" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\"></img><a href=\"" << this->DisplayNameDefaultOutput
+  << this->numOutputFiles << ".png\">output png</a>";
   this->numOutputFiles++;
   return out.str();
 }
@@ -1110,12 +1084,31 @@ void Expression::MakeFunction
 
 bool Expression::MakeEmptyContext(CommandList& owner)
 { this->reset(owner, 1);
-  this->AddChildAtomOnTop(owner.opContext());
-  return true;
+  return this->AddChildAtomOnTop(owner.opContexT());
 }
 
-bool Expression::MakeXOX
-  (CommandList& owner, int theOp, const Expression& left, const Expression& right)
+bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const Expression& inputPolyVarE)
+{ this->MakeEmptyContext(owner);
+  Expression thePolyVars;
+  thePolyVars.reset(owner, 2);
+  thePolyVars.AddChildAtomOnTop(owner.opPolynomialVariables());
+  thePolyVars.AddChildOnTop(inputPolyVarE);
+  return this->AddChildOnTop(thePolyVars);
+}
+
+bool Expression::MakeContextSSLieAlg
+  (CommandList& owner, const SemisimpleLieAlgebra& theSSLiealg)
+{ this->MakeEmptyContext(owner);
+  return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
+}
+
+bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const std::string& inputPolyVarName)
+{ Expression varNameE;
+  varNameE.MakeAtom(owner.AddOperationNoRepetitionOrReturnIndexFirst(inputPolyVarName), owner);
+  return this->MakeContextWithOnePolyVar(owner, varNameE);
+}
+
+bool Expression::MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right)
 { if (&left==this || &right==this)
   { Expression leftCopy=left;
     Expression rightCopy=right;
@@ -1128,8 +1121,7 @@ bool Expression::MakeXOX
   return this->AddChildOnTop(right);
 }
 
-bool Expression::MakeOX
-  (CommandList& owner, int theOp, const Expression& opArgument)
+bool Expression::MakeOX(CommandList& owner, int theOp, const Expression& opArgument)
 { if (&opArgument==this)
   { Expression copyE=opArgument;
     return this->MakeOX(owner, theOp, copyE);
@@ -1145,6 +1137,33 @@ bool Expression::Sequencefy()
   if (this->IsSequenceNElementS())
     return true;
   return this->MakeOX(*this->theBoss, this->theBoss->opSequence(), *this);
+}
+
+bool CommandList::GetVectorExpressions
+  (const Expression& input, List<Expression>& output, int targetDimNonMandatory)
+{ MacroRegisterFunctionWithName("CommandList::GetVectorExpressions");
+  output.ReservE(input.children.size);
+  output.SetSize(0);
+  if (!input.IsSequenceNElementS())
+  { if (targetDimNonMandatory>0)
+      if (targetDimNonMandatory!=1)
+      { this->Comments << "<hr>GetVector failure: target dim is " << targetDimNonMandatory << " but the input " << input.ToString()
+        << " can only be interpretted as a single element";
+        return false;
+      }
+    output.AddOnTop(input);
+    return true;
+  }
+  if (targetDimNonMandatory>0)
+    if (targetDimNonMandatory!=input.children.size-1)
+    { this->Comments << "<hr>Failed to GetVector: the input is required to have " << targetDimNonMandatory << " columns but it has "
+      << input.children.size-1 << " columns instead. <hr>";
+      return false;
+    }
+  targetDimNonMandatory=input.children.size-1;
+  for (int i=0; i<targetDimNonMandatory; i++)
+    output.AddOnTop(input[i+1]);
+  return true;
 }
 
 bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
@@ -1927,99 +1946,30 @@ bool CommandList::ApplyOneRule()
   return false;
 }
 
-bool CommandList::fHWTAABF
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fHWTAABF");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(4))
-    return output.SetError("Function expects three arguments.", theCommands);
-  Expression leftExpression, rightExpression, finalContext;
-  const Expression& weightExpression=input[3];
-  if (!theCommands.innerElementUniversalEnvelopingAlgebra
-      (theCommands, input[1], leftExpression))
-    return output.SetError("Failed to convert left expression to element UE.", theCommands);
-  if (!theCommands.innerElementUniversalEnvelopingAlgebra
-      (theCommands, input[2], rightExpression ))
-    return output.SetError("Failed to convert left expression to element UE.", theCommands);
-  if (!Expression::ContextMergeContexts
-      (leftExpression.GetContext(), rightExpression.GetContext(), finalContext))
-    return output.SetError
-    ("Failed to merge the contexts of the two UE elements ", theCommands);
-  int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
-  if (algebraIndex==-1)
-    return output.SetError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
-  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras[algebraIndex];
-  Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVectoR<RationalFunctionOld>
-      (weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerRationalFunction))
-  { std::stringstream errorStream;
-    errorStream << "Error: could not obtain highest weight from the third argument which is "
-    << weightExpression.ToString();
-    return output.SetError(errorStream.str(), theCommands);
-  }
-  if (!leftExpression.SetContextAtLeastEqualTo(finalContext) ||
-      ! rightExpression.SetContextAtLeastEqualTo(finalContext))
-    return output.SetError
-    ("Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ", theCommands);
-  //std::cout << "<br>starting left elt after the very final conversion: " << leftD.ToString();
-  //std::cout << "<br>starting right elt after conversion: " << rightD.ToString();
-  //std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ToString();
-  //std::cout << "<br>Left context: " << leftD.GetContext().ToString();
-  //std::cout << "<br>Right context: " << rightD.GetContext().ToString();
-
-  RationalFunctionOld theRingZero, theRingUnit;
-  theRingZero.MakeZero(theCommands.theGlobalVariableS);
-  theRingUnit.MakeOne(theCommands.theGlobalVariableS);
-  SemisimpleLieAlgebra theSSalgebra;
-  theSSalgebra=*constSSalg;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  std::stringstream out;
-  Vector<RationalFunctionOld> hwDualCoords;
-
-  theSSalgebra.OrderSSalgebraForHWbfComputation();
-  hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
-  RationalFunctionOld outputRF;
-  //std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
-  if(!leftExpression.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().HWTAAbilinearForm
-     (rightExpression.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >(), outputRF,
-      &hwDualCoords, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, &theCommands.Comments))
-    return output.SetError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
-  return output.AssignValueWithContext(outputRF, finalContext, theCommands);
-}
-
 template<class coefficient>
 bool CommandList::GetTypeHighestWeightParabolic
-(CommandList& theCommands, const Expression& input, Expression& output,
- Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
- Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
- Expression::FunctionAddress ConversionFun)
+(CommandList& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
+ Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
 { if (!input.IsListNElements(4) && !input.IsListNElements(3))
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
      SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  std::string errorString;
-  if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
-  if (!theCommands.GetVectoR<coefficient>
-      (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
-       ConversionFun))
+  if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;
-    tempStream << "Failed to convert the second argument of HWV to a list of "
-    << ambientSSalgebra->GetRank() << " polynomials. The second argument you gave is "
-    << middleE.ToString() << ".";
+    tempStream << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return output.SetError(tempStream.str(), theCommands);
   }
   if (input.IsListNElements(4))
   { Vector<Rational> parabolicSel;
     const Expression& rightE=input[3];
-    if (!theCommands.GetVectoR<Rational>
-        (rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
+    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
     { std::stringstream tempStream;
-      tempStream << "Failed to convert the third argument of HWV to a list of "
-      << ambientSSalgebra->GetRank()
+      tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
       return output.SetError(tempStream.str(), theCommands);
     }
@@ -2068,8 +2018,7 @@ bool CommandList::fDecomposeCharGenVerma
   WeylGroup theWeyl;
   theWeyl=theSSlieAlg->theWeyl;
   if (!theKLpolys.ComputeKLPolys(&theWeyl))
-    return output.SetError
-    ("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
+    return output.SetError("failed to generate Kazhdan-Lusztig polynomials (output too large?)", theCommands);
 //  Vectors<Polynomial<Rational> > tempVects;
 //  tempVects.AddOnTop(theSSlieAlg.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords) );
 //  HashedList<Vector<Polynomial<Rational> > > theOrbit;
@@ -2082,8 +2031,7 @@ bool CommandList::fDecomposeCharGenVerma
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   ReflectionSubgroupWeylGroup theSub;
-  if (!theSub.MakeParabolicFromSelectionSimpleRoots
-      (theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
+  if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
     return output.SetError
     ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
@@ -2160,21 +2108,17 @@ bool CommandList::innerPrintGenVermaModule
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if(!theCommands.GetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
-       theCommands.innerRationalFunction) )
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, theCommands.innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
       return true;
-  if (!theCommands.innerHWVCommon
-      (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, false))
+  if (!theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, false))
     return output.SetError("Failed to create Generalized Verma module", theCommands);
   if (output.IsError())
     return true;
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt=
-  output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  ModuleSSalgebra<RationalFunctionOld>&
-  theModule=theElt.GetOwnerModule();
+  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt=output.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  ModuleSSalgebra<RationalFunctionOld>& theModule= *theElt[0].theMons[0].owneR;
   return output.AssignValue(theModule.ToString(), theCommands);
 }
 
@@ -2201,25 +2145,23 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError
-    ("Function fSplitGenericGenVermaTensorFD is expected to have three arguments: \
+    ("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: \
      SS algebra type, Number, List{}. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& genVemaWeightNode=input[3];
   const Expression& levelNode=input[2];
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
-  std::string errorString;
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, theSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
   if (!theCommands.GetVectoR
       (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial))
   { theCommands.Comments
-    << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
+    << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of "
     << theRank << " polynomials. The second argument you gave is "
     << genVemaWeightNode.ToString() << ".";
     return false;
@@ -2723,11 +2665,14 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     ei.MakeEi(theSSalgebra.GetRank(), j);
     theGenerator.MakeGGenerator(ei, theSSalgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
-//    theGenerator.MakeHgenerator
-//    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
-//    theGeneratorsItry.AddOnTop(theGenerator);
+    theGenerator.MakeHgenerator(ei, theSSalgebra);
+    theGeneratorsItry.AddOnTop(theGenerator);
     ei.Minus();
     theGenerator.MakeGGenerator(ei, theSSalgebra);
+    theGeneratorsItry.AddOnTop(theGenerator);
+  }
+  for (int j=0; j<theSSalgebra.theWeyl.RootSystem.size; j++)
+  { theGenerator.MakeGGenerator(theSSalgebra.theWeyl.RootSystem[j], theSSalgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
   }
   theQDOs.SetSize(theGeneratorsItry.size);
@@ -3064,45 +3009,38 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
   }
 }
 
-bool CommandList::fSplitGenericGenVermaTensorFD
+bool CommandList::innerSplitGenericGenVermaTensorFD
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSplitGenericGenVermaTensorFD");
+{ MacroRegisterFunctionWithName("CommandList::innerSplitGenericGenVermaTensorFD");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError
-    ("Function fSplitGenericGenVermaTensorFD is expected to have three arguments: \
-     SS algebra type, weight, weight. ", theCommands);
+    ("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, weight, weight. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& genVemaWeightNode=input[3];
   const Expression& fdWeightNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, theSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
-  Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVectoR<RationalFunctionOld>
-      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank,
-       CommandList::innerRationalFunction))
+  Expression hwContext(theCommands);
+  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CommandList::innerRationalFunction))
   { theCommands.Comments
-    << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
-    << theRank << " polynomials. The second argument you gave is "
-    << genVemaWeightNode.ToString() << ".";
+    << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
+    << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
     return false;
   }
   Vector<Rational> theFDhw;
-  if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, &emptyContext, theRank, 0))
+  if (!theCommands.GetVectoR<Rational>(fdWeightNode, theFDhw, 0, theRank, 0))
   { theCommands.Comments
-    << "Failed to convert the second argument of fSplitGenericGenVermaTensorFD to a list of "
-    << theRank << " rationals. The second argument you gave is "
-    << fdWeightNode.ToString() << ".";
+    << "Failed to convert the second argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
+    << " rationals. The second argument you gave is " << fdWeightNode.ToString() << ".";
     return false;
   }
 //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
-  int theNumVars=hwContext.GetNumContextVariables();
+  int theNumVars=hwContext.ContextGetNumContextVariables();
   RationalFunctionOld RFOne, RFZero;
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   RFZero.MakeZero(theCommands.theGlobalVariableS);
@@ -3123,12 +3061,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       if (theCoeff>=0)
         isGood=true;
     if (!isGood)
-      return output.SetError
-      ("Error: the third argument of fSplitGenericGenVermaTensorFD must be a \
-       list of small non-negative integers.", theCommands);
+      return output.SetError("Error: the third argument of innerSplitGenericGenVermaTensorFD must be a list of small non-negative integers.", theCommands);
   }
-  theCommands.innerHWVCommon
-  (theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra);
+  theCommands.innerHWVCommon(theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra);
   if (hwvGenVerma.IsError())
   { output=hwvGenVerma;
     return true;
@@ -3141,12 +3076,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     return true;
   }
   std::stringstream out;
-  out << "hwv par sel: " << hwvGenVerma.ToString();
-  out << "hwv fd: " << hwvFD.ToString();
-  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& theHWgenVerma=
-  hwvGenVerma.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& theHWfd=
-  hwvFD.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  out << "hwv par sel: " << hwvGenVerma.ToString() << "hwv fd: " << hwvFD.ToString();
+  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& theHWgenVerma= hwvGenVerma.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  const ElementTensorsGeneralizedVermas<RationalFunctionOld>& theHWfd=hwvFD.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
 
   ModuleSSalgebra<RationalFunctionOld>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
   //int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
@@ -3178,10 +3110,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   //out << "<br> Splitting report: " << report;
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
-  latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
-  << "GenVermatimes7DimCentralCharacters"
-  << "} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  << "GenVermatimes7DimCentralCharacters} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.CustomPlusSign="";
   tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
@@ -3198,10 +3128,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     currentChar=theCasimir;
     currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
     theCentralCharacters.AddOnTop(currentChar);
-    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi")
-    << "</td><td>" << currentChar.ToString(&tempFormat) << "</td></tr>";
-    latexReport1 << " $"
-    << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
+    out << "<tr><td>" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi") << "</td><td>"
+    << currentChar.ToString(&tempFormat) << "</td></tr>";
+    latexReport1 << " $" << theFDLeviSplitShifteD[i].weightFundamentalCoordS.ToStringLetterFormat("\\psi", &tempFormat) << "$"
     << "&$p_{" << i+1 <<"}:=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
@@ -3209,10 +3138,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   ElementTensorsGeneralizedVermas<RationalFunctionOld> tempElt, tempElt2;
   theFDMod.highestWeightVectorNotation="v";
   theGenMod.highestWeightVectorNotation="w";
-  out << "Let w be the highest weight vector of the generalized Verma component, "
-  << "and let v be the highest weight vector of the finite dimensional component";
-  out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td>"
-  << "<td>Additional multiplier</td>";
+  out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
+  out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td><td>Additional multiplier</td>";
   if (theNumVars==1)
     out << "<td>gcd polynomial coeffs</td>";
   out << "<td>the hwv</td>";
@@ -3220,9 +3147,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     out << "<td>gcd divided out</td>";
   out << "</tr>";
   std::stringstream latexReport2;
-  latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{"
-  << "\\label{tableDecompo" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "times7dim}"
-  << "Decomposition for the $"
+  latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{\\label{tableDecompo"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "times7dim}Decomposition for the $"
   << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
   << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
@@ -3231,9 +3157,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   { Vector<RationalFunctionOld> currentWeightSimpleCoords=
     theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
     tempElt.MakeHWV(theFDMod, RFOne);
-    tempElt.MultiplyOnTheLeft
-    (theLeviEigenVectors[i], theElt, *theSSalgebra, *theCommands.theGlobalVariableS,
-     RFOne, RFZero);
+    tempElt.MultiplyOnTheLeft(theLeviEigenVectors[i], theElt, *theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
     tempElt.MakeHWV(theGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
 //      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra,
@@ -3251,9 +3175,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
       { theCasimirMinusChar=theCasimir;
         theCasimirMinusChar-=theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft
-        (theCasimirMinusChar, tempElt2, *theSSalgebra, *theCommands.theGlobalVariableS,
-        RFOne, RFZero);
+        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, *theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
         tempStream2 << " $(\\bar c-p_" << j+1 << ") $ ";
@@ -3274,8 +3196,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
 //      std::cout << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
     out << "<tr><td>"
     << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str())
-    << "</td><td>" << tempRat.ToString() << "</td>";
+    << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
     latexReport2
     << "$" << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
@@ -3291,16 +3212,14 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     if (theNumVars==1)
     { tmpRF=tmpGCD;
       theElt/=tmpRF;
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}")
-      << "</td>";
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}" + theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
     }
     out << "</tr>";
   }
   out << "</table>";
   latexReport2 << "\\end{longtable}";
-  out << "<br>Ready LaTeX (table 1 and 2): <br><br><br>" << latexReport1.str();
-  out << "<br><br><br>" << latexReport2.str() << "<br>";
-  return output.AssignValue<std::string>(out.str(), theCommands);
+  out << "<br>Ready LaTeX (table 1 and 2): <br><br><br>" << latexReport1.str() << "<br><br><br>" << latexReport2.str() << "<br>";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::innerFunctionToMatrix
@@ -3352,10 +3271,8 @@ bool CommandList::innerGetChevGen
 { if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -3380,12 +3297,10 @@ bool CommandList::innerGetCartanGen
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-  std::string errorString;
 //  std::cout << "<br>before calling inner ss: " << input.ToString();
 //  std::cout.flush();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSalg, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
   { std::cout << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a "
     << "semisimple Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -3418,11 +3333,9 @@ bool CommandList::fKLcoeffs
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  std::string errorString;
-  SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* theSSalgebra=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (theWeyl.theDynkinType.GetSizeWeylGroupByFormula()>192)
@@ -3447,11 +3360,10 @@ bool CommandList::fKLcoeffs
 bool CommandList::innerPrintSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 { MacroRegisterFunctionWithName("CommandList::innerPrintSSLieAlgebra");
-  std::string errorString;
-  SemisimpleLieAlgebra *tempSSpointer;
+  SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, tempSSpointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, tempSSpointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
@@ -3771,9 +3683,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("ElementWeylGroup");
   this->AddOperationBuiltInType("WeylGroupRep");
   this->AddOperationBuiltInType("WeylGroupVirtualRep");
+  this->AddOperationBuiltInType("Context");
 
+  this->AddOperationNoRepetitionAllowed("ExpressionWithContext");
   this->AddOperationNoRepetitionAllowed("PolyVars");
-  this->AddOperationNoRepetitionAllowed("Context");
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");
@@ -3899,51 +3812,6 @@ bool CommandList::outerTensor
 //    return false;
   //std::cout << "<br>After do associate: " << theExpression.ToString();
   return false;
-}
-
-bool CommandList::outerExtractBaseMultiplication
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::outerExtractBaseMultiplication");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
-    return false;
-  bool result=false;
-  //  std::cout << "<br>handling base extraction of: " << input.ToString();
-  //handle Anything*Rational:=Rational*Anything
-  output=input;
-  if (output[2].IsOfType<Rational>())
-  { output.children.SwapTwoIndices(1, 2);
-    result=true;
-//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
-  }
-//  Expression leftE=output[1];
-//  Expression rightE=output[2];
-  if (output[2].IsListStartingWithAtom(theCommands.opTimes()))
-  { if (output[2].children.size!=3)
-      return result;
-//    Expression rightLeftE=rightE[1];
-//    Expression rightRightE=rightE[2];
-    //handle Anything1*(Rational*Anything2):=Rational*(Anything1*Anything2)
-    if (output[2][1].IsOfType<Rational>())
-    { Expression tempRight;
-      tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
-      output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
-      result=true;
-//      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
-    }
-    //<- handle a*(b*anything)
-    //on condition that a*b has an inner handler
-    Expression tempExp, newExpr;
-    tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
-    if (theCommands.innerTimes(theCommands, tempExp, newExpr))
-    { output.MakeProducT(theCommands, newExpr, output[2][2]);
-      result=true;
-    }
-  }
-  //handle 0*anything=0
-  if (output[1].IsEqualToZero())
-    return output.AssignValue(0, theCommands);
-  return result;
 }
 
 bool CommandList::innerCollectMultiplicands
@@ -4088,10 +3956,9 @@ bool CommandList::StandardIsDenotedBy
   output.SetChildAtomValue(0, theCommands.opDefine());
   ////
   if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    if (withNotation.GetValuENonConstUseWithCaution
-        <ElementTensorsGeneralizedVermas<RationalFunctionOld> >().IsHWV())
+    if (withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().IsHWV())
     { MonomialGeneralizedVerma<RationalFunctionOld>& theElt=
-      withNotation.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()[0].theMons[0];
+      withNotation.GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()[0].theMons[0];
       theElt.GetOwner().highestWeightVectorNotation=theNotation.ToString();
     }
   return true;
@@ -4252,8 +4119,7 @@ bool CommandList::outerPlus
     return true;
   }
   output.MakeXOX
-  (theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1],
-   summandsWithCoeff[summandsWithCoeff.size-2]);
+  (theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1], summandsWithCoeff[summandsWithCoeff.size-2]);
   Expression result;
   for (int i=summandsWithCoeff.size-3; i>=0; i--)
   { result.reset(theCommands, 3);
@@ -4315,7 +4181,8 @@ bool CommandList::outerStandardFunction
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
-        { return true;
+        { output.CheckConsistency();
+          return true;
         }
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
@@ -4327,12 +4194,14 @@ bool CommandList::outerStandardFunction
       { //std::cout << "more than 2 children: " << input.Lispify();
         if (innerFun.inputFitsMyInnerType(input))
           if (innerFun.theFunction(theCommands, input, output))
-          { return true;
+          { output.CheckConsistency();
+            return true;
           }
       } else
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
-          { return true;
+          { output.CheckConsistency();
+            return true;
           }
     }
   return false;
@@ -4359,7 +4228,7 @@ bool CommandList::outerLessThan
   const Expression& left=input[1];
   const Expression& right=input[2];
   Rational leftRat, rightRat;
-  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational> (&rightRat))
+  if (!left.IsOfType<Rational> (&leftRat)|| ! right.IsOfType<Rational>(&rightRat))
     return false;
   if (rightRat>leftRat)
     return output.AssignValue(1, theCommands);
@@ -4378,32 +4247,6 @@ bool CommandList::outerEqualEqual
     return output.AssignValue(1, theCommands);
   else
     return output.AssignValue(0, theCommands);
-}
-
-bool CommandList::outerLieBracket
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerLieBracket");
-  if (!input.IsListNElements(3))
-    return false;
-  const Expression& leftE=input[1];
-  const Expression& rightE=input[2];
-  if (leftE.IsOfType<Rational>() && rightE.IsOfType<Rational>())
-    return output.AssignValue(0, theCommands);
-  if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() &&
-      rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
-  { Expression leftCopy=leftE;
-    Expression rightCopy=rightE;
-    Expression finalContext;
-    if (!Expression::ContextConvertBothToCommonContext(leftCopy, rightCopy, finalContext))
-      return false;
-    ElementUniversalEnveloping<RationalFunctionOld> result;
-    leftCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >()
-    .LieBracketOnTheRight
-    (rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
-    result.Simplify(theCommands.theGlobalVariableS);
-    return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);
-  }
-  return false;
 }
 
 bool Expression::SetError(const std::string& theError, CommandList& owner)
@@ -4598,13 +4441,13 @@ bool CommandList::EvaluateExpression
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
       this->Comments << "&nbsp&nbsp&nbsp&nbsp";
-    this->Comments << "Evaluating " << input.Lispify()
-    << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
+      //std::cout << "&nbsp&nbsp&nbsp&nbsp";
+    this->Comments << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
+//    std::cout << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Recursion depth limit of " << this->MaxRecursionDeptH
-    << " exceeded while evaluating expressions.";
+    out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
     output.SetError(out.str(), *this);
     if (this->flagMaxRecursionErrorEncountered)
       this->evaluationErrors.AddOnTop(out.str());
@@ -4619,8 +4462,7 @@ bool CommandList::EvaluateExpression
   }
   if (this->ExpressionStack.Contains(input))
   { std::stringstream errorStream;
-    errorStream << "I think I have detected an infinite cycle: I am asked to  "
-    << " reduce " << input.ToString()
+    errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
     << " but I have already seen that expression in the expression stack. ";
     this->flagAbortComputationASAP=true;
     return output.SetError(errorStream.str(), *this);
@@ -4647,7 +4489,7 @@ bool CommandList::EvaluateExpression
   int counterNumTransformations=0;
   Expression tempE;
   tempE.reset(*this);
-  std::string beforePatternMatch;
+  Expression beforePatternMatch;
   //std::cout << "<br>";
   //for (int i=0; i<this->RecursionDeptH; i++)
     //std::cout << "&nbsp;";
@@ -4657,8 +4499,8 @@ bool CommandList::EvaluateExpression
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
     counterNumTransformations++;
-    //std::cout << " transforming " << output.ToString();
-    //std::cout.flush();
+//    std::cout << " transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
+//    std::cout.flush();
 
     //if (this->flagLogEvaluation && counterNumTransformations>1 )
     //{ this->Comments << "<br>input: " << input.ToString() << "->"
@@ -4729,7 +4571,8 @@ bool CommandList::EvaluateExpression
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString();
+        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString()
+        << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
       output=tempE;
       continue;
     }
@@ -4749,12 +4592,12 @@ bool CommandList::EvaluateExpression
     //std::cout.flush();
 
       if (this->flagLogEvaluatioN)
-        beforePatternMatch=output.ToString();
-      if(this->ProcessOneExpressionOnePatternOneSub
-         (currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
+        beforePatternMatch=output;
+      if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch << "  ->  " << output.ToString();
+          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch.ToString() << "  ->  " << output.ToString()
+          << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
         break;
       }
     }
@@ -5003,7 +4846,10 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()const
 { this->CheckInitialization();
   Expression myContext=this->GetContext();
-  return &this->theBoss->theObjectContainer.theLieAlgebras[myContext.ContextGetIndexAmbientSSalg()];
+  int indexSSalg=myContext.ContextGetIndexAmbientSSalg();
+  if (indexSSalg==-1)
+    return 0;
+  return &this->theBoss->theObjectContainer.theLieAlgebras[indexSSalg];
 }
 
 int Expression::ContextGetIndexAmbientSSalg()const
@@ -5019,8 +4865,12 @@ int Expression::ContextGetIndexAmbientSSalg()const
 
 Expression Expression::GetContext()const
 { this->CheckInitialization();
-  if (this->HasContext())
+  if (this->IsBuiltInType())
     return (*this)[1];
+  std::cout << "This is a programming error: GetContext called on an Expression that is not a built-in data type, namely,  "
+  << "on expression " << this->ToString() << " (lisp: " << this->ToStringFull() << ")" << ". Here's  a stack trace. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
   Expression output;
   output.MakeEmptyContext(*this->theBoss);
   return output;
@@ -5043,7 +4893,7 @@ int Expression::GetNumCols()const
 
 bool Expression::operator>(const Expression& other)const
 { if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
-    return this->GetValuE<Rational>()>other.GetValuE<Rational>();
+    return this->GetValue<Rational>()>other.GetValue<Rational>();
   if (this->children.size>other.children.size)
     return true;
   if (other.children.size>this->children.size)
@@ -5065,11 +4915,12 @@ bool Expression::operator>(const Expression& other)const
 }
 
 bool Expression::ToStringData
-(std::string& output, FormatExpressions* theFormat, Expression* startingExpression)const
+(std::string& output, FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("Expression::ToStringData");
   std::stringstream out;
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
+  MemorySaving<FormatExpressions> contextFormat;
   if (this->IsAtoM())
   { if (this->theData< this->theBoss->GetOperations().size && this->theData>=0)
       out << this->theBoss->GetOperations()[this->theData];
@@ -5078,7 +4929,7 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<std::string>())
   { if (isFinal)
-      out << this->GetValuE<std::string>();
+      out << this->GetValue<std::string>();
     else
     { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript)";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -5087,137 +4938,121 @@ bool Expression::ToStringData
   } else if (this->IsOfType<Rational>())
   { if (this->HasNonEmptyContext())
       out << "Rational{}(" << (*this)[1].ToString() << ", ";
-    out << this->GetValuE<Rational>().ToString();
+    out << this->GetValue<Rational>().ToString();
     if (this->HasNonEmptyContext())
       out << ")";
     result=true;
   } else if (this->IsOfType<ElementZmodP>())
-  { out << this->GetValuE<ElementZmodP>().ToString();
+  { out << this->GetValue<ElementZmodP>().ToString();
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
-  { out << "Polynomial{}(";
-    Expression contextE=this->GetContext();
-    FormatExpressions tempFormat;
-//    out << "(" << contextE.ToString(theFormat) << ", "
-    contextE.ContextGetFormatExpressions(tempFormat);
-    out << this->GetValuE<Polynomial<Rational> >().ToString(&tempFormat) << ")";
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    out << "Polynomial{}(";
+    out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement()) << ")";
+//    out << "[" << this->GetContext().ToString() << "]";
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
-  { out << "RationalFunction{}";
-    Expression contextE=this->GetContext();
-    out << "(" << contextE.ToString(theFormat) << ", "
-    << this->GetValuE<RationalFunctionOld>().ToString(theFormat) << ")";
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    out << "RationalFunction{}("
+    << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
   { out << "SSLieAlg{}("
-    //<< this->GetContext().ToString(theFormat) << ", "
-    << this->GetValuE<SemisimpleLieAlgebra>().GetLieAlgebraName()
+    << this->GetValue<SemisimpleLieAlgebra>().GetLieAlgebraName()
     << ")";
     result=true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-  { FormatExpressions tempFormat;
-    this->GetContext().ContextGetFormatExpressions(tempFormat);
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "UEE{}(" //<< this->GetContext().ToString() << ", "
-    << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&tempFormat)
+    << this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().ToString(&contextFormat.GetElement())
     << ")";
     result=true;
   } else if (this->IsOfType<MatrixTensor<Rational> >())
-  { FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    if (this->GetValuE<MatrixTensor<Rational> >().GetMaxNumColsNumRows()<20)
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    if (this->GetValue<MatrixTensor<Rational> >().GetMaxNumColsNumRows()<20)
       out << "MatrixRationalsTensorForm{}("
-      << this->GetValuE<MatrixTensor<Rational> > ().ToStringMatForm(&tempFormat) << ")";
+      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatForm(&contextFormat.GetElement()) << ")";
     else
-      out << this->GetValuE<MatrixTensor<Rational> >().ToString();
+      out << this->GetValue<MatrixTensor<Rational> >().ToString();
     result=true;
   } else if (this->IsOfType<Matrix<Rational> >())
-  { FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    out << "innerMatrixRational{}("
-    << this->GetValuE<Matrix<Rational> >().ToString(&tempFormat) << ")";
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    out << "innerMatrixRational{}(" << this->GetValue<Matrix<Rational> >().ToString(&contextFormat.GetElement()) << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { FormatExpressions tempFormat;
-    this->GetContext().ContextGetFormatExpressions(tempFormat);
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "ETGVM{}(";
-    out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&tempFormat);
+    out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
     out << ")";
     result=true;
   } else if (this->IsOfType<CalculusFunctionPlot>())
   { if (isFinal)
-    { CalculusFunctionPlot& thePlot=this->GetValuENonConstUseWithCaution<CalculusFunctionPlot>();
-      out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink
-      (thePlot.GetPlotStringAddLatexCommands(false), true);
+    { CalculusFunctionPlot& thePlot=this->GetValueNonConst<CalculusFunctionPlot>();
+      out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>"
       << thePlot.GetPlotStringAddLatexCommands(true);
     } else
       out << "(plot not shown)";
     result=true;
   } else if (this->IsOfType<WeylGroup>())
-  { WeylGroup& theGroup=this->GetValuENonConstUseWithCaution<WeylGroup>();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseReflectionNotation=true;
-    out << theGroup.ToString(&tempFormat);
+  { WeylGroup& theGroup=this->GetValueNonConst<WeylGroup>();
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseReflectionNotation=true;
+    out << theGroup.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<ElementWeylGroup>())
-  { ElementWeylGroup& theElt=this->GetValuENonConstUseWithCaution<ElementWeylGroup>();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseReflectionNotation=true;
-    out << theElt.ToString(&tempFormat);
+  { const ElementWeylGroup& theElt=this->GetValue<ElementWeylGroup>();
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseReflectionNotation=true;
+    out << theElt.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<WeylGroupRepresentation<Rational> >())
-  { WeylGroupRepresentation<Rational>& theElt=
-    this->GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseReflectionNotation=true;
-    out << theElt.ToString(&tempFormat);
+  { const WeylGroupRepresentation<Rational>& theElt=this->GetValue<WeylGroupRepresentation<Rational> >();
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseReflectionNotation=true;
+    out << theElt.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<WeylGroupVirtualRepresentation>())
-  { WeylGroupVirtualRepresentation& theElt=
-    this->GetValuENonConstUseWithCaution<WeylGroupVirtualRepresentation>();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseReflectionNotation=true;
-    out << theElt.ToString(&tempFormat);
+  { const WeylGroupVirtualRepresentation& theElt=this->GetValue<WeylGroupVirtualRepresentation>();
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseReflectionNotation=true;
+    out << theElt.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<charSSAlgMod<Rational> >())
-  { charSSAlgMod<Rational> theElt=this->GetValuENonConstUseWithCaution<charSSAlgMod<Rational> >();
+  { charSSAlgMod<Rational> theElt=this->GetValue<charSSAlgMod<Rational> >();
     out << theElt.ToString();
     result=true;
   } else if (this->IsOfType<SemisimpleSubalgebras>())
-  { SemisimpleSubalgebras& theSubalgebras=
-    this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
-    FormatExpressions tempFormat;
-    tempFormat.flagUseLatex=true;
-    tempFormat.flagUseHTML=true;
-    tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-    out << theSubalgebras.ToString(&tempFormat);
+  { SemisimpleSubalgebras& theSubalgebras=this->GetValueNonConst<SemisimpleSubalgebras>();
+    contextFormat.GetElement().flagUseLatex=true;
+    contextFormat.GetElement().flagUseHTML=true;
+    contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly=false;
+    out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())
-  { out << this->GetValuENonConstUseWithCaution<double>();
+  { out << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
-  { out << this->GetValuENonConstUseWithCaution<AlgebraicNumber>().ToString();
+  { out << this->GetValue<AlgebraicNumber>().ToString();
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
-  { out << this->GetValuENonConstUseWithCaution<LittelmannPath>().ToString()  ;
+  { out << this->GetValue<LittelmannPath>().ToString()  ;
     result=true;
   } else if (this->IsOfType<Matrix<RationalFunctionOld> >())
-  { Expression contextE=this->GetContext();
-    FormatExpressions tempFormat;
-    contextE.ContextGetFormatExpressions(tempFormat);
-    tempFormat.flagUseHTML=false;
-    tempFormat.flagUseLatex=true;
-    out << this->GetValuENonConstUseWithCaution<Matrix<RationalFunctionOld> >().ToString(&tempFormat)  ;
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseLatex=true;
+    out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement())
+    //<< "[" << this->GetContext().ToString() << "]"
+    ;
     result=true;
   }
   output=out.str();
@@ -5241,7 +5076,7 @@ std::string Expression::ToStringFull()const
 }
 
 std::string Expression::ToString
-(FormatExpressions* theFormat, Expression* startingExpression)const
+(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
@@ -5263,7 +5098,7 @@ std::string Expression::ToString
   int lineBreak=50;
   int charCounter=0;
   std::string tempS;
-  if (this->ToStringData(tempS, theFormat, startingExpression))
+  if (this->ToStringData(tempS, theFormat))
     out << tempS;
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
   { std::string firstE=(*this)[1].ToString(theFormat);
@@ -5293,7 +5128,7 @@ std::string Expression::ToString
         (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
       bool secondNeedsBrackets=true;
       if ((*this)[2].IsOfType<Rational>())
-        if ((*this)[2].GetValuE<Rational>().IsInteger())
+        if ((*this)[2].GetValue<Rational>().IsInteger())
           secondNeedsBrackets=false;
       if (firstNeedsBrackets)
         out << "(" << firstE << ")";
@@ -5314,12 +5149,11 @@ std::string Expression::ToString
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
     bool firstNeedsBrackets=
-    (!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
-      (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide())))
+    (!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide())))
     && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
     bool secondNeedsBrackets=true;
     if ((*this)[2].IsOfType<Rational>())
-      secondNeedsBrackets=(*this)[2].GetValuE<Rational>().IsNonPositive();
+      secondNeedsBrackets=(*this)[2].GetValue<Rational>().IsNonPositive();
     if (firstE=="-1" )
       firstE="-";
     if (firstE=="1")
@@ -5473,7 +5307,7 @@ std::string Expression::ToString
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
-          out << (*this)[i].GetValuE<std::string>();
+          out << (*this)[i].GetValue<std::string>();
         else if (((*this)[i].IsOfType<CalculusFunctionPlot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
                   (*this)[i].IsOfType<WeylGroup>() || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >())
                  && isFinal)
@@ -5573,8 +5407,7 @@ bool Expression::IsLisT()const
   if (this->children.size<=0)
     return false;
   if (this->theData!=this->theBoss->opLisT())
-  { std::cout << "This is a programming error. "
-    << "List expressions must have data valule equal to  CommandList::opList(). "
+  { std::cout << "This is a programming error. List expressions must have data valule equal to CommandList::opList(). "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -5619,17 +5452,17 @@ bool Expression::RemoveContext()
 
 bool Expression::HasContext()const
 { this->CheckInitialization();
-  if (this->children.size<2)
+  if (!this->IsBuiltInType() || !this->children.size==3)
     return false;
   //std::string debugString=(*this)[1].ToString();
   //std::cout << "<br>Trying to fetch context from: " << debugString ;
-  return (*this)[1].IsListStartingWithAtom(this->theBoss->opContext());
+  return (*this)[1].IsListStartingWithAtom(this->theBoss->opContexT());
 }
 
 bool Expression::HasNonEmptyContext()const
 { if (!this->HasContext())
     return false;
-  return !this->GetContext().IsListNElementsStartingWithAtom(this->theBoss->opContext(), 1);
+  return !this->GetContext().IsListNElementsStartingWithAtom(this->theBoss->opContexT(), 1);
 }
 
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
@@ -5739,10 +5572,8 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= "
-  << this->NumPredefinedVars  << " predefined + "
-  << this->operations.size-this->NumPredefinedVars
-  << " user-defined). <br>Predefined: \n<br>\n";
+  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= " << this->NumPredefinedVars
+  << " predefined + " << this->operations.size-this->NumPredefinedVars << " user-defined). <br>Predefined: \n<br>\n";
   for (int i=0; i<this->operations.size; i++)
   { out << openTag1 << this->operations[i] << closeTag1;
     if (this->FunctionHandlers[i].size>0)
@@ -5774,10 +5605,8 @@ bool Function::inputFitsMyInnerType(const Expression& input)
     return true;
   if (input.children.size!=3)
     return false;
-  bool argument1good=this->theArgumentTypes[0].theData==-1
-  ? true :input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
-  bool argument2good=this->theArgumentTypes[1].theData==-1
-  ? true :input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
+  bool argument1good=this->theArgumentTypes[0].theData==-1 ? true :input[1].IsListStartingWithAtom(this->theArgumentTypes[0].theData);
+  bool argument2good=this->theArgumentTypes[1].theData==-1 ? true :input[2].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
   return argument1good && argument2good;
 }
 
@@ -5968,12 +5797,12 @@ std::string CommandList::ToString()
 bool CommandList::ReplaceIntIntBy10IntPlusInt()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Rational tempRat=left.theData.GetValuE<Rational>();
+  Rational tempRat=left.theData.GetValue<Rational>();
   if (this->registerPositionAfterDecimalPoint==0)
   { tempRat*=10;
-    tempRat+=right.theData.GetValuE<Rational>();
+    tempRat+=right.theData.GetValue<Rational>();
   } else
-  { Rational afterDecimal=right.theData.GetValuE<Rational>();
+  { Rational afterDecimal=right.theData.GetValue<Rational>();
     for (int i=0; i<this->registerPositionAfterDecimalPoint; i++)
       afterDecimal/=10;
     tempRat+=afterDecimal;
@@ -6222,8 +6051,7 @@ bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 }
 
 bool CommandList::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
-{ SyntacticElement& theElt=
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
   int theBoundVar=theElt.theData.theData;
 //  std::cout << "<br>index of variable: " << theElt.ToString(*this);
   if (this->IsBoundVarInContext(theBoundVar))
@@ -6369,7 +6197,7 @@ bool CommandList::innerFreudenthalEval
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
-  SemisimpleLieAlgebra* theSSalg;
+  SemisimpleLieAlgebra* theSSalg=0;
   Expression context;
   if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
@@ -6381,80 +6209,9 @@ bool CommandList::innerFreudenthalEval
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly
-      (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
+  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
     return output.SetError(reportString, theCommands);
   return output.AssignValue(resultChar, theCommands);
-}
-
-bool CommandList::fElementSSAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
-    return false;
-  if (!input[1].IsOfType<SemisimpleLieAlgebra>())
-    return false;
-  SemisimpleLieAlgebra& ownerAlgebra=input[1].GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
-  int theDisplayIndex;
-  if (!input[2].IsSmallInteger(&theDisplayIndex))
-  { bool isGood=
-    (theDisplayIndex>0 && theDisplayIndex<= ownerAlgebra.GetNumPosRoots()) ||
-    (theDisplayIndex<0 && theDisplayIndex>=- ownerAlgebra.GetNumPosRoots());
-    if (!isGood)
-    { theCommands.Comments
-      << "<b>Error</b>. You requested element of index " << theDisplayIndex
-      << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
-      << ". The index of the Vector<Rational> space must be a non-zero integer "
-      << " of absolute value between 1 and the number of positive roots. "
-      << "The number of positive roots for the current semisimple Lie algebra is "
-      << ownerAlgebra.GetNumPosRoots()
-      << ". If you want to request an element of the Cartan, you should use two indices, "
-      << "the first of which is zero. For example,"
-      << " ElementSemisimpleAlgebra{}(0,1) gives you the an element of the Cartan "
-      << "corresponding to the first simple Vector<Rational>. "
-      ;
-      return false;
-    }
-    ElementSemisimpleLieAlgebra<Rational> theElt;
-    int actualIndex=theDisplayIndex;
-    if (actualIndex<0)
-      actualIndex+=ownerAlgebra.GetNumPosRoots();
-    else
-      actualIndex+=ownerAlgebra.GetNumPosRoots()+ownerAlgebra.GetRank()-1;
-    theElt.MakeGenerator(actualIndex, ownerAlgebra);
-    RationalFunctionOld rfOne, rfZero;
-    rfOne.MakeOne(theCommands.theGlobalVariableS);
-    rfZero.MakeZero(theCommands.theGlobalVariableS);
-    ElementUniversalEnveloping<RationalFunctionOld> tempUE;
-    //  std::cout << "tempelt: " << tempElt.ToString();
-    tempUE.AssignElementLieAlgebra(theElt, ownerAlgebra, rfOne, rfZero);
-    return output.AssignValue(tempUE, theCommands);
-  }
-  if (!input[2].IsSequenceNElementS(2))
-    return false;
-  int index1, indexInCartan;
-  if (input[2][1].IsSmallInteger(&index1) || input[2][2].IsSmallInteger(&indexInCartan))
-    return false;
-  bool isGood=(index1==0 && indexInCartan <=ownerAlgebra.GetRank() && indexInCartan>0);
-  if (!isGood)
-  { theCommands.Comments
-    << "You requested element of the Cartan subalgebra labeled by (" << index1
-    << ", " << indexInCartan
-    << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
-    << "). For your request to succeed, the first index must be zero and the second must be an integer"
-    << " between 1 and the rank of the Algebra which is " << ownerAlgebra.GetRank()
-    << ". If you want to request an element that is in a root space outside of the Cartan, you should only one index."
-    ;
-    return false;
-  }
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
-  int actualIndeX=indexInCartan-1+ownerAlgebra.GetNumPosRoots();
-  tempElt.MakeGenerator(actualIndeX, ownerAlgebra);
-  RationalFunctionOld rfOne, rfZero;
-  rfOne.MakeOne(theCommands.theGlobalVariableS);
-  rfZero.MakeZero(theCommands.theGlobalVariableS);
-  ElementUniversalEnveloping<RationalFunctionOld> tempUE;
-  tempUE.AssignElementLieAlgebra(tempElt, ownerAlgebra, rfOne, rfZero);
-  return output.AssignValue(tempUE, theCommands);
 }
 
 bool Expression::IsMeltable(int* numResultingChildren)const
@@ -6467,6 +6224,82 @@ bool Expression::IsMeltable(int* numResultingChildren)const
     else
       *numResultingChildren=(*this)[1].children.size-1;
   }
+  return true;
+}
+
+bool Expression::MergeContextsMyAruments(Expression& output)const
+{ MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
+//  std::cout << "<hr>Merging contexts of expression " << this->ToString();
+  this->CheckInitialization();
+  if (this->children.size<2)
+    return false;
+//  std::cout << " ... continuing to merge..." ;
+  for (int i=1; i< this->children.size; i++)
+    if (!(*this)[i].IsBuiltInType())
+    { this->theBoss->Comments << "<hr>Failed to merge the arguments of the expression" << this->ToString()
+      << ": the argument " << (*this)[i].ToString() << "is not of built-in type";
+      return false;
+    }
+  Expression commonContext=(*this)[1].GetContext();
+  bool needsMerge=false;
+  for (int i=2; i<this->children.size; i++)
+    if (!(commonContext==(*this)[i].GetContext()))
+    { needsMerge=true;
+      break;
+    }
+//  if (needsMerge)
+//    std::cout << "needs merge!"; else std::cout << "no need merge no nothin";
+  if (!needsMerge)
+  { output=*this;
+    return true;
+  }
+  for (int i=2; i<this->children.size; i++)
+  { if (!(*this)[i].IsBuiltInType())
+    { this->theBoss->Comments << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
+      return false;
+    }
+    if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext))
+    { this->theBoss->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
+      return false;
+    }
+  }
+  output.reset(*this->theBoss, this->children.size);
+  output.AddChildOnTop((*this)[0]);
+  Expression convertedE;
+  for (int i=1; i<this->children.size; i++)
+  { convertedE=(*this)[i];
+    if (!convertedE.SetContextAtLeastEqualTo(commonContext))
+    { this->theBoss->Comments << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
+      return false;
+    }
+    output.AddChildOnTop(convertedE);
+  }
+  return true;
+}
+
+bool CommandList::ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext)
+{ MacroRegisterFunctionWithName("CommandList::ConvertExpressionsToCommonContext");
+  Expression commonContext;
+  commonContext.MakeEmptyContext(*this);
+  if (inputOutputStartingContext!=0)
+    if (inputOutputStartingContext->IsContext())
+      commonContext=*inputOutputStartingContext;
+  for (int i=0; i<inputOutputEs.size; i++)
+  { if (!inputOutputEs[i].IsBuiltInType())
+    { this->Comments << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      return false;
+    }
+    if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext))
+    { this->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << inputOutputEs[i].GetContext().ToString();
+      return false;
+    }
+  }
+  for (int i=0; i<inputOutputEs.size; i++)
+    if (!inputOutputEs[i].::Expression::SetContextAtLeastEqualTo(commonContext))
+      return false;
+  if (inputOutputStartingContext!=0)
+    *inputOutputStartingContext=commonContext;
   return true;
 }
 

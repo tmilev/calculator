@@ -659,10 +659,8 @@ bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
     ("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   const Expression& theSSalgebraNode=input[1];
   SemisimpleLieAlgebra* theSSalgebra;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   Vectors<Rational> theHWs;
   theHWs.SetSize(input.children.size-2);
   for (int i=2; i<input.children.size; i++)
@@ -725,7 +723,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple
   const Expression& vectorNode=input[2];
   DynkinType theType;
   if (theSSalgebraNode.IsOfType<SemisimpleLieAlgebra>())
-    theType=theSSalgebraNode.GetValuE<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
+    theType=theSSalgebraNode.GetValue<SemisimpleLieAlgebra>().theWeyl.theDynkinType;
   else
     if (!Serialization::innerLoadDynkinType(theCommands, theSSalgebraNode, theType))
       return false;
@@ -802,10 +800,8 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
   const Expression& theSSalgebraNode=input[1];
   const Expression& vectorNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
   if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), Serialization::innerPolynomial))
@@ -907,7 +903,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
     return false;
   if (!output.IsOfType<WeylGroup>())
     return true;
-  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
+  WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
@@ -974,12 +970,10 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitSimple
 bool WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
 (CommandList& theCommands, const Expression& input, Expression& output)
 { SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, thePointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   output.AssignValue(thePointer->theWeyl, theCommands);
-  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
+  WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.CartanSymmetric.NumRows>6)
     return output.AssignValue<std::string>
     ("I have been instructed not to do this for Weyl groups of rank greater \
@@ -1010,7 +1004,7 @@ bool WeylGroupCalculatorFunctions::innerTensorWeylReps
     return false;
   WeylGroupRepresentation<Rational> leftRep;
   WeylGroupRepresentation<Rational> rightRep;
-  if (!input[1].IsOfType<WeylGroupRepresentation<Rational> > (&leftRep))
+  if (!input[1].IsOfType<WeylGroupRepresentation<Rational> >(&leftRep))
     return false;
   if (!input[2].IsOfType<WeylGroupRepresentation<Rational> > (&rightRep))
     return false;
@@ -1034,12 +1028,12 @@ bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if (!leftE.IsOfType<WeylGroupVirtualRepresentation> ())
+  if (!leftE.IsOfType<WeylGroupVirtualRepresentation>())
     return false;
-  if (!rightE.IsOfType<WeylGroupVirtualRepresentation> ())
+  if (!rightE.IsOfType<WeylGroupVirtualRepresentation>())
     return false;
-  WeylGroupVirtualRepresentation outputRep=leftE.GetValuENonConstUseWithCaution<WeylGroupVirtualRepresentation>();
-  outputRep*=rightE.GetValuE<WeylGroupVirtualRepresentation>();
+  WeylGroupVirtualRepresentation outputRep=leftE.GetValue<WeylGroupVirtualRepresentation>();
+  outputRep*=rightE.GetValue<WeylGroupVirtualRepresentation>();
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -1049,8 +1043,7 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
   if (!input.IsOfType<WeylGroupRepresentation<Rational> > ())
     return false;
 //  theRep.Decomposition(theCFs, outputReps);
-  WeylGroupRepresentation<Rational>& inputRep =
-  input.GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
+  WeylGroupRepresentation<Rational>& inputRep =input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
   WeylGroupVirtualRepresentation outputRep;
   outputRep.ownerGroup=inputRep.OwnerGroup;
   inputRep.DecomposeMeIntoIrreps(outputRep.coefficientsIrreps, theCommands.theGlobalVariableS);
@@ -1066,7 +1059,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
   if (!output.IsOfType<WeylGroup>())
     return false;
 //  std::cout << "not implemented!";
-  WeylGroup& theGroup=output.GetValuENonConstUseWithCaution<WeylGroup>();
+  WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
 //  std::cout << theGroup.ToString();
   WeylGroupRepresentation<Rational> tempRep;
@@ -1085,10 +1078,8 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], thePointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], thePointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   ElementWeylGroup theElt;
   theElt.ReservE(input.children.size-2);
   for(int i=2; i<input.children.size; i++){
@@ -1264,8 +1255,7 @@ bool WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep
   }
   if (!input.IsOfType<WeylGroupRepresentation<Rational> >())
     return false;
-  WeylGroupRepresentation<Rational>& inputRep=
-  input.GetValuENonConstUseWithCaution<WeylGroupRepresentation<Rational> >();
+  WeylGroupRepresentation<Rational>& inputRep=input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
   if (inputRep.OwnerGroup->irreps.size<inputRep.OwnerGroup->conjugacyClasses.size)
     inputRep.OwnerGroup->ComputeIrreducibleRepresentations(theCommands.theGlobalVariableS);
   WeylGroupVirtualRepresentation outputRep;

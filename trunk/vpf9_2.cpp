@@ -2395,8 +2395,7 @@ void RationalFunctionOld::Simplify()
 //      std::cout << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement()=(tempP);
-      std::cout << "<br>the critical divide: " << this->Denominator.GetElement().ToString()
-      << " by " << theGCD.ToString() << ".";
+//      std::cout << "<br>the critical divide: " << this->Denominator.GetElement().ToString() << " by " << theGCD.ToString() << ".";
       //assert(false);
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Denominator.GetElement()=(tempP);

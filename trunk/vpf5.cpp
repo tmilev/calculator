@@ -158,11 +158,10 @@ bool CommandList::fWeylDimFormula
   if (!input.IsListNElements(3))
     return output.SetError("This function takes 2 arguments", theCommands);
 
-  std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
-    return output.SetError(errorString, theCommands);
+      (Serialization::innerSSLieAlgebra, input[1], theSSowner))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
 
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
@@ -195,16 +194,12 @@ bool CommandList::fAnimateLittelmannPaths
   if (!input.IsListNElements(3))
     return output.SetError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner=0;
-  std::string errorMessage;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorMessage))
-    return output.SetError(errorMessage, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSowner))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
-  if (!theCommands.GetVectoR<Rational>
-      (input[2], theWeight, &tempContext, theSSowner->GetRank(), 0))
-    return output.SetError
-    ("Failed to convert the argument of the function to a highest weight vector", theCommands);
+  if (!theCommands.GetVectoR<Rational>(input[2], theWeight, &tempContext, theSSowner->GetRank(), 0))
+    return output.SetError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
@@ -238,11 +233,9 @@ bool CommandList::innerRootSAsAndSltwos
 (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 { MacroRegisterFunctionWithName("CommandList::innerRootSAsAndSltwos");
   //bool showIndicator=true;
-  std::string errorString;
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, ownerSS, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSS))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   CGI::SetCGIServerIgnoreUserAbort();
   std::string outMainDisplayPatH, outMainPatH;
   std::stringstream outSltwoPath, outSltwoDisplayPath;
@@ -288,7 +281,8 @@ bool CommandList::innerRootSAsAndSltwos
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
   } else
-    out << "The table is precomputed and served from the hard disk. ";
+    out << "The table is precomputed and served from the hard disk. <br>";
+//  out << "The full file name: " << outSltwoFileDisplayName.str();
   out << "<a href=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\">See the result in a separate file/page. </a>";
@@ -309,10 +303,8 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   const Expression& inducingParNode=input[3];
   const Expression& splittingParNode=input[4];
   SemisimpleLieAlgebra* ownerSSPointer=0;
-  std::string errorString;
-  if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, typeNode, ownerSSPointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, typeNode, ownerSSPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
@@ -348,28 +340,23 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   return output.AssignValue(report, theCommands);
 }
 
-bool CommandList::fCasimir
+bool CommandList::innerCasimir
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  std::string errorString;
-  SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, theSSalg, &errorString))
-    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* theSSalg=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSalg))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
-  RationalFunctionOld rfOne, rfZero;
-  rfOne.MakeOne(theCommands.theGlobalVariableS);
-  rfZero.MakeZero(theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
-  theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
+  theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
-  theCommands.Comments << "Context Lie algebra: "
-  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
+  theCommands.Comments << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
-  output.AssignValue(theCasimir, theCommands);
-  return true;
+  Expression contextE;
+  contextE.MakeContextSSLieAlg(theCommands, theSSowner);
+  return output.AssignValueWithContext(theCasimir, contextE, theCommands);
 }
 
 bool CommandList::innerDrawWeightSupportWithMults
@@ -381,15 +368,12 @@ bool CommandList::innerDrawWeightSupportWithMults
      theCommands);
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
-  SemisimpleLieAlgebra* theSSalgpointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, typeNode, theSSalgpointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* theSSalgpointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, typeNode, theSSalgpointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
-  if (!theCommands.GetVectoR<Rational>
-      (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
+  if (!theCommands.GetVectoR<Rational>  (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
     return output.SetError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theSSalgpointer->theWeyl;
@@ -408,13 +392,11 @@ bool CommandList::innerDrawWeightSupportWithMults
 bool CommandList::innerDrawRootSystem
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  std::string errorString;
   bool hasPreferredProjectionPlane= input.IsListNElements(4);
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, typeNode, theAlgPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   WeylGroup& theWeyl=theAlg.theWeyl;
   Vectors<Rational> preferredProjectionPlane;
@@ -445,16 +427,13 @@ bool CommandList::innerDrawWeightSupport
     return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
-  std::string errorString;
   SemisimpleLieAlgebra* theAlgPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, typeNode, theAlgPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
-  if (!theCommands.GetVectoR<Rational>
-      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
+  if (!theCommands.GetVectoR<Rational>(hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -470,33 +449,26 @@ bool CommandList::innerDrawWeightSupport
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fEmbedG2inB3
+bool CommandList::innerEmbedG2inB3
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ theCommands.innerElementUniversalEnvelopingAlgebra(theCommands, input, output);
+{ output=input;
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    return output.SetError
-    ("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
+    return output.SetError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   SemisimpleLieAlgebra& ownerSS=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
   if (!ownerSS.IsOfSimpleType('G', 2))
-    return output.SetError
-    ("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
+    return output.SetError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
 
-  ElementUniversalEnveloping<RationalFunctionOld> argument=
-  output.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunctionOld> argument=output.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
     return output.SetError("Failed to apply homomorphism for unspecified reason", theCommands);
 //  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
-  outputUE.Simplify(theCommands.theGlobalVariableS, 1, 0);
-  return output.AssignValue(outputUE, theCommands);
-}
-
-std::string CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
-{ std::stringstream out;
-  out << "<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script>";
-  return out.str();
+  outputUE.Simplify(theCommands.theGlobalVariableS);
+  Expression contextE;
+  contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
+  return output.AssignValueWithContext(outputUE, contextE, theCommands);
 }
 
 std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
@@ -552,8 +524,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   out << "<table>";
   for (int i=0; i<theOrbit.size; i++)
   { LittelmannPath& currentPath=theOrbit[i];
-    out << "<tr><td>" << currentPath.ToString() << "</td>"
-    << "<td>" << this->ElementToStringOperatorSequenceStartingOnMe(theGens[i]) << "</td></tr>";
+    out << "<tr><td>" << currentPath.ToString() << "</td>" << "<td>" << this->ElementToStringOperatorSequenceStartingOnMe(theGens[i]) << "</td></tr>";
   }
   out << "</table>";
   LittelmannPath lastPath=theOrbit[0];
@@ -570,8 +541,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
       lastPath.ActByFalpha(curInd);
     tempPath=lastPath;
     tempPath.ActByEalpha(nextInd);
-    out << "<tr><td> e_" << nextInd+1 << "("
-    << lastPath.ToString() << ") =</td>" <<"<td>" << tempPath.ToString() << "</td>";
+    out << "<tr><td> e_" << nextInd+1 << "(" << lastPath.ToString() << ") =</td>" <<"<td>" << tempPath.ToString() << "</td>";
 /*    for (int j=0; j<this->owner->GetDim(); j++)
     { tempPath=lastPath;
       tempPath.ActByEalpha(j);
@@ -590,9 +560,8 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     tempMon.generatorsIndices.ReverseOrderElements();
     tempMon.Powers.ReverseOrderElements();
     bool isadapted=tempPath.IsAdaptedString(tempMon);
-    out << "<tr><td>" << tempMon.ToString() << "</td><td>"
-    << (isadapted ? "is adapted to" : "is not adapted to" )
-    <<  "</td><td>" << tempPath.ToString() << "</td><td>";
+    out << "<tr><td>" << tempMon.ToString() << "</td><td>" << (isadapted ? "is adapted to" : "is not adapted to" ) <<  "</td><td>"
+    << tempPath.ToString() << "</td><td>";
     for (int j=0; j<this->owner->GetDim(); j++)
     { tempPath=theOrbit[i];
       tempPath.ActByEFDisplayIndex(j+1);
@@ -958,7 +927,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
   { theG2B3Data.theWeightFundCoords=theHWs[i];
     theCommands.fSplitFDpartB3overG2inner
     (theCommands, theG2B3Data, tempExpression);
-    timeReport << tempExpression.GetValuE<std::string>();
+    timeReport << tempExpression.GetValue<std::string>();
     RationalFunctionOld numEigenVectors;
     numEigenVectors=rfZero;
     for (int j=0; j<theG2B3Data.theSmallCharFDpart.size(); j++)
@@ -1754,10 +1723,8 @@ bool CommandList::fParabolicWeylGroups
   (CommandList& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   SemisimpleLieAlgebra* theSSPointer;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, theSSPointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
   ReflectionSubgroupWeylGroup theSubgroup;
@@ -1894,11 +1861,9 @@ bool CommandList::fPrintAllPartitions
   if (!input.IsListNElements(3))
     return output.SetError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
 
-  std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSowner))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
   Expression theContext;
@@ -2172,12 +2137,9 @@ bool CommandList::fLSPath
   MacroRegisterFunctionWithName("CommandList::fLSPath");
   if (input.children.size<3)
     return output.SetError("LSPath needs at least two arguments.", theCommands);
-
-  std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSowner, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSowner))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
   Vectors<Rational> waypoints;
@@ -2520,10 +2482,9 @@ bool CommandList::innerFactorPoly
     return false;
   std::cout << "here I am .";
   Expression theContext=output.GetContext();
-  Polynomial<Rational> thePoly=output.GetValuE<Polynomial<Rational> >();
+  Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
-    return output.SetError
-    ("I have been taught to factor one variable polys only. ", theCommands);
+    return output.SetError("I have been taught to factor one variable polys only. ", theCommands);
   Polynomial<Rational> smallestDiv;
   List<Polynomial<Rational> > theFactors;
   while (!thePoly.IsAConstant())
@@ -2593,9 +2554,27 @@ bool CommandList::innerSqrt
 { if (!input.IsOfType<Rational>())
     return false;
   AlgebraicNumber theNumber;
-  if (!theNumber.AssignRationalQuadraticRadical(input.GetValuE<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
+  if (!theNumber.AssignRationalQuadraticRadical(input.GetValue<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
     return false;
   return output.AssignValue(theNumber, theCommands);
+}
+
+bool CommandList::innerInterpolatePoly
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerInterpolatePoly");
+  Matrix<Rational> pointsOfInterpoly;
+  if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2))
+  { theCommands.Comments << "<hr>Failed to extract points of interpolation from " << input.ToString();
+    return false;
+  }
+  Polynomial<Rational> interPoly;
+  Vector<Rational> theArgs, theValues;
+  pointsOfInterpoly.GetVectorFromColumn(0, theArgs);
+  pointsOfInterpoly.GetVectorFromColumn(1, theValues);
+  interPoly.Interpolate(theArgs, theValues);
+  Expression theContext;
+  theContext.MakeContextWithOnePolyVar(theCommands, "x");
+  return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 
 bool CommandList::innerPrintZnEnumeration
@@ -2604,7 +2583,7 @@ bool CommandList::innerPrintZnEnumeration
   if (!input.IsListNElements(3))
     return false;
   int grade, dimension;
-  if (!input[2].IsSmallInteger(& grade) || !input[1].IsSmallInteger(&dimension))
+  if (!input[2].IsSmallInteger(&grade) || !input[1].IsSmallInteger(&dimension))
     return false;
   if (grade>10 || dimension >5 || grade<0 || dimension<0)
     return false;

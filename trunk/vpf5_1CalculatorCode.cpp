@@ -269,8 +269,8 @@ bool CommandList::innerGCDOrLCM
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-//  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
-//  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
+  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  std::cout << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
@@ -502,10 +502,8 @@ bool CommandList::innerPrintSSsubalgebras
   SemisimpleLieAlgebra* ownerSSPointer;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
-  { std::string errorString;
-    if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-        (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
-      return output.SetError(errorString, theCommands);
+  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
+      return output.SetError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>4)
     { out << "<b>This code is completely experimental and has been set to run up to rank 4."
       << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
@@ -514,15 +512,14 @@ bool CommandList::innerPrintSSsubalgebras
       out << "<b>This code is completely experimental. Use the following printouts on "
       << "your own risk</b>";
   } else
-    ownerSSPointer=input.GetValuE<SemisimpleSubalgebras>().owneR;
+    ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owneR;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
   std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
   std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
-  out << "<br>Output file: <a href= \"" << displayFolder
-  << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
+  out << "<br>Output file: <a href= \"" << displayFolder << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
   out << "<script> var reservedCountDownToRefresh = 5; "
   << "setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
@@ -535,7 +532,7 @@ bool CommandList::innerPrintSSsubalgebras
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
-    input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>() :
+    input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras
     [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
     ;
@@ -585,11 +582,9 @@ bool CommandList::innerSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
-  std::string errorString;
   SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input, ownerSSPointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
@@ -618,15 +613,12 @@ bool CommandList::innerEmbedSSalgInSSalg
   const Expression& EsmallSA=input[1];
   const Expression& ElargeSA=input[2];
 
-  std::string errorString;
-  SemisimpleLieAlgebra* theSmallSapointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer, &errorString))
-    return output.SetError(errorString, theCommands);
-  SemisimpleLieAlgebra* thelargeSapointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer, &errorString))
-    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* theSmallSapointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra* thelargeSapointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
   SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
@@ -668,11 +660,9 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
   if (input.children.size!=3)
     return output.SetError
     ("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
-  SemisimpleLieAlgebra* ownerSS;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], ownerSS, &errorString))
-    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* ownerSS=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theE;
   if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theE, *ownerSS))
     return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
@@ -696,13 +686,10 @@ bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expre
 { MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
   if (input.children.size<3)
     return output.SetError
-    ("Function ad common eigenspaces needs at least 2 arguments \
-      - type and at least one element of the algebra.", theCommands);
+    ("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], ownerSS, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.ReservE(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
@@ -736,8 +723,7 @@ bool CommandList::innerGroebner
   const Expression& numComputationsE=input[1];
   Rational upperBound=0;
   if (!numComputationsE.IsOfType(&upperBound))
-    return output.SetError
-    ("Failed to convert the first argument of the expression to rational number.", theCommands);
+    return output.SetError("Failed to convert the first argument of the expression to rational number.", theCommands);
   if (upperBound>1000000)
     return output.SetError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
@@ -943,7 +929,7 @@ bool CommandList::innerMatrixRationalTensorForm
       return false;
   if (!output.IsOfType<Matrix<Rational> >())
     return false;
-  outputMat=output.GetValuE<Matrix<Rational> >();
+  outputMat=output.GetValue<Matrix<Rational> >();
   return output.AssignValue(outputMat, theCommands);
 }
 
@@ -951,12 +937,11 @@ bool CommandList::innerMatrixRationalFunction
   (CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments
-      (input, outputMat, &ContextE, -1, CommandList::innerRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CommandList::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
     return false;
   }
-  std::cout << "<hr>And the context is: " << ContextE.ToString();
+//  std::cout << "<hr>And the context is: " << ContextE.ToString();
   return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
 
@@ -964,33 +949,25 @@ bool CommandList::innerDrawPolarRfunctionTheta
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDrawPolarRfunctionTheta");
   if (!input.IsListNElements(4))
-    return output.SetError
-    ("Drawing polar coordinates takes three arguments: function, lower angle \
-      bound and upper angle bound. ", theCommands);
+    return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
   Expression functionE;
   Rational upperBound, lowerBound;
   if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return
-    output.SetError
-    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
   if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
     return false;
   std::stringstream out, resultStream;
-  out << CGI::GetHtmlMathSpanPure(input[1].ToString())
-  << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-plot}"
-  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  out << CGI::GetHtmlMathSpanPure(input[1].ToString()) << "<br>";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
-  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
-  std::string funString=functionE.GetValuE<std::string>();
-  resultStream << funString << " t 57.29578 mul cos mul " << funString
-  << " t 57.29578 mul sin mul " << "}";
+  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  std::string funString=functionE.GetValue<std::string>();
+  resultStream << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
   resultStream << "\\end{pspicture}\\end{document}";
   out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
   out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
@@ -1003,8 +980,7 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
 }
 
 std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
-(bool useHtml, const std::string& functionStringPostfixNotation,
- const std::string& functionStringCalculatorFormat, const Rational& lowerBound,
+(bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound,
  const Rational& upperBound)
 { std::stringstream out;
   out << "\n\n%Function formula: " << functionStringCalculatorFormat << "\n\n";
@@ -1013,9 +989,7 @@ std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
   out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   if (useHtml)
     out << "<br>\n";
-  out << "\\psplot[linecolor=red, plotpoints=1000]{"
-  << lowerBound.DoubleValue() << "}{"
-  << upperBound.DoubleValue() << "}{";
+  out << "\\psplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -1072,12 +1046,10 @@ bool CommandList::innerPlot2DWithBars
 { MacroRegisterFunctionWithName("CommandList::innerPlot2DWithBars");
   //std::cout << input.ToString();
   if (input.children.size<5)
-    return output.SetError
-    ("Plotting coordinates takes three or more arguments: function, lower and upper bound. ", theCommands);
+    return output.SetError("Plotting coordinates takes three or more arguments: function, lower and upper bound. ", theCommands);
   bool tempB=theCommands.innerPlot2D(theCommands, input, output);
   if (!tempB || !output.IsOfType<CalculusFunctionPlot>())
-  { theCommands.Comments << "<hr>Failed to a plot from " << input.ToString()
-    << ", not proceding with bar plot.";
+  { theCommands.Comments << "<hr>Failed to a plot from " << input.ToString() << ", not proceding with bar plot.";
     return false;
   }
   const Expression& lowerE=input[2];
@@ -1093,9 +1065,7 @@ bool CommandList::innerPlot2DWithBars
     theDeltaNoSign=1;
   Rational upperBound, lowerBound;
   if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return
-    output.SetError
-    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
   Expression tempE1, tempE2, tempX, tempResult;
@@ -1122,8 +1092,7 @@ bool CommandList::innerPlot2DWithBars
     double finalREsultDouble;
     if (!tempResult.IsOfType<Rational>(&finalResultRat))
     { if (!tempResult.IsOfType<double>(&finalREsultDouble))
-      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead "
-        << "I evaluated to " << tempResult.ToString();
+      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << tempResult.ToString();
         return false;
       }
     } else finalREsultDouble=finalResultRat.DoubleValue();
@@ -1162,29 +1131,23 @@ bool CommandList::innerPlot2DWithBars
           outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
         }
       }
-      outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
-      << MathRoutines::ReducePrecision(xValues[i]) << ", "
-      << MathRoutines::ReducePrecision(fValues[i]) << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
-      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")("
-      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", 0)";
-      outHtml << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)("
-      << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValues[i])
-      << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
-      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")("
-      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", 0)";
+      outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)(" << MathRoutines::ReducePrecision(xValues[i]) << ", "
+      << MathRoutines::ReducePrecision(fValues[i]) << ")" << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", 0)";
+      outHtml << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", 0)(" << MathRoutines::ReducePrecision(xValues[i]) << ", "
+      << MathRoutines::ReducePrecision(fValues[i]) << ")" << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", " << MathRoutines::ReducePrecision(fValues[i]) << ")(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue())
+      << ", 0)";
     }
   outHtml << "<br>";
   for (int i=0; i<rValues.size; i++)
   { std::stringstream tempStream;
-    tempStream << "\\rput[t](" << MathRoutines::ReducePrecision(rValues[i].DoubleValue()) << ",-0.03)"
-    << "{$";
+    tempStream << "\\rput[t](" << MathRoutines::ReducePrecision(rValues[i].DoubleValue()) << ",-0.03)" << "{$";
     if (rValues[i].IsInteger())
       tempStream << rValues[i].ToString();
     else
-      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}"
-      << "{" << rValues[i].GetDenominator().ToString() << "}";
+      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}" << "{" << rValues[i].GetDenominator().ToString() << "}";
     tempStream << "$}";
     outHtml << tempStream.str();
     outTex << tempStream.str();
@@ -1193,7 +1156,7 @@ bool CommandList::innerPlot2DWithBars
   CalculusFunctionPlot thePlot;
   thePlot.thePlotElements.AddOnTop(outTex.str());
   thePlot.thePlotElementsWithHtml.AddOnTop(outHtml.str());
-  thePlot+=output.GetValuE<CalculusFunctionPlot>();
+  thePlot+=output.GetValue<CalculusFunctionPlot>();
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1202,27 +1165,22 @@ bool CommandList::innerPlot2D
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
   //std::cout << input.ToString();
   if (input.children.size<4)
-    return output.SetError
-    ("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
+    return output.SetError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
   Expression functionE;
   Rational upperBound, lowerBound;
   if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return
-    output.SetError
-    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
   if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
     return false;
   CalculusFunctionPlot thePlot;
   thePlot.thePlotElements.AddOnTop
-  (thePlot.GetPlotStringFromFunctionStringAndRanges
-  (false, functionE.GetValuE<std::string>(), input[1].ToString(), lowerBound, upperBound));
+  (thePlot.GetPlotStringFromFunctionStringAndRanges(false, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound));
   thePlot.thePlotElementsWithHtml.AddOnTop
-  (thePlot.GetPlotStringFromFunctionStringAndRanges
-  (true, functionE.GetValuE<std::string>(), input[1].ToString(), lowerBound, upperBound));
+  (thePlot.GetPlotStringFromFunctionStringAndRanges(true, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound));
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1250,13 +1208,11 @@ bool CommandList::innerSuffixNotationForPostScript
   }
   std::stringstream out;
   if (input.IsOfType<Rational>())
-  { out << input.GetValuE<Rational>().DoubleValue();
+  { out << input.GetValue<Rational>().DoubleValue();
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;
-  bool useUsualOrder=
-  !input[0].IsAtoM(theCommands.opDivide()) &&
-  !input[0].IsAtoM(theCommands.opThePower());
+  bool useUsualOrder=!input[0].IsAtoM(theCommands.opDivide()) && !input[0].IsAtoM(theCommands.opThePower());
 //  if (input[0].IsAtoM(theCommands.opDivide()))
 //    std::cout << input.Lispify();
   if (useUsualOrder)
@@ -1305,11 +1261,9 @@ bool CommandList::innerCharacterSSLieAlgFD
   if (output.IsError())
     return true;
   if (!parSel.CardinalitySelection==0)
-    return output.SetError
-    ("I know only to compute with finite dimensional characters, for the time being.", theCommands);
+    return output.SetError("I know only to compute with finite dimensional characters, for the time being.", theCommands);
   charSSAlgMod<Rational> theElt;
-  theElt.MakeFromWeight
-  (ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
+  theElt.MakeFromWeight(ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), ownerSSLiealg);
   return output.AssignValue(theElt, theCommands);
 }
 
@@ -1317,8 +1271,7 @@ bool CommandList::innerConesIntersect
   (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerConesIntersect");
   if (!input.IsListNElements(3))
-  { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1
-    << " instead. ";
+  { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
     return false;
   }
   Matrix<Rational> coneNonStrictMatForm;
@@ -1360,22 +1313,17 @@ bool CommandList::innerConesIntersect
     for (int i=0; i<coneNonStrictGens.size; i++)
       checkVector+=coneNonStrictGens[i]*outputIntersection[coneStrictGens.size+i];
     if (!checkVector.IsEqualToZero())
-    { std::cout << "<br>This is a programming error: the output linear combination"
-      << outputIntersection.ToString()
-      << " corresponds to the cone intersection " << checkVector.ToString()
-      << " and is not equal to zero! Here is the cone output so far: "
+    { std::cout << "<br>This is a programming error: the output linear combination" << outputIntersection.ToString()
+      << " corresponds to the cone intersection " << checkVector.ToString() << " and is not equal to zero! Here is the cone output so far: "
       << out.str() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    out << "<br>Cones intersect, here is one intersection: 0= "
-    << outputIntersection.ToStringLetterFormat("v");
+    out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else
   { out << "<br>Cones have empty intersection.";
-    out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString()
-    << ". Indeed, ";
+    out << "<br> A normal separating the cones is: n:=" << outputSeparatingNormal.ToString() << ". Indeed, ";
     for (int i=0; i<coneStrictGens.size; i++)
-      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = "
-      << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
+      out << "<br>\\langle v_{" << i+1 << "}, n\\rangle = " << outputSeparatingNormal.ScalarEuclidean(coneStrictGens[i]).ToString();
     for (int i=0; i<coneNonStrictGens.size; i++)
       out << "<br>\\langle v_{" << i+1 + coneStrictGens.size << "}, n\\rangle = "
       << outputSeparatingNormal.ScalarEuclidean(coneNonStrictGens[i]).ToString();
@@ -1388,8 +1336,7 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 (PolynomialSubstitution<coefficient>& outputSub)
 { outputSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   for (int i=0; i<this->solutionsFound.GetElement().CardinalitySelection; i++)
-    outputSub[this->solutionsFound.GetElement().elements[i]]=
-    this->systemSolution.GetElement()[this->solutionsFound.GetElement().elements[i]];
+    outputSub[this->solutionsFound.GetElement().elements[i]]= this->systemSolution.GetElement()[this->solutionsFound.GetElement().elements[i]];
 }
 
 template <class coefficient>
@@ -1442,9 +1389,7 @@ int GroebnerBasisComputation<coefficient>::GetPreferredSerreSystemSubIndex()
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
- (Polynomial<coefficient>& thePoly, int theIndex,
-  PolynomialSubstitution<coefficient>& theFinalSub,
-  GlobalVariables* theGlobalVariables)
+ (Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables)
 { Polynomial<coefficient> tempP;
   tempP.MakeMonomiaL(theIndex, 1, 1);
   if (thePoly==tempP)
@@ -1500,8 +1445,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   ProgressReport theReport2(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem
-    << "<br>Solving the system\n<br>\n" << inputSystem.ToString();
+    out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n" << inputSystem.ToString();
     theReport1.Report(out.str());
   }
   bool changed=true;
@@ -1653,14 +1597,10 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
     for (int i=0; i<workingSystem.size; i++)
     { workingSystem[i].Substitution(theSub);
       if (!workingSystem[i].IsEqualToZero())
-      { std::cout << "<br>This is a programming error. Function SolveSerreLikeSystem "
-        << "reports to have found a solution over the base field, but substituting the solution "
-        << " back to the original system does not yield a zero system of equations. More precisely, "
-        << "the reported solution was " << this->ToStringSerreLikeSolution()
-        << " but substitution in equation " << inputSystem[i].ToString() << " yields "
-        << workingSystem[i].ToString() << ". "
-        << " Calculator input: "
-        << "<br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>";
+      { std::cout << "<br>This is a programming error. Function SolveSerreLikeSystem reports to have found a solution over the base field, "
+        << "but substituting the solution back to the original system does not yield a zero system of equations. More precisely, "
+        << "the reported solution was " << this->ToStringSerreLikeSolution() << " but substitution in equation " << inputSystem[i].ToString()
+        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>";
         std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
@@ -1675,8 +1615,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution(For
   for (int i=0; i<this->systemSolution.GetElement().size; i++)
     if (this->solutionsFound.GetElement().selected[i])
     { tempP.MakeMonomiaL(i, 1, 1);
-      out << " " << tempP.ToString(theFormat) << " := "
-      << this->systemSolution.GetElement()[i] << ";";
+      out << " " << tempP.ToString(theFormat) << " := " << this->systemSolution.GetElement()[i] << ";";
     }
   return out.str();
 }
@@ -1686,8 +1625,7 @@ void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex
 (int theIndex, const coefficient& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   if (this->solutionsFound.GetElement().selected[theIndex])
-  { std::cout << "This a programming error: attempting to set value to a variable "
-    << " whose value has already been computed. "
+  { std::cout << "This a programming error: attempting to set value to a variable whose value has already been computed. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -1752,8 +1690,7 @@ bool CommandList::innerSolveSerreLikeSystem
   { if (theComputation.flagSystemSolvedOverBaseField)
       out << "<br>One solution follows. " << theComputation.ToStringSerreLikeSolution(&theFormat);
     else
-      out << "However, I was unable to find such a solution: either my heuristics were not good enough, "
-      << " or no solution is rational.";
+      out << "However, I was unable to find such a solution: either my heuristics were not good enough, or no solution is rational.";
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1776,12 +1713,10 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
     adadAppliedToMon.AddMonomial(baseGen,1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.Simplify();
-    std::cout << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString()
-    << " to get " << tempElt.ToString();
+    std::cout << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString() << " to get " << tempElt.ToString();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.Simplify();
-    std::cout << " acting by " << this->ToString() << " on " << tempElt.ToString()
-    << " to get " << adadAppliedToMon.ToString();
+    std::cout << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get " << adadAppliedToMon.ToString();
     std::cout << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
     result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
@@ -1790,8 +1725,7 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
 
 template <class coefficient>
 coefficient SemisimpleLieAlgebra::GetKillingForm
-  (const ElementSemisimpleLieAlgebra<coefficient>& left,
-   const ElementSemisimpleLieAlgebra<coefficient>& right)
+  (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
   coefficient result=0;
   ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
@@ -1814,6 +1748,8 @@ bool CommandList::innerKillingForm
     return false;
   Expression leftE=input[1];
   Expression rightE=input[2];
+  if (!leftE.IsBuiltInType() || !rightE.IsBuiltInType())
+    return false;
   if (!Expression::MergeContexts(leftE, rightE))
     return false;
   Expression theContext=leftE.GetContext();
@@ -1837,10 +1773,8 @@ bool CommandList::innerRootSubsystem
   if (input.children.size<3)
     return false;
   SemisimpleLieAlgebra* theSSlieAlg=0;
-  std::string errorString;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerSSLieAlgebra, input[1], theSSlieAlg, &errorString))
-    return output.SetError(errorString, theCommands);
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSlieAlg))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;
   Vectors<Rational> outputRoots;

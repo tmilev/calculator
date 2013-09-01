@@ -316,139 +316,67 @@ bool Serialization::innerStoreObject
   return true;
 }
 
-template <class dataType>
-bool CommandList::innerExtractPMTDtreeContext
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::innerExtractPMTDtreeContext");
+bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerPolynomial");
+  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+//  std::cout << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Max recursion depth of " << theCommands.MaxRecursionDeptH
-    << " exceeded while trying to evaluate to polynomial an expression "
-    << "(i.e., your polynomial expression is too large).";
-    return output.SetError(out.str(), theCommands);
-  }
-//  std::cout << "<br>Extracting context from: " << input.ToString();
-  if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
-      input.IsListStartingWithAtom(theCommands. opPlus()) ||
-      input.IsListStartingWithAtom(theCommands.opMinus()) )
-  { output.MakeEmptyContext(theCommands);
-    Expression newContext, intermediateContext;
-    for (int i=1; i<input.children.size; i++)
-      if (theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
-      { if (!Expression::ContextMergeContexts(newContext, output, intermediateContext))
-          return false;
-        output=intermediateContext;
-      } else
-        return false;
-    return true;
-  }
-  int thePower;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
-    if (input[2].IsSmallInteger(&thePower))
-      return theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
-  if(input.IsAtoM(theCommands.opContext()))
-  { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
-    return false;
-  }
-  if (input.HasContext())
-  { output=input.GetContext();
-    return true;
-  }
-  Expression theContext;
-  input.GetContextForConversionIgnoreMyContext<dataType>(theContext);
-  return Expression::ContextMergeContexts(theContext, input.GetContext(), output);
-  //std::cout << "<br>Context for conversion ignoring mine: " << theContext.ToString();
-}
-
-template <class dataType>
-bool CommandList::outerExtractAndEvaluatePMTDtree
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ Expression contextE;
-  if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
-    return false;
-//  std::cout << "<hr>Extracted context from " << input.ToString() << ": "
-//  << contextE.ToString();
-  bool result= theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
-//  std::cout << "<hr>.. and final output is: " << output.ToString()
-//  << " with final context " << contextE.ToString();
-  return result;
-}
-
-template <class dataType>
-bool CommandList::EvaluatePMTDtree
-(const Expression& inputContext, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::EvaluatePMTDtree");
-  RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH>this->MaxRecursionDeptH)
-  { this->Comments << "Max recursion depth of " << this->MaxRecursionDeptH
+  { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression "
     << "(i.e. your polynomial expression is too large).";
     return false;
   }
-  dataType outputData;
-//  std::cout << "<br>Context:" <<  inputContext.ToString()
-//  << " Evaluating PMTD tree of " << input.ToString();
-  if (input.IsListStartingWithAtom(this->opTimes()) ||
-      input.IsListStartingWithAtom(this-> opPlus()) )
-  { for (int i=1; i<input.children.size; i++)
-    { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
-      { this->Comments << "<hr>Failed to evaluate pmtd tree from input "
-        << input[i].ToString() << " with context " << inputContext.ToString();
-        return false;
-      }
-//      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
-      if (input[0].IsAtoM(this->opTimes()))
-      { if (i==1)
-          outputData=output.GetValuE<dataType>();
-        else
-        { //std::cout << "<hr>Multiplying: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData*=output.GetValuE<dataType>();
-          //std::cout << "<br>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
-        }
-      } else if (input[0].IsAtoM(this->opPlus()))
-      { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ToString(this->theGlobalVariableS->theDefaultLieFormat);
-        if (i==1)
-        { outputData=output.GetValuE<dataType>();
-//          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-//          << ", which should equal the bufferData: " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-        } else
-        { //std::cout << "<hr>Adding: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData+=output.GetValuE<dataType>();
-          //std::cout << "<hr>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
-        }
-      }
+  if (input.IsOfType<Polynomial<Rational> >())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<Rational>())
+  { if (!input.ConvertToType<Polynomial<Rational> >(output))
+    { std::cout << "This is a programming error: failed to convert rational to polynomial. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
-    return output.AssignValueWithContext(outputData, inputContext, *this);
+    return true;
   }
-  int thePower;
-  if (input.IsListNElementsStartingWithAtom(this->opThePower(), 3))
-    if (input[2].IsSmallInteger(&thePower))
-    { if(!this->EvaluatePMTDtree<dataType>(inputContext, input[1], output))
-      { this->Comments << "<hr>Failed to evaluate pmtd tree from input "
-        << input[1].ToString() << " with context " << inputContext.ToString();
-        return false;
+  Expression theConverted, theComputed;
+  bool isGood=false;
+  if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
+  { isGood=true;
+    theComputed.reset(theCommands, input.children.size);
+    theComputed.AddChildOnTop(input[0]);
+    for (int i=1; i<input.children.size; i++)
+    { if (!Serialization::innerPolynomial(theCommands, input[i], theConverted))
+      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
+        isGood=false;
+        break;
       }
-      outputData=output.GetValuE<dataType>();
-      outputData.RaiseToPower(thePower);
-      return output.AssignValueWithContext(outputData, inputContext, *this);
+      theComputed.AddChildOnTop(theConverted);
     }
-  Expression intermediate=input;
-  Expression tempContext=inputContext;
-  if (!intermediate.SetContextAtLeastEqualTo(tempContext))
-  { this->Comments << "Failed to set context " << tempContext.ToString()
-    << " onto expression " << intermediate.ToString() << "."
-    << " <b>This could be a programming error.</b> ";
-    return false;
+  } else if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  { isGood=true;
+    if(!Serialization::innerPolynomial(theCommands, input[1], theConverted))
+    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+      isGood=false;
+    }
+    theComputed.reset(theCommands, input.children.size);
+    theComputed.AddChildAtomOnTop(theCommands.opThePower());
+    theComputed.AddChildOnTop(theConverted);
+    theComputed.AddChildOnTop(input[2]);
   }
-  if (!intermediate.ConvertToType<dataType>(output))
-  { this->Comments << "Failed to convert " << intermediate.ToString()
-    << " to the desired type. ";
-    return false;
+  if (isGood)
+  { BoundVariablesSubstitution tmpBVS;
+    bool tempBool;
+//    std::cout << "Evaluating: " << theComputed.ToString();
+    if (theCommands.EvaluateExpression(theComputed, output, tmpBVS, tempBool))
+      if (output.IsOfType<Polynomial<Rational> >())
+        return true;
   }
-  return true;
+  //Make Expression with context consisting of one monomial:
+  Polynomial<Rational> JustAmonomial;
+  JustAmonomial.MakeMonomiaL(0,1,1);
+  Expression theContext;
+  theContext.MakeContextWithOnePolyVar(theCommands, input);
+  return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
 }
 
 bool Serialization::innerSSLieAlgebra
@@ -464,11 +392,11 @@ bool Serialization::innerLoadDynkinType
   Expression polyE;
   if (!Serialization::innerPolynomial(theCommands, input, polyE))
     return false;
-  if (polyE.IsError())
+  if (!polyE.IsOfType<Polynomial<Rational> >())
     return true;
 //  std::cout << "<br>Got de poly!";
 //  std::cout.flush();
-  Polynomial<Rational> theType=polyE.GetValuE<Polynomial<Rational> >();
+  Polynomial<Rational> theType=polyE.GetValue<Polynomial<Rational> >();
 //  std::cout << "<br>its " << theType.ToString();
 //  std::cout.flush();
   Expression theContext=polyE.GetContext();
@@ -486,7 +414,6 @@ bool Serialization::innerLoadDynkinType
       return false;
     }
     Expression typEE= theContext.ContextGetContextVariable(variableIndex);
-
     if (!Serialization::DeSerializeMon(theCommands, typEE, theContext, simpleComponent))
       return false;
 //        std::cout << "got it!3.5";
@@ -555,19 +482,17 @@ bool Serialization::innerLoadSSLieAlgebra
     theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
-    theCommands.Comments << tempE.GetValuE<std::string>();
+    theCommands.Comments << tempE.GetValue<std::string>();
   }
   //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
 }
 
-bool Serialization::innerStoreSemisimpleLieAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool Serialization::innerStoreSemisimpleLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<SemisimpleLieAlgebra>())
     return output.SetError
-    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
-     theCommands);
-  SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
+    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
+  SemisimpleLieAlgebra& owner=input.GetValueNonConst<SemisimpleLieAlgebra>();
   return Serialization::innerStoreObject(theCommands, owner, output);
 }
 
@@ -735,13 +660,11 @@ bool Serialization::innerLoadSltwoSubalgebras
   return false;
 }
 
-bool Serialization::innerStoreSemisimpleSubalgebrasFromExpression
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool Serialization::innerStoreSemisimpleSubalgebrasFromExpression(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("innerStoreSemisimpleSubalgebrass");
   if (!input.IsOfType<SemisimpleSubalgebras>())
     return false;
-  SemisimpleSubalgebras& theSubalgebras=
-  input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
+  SemisimpleSubalgebras& theSubalgebras=input.GetValueNonConst<SemisimpleSubalgebras>();
   return Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSubalgebras, output);
 }
 
@@ -762,11 +685,9 @@ bool Serialization::innerStoreCandidateSA
     listGenerators.reset(theCommands);
     listGenerators.AddChildAtomOnTop(theCommands.opSequence());
     for (int i=0; i<input.theNegGens.size; i++)
-    { Serialization::innerStoreElementSemisimpleLieAlgebra
-      (theCommands, input.theNegGens[i], tempE);
+    { Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input.theNegGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
-      Serialization::innerStoreElementSemisimpleLieAlgebra
-      (theCommands, input.thePosGens[i], tempE);
+      Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input.thePosGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
     }
     output.AddChildOnTop(listGenerators);
@@ -1018,7 +939,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
  SemisimpleLieAlgebra& owner)
 { Expression genE;
   ElementUniversalEnveloping<RationalFunctionOld> curGenUErf;
-  if (!Serialization::innerUE(theCommands, input, genE, owner))
+  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input, genE, owner))
   { theCommands.Comments << "<hr> Failed to load element UE from " << input.ToString() << ". ";
     return false;
   }
@@ -1026,7 +947,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   { theCommands.Comments << "<hr>Failed to load generator with error message " << genE.ToString();
     return false;
   }
-  curGenUErf=genE.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> > ();
+  curGenUErf=genE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> > ();
   if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
   { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString()
     << " to an honest Lie algebra element. ";
@@ -1035,7 +956,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   return true;
 }
 
-bool Serialization::innerUE
+bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   (CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner)
 { ChevalleyGenerator theChevGen;
   theChevGen.owneR=&owner;
@@ -1048,14 +969,12 @@ bool Serialization::innerUE
   outputUE.MakeZero(owner);
   Expression polyE;
   if (!Serialization::innerPolynomial(theCommands, input, polyE))
-  { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
-    << " to polynomial.<hr>";
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
     return false;
   }
   Polynomial<Rational> theP;
   if (polyE.IsError() || !polyE.IsOfType<Polynomial<Rational> >(&theP))
-  { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
-    << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial. Instead I got " << polyE.ToString() << ". <hr>";
     return false;
   }
   Expression theContext=polyE.GetContext();
@@ -1069,23 +988,22 @@ bool Serialization::innerUE
     for (int i=0; i<currentMon.GetMinNumVars(); i++)
     { int thePower;
       if (!currentMon(i).IsSmallInteger(&thePower))
-      { theCommands.Comments << "<hr>Failed to convert one of the exponents appearing in "
-        << input.ToString() << " to  a small integer polynomial.<hr>";
+      { theCommands.Comments << "<hr>Failed to convert one of the exponents appearing in " << input.ToString()
+        << " to  a small integer polynomial.<hr>";
         return false;
       }
       if (thePower==0)
         continue;
       Expression singleChevGenE=theContext.ContextGetContextVariable(i);
       if (!singleChevGenE.IsListNElements(2))
-      { theCommands.Comments << "<hr>Failed to convert " << input.ToString()
-        << " to polynomial.<hr>";
+      { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
         return false;
       }
       std::string theLetter;
       if (!singleChevGenE[0].IsOperation(&theLetter) ||
           !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
-      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
-        << " to Chevalley generator of " << owner.GetLieAlgebraName();
+      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+        << owner.GetLieAlgebraName();
         return false;
       }
       bool isGood=true;
@@ -1131,28 +1049,15 @@ bool Serialization::innerUE
   Expression outputContext;
   outputContext.MakeEmptyContext(theCommands);
   outputContext.AddChildOnTop(outputPolyVars);
-  outputContext.ContextSetSSLieAlgebrA
-  (theCommands.theObjectContainer.theLieAlgebras.GetIndex(owner), theCommands);
+  outputContext.ContextSetSSLieAlgebrA(theCommands.theObjectContainer.theLieAlgebras.GetIndex(owner), theCommands);
   return output.AssignValueWithContext(outputUE, outputContext, theCommands);
 }
 
-bool Serialization::innerPolynomial
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPolynomial");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
-  return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
-  (theCommands, input, output);
-}
-
-bool Serialization::innerStorePoly
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool Serialization::innerStorePoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerStorePoly");
   Polynomial<Rational> thePoly;
   if (!input.IsOfType(&thePoly))
-    return output.SetError
-    ("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
+    return output.SetError("To ask to store a non-polynomial to a polynomial is not allowed. ", theCommands);
   Expression theContext=input.GetContext();
   Expression resultE;
   if (!Serialization::innerStoreMonCollection(theCommands, thePoly, resultE, &theContext))
@@ -1165,67 +1070,41 @@ bool Serialization::innerStorePoly
   return true;
 }
 
-bool CommandList::innerRationalFunction
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerRationalFunction(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomial");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
   //std::cout << "<br>First elt input is:" << input[0].ToString();
-  bool result= theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
-  (theCommands, input, output);
+  Expression theConverted;
+  bool result= Serialization::innerPolynomial(theCommands, input, theConverted);
   if (!result)
     return false;
-  if (!output.IsOfType<RationalFunctionOld>())
-  { std::cout << "<br>This is a programming error: outerExtractAndEvaluatePMTDtree returned true "
-    << "from input " << input.ToString()
-    << " but the result is not of type RationalFunctionOld, instead it is "
-    << output.ToString() << ". "
+  if (!theConverted.IsOfType<Polynomial<Rational> >())
+  { std::cout << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
+    << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return result;
-}
-
-bool CommandList::innerElementUniversalEnvelopingAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerElementUniversalEnvelopingAlgebra");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (input.IsOfType<ElementUniversalEnveloping<RationalFunctionOld > >())
-  { output=input;
-    return true;
-  }
-  if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >(theCommands, input, output))
-    return output.SetError
-    ("Failed to convert " +input.ToString() + " to element universal enveloping.", theCommands);
-  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  if (!output.IsOfType(&outputUE))
-    return output.SetError("Failed to convert to element universal enveloping.", theCommands);
-//  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
-//  << output.GetContext().ToString();
-  outputUE.Simplify(theCommands.theGlobalVariableS, 1, 0);
-  return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
+  return theConverted.ConvertToType<RationalFunctionOld>(output);
 }
 
 bool Serialization::innerStoreRationalFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RationalFunctionOld theRF;
   if (!input.IsOfType(&theRF))
-    return output.SetError
-    ("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
+    return output.SetError("To ask to store a non-rational function as a rational function is not allowed.", theCommands);
   Expression contextE=input.GetContext();
   return Serialization::innerStoreObject(theCommands, theRF, output, &contextE);
 }
 
 bool Serialization::innerStoreObject
-(CommandList& theCommands, const RationalFunctionOld& input, Expression& output,
- Expression* theContext)
+(CommandList& theCommands, const RationalFunctionOld& input, Expression& output, Expression* theContext)
 { if (input.expressionType==input.typeRational)
     return output.AssignValue(input.ratValue, theCommands);
   Polynomial<Rational> theNumerator;
   input.GetNumerator(theNumerator);
   if (input.expressionType==input.typePoly)
-    return Serialization::innerStoreMonCollection
-    (theCommands, theNumerator, output, theContext);
+    return Serialization::innerStoreMonCollection(theCommands, theNumerator, output, theContext);
   if (input.expressionType!=input.typeRationalFunction)
   { std::cout << "This is a programming error: I am processing a rational function which is not "
     << " of type rational polynomial or honest rataional function. Something has gone very wrong. "

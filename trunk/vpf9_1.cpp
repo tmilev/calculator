@@ -2128,16 +2128,25 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
 void rootSubalgebras::ElementToHtml
 (std::string& header, std::string& pathPhysical, std::string& htmlPathServer,
  SltwoSubalgebras* Sl2s, const std::string& calculatorDisplayName, GlobalVariables* theGlobalVariables)
-{ std::fstream output; std::string tempS;
+{ MacroRegisterFunctionWithName("rootSubalgebras::ElementToHtml");
+  std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
   std::string MyPathServer, childrenPathServer;
-  MyPathPhysical=pathPhysical; childrenPathPhysical=pathPhysical;
-  MyPathServer=htmlPathServer; childrenPathServer= htmlPathServer;
+  MyPathPhysical=pathPhysical;
+  childrenPathPhysical=pathPhysical;
+  MyPathServer=htmlPathServer;
+  childrenPathServer= htmlPathServer;
   MyPathPhysical.append("rootHtml.html");
   MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_");
   childrenPathServer.append("rootHtml_");
   CGI::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
+  if (!CGI::FileExists(MyPathPhysical))
+  { std::cout << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
+    << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   output << "<html><title> Root subsystems of "
   << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
   output << "<meta name=\"keywords\" content=\""

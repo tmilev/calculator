@@ -77,10 +77,8 @@ void* RunTimer(void* ptr)
       break;
   }
   if (!ComputationComplete)
-  { std::cout << "</div><br><br><br>Your computation has taken "
-    << elapsedtime << " seconds so far.";
-    std::cout << "<br>The maximum allowed run time for "
-    << " the entire system is  "
+  { std::cout << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
+    std::cout << "<br>The maximum allowed run time for " << " the entire system is  "
     << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
     << " seconds (twice the amount of time allowed for calculator interpretation). "
     << "<br>This safety limit is hard coded in this particular server. "
@@ -518,73 +516,21 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-
-  //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(d_4)";
-//  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
-  //civilizedInput= "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)";
- // civilizedInput="WeylGroupIrrepsAndCharTable{}(a_2);";
- // civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(g_2)";
-// civilizedInput="experimentalPrintSemisimpleSubalgebras{}(d_4)";
-  //civilizedInput="PenkovProjectTest";
-//  civilizedInput="WeylGroupIrrepsAndCharTable{}(b_3);";
- // civilizedInput="WeylGroupIrrepsAndCharTable{}(c_3);";
-  //civilizedInput="Y:=Polynomial{}((a+b)^2);Store{}Y";
-//  civilizedInput="PenkovProjectRecompute";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}a_2";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}A_2";
-//  civilizedInput="SplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
-//  civilizedInput="WeylGroupGetOuterAutoGenerators{}(2D_4)";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}(D_4)";
-//  civilizedInput="\\sqrt {3}+\\sqrt 2";
-  //civilizedInput="s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ";
-//  civilizedInput="\\sqrt 4";
-//  civilizedInput="\\sqrt 2+\\sqrt{}3";
-//civilizedInput="FactorOneVarPolyOverRationals{}(x^2-7x+12)";
- // civilizedInput="\\sqrt {}2+\\sqrt{}3+\\sqrt{}5";
-//  civilizedInput="\\sqrt{}-2";
-//  civilizedInput="(\\sqrt{}2+\\sqrt{}3)";
-  //civilizedInput="(\\sqrt{}2+\\sqrt{}3)\\sqrt{}2";
-//  civilizedInput="(1/(1+\sqrt{}2+\sqrt{}3+\sqrt{}5+\sqrt{}7))*( 179/1009\sqrt{5} -391/2018\sqrt{2}\sqrt{3}-326/3027\sqrt{3}+263/2018\sqrt{2}+289/1009)";
-  //civilizedInput="(\\sqrt{}2+\\sqrt{}3)*( \\sqrt{2}\\sqrt{3})";
-//  civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, (Serialization{}(LoadCandidateSubalgebra, 2 A^{2}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2)), (g_{-24}, g_{24}, g_{-16}, g_{16})),Serialization{}(LoadCandidateSubalgebra, 2A^{2}_{1}+B^{2}_{2}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 1, 2, 0), (0, 0, -1, 0)), ( g_{-24}, g_{24}, g_{-16}, g_{16}, g_{-9}, g_{9}, g_{3}, g_{-3})))))";
-  //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}g_2";
- // civilizedInput="%HideLHS Load{}( Serialization{}(LoadSemisimpleSubalgebras, F^{2}_{4}, ( Serialization{}(LoadCandidateSubalgebra, G^{6}_{2}, ((3, 6, 8, 4), (-3, -9, -12, -6)), (g_{-19}+g_{-20}, g_{20}+g_{19}, g_{23}, g_{-23})),Serialization{}(LoadCandidateSubalgebra, A^{16}_{1}+G^{6}_{2}, ((4, 8, 12, 8), (2, 3, 4, 0), (-3, -3, -6, 0)), (g_{-12}+g_{-13}, 2g_{13}+2g_{12}, -g_{-9}+g_{-8}, -g_{9}+g_{8}, g_{11}, g_{-11})))))";
-  //civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}b_3";
-//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_1, a_2)";
-  //civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(g_2, g_2)";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute{}c^2_3";
-  //civilizedInput="printSemisimpleLieAlgebra{}(c^{2}_4)";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}G_2";
-//  civilizedInput="experimentalPrintSemisimpleSubalgebrasFull{}a_2";
-/*  civilizedInput="%HideLHS \
-experimentalPrintSemisimpleSubalgebrasFull{}Load{}(\
-Serialization{}(LoadSemisimpleSubalgebras, F_{4}, (\
-Serialization{}(LoadCandidateSubalgebra, A^{1}_{1}+A^{10}_{1}, ((2, 3, 4, 2), (0, 4, 8, 6)), (\
-g_{-24}, g_{24}, 2g_{-9}+g_{-4}, 3g_{4}+2g_{9}\
-)),\
-Serialization{}(LoadCandidateSubalgebra, 2A^{1}_{1}+A^{10}_{1}, ((2, 3, 4, 2), (0, 1, 2, 2), (0, 4, 6, 0)), (\
-g_{-24}, g_{24}, g_{-16}, g_{16}, 2g_{-2}+g_{-3}, 3g_{3}+2 g_{2}\
-))\
-\
-))\
-)\
-  ";*/
+//  civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
+//  civilizedInput="g_{{a}}:=getChevalleyGenerator{} (G_2, a);hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
-  std::cout
-  << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString,inputStringNames.Contains
-  ("checkUsePreamble"))
+  std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString, inputStringNames.Contains("checkUsePreamble"))
   << tempStreamXX.str();
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout
-    << "Your input has been treated normally, however the return string"
-    << " of your input has been modified. More precisely, &lt; and &gt;  are "
+    << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\""
   << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
@@ -594,9 +540,7 @@ g_{-24}, g_{24}, g_{-16}, g_{16}, 2g_{-2}+g_{-3}, 3g_{3}+2 g_{2}\
   std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
-    std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?"
-    << theParser.inputStringRawestOfTheRaw
-    << "\">Link to your input.</a>";
+    std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   std::cout << "\n</FORM>";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
@@ -626,8 +570,7 @@ g_{-24}, g_{24}, g_{-16}, g_{16}, 2g_{-2}+g_{-3}, 3g_{3}+2 g_{2}\
     if (theParser.outputCommentsString.size()<10000)
       std::cout << theParser.outputCommentsString;
     else
-      std::cout << "The comments generated by your computation are a bit too long."
-      << " If you want to see them click the show/hide button below.<br>"
+      std::cout << "The comments generated by your computation are a bit too long. If you want to see them click the show/hide button below.<br>"
       << CGI::GetHtmlSpanHidableStartsHiddeN(theParser.outputCommentsString);
     std::cout << "</td>";
   }

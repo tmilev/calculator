@@ -36,8 +36,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
         { int currentIndex=this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex=this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex])
-          { std::cout << "This is a programming error. For some reason I am not computed. "
-            << " Here is me: "
+          { std::cout << "This is a programming error. For some reason I am not computed. Here is me: "
             << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }

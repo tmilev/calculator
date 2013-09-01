@@ -5,6 +5,60 @@
 ProjectInformationInstance ProjectInfoVpf6_1cpp
 (__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
 
+bool CommandList::innerOperationBinary
+  (CommandList& theCommands, const Expression& input, Expression& output, int theOp)
+{ for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)
+    if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input))
+      if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output))
+        return true;
+  return false;
+}
+
+bool CommandList::outerExtractBaseMultiplication
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  MacroRegisterFunctionWithName("CommandList::outerExtractBaseMultiplication");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  bool result=false;
+  //  std::cout << "<br>handling base extraction of: " << input.ToString();
+  //handle Anything*Rational:=Rational*Anything
+  output=input;
+  if (output[2].IsOfType<Rational>())
+  { output.children.SwapTwoIndices(1, 2);
+    result=true;
+//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
+  }
+//  Expression leftE=output[1];
+//  Expression rightE=output[2];
+  if (output[2].IsListStartingWithAtom(theCommands.opTimes()))
+  { if (output[2].children.size!=3)
+      return result;
+//    Expression rightLeftE=rightE[1];
+//    Expression rightRightE=rightE[2];
+    //handle Anything1*(Rational*Anything2):=Rational*(Anything1*Anything2)
+    if (output[2][1].IsOfType<Rational>())
+    { Expression tempRight;
+      tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
+      output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
+      result=true;
+//      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
+    }
+    //<- handle a*(b*anything)
+    //on condition that a*b has an inner handler
+    Expression tempExp, newExpr;
+    tempExp.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][1]);
+    if (theCommands.innerTimes(theCommands, tempExp, newExpr))
+    { output.MakeProducT(theCommands, newExpr, output[2][2]);
+      result=true;
+    }
+  }
+  //handle 0*anything=0
+  if (output[1].IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  return result;
+}
+
 bool CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat");
@@ -198,21 +252,13 @@ bool CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor
   if (!input.IsListNElements(3))
     return false;
 //  std::cout << "<br>Attempting to tensor " << input[1].ToString() << " and " << input[2].ToString();
-
-  Expression leftCopy=input[1];
-  output=input[2];
-  if (!output.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    return false;
-  if (!leftCopy.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    return false;
-  if (!output.MergeContexts(leftCopy, output))
+  Expression inputConverted;
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(inputConverted))
     return false;
   ElementTensorsGeneralizedVermas<RationalFunctionOld>
-  resultTensor=leftCopy.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  resultTensor.TensorOnTheRight
-  (output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(),
-   *theCommands.theGlobalVariableS);
-  return output.AssignValueWithContext(resultTensor, output.GetContext(), theCommands);
+  resultTensor=inputConverted[1].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  resultTensor.TensorOnTheRight(inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(), *theCommands.theGlobalVariableS);
+  return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
@@ -225,219 +271,85 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor
   { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
   }
-  if (!input[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { //std::cout << "<br>input[2] is not tensor product, instead it is " << input[2].ToString()
-    //<< "."; //",stack trace:  "  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  Expression inputConverted;
+  if (!input.MergeContextsMyAruments(inputConverted))
     return false;
-  }
-  static bool theGhostHasAppeared=false;
-  output=input[2];
-  Expression leftCopy=input[1];
+  if (!inputConverted[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+    return false;
 //  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
-  if (!output.MergeContexts(leftCopy, output))
-  { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
-    return false;
-  }
 //  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
-  ElementUniversalEnveloping<RationalFunctionOld>* leftUE;
-  std::string errorString;
-//  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerElementUniversalEnvelopingAlgebra, leftCopy, leftUE, &errorString))
-  { //std::cout << "Error to convert: " << errorString;
-    return false;
-  }
 //  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
+  SemisimpleLieAlgebra& theSSalg=inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
+  Expression leftE;
+//  std::cout << "<hr>Got where i needa be";
+  inputConverted[1].CheckConsistency();
+  input[1].CheckConsistency();
+  input[2].CheckConsistency();
+  if (!inputConverted[1].ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftE))
+  { //theCommands.Comments << "<hr>Failed to convert " << inputConverted[1].ToString() << " to element of Universal enveloping algebra. ";
+    return false;
+  }
+//  std::cout << " ... and got my ue out!";
+  static bool theGhostHasAppeared=false;
   if (!theGhostHasAppeared)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...<br>";
     theGhostHasAppeared=true;
   }
-  RationalFunctionOld RFOne, RFZero;
-  RFZero.MakeZero(theCommands.theGlobalVariableS);
-  RFOne.MakeOne(theCommands.theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
-  SemisimpleLieAlgebra& theSSalg=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
   //std::cout << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
-  if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
-      (*leftUE, outputElt, theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
+  if (!inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
+      (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, *theCommands.theGlobalVariableS, 1, 0))
   { //std::cout << "<br>failed to multiply on the left";
     return false;
   }
-  return output.AssignValueWithContext(outputElt , output.GetContext(), theCommands);
+  return output.AssignValueWithContext(outputElt, inputConverted[2].GetContext(), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  Expression rightCopy=input[2];
-  RationalFunctionOld* left;
-  RationalFunctionOld* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, output, left, &errorString))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, rightCopy, right, &errorString))
-    return false;
-  RationalFunctionOld result;
-  result=*left;
-  result*=*right;
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<RationalFunctionOld>(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  Expression rightCopy=input[2];
-  RationalFunctionOld* left;
-  RationalFunctionOld* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, output, left, &errorString))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, rightCopy, right, &errorString))
-    return false;
-  RationalFunctionOld result;
-  result=*left;
-  result+=*right;
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return CommandListInnerTypedFunctions::innerAddTypeToType<RationalFunctionOld>(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-//  std::cout << "<br>attempting to divide " << input[1].ToString() << " by " << input[2].ToString();
-  output=input[1];
-  Expression rightCopy=input[2];
-  RationalFunctionOld* left;
-  RationalFunctionOld* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, output, left, &errorString))
-    return false;
-  left->checkConsistency();
-//  std::cout << "<br>numerical value of left: " << left;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerRationalFunction, rightCopy, right, &errorString))
-    return false;
-  right->checkConsistency();
-  if (right->IsEqualToZero())
-    return output.SetError("Division error. ", theCommands);
-//  std::cout << "<br>The numerical value of left " << left << ", the numberical value of right "
-//  << right << "<br>";
-  //for (int i=0; i<theCommands.theObjectContainer.theRFs.size; i++)
-  //{ //std::cout << "Address of entry " << i+1 << ": "
-    //<< &theCommands.theObjectContainer.theRFs[i] << "<br>";
-  //}
-  left->checkConsistency();
-  RationalFunctionOld result=*left;
-  result.checkConsistency();
-  std::cout << "<br>dividing " << result.ToString() << " by " << right->ToString();
-  result/=*right;
-  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return CommandListInnerTypedFunctions::innerDivideTypeByType<RationalFunctionOld>(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  Expression rightCopy=input[2];
-  Polynomial<Rational>* left;
-  Polynomial<Rational>* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerPolynomial, output, left, &errorString))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerPolynomial, rightCopy, right, &errorString))
-    return false;
-  Polynomial<Rational> result=*left;
-//  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
-  result*=*right;
-//  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerAddUEToAny
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddUEToAny");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-    return false;
-  Expression rightCopy=input[2];
-  ElementUniversalEnveloping<RationalFunctionOld>* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerElementUniversalEnvelopingAlgebra, rightCopy, right, &errorString))
-    return false;
-  ElementUniversalEnveloping<RationalFunctionOld> result
-  =output.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
-  result+=*right;
-//  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
-//  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  //std::cout << "<br>adding ue to any";
+  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementUniversalEnveloping<RationalFunctionOld> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyUEByAny");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
+  if (input.children.size!=3)
     return false;
-  Expression leftCopy=input[1];
-  Expression rightCopy=input[2];
-  if (!rightCopy.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+  Expression inputContextsMerged;
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementUniversalEnveloping<RationalFunctionOld> >(inputContextsMerged))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld>* left;
-  std::string errorString;
-  if (!leftCopy.MergeContexts(leftCopy, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerElementUniversalEnvelopingAlgebra, leftCopy, left, &errorString))
-    return false;
-  ElementUniversalEnveloping<RationalFunctionOld> result=*left;
-  result*=
-  rightCopy.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result.Simplify(theCommands.theGlobalVariableS);
-//  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
-//  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, leftCopy.GetContext(), theCommands);
+  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO
@@ -453,18 +365,17 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO
       !rightCopy.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
     return false;
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon
-  =output.GetValuE<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  =output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon
-  =rightCopy.GetValuE<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  =rightCopy.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> result;
   result=leftMon;
   result*=rightMon;
   for (int i=0; i<result.generatorsIndices.size; i++)
     if (result.Powers[i]>100000 || result.Powers[i]<0)
       return output.SetError
-      ("The result of this operation is " + result.ToString() +
-       " which is outside of the allowed range. ", theCommands);
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+      ("The result of this operation is " + result.ToString() + " which is outside of the allowed range. ", theCommands);
+  return output.AssignValue(result, theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
@@ -478,16 +389,14 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
   Expression rightCopy=input[2];
   if (!output.MergeContexts(output, rightCopy))
     return false;
-  if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() ||
-      !rightCopy.IsOfType<LittelmannPath>())
+  if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() || !rightCopy.IsOfType<LittelmannPath>())
     return false;
-  LittelmannPath result=rightCopy.GetValuE<LittelmannPath>();
+  LittelmannPath result=rightCopy.GetValue<LittelmannPath>();
   WeylGroup& theWeyl=*result.owner;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO=
-  output.GetValuE<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
+  output.GetValue<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
   for (int i=theLRO.generatorsIndices.size-1; i>=0; i--)
-    if (theLRO.generatorsIndices[i]==0 || theLRO.generatorsIndices[i]< -theWeyl.GetDim()
-        || theLRO.generatorsIndices[i]> theWeyl.GetDim())
+    if (theLRO.generatorsIndices[i]==0 || theLRO.generatorsIndices[i]< -theWeyl.GetDim() || theLRO.generatorsIndices[i]> theWeyl.GetDim())
     { std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value is "
       << "between 1 and the rank of the ambient Lie algebra, instead I get index  "
@@ -496,56 +405,20 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
     } else
       for (int j=0; j<theLRO.Powers[i]; j++)
         result.ActByEFDisplayIndex(theLRO.generatorsIndices[i]);
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return output.AssignValue(result, theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-//  std::cout << "<br>adding element gvm and element gvm. ";
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  Expression rightCopy=input[2];
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!output.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >() ||
-      !rightCopy.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    return false;
-  ElementTensorsGeneralizedVermas<RationalFunctionOld> result;
-  result=output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  result+=rightCopy.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-  //std::cout << "result of addition: " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+//  std::cout << "<hr>HERE I am!";
+  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  theCommands.CheckInputNotSameAsOutput(input, output);
-  if (!input.IsListNElements(3))
-    return false;
-  output=input[1];
-  Expression rightCopy=input[2];
-  Polynomial<Rational>* left;
-  Polynomial<Rational>* right;
-  std::string errorString;
-  if (!output.MergeContexts(output, rightCopy))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerPolynomial, output, left, &errorString))
-    return false;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (Serialization::innerPolynomial, rightCopy, right, &errorString))
-    return false;
-  Polynomial<Rational> result=*left;
-//  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
-  result+=*right;
-//  std::cout << " to get " << result.ToString();
-  return output.AssignValueWithContext(result, output.GetContext(), theCommands);
+  return CommandListInnerTypedFunctions::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerAddPlotToPlot
@@ -613,34 +486,31 @@ bool CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  ElementUniversalEnveloping<RationalFunctionOld> theUE;
-  RationalFunctionOld theExponent;
-  Expression copyExponent=input[2];
-  Expression copyBase=input[1];
-  if (!copyExponent.MergeContexts(copyExponent, copyBase))
+  Expression inputConverted;
+  if (!input.MergeContextsMyAruments(inputConverted))
     return false;
-  if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > (&theUE))
+  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  Expression copyExponent=inputConverted[2];
+  Expression copyBase=inputConverted[1];
+  if (!copyBase.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&theUE))
     return false;
   if (!theUE.IsAPowerOfASingleGenerator())
   { int tempPower;
     if (!copyExponent.IsSmallInteger(&tempPower))
       return false;
     theUE.RaiseToPower(tempPower);
-    return output.AssignValueWithContext(theUE, copyExponent.GetContext(), theCommands);
+    return output.AssignValueWithContext(theUE, copyBase.GetContext(), theCommands);
   }
-  if (copyExponent.IsOfType<Rational>())
-    theExponent=copyExponent.GetValuE<Rational>();
-  else if (copyExponent.IsOfType<Polynomial<Rational> >())
-    theExponent=copyExponent.GetValuE<Polynomial<Rational> >();
-  else if (!copyExponent.IsOfType<RationalFunctionOld>(&theExponent))
+  Expression exponentConverted;
+  if (!copyExponent.ConvertToType<RationalFunctionOld>(exponentConverted))
     return false;
   MonomialUniversalEnveloping<RationalFunctionOld> theMon;
   theMon=theUE[0];
-  theMon.Powers[0]*= theExponent;
+  theMon.Powers[0]*= exponentConverted.GetValue<RationalFunctionOld>();
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   outputUE.MakeZero(*theUE.owneR);
   outputUE.AddMonomial(theMon, 1);
-  return output.AssignValueWithContext(outputUE, copyExponent.GetContext(), theCommands);
+  return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerPowerSequenceByT
@@ -712,6 +582,7 @@ bool CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
+//  std::cout << "Adding " << input[1].ToString() << " 'n " << input[2].ToString();
   Rational leftR, rightR;
   double leftD, rightD;
   if(input[1].IsOfType(&leftR))
@@ -813,14 +684,14 @@ bool CommandListInnerTypedFunctions::innerTensorMatRatByMatRat
   const Expression& rightE=input[2];
   if (!rightE.IsOfType<Matrix<Rational> >() || !leftE.IsOfType<Matrix<Rational> >())
     return false;
-//  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+//  if (leftE.GetValue<Matrix<Rational> >().NumCols!=rightMat.NumRows)
 //    return false;
   Matrix<Rational> result;
-  result.AssignTensorProduct(leftE.GetValuE<Matrix<Rational> >(), rightE.GetValuE<Matrix<Rational> >());
+  result.AssignTensorProduct(leftE.GetValue<Matrix<Rational> >(), rightE.GetValue<Matrix<Rational> >());
   return output.AssignValue(result, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerTensorMatTensorByMatTensor
+bool CommandListInnerTypedFunctions::innerTensorMatByMatTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
@@ -828,10 +699,10 @@ bool CommandListInnerTypedFunctions::innerTensorMatTensorByMatTensor
   const Expression& rightE=input[2];
   if (!rightE.IsOfType<MatrixTensor<Rational> >() || !leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
-//  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+//  if (leftE.GetValue<Matrix<Rational> >().NumCols!=rightMat.NumRows)
 //    return false;
   MatrixTensor<Rational> result;
-  result.AssignTensorProduct(leftE.GetValuE<MatrixTensor<Rational> >(), rightE.GetValuE<MatrixTensor<Rational> >());
+  result.AssignTensorProduct(leftE.GetValue<MatrixTensor<Rational> >(), rightE.GetValue<MatrixTensor<Rational> >());
   return output.AssignValue(result, theCommands);
 }
 
@@ -845,16 +716,16 @@ bool CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatr
     return false;
   Rational theScalar;
   if (leftE.IsOfType<Rational>(&theScalar))
-  { Matrix<Rational> result=rightE.GetValuE<Matrix<Rational> >();
+  { Matrix<Rational> result=rightE.GetValue<Matrix<Rational> >();
     result*=theScalar;
     return output.AssignValue(result, theCommands);
   }
   if (!leftE.IsOfType<Matrix<Rational> >())
     return false;
-  const Matrix<Rational>& rightMat=rightE.GetValuE<Matrix<Rational> >();
-  if (leftE.GetValuE<Matrix<Rational> >().NumCols!=rightMat.NumRows)
+  const Matrix<Rational>& rightMat=rightE.GetValue<Matrix<Rational> >();
+  if (leftE.GetValue<Matrix<Rational> >().NumCols!=rightMat.NumRows)
     return false;
-  Matrix<Rational> result=leftE.GetValuE<Matrix<Rational> >();
+  Matrix<Rational> result=leftE.GetValue<Matrix<Rational> >();
   result.MultiplyOnTheRight(rightMat);
   return output.AssignValue(result, theCommands);
 }
@@ -869,16 +740,39 @@ bool CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrix
     return false;
   Rational theScalar;
   if (leftE.IsOfType<Rational>(&theScalar))
-  { MatrixTensor<Rational> result=rightE.GetValuE<MatrixTensor<Rational> >();
+  { MatrixTensor<Rational> result=rightE.GetValue<MatrixTensor<Rational> >();
     result*=theScalar;
     return output.AssignValue(result, theCommands);
   }
   if (!leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
-  const MatrixTensor<Rational>& rightMat=rightE.GetValuE<MatrixTensor<Rational> >();
-  MatrixTensor<Rational> result=leftE.GetValuE<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& rightMat=rightE.GetValue<MatrixTensor<Rational> >();
+  MatrixTensor<Rational> result=leftE.GetValue<MatrixTensor<Rational> >();
   result*=rightMat;
   return output.AssignValue(result, theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerLieBracketRatOrUEbyRatOrUE
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerLieBracketUEbyUE");
+  if (!input.IsListNElements(3))
+    return false;
+  Expression inputConverted;
+  if (!input.MergeContextsMyAruments(inputConverted))
+    return false;
+  const Expression& leftE=inputConverted[1];
+  const Expression& rightE=inputConverted[2];
+  if (leftE.IsOfType<Rational>() || rightE.IsOfType<Rational>())
+    return output.AssignValueWithContext(0, leftE.GetContext() , theCommands);
+  if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() &&
+      rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
+  { ElementUniversalEnveloping<RationalFunctionOld> result;
+    leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().LieBracketOnTheRight
+    (rightE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
+    result.Simplify(theCommands.theGlobalVariableS);
+    return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
+  }
+  return false;
 }
 
 bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational
@@ -889,8 +783,8 @@ bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational
   const Expression& rightE=input[2];
   if (!rightE.IsOfType<Matrix<Rational> >()|| !leftE.IsOfType<Matrix<Rational> >())
     return false;
-  const Matrix<Rational>& rightMat=rightE.GetValuE<Matrix<Rational> >();
-  const Matrix<Rational>& leftMat=leftE.GetValuE<Matrix<Rational> >();
+  const Matrix<Rational>& rightMat=rightE.GetValue<Matrix<Rational> >();
+  const Matrix<Rational>& leftMat=leftE.GetValue<Matrix<Rational> >();
   if (rightMat.NumRows!=leftMat.NumRows || rightMat.NumCols!=leftMat.NumCols)
     return false;
   Matrix<Rational> result=leftMat;
@@ -906,8 +800,8 @@ bool CommandListInnerTypedFunctions::innerAddMatrixTensorToMatrixTensor
   const Expression& rightE=input[2];
   if (!rightE.IsOfType<MatrixTensor<Rational> >()|| !leftE.IsOfType<MatrixTensor<Rational> >())
     return false;
-  const MatrixTensor<Rational>& rightMat=rightE.GetValuE<MatrixTensor<Rational> >();
-  const MatrixTensor<Rational>& leftMat=leftE.GetValuE<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& rightMat=rightE.GetValue<MatrixTensor<Rational> >();
+  const MatrixTensor<Rational>& leftMat=leftE.GetValue<MatrixTensor<Rational> >();
   MatrixTensor<Rational> result=leftMat;
   result+=rightMat;
   return output.AssignValue(result, theCommands);
@@ -971,4 +865,47 @@ bool CommandListInnerTypedFunctions::innerNChooseK
     return output.AssignValue(0, theCommands);
   Rational result= result.NChooseK(N, K);
   return output.AssignValue(result, theCommands);
+}
+
+bool CommandList::innerHWTAABF(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerHWTAABF");
+  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+  if (!input.IsListNElements(4))
+    return output.SetError("Function expects three arguments.", theCommands);
+  Expression leftMerged=input[1];
+  Expression rightMerged=input[2];
+  if (!Expression::MergeContexts(leftMerged, rightMerged))
+    return output.SetError("Failed to merge the contexts of the two UE elements ", theCommands);
+  Expression finalContext=rightMerged.GetContext();
+  int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
+  if (algebraIndex==-1)
+    return output.SetError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
+  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras[algebraIndex];
+  const Expression& weightExpression=input[3];
+  Vector<RationalFunctionOld> weight;
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerRationalFunction))
+  { theCommands.Comments << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
+    return false;
+  }
+  if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext))
+    return output.SetError("Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ", theCommands);
+  Expression leftConverted, rightConverted;
+  if (!leftMerged.ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftConverted))
+    return false;
+  if (!rightMerged.ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(rightConverted))
+    return false;
+  const ElementUniversalEnveloping<RationalFunctionOld>& leftUE=leftConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  const ElementUniversalEnveloping<RationalFunctionOld>& rightUE=rightConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  SemisimpleLieAlgebra theSSalgebra;
+  theSSalgebra=*constSSalg;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  std::stringstream out;
+  Vector<RationalFunctionOld> hwDualCoords;
+  theSSalgebra.OrderSSalgebraForHWbfComputation();
+  hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
+  RationalFunctionOld outputRF;
+  //std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
+  if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, *theCommands.theGlobalVariableS, 1, 0, &theCommands.Comments))
+    return output.SetError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
+  return output.AssignValueWithContext(outputRF, finalContext, theCommands);
 }

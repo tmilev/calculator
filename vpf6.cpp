@@ -87,6 +87,12 @@ int Expression::GetTypeOperation<Polynomial<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<ElementWeylAlgebra>()const
+{ this->CheckInitialization();
+  return this->theBoss->opElementWeylAlgebra();
+}
+
+template < >
 int Expression::GetTypeOperation<SemisimpleLieAlgebra>()const
 { this->CheckInitialization();
   return this->theBoss->opSSLieAlg();
@@ -230,6 +236,15 @@ Polynomial<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.thePolys
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+ElementWeylAlgebra
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theWeylAlgebraElements
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -461,6 +476,17 @@ Polynomial<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
+ElementWeylAlgebra& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementWeylAlgebra>())
+  { std::cout << "This is a programming error: expression not of required type ElementWeylAlgebra."
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theWeylAlgebraElements.GetElement(this->GetLastChild().theData);
+}
+
+template < >
 LittelmannPath& Expression::GetValueNonConst()const
 { if (!this->IsOfType<LittelmannPath>())
   { std::cout << "This is a programming error: expression not of required type LittelmannPath."
@@ -655,6 +681,27 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
 }
 
 template< >
+bool Expression::ConvertToType<ElementWeylAlgebra>(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
+  this->CheckInitialization();
+  if (this->IsOfType<Rational>())
+  { ElementWeylAlgebra resultEWA;
+    resultEWA.MakeConst(this->GetValue<Rational>());
+    return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<Polynomial<Rational> >())
+  { ElementWeylAlgebra resultEWA;
+    resultEWA.AssignPolynomial(this->GetValue<Polynomial<Rational> >());
+    return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<ElementWeylAlgebra>())
+  { output=*this;
+    return true;
+  }
+  return false;
+}
+
+template< >
 bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   //std::cout << "<hr>convert to ue called on: " << this->ToString();
@@ -726,6 +773,8 @@ bool Expression::CheckConsistency()const
       if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
         isGood=true;
       if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg()))
+        isGood=true;
+      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opDifferentialOperatorVariables()))
         isGood=true;
       if (!isGood)
       { std::cout << "This is a programming error. The context " << mustBeTheContext.ToString()
@@ -826,41 +875,48 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   if (myOldContext==newContext)
     return true;
   inputOutputMinContext=newContext;
-  PolynomialSubstitution<Rational> polySub;
-  bool mustBeTrue= myOldContext.ContextGetPolySubFromSuperContext(newContext, polySub);
-  if (!mustBeTrue)
-  { std::cout << "This is a programming error: I was not able to extract a polynomial substitution from what is supposed to be a super-context. Something is wrong. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
   if (this->IsOfType<Rational>())
   { //std::cout << "HERE i am!";
     this->SetChilD(1, inputOutputMinContext);
     return true;
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
-  { ElementUniversalEnveloping<RationalFunctionOld> newUE=
-    this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-    newUE.Substitution(polySub);
+  { ElementUniversalEnveloping<RationalFunctionOld> newUE=this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+    PolynomialSubstitution<Rational> subPolyPart;
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    newUE.Substitution(subPolyPart);
     return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { Polynomial<Rational> newPoly=this->GetValue<Polynomial<Rational> >();
     //std::cout << "<br>Subbing " << polySub.ToString() << " in "
+    PolynomialSubstitution<Rational> subPolyPart;
     //<< newPoly.ToString();
-    if (!newPoly.Substitution(polySub))
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    if (!newPoly.Substitution(subPolyPart))
       return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
+  if (this->IsOfType<ElementWeylAlgebra>())
+  { PolynomialSubstitution<Rational> subDOpart;
+    PolynomialSubstitution<Rational> subPolyPart;
+    myOldContext.ContextGetPolyAndDOSubFromSuperContextNoFailure(newContext, subPolyPart, subDOpart);
+    ElementWeylAlgebra outputEWA=this->GetValue<ElementWeylAlgebra>();
+    outputEWA.Substitution(subPolyPart, subDOpart);
+    return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
+  }
   if (this->IsOfType<RationalFunctionOld>())
   { RationalFunctionOld newRF=this->GetValue<RationalFunctionOld>();
-    newRF.Substitution(polySub);
+    PolynomialSubstitution<Rational> subPolyPart;
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    newRF.Substitution(subPolyPart);
     return this->AssignValueWithContext(newRF, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV
-    =this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-    newETGV.Substitution(polySub, this->theBoss->theObjectContainer.theCategoryOmodules);
+  { ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV=this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+    PolynomialSubstitution<Rational> subPolyPart;
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    newETGV.Substitution(subPolyPart, this->theBoss->theObjectContainer.theCategoryOmodules);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->theBoss);
   }
   this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo";
@@ -908,7 +964,47 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
   return this->AddChildOnTop(LieAlgContextE);
 }
 
+bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar)
+{ if (!this->IsContext())
+  { std::cout << "This is a programming error: calling Expression::ContextSetDiffOperatorVar on a non-context expression. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Expression diffVarsE, polyVarsE;
+  diffVarsE.reset(*this->theBoss, 2);
+  diffVarsE.AddChildAtomOnTop(this->theBoss->opDifferentialOperatorVariables());
+  diffVarsE.AddChildOnTop(theDiffOpVar);
+  polyVarsE.reset(*this->theBoss, 2);
+  polyVarsE.AddChildAtomOnTop(this->theBoss->opPolynomialVariables());
+  polyVarsE.AddChildOnTop(thePolyVar);
+  bool foundDiffVarsE=false;
+  bool foundPolyVarsE=false;
+  for (int i=0; i<this->children.size; i++)
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opDifferentialOperatorVariables()))
+    { this->SetChilD(i, diffVarsE);
+      foundDiffVarsE=true;
+    } else if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+    { this->SetChilD(i, polyVarsE);
+      foundPolyVarsE=true;
+    }
+  if (!foundPolyVarsE)
+    this->AddChildOnTop(polyVarsE);
+  if (!foundDiffVarsE)
+    this->AddChildOnTop(diffVarsE);
+  return true;
+}
+
+Expression Expression::ContextGetDifferentialOperatorVariables()const
+{ this->CheckInitialization();
+  return this->ContextGetContextType(this->theBoss->opDifferentialOperatorVariables());
+}
+
 Expression Expression::ContextGetPolynomialVariables()const
+{ this->CheckInitialization();
+  return this->ContextGetContextType(this->theBoss->opPolynomialVariables());
+}
+
+Expression Expression::ContextGetContextType(int theType)const
 { MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
   this->CheckInitialization();
   if (!this->IsContext())
@@ -918,16 +1014,15 @@ Expression Expression::ContextGetPolynomialVariables()const
     //assert(false);
   }
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+    if ((*this)[i].IsListNElementsStartingWithAtom(theType))
       return (*this)[i];
   Expression output;
   output.reset(*this->theBoss, 1);
-  output.AddChildAtomOnTop(this->theBoss->opPolynomialVariables());
+  output.AddChildAtomOnTop(theType);
   return output;
 }
 
-bool Expression::ContextMergeContexts
-(const Expression& leftContext, const Expression& rightContext, Expression& outputContext)
+bool Expression::ContextMergeContexts(const Expression& leftContext, const Expression& rightContext, Expression& outputContext)
 { MacroRegisterFunctionWithName("Expression::ContextMergeContexts");
   if (&leftContext==&outputContext || &rightContext==&outputContext)
   { Expression leftCopy=leftContext;
@@ -946,26 +1041,69 @@ bool Expression::ContextMergeContexts
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
 //  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
-  HashedList<Expression> varUnion;
-  List<int> varUnionIndices;
-  varUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
-  for (int i =1; i<leftPolyV.children.size; i++)
-    varUnion.AddOnTopNoRepetition(leftPolyV[i]);
+  HashedList<Expression> polyVarUnion;
+  MemorySaving<HashedList<Expression> > DOVarUnion;
+  polyVarUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
+  for (int i=1; i<leftPolyV.children.size; i++)
+    polyVarUnion.AddOnTopNoRepetition(leftPolyV[i]);
   for (int i =1; i<rightPolyV.children.size; i++)
-    varUnion.AddOnTopNoRepetition(rightPolyV[i]);
-  varUnion.QuickSortAscending();
-  varUnionIndices.SetSize(varUnion.size);
+    polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
+  polyVarUnion.QuickSortAscending();
   CommandList& owner=*leftContext.theBoss;
-  for (int i=0; i<varUnion.size; i++)
-    varUnionIndices[i]=owner.theExpressionContainer.GetIndex(varUnion[i]);
-  outputContext.reset(owner, 5+varUnion.size);
+  outputContext.reset(owner, 5+polyVarUnion.size);
   outputContext.AddChildAtomOnTop(owner.opContexT());
-  if (varUnion.size>0)
+  if (polyVarUnion.size>0)
   { Expression polyVarsE;
-    polyVarsE.reset(owner, varUnion.size+1);
+    polyVarsE.reset(owner, polyVarUnion.size+1);
     polyVarsE.AddChildAtomOnTop(owner.opPolynomialVariables());
-    polyVarsE.children.AddOnTop(varUnionIndices);
+    for (int i=0; i<polyVarUnion.size; i++)
+      polyVarsE.AddChildOnTop(polyVarUnion[i]);
     outputContext.AddChildOnTop(polyVarsE);
+  }
+  //Converting differential operators if needed.
+  Expression leftDOV=leftContext.ContextGetDifferentialOperatorVariables();
+  Expression rightDOV=rightContext.ContextGetDifferentialOperatorVariables();
+  if (leftDOV.children.size>1 || rightDOV.children.size>1)
+  { Selection foundDOVar;
+    List<Expression> DOVars;
+    foundDOVar.init(polyVarUnion.size);
+    DOVars.SetSize(polyVarUnion.size);
+    Expression* currentPolyV=&leftPolyV;
+    Expression* currentDOV=&leftDOV;
+    for (int k=0; k<2; k++, currentPolyV=&rightPolyV, currentDOV=&rightDOV)
+      for (int i=1; i<currentDOV->children.size; i++)
+      { int theIndex=polyVarUnion.GetIndex((*currentPolyV)[i]);
+        if (foundDOVar.selected[theIndex])
+          if ((*currentDOV)[i]!=DOVars[theIndex])
+          { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
+            << " because " << (*currentPolyV)[i].ToString() << " has two different corresponding differential operator variables: "
+            << DOVars[theIndex].ToString() << " and " << (*currentDOV)[i].ToString();
+            return false;
+          }
+        foundDOVar.AddSelectionAppendNewIndex(theIndex);
+        DOVars[theIndex]=(*currentDOV)[i];
+      }
+    for (int i=0; i<foundDOVar.MaxSize; i++)
+      if (!foundDOVar.selected[i])
+      { Expression currentDOVar;
+        currentDOVar.reset(owner, 2);
+        currentDOVar.AddChildAtomOnTop(owner.AddOperationNoRepetitionOrReturnIndexFirst("\\partial"));
+        Expression indexE;
+        indexE.AssignValue(i, owner);
+        currentDOVar.AddChildOnTop(indexE);
+        if (DOVars.Contains(currentDOVar))
+        { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
+          << ": " << polyVarUnion[i].ToString() << " had no differential letter assigned to it. I tried to assign automatically  "
+          << currentDOVar.ToString() << " as differential operator letter, but it was already taken. ";
+          return false;
+        }
+      }
+    Expression diffVarsE;
+    diffVarsE.reset(owner, polyVarUnion.size+1);
+    diffVarsE.AddChildAtomOnTop(owner.opDifferentialOperatorVariables());
+    for (int i=0; i<DOVars.size; i++)
+      diffVarsE.AddChildOnTop(DOVars[i]);
+    outputContext.AddChildOnTop(diffVarsE);
   }
   if (leftSSindex!=-1)
   { Expression ssAlgE;
@@ -989,6 +1127,10 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
   output.polyAlphabeT.SetSize(thePolyE.children.size-1);
   for (int i=1; i<thePolyE.children.size; i++)
     output.polyAlphabeT[i-1]=thePolyE[i].ToString();
+  Expression theDOE=this->ContextGetDifferentialOperatorVariables();
+  output.weylAlgebraLetters.SetSize(theDOE.children.size-1);
+  for (int i=1; i<theDOE.children.size; i++)
+    output.weylAlgebraLetters[i-1]=theDOE[i].ToString();
 }
 
 bool Expression::IsContext()const
@@ -1096,8 +1238,13 @@ bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const Expression&
   return this->AddChildOnTop(thePolyVars);
 }
 
-bool Expression::MakeContextSSLieAlg
-  (CommandList& owner, const SemisimpleLieAlgebra& theSSLiealg)
+bool Expression::MakeContextWithOnePolyVarOneDiffVar
+(CommandList& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
+{ this->MakeEmptyContext(owner);
+  return this->ContextSetDiffOperatorVar(inputPolyVarE, inputDiffVarE);
+}
+
+bool Expression::MakeContextSSLieAlg(CommandList& owner, const SemisimpleLieAlgebra& theSSLiealg)
 { this->MakeEmptyContext(owner);
   return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
 }
@@ -3659,6 +3806,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
+  this->AddOperationNoRepetitionAllowed("PolyVars");
+  this->AddOperationNoRepetitionAllowed("DiffOpVars");
+  this->AddOperationNoRepetitionAllowed("Context");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -3683,10 +3833,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("ElementWeylGroup");
   this->AddOperationBuiltInType("WeylGroupRep");
   this->AddOperationBuiltInType("WeylGroupVirtualRep");
-  this->AddOperationBuiltInType("Context");
+  this->AddOperationBuiltInType("ElementWeylAlgebra");
 
-  this->AddOperationNoRepetitionAllowed("ExpressionWithContext");
-  this->AddOperationNoRepetitionAllowed("PolyVars");
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");
@@ -4523,8 +4671,7 @@ bool CommandList::EvaluateExpression
     if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << " While simplifying " << output.ToString(&this->formatVisibleStrings)
-        << "<br>Maximum number of algebraic transformations of "
+        out << " While simplifying " << output.ToString(&this->formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
         << this->MaxAlgTransformationsPerExpression << " exceeded.";
         output.SetError(out.str(), *this);
         this->flagAbortComputationASAP=true;
@@ -4532,7 +4679,7 @@ bool CommandList::EvaluateExpression
       }
       break;
     }
-//////------Handling naughty expressions end------
+//////------End of handling naughty expressions------
 /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
     if (!output.IsBuiltInType())
@@ -4556,8 +4703,7 @@ bool CommandList::EvaluateExpression
             std::cout << "<hr>a:=b is here<hr>";
         }*/
         if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
-          if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) ||
-            output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
+          if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) || output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
           { this->RuleStack.AddOnTop(output[i]);
             this->RuleContextIdentifier++;
            // std::cout << ".. added !!!!";
@@ -4571,8 +4717,7 @@ bool CommandList::EvaluateExpression
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString()
-        << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
+        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString() << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
       output=tempE;
       continue;
     }
@@ -4596,8 +4741,7 @@ bool CommandList::EvaluateExpression
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch.ToString() << "  ->  " << output.ToString()
-          << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
+          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch.ToString() << "  ->  " << output.ToString() << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
         break;
       }
     }
@@ -4712,24 +4856,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   return true;
 }
 
-bool CommandList::fExpressionHasBoundVars
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-    return false;
-  if (input.IsListOfTwoAtomsStartingWith(theCommands.opBind()))
-    return output.AssignValue(1, theCommands);
-  else
-    for (int i=0; i<input.children.size; i++)
-      if (!theCommands.fExpressionHasBoundVars(theCommands, input[i], output))
-        return false;
-      else if (output.IsEqualToOne())
-        return true;
-  return output.AssignValue(0, theCommands);
-}
-
-bool CommandList::ExtractExpressions
-(Expression& outputExpression, std::string* outputErrors)
+bool CommandList::ExtractExpressions(Expression& outputExpression, std::string* outputErrors)
 { //std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
@@ -4807,8 +4934,7 @@ void CommandList::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
   if (!this->flagDisplayFullExpressionTree)
-    out << this->theProgramExpression.ToString
-    (&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
+    out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
   else
   { out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
@@ -4914,8 +5040,7 @@ bool Expression::operator>(const Expression& other)const
   return false;
 }
 
-bool Expression::ToStringData
-(std::string& output, FormatExpressions* theFormat)const
+bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("Expression::ToStringData");
   std::stringstream out;
   bool result=false;
@@ -5050,9 +5175,16 @@ bool Expression::ToStringData
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseLatex=true;
-    out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement())
-    //<< "[" << this->GetContext().ToString() << "]"
-    ;
+    out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
+    result=true;
+  } else if (this->IsOfType<ElementWeylAlgebra>())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagUseHTML=false;
+    contextFormat.GetElement().flagUseLatex=true;
+    out << "ElementWeylAlgebra{}(";
+    out << this->GetValue<ElementWeylAlgebra>().ToString(&contextFormat.GetElement());
+    out << ")";
+//    out << "[" << this->GetContext().ToString() << "]";
     result=true;
   }
   output=out.str();
@@ -5113,12 +5245,9 @@ std::string Expression::ToString
     else
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
-    out << (*this)[1].ToString(theFormat)
-    << ":=:" << (*this)[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << ":=:" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
-    out <<  (*this)[1].ToString(theFormat) << " :if "
-    << (*this)[2].ToString(theFormat)
-    << ":=" << (*this)[3].ToString(theFormat);
+    out <<  (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
@@ -5361,8 +5490,7 @@ std::string Expression::ToString
     outTrue << "<table>";
     outTrue << "<tr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
     outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
-    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: "
-    << "many thanks for your great work!</td></tr>";
+    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
    // std::cout << this->Lispify();
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
@@ -5508,8 +5636,7 @@ void CommandList::AddOperationBuiltInType(const std::string& theOpName)
 
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->GetOperations().Contains(theOpName))
-  { std::cout << "This is a programming error: operation " << theOpName << " already created. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: operation " << theOpName << " already created. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->operations.AddOnTop(theOpName);
@@ -5518,10 +5645,8 @@ void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 }
 
 void CommandList::AddOperationBinaryInnerHandlerWithTypes
-  (const std::string& theOpName, Expression::FunctionAddress innerHandler,
-   int leftType, int rightType,
-   const std::string& opDescription, const std::string& opExample,
-   bool visible, bool experimental)
+(const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
+ const std::string& opExample, bool visible, bool experimental)
 { int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
   { this->operations.AddOnTop(theOpName);
@@ -5529,9 +5654,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
     this->FunctionHandlers.SetSize(this->operations.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
-  Function innerFunction
-  (innerHandler, 0, opDescription, opExample, true, visible, experimental, true)
-  ;
+  Function innerFunction(innerHandler, 0, opDescription, opExample, true, visible, experimental, true);
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(leftType);
   innerFunction.theArgumentTypes.AddChildAtomOnTop(rightType);
@@ -5540,10 +5663,8 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
 }
 
 void CommandList::AddOperationHandler
-  (const std::string& theOpName, Expression::FunctionAddress handler,
-   const std::string& opArgumentListIgnoredForTheTimeBeing,
-   const std::string& opDescription, const std::string& opExample,
-   bool isInner, bool visible, bool isExperimental)
+(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
+ const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
 { int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
   { this->operations.AddOnTop(theOpName);
@@ -5552,13 +5673,10 @@ void CommandList::AddOperationHandler
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
-  { std::cout << "This section of code is not implemented yet. Crashing to let you know. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This section of code is not implemented yet. Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  Function theFun
-  (handler, 0, opDescription, opExample, isInner, visible, isExperimental)
-  ;
+  Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].ReservE(55);
   else
@@ -5627,11 +5745,8 @@ std::string Function::GetString(CommandList& theBoss)
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
-      out2 << "<a href=\""
-      << theBoss.DisplayNameCalculator  << "?"
-      << " textType=Calculator&textDim=1&textInput="
-      << CGI::UnCivilizeStringCGI(this->theExample)
-      << "\"> " << " Example" << "</a>" ;
+      out2 << "<a href=\"" << theBoss.DisplayNameCalculator  << "? textType=Calculator&textDim=1&textInput="
+      << CGI::UnCivilizeStringCGI(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
   return out2.str();
@@ -5650,10 +5765,8 @@ std::string CommandList::ToStringFunctionHandlers()
       if (this->FunctionHandlers[i][j].flagIsInner)
         numInnerHandlers++;
   }
-  out << "\n <b> " << numOpsHandled << "  operations handled, "
-  << "by a total of " << numHandlers << " handler functions ("
-  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer)."
-  << "</b><br>\n";
+  out << "\n <b> " << numOpsHandled << "  operations handled, by a total of " << numHandlers << " handler functions ("
+  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
@@ -5685,8 +5798,8 @@ std::string ObjectContainer::ToString()
   if (this->theSSsubalgebras.size>0)
   { out << "<br>Lie semisimple subalgebras computation data structures (" << this->theLieAlgebras.size << " total): ";
     for (int i=0; i<this->theSSsubalgebras.size; i++)
-    { out << " Type " << this->theSSsubalgebras[i].owneR->GetLieAlgebraName()
-      << " with " << this->theSSsubalgebras[i].theSubalgebraCandidates.size << " candidates";
+    { out << " Type " << this->theSSsubalgebras[i].owneR->GetLieAlgebraName() << " with "
+      << this->theSSsubalgebras[i].theSubalgebraCandidates.size << " candidates";
       if (i!=this->theLieAlgebras.size-1)
         out << ", ";
     }
@@ -5707,43 +5820,29 @@ std::string CommandList::ToString()
   out2 << "<br>Computation time: "
   << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
   std::stringstream tempStreamTime;
-  tempStreamTime << " Of them "
-  << this->StartTimeEvaluationInSecondS
-  << " seconds (" << this->StartTimeEvaluationInSecondS*1000 << " millisecond(s)) boot + "
-  << elapsedSecs-this->StartTimeEvaluationInSecondS << " ("
-  << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000 << " milliseconds) user computation.<br>"
-  << "Boot time is measured from start of main() until evaluation start and excludes static initializations "
-  << "+ executable load. "
-  << "Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
+  tempStreamTime << " Of them " << this->StartTimeEvaluationInSecondS << " seconds (" << this->StartTimeEvaluationInSecondS*1000
+  << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
+  << " milliseconds) user computation.<br>Boot time is measured from start of main() until evaluation start and excludes static initializations "
+  << "+ executable load. Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
   out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
-  out2 << "<br>Maximum computation time: "
-  << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
-  << " seconds. ";
+  out2 << "<br>Maximum computation time: " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
-  out2 << "<br>Number of Lists created: " << NumListsCreated
-  << "<br> Number of List resizes: " << NumListResizesTotal
+  out2 << "<br>Number of Lists created: " << NumListsCreated << "<br> Number of List resizes: " << NumListResizesTotal
   << "<br> Number HashedList hash resizing: " << NumHashResizes;
   if (Rational::TotalSmallAdditions>0)
-    out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
-    << " (# successful calls Rational::TryToAddQuickly)";
+    out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (# successful calls Rational::TryToAddQuickly)";
   if (Rational::TotalSmallMultiplications>0)
-    out2 << "<br>Number small rational number multiplications: "
-    << Rational::TotalSmallMultiplications
-    << " (# successful calls Rational::TryToMultiplyQuickly)";
+    out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (# successful calls Rational::TryToMultiplyQuickly)";
   if (Rational::TotalSmallGCDcalls>0)
-    out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls
-    << " (# calls of Rational::gcd)";
+    out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (# calls of Rational::gcd)";
   if (Rational::TotalLargeAdditions>0)
-    out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions
-    << " (# calls LargeIntUnsigned::AddNoFitSize)";
+    out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (# calls LargeIntUnsigned::AddNoFitSize)";
   if (Rational::TotalLargeMultiplications>0)
-    out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications
-    << " (# calls LargeIntUnsigned::MultiplyBy)";
+    out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (# calls LargeIntUnsigned::MultiplyBy)";
   if (Rational::TotalLargeGCDcalls>0)
-    out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls
-    << " (# calls LargeIntUnsigned::gcd)";
+    out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
   #endif
   if (this->RuleStack.size>0)
   { out2 << "<hr><b>Predefined rules.</b><br>";
@@ -5754,18 +5853,16 @@ std::string CommandList::ToString()
     }
   }
   out2 << "<hr>" << this->ToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
-  out << "<br><b>Object container information</b>."
-  << "The object container is the data structure storing all c++ built-in data types "
-  << " requested by the user<br> "
-  << this->theObjectContainer.ToString();
+  out << "<br><b>Object container information</b>.The object container is the data structure storing all c++ built-in data types "
+  << " requested by the user<br> " << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n Variables (" << this->operations.size << " = "
-  << this->NumPredefinedVars << " predefined + " << this->operations.size-this->NumPredefinedVars << " user-defined):<br>\n";
+  out << "<br>\n Variables (" << this->operations.size << " = " << this->NumPredefinedVars << " predefined + "
+  << this->operations.size-this->NumPredefinedVars << " user-defined):<br>\n";
   for (int i=0; i<this->operations.size; i++)
   { out << "\n" << i << ": " << openTag1 << this->operations[i] << closeTag1;
     if(i!=this->operations.size-1)
@@ -5782,11 +5879,9 @@ std::string CommandList::ToString()
   for (int i=0; i< numExpressionsToDisplay; i++)
     out << this->theExpressionContainer[i].ToString() << ", ";
   out << "<hr>";
-  out << "\n Cached expressions (" << this->cachedExpressions.size
-  << " total):\n<br>\n";
+  out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
   for (int i=0; i<this->cachedExpressions.size; i++)
-  { out << this->cachedExpressions[i].ToString()
-    << " -> " << this->imagesCachedExpressions[i].ToString();
+  { out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();
     if (i!=this->cachedExpressions.size-1)
       out << "<br>";
   }
@@ -5966,8 +6061,7 @@ bool CommandList::ReplaceXByCon(int theCon, int theFormat)
   return true;
 }
 
-bool CommandList::ReplaceXByConCon
-(int con1, int con2, int format1, int format2)
+bool CommandList::ReplaceXByConCon(int con1, int con2, int format1, int format2)
 { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size+1);
   (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
@@ -5989,10 +6083,19 @@ void ObjectContainer::reset()
   this->theLittelmannOperators.Clear();
 }
 
-bool Expression::ContextGetPolySubFromSuperContext
-  (const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
-{ PolynomialSubstitution<Rational> theSub;
-  Expression polyVarsElargerContext=largerContext.ContextGetPolynomialVariables();
+bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
+{ bool mustBeTrue= this->ContextGetPolySubFromSuperContext(largerContext, output);
+  if (!mustBeTrue)
+  { std::cout << "This is a programming error: I was not able to extract a polynomial substitution from smaller context "
+    << this->ToString() << " relative to larger context " << largerContext.ToString() << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return mustBeTrue;
+}
+
+bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
+{ Expression polyVarsElargerContext=largerContext.ContextGetPolynomialVariables();
   Expression polyVarsEsmallContext=this->ContextGetPolynomialVariables();
   output.SetSize(polyVarsElargerContext.children.size-1);
   int numVars=polyVarsElargerContext.children.size-1;
@@ -6001,6 +6104,35 @@ bool Expression::ContextGetPolySubFromSuperContext
     if (theNewIndex==-1)
       return false;
     output[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
+  }
+  return true;
+}
+
+bool Expression::ContextGetPolyAndDOSubFromSuperContextNoFailure
+(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const
+{ bool mustBeTrue= this->ContextGetPolyAndDOSubFromSuperContext(largerContext, outputPolyPart, outputDOpart);
+  if (!mustBeTrue)
+  { std::cout << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from "
+    << " smaller context " << this->ToString() << " relative to larger context " << largerContext.ToString()
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return mustBeTrue;
+}
+
+bool Expression::ContextGetPolyAndDOSubFromSuperContext
+(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const
+{ if(!this->ContextGetPolySubFromSuperContext(largerContext, outputPolyPart))
+    return false;
+  Expression DOVarsElargerContext=largerContext.ContextGetDifferentialOperatorVariables();
+  Expression DOVarsEsmallContext=this->ContextGetDifferentialOperatorVariables();
+  outputDOpart.SetSize(DOVarsElargerContext.children.size-1);
+  int numVars=DOVarsElargerContext.children.size-1;
+  for (int i=1; i<DOVarsEsmallContext.children.size; i++)
+  { int theNewIndex=DOVarsElargerContext.GetIndexChild(DOVarsEsmallContext[i]);
+    if (theNewIndex==-1)
+      return false;
+    outputDOpart[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
   }
   return true;
 }
@@ -6020,15 +6152,12 @@ bool CommandList::IsNonBoundVarInContext(int inputOp)
 }
 
 bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
-{ SyntacticElement& theElt=
-  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   int theBoundVar=theElt.theData.theData;
 //  std::cout << "<br>Registering bound variable index: " << theBoundVar;
   if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string "
-    << this->operations[theBoundVar]
-    << " is first used to denote a non-bound variable"
+    out << "Syntax error. In the same syntactic scope, the string " << this->operations[theBoundVar] << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString=out.str();
     theElt.controlIndex=this->conError();
@@ -6106,8 +6235,7 @@ void CommandList::InitJavaScriptDisplayIndicator()
   this->javaScriptDisplayingIndicator=output.str();
 }
 
-void CommandList::initDefaultFolderAndFileNames
-  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
+void CommandList::initDefaultFolderAndFileNames(const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
 { this->PhysicalPathServerBase = inputPathBinaryBaseIsFolderBelow + "../";
   this->DisplayPathServerBase = "/" + inputDisplayPathBase;
 
@@ -6126,8 +6254,7 @@ void CommandList::initDefaultFolderAndFileNames
 
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperators
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
@@ -6142,10 +6269,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators
       truncatedInput.children.RemoveLastObject();
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra,
-       Serialization::innerPolynomial))
-    return output.SetError
-    ("Failed to extract type, highest weight, parabolic selection", theCommands);
+      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, Serialization::innerPolynomial))
+    return output.SetError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;
   std::string letterString="x";
@@ -6164,18 +6289,15 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators
 //  theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, &letterString,
-   &partialString, &exponentLetterString);
+  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, &letterString, &partialString, &exponentLetterString);
 }
 
-bool CommandList::innerFreudenthalFull
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerFreudenthalFull(CommandList& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
-  if (!theCommands.GetTypeHighestWeightParabolic<Rational>
-      (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
+  if (!theCommands.GetTypeHighestWeightParabolic<Rational>(theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;
@@ -6185,16 +6307,14 @@ bool CommandList::innerFreudenthalFull
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
   startingChar.MakeFromWeight(hwSimple, theSSalg);
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMeFullCharacter
-      (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
+  if (!startingChar.FreudenthalEvalMeFullCharacter(resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
     return output.SetError(reportString, theCommands);
   std::stringstream out;
   out << resultChar.ToString();
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerFreudenthalEval
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerFreudenthalEval(CommandList& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg=0;
@@ -6236,8 +6356,8 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
 //  std::cout << " ... continuing to merge..." ;
   for (int i=1; i< this->children.size; i++)
     if (!(*this)[i].IsBuiltInType())
-    { this->theBoss->Comments << "<hr>Failed to merge the arguments of the expression" << this->ToString()
-      << ": the argument " << (*this)[i].ToString() << "is not of built-in type";
+    { this->theBoss->Comments << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
+      << (*this)[i].ToString() << "is not of built-in type";
       return false;
     }
   Expression commonContext=(*this)[1].GetContext();
@@ -6303,8 +6423,7 @@ bool CommandList::ConvertExpressionsToCommonContext(List<Expression>& inputOutpu
   return true;
 }
 
-bool CommandList::outerMeltBrackets
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerMeltBrackets(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   //std::cout << "outerMeltBrackets meldet sich!";

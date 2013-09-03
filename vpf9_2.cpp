@@ -132,17 +132,15 @@ void ElementWeylAlgebra::MultiplyTwoMonomials
   }
 }
 
-void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report)
+void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
 { this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
-  report=this->ToString();
 }
 
-void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report)
+void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
 { this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
-  report=this->ToString();
 }
 
-void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
+void ElementWeylAlgebra::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1=(*this);
   tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
@@ -155,7 +153,7 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
   //this->ComputeDebugString(false);
 }
 
-void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
+void ElementWeylAlgebra::LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1=(standsOnTheRight);
   tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
@@ -168,8 +166,7 @@ void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRig
   //this->ComputeDebugString(false);
 }
 
-void ElementWeylAlgebra::MultiplyOnTheLeft
-(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
+void ElementWeylAlgebra::MultiplyOnTheLeft(const  ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
 { ElementWeylAlgebra buffer;
   ElementWeylAlgebra Accum;
   Accum.MakeZero();
@@ -311,8 +308,7 @@ void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   outputDO.MakeZero();
   int inputPower=0;
   if (!inputRationalPower.IsSmallInteger(&inputPower))
-  { std::cout << "This is a programming error: "
-    << " I can give you a differential operator only from integer exponent. "
+  { std::cout << "This is a programming error: " << " I can give you a differential operator only from integer exponent. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -329,6 +325,26 @@ void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
     newMult-=1;
   }
 //  output/=den;
+}
+
+void ElementWeylAlgebra::Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt)
+{ MacroRegisterFunctionWithName("ElementWeylAlgebra::Substitution");
+  Polynomial<Rational> DOpart, polyPart;
+  MonomialWeylAlgebra theMon;
+  ElementWeylAlgebra output;
+  output.MakeZero();
+  for (int i=0; i<this->size(); i++)
+  { const MonomialWeylAlgebra& currentMon =(*this)[i];
+    currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart);
+    currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart);
+    for (int j=0; j<polyPart.size(); j++)
+      for (int k=0; k<DOpart.size(); k++)
+      { theMon.polynomialPart=polyPart[j];
+        theMon.differentialPart=DOpart[k];
+        output.AddMonomial(theMon, polyPart.theCoeffs[j]*DOpart.theCoeffs[k]);
+      }
+  }
+  *this=output;
 }
 
 bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
@@ -364,13 +380,11 @@ bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
 }
 
 bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
-(Vectors<Rational>& RootsWithCharacteristic2,
- Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
- ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF,
- Matrix<Rational>& outputMatrixSystemToBeSolved,
- PolynomialSubstitution<Rational>& outputSystemToBeSolved,
- Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
-{ if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
+(Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+ ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
+ PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra");
+  if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size=0;
@@ -411,8 +425,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
     coeffsF.elements[0][i]=i+1;
   this->initHEFSystemFromECoeffs
-  (theRelativeDimension, rootsInPlay, simpleBasisSA,
-   SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
+  (theRelativeDimension, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
    h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat=(outputMatrixSystemToBeSolved);
@@ -421,8 +434,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   outputE.MakeZero();
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
   ChevalleyGenerator tempGen;
-  if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
-     (tempMat, tempMatColumn, tempMatResult))
+  if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
   { for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(-rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
@@ -550,8 +562,7 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
 Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
 { Rational output=1;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    output*=WeylGroup::GetSizeWeylGroupByFormula
-    (this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
+    output*=WeylGroup::GetSizeWeylGroupByFormula(this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
   return output;
 }
 

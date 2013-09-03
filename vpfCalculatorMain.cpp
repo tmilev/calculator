@@ -518,6 +518,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("8");
 //  civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
 //  civilizedInput="g_{{a}}:=getChevalleyGenerator{} (G_2, a);hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
+//civilizedInput="\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); ";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

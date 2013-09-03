@@ -7,7 +7,35 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
 void CommandList::initPredefinedInnerFunctions()
-{
+{ this->AddOperationInnerHandler
+  ("Polynomial", Serialization::innerPolynomial, "",
+   "Creates a polynomial expression. ",
+   "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
+  this->AddOperationInnerHandler
+  ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
+   "Creates a polynomial coefficient differential operator. First argument denotes differential operator letter, second argument - the \
+   dual polynomial expression. ",
+   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
+  this->AddOperationInnerHandler
+  ("RF", this->innerRationalFunction, "",
+   "Creates a built-in rational function.",
+   "RF{}(x_1+RF{}x_1+x_2)");
+  this->AddOperationInnerHandler
+  ("MatrixRationals", this->innerMatrixRational,"",
+   "Creates an internal c++ matrix structure from double list of rationals. \
+   ", "s_1:=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
+   \ns_2:=MatrixRationals{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
+   \ns_3:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
+   \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ");
+  this->AddOperationInnerHandler
+  ("MatrixRationalsTensorForm", this->innerMatrixRationalTensorForm,"",
+   "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
+   ", "s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ");
+  this->AddOperationInnerHandler
+  ("MatrixRFs", this->innerMatrixRationalFunction,"",
+   "Creates an internal c++ matrix structure from double list of rational functions. \
+   ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
+
   this->AddOperationInnerHandler
   ("PerturbSplittingNormal", CommandList::innerPerturbSplittingNormal, "",
    "Takes 3 arguments: normal, cone and general vectors. Attempts to perturb the normal so that the cone \
@@ -360,30 +388,6 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    equal to 2/(simple root length squared) ).",
    "getCartanGenerator{}(G_2, 1)");
 
-  this->AddOperationInnerHandler
-  ("Polynomial", Serialization::innerPolynomial, "",
-   "Creates a polynomial expression. ",
-   "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
-  this->AddOperationInnerHandler
-  ("RF", this->innerRationalFunction, "",
-   "Creates a built-in rational function.",
-   "RF{}(x_1+RF{}x_1+x_2)");
-
-  this->AddOperationInnerHandler
-  ("MatrixRationals", this->innerMatrixRational,"",
-   "Creates an internal c++ matrix structure from double list of rationals. \
-   ", "s_1:=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
-   \ns_2:=MatrixRationals{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
-   \ns_3:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
-   \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ");
-  this->AddOperationInnerHandler
-  ("MatrixRationalsTensorForm", this->innerMatrixRationalTensorForm,"",
-   "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
-   ", "s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ");
-  this->AddOperationInnerHandler
-  ("MatrixRFs", this->innerMatrixRationalFunction,"",
-   "Creates an internal c++ matrix structure from double list of rational functions. \
-   ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
   this->AddOperationInnerHandler
   ("FunctionToMatrix", this->innerFunctionToMatrix,"",
    "Creates a matrix from a function. The first argument gives the function, \
@@ -982,13 +986,31 @@ void CommandList::initPredefinedStandardOperations()
    "Adds a polynomial to a polynomial. ",
    "x:=1+Polynomial{}\\lambda; x+x"
    , true);
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opRational(), this->opElementWeylAlgebra(),
+   "Adds a rational or polynomial to element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opPoly(), this->opElementWeylAlgebra(),
+   "Adds a rational or polynomial to element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opPoly(),
+   "Adds a rational or polynomial to element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
+   "Adds a rational or polynomial to element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
    , true);
-
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Adds double or rational to a double or rational approximately using the built-in cpp \
@@ -1051,8 +1073,6 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyAlgebraicNumberByAlgebraicNumber, this->opRational(), this->opAlgNumber(),
    "Multiplies two algebraic number by rational. ",
    "2(\\sqrt {2}+\\sqrt{}3)", true);
-
-
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
@@ -1067,7 +1087,22 @@ void CommandList::initPredefinedStandardOperations()
    Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, \
    page 142, exercise 9. ",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true);
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opRational(), this->opElementWeylAlgebra(),
+   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; 3\\partial_i", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opPoly(), this->opElementWeylAlgebra(),
+   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
+   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\na:=x_1x_2;\nb:=\\partial_1\\partial_2; a b - b a -[a,b] ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opPoly(),
+   "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
+   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
    "Multiplies polynomial by a rational (polynomial comes first). ",
@@ -1359,8 +1394,12 @@ void CommandList::initPredefinedStandardOperations()
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationInnerHandler
-  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatOrUEbyRatOrUE, "",
-   "Lie bracket. ",
+  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatPolyOrDOWithRatPolyOrDO, "",
+   "Lie bracket of differential operators. ",
+   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
+  this->AddOperationInnerHandler
+  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatOrUEWithRatOrUE, "",
+   "Lie bracket of elements of semisimple Lie algebra. ",
    "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes

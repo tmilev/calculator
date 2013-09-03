@@ -2653,6 +2653,35 @@ bool CommandList::GetMatrixExpressions
   return true;
 }
 
+bool CommandList::innerDifferentialOperator
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerDifferentialOperator");
+  if (!input.IsListNElements(3))
+    return false;
+//  const Expression& diffE=input[1];
+//  const Expression& polyE=input[2];
+//  if (diffE.HasBoundVariables() || polyE.HasBoundVariables())
+//    return false;
+  Vector<Polynomial<Rational> > inputPolForm;
+  Expression startContext;
+  if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, Serialization::innerPolynomial))
+  { theCommands.Comments << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
+    return false;
+  }
+  int letterDiff=0, letterPol=0;
+  if (!inputPolForm[0].IsOneLetterFirstDegree(&letterDiff) || !inputPolForm[1].IsOneLetterFirstDegree(&letterPol) ||
+      letterDiff==letterPol)
+  { theCommands.Comments << "<hr>Failed to get different one-variable polynomials from input.  " << input.ToString();
+    return false;
+  }
+  Expression endContext;
+  endContext.MakeContextWithOnePolyVarOneDiffVar
+  (theCommands, startContext.ContextGetContextVariable(letterPol), startContext.ContextGetContextVariable(letterDiff));
+  ElementWeylAlgebra outputElt;
+  outputElt.Makedi(0, 1);
+  return output.AssignValueWithContext(outputElt, endContext, theCommands);
+}
+
 class DoxygenInstance
 {
   public:

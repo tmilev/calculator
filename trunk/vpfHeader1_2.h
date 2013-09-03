@@ -2901,20 +2901,11 @@ public:
   unsigned int HashFunction()const
   { return this->::MonomialCollection<MonomialUniversalEnveloping<coefficient>, coefficient>::HashFunction();
   }
-template<class CoefficientTypeQuotientField>
-static bool GetBasisFromSpanOfElements
-  (List<ElementUniversalEnveloping<coefficient> >& theElements,
-   Vectors<CoefficientTypeQuotientField>& outputCoords,
-   List<ElementUniversalEnveloping<coefficient> >& outputTheBasis,
-   const CoefficientTypeQuotientField& theFieldUnit,
-   const CoefficientTypeQuotientField& theFieldZero,
-   GlobalVariables& theGlobalVariables)
-   ;
-
-  void AssignFromCoordinateFormWRTBasis
-  (List<ElementUniversalEnveloping<coefficient> >& theBasis,
-   Vector<coefficient>& input, SemisimpleLieAlgebra& owner)
-  ;
+  template<class CoefficientTypeQuotientField>
+  static bool GetBasisFromSpanOfElements
+  (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords, List<ElementUniversalEnveloping<coefficient> >& outputTheBasis,
+   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables);
+  void AssignFromCoordinateFormWRTBasis(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()const
   { if (this->size()!=1)
@@ -2923,20 +2914,10 @@ static bool GetBasisFromSpanOfElements
       return false;
     return (*this)[0].generatorsIndices.size==1;
   }
-  void SubstitutionCoefficients
-(PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext,
- const coefficient& theRingUnit, const coefficient& theRingZero)
-  ;
-  void Substitution
-(const PolynomialSubstitution<Rational>& theSub)
-  ;
-  void MakeCasimir
-(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
-   ;
-  void LieBracketOnTheRight
-  (const ElementUniversalEnveloping<coefficient>& right,
-   ElementUniversalEnveloping<coefficient>& output)const;
+  void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext, const coefficient& theRingUnit, const coefficient& theRingZero);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
+  void MakeCasimir(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  void LieBracketOnTheRight(const ElementUniversalEnveloping<coefficient>& right, ElementUniversalEnveloping<coefficient>& output)const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
   { Rational tempRat=coeff;
@@ -2982,6 +2963,12 @@ static bool GetBasisFromSpanOfElements
 class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, Rational>
 {
 public:
+  unsigned inline int HashFunction()const
+  { return this->::MonomialCollection<MonomialWeylAlgebra, Rational>::HashFunction();
+  }
+  static inline unsigned int HashFunction(const ElementWeylAlgebra& input)
+  { return input.HashFunction();
+  }
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
@@ -2991,20 +2978,15 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO,
- Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
-   ;
+(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables);
   bool ActOnPolynomial(Polynomial<Rational>& thePoly);
   void SetNumVariables(int newNumVars);
-  void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
-  void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
-  void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
-  void MakeConst(const Rational& theConst);
-  void SubstitutionTreatPartialsAndVarsAsIndependent
-  (PolynomialSubstitution<Rational>& theSub)
-  ;
+  void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
+  void LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
+  void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
+  void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
+  void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
+  void Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt);
   void MakeOne(int ExpectedNumVars=0)
   { MonomialWeylAlgebra tempMon;
     tempMon.polynomialPart.MakeOne(ExpectedNumVars);
@@ -3013,10 +2995,7 @@ public:
     this->AddMonomial(tempMon, 1);
   }
   void RaiseToPower(int thePower);
-  void MultiplyTwoMonomials
-(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right,
- ElementWeylAlgebra& output)const
-;
+  void MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const;
   void AssignPolynomial(const Polynomial<Rational>& input)
   { this->MakeZero();
     MonomialWeylAlgebra tempM;
@@ -3040,11 +3019,8 @@ class LittelmannPath
 public:
   WeylGroup* owner;
   Vectors<Rational> Waypoints;
-  void MakeFromWeightInSimpleCoords
-  (const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
-  ;
-  void MakeFromWaypoints
-  (Vectors<Rational>& weightsInSimpleCoords, WeylGroup& theOwner)
+  void MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner);
+  void MakeFromWaypoints(Vectors<Rational>& weightsInSimpleCoords, WeylGroup& theOwner)
   { this->owner=&theOwner;
     this->Waypoints=weightsInSimpleCoords;
     this->Simplify();
@@ -3059,22 +3035,14 @@ public:
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
   }
-  bool IsAdaptedString
-  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
-  ;
-  std::string ElementToStringIndicesToCalculatorOutput
-(LittelmannPath& inputStartingPath, List<int>& input)
-  ;
-  std::string ElementToStringOperatorSequenceStartingOnMe
-(List<int>& input)
-  ;
+  bool IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString);
+  std::string ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
+  std::string ElementToStringOperatorSequenceStartingOnMe(List<int>& input);
   bool GenerateOrbit
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
  Selection* parabolicNonSelectedAreInLeviPart=0)
 ;
-std::string GenerateOrbitAndAnimate
-(GlobalVariables& theGlobalVariables)
-;
+std::string GenerateOrbitAndAnimate(GlobalVariables& theGlobalVariables);
   bool MinimaAreIntegral();
   std::string ToString(bool useSimpleCoords=true, bool useArrows=true, bool includeDominance=false)const;
   void Simplify();
@@ -3119,31 +3087,14 @@ class ConeLatticeAndShiftMaxComputation
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
   std::string ToString(FormatExpressions* theFormat=0);
-  void init
-  (Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift)
-  ;
-  void FindExtremaParametricStep1
-    (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-       ;
-  void FindExtremaParametricStep2TrimChamberForMultOne
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
-;
-  void FindExtremaParametricStep3
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
-;
-  void FindExtremaParametricStep4
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
-;
-  void FindExtremaParametricStep5
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
-;
-
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
-  ;
-  bool ReadFromFile
-(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
-  ;
+  void init(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift);
+  void FindExtremaParametricStep1(Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables);
+  void FindExtremaParametricStep2TrimChamberForMultOne(Controller& thePauseController, GlobalVariables& theGlobalVariables);
+  void FindExtremaParametricStep3(Controller& thePauseController, GlobalVariables& theGlobalVariables);
+  void FindExtremaParametricStep4(Controller& thePauseController, GlobalVariables& theGlobalVariables);
+  void FindExtremaParametricStep5(Controller& thePauseController, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes);
 };
 
 class PiecewiseQuasipolynomial
@@ -3169,18 +3120,19 @@ class PiecewiseQuasipolynomial
   }
   std::string ToString(bool useLatex, bool useHtml);
   PiecewiseQuasipolynomial(){this->theBuffers=0;}
-  PiecewiseQuasipolynomial(GlobalVariables& PermanentGlobalVariables){this->theBuffers=& PermanentGlobalVariables;}
-  void DrawMe
- (DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber=0,
- Vector<Rational> * distinguishedPoint=0)
-  ;
-  int GetNumVars(){return this->NumVariables;}
-  inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other){ this->MakeCommonRefinement(other.theProjectivizedComplex);  }
+  PiecewiseQuasipolynomial(GlobalVariables& PermanentGlobalVariables)
+  { this->theBuffers=& PermanentGlobalVariables;
+  }
+  void DrawMe(DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber=0, Vector<Rational> * distinguishedPoint=0);
+  int GetNumVars()
+  { return this->NumVariables;
+  }
+  inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other)
+  { this->MakeCommonRefinement(other.theProjectivizedComplex);
+  }
   void MakeCommonRefinement(const ConeComplex& other);
   void TranslateArgument(Vector<Rational> & translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
-  bool MakeVPF
-  (Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
-  ;
+  bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables);
   Rational Evaluate(const Vector<Rational> & thePoint);
   Rational EvaluateInputProjectivized(const Vector<Rational> & thePoint);
   void MakeZero(int numVars, GlobalVariables& theGlobalVariables)
@@ -3211,20 +3163,16 @@ public:
   void CheckNonZeroOwner()const
   { if (this->owner!=0)
       return;
-    std::cout << "This is a programming error: Monomial char has zero owner, which is not allowed by the current "
-    << "function call. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    std::cout << "This is a programming error: Monomial char has zero owner, which is not allowed by the current function call. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   void AccountSingleWeight
 (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
  Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
   ;
-  std::string TensorAndDecompose
-(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
-   ;
-  std::string ToString
-  (FormatExpressions* theFormat=0)const
-  ;
+  std::string TensorAndDecompose(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
   { return weightFundamentalCoordS.HashFunction();
   }
@@ -3269,61 +3217,37 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const charSSAlgMod<coefficient>& input)
-  { return input.::MonomialCollection<MonomialChar<coefficient>, coefficient>
-    ::HashFunction(input);
+  { return input.::MonomialCollection<MonomialChar<coefficient>, coefficient>::HashFunction(input);
   }
   void GetDual(charSSAlgMod<coefficient>& output)const;
-  void MakeFromWeight
-(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
-   ;
-  bool SplitCharOverRedSubalg
-(std::string* Report, charSSAlgMod& output, branchingData& inputData,
- GlobalVariables& theGlobalVariables)
-   ;
+  void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
+  bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables);
   bool GetDominantCharacterWRTsubalgebra
- (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
-  GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
-;
+ (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
   bool FreudenthalEvalMeDominantWeightsOnly
- (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
-  std::string* outputDetails, GlobalVariables* theGlobalVariables)
-  ;
+ (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
   bool FreudenthalEvalMeFullCharacter
- (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
-  std::string* outputDetails, GlobalVariables* theGlobalVariables)
-  ;
-  bool DrawMeNoMults
-(std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars, int upperBoundWeights)
+ (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
   }
-  bool DrawMeWithMults
-(std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars, int upperBoundWeights)
+  bool DrawMeWithMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
   }
-  void DrawMeAssumeCharIsOverCartan
-(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const
-  ;
+  void DrawMeAssumeCharIsOverCartan(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
   SemisimpleLieAlgebra* GetOwner()const
   { if (this->size()==0)
-    { std::cout << "This is a programming error: requesting owner semisimple Lie algebra "
-      << " of zero character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: requesting owner semisimple Lie algebra of zero character. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return (*this)[0].owner;
   }
-  bool DrawMe
-(std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
-  ;
+  bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight
 (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
- ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
-     ;
-  int GetIndexExtremeWeightRelativeToWeyl
-  (WeylGroup& theWeyl)const
-  ;
+ ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables);
+  int GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
@@ -3373,10 +3297,8 @@ struct branchingData
   template <class coefficient>
   Vector<coefficient> ProjectWeight(Vector<coefficient>& input);
   void resetOutputData();
-  void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
-  ;
-  void initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
-  ;
+  void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables);
+  void initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables);
   void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
   { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInitted");
     this->initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
@@ -3487,7 +3409,7 @@ class MonomialMatrix
 };
 
 template <class coefficient>
-class MatrixTensor: public ElementMonomialAlgebra<MonomialMatrix, coefficient >
+class MatrixTensor: public ElementMonomialAlgebra<MonomialMatrix, coefficient>
 {
 public:
   void MakeIdSpecial()
@@ -3652,9 +3574,7 @@ public:
       for (int j=0; j<inputVectors[i].size(); j++)
         this->AddMonomial(MonomialMatrix(i,inputVectors[i][j].theIndex), inputVectors[i].theCoeffs[j]);
   }
-  void GaussianEliminationByRowsMatrix
-  (MatrixTensor<coefficient>* carbonCopyMat=0);
-
+  void GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat=0);
   template <class otherType>
   void ActOnVectorColumn(VectorSparse<otherType>& inputOutput)const
   { VectorSparse<otherType> output;
@@ -3728,14 +3648,10 @@ class ModuleSSalgebra
   List<List<List<ElementUniversalEnveloping<coefficient> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
   Rational hwtaabfSimpleGensOnly
-  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
-   ProgressReport* theProgressReport=0)
-  ;
+  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon, const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
+   ProgressReport* theProgressReport=0);
   Rational hwTrace
-  (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
-   ProgressReport* theProgressReport=0)
-  ;
+  (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair, ProgressReport* theProgressReport=0);
   void TestConsistency(GlobalVariables& theGlobalVariables);
 public:
   SemisimpleLieAlgebra* owneR;
@@ -3744,13 +3660,9 @@ public:
   //specialization below.
   //[Update:] made a bug report on this in the gcc bug tracker.
   //This issue has officially been recognized as a gcc bug. Hope to get a fix soon.
-  HashedListSpecialized
-  <MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
-  theGeneratingWordsNonReducedInt;
+  HashedListSpecialized<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theGeneratingWordsNonReducedInt;
   Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
-
   List<LittelmannPath> thePaths;
-
   List<List<MonomialUniversalEnveloping<coefficient> > > theGeneratingWordsGrouppedByWeight;
   List<List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
 //  List<ElementUniversalEnveloping<coefficient> > theSimpleGens;
@@ -3759,15 +3671,12 @@ public:
   List<Matrix<coefficient> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<coefficient> > theBilinearFormsInverted;
 //  Vectors<Rational> weightsSimpleGens;
-
   Vector<coefficient> theHWDualCoordsBaseFielD;
   Vector<coefficient> theHWSimpleCoordSBaseField;
   Vector<coefficient> theHWFundamentalCoordsBaseField;
-
   Vector<Rational> theHWFDpartDualCoords;
   Vector<Rational> theHWFDpartSimpleCoordS;
   Vector<Rational> theHWFDpartFundamentalCoordS;
-
 //  List<List<Matrix<coefficient> > >
   HashedList<Vector<Rational> > theModuleWeightsSimpleCoords;
   charSSAlgMod<coefficient> theCharOverH;
@@ -3778,23 +3687,17 @@ public:
   //Note: for some reason, the linker fails to resolve without the
   //explicit template specialization below.
   //[Update:] This is now a recognized gcc bug.
-  HashedListSpecialized
-  <
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
-  > cachedPairs;
+  HashedListSpecialized<Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > > cachedPairs;
   List<Rational> cachedTraces;
-
   bool flagIsInitialized;
   bool flagConjectureBholds;
   bool flagConjectureCholds;
   int NumCachedPairsBeforeSimpleGen;
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
   int MaxNumCachedPairs;
-
   bool operator==(const ModuleSSalgebra<coefficient>& other)
   { return
-    this->owneR==other.owneR
-    && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
+    this->owneR==other.owneR && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
   }
   bool HasFreeAction(int generatorIndex)const
@@ -3826,14 +3729,8 @@ public:
 //  HashedList<MonomialUniversalEnveloping<coefficient> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<coefficient> > ActionsChevalleyGenerators;
-  MatrixTensor<coefficient>& GetActionGeneratorIndeX
-  (int generatorIndex, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
- ;
-  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex
-  (int generatorIndex, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
- ;
+  MatrixTensor<coefficient>& GetActionGeneratorIndeX(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  MatrixTensor<coefficient>& GetActionSimpleGeneratorIndex(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
       return -1;
@@ -3846,16 +3743,11 @@ public:
   int GetDim()const
   { return this->theGeneratingWordsNonReduced.size;
   }
-  void IntermediateStepForMakeFromHW
-( Vector<coefficient>& HWDualCoordS, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
-  const coefficient& theRingZero)
-  ;
+  void IntermediateStepForMakeFromHW(Vector<coefficient>& HWDualCoordS, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   bool MakeFromHW
-(SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords,
- const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
-const coefficient& theRingUnit, const coefficient& theRingZero,
- std::string* outputReport, bool computeSimpleGens=true)
-  ;
+(SemisimpleLieAlgebra& inputAlgebra, Vector<coefficient>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
+ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero, std::string* outputReport,
+ bool computeSimpleGens=true);
   SemisimpleLieAlgebra& GetOwner()const
   { if (this->owneR==0)
     { std::cout << "This is a programming error: calling GetOwner() on a non-initialized "
@@ -3866,75 +3758,46 @@ const coefficient& theRingUnit, const coefficient& theRingZero,
     return *this->owneR;
   }
   void GetAdActionHomogenousElT
-  (ElementUniversalEnveloping<coefficient>& inputHomogeneous, Vector<Rational> & weightUEEltSimpleCoords,
-   List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
-   ;
+  (ElementUniversalEnveloping<coefficient>& inputHomogeneous, Vector<Rational> & weightUEEltSimpleCoords, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
+   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   void GetMatrixHomogenousElt
-  (ElementUniversalEnveloping<coefficient>& inputHomogeneous,
-   List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
-    Vector<Rational> & weightUEEltSimpleCoords, MatrixTensor<coefficient>& output,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
-   ;
+  (ElementUniversalEnveloping<coefficient>& inputHomogeneous, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
+   Vector<Rational> & weightUEEltSimpleCoords, MatrixTensor<coefficient>& output, GlobalVariables& theGlobalVariables,
+   const coefficient& theRingUnit, const coefficient& theRingZero);
   void ExpressAsLinearCombinationHomogenousElement
-  (ElementUniversalEnveloping<coefficient>& inputHomogeneous,
-   ElementUniversalEnveloping<coefficient>& outputHomogeneous,
-   int indexInputBasis, const Vector<coefficient>& subHiGoesToIthElement,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero
-   )
-  ;
+  (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
+   const Vector<coefficient>& subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
   { if (this->highestWeightVectorNotation!="")
       return this->highestWeightVectorNotation;
     std::stringstream out;
-    out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
-    << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
+    out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat) << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
     return out.str();
 //    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi
-  (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
-   const coefficient& theRingZero, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0,
-   Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0, charSSAlgMod<coefficient>* outputChar=0)
-   ;
+  (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero,
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0,
+   charSSAlgMod<coefficient>* outputChar=0);
   void SplitFDpartOverFKLeviRedSubalg
-  (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
-   GlobalVariables& theGlobalVariables, List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0,
-   Vectors<coefficient>* outputWeightsFundCoords=0, Vectors<coefficient>* outputEigenSpace=0,
-   std::stringstream* comments=0, const coefficient& theRingUnit=1,
-   const coefficient& theRingZero=0)
-   ;
-   template<class ResultType>
-   void GetElementsNilradical
-(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,
- List<int>* listOfGenerators=0)
-   ;
-   bool IsNotInLevi
-(int theGeneratorIndex)
-   ;
-   bool IsNotInParabolic
-(int theGeneratorIndex)
-   ;
-   void GetGenericUnMinusElt
-   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
-   ;
-   void GetGenericUnMinusElt
-   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
-   ;
-   //The input of the following function is supposed to be an honest element of the
-   //Universal enveloping,
-   //i.e. inputElt is not allowed to have non-small integer exponents.
-   bool GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
-  GlobalVariables& theGlobalVariables)
-   ;
-bool GetActionEulerOperatorPart
-(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
-   ;
-   ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
-   {}
+  (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, GlobalVariables& theGlobalVariables,
+   List<ElementUniversalEnveloping<coefficient> >* outputEigenVectors=0, Vectors<coefficient>* outputWeightsFundCoords=0,
+   Vectors<coefficient>* outputEigenSpace=0, std::stringstream* comments=0, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
+  template<class ResultType>
+  void GetElementsNilradical(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators=0);
+  bool IsNotInLevi(int theGeneratorIndex);
+  bool IsNotInParabolic(int theGeneratorIndex);
+  void GetGenericUnMinusElt(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables);
+  void GetGenericUnMinusElt(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  //The input of the following function is supposed to be an honest element of the
+  //Universal enveloping,
+  //i.e. inputElt is not allowed to have non-small integer exponents.
+  bool GetActionGenVermaModuleAsDiffOperator(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables);
+  bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables);
+  ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
+  {}
 };
 
 template<class coefficient>
@@ -3959,10 +3822,10 @@ class MonomialGeneralizedVerma
     this->theMonCoeffOne=other.theMonCoeffOne;
   }
 
-  std::string ToString
-  (FormatExpressions* theFormat=0, bool includeV=true)const
-  ;
-  static const bool IsEqualToZero(){return false;}
+  std::string ToString(FormatExpressions* theFormat=0, bool includeV=true)const;
+  static const bool IsEqualToZero()
+  { return false;
+  }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other)const
   { if (this->indexFDVector==other.indexFDVector && this->owneR==other.owneR)
       return this->theMonCoeffOne==other.theMonCoeffOne;
@@ -3973,8 +3836,7 @@ class MonomialGeneralizedVerma
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
-  void Substitution
-  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   unsigned int HashFunction()const
   { return this->indexFDVector*SomeRandomPrimes[0]+ (*((unsigned *)&(this->owneR)))*SomeRandomPrimes[1];
   }
@@ -3990,10 +3852,7 @@ class MonomialGeneralizedVerma
       return this->indexFDVector>other.indexFDVector;
     return this->theMonCoeffOne>other.theMonCoeffOne;
   }
-  void ReduceMe
-(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables,
-  const coefficient& theRingUnit, const coefficient& theRingZero)const
-   ;
+  void ReduceMe(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   bool IsHWV()const
   { if (!this->theMonCoeffOne.IsEqualToOne())
       return false;
@@ -4011,14 +3870,11 @@ class MonomialGeneralizedVerma
 };
 
 template<class coefficient>
-class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient >
+class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient>
 {
   public:
 //  ModuleSSalgebra<coefficient>* owneR;
-  void MultiplyMeByUEEltOnTheLeft
-  (const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero)
-  ;
+  void MultiplyMeByUEEltOnTheLeft(const ElementUniversalEnveloping<coefficient>& theUE, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero);
   unsigned int HashFunction()const
   { return this->MonomialCollection<MonomialGeneralizedVerma<coefficient>, coefficient >::HashFunction();
   }
@@ -4026,9 +3882,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   { return input.HashFunction();
   }
   ElementSumGeneralizedVermas(){}
-  void MakeHWV
-  (ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit)
-  ;
+  void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
   int GetNumVars()
   { if (this->owneR==0)
       return -1;
@@ -4088,8 +3942,7 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
-  void Substitution
-  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
+  void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].Substitution(theSub, theMods);
   }
@@ -4127,8 +3980,7 @@ public:
 };
 
 template <class coefficient>
-void MonomialTensorGeneralizedVermas <coefficient>::SimplifyNormalizeCoeffs
-()
+void MonomialTensorGeneralizedVermas <coefficient>::SimplifyNormalizeCoeffs()
 { if (this->Coefficient.IsEqualToZero())
   { this->MakeZero(this->Coefficient.GetZero());
     return;
@@ -4146,50 +3998,30 @@ void MonomialTensorGeneralizedVermas <coefficient>::SimplifyNormalizeCoeffs
 
 template<class coefficient>
 class ElementTensorsGeneralizedVermas :
-public MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient >
+public MonomialCollection<MonomialTensorGeneralizedVermas<coefficient>, coefficient>
 {
 public:
   bool MultiplyOnTheLeft
-  (const ElementUniversalEnveloping<coefficient>& theUE,
-   ElementTensorsGeneralizedVermas<coefficient>& output,
-   SemisimpleLieAlgebra& ownerAlgebra, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero)const
-  ;
+  (const ElementUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
+   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   bool MultiplyOnTheLeft
-  (const MonomialUniversalEnveloping<coefficient>& theUE,
-   ElementTensorsGeneralizedVermas<coefficient>& output,
-   SemisimpleLieAlgebra& ownerAlgebra,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
-  ;
+  (const MonomialUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
+   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   void TensorOnTheRight
-  (const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit=1, const coefficient& theRingZero=0
-   )
-   ;
+  (const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   void MultiplyByElementLieAlg
-  (ElementTensorsGeneralizedVermas<coefficient>& output,
-   SemisimpleLieAlgebra& ownerAlgebra,  int indexGenerator, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero)const
-  ;
-  void MultiplyBy
-  (const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight,
-   GlobalVariables& theGlobalVariables)
-   ;
-  bool IsHWV
-  ()const
+  (ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
+   const coefficient& theRingUnit, const coefficient& theRingZero)const;
+  void MultiplyBy(const ElementTensorsGeneralizedVermas<coefficient>& standsOnTheRight, GlobalVariables& theGlobalVariables);
+  bool IsHWV()const
   { if (this->theCoeffs.size!=1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())
       return false;
     return (*this)[0].IsHWV();
   }
-
-  void MakeHWV
-  (ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit)
-  ;
-  void Substitution
-  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
-  ;
+  void MakeHWV(ModuleSSalgebra<coefficient>& theOwner, const coefficient& theRingUnit);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   void SetNumVariables(int GoalNumVars)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].SetNumVariables(GoalNumVars);
@@ -4243,24 +4075,26 @@ public:
   PolynomialSubstitution<coefficient> theSubNthElementIsImageNthCoordSimpleBasis;
   void ComputeDebugString(){FormatExpressions tempFormat; this->DebugString=this->ToString(tempFormat);}
   std::string ToString(const FormatExpressions& theFormat)const;
-  void ToString(std::string& output)const{output=this->ToString();}
-  bool IsEqualToZero()const {return this->theElT.IsEqualToZero();}
+  void ToString(std::string& output)const
+  { output=this->ToString();
+  }
+  bool IsEqualToZero()const
+  { return this->theElT.IsEqualToZero();
+  }
   bool NeedsBrackets()const;
   void AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
   (ElementUniversalEnvelopingOrdered<coefficient>& input, const ElementVermaModuleOrdered<coefficient>& theRingZero,
-   GlobalVariables* theContext, const coefficient& theRingUnit)
-  ;
+   GlobalVariables* theContext, const coefficient& theRingUnit);
   void ActOnMe
-  (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext)const
-  ;
+  (const ElementSemisimpleLieAlgebra<Rational>& actingElt, ElementVermaModuleOrdered<coefficient>& output, SemisimpleLieAlgebra& owner, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables* theContext)const;
   static void GetBasisFromSpanOfElements
   (List<ElementVermaModuleOrdered<coefficient> >& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
-    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero, GlobalVariables& theGlobalVariables)
-    ;
+    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero, GlobalVariables& theGlobalVariables);
   bool GetCoordsInBasis
-  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables)const
-  ;
-  bool IsProportionalTo(const ElementVermaModuleOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const{ return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero); }
+  (const List<ElementVermaModuleOrdered<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables)const;
+  bool IsProportionalTo(const ElementVermaModuleOrdered<coefficient>& other, coefficient& outputTimesMeEqualsOther, const coefficient& theRingZero)const
+  { return this->theElT.IsProportionalTo(other.theElT, outputTimesMeEqualsOther, theRingZero);
+  }
   void MakeZero(SemisimpleLieAlgebraOrdered& owner, PolynomialSubstitution<Rational>& incomingSub)
   { this->theElT.MakeZero(owner);
     this->theSubNthElementIsImageNthCoordSimpleBasis=incomingSub;
@@ -4270,14 +4104,18 @@ public:
   { this->theElT.operator*=<CoefficientTypeOther>(theConst);
   }
   void MultiplyOnTheLeft
-(const ElementSemisimpleLieAlgebra<Rational>& other,
- ElementVermaModuleOrdered<coefficient>& output, const coefficient& theRingUnit,
- const coefficient& theRingZero, GlobalVariables* theContext)
-;
-  void ClearDenominators(coefficient& outputWasMultipliedBy, const coefficient& theRingUnit){ this->theElT.ClearDenominators(outputWasMultipliedBy, theRingUnit); }
+(const ElementSemisimpleLieAlgebra<Rational>& other, ElementVermaModuleOrdered<coefficient>& output, const coefficient& theRingUnit,
+ const coefficient& theRingZero, GlobalVariables* theContext);
+  void ClearDenominators(coefficient& outputWasMultipliedBy, const coefficient& theRingUnit)
+  { this->theElT.ClearDenominators(outputWasMultipliedBy, theRingUnit);
+  }
   void operator/=(const coefficient& theConst){this->theElT.operator/=(theConst);}
-  void operator-=(const ElementVermaModuleOrdered& other){ this->theElT-=other.theElT;}
-  void operator+=(const ElementVermaModuleOrdered& other){ this->theElT+=other.theElT;}
+  void operator-=(const ElementVermaModuleOrdered& other)
+  { this->theElT-=other.theElT;
+  }
+  void operator+=(const ElementVermaModuleOrdered& other)
+  { this->theElT+=other.theElT;
+  }
   void operator=(const ElementVermaModuleOrdered& other)
   { this->theElT=other.theElT;
     this->theSubNthElementIsImageNthCoordSimpleBasis=other.theSubNthElementIsImageNthCoordSimpleBasis;
@@ -4311,20 +4149,11 @@ public:
   std::string ElementModuleIndexToString(int input, bool useHtml);
   std::string GetNotationString(bool useHtml);
   bool ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables)
-  ;
-  std::string PairTwoIndices
-  (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
-  ;
-  void ExtractHighestWeightVectorsFromVector
-  (Matrix<Rational> & input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors)
-  ;
-  void ClimbDownFromHighestWeightAlongSl2String
-  (Matrix<Rational> & input, Matrix<Rational> & output, Rational& outputCoeff, int generatorPower)
-  ;
-  void ClimbUpFromVector
-  (Matrix<Rational> & input, Matrix<Rational> & outputLastNonZero, int& largestPowerNotKillingInput)
-  ;
+  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables);
+  std::string PairTwoIndices(List<int>& output, int leftIndex, int rightIndex, bool useHtml);
+  void ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input, List<Matrix<Rational> >& outputDecompositionOfInput, List<Matrix<Rational> >& outputTheHWVectors);
+  void ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational> & input, Matrix<Rational> & output, Rational& outputCoeff, int generatorPower);
+  void ClimbUpFromVector(Matrix<Rational> & input, Matrix<Rational> & outputLastNonZero, int& largestPowerNotKillingInput);
 };
 
 class GeneralizedVermaModuleCharacters
@@ -4373,19 +4202,10 @@ public:
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
-  std::string ComputeMultsLargerAlgebraHighestWeight
-  (Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
-   Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
-  ;
-  std::string CheckMultiplicitiesVsOrbits
-  (GlobalVariables& theGlobalVariables)
-  ;
-  std::string ElementToStringMultiplicitiesReport
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void IncrementComputation
-  (Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
-  ;
+  std::string ComputeMultsLargerAlgebraHighestWeight(Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables);
+  std::string CheckMultiplicitiesVsOrbits(GlobalVariables& theGlobalVariables);
+  std::string ElementToStringMultiplicitiesReport(GlobalVariables& theGlobalVariables);
+  void IncrementComputation(Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables);
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
   GeneralizedVermaModuleCharacters()
   { this->UpperLimitChambersForDebugPurposes=-1;
@@ -4396,11 +4216,8 @@ public:
   }
   void ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
   void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
-  ;
-  bool ReadFromFile
-  (std::fstream& input, GlobalVariables* theGlobalVariables)
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
   { std::string tempS;
     int numReadWords;
     Vector<Rational>  parSel; parSel=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
@@ -4413,7 +4230,6 @@ public:
   //    this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
     }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
-
     input >> tempS >> this->computationPhase;
     assert(tempS=="ComputationPhase:");
     bool result=true;
@@ -4422,42 +4238,20 @@ public:
     XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
     return result;
   }
-  bool ReadFromFileNoComputationPhase
-  (std::fstream& input, GlobalVariables* theGlobalVariables)
-  ;
-  std::string PrepareReportOneCone
-  (FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables)
-  ;
+  bool ReadFromFileNoComputationPhase(std::fstream& input, GlobalVariables* theGlobalVariables);
+  std::string PrepareReportOneCone(FormatExpressions& theFormat, const Cone& theCone, GlobalVariables& theGlobalVariables);
   void GetProjection(int indexOperator, const Vector<Rational> & input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
-  void InitTheMaxComputation
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void ComputeQPsFromChamberComplex
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void GetSubFromIndex
-  (PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& ouputDen, int theIndex)
-;
+  void InitTheMaxComputation(GlobalVariables& theGlobalVariables);
+  void ComputeQPsFromChamberComplex(GlobalVariables& theGlobalVariables);
+  void GetSubFromIndex(PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& ouputDen, int theIndex);
   void SortMultiplicities(GlobalVariables& theGlobalVariables);
-  void GetSubFromNonParamArray
-(Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams)
-  ;
-  void initQPs
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void initFromHomomorphism
-  (Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
-  ;
-  void TransformToWeylProjectiveStep1
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void TransformToWeylProjectiveStep2
-  (GlobalVariables& theGlobalVariables)
-  ;
-  void TransformToWeylProjective
-  (int indexOperator, Vector<Rational> & startingNormal, Vector<Rational> & outputNormal)
-  ;
+  void GetSubFromNonParamArray(Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams);
+  void initQPs(GlobalVariables& theGlobalVariables);
+  void initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjectiveStep1(GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjectiveStep2(GlobalVariables& theGlobalVariables);
+  void TransformToWeylProjective(int indexOperator, Vector<Rational> & startingNormal, Vector<Rational> & outputNormal);
 };
 
 template <class coefficient>
@@ -4492,7 +4286,9 @@ public:
   Vector<Rational> affinePoint;
   Vector<Rational> normal;
   void ToString(std::string& output);
-  void ComputeDebugString(){this->ToString(this->DebugString); }
+  void ComputeDebugString()
+  { this->ToString(this->DebugString);
+  }
   //void InduceFromFacet(Facet& input);
   //the below returns false if the projection is not of full dimension
   unsigned int HashFunction()const;

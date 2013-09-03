@@ -996,8 +996,7 @@ std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
 
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
 { std::stringstream resultStream;
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
-  << "\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
   if (useHtml)
     resultStream << "<br>";
   resultStream << " \\psset{xunit=1cm, yunit=1cm}";
@@ -1249,8 +1248,7 @@ bool CommandList::innerSuffixNotationForPostScript
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerCharacterSSLieAlgFD
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerCharacterSSLieAlgFD(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerCharacterSSLieAlgFD");
   Vector<Rational> theHW;
   Selection parSel;
@@ -1267,8 +1265,7 @@ bool CommandList::innerCharacterSSLieAlgFD
   return output.AssignValue(theElt, theCommands);
 }
 
-bool CommandList::innerConesIntersect
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerConesIntersect(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerConesIntersect");
   if (!input.IsListNElements(3))
   { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
@@ -1288,9 +1285,8 @@ bool CommandList::innerConesIntersect
   }
   std::stringstream out;
   if (coneNonStrictMatForm.NumCols!=coneStrictMatForm.NumCols)
-  { out << "I got as input vectors of different dimensions, first groups had vectors of dimension "
-    << coneNonStrictMatForm.NumCols << " and second of dimension " << coneStrictMatForm.NumCols
-    << " which is not allowed. ";
+  { out << "I got as input vectors of different dimensions, first groups had vectors of dimension " << coneNonStrictMatForm.NumCols
+    << " and second of dimension " << coneStrictMatForm.NumCols << " which is not allowed. ";
     return output.SetError(out.str(), theCommands);
   }
   coneNonStrictMatForm.GetVectorsFromRows(coneNonStrictGens);
@@ -1404,10 +1400,8 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
           this->SetSerreLikeSolutionIndex(j, 0);
         else
           if (this->systemSolution.GetElement()[j]!=0)
-          { std::cout << "This is a programming error: variable index " << j+1
-            << " is supposed to be a free parameter, i.e., be set to zero, but "
-            << "instead it has a non-zero value. "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          { std::cout << "This is a programming error: variable index " << j+1 << " is supposed to be a free parameter, i.e., be set to zero, but "
+            << "instead it has a non-zero value. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
         theFinalSub[j]=0;
@@ -1417,8 +1411,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
     thePoly.Substitution(theFinalSub);
   coefficient tempCF;
   if (!thePoly.IsAConstant(&tempCF))
-  { std::cout << "\n<br>\nThis is a programming error: after carrying all implied substitutions "
-    << " the polynomial is not a constant, rather equals "
+  { std::cout << "\n<br>\nThis is a programming error: after carrying all implied substitutions the polynomial is not a constant, rather equals "
     << thePoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -1663,8 +1656,7 @@ bool CommandList::innerReverseOrder
   return true;
 }
 
-bool CommandList::innerSolveSerreLikeSystem
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
@@ -1696,8 +1688,7 @@ bool CommandList::innerSolveSerreLikeSystem
 }
 
 template <class coefficient>
-coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
-  (const ElementUniversalEnveloping<coefficient>& right)const
+coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const ElementUniversalEnveloping<coefficient>& right)const
 { MacroRegisterFunctionWithName("ElementUniversalEnveloping::GetKillingFormProduct");
   if (this->IsEqualToZero())
     return 0;
@@ -1724,8 +1715,7 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct
 }
 
 template <class coefficient>
-coefficient SemisimpleLieAlgebra::GetKillingForm
-  (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right)
+coefficient SemisimpleLieAlgebra::GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
   coefficient result=0;
   ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
@@ -1741,8 +1731,7 @@ coefficient SemisimpleLieAlgebra::GetKillingForm
   return result;
 }
 
-bool CommandList::innerKillingForm
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerKillingForm(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerKillingForm");
   if (!input.IsListNElements(3))
     return false;
@@ -1767,8 +1756,7 @@ bool CommandList::innerKillingForm
   return output.AssignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
 }
 
-bool CommandList::innerRootSubsystem
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerRootSubsystem(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerRootSubsystem");
   if (input.children.size<3)
     return false;

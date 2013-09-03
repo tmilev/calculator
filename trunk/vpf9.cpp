@@ -800,6 +800,7 @@ FormatExpressions::FormatExpressions()
   this->chevalleyGgeneratorLetter="g";
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
+  this->WeylAlgebraDefaultLetter="\\partial";
   this->FDrepLetter="V";
   this->simpleRootLetter="\\eta";
   this->MaxLineLength=100;

@@ -4987,9 +4987,7 @@ public:
     return (*whichLetter)!=-1;
   }
   template <class Element>
-  bool SubstitutioN
-(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)const
-  ;
+  bool SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit=1)const;
   void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { for (int i=this->monBody.size-1; i>=0; i--)
@@ -5788,6 +5786,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     if (this->IsAConstant(&tempC))
       return tempC.IsEqualToOne();
     return false;
+  }
+  bool IsOneLetterFirstDegree(int* whichLetter=0)const
+  { if(this->size()!=1)
+      return false;
+    return (*this)[0].IsOneLetterFirstDegree(whichLetter);
   }
   bool IsAConstant(coefficient* whichConstant=0)const
   { if (this->size()>1)

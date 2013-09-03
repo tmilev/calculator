@@ -48,6 +48,8 @@
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
 		<Unit filename="vpf5_2javascript_graphics.cpp" />
 		<Unit filename="vpf6.cpp" />
+		<Unit filename="vpf6_05evaluationroutines.cpp" />
+		<Unit filename="vpf6_0parsingRoutines.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.h" />
 		<Unit filename="vpf6_2serialization_code.cpp" />

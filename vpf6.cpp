@@ -1286,8 +1286,7 @@ bool Expression::Sequencefy()
   return this->MakeOX(*this->theBoss, this->theBoss->opSequence(), *this);
 }
 
-bool CommandList::GetVectorExpressions
-  (const Expression& input, List<Expression>& output, int targetDimNonMandatory)
+bool CommandList::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
 { MacroRegisterFunctionWithName("CommandList::GetVectorExpressions");
   output.ReservE(input.children.size);
   output.SetSize(0);
@@ -1313,784 +1312,12 @@ bool CommandList::GetVectorExpressions
   return true;
 }
 
-bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
-{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-8];
-  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
-  SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
-  newExpr.format=formatOptions;
-  newExpr.AddChildOnTop(leftE.theData);
-  newExpr.AddChildOnTop(middleE.theData);
-  newExpr.AddChildOnTop(rightE.theData);
-  opElt.theData=newExpr;
-  opElt.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(7);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceOXXEXEXEXByE(int formatOptions)
-{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-9];
-  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
-  SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
-  newExpr.AddChildOnTop(leftE.theData);
-  newExpr.AddChildOnTop(middleE.theData);
-  newExpr.AddChildOnTop(rightE.theData);
-  newExpr.format= formatOptions;
-  opElt.theData=newExpr;
-  opElt.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(8);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceOXEByE(int formatOptions)
-{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Expression newExpr;
-  newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format= formatOptions;
-  left.theData=newExpr;
-  left.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceOEXByEX(int formatOptions)
-{ SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format= formatOptions;
-  middle.theData=newExpr;
-  middle.controlIndex=this->conExpression();
-  this->DecreaseStackExceptLast(1);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::isRightSeparator(char c)
-{ switch(c)
-  { case ' ':
-    case '\n':
-    case '>':
-    case '<':
-    case ':':
-    case ',':
-    case ';':
-    case '+':
-    case '*':
-    case '^':
-    case '=':
-    case '_':
-    case '%':
-    case '/':
-    case '-':
-    case '`':
-    case '[':
-    case '&':
-    case '\\':
-    case '}':
-    case '{':
-    case '~':
-    case '$':
-    case ']':
-    case '(':
-    case ')':
-    case '.':
-      return true;
-    default:
-      return false;
-  }
-}
-
-bool CommandList::isLeftSeparator(char c)
-{ switch(c)
-  { case ' ':
-    case '\n':
-    case '>':
-    case '<':
-    case ':':
-    case ',':
-    case ';':
-    case '+':
-    case '*':
-    case '^':
-    case '&':
-    case '=':
-    case '_':
-    case '/':
-    case '-':
-    case '`':
-    case '[':
-    case '%':
-    case '}':
-    case '{':
-    case '~':
-    case '$':
-    case ']':
-    case '(':
-    case ')':
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-    case '.':
-      return true;
-    default:
-      return false;
-  }
-}
-
-SyntacticElement CommandList::GetEmptySyntacticElement()
-{ SyntacticElement result;
-  result.controlIndex=this->controlSequences.GetIndex(" ");
-  result.theData.reset(*this);
-  return result;
-}
-
 std::string BoundVariablesSubstitution::ToString()
 { std::stringstream out;
   out << "the pairs: ";
   for (int i=0; i<this->theBoundVariables.size; i++)
-    out << this->theBoundVariables[i].ToString() << "->"
-    << this->variableImages[i].ToString() << "<br>";
+    out << this->theBoundVariables[i].ToString() << "->" << this->variableImages[i].ToString() << "<br>";
   return out.str();
-}
-
-void CommandList::ParseFillDictionary
-  (const std::string& input)
-{ std::string current;
-  (*this->CurrrentSyntacticSouP).ReservE(input.size());
-  (*this->CurrrentSyntacticSouP).SetSize(0);
-  char LookAheadChar;
-  SyntacticElement currentElement;
-  int currentDigit;
-  for (unsigned i=0; i<input.size(); i++)
-  { current.push_back(input[i]);
-    if (i+1<input.size())
-      LookAheadChar=input[i+1];
-    else
-      LookAheadChar=' ';
-    if (current=="\n")
-      current=" ";
-    if (current=="~")
-      current=" ";
-    if (this->isLeftSeparator(current[0]) ||
-        this->isRightSeparator(LookAheadChar) || current==" ")
-    { if (this->controlSequences.Contains(current))
-      { currentElement.controlIndex=this->controlSequences.GetIndex(current);
-        currentElement.theData.reset(*this);
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else if (MathRoutines::isADigit(current, currentDigit))
-      { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
-        currentElement.controlIndex=this->conInteger();
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else
-      { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
-        currentElement.theData.MakeAtom
-        (this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-       // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
-      }
-      current="";
-    }
-  }
-  currentElement.theData.reset(*this);
-  currentElement.controlIndex=this->conEndProgram();
-  (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-}
-
-int CommandList::GetOperationIndexFromControlIndex(int controlIndex)
-{ return this->operations.GetIndex(this->controlSequences[controlIndex]);
-}
-
-int CommandList::GetExpressionIndex()
-{ return this->controlSequences.GetIndex("Expression");
-}
-
-bool CommandList::ReplaceOXbyE(int inputFormat)
-{ this->ReplaceOXbyEX(inputFormat);
-  this->DecreaseStackSetCharacterRangeS(1);
-  return true;
-}
-
-bool CommandList::ReplaceXOXbyEusingO(int theControlIndex, int inputFormat)
-{ this->ReplaceOXbyEXusingO(theControlIndex, inputFormat);
-  return this->ReplaceXEXByE(inputFormat);
-}
-
-bool CommandList::ReplaceOXbyEX(int inputFormat)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  return this->ReplaceOXbyEXusingO(theElt.controlIndex, inputFormat);
-}
-
-bool CommandList::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat)
-{ SyntacticElement& theSequenceElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  SyntacticElement& theFunctionElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
-  Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.ReservE(theSequenceElt.theData.children.size);
-  newExpr.AddChildOnTop(theFunctionElt.theData);
-  if (theSequenceElt.theData.IsAtoM())
-    newExpr.AddChildOnTop(theSequenceElt.theData);
-  else
-    for (int i=1; i<theSequenceElt.theData.children.size; i++)
-      newExpr.AddChildOnTop(theSequenceElt.theData[i]);
-  theFunctionElt.theData=newExpr;
-  return this->DecreaseStackSetCharacterRangeS(4);
-}
-
-bool CommandList::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  theElt.theData.format=inputFormat;
-  theElt.controlIndex=this->conExpression();
-  return true;
-}
-
-bool CommandList::ReplaceAXbyEX()
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-//  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
-  theElt.controlIndex=this->conExpression();
-//  std::cout << "replaceAbyE: " << theElt.theData.ToString();
-  return true;
-}
-
-bool CommandList::LookAheadAllowsApplyFunction(const std::string& lookAhead)
-{ return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
-}
-
-bool CommandList::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputFormat)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& afterleft = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  left.theData.AddChildOnTop(right.theData);
-  left.theData.format=inputFormat;
-  left.controlIndex=theControlIndex;
-  afterleft=*this->CurrentSyntacticStacK->LastObject();
-  this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  left.theData.AddChildOnTop(right.theData);
-  left.theData.format=inputFormat;
-  left.controlIndex=theControlIndex;
-  this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat, int numXs)
-{ SyntacticElement& main = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
-  Expression newExpr;
-  newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(this->opSequence());
-  newExpr.AddChildOnTop(main.theData);
-  newExpr.format=inputFormat;
-  main.theData=newExpr;
-  main.controlIndex=theControlIndex;
-  return true;
-}
-
-bool CommandList::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->opSequence());
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=inputFormat;
-  left.theData=newExpr;
-  left.controlIndex=theControlIndex;
-  this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEEByEusingO(int theControlIndex)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  //    newExpr.inputIndexBoundVars=
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  left.theData=newExpr;
-  this->DecreaseStackSetCharacterRangeS(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEOXbyEX()
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& opElt = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  int theOp=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
-  Expression newExpr;
-  newExpr.reset(*this, 2);
-  newExpr.AddChildAtomOnTop(theOp);
-  newExpr.AddChildOnTop(left.theData);
-  left.theData=newExpr;
-  this->DecreaseStackExceptLast(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEEXByEXusingO(int theControlIndex)
-{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  //    newExpr.inputIndexBoundVars=
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  left.theData=newExpr;
-  this->DecreaseStackExceptLast(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEXXEXEByEusingO(int theControlIndex)
-{ SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  Expression newExpr;
-  newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(middle.theData);
-  newExpr.AddChildOnTop(right.theData);
-  left.theData=newExpr;
-  this->DecreaseStackSetCharacterRangeS(5);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEXXEXEXByEXusingO(int theControlIndex)
-{ SyntacticElement& middle = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-7];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 4);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(theControlIndex));
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(middle.theData);
-  newExpr.AddChildOnTop(right.theData);
-  left.theData=newExpr;
-  this->DecreaseStackExceptLast(5);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceEOEXByEX(int formatOptions)
-{ SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(middle.controlIndex));
-  newExpr.AddChildOnTop(left.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=formatOptions;
-  left.theData=newExpr;
-  middle=*(*this->CurrentSyntacticStacK).LastObject();
-//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
-  this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-bool CommandList::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
-{ //std::cout << "<b>Here iam!</b>";
-  SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression newExpr;
-  newExpr.reset(*this, 3);
-  newExpr.AddChildAtomOnTop(inputOperation);
-  newExpr.AddChildOnTop(middle.theData);
-  newExpr.AddChildOnTop(right.theData);
-  newExpr.format=formatOptions;
-  left.theData=newExpr;
-  left.controlIndex=this->conExpression();
-  middle=*(*this->CurrentSyntacticStacK).LastObject();
-//  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
-  this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
-}
-
-
-bool CommandList::isSeparatorFromTheLeftGeneral(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input=="," || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" || input=="&";
-}
-
-bool CommandList::isSeparatorFromTheRightGeneral(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input=="," || input==":" || input==";" || input=="MatrixSeparator"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end" || input=="&" || input=="EndProgram";
-}
-
-bool CommandList::isSeparatorFromTheLeftForList(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
-}
-
-bool CommandList::isSeparatorFromTheLeftForListMatrixRow(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
-}
-
-bool CommandList::isSeparatorFromTheLeftForMatrixRow(const std::string& input)
-{ return input=="{" || input=="(" || input=="[" || input==":" || input==";" || input==" "
-  || input=="MatrixSeparator" || input == "MatrixRowSeparator" ;
-}
-
-bool CommandList::isSeparatorFromTheRightForList(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
-}
-
-bool CommandList::isSeparatorFromTheRightForListMatrixRow(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
-}
-
-bool CommandList::isSeparatorFromTheRightForMatrixRow(const std::string& input)
-{ return input=="}" || input==")" || input=="]" || input==":" || input==";" || input=="MatrixSeparator" || input=="&"
-  || input=="MatrixRowSeparator" || input=="\\\\" || input=="\\end";
-}
-
-bool CommandList::isSeparatorFromTheLeftForDefinition(const std::string& input)
-{ return input=="{" || input=="(" || input==";" || input=="SequenceStatements" || input==" ";
-}
-
-bool CommandList::isSeparatorFromTheRightForDefinition(const std::string& input)
-{ return input=="}" || input==")" || input==";" || input=="EndProgram";
-}
-
-bool CommandList::AllowsTensorInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="*" || lookAhead=="/" ||
-    lookAhead=="Expression" || lookAhead==")" ||
-    lookAhead=="(" || lookAhead=="[" ||
-    lookAhead=="=" || lookAhead=="\\otimes" ||
-//    lookAhead=="{" ||
-    lookAhead=="Variable" || lookAhead=="," ||
-    lookAhead==";" || lookAhead=="]" ||
-    lookAhead=="}" || lookAhead==":" || lookAhead=="EndProgram"
-    ;
-}
-
-bool CommandList::AllowsTimesInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="*" || lookAhead=="/" ||
-    lookAhead=="Expression" || lookAhead==")" ||
-    lookAhead=="(" || lookAhead=="[" ||
-    lookAhead=="=" ||
-//    lookAhead=="{" ||
-    lookAhead=="Variable" || lookAhead=="," ||
-    lookAhead==";" || lookAhead=="]" ||
-    lookAhead=="}" || lookAhead==":" ||
-    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
-    lookAhead=="EndProgram"
-    ;
-}
-
-bool CommandList::AllowsPlusInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="," || lookAhead=="=" ||
-    lookAhead==")" || lookAhead==";" ||
-    lookAhead=="]" || lookAhead=="}" ||
-    lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" ||
-    lookAhead=="EndProgram" ||
-    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
-    ;
-}
-
-bool CommandList::LookAheadAllowsDivide(const std::string& lookAhead)
-{ return this->AllowsTimesInPreceding(lookAhead);
-}
-
-bool CommandList::ApplyOneRule()
-{ //return false;
-  MacroRegisterFunctionWithName("CommandList::ApplyOneRule");
-  if (this->CurrentSyntacticStacK->size<=this->numEmptyTokensStart)
-    return false;
-  const SyntacticElement& lastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  const std::string& lastS=this->controlSequences[lastE.controlIndex];
-  if (lastS==" ")
-    return  this->PopTopSyntacticStack();
-  const SyntacticElement& secondToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  const std::string& secondToLastS=this->controlSequences[secondToLastE.controlIndex];
-  const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  const std::string& thirdToLastS=this->controlSequences[thirdToLastE.controlIndex];
-  const SyntacticElement& fourthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
-  const std::string& fourthToLastS=this->controlSequences[fourthToLastE.controlIndex];
-  const SyntacticElement& fifthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
-  const std::string& fifthToLastS=this->controlSequences[fifthToLastE.controlIndex];
-  const SyntacticElement& sixthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
-  const std::string& sixthToLastS=this->controlSequences[sixthToLastE.controlIndex];
-  const SyntacticElement& seventhToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-7];
-  const std::string& seventhToLastS=this->controlSequences[seventhToLastE.controlIndex];
-  const SyntacticElement& eighthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-8];
-  const std::string& eighthToLastS=this->controlSequences[eighthToLastE.controlIndex];
-//  const SyntacticElement& ninthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-9];
-//  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
-  if (this->flagLogSyntaxRules)
-    this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
-  if (secondToLastS=="%" && lastS=="LogParsing")
-  { this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
-    this->flagLogSyntaxRules=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="LogFull")
-  { std::cout
-    << "<hr>You are requesting a full log of the evaluation process. "
-    << "<br><b>WARNING requesting  a full log of the evaluation process is very slow, "
-    << " and might produce a HUGE printout. </b>"
-    << "<br><b>You have been warned. </b><hr>";
-    this->flagLogFullTreeCrunching=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="LogEvaluation")
-  { this->flagLogEvaluatioN=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="LatexLink")
-  { this->flagProduceLatexLink=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="FullTree")
-  { this->flagDisplayFullExpressionTree=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-  if (secondToLastS=="%" && lastS=="HideLHS")
-  { this->flagHideLHS=true;
-    this->PopTopSyntacticStack();
-    return this->PopTopSyntacticStack();
-  }
-
-/*  if (lastE.theData.IndexBoundVars==-1)
-  { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
-    << this->ElementToStringSyntacticStack()
-    << " does not have properly initialized context. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
-    assert(false);
-  }*/
-  if (secondToLastS==":" && lastS=="=")
-    return this->ReplaceXXByCon(this->conDefine());
-  if (secondToLastS==":=" && lastS==":")
-    return this->ReplaceXXByCon(this->conIsDenotedBy());
-  if (secondToLastS=="{" && lastS=="}")
-    return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
-  if (lastS=="\\cdot")
-    return this->ReplaceXByCon(this->conApplyFunction(), Expression::formatFunctionUseCdot);
-//  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")
-//    return this->ReplaceXXXByCon(this->conBindVariable());
-  if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
-    return this->ReplaceXXVXdotsXbyE_BOUND_XdotsX(2);
-  if (secondToLastS=="Variable" && ((lastS!="}" && lastS!=" ") || thirdToLastS!="{" || fourthToLastS!="{"))
-    return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(1);
-  if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!="}" && lastS!=" ")
-    return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(2);
-  if (secondToLastS=="\\left" && lastS == "(")
-    return this->ReplaceXYByY();
-  if (secondToLastS=="\\right" && lastS == ")")
-    return this->ReplaceXYByY();
-  if (lastS=="=" && secondToLastS=="=")
-    return this->ReplaceXXByCon(this->conEqualEqual());
-  if (lastS=="Integer" && secondToLastS=="Integer")
-    return this->ReplaceIntIntBy10IntPlusInt();
-  if (secondToLastS=="Integer" && lastS!="Integer" && lastS!=".")
-  { this->registerPositionAfterDecimalPoint=0;
-    return this->ReplaceAXbyEX();
-  }
-  if (thirdToLastS=="Integer" && secondToLastS=="." && lastS=="Integer" && this->registerPositionAfterDecimalPoint==0)
-  { this->registerPositionAfterDecimalPoint=1;
-    return this->ReplaceXYByY();
-  }
-  //there is an ambiguity on how should function application be associated
-  //Which is better: x{}y{}z:= x{} (y{}z), or x{}y{}z:=(x{}y){}z ?
-  //In our implementation, we choose x{}y{}z:= x{} (y{}z). Although this is slightly harder to implement,
-  //it appears to be the more natural choice.
-//  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
-//      && this->LookAheadAllowsApplyFunction(lastS) )
-//    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
-  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression" && this->LookAheadAllowsApplyFunction(lastS))
-    return this->ReplaceEXEXByEX(Expression::formatDefault);
-  if (fourthToLastS=="Expression" && thirdToLastS=="_" && secondToLastS=="Expression" && lastS!="_")
-    return this->ReplaceEXEXByEX(Expression::formatFunctionUseUnderscore);
-  //end of ambiguity.
-  if (fourthToLastS=="{"  && thirdToLastS=="{}" && secondToLastS=="Expression" && lastS=="}")
-    return this->ReplaceXYYXByYY();
-  if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->LookAheadAllowsThePower(lastS) )
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="-" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="-" && this->AllowsPlusInPreceding(lastS) )
-    return this->ReplaceOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="mod" && fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="\\choose" && fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="\\otimes" && fourthToLastS=="Expression" && this->AllowsTensorInPreceding(lastS))
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="Expression" && fourthToLastS=="\\frac")
-    return this->ReplaceXEEXByEXusingO(this->opDivide(), Expression::formatUseFrac);
-  if (secondToLastS=="Expression" && thirdToLastS=="*" && fourthToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
-    return this->ReplaceEOEXByEX(Expression::formatTimesDenotedByStar);
-  if (secondToLastS=="Expression" && thirdToLastS=="/" && fourthToLastS=="Expression" && this->LookAheadAllowsDivide(lastS) )
-    return this->ReplaceEOEXByEX();
-  if (secondToLastS=="Expression" && thirdToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
-    return this->ReplaceEEXByEXusingO(this->conTimes());
-  if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
-    return this->ReplaceXEXByE(secondToLastE.theData.format);
-  if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
-    return this->ReplaceXEXByE(secondToLastE.theData.format);
-  if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
-    return this->ReplaceEOEByE();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS==">" &&
-      fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="<" &&
-      fourthToLastS=="Expression")
-    return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) &&
-      fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" &&
-      this->isSeparatorFromTheRightForDefinition(lastS))
-    return this->ReplaceEOEXByEX();
-  if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" &&
-      thirdToLastS==":=:" && secondToLastS=="Expression" &&
-      this->isSeparatorFromTheRightForDefinition(lastS))
-    return this->ReplaceEOEXByEX();
-  if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
-    return this->ReplaceEOEXByEX();
-  if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
-    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
-  //else
-  //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
-  if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
-    return this->ReplaceEOEXByEX();
-  if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" &&
-      (lastS=="," || lastS==")" || lastS=="}"))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());
-  if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
-    return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
-  if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceXXYBySequenceY(this->conSequence());
-  if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
-    return this->ReplaceXXYXBySequenceYX(this->conSequence());
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" &&
-      secondToLastS=="Sequence" && lastS==")")
-    return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" &&
-      secondToLastS=="Sequence" && lastS=="}")
-    return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (secondToLastS=="Sequence" && lastS!=",")
-    return this->ReplaceOXbyEX();
-  if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
-  { this->registerNumNonClosedBeginArray++;
-    return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
-  }
-  if (fourthToLastS=="\\end" && thirdToLastS=="{" && secondToLastS=="array" && lastS=="}" )
-  { this->registerNumNonClosedBeginArray--;
-    return this->ReplaceXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
-  }
-  if (lastS=="\\" && secondToLastS== "\\")
-    return this->ReplaceXXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\\\"));
-  if (lastS=="\\\\")
-  { if (this->registerNumNonClosedBeginArray>0)
-      return this->ReplaceXByCon(this->conMatrixRowSeparator(), Expression::formatMatrixRow);
-    else
-      return this->PopTopSyntacticStack();
-  }
-  if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
-    return this->ReplaceYXdotsXBySequenceYXdotsX(this->conMatrixRow(), Expression::formatMatrixRow, 1);
-  if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conSequenceMatrixRow(), Expression::formatMatrix);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="Expression" && lastS=="&")
-    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
-  if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXBySequenceX(this->conSequenceMatrixRow(), Expression::formatMatrix);
-  if (thirdToLastS=="MatrixSeparator" && secondToLastS=="SequenceMatrixRows" && lastS=="MatrixSeparator")
-    return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
-  if (secondToLastS=="MatrixRowSeparator" && lastS == "MatrixSeparator")
-    return this->ReplaceXYByY();
-  if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
-    return this->ReplaceXEXEXByEusingO(this->conLieBracket());
-  if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) &&
-      seventhToLastS=="Expression" && sixthToLastS==":" &&
-      fifthToLastS=="if" && fourthToLastS=="Expression" &&
-      thirdToLastS==":=" && secondToLastS=="Expression" &&
-      this->isSeparatorFromTheRightForDefinition(lastS))
-    return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
-  if (lastS==";")
-  { this->NonBoundVariablesStack.LastObject()->Clear();
-    this->BoundVariablesStack.LastObject()->Clear();
-  }
-  if (thirdToLastS=="SequenceStatements" && secondToLastS=="Expression" &&
-      (lastS==")" || lastS =="}"))
-    return this->ReplaceEXdotsXbySsXdotsX(1);
-  if (secondToLastS=="Expression" && lastS==";")
-    return this->ReplaceEXdotsXBySs(1);
-  if (secondToLastS=="Expression" && lastS=="EndProgram")
-    return this->ReplaceEXdotsXbySsXdotsX(1);
-  if ((thirdToLastS=="(" || thirdToLastS=="{" ) && secondToLastS=="SequenceStatements" &&
-      (lastS==")" || lastS== "}"))
-    return this->ReplaceXEXByE();
-  if (secondToLastS=="SequenceStatements" && lastS=="SequenceStatements")
-    return this->ReplaceSsSsXdotsXbySsXdotsX(0);
-  if (thirdToLastS=="SequenceStatements" && secondToLastS=="SequenceStatements" &&
-      (lastS=="EndProgram" || lastS ==")" || lastS=="}"))
-    return this->ReplaceSsSsXdotsXbySsXdotsX(1);
-  if (secondToLastS=="SequenceStatements" && lastS=="EndProgram")
-    return this->ReplaceXXByCon(this->conExpression());
-  if (lastS=="EndProgram")
-    return this->DecreaseStackSetCharacterRangeS(1);
-  return false;
 }
 
 template<class coefficient>
@@ -2138,8 +1365,7 @@ bool CommandList::GetTypeHighestWeightParabolic
   return true;
 }
 
-bool CommandList::fDecomposeCharGenVerma
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fDecomposeCharGenVerma");
   Expression theContext;
@@ -2148,8 +1374,7 @@ bool CommandList::fDecomposeCharGenVerma
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
   if (!theCommands.GetTypeHighestWeightParabolic<RationalFunctionOld>
-      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg,
-       theCommands.innerRationalFunction))
+      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg, theCommands.innerRationalFunction))
    return false;
   if (output.IsError())
     return true;
@@ -2235,8 +1460,7 @@ bool CommandList::fDecomposeCharGenVerma
     currentHW+=theSub.GetRho();
     theWeyl.ActOn(indexInWeyl, currentHW);
     currentHW-=theSub.GetRho();
-    out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega")
-    << "</td>";
+    out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(currentChar.ToString(&formatChars)) << "</td>";
     if (currentElt.size%2==1)
       currentChar*=-1;
@@ -2248,8 +1472,7 @@ bool CommandList::fDecomposeCharGenVerma
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CommandList::innerPrintGenVermaModule
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPrintGenVermaModule(CommandList& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
@@ -2269,25 +1492,21 @@ bool CommandList::innerPrintGenVermaModule
   return output.AssignValue(theModule.ToString(), theCommands);
 }
 
-bool CommandList::innerHWV
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if(!theCommands.GetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
-       theCommands.innerRationalFunction) )
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
       return true;
-  return theCommands.innerHWVCommon
-  (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
+  return theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
-bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
@@ -2315,8 +1534,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   }
   int desiredHeight;
   if (!levelNode.IsSmallInteger(&desiredHeight))
-    return output.SetError
-    ("second argument of " + input.ToString()+ " must be a small integer", theCommands);
+    return output.SetError("second argument of " + input.ToString()+ " must be a small integer", theCommands);
 
 //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
@@ -2363,8 +1581,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
 }
 
 template <class coefficient>
-bool ModuleSSalgebra<coefficient>::IsNotInParabolic
-(int theGeneratorIndex)
+bool ModuleSSalgebra<coefficient>::IsNotInParabolic(int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0)
@@ -2373,8 +1590,7 @@ bool ModuleSSalgebra<coefficient>::IsNotInParabolic
 }
 
 template <class coefficient>
-bool ModuleSSalgebra<coefficient>::IsNotInLevi
-(int theGeneratorIndex)
+bool ModuleSSalgebra<coefficient>::IsNotInLevi(int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
@@ -2384,8 +1600,7 @@ bool ModuleSSalgebra<coefficient>::IsNotInLevi
 
 template <class coefficient>
 void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
- (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output,
-  GlobalVariables& theGlobalVariables)
+ (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   RationalFunctionOld tempRF;
@@ -2516,9 +1731,7 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 }
 
 template <class coefficient>
-void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra
-(List<quasiDiffOp<coefficient> >& theElts,
- FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport (theGlobalVariables);
   HashedList<quasiDiffMon> bufferMons;
@@ -2536,12 +1749,8 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra
       for (int j=i+1; j<theEltsConverted.size; j++)
       { tempQDO=theEltsConverted[i];
         std::stringstream report;
-        report << "Lie bracketing elements "
-        << " of indices " << i+1 << " and "
-        << j+1 << " out of " << theEltsConverted.size << "<br> "
-        << tempQDO.ToString(theFormat) << "<br> with element <br>"
-        << theEltsConverted[j].ToString(theFormat)
-        << " to get <br>";
+        report << "Lie bracketing elements " << " of indices " << i+1 << " and " << j+1 << " out of " << theEltsConverted.size << "<br> "
+        << tempQDO.ToString(theFormat) << "<br> with element <br>" << theEltsConverted[j].ToString(theFormat) << " to get <br>";
         //      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
   //      << " and " << theEltsConverted[j].ToString(&tempFormat);
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
@@ -2561,9 +1770,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra
             break;
       }
   }
-  std::cout << "<hr>" << "<b>Num times Gaussian Elimination was called = "
-  << numTimesEliminationWasExecuted
-   << ".</b>";
+  std::cout << "<hr>" << "<b>Num times Gaussian Elimination was called = " << numTimesEliminationWasExecuted << ".</b>";
   theElts.SetSize(theEltsConverted.size);
   for (int i=0; i<theEltsConverted.size; i++)
     theElts[i]=theEltsConverted[i];
@@ -2615,24 +1822,18 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
   }
   std::string result=reordered.ToString(theFormat);
   if (result=="0" && this->size()!=0)
-  { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero  "
-    << " quasidifferential operator "
-    << " with non-properly formatted LaTeX string "
-    << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
-    << ", however its properly formatted string is 0. "
-    << "Probably there is something wrong with the initializations of the monomials "
-    << "of the qdo. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero quasidifferential operator "
+    << " with non-properly formatted LaTeX string " << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
+    << ", however its properly formatted string is 0. Probably there is something wrong with the initializations of the monomials "
+    << "of the qdo. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return result;
 }
 
 template <class coefficient>
-bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart
-(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName
-  ("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
+bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
 //  int varShift=this->GetMinNumVars();
 //  std::cout << "<br>varShift for Euler operator: " << varShift;
   int powerMonCoeff=0;
@@ -2642,10 +1843,8 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart
 //  <<  " with min num vars equal to " << theCoeff.GetMinNumVars();
   for (int i=0; i<theCoeff.GetMinNumVars(); i++)
   { if (!theCoeff(i).IsSmallInteger(&powerMonCoeff))
-    { std::cout << "This is a programming error. "
-      << "Getting euler operator part of action on generalized Verma module: I have an "
-      << "exponent with non-small integer entry. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error. Getting euler operator part of action on generalized Verma module: I have an "
+      << "exponent with non-small integer entry. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     currentMonContribution.Makexidj(i, i, 0);
@@ -2661,8 +1860,7 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart
 
 template <class coefficient>
 bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
-  GlobalVariables& theGlobalVariables)
+(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<coefficient> > eltsNilrad;
   List<int> indicesNilrad;
@@ -2775,10 +1973,8 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 }
 
 bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
-(CommandList& theCommands, const Expression& input, Expression& output,
-  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing,
-  SemisimpleLieAlgebra* owner, std::string* xLetter, std::string* partialLetter,
-  std::string* exponentVariableLetter)
+(CommandList& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws,  Expression& hwContext,
+ Selection& selInducing, SemisimpleLieAlgebra* owner, std::string* xLetter, std::string* partialLetter, std::string* exponentVariableLetter)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
@@ -2859,12 +2055,9 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       //std::cout << "<br>theWeylFormat: ";
 //      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
 //        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
-      theWeylFormat.polyAlphabeT.SetSize
-      (numStartingVars+ elementsNegativeNilrad.size);
-      theWeylFormat.weylAlgebraLetters.SetSize
-      (numStartingVars+ elementsNegativeNilrad.size);
-      theUEformat.polyAlphabeT.SetSize
-      (numStartingVars+ elementsNegativeNilrad.size);
+      theWeylFormat.polyAlphabeT.SetSize(numStartingVars+ elementsNegativeNilrad.size);
+      theWeylFormat.weylAlgebraLetters.SetSize(numStartingVars+ elementsNegativeNilrad.size);
+      theUEformat.polyAlphabeT.SetSize(numStartingVars+ elementsNegativeNilrad.size);
       for (int k=0; k<numStartingVars; k++)
         theWeylFormat.weylAlgebraLetters[k]="error";
       //std::cout << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
@@ -2878,25 +2071,20 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
         tempstream2 << theFinalXletter << "_{" << k-numStartingVars+1 << "}";
         tempstream3 << theFinalXletter << "_" << k-numStartingVars+1;
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars+1 << "}";
-        if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) ||
-            theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
+        if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) || theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
           return output.SetError
           ("Error: the variable "+ tempstream2.str()+
-           " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ",
-           theCommands);
+           " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
       }
 //      std::cout << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
 //        std::cout << theUEformat.polyAlphabeT[k] << ", ";
-      out << "<tr><td>General monomial in U(n_-):</td><td>"
-      << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
-      latexReport << "& \\multicolumn{" << theGeneratorsItry.size
-      << "}{c}{Element acting}\\\\<br>\n ";
+      out << "<tr><td>General monomial in U(n_-):</td><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
+      latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
-      out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size
-      << "\"> Element acting</td></td></tr>";
+      out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
       out << "<tr><td>Action on</td>";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { out << "<td>" << theGeneratorsItry[j].ToString(&theUEformat) << "</td>";
@@ -2907,18 +2095,15 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
-      { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero)
-        ;
+      { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
-        out << "<td>" << CGI::GetHtmlMathSpanPure
-        ("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}")
+        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}")
         << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
-        latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat)
-        << "\\end{array}$ ";
+        latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
@@ -2926,16 +2111,11 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
     << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
-    latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline"
-    << "\\multirow{"
-    << theGeneratorsItry.size
-    << "}{*}{$"
-    << theSSalgebra.GetLieAlgebraName() << "$}"
-    << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
+    latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
+    << "}{*}{$" << theSSalgebra.GetLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
-    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString()
-    << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
     //std::cout << "<hr>hw: " << theMod.theHWFundamentalCoordsBaseField.ToString() << " nilrad elts: " << elementsNegativeNilrad.ToString();
     //std::cout << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
@@ -2945,17 +2125,13 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       ;
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
-      out << "<td>" << CGI::GetHtmlMathSpanPure
-      ("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
-      << "</td>";
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}") << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
       theWeylFormat.MaxLineLength=300;
-      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat)
-      << "\\end{array}$";
+      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
       if (j!=0)
         latexReport2 << "&&";
-      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat)
-      << "\\end{array}$\\\\ "
+      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$\\\\ "
       << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
@@ -2977,7 +2153,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
 
 template <class coefficient>
 std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)const
-{ if (this->owneR==0)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra::ToString");
+  if (this->owneR==0)
     return "(Error: module not initialized)";
   SemisimpleLieAlgebra& theAlgebrA=*this->owneR;
   WeylGroup theWeyl;
@@ -3023,10 +2200,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "</table>";
 
   out << "<br>Character: " << this->theChaR.ToString();
-  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection
-  << " out of "
-  << this->actionsGeneratorsMaT.size << " computed actions) follow. "
-  << " Note that generator actions are computed on demand, only the simple "
+  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
+  << this->actionsGeneratorsMaT.size << " computed actions) follow. Note that generator actions are computed on demand, only the simple "
   << " Chevalley generators are computed by default. ";
   out << "<table><tr><td>Generator </td><td>Action</td></tr>";
   ElementSemisimpleLieAlgebra<Rational> tempSSElt;
@@ -3051,8 +2226,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   std::string tempS;
   DrawingVariables theDV;
   this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theGlobalVariables, theDV);
-  out << " A picture of the weight support follows. "
-  << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  out << " A picture of the weight support follows. " << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
 
   bool isBad=false;
   for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
@@ -3063,11 +2237,9 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
     for (int i=0; i<currentList.size; i++)
     { MonomialUniversalEnveloping<coefficient>& currentElt=currentList[i];
-      out << "<br>monomial " << i+1 << ": "
-      << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+      out << "<br>monomial " << i+1 << ": " << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
     }
-    out << "; Matrix of Shapovalov form associated to current weight level: <br> "
-    << theBF.ToString(&theGlobalVariables.theDefaultFormat);
+    out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ToString(&theGlobalVariables.theDefaultFormat);
 /*    if (!theBF.IsPositiveDefinite())
     { monomialDetailStream << "<b>Is not positive definite!</b>";
       this->flagConjectureCholds=false;
@@ -3088,18 +2260,15 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   }
   if (isBad)
     out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
-  out << "<br>Cached Shapovalov products before generator action computation: "
-  << this->cachedPairs.size << ". Dimension : " << this->GetDim();
+  out << "<br>Cached Shapovalov products before generator action computation: " << this->cachedPairs.size << ". Dimension : " << this->GetDim();
   ElementSemisimpleLieAlgebra<Rational> tempSSelt;
-  out << "<br>Cached Shapovalov products final: "
-  << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  out << "<br>Cached Shapovalov products final: " << this->cachedPairs.size << "; dimension : " << this->GetDim();
   return out.str();
 }
 
 bool CommandList::innerHWVCommon
-(CommandList& theCommands, Expression& output,
- Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose)
+(CommandList& theCommands, Expression& output, Vector<RationalFunctionOld>& highestWeightFundCoords, Selection& selectionParSel,
+ Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose)
 { MacroRegisterFunctionWithName("CommandList::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
@@ -3156,8 +2325,7 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
   }
 }
 
-bool CommandList::innerSplitGenericGenVermaTensorFD
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSplitGenericGenVermaTensorFD");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
@@ -3239,8 +2407,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
   theFDMod.SplitOverLevi
   (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
-   &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit)
-  ;
+   &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit);
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunctionOld> > theCentralCharacters;
   theCasimir.MakeCasimir(*theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
@@ -3369,8 +2536,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerFunctionToMatrix
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerFunctionToMatrix");
   std::cout << input.ToString();
   if (!input.IsListNElements(4))
@@ -3413,8 +2579,7 @@ bool CommandList::innerFunctionToMatrix
   return true;
 }
 
-bool CommandList::innerGetChevGen
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerGetChevGen(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
@@ -3438,8 +2603,7 @@ bool CommandList::innerGetChevGen
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
-bool CommandList::innerGetCartanGen
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerGetCartanGen(CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>Here I am with input: " << input.ToString();
   if (!input.IsListNElements(3))
     return false;
@@ -3476,8 +2640,7 @@ bool CommandList::innerGetCartanGen
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
-bool CommandList::fKLcoeffs
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::fKLcoeffs(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
@@ -3487,15 +2650,13 @@ bool CommandList::fKLcoeffs
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (theWeyl.theDynkinType.GetSizeWeylGroupByFormula()>192)
   { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
-    << theSSalgebra->GetLieAlgebraName() << " has "
-    << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << ".";
+    << theSSalgebra->GetLieAlgebraName() << " has " << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
   theFormat.polyAlphabeT.SetSize(1);
   theFormat.polyAlphabeT[0]="q";
-  out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
-  << "Representations of Coxeter Groups and Hecke Algebras.<br>";
+  out << "Our notation follows that of the original Kazhdan-Lusztig paper, Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra->GetLieAlgebraName();
   KLpolys theKLpolys;
   theKLpolys.ComputeKLPolys(&theWeyl);
@@ -3504,8 +2665,7 @@ bool CommandList::fKLcoeffs
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerPrintSSLieAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
+bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 { MacroRegisterFunctionWithName("CommandList::innerPrintSSLieAlgebra");
   SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
@@ -3657,16 +2817,14 @@ bool CommandList::innerPrintSSLieAlgebra
 
 bool Expression::HasBoundVariables()const
 { if (this->theBoss==0)
-  { std::cout << "This is a programming error: calling function HasBoundVariables"
-    << " on non-initialized expression. "
+  { std::cout << "This is a programming error: calling function HasBoundVariables on non-initialized expression. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
-  { std::cout << "This is a programming error: function HasBoundVariables has "
-    << "exceeded recursion depth limit. "
+  { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -3710,8 +2868,7 @@ bool CommandList::innerIsRational
   return true;
 }
 
-bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
-(const Expression& input, List<Expression>& output, int theOp)
+bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
@@ -3730,196 +2887,16 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
   return result;
 }
 
-void CommandList::init(GlobalVariables& inputGlobalVariables)
-{ MacroRegisterFunctionWithName("CommandList::init");
-  //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
-  this->theGlobalVariableS=&inputGlobalVariables;
-  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
-//  this->MaxAlgTransformationsPerExpression=100000;
-  this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->MaxAlgTransformationsPerExpression=100;
-  this->MaxRecursionDeptH=10000;
-  this->RecursionDeptH=0;
-  this->NumErrors=0;
-  this->DepthRecursionReached=0;
-  this->flagLogSyntaxRules=false;
-  this->flagLogEvaluatioN=false;
-  this->flagLogPatternMatching=false;
-  this->flagLogFullTreeCrunching=false;
-  this->flagNewContextNeeded=true;
-  this->flagProduceLatexLink=false;
-  this->flagDisplayFullExpressionTree=false;
-  this->MaxLatexChars=2000;
-  this->numEmptyTokensStart=9;
-  this->MaxNumCachedExpressionPerContext=100000;
-
-  this->theExpressionContainer.Clear();
-//  this->theExpressionContainer.SetExpectedSize(1000);
-
-
-  this->controlSequences.Clear();
-  this->operations.Clear();
-  this->builtInTypes.Clear();
-  this->FunctionHandlers.SetSize(0);
-  this->operations.SetExpectedSize(300);
-  this->FunctionHandlers.SetExpectedSize(300);
-  this->builtInTypes.SetExpectedSize(50);
-
-  this->syntacticSouP.SetSize(0);
-  this->syntacticStacK.SetSize(0);
-  this->flagTimeLimitErrorDetected=false;
-  this->flagFirstErrorEncountered=false;
-  this->flagMaxTransformationsErrorEncountered=false;
-  this->flagMaxRecursionErrorEncountered=false;
-  this->flagAbortComputationASAP=false;
-  this->ExpressionStack.Clear();
-
-  this->theCruncherIds.Clear();
-  this->theCruncherS.SetSize(0);
-  this->syntaxErrors="";
-  this->evaluationErrors.SetSize(0);
-  this->CurrentSyntacticStacK=&this->syntacticStacK;
-  this->CurrrentSyntacticSouP=&this->syntacticSouP;
-  //operation List is the very first operation. It signifies a non-atomic expression.
-  //operation List is signified by the empty string
-  //operation List must always have index 0.
-  this->AddOperationNoRepetitionAllowed("");
-
-  this->AddOperationNoRepetitionAllowed(":=");
-  this->AddOperationNoRepetitionAllowed(";");
-  this->AddOperationNoRepetitionAllowed("if:=");
-  this->AddOperationNoRepetitionAllowed("{}");
-  this->AddOperationNoRepetitionAllowed("+");
-  this->AddOperationNoRepetitionAllowed("-");
-  this->AddOperationNoRepetitionAllowed("/");
-  this->AddOperationNoRepetitionAllowed("*");
-  this->AddOperationNoRepetitionAllowed("mod");
-  this->AddOperationNoRepetitionAllowed("\\otimes");
-  this->AddOperationNoRepetitionAllowed("\\choose");
-  this->AddOperationNoRepetitionAllowed("[]");
-  this->AddOperationNoRepetitionAllowed(":=:");
-  this->AddOperationNoRepetitionAllowed("^");
-  this->AddOperationNoRepetitionAllowed(">");
-  this->AddOperationNoRepetitionAllowed("<");
-  this->AddOperationNoRepetitionAllowed("==");
-  this->AddOperationNoRepetitionAllowed("\\cup");
-  this->AddOperationNoRepetitionAllowed("\\sqcup");
-  this->AddOperationNoRepetitionAllowed("Error");
-  this->AddOperationNoRepetitionAllowed("Sequence");
-  this->AddOperationNoRepetitionAllowed("PolyVars");
-  this->AddOperationNoRepetitionAllowed("DiffOpVars");
-  this->AddOperationNoRepetitionAllowed("Context");
-
-  this->AddOperationBuiltInType("Rational");
-  this->AddOperationBuiltInType("EltZmodP");
-  this->AddOperationBuiltInType("Double");
-  this->AddOperationBuiltInType("AlgebraicNumberOld");
-  this->AddOperationBuiltInType("PolynomialRational");
-  this->AddOperationBuiltInType("RationalFunction");
-  this->AddOperationBuiltInType("string");
-  this->AddOperationBuiltInType("ElementUEoverRF");
-  this->AddOperationBuiltInType("ElementTensorGVM");
-  this->AddOperationBuiltInType("CharSSAlgMod");
-  this->AddOperationBuiltInType("SemisimpleLieAlg");
-  this->AddOperationBuiltInType("LittelmannPath");
-  this->AddOperationBuiltInType("LRO");
-  this->AddOperationBuiltInType("Matrix_Rational");
-  this->AddOperationBuiltInType("MatrixTensor_Rational");
-  this->AddOperationBuiltInType("Matrix_RF");
-  this->AddOperationBuiltInType("CalculusPlot");
-  this->AddOperationBuiltInType("SemisimpleSubalgebras");
-  this->AddOperationBuiltInType("CandidateSSsubalgebra");
-  this->AddOperationBuiltInType("WeylGroup");
-  this->AddOperationBuiltInType("ElementWeylGroup");
-  this->AddOperationBuiltInType("WeylGroupRep");
-  this->AddOperationBuiltInType("WeylGroupVirtualRep");
-  this->AddOperationBuiltInType("ElementWeylAlgebra");
-
-  this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
-  this->controlSequences.AddOnTop("{{}}");
-  this->controlSequences.AddOnTop("Variable");
-  this->controlSequences.AddOnTop(this->operations);//all operations defined up to this point are also control sequences
-  this->controlSequences.AddOnTop("Expression");
-  this->controlSequences.AddOnTop("Integer");
-  this->controlSequences.AddOnTop(",");
-  this->controlSequences.AddOnTop(".");
-  this->controlSequences.AddOnTop("if");
-  this->controlSequences.AddOnTop("\\frac");
-  this->controlSequences.AddOnTop("\\cdot");
-  this->controlSequences.AddOnTop("_");
-  this->controlSequences.AddOnTop("(");
-  this->controlSequences.AddOnTop(")");
-  this->controlSequences.AddOnTop("[");
-  this->controlSequences.AddOnTop("]");
-  this->controlSequences.AddOnTop("{");
-  this->controlSequences.AddOnTop("}");
-  this->controlSequences.AddOnTop(":");
-  this->controlSequences.AddOnTop("SequenceStatements");
-  this->controlSequences.AddOnTop("MakeSequence");
-  this->controlSequences.AddOnTop("SequenceMatrixRows");
-  this->controlSequences.AddOnTop("MatrixRow");
-  this->controlSequences.AddOnTop("=");
-  this->controlSequences.AddOnTop("$");
-  this->controlSequences.AddOnTop("MatrixSeparator");
-  this->controlSequences.AddOnTop("MatrixRowSeparator");
-  this->controlSequences.AddOnTop("\\begin");
-  this->controlSequences.AddOnTop("\\left");
-  this->controlSequences.AddOnTop("\\right");
-  this->controlSequences.AddOnTop("array");
-  this->controlSequences.AddOnTop("\\end");
-  this->controlSequences.AddOnTop("\\\\");
-  this->controlSequences.AddOnTop("\\");
-  this->controlSequences.AddOnTop("&");
-  this->controlSequences.AddOnTop("%");
-  this->controlSequences.AddOnTop("LogParsing");
-  this->controlSequences.AddOnTop("LogEvaluation");
-  this->controlSequences.AddOnTop("LogFull");
-  this->controlSequences.AddOnTop("LatexLink");
-  this->controlSequences.AddOnTop("FullTree");
-  this->controlSequences.AddOnTop("HideLHS");
-  this->controlSequences.AddOnTop("EndProgram");
-//additional operations treated like regular expressions.
-  this->AddOperationNoRepetitionAllowed("MonomialCollection");
-  this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Serialization");
-  this->AddOperationNoRepetitionAllowed("Melt");
-  this->AddOperationNoRepetitionAllowed("Bind");
-
-
-  this->TotalNumPatternMatchedPerformed=0;
-  this->initPredefinedStandardOperations();
-  this->initPredefinedInnerFunctions();
-  Expression theSSLieAlgrule;
-  this->RuleStack.SetSize(0);
-  this->RuleContextIdentifier=0;
-/*  this->Evaluate
-  ("(InternalVariable1{}{{InternalVariableA}})_{{InternalVariableB}}\
-   :=getSemisimpleLieAlgGenerator{}\
-   (InternalVariable1{}InternalVariableA,\
-   InternalVariableB)")
-  ;
-  this->theProgramExpression[1][0].SetChildAtomValue(0, this->opSSLieAlg(), *this);
-  this->theProgramExpression[2][1][1].SetChildAtomValue(0, this->opSSLieAlg(), *this);
-  this->RuleStack.AddOnTop(this->theProgramExpression);
-*/
-
-
-//  std::cout << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
-}
-
-Expression::FunctionAddress CommandList::GetInnerFunctionFromOp
-(int theOp, const Expression& left, const Expression& right)
-{ std::cout << "Function CommandList::GetfOp not implemented yet. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+Expression::FunctionAddress CommandList::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
+{ std::cout << "Function CommandList::GetfOp not implemented yet. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   assert(false);
   return 0;
 }
 
 template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
-  (const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero
-   )
+(const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables,
+ const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
   if (right.IsEqualToZero())
   { this->MakeZero();
@@ -4023,8 +3000,7 @@ bool CommandList::outerCheckRule
   return output.SetError(out.str(), theCommands);
 }
 
-bool CommandList::innerSubZeroDivAnythingWithZero
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSubZeroDivAnythingWithZero(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
   if (input[1].IsEqualToZero())
@@ -4033,8 +3009,7 @@ bool CommandList::innerSubZeroDivAnythingWithZero
   return false;
 }
 
-bool CommandList::innerCancelMultiplicativeInverse
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerCancelMultiplicativeInverse(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -4046,8 +3021,7 @@ bool CommandList::innerCancelMultiplicativeInverse
   return false;
 }
 
-bool CommandList::innerAssociateDivisionDivision
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
   if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -4075,8 +3049,7 @@ bool CommandList::outerAssociateTimesDivision
   return true;
 }
 
-bool CommandList::outerAssociate
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerAssociate(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theOperation=input[0].theData;
@@ -4088,16 +3061,15 @@ bool CommandList::outerAssociate
   return true;
 }
 
-bool CommandList::StandardIsDenotedBy
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::StandardIsDenotedBy(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
     return false;
   const Expression& withNotation=input[2];
   const Expression& theNotation=input[1];
-  theCommands.Comments << "<br>Registering notation: globally, " << withNotation.ToString()
-  << " will be denoted by " << theNotation.ToString();
+  theCommands.Comments << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
+  << theNotation.ToString();
   theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.ToString());
   theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
   output=input;
@@ -4112,8 +3084,7 @@ bool CommandList::StandardIsDenotedBy
   return true;
 }
 
-bool CommandList::innerMultiplyByOne
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerMultiplyByOne(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.children.size!=3)
     return false;
   if (!input[1].IsEqualToOne())
@@ -4122,8 +3093,7 @@ bool CommandList::innerMultiplyByOne
   return true;
 }
 
-bool CommandList::outerTimesToFunctionApplication
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
     return false;
   if (input.children.size<2)
@@ -4136,19 +3106,14 @@ bool CommandList::outerTimesToFunctionApplication
   return true;
 }
 
-bool CommandList::outerDistribute
-(CommandList& theCommands, const Expression& input, Expression& output,
+bool CommandList::outerDistribute(CommandList& theCommands, const Expression& input, Expression& output,
  int AdditiveOp, int multiplicativeOp)
-{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft
-      (theCommands, input, output, AdditiveOp, multiplicativeOp))
+{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
     return true;
-  return theCommands.outerRightDistributeBracketIsOnTheRight
-  (theCommands, input, output, AdditiveOp, multiplicativeOp);
+  return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
 }
 
-bool CommandList::outerLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, const Expression& input, Expression& output,
- int AdditiveOp, int multiplicativeOp)
+bool CommandList::outerLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -4162,9 +3127,7 @@ bool CommandList::outerLeftDistributeBracketIsOnTheLeft
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool CommandList::outerRightDistributeBracketIsOnTheRight
-(CommandList& theCommands, const Expression& input, Expression& output,
- int AdditiveOp, int multiplicativeOp)
+bool CommandList::outerRightDistributeBracketIsOnTheRight(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -4178,8 +3141,7 @@ bool CommandList::outerRightDistributeBracketIsOnTheRight
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool CommandList::CollectSummands
-(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
+bool CommandList::CollectSummands(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
 { List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   Expression oneE; //used to record the constant term
@@ -4211,8 +3173,7 @@ bool CommandList::innerAssociateExponentExponent
   return output.MakeXOX(theCommands, opPower, input[1][1], tempE);
 }
 
-bool CommandList::outerPowerRaiseToFirst
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerPowerRaiseToFirst(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     return false;
   if (input[2].IsEqualToOne())
@@ -4227,8 +3188,7 @@ bool CommandList::outerPowerRaiseToFirst
   return false;
 }
 
-bool CommandList::outerPlus
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerPlus");
 //  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
   if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
@@ -4257,8 +3217,7 @@ bool CommandList::outerPlus
   }
   if (summandsWithCoeff.size>=2)
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
-    { std::cout << "This is a pgoramming error: bad comparison! "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a pgoramming error: bad comparison! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   summandsWithCoeff.QuickSortAscending();
@@ -4279,8 +3238,7 @@ bool CommandList::outerPlus
   return true;
 }
 
-bool CommandList::EvaluateIf
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::EvaluateIf(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDefineConditional(), 4))
     return output.SetError("Error: operation :if := takes three arguments.", theCommands);
   Rational conditionRat;
@@ -4297,66 +3255,7 @@ bool CommandList::EvaluateIf
   return false;
 }
 
-bool CommandList::outerStandardFunction
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerStandardFunction");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (&input==&output)
-  { std::cout << "This is a programming error: the input and output object of "
-    << " outerStandardFunction must be different."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  if (!input.IsLisT())
-    return false;
-  const Expression& functionNameNode =input[0];
-  int theIndex;
-//  std::cout << "<br>Simplifying with standard fn " << input.ToString();
-//  std::cout.flush();
-  if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
-    if (input.children.size==2)
-      if (input[1].IsSmallInteger(&theIndex))
-        if (theIndex>0 && theIndex<functionNameNode.children.size)
-        { output=input[theIndex];
-          return true;
-        }
-  if (!functionNameNode.IsAtoM())
-    return false;
-//  std::cout << "<br>Evaluating: " << input.ToString();
-//  std::cout.flush();
-  for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
-    if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
-    { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      if (outerFun.theFunction(theCommands, input, output))
-        if(output!=input)
-        { output.CheckConsistency();
-          return true;
-        }
-    } else
-    { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
-      //if (functionNameNode.ToString()=="+")
-      //{ bool tempbool=true;
-      //   std::cout << "<br>Here i am!";
-      //}
-      if (input.children.size>2)
-      { //std::cout << "more than 2 children: " << input.Lispify();
-        if (innerFun.inputFitsMyInnerType(input))
-          if (innerFun.theFunction(theCommands, input, output))
-          { output.CheckConsistency();
-            return true;
-          }
-      } else
-        if (innerFun.inputFitsMyInnerType(input[1]))
-          if (innerFun.theFunction(theCommands, input[1], output))
-          { output.CheckConsistency();
-            return true;
-          }
-    }
-  return false;
-}
-
-bool CommandList::outerGreaterThan
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerGreaterThan(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -4369,8 +3268,7 @@ bool CommandList::outerGreaterThan
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::outerLessThan
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerLessThan(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -4383,8 +3281,7 @@ bool CommandList::outerLessThan
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::outerEqualEqual
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerEqualEqual(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -4417,8 +3314,7 @@ bool Expression::IsInteger(LargeInt* whichInteger)const
   return theRat.IsInteger(whichInteger);
 }
 
-bool CommandList::outerUnion
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerUnion(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opUnion()))
     return false;
   int numElts=1;
@@ -4436,8 +3332,7 @@ bool CommandList::outerUnion
   return true;
 }
 
-bool CommandList::outerUnionNoRepetition
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerUnionNoRepetition(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsLisT())
     return false;
   int numElts=1;
@@ -4463,8 +3358,7 @@ bool CommandList::outerUnionNoRepetition
   return true;
 }
 
-bool CommandList::outerDivide
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerDivide(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerDivide");
 //  std::cout << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
 //  << input.Lispify() ;
@@ -4484,10 +3378,8 @@ bool CommandList::outerDivide
   return output.SetChilD(2, tempE);
 }
 
-bool CommandList::outerMinus
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!(input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 3) ||
-        input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 2)) )
+bool CommandList::outerMinus(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!(input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 3) || input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 2)) )
     return false;
   Expression tempE, minusOne;
   minusOne.AssignValue(-1, theCommands);
@@ -4504,469 +3396,6 @@ bool Expression::operator==(const Expression& other)const
 { if (this->theBoss!=other.theBoss)
     return false;
   return this->theData==other.theData && this->children==other.children;
-}
-
-bool CommandList::ExpressionMatchesPattern
-(const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
- std::stringstream* theLog)
-{ MacroRegisterFunctionWithName("CommandList::ExpressionMatchesPattern");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (!(thePattern.theBoss==this && input.theBoss==this))
-  { std::cout << "This is a programming error. Either a pattern or an input has a wrongly "
-    << " initialized owner: the pattern is " << thePattern.ToString() << " and the input is "
-    << input.ToString() << ". "
-    << " The error is certainly in the preceding code; here "
-    << "is a stack trace"
-    << ", however beware that the error might be in code preceding the stack loading. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-//  static int ExpressionMatchesPatternDebugCounter=-1;
-  static const bool printLocalDebugInfo=false;
-//  if (input.ToString()=="f{}((a)):=a+5")
-//    printLocalDebugInfo=true;
-  //ExpressionMatchesPatternDebugCounter++;
-//  std::cout << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
-//  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
-  if (printLocalDebugInfo)
-  { std::cout << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
-    std::cout << "<br> current matched expressions: " << matchedExpressions.ToString();
-  }
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (this->RecursionDeptH>this->MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Max recursion depth of " << this->MaxRecursionDeptH
-    << " exceeded whlie trying to match expression pattern "
-    << thePattern.ToString() << " onto expression " << input.ToString();
-    this->evaluationErrors.AddOnTop(out.str());
-    return false;
-  }
-//  if (this->opDefine()==input.theOperation)
-//    return false;
-  int opVarB=this->opBind();
-  if (thePattern.IsListStartingWithAtom(opVarB))
-  { int indexLeft= matchedExpressions.theBoundVariables.GetIndex(thePattern);
-    if (indexLeft==-1)
-    { matchedExpressions.theBoundVariables.AddOnTop(thePattern);
-      matchedExpressions.variableImages.AddOnTop(input);
-      indexLeft=matchedExpressions.theBoundVariables.size-1;
-    }
-    if (matchedExpressions.variableImages[indexLeft]!=input)
-      return false;
-    if (printLocalDebugInfo)
-      std::cout << "<br><b>Match!</b>";
-    return true;
-  }
-  if (thePattern.theData!=input.theData || thePattern.children.size!=input.children.size )
-    return false;
-  for (int i=0; i<thePattern.children.size; i++)
-    if (!(this->ExpressionMatchesPattern(thePattern[i], input[i], matchedExpressions, theLog)))
-      return false;
-  if (printLocalDebugInfo)
-    std::cout << "<br><b>Match!</b>";
-  return true;
-}
-
-StackMaintainerRules::StackMaintainerRules(CommandList* inputBoss)
-{ this->theBoss=inputBoss;
-  if (this->theBoss!=0)
-    this->startingRuleStackSize=inputBoss->RuleStack.size;
-}
-
-StackMaintainerRules::~StackMaintainerRules()
-{ if (this->theBoss!=0)
-    this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
-  this->theBoss=0;
-}
-
-bool CommandList::EvaluateExpression
-(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs,
- bool& outputIsFree)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::EvaluateExpression");
-  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
-  { this->Comments << "<br>";
-    for (int i=0; i<this->RecursionDeptH; i++)
-      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
-      //std::cout << "&nbsp&nbsp&nbsp&nbsp";
-    this->Comments << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
-//    std::cout << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
-  }
-  if (this->RecursionDeptH>=this->MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
-    output.SetError(out.str(), *this);
-    if (this->flagMaxRecursionErrorEncountered)
-      this->evaluationErrors.AddOnTop(out.str());
-    this->flagMaxRecursionErrorEncountered=true;
-    this->flagAbortComputationASAP=true;
-    return true;
-  }
-  output=input;
-  if (output.IsError())
-  { this->flagAbortComputationASAP=true;
-    return true;
-  }
-  if (this->ExpressionStack.Contains(input))
-  { std::stringstream errorStream;
-    errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
-    << " but I have already seen that expression in the expression stack. ";
-    this->flagAbortComputationASAP=true;
-    return output.SetError(errorStream.str(), *this);
-  }
-  this->ExpressionStack.AddOnTop(input);
-  Expression theExpressionWithContext;
-  theExpressionWithContext.reset(*this, 3);
-  theExpressionWithContext.AddChildAtomOnTop(this->opSequence());
-  theExpressionWithContext.AddChildValueOnTop(this->RuleContextIdentifier);
-  theExpressionWithContext.AddChildOnTop(input);
-  int indexInCache=this->cachedExpressions.GetIndex(theExpressionWithContext);
-  if (indexInCache!=-1)
-    output= this->imagesCachedExpressions[indexInCache];
-  else if (this->cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
-  { this->cachedExpressions.AddOnTop(theExpressionWithContext);
-    indexInCache=this->cachedExpressions.size-1;
-    this->imagesCachedExpressions.SetSize(indexInCache+1);
-    this->imagesCachedExpressions.LastObject()->reset(*this);
-    this->imagesCachedExpressions.LastObject()->SetError("Error: not computed yet.", *this);
-  }
-  //reduction phase:
-  outputIsFree=true;
-  bool ReductionOcurred=true;
-  int counterNumTransformations=0;
-  Expression tempE;
-  tempE.reset(*this);
-  Expression beforePatternMatch;
-  //std::cout << "<br>";
-  //for (int i=0; i<this->RecursionDeptH; i++)
-    //std::cout << "&nbsp;";
-  //std::cout << "Evaluating " << input.ToString();
-  //std::cout.flush();
-  while (ReductionOcurred && !this->flagAbortComputationASAP)
-  { StackMaintainerRules theRuleStackMaintainer(this);
-    ReductionOcurred=false;
-    counterNumTransformations++;
-//    std::cout << " transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
-//    std::cout.flush();
-
-    //if (this->flagLogEvaluation && counterNumTransformations>1 )
-    //{ this->Comments << "<br>input: " << input.ToString() << "->"
-    //  << output.ToString();
-    //}
-    if (indexInCache!=-1)
-      this->imagesCachedExpressions[indexInCache]=output;
-//////------Handling naughty expressions------
-    if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
-      if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
-      { if (!this->flagTimeLimitErrorDetected)
-          std::cout << "<br><b>Max allowed computational time is "
-          << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS
-          << " have elapsed -> aborting computation ungracefully.</b>";
-        this->flagTimeLimitErrorDetected=true;
-        this->flagAbortComputationASAP=true;
-        break;
-      }
-    if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
-    { if (!this->flagMaxTransformationsErrorEncountered)
-      { std::stringstream out;
-        out << " While simplifying " << output.ToString(&this->formatVisibleStrings) << "<br>Maximum number of algebraic transformations of "
-        << this->MaxAlgTransformationsPerExpression << " exceeded.";
-        output.SetError(out.str(), *this);
-        this->flagAbortComputationASAP=true;
-        this->flagMaxTransformationsErrorEncountered=true;
-      }
-      break;
-    }
-//////------End of handling naughty expressions------
-/////-------Evaluating children if the expression is not of built-in type-------
-    //bool foundError=false;
-    if (!output.IsBuiltInType())
-      for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
-      { bool tempBool=true;
-  //      bool debugBool=false;
-  //      if (output[i].ToString()=="c");
-  //        debugBool=true;
-        if (this->EvaluateExpression(output[i], tempE, bufferPairs, tempBool))
-          output.SetChilD(i, tempE);
-        if (!tempBool)
-          outputIsFree=false;
-        if (output[i].IsError())
-        { this->flagAbortComputationASAP=true;
-          break;
-        }
-  /*      if (this->RecursionDeptH==1)
-        { std::cout << "<hr>Considering whether "
-          << output[i].Lispify() << " is rule-stack-worthy.";
-          if (output.ToString()=="a:=b")
-            std::cout << "<hr>a:=b is here<hr>";
-        }*/
-        if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
-          if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) || output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
-          { this->RuleStack.AddOnTop(output[i]);
-            this->RuleContextIdentifier++;
-           // std::cout << ".. added !!!!";
-          }
-      }
-    if (this->flagAbortComputationASAP)
-      break;
-    //->/////-------Default operation handling-------
-      //std::cout << "<br>got to standard functions";
-    //std::cout.flush();
-    if (this->outerStandardFunction(*this, output, tempE))
-    { ReductionOcurred=true;
-      if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString() << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
-      output=tempE;
-      continue;
-    }
-    //->/////-------Default operation handling end-------
-    //if (foundError || !resultExpressionIsFree)
-      //break;
-/////-------Evaluating children end-------
-/////-------User-defined pattern matching------
-      //std::cout << "<br>got to custom rules";
-    //std::cout.flush();
-    for (int i=0; i<this->RuleStack.size && !this->flagAbortComputationASAP; i++)
-    { Expression& currentPattern=this->RuleStack[i];
-      this->TotalNumPatternMatchedPerformed++;
-      bufferPairs.reset();
-      //std::cout << "<br>Checking whether "
-      //<< output.ToString() << " matches " << currentPattern.ToString();
-    //std::cout.flush();
-
-      if (this->flagLogEvaluatioN)
-        beforePatternMatch=output;
-      if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
-      { ReductionOcurred=true;
-        if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch.ToString() << "  ->  " << output.ToString() << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
-        break;
-      }
-    }
-/////-------User-defined pattern matching end------
-  }
-  this->ExpressionStack.RemoveIndexSwapWithLast(this->ExpressionStack.size-1);
-  if (output.IsListStartingWithAtom(this->opBind()))
-    outputIsFree=false;
-  if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
-  { this->Comments << "<br>";
-    for (int i=0; i<this->RecursionDeptH; i++)
-      this->Comments << "&nbsp&nbsp&nbsp&nbsp";
-    this->Comments << "to get: " << output.Lispify();
-  }
-
-  return true;
-}
-
-Expression* CommandList::PatternMatch
-(const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
- const Expression* condition, std::stringstream* theLog, bool logAttempts)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::PatternMatch");
-  if (this->RecursionDeptH>=this->MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Error: while trying to evaluate expression, the maximum recursion depth of "
-    << this->MaxRecursionDeptH << " was exceeded";
-    theExpression.SetError(out.str(), *this);
-    return 0;
-  }
-//  if (theExpression.ToString()=="f{}((a)):=a+5")
-//  { std::cout << "!here";
-//  }
-  thePattern.CheckInitialization();
-  theExpression.CheckInitialization();
-  if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
-    return 0;
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
-    << thePattern.ToString() << " with " << bufferPairs.ToString();
-  if (condition==0)
-    return &theExpression;
-  Expression tempExp=*condition;
-  tempExp.CheckInitialization();
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
-  this->SpecializeBoundVars(tempExp, bufferPairs);
-  tempExp.CheckInitialization();
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
-  BoundVariablesSubstitution tempPairs;
-  bool isFree;
-  Expression conditionResult;
-  this->EvaluateExpression(tempExp, conditionResult, tempPairs, isFree);
-  if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>The evaluated specialized condition: " << conditionResult.ToString() << "; evaluating...";
-  if (conditionResult.IsEqualToOne())
-    return &theExpression;
-  return 0;
-}
-
-void CommandList::SpecializeBoundVars
-(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
-  { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn);
-    if (indexMatching!=-1)
-    { toBeSubbedIn=matchedPairs.variableImages[indexMatching];
-      //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
-      return;
-    }
-  }
-  Expression subbedE;
-  for (int i=0; i<toBeSubbedIn.children.size; i++)
-  { subbedE=toBeSubbedIn[i];
-    this->SpecializeBoundVars(subbedE, matchedPairs);
-    toBeSubbedIn.SetChilD(i, subbedE);
-  }
-//  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
-}
-
-bool CommandList::ProcessOneExpressionOnePatternOneSub
-(Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
- std::stringstream* theLog, bool logAttempts)
-{ MacroRegisterFunctionWithName("CommandList::ProcessOneExpressionOnePatternOneSub");
-  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (!thePattern.IsListNElementsStartingWithAtom(this->opDefine(), 3) &&
-      !thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4))
-    return false;
-  if (theLog!=0 && logAttempts)
-  { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
-    (*theLog) << " by pattern " << thePattern.ToString();
-  }
-  theExpression.CheckInitialization();
-  const Expression& currentPattern=thePattern[1];
-  const Expression* theCondition=0;
-  bool isConditionalDefine=
-  thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4);
-  if (isConditionalDefine)
-    theCondition=&thePattern[2];
-  Expression* toBeSubbed=this->PatternMatch
-  (currentPattern, theExpression, bufferPairs, theCondition, theLog, logAttempts);
-  if (toBeSubbed==0)
-    return false;
-  if (theLog!=0 && logAttempts)
-    *theLog << "<br><b>found a match!</b>";
-  if (isConditionalDefine)
-    *toBeSubbed=thePattern[3];
-  else
-    *toBeSubbed=thePattern[2];
-  this->SpecializeBoundVars(*toBeSubbed, bufferPairs);
-  return true;
-}
-
-bool CommandList::ExtractExpressions(Expression& outputExpression, std::string* outputErrors)
-{ //std::string lookAheadToken;
-  std::stringstream errorLog;
-  (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
-  (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
-  this->registerNumNonClosedBeginArray=0;
-  this->registerPositionAfterDecimalPoint=0;
-  for (int i=0; i<this->numEmptyTokensStart; i++)
-    (*this->CurrentSyntacticStacK)[i]=this->GetEmptySyntacticElement();
-  this->parsingLog="";
-  this->NonBoundVariablesStack.SetSize(1);
-  this->BoundVariablesStack.SetSize(1);
-  this->NonBoundVariablesStack.LastObject()->Clear();
-  this->BoundVariablesStack.LastObject()->Clear();
-  for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
-  { (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
-    while(this->ApplyOneRule())
-    {}
-  }
-  bool success=false;
-  if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart)
-    errorLog << "Non-meaningful input detected (spacebar, enter characters only?).";
-  else if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
-  { SyntacticElement& result=(*this->CurrentSyntacticStacK)[this->numEmptyTokensStart];
-    if (result.errorString=="" && result.controlIndex==this->conExpression())
-    { outputExpression=result.theData;
-      success=true;
-//      std::cout << "Success: " << result.theData.ToString();
-    }
-    else if (result.errorString!="")
-      errorLog << "Syntax error with message: " << result.errorString;
-    else
-    { errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
-      errorLog << "It simplifies to:<br> " << this->ElementToStringSyntacticStack();
-    }
-  } else
-  { errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
-    errorLog << "Instead it simplifies to:<br> " << this->ElementToStringSyntacticStack();
-  }
-  if (outputErrors!=0)
-    *outputErrors=errorLog.str();
-  return success;
-}
-
-void CommandList::EvaluateCommands()
-{ MacroRegisterFunctionWithName("CommandList::EvaluateCommands");
-  std::stringstream out;
-  BoundVariablesSubstitution thePairs;
-
-//  this->theLogs.resize(this->theCommands.size());
-//this->ToString();
-  //std::stringstream comments;
-  if (this->syntaxErrors!="")
-  { out << "<hr><b>Syntax errors encountered</b><br>";
-    out << this->syntaxErrors;
-    out << "<hr>";
-  }
-//  std::cout
-//  << "Starting expression: " << this->theProgramExpression.ToString()
-//  << "<hr>";
-  Expression StartingExpression=this->theProgramExpression;
-  this->flagAbortComputationASAP=false;
-  bool tempBool;
-  this->Comments.clear();
-  this->EvaluateExpression
-  (this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
-  if (this->RecursionDeptH!=0)
-  { std::cout << "This is a programming error: the starting recursion depth "
-    << "before evaluation was 0, but after evaluation it is "
-    << this->RecursionDeptH << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;
-  this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
-  this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
-  this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
-  if (!this->flagDisplayFullExpressionTree)
-    out << this->theProgramExpression.ToString(&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
-  else
-  { out << "<hr>Input:<br> " << StartingExpression.ToStringFull() << "<hr>"
-    << "Output:<br>" << this->theProgramExpression.ToStringFull();
-  }
-  this->outputString=out.str();
-  if (this->Comments.str()!="")
-  { std::stringstream commentsStream;
-    commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
-    this->outputCommentsString=commentsStream.str();
-  }
-}
-
-std::string SyntacticElement::ToString(CommandList& theBoss)const
-{ std::stringstream out;
-  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError()
-  || this->controlIndex==theBoss.conSequence() ;
-  if (makeTable)
-    out << "<table border=\"1\"><tr><td>";
-  if (this->controlIndex<0)
-    out << "Error: control index is not initialized! This is likely a programming error.";
-  else
-    out << theBoss.controlSequences[this->controlIndex] << " ";
-  if (makeTable)
-  { out << "</td></tr><tr><td>";
-    out << this->theData.ToString(0);
-    out << "</td></tr><tr><td>" << this->theData.ToStringFull();
-    if (this->errorString!="")
-      out << "</td></tr><tr><td>" << this->errorString;
-    out << "</td></tr></table>";
-  } else
-    out << this->theData.ToString(0);
-  return out.str();
 }
 
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()const

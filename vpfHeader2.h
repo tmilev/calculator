@@ -888,13 +888,11 @@ public:
   bool ReplaceAXbyEX();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceXEXByOEusingO(int inputOpIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();
-  bool GetMatrixExpressions
-  (const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1,
-   int desiredNumCols=-1)
-  ;
+  bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
   bool ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
@@ -1028,6 +1026,9 @@ public:
   }
   int opSequence()
   { return this->operations.GetIndexIMustContainTheObject("Sequence");
+  }
+  int opQuote()
+  { return this->operations.GetIndexIMustContainTheObject("\"");
   }
   int opMelt()
   { return this->operations.GetIndexIMustContainTheObject("Melt");
@@ -1203,7 +1204,13 @@ public:
   ;
   static bool innerReverseOrder(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursivelyToSimilar(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDifferentialOperator(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPolynomialWithDO(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerDOorPoly(theCommands, input, output, true);
+  }
+  static bool innerDifferentialOperator(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerDOorPoly(theCommands, input, output, false);
+  }
+  static bool innerDOorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly);
   static bool outerUnion(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerUnionNoRepetition(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerOperationBinary(CommandList& theCommands, const Expression& input, Expression& output, int theOp);

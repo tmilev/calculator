@@ -17,6 +17,10 @@ void CommandList::initPredefinedInnerFunctions()
    dual polynomial expression. ",
    "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
   this->AddOperationInnerHandler
+  ("PolynomialWithDO", CommandList::innerPolynomialWithDO, "",
+   "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
+   "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \n\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n\\partial_1 x_1");
+  this->AddOperationInnerHandler
   ("RF", this->innerRationalFunction, "",
    "Creates a built-in rational function.",
    "RF{}(x_1+RF{}x_1+x_2)");

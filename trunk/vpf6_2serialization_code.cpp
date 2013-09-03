@@ -8,8 +8,7 @@ bool Serialization::innerStoreChevalleyGenerator
   input.CheckInitialization();
   output.reset(theCommands, 2);
   Expression generatorLetterE, generatorIndexE;
-  if (input.theGeneratorIndex>=input.owneR->GetNumPosRoots() &&
-      input.theGeneratorIndex< input.owneR->GetNumPosRoots()+input.owneR->GetRank())
+  if (input.theGeneratorIndex>=input.owneR->GetNumPosRoots() && input.theGeneratorIndex< input.owneR->GetNumPosRoots()+input.owneR->GetRank())
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("h"), theCommands);
   else
     generatorLetterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("g"), theCommands);
@@ -24,17 +23,13 @@ template <>
 bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
 (CommandList& theCommands, const Expression& input, Expression& outputContext)
 { if (!input.IsListNElements(4))
-  { theCommands.Comments
-    << "<hr>Failed to get ChevalleyGenerator context: "
-    << "input is not a sequence of 4 elements, instead it has "
+  { theCommands.Comments << "<hr>Failed to get ChevalleyGenerator context: input is not a sequence of 4 elements, instead it has "
     << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
     return false;
   }
   DynkinType theType;
   if (!Serialization::DeSerializeMonCollection(theCommands, input[2], theType))
-  { theCommands.Comments
-    << "<hr>Failed to load dynkin type from "
-    << input[2].ToString() << ".";
+  { theCommands.Comments << "<hr>Failed to load dynkin type from " << input[2].ToString() << ".";
     return false;
   }
   SemisimpleLieAlgebra tempAlgebra;
@@ -59,21 +54,17 @@ bool Serialization::DeSerializeMonGetContext<DynkinSimpleType>
 }
 
 template <>
-bool Serialization::DeSerializeMon
-(CommandList& theCommands, const Expression& input, const Expression& inputContext,
- ChevalleyGenerator& outputMon)
+bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& input, const Expression& inputContext, ChevalleyGenerator& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon");
   std::cout << "here i am again -!. ";
   std::cout.flush();
   int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
-  { theCommands.Comments << "<hr>Can't load Chevalley generator: "
-    << " failed extract ambient algebra index from context " << inputContext.ToString();
+  { theCommands.Comments << "<hr>Can't load Chevalley generator: failed extract ambient algebra index from context " << inputContext.ToString();
     return false;
   }
   if (!input.IsListNElements(4))
-  { theCommands.Comments << "<hr>Can't load Chevalley generator: "
-    << " input is not a list of 4 elements, instead it has " << input.children.size
+  { theCommands.Comments << "<hr>Can't load Chevalley generator: input is not a list of 4 elements, instead it has " << input.children.size
     << " elements, i.e., is " << input.ToString();
     return false;
   }
@@ -109,8 +100,7 @@ bool Serialization::DeSerializeMon
   return true;
 }
 
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
+bool Serialization::innerStoreObject(CommandList& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input,
  Expression& output, Expression* theContext, bool* isNonConst)
 { output.reset(theCommands);
   if (input.IsEqualToOne())
@@ -129,10 +119,8 @@ bool Serialization::innerStoreObject
     return false;
   }
   if (!input.Powers[0].IsEqualToOne())
-  { if (!Serialization::innerStoreObject
-        (theCommands, input.Powers[0], exponentE, theContext))
-    { theCommands.Comments << "<hr>Failed to store the exponent "
-      << input.Powers[0].ToString();
+  { if (!Serialization::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
+    { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString();
       if (theContext!=0)
         theCommands.Comments << " with context " << theContext->ToString();
       else
@@ -150,8 +138,7 @@ bool Serialization::innerStoreObject
       return false;
     }
     if (!input.Powers[0].IsEqualToOne())
-    { if (!Serialization::innerStoreObject
-          (theCommands, input.Powers[0], exponentE, theContext))
+    { if (!Serialization::innerStoreObject(theCommands, input.Powers[0], exponentE, theContext))
       { theCommands.Comments << "<hr>Failed to store the exponent " << input.Powers[0].ToString()
         << " with context " << theContext->ToString();
         return false;
@@ -164,13 +151,10 @@ bool Serialization::innerStoreObject
   return true;
 }
 
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const MonomialP& input,
-  Expression& output, Expression* theContext, bool* inputOutputNonConst)
+bool Serialization::innerStoreObject(CommandList& theCommands, const MonomialP& input, Expression& output, Expression* theContext, bool* inputOutputNonConst)
 { MacroRegisterFunctionWithName("Serialization::SerializeMon_MonomialP");
   if (theContext==0)
-  { std::cout << "This is a programming error: it is forbiddeen to call "
-    << " MonomialP storing without providing a context. "
+  { std::cout << "This is a programming error: it is forbiddeen to call MonomialP storing without providing a context. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -200,9 +184,7 @@ bool Serialization::innerStoreObject
 }
 
 template <>
-bool Serialization::DeSerializeMon<DynkinSimpleType>
-(CommandList& theCommands, const Expression& input, const Expression& inputContext,
- DynkinSimpleType& outputMon)
+bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, const Expression& input, const Expression& inputContext, DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon_DynkinSimpleType");
     //std::cout << "here i am again. ";
   //std::cout.flush();
@@ -295,8 +277,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>
   return true;
 }
 
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const DynkinSimpleType& input, Expression& output,
+bool Serialization::innerStoreObject(CommandList& theCommands, const DynkinSimpleType& input, Expression& output,
  Expression* theContext, bool* isNonConst)
 { MacroRegisterFunctionWithName("Serialization::DynkinSimpleType");
   if (isNonConst!=0)
@@ -322,8 +303,7 @@ bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& 
 //  std::cout << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
   { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
-    << " exceeded while trying to evaluate polynomial expression "
-    << "(i.e. your polynomial expression is too large).";
+    << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
     return false;
   }
   if (input.IsOfType<Polynomial<Rational> >())
@@ -332,8 +312,7 @@ bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& 
   }
   if (input.IsOfType<Rational>())
   { if (!input.ConvertToType<Polynomial<Rational> >(output))
-    { std::cout << "This is a programming error: failed to convert rational to polynomial. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: failed to convert rational to polynomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return true;
@@ -379,14 +358,12 @@ bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& 
   return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
 }
 
-bool Serialization::innerSSLieAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool Serialization::innerSSLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
   return Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
 }
 
-bool Serialization::innerLoadDynkinType
-(CommandList& theCommands, const Expression& input, DynkinType& output)
+bool Serialization::innerLoadDynkinType(CommandList& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerLoadDynkinType");
   Expression polyE;

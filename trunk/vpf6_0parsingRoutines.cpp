@@ -108,10 +108,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
-  this->AddOperationNoRepetitionAllowed("PolyVars");
-  this->AddOperationNoRepetitionAllowed("DiffOpVars");
   this->AddOperationNoRepetitionAllowed("Context");
   this->AddOperationNoRepetitionAllowed("\"");
+  this->AddOperationNoRepetitionAllowed("PolyVars");
+  this->AddOperationNoRepetitionAllowed("DiffOpVars");
+
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
@@ -163,6 +164,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("SequenceMatrixRows");
   this->controlSequences.AddOnTop("MatrixRow");
   this->controlSequences.AddOnTop("=");
+  this->controlSequences.AddOnTop("\\circ");
   this->controlSequences.AddOnTop("$");
   this->controlSequences.AddOnTop("MatrixSeparator");
   this->controlSequences.AddOnTop("MatrixRowSeparator");
@@ -183,6 +185,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("EndProgram");
 //additional operations treated like regular expressions.
+  this->AddOperationBuiltInType("PolynomialWithDO");
+  this->AddOperationBuiltInType("DifferentialOperator");
+
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
   this->AddOperationNoRepetitionAllowed("Serialization");
@@ -442,15 +447,23 @@ bool CommandList::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(in
   return this->DecreaseStackSetCharacterRangeS(4);
 }
 
-bool CommandList::ReplaceXEXByOEusingO(int inputOpIndex, int inputFormat)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  Expression theE=theElt.theData;
-  theElt.theData.reset(*this, 2);
-  theElt.theData.AddChildAtomOnTop(inputOpIndex);
-  theElt.theData.AddChildOnTop(theE);
-  theElt.theData.format=inputFormat;
-  theElt.controlIndex=this->conExpression();
-  return true;
+bool CommandList::ReplaceXEXByE(int inputFormat)
+{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=this->conExpression();
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
+  return this->DecreaseStackSetCharacterRangeS(2);
+}
+
+
+bool CommandList::ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat)
+{ SyntacticElement& outputElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& inputElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  outputElt.theData.reset(*this, 2);
+  outputElt.theData.AddChildAtomOnTop(inputOpIndex);
+  outputElt.theData.AddChildOnTop(inputElt.theData);
+  outputElt.theData.format=inputFormat;
+  outputElt.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(2);
 }
 
 bool CommandList::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
@@ -734,7 +747,8 @@ bool CommandList::LookAheadAllowsDivide(const std::string& lookAhead)
 }
 
 bool CommandList::ExtractExpressions(Expression& outputExpression, std::string* outputErrors)
-{ //std::string lookAheadToken;
+{ MacroRegisterFunctionWithName("ommandList::ExtractExpressions");
+  //std::string lookAheadToken;
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
@@ -747,10 +761,20 @@ bool CommandList::ExtractExpressions(Expression& outputExpression, std::string* 
   this->BoundVariablesStack.SetSize(1);
   this->NonBoundVariablesStack.LastObject()->Clear();
   this->BoundVariablesStack.LastObject()->Clear();
+  const int maxNumTimesOneRuleCanBeCalled=1000;
   for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
   { (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
+    int numberOfTimesApplyOneRuleCalled=0;
     while(this->ApplyOneRule())
-    {}
+    { numberOfTimesApplyOneRuleCalled++;
+      if (numberOfTimesApplyOneRuleCalled>maxNumTimesOneRuleCanBeCalled)
+      { std::cout << "This may be a programming error: CommandList::ApplyOneRule called more than " << maxNumTimesOneRuleCanBeCalled
+        << " times without advancing to the next syntactic element in the syntactic soup. If this is indeed an expression which requires that"
+        << " many application of a single parsing rule, then you should modify function CommandList::ExtractExpressions"
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
   }
   bool success=false;
   if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart)
@@ -854,6 +878,8 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
     return this->ReplaceXByCon(this->conApplyFunction(), Expression::formatFunctionUseCdot);
+  if (lastS=="\\circ")
+    return this->ReplaceXByCon(this->conApplyFunction(), Expression::formatFunctionUseCdot);
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")
 //    return this->ReplaceXXXByCon(this->conBindVariable());
   if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
@@ -919,7 +945,7 @@ bool CommandList::ApplyOneRule()
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="\"" && secondToLastS=="Expression" && lastS=="\"")
-    return this->ReplaceXEXByOEusingO(this->opQuote());
+    return this->ReplaceXEXByEcontainingOE(this->opQuote());
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lastS) && secondToLastS=="Expression" && thirdToLastS=="==" && fourthToLastS=="Expression")

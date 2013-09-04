@@ -17,7 +17,7 @@ public:
   static bool innerDivideTypeByType(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerAddDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrDOToRatOrPolyOrDO(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddUEToAny(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
@@ -31,7 +31,7 @@ public:
   static bool innerAddAlgebraicNumberToAlgebraicNumber(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyByRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLRO(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLSPath(CommandList& theCommands, const Expression& input, Expression& output);
@@ -51,14 +51,16 @@ public:
   static bool innerMultiplyAnyByEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerLieBracketRatOrUEWithRatOrUE(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketRatPolyOrDOWithRatPolyOrDO(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerDivideRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideDoubleByDouble(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerEWABySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerSequenceByT(CommandList& theCommands, const Expression& input, Expression& output);

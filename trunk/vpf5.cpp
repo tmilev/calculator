@@ -2653,8 +2653,8 @@ bool CommandList::GetMatrixExpressions
   return true;
 }
 
-bool CommandList::innerDOorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly)
-{ MacroRegisterFunctionWithName("CommandList::innerDOorPoly");
+bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly)
+{ MacroRegisterFunctionWithName("CommandList::innerEWAorPoly");
   if (!input.IsListNElements(3))
     return false;
 //  const Expression& diffE=input[1];

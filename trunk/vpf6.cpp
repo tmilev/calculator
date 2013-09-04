@@ -898,11 +898,11 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<ElementWeylAlgebra>())
-  { PolynomialSubstitution<Rational> subDOpart;
+  { PolynomialSubstitution<Rational> subEWApart;
     PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolyAndDOSubFromSuperContextNoFailure(newContext, subPolyPart, subDOpart);
+    myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra outputEWA=this->GetValue<ElementWeylAlgebra>();
-    outputEWA.Substitution(subPolyPart, subDOpart);
+    outputEWA.Substitution(subPolyPart, subEWApart);
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
@@ -1042,7 +1042,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
 //  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   HashedList<Expression> polyVarUnion;
-  MemorySaving<HashedList<Expression> > DOVarUnion;
+  MemorySaving<HashedList<Expression> > EWAVarUnion;
   polyVarUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
   for (int i=1; i<leftPolyV.children.size; i++)
     polyVarUnion.AddOnTopNoRepetition(leftPolyV[i]);
@@ -1061,48 +1061,48 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     outputContext.AddChildOnTop(polyVarsE);
   }
   //Converting differential operators if needed.
-  Expression leftDOV=leftContext.ContextGetDifferentialOperatorVariables();
-  Expression rightDOV=rightContext.ContextGetDifferentialOperatorVariables();
-  if (leftDOV.children.size>1 || rightDOV.children.size>1)
-  { Selection foundDOVar;
-    List<Expression> DOVars;
-    foundDOVar.init(polyVarUnion.size);
-    DOVars.SetSize(polyVarUnion.size);
+  Expression leftEWAV=leftContext.ContextGetDifferentialOperatorVariables();
+  Expression rightEWAV=rightContext.ContextGetDifferentialOperatorVariables();
+  if (leftEWAV.children.size>1 || rightEWAV.children.size>1)
+  { Selection foundEWAVar;
+    List<Expression> EWAVars;
+    foundEWAVar.init(polyVarUnion.size);
+    EWAVars.SetSize(polyVarUnion.size);
     Expression* currentPolyV=&leftPolyV;
-    Expression* currentDOV=&leftDOV;
-    for (int k=0; k<2; k++, currentPolyV=&rightPolyV, currentDOV=&rightDOV)
-      for (int i=1; i<currentDOV->children.size; i++)
+    Expression* currentEWAV=&leftEWAV;
+    for (int k=0; k<2; k++, currentPolyV=&rightPolyV, currentEWAV=&rightEWAV)
+      for (int i=1; i<currentEWAV->children.size; i++)
       { int theIndex=polyVarUnion.GetIndex((*currentPolyV)[i]);
-        if (foundDOVar.selected[theIndex])
-          if ((*currentDOV)[i]!=DOVars[theIndex])
+        if (foundEWAVar.selected[theIndex])
+          if ((*currentEWAV)[i]!=EWAVars[theIndex])
           { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
             << " because " << (*currentPolyV)[i].ToString() << " has two different corresponding differential operator variables: "
-            << DOVars[theIndex].ToString() << " and " << (*currentDOV)[i].ToString();
+            << EWAVars[theIndex].ToString() << " and " << (*currentEWAV)[i].ToString();
             return false;
           }
-        foundDOVar.AddSelectionAppendNewIndex(theIndex);
-        DOVars[theIndex]=(*currentDOV)[i];
+        foundEWAVar.AddSelectionAppendNewIndex(theIndex);
+        EWAVars[theIndex]=(*currentEWAV)[i];
       }
-    for (int i=0; i<foundDOVar.MaxSize; i++)
-      if (!foundDOVar.selected[i])
-      { Expression currentDOVar;
-        currentDOVar.reset(owner, 2);
-        currentDOVar.AddChildAtomOnTop(owner.AddOperationNoRepetitionOrReturnIndexFirst("\\partial"));
+    for (int i=0; i<foundEWAVar.MaxSize; i++)
+      if (!foundEWAVar.selected[i])
+      { Expression currentEWAVar;
+        currentEWAVar.reset(owner, 2);
+        currentEWAVar.AddChildAtomOnTop(owner.AddOperationNoRepetitionOrReturnIndexFirst("\\partial"));
         Expression indexE;
         indexE.AssignValue(i, owner);
-        currentDOVar.AddChildOnTop(indexE);
-        if (DOVars.Contains(currentDOVar))
+        currentEWAVar.AddChildOnTop(indexE);
+        if (EWAVars.Contains(currentEWAVar))
         { owner.Comments << "<hr>Failed to merge contexts " << leftContext.ToString() << " and " << rightContext.ToString()
           << ": " << polyVarUnion[i].ToString() << " had no differential letter assigned to it. I tried to assign automatically  "
-          << currentDOVar.ToString() << " as differential operator letter, but it was already taken. ";
+          << currentEWAVar.ToString() << " as differential operator letter, but it was already taken. ";
           return false;
         }
       }
     Expression diffVarsE;
     diffVarsE.reset(owner, polyVarUnion.size+1);
     diffVarsE.AddChildAtomOnTop(owner.opDifferentialOperatorVariables());
-    for (int i=0; i<DOVars.size; i++)
-      diffVarsE.AddChildOnTop(DOVars[i]);
+    for (int i=0; i<EWAVars.size; i++)
+      diffVarsE.AddChildOnTop(EWAVars[i]);
     outputContext.AddChildOnTop(diffVarsE);
   }
   if (leftSSindex!=-1)
@@ -1127,10 +1127,10 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
   output.polyAlphabeT.SetSize(thePolyE.children.size-1);
   for (int i=1; i<thePolyE.children.size; i++)
     output.polyAlphabeT[i-1]=thePolyE[i].ToString();
-  Expression theDOE=this->ContextGetDifferentialOperatorVariables();
-  output.weylAlgebraLetters.SetSize(theDOE.children.size-1);
-  for (int i=1; i<theDOE.children.size; i++)
-    output.weylAlgebraLetters[i-1]=theDOE[i].ToString();
+  Expression theEWAE=this->ContextGetDifferentialOperatorVariables();
+  output.weylAlgebraLetters.SetSize(theEWAE.children.size-1);
+  for (int i=1; i<theEWAE.children.size; i++)
+    output.weylAlgebraLetters[i-1]=theEWAE[i].ToString();
 }
 
 bool Expression::IsContext()const
@@ -1190,14 +1190,14 @@ std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
-//  std::cout << "<br>system command:<br>" << systemCommand1.str();
+  //std::cout << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());
   if (useLatexDviPSpsTopdf)
   { systemCommand2 << " dvips -o " <<  fileName.str() << ".ps " << fileName.str() << ".dvi";
-//    std::cout << "<br>system command:<br>" << systemCommand2.str();
+    //std::cout << "<br>system command:<br>" << systemCommand2.str();
     this->SystemCommands.AddOnTop(systemCommand2.str());
     systemCommand3 << " convert " << fileName.str() << ".ps " << fileName.str() << ".png";
-//    std::cout << "<br>system command:<br>" << systemCommand3.str();
+    //std::cout << "<br>system command:<br>" << systemCommand3.str();
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
@@ -1211,13 +1211,11 @@ inline int IntIdentity(const int& x)
 { return x;
 }
 
-void Expression::MakeProducT
-  (CommandList& owner, const Expression& left, const Expression& right)
+void Expression::MakeProducT(CommandList& owner, const Expression& left, const Expression& right)
 { this->MakeXOX(owner, owner.opTimes(), left, right);
 }
 
-void Expression::MakeFunction
-  (CommandList& owner, const Expression& theFunction, const Expression& theArgument)
+void Expression::MakeFunction(CommandList& owner, const Expression& theFunction, const Expression& theArgument)
 { this->reset(owner, 2);
   this->AddChildOnTop(theFunction);
   this->AddChildOnTop(theArgument);
@@ -1238,8 +1236,7 @@ bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const Expression&
   return this->AddChildOnTop(thePolyVars);
 }
 
-bool Expression::MakeContextWithOnePolyVarOneDiffVar
-(CommandList& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
+bool Expression::MakeContextWithOnePolyVarOneDiffVar(CommandList& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
 { this->MakeEmptyContext(owner);
   return this->ContextSetDiffOperatorVar(inputPolyVarE, inputDiffVarE);
 }
@@ -1326,8 +1323,7 @@ bool CommandList::GetTypeHighestWeightParabolic
  Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
 { if (!input.IsListNElements(4) && !input.IsListNElements(3))
     return output.SetError
-    ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
-     SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
+    ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
@@ -1381,8 +1377,7 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
   std::stringstream out;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat)
-  << "<br>Parabolic selection: " << parSel.ToString();
+  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat) << "<br>Parabolic selection: " << parSel.ToString();
   theHWFundCoordsFDPart=theHWfundcoords;
   for (int i=0; i<parSel.CardinalitySelection; i++)
     theHWFundCoordsFDPart[parSel.elements[i]]=0;
@@ -1396,16 +1391,14 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
 //  HashedList<Vector<Polynomial<Rational> > > theOrbit;
 //  if (!theSSlieAlg.theWeyl.GenerateOrbit(tempVects, true, theOrbit, false, -1, 0, 1000))
 //    out << "Error: failed to generate highest weight \rho-modified orbit (too large?)";
-  theHWSimpCoordsFDPart=theWeyl.GetSimpleCoordinatesFromFundamental
-  (theHWFundCoordsFDPart);
+  theHWSimpCoordsFDPart=theWeyl.GetSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart+=theWeyl.rho;
 //  ElementWeylGroup raisingElt;
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   ReflectionSubgroupWeylGroup theSub;
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
-    return output.SetError
-    ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
+    return output.SetError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
@@ -1416,12 +1409,10 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
     currentHW+=theSub.GetRho();
     theWeyl.ActOn(i, currentHW);
     currentHW-=theSub.GetRho();
-    out << "<tr><td>" << currentHW.ToString() << "</td><td>"
-    << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
+    out << "<tr><td>" << currentHW.ToString() << "</td><td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
   }
   out << "</table>";
-  out << "<br>The rho of the Levi part is: " << theSub.GetRho().ToString()
-  << "<br>Weyl group of Levi part follows. "
+  out << "<br>The rho of the Levi part is: " << theSub.GetRho().ToString() << "<br>Weyl group of Levi part follows. "
   << "<br><table><tr><td>Weyl element<td><td>Image hw under small rho modified action fund coords</td>"
   << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel=parSel;
@@ -1511,8 +1502,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theComma
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError
-    ("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: \
-     SS algebra type, Number, List{}. ", theCommands);
+    ("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& genVemaWeightNode=input[3];
   const Expression& levelNode=input[2];
@@ -1524,12 +1514,10 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theComma
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVectoR
-      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial))
+  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial))
   { theCommands.Comments
-    << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of "
-    << theRank << " polynomials. The second argument you gave is "
-    << genVemaWeightNode.ToString() << ".";
+    << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
+    << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
     return false;
   }
   int desiredHeight;
@@ -1576,8 +1564,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theComma
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.innerWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
+  return theCommands.innerWriteGenVermaModAsDiffOperatorInner(theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
 }
 
 template <class coefficient>
@@ -1684,12 +1671,8 @@ template <class coefficient>
 class quasiDiffOp : public MonomialCollection<quasiDiffMon, coefficient>
 {
 public:
-  std::string ToString(FormatExpressions* theFormat=0)const
-  ;
-  void GenerateBasisLieAlgebra
-  (List<quasiDiffOp<coefficient> >& theElts,
- FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0)
-  ;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  void GenerateBasisLieAlgebra(List<quasiDiffOp<coefficient> >& theElts, FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
   void operator*=(const quasiDiffOp<coefficient>& standsOnTheRight);
   void operator=(const  MonomialCollection<quasiDiffMon, coefficient>& other)
   { this->MonomialCollection<quasiDiffMon, coefficient>::operator=(other);
@@ -1919,16 +1902,14 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
       //problemCounter++;
       currentMon.Powers[j].GetConstantTerm(currentShift);
       ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-      (currentShift, j+varShift, oneIndexContribution,
-      negativeExponentDenominatorContribution, theGlobalVariables);
+      (currentShift, j+varShift, oneIndexContribution, negativeExponentDenominatorContribution, theGlobalVariables);
 //      std::cout << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
 //      << negativeExponentDenominatorContribution.ToString() << " divided by "
 //      << oneIndexContribution.ToString();
       exponentContribution*=oneIndexContribution;
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
       if (!tempP1.IsEqualToZero())
-      { std::cout << "This is a mathematical error! Something is very wrong with embedding "
-        << " semisimple Lie algebras in Weyl algebras. "
+      { std::cout << "This is a mathematical error! Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
@@ -1940,8 +1921,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
     { //problemCounter++;
       //if (problemCounter==249)
         //std::cout << "ere be problem!";
-      if (!this->GetActionEulerOperatorPart
-         (theCoeff[l], eulerOperatorContribution, theGlobalVariables))
+      if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution, theGlobalVariables))
         return false;
 //      std::cout << "<br>Euler operator contribution: " << eulerOperatorContribution.ToString();
       weylPartSummand=exponentContribution;
@@ -2040,8 +2020,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
-    if (!theMod.MakeFromHW
-        (theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
+    if (!theMod.MakeFromHW(theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true))
       return output.SetError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
@@ -2065,8 +2044,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       std::string theFinalPartialLetter=(partialLetter==0) ? "\\partial" : *partialLetter;
       for (int k=numStartingVars; k<theUEformat.polyAlphabeT.size; k++)
       { std::stringstream tmpStream, tempstream2, tempstream3, tempStream4;
-        tmpStream << theUEformat.polyDefaultLetter << "_{"
-        << k-hwContext.ContextGetNumContextVariables()+1 << "}";
+        tmpStream << theUEformat.polyDefaultLetter << "_{" << k-hwContext.ContextGetNumContextVariables()+1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
         tempstream2 << theFinalXletter << "_{" << k-numStartingVars+1 << "}";
         tempstream3 << theFinalXletter << "_" << k-numStartingVars+1;
@@ -2100,16 +2078,14 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
-        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}")
-        << "</td>";
+        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
-    << "</td>";
+    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.GetLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
@@ -2120,9 +2096,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     //std::cout << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
     { theGenerator=theGeneratorsItry[j];
-      theMod.GetActionGenVermaModuleAsDiffOperator
-      (theGenerator, theQDOs[j], *theCommands.theGlobalVariableS)
-      ;
+      theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
       out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}") << "</td>";
@@ -2165,10 +2139,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: " << this->theHWFundamentalCoordsBaseField.ToString();
   out << "<br>In simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
-  out << "<br>Finite dimensional part h. w. fundamental coordinates:"
-  << this->theHWFDpartFundamentalCoordS.ToString();
-  out << "<br>Finite dimensinoal part h. w. simple coords: "
-  << this->theHWFDpartSimpleCoordS.ToString();
+  out << "<br>Finite dimensional part h. w. fundamental coordinates: " << this->theHWFDpartFundamentalCoordS.ToString();
+  out << "<br>Finite dimensinoal part h. w. simple coords: " << this->theHWFDpartSimpleCoordS.ToString();
   out << "<br>Inducing module character (over the Cartan subalgebra): ";
   FormatExpressions latexFormat;
   latexFormat.flagUseLatex=true;
@@ -2192,9 +2164,8 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       tempWelt.SetSize(currentListInt[j].generatorsIndices.size);
       for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
         tempWelt[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
-      out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
-      << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda</td><td>"
-      << tempWelt.ToString() << "</td> </tr>";
+      out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat)
+      << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }
   }
   out << "</table>";
@@ -2303,12 +2274,10 @@ bool CommandList::innerHWVCommon
     if (Verbose)
       theCommands.Comments << theMod.ToString();
     if (!isGood)
-      return output.SetError
-      ("Error while generating highest weight module. See comments for details. ", theCommands);
+      return output.SetError("Error while generating highest weight module. See comments for details. ", theCommands);
   }
   theElt.MakeHWV(theMod, RFOne);
-  return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >
-  (theElt, hwContext, theCommands);
+  return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
 }
 
 template <class coefficient>
@@ -2552,9 +2521,7 @@ bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expressi
   if (numRows<=0 || numCols<=0)
     return false;
   if (numRows>1000 || numCols>1000)
-  { theCommands.Comments
-    << "Max number of rows/columns is 1000. You requested " << numRows << " rows and "
-    << numCols << " columns.<br>";
+  { theCommands.Comments << "Max number of rows/columns is 1000. You requested " << numRows << " rows and " << numCols << " columns.<br>";
     return false;
   }
   output.reset(theCommands, numRows+1);
@@ -2680,8 +2647,7 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
   out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
-  out << "<br>Weyl group size: " << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << "."
-  << "<br>To get extra details: ";
+  out << "<br>Weyl group size: " << theWeyl.theDynkinType.GetSizeWeylGroupByFormula() << "." << "<br>To get extra details: ";
   std::stringstream tempStream;
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
@@ -2704,11 +2670,9 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
     }
     out << "\\end{longtable}" << "<hr>";
   }
-  out << "We define the symmetric Cartan matrix by requesting that the entry in "
-  << "the i-th row and j-th column "
-  << " be the scalar product of the i^th and j^th roots. "
-  << "Symmetric Cartan matrix:<br>"
-  << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
+  out << "We define the symmetric Cartan matrix by requesting that the entry in the i-th row and j-th column "
+  << " be the scalar product of the i^th and j^th roots. Symmetric Cartan matrix:<br>"
+  << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat));
   Rational tempRat;
   Matrix<Rational> tempMat;
   tempMat = theWeyl.CartanSymmetric;
@@ -2741,15 +2705,12 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
   out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
-  out
-  << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
-  << " with the j^th simple root times 2 divided by the root length squared,<br> "
+  out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
-  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
-    << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> " << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -2757,15 +2718,12 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
-  { out << "<tr><td>"
-    << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
-    << CGI::GetHtmlMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+  { out << "<tr><td>" << simpleBasis[i].ToString() << " </td><td>=</td> <td>" << CGI::GetHtmlMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.theDynkinType.IsSimple
-      (&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.lengthFirstCoRootSquared))
+  if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.lengthFirstCoRootSquared))
     if (tempSimpleType.lengthFirstCoRootSquared==2)
     { //std::cout << "here i am";
       Matrix<Rational> tempM, tempM2;
@@ -2774,28 +2732,21 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
       tempM2.Transpose();
       tempM2.MultiplyOnTheRight(tempM);
       if (!(tempM2==theWeyl.CartanSymmetric))
-      { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the "
-        << "vectors are incorrect. Please fix function DynkinType::GetEpsilonMatrix. "
-        << "The matrix of the epsilon coordinates is "
-        << tempM.ToString()
-        << ", the Symmetric Cartan matrix is "
-        << theWeyl.CartanSymmetric.ToString() << ", and the  "
-        << "transpose of the epsilon matrix times the epsilon matrix:  "
-        << tempM2.ToString() << ". "
+      { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the vectors are incorrect. "
+        << "Please fix function DynkinType::GetEpsilonMatrix. The matrix of the epsilon coordinates is " << tempM.ToString()
+        << ", the Symmetric Cartan matrix is " << theWeyl.CartanSymmetric.ToString() << ", and the  "
+        << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
     }
   if (Verbose)
-  { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
-    << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
+  { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
     Vectors<Rational> rootSystemEpsCoords;
     theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
     for (int i=0; i<theWeyl.RootSystem.size; i++)
     { const Vector<Rational>& current=theWeyl.RootSystem[i];
-      out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
-      << rootSystemEpsCoords[i].ToStringLetterFormat("e")
-      << "</td></tr>";
+      out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>" << rootSystemEpsCoords[i].ToStringLetterFormat("e") << "</td></tr>";
     }
     out << "</table>";
     out << "Comma delimited list of roots: ";
@@ -2806,10 +2757,8 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
     }
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
-    out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
-    << "(computed as explained on John Stembridge's website). "
-    << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
-    << "<br>The grey lines are the edges of the Weyl chamber.<br>"
+    out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "
+    << "<br>The darker red dots can be dragged with the mouse to rotate the picture.<br>The grey lines are the edges of the Weyl chamber.<br>"
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   }
   return output.AssignValue<std::string>(out.str(), theCommands);
@@ -2836,8 +2785,7 @@ bool Expression::HasBoundVariables()const
   return false;
 }
 
-bool CommandList::innerNot
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerNot(CommandList& theCommands, const Expression& input, Expression& output)
 { int theInt;
   if (!input.IsSmallInteger(&theInt))
     return false;
@@ -2846,8 +2794,7 @@ bool CommandList::innerNot
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::innerIsInteger
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerIsInteger(CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
     return false;
   if (input.IsInteger())
@@ -2895,8 +2842,7 @@ Expression::FunctionAddress CommandList::GetInnerFunctionFromOp(int theOp, const
 
 template <class coefficient>
 void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
-(const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit, const coefficient& theRingZero)
+(const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
   if (right.IsEqualToZero())
   { this->MakeZero();
@@ -2920,8 +2866,7 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
   *this=output;
 }
 
-bool CommandList::outerTensor
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerTensor(CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::StandardTensor");
@@ -2939,8 +2884,7 @@ bool CommandList::outerTensor
   return false;
 }
 
-bool CommandList::innerCollectMultiplicands
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerCollectMultiplicands(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   Expression constPower, thePower;
@@ -2966,8 +2910,7 @@ bool CommandList::innerCollectMultiplicands
   return false;
 }
 
-bool CommandList::outerCombineFractions
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerCombineFractions(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
     return false;
   const Expression* quotientE=0;
@@ -2988,8 +2931,7 @@ bool CommandList::outerCombineFractions
   return output.MakeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
 }
 
-bool CommandList::outerCheckRule
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerCheckRule(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDefine(), 3))
     return false;
   if (input[1]!=input[2])
@@ -3037,8 +2979,7 @@ bool CommandList::innerAssociateDivisionDivision(CommandList& theCommands, const
   return false;
 }
 
-bool CommandList::outerAssociateTimesDivision
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerAssociateTimesDivision(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -3106,8 +3047,7 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   return true;
 }
 
-bool CommandList::outerDistribute(CommandList& theCommands, const Expression& input, Expression& output,
- int AdditiveOp, int multiplicativeOp)
+bool CommandList::outerDistribute(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
     return true;
   return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
@@ -3161,8 +3101,7 @@ bool CommandList::CollectSummands(CommandList& theCommands, const Expression& in
   return true;
 }
 
-bool CommandList::innerAssociateExponentExponent
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerAssociateExponentExponent(CommandList& theCommands, const Expression& input, Expression& output)
 { int opPower=theCommands.opThePower();
   if (!input.IsListNElementsStartingWithAtom(opPower, 3))
     return false;
@@ -3547,8 +3486,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { if (isFinal)
     { CalculusFunctionPlot& thePlot=this->GetValueNonConst<CalculusFunctionPlot>();
       out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), true);
-      out << "<br><b>LaTeX code used to generate the output. </b><br>"
-      << thePlot.GetPlotStringAddLatexCommands(true);
+      out << "<br><b>LaTeX code used to generate the output. </b><br>" << thePlot.GetPlotStringAddLatexCommands(true);
     } else
       out << "(plot not shown)";
     result=true;
@@ -3613,7 +3551,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << "ElementWeylAlgebra{}(";
     out << this->GetValue<ElementWeylAlgebra>().ToString(&contextFormat.GetElement());
     out << ")";
-//    out << "[" << this->GetContext().ToString() << "]";
+    out << "[" << this->GetContext().ToString() << "]";
     result=true;
   }
   output=out.str();
@@ -3636,8 +3574,7 @@ std::string Expression::ToStringFull()const
   return out.str();
 }
 
-std::string Expression::ToString
-(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
+std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
@@ -4026,8 +3963,8 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
 { std::string tempS;
   if (!this->IsListNElementsStartingWithAtom())
     return false;
-  if (this->children.size<2 || !(*this)[this->children.size-1].IsAtoM())
-    return false;
+//  if (this->children.size<2 || !(*this)[this->children.size-1].IsAtoM())
+//    return false;
   if (!(*this)[0].IsOperation(&tempS))
     return false;
   if (this->theBoss->GetBuiltInTypes().Contains(tempS))
@@ -4537,9 +4474,9 @@ bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerConte
   return true;
 }
 
-bool Expression::ContextGetPolyAndDOSubFromSuperContextNoFailure
-(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const
-{ bool mustBeTrue= this->ContextGetPolyAndDOSubFromSuperContext(largerContext, outputPolyPart, outputDOpart);
+bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure
+(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const
+{ bool mustBeTrue= this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue)
   { std::cout << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from "
     << " smaller context " << this->ToString() << " relative to larger context " << largerContext.ToString()
@@ -4549,19 +4486,19 @@ bool Expression::ContextGetPolyAndDOSubFromSuperContextNoFailure
   return mustBeTrue;
 }
 
-bool Expression::ContextGetPolyAndDOSubFromSuperContext
-(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const
+bool Expression::ContextGetPolyAndEWASubFromSuperContext
+(const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const
 { if(!this->ContextGetPolySubFromSuperContext(largerContext, outputPolyPart))
     return false;
-  Expression DOVarsElargerContext=largerContext.ContextGetDifferentialOperatorVariables();
-  Expression DOVarsEsmallContext=this->ContextGetDifferentialOperatorVariables();
-  outputDOpart.SetSize(DOVarsElargerContext.children.size-1);
-  int numVars=DOVarsElargerContext.children.size-1;
-  for (int i=1; i<DOVarsEsmallContext.children.size; i++)
-  { int theNewIndex=DOVarsElargerContext.GetIndexChild(DOVarsEsmallContext[i]);
+  Expression EWAVarsElargerContext=largerContext.ContextGetDifferentialOperatorVariables();
+  Expression EWAVarsEsmallContext=this->ContextGetDifferentialOperatorVariables();
+  outputEWApart.SetSize(EWAVarsElargerContext.children.size-1);
+  int numVars=EWAVarsElargerContext.children.size-1;
+  for (int i=1; i<EWAVarsEsmallContext.children.size; i++)
+  { int theNewIndex=EWAVarsElargerContext.GetIndexChild(EWAVarsEsmallContext[i]);
     if (theNewIndex==-1)
       return false;
-    outputDOpart[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
+    outputEWApart[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
   }
   return true;
 }

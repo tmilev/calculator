@@ -234,6 +234,29 @@ bool CommandListInnerTypedFunctions::innerDivideRatByRat(CommandList& theCommand
   return output.AssignValue(leftR/rightR, theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerDivideDoubleByDouble(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideRatByRat");
+  if (!input.IsListNElements(3))
+    return false;
+  double leftD, rightD;
+  Rational leftR, rightR;
+  if (!input[1].IsOfType(&leftD))
+  { if (!input[1].IsOfType(&leftR))
+      return false;
+    else
+      leftD=leftR.DoubleValue();
+  }
+  if (!input[2].IsOfType(&rightD))
+  { if (!input[2].IsOfType(&rightR))
+      return false;
+    else
+      rightD=rightR.DoubleValue();
+  }
+  if (rightD==0)
+    return output.SetError("Division by zero.", theCommands);
+  return output.AssignValue(leftD/rightD, theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerTensorEltTensorByEltTensor");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -292,9 +315,9 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor(CommandList& th
   return output.AssignValueWithContext(outputElt, inputConverted[2].GetContext(), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
   return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra>(theCommands, input, output);
 }
 
@@ -310,9 +333,9 @@ bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
   return CommandListInnerTypedFunctions::innerAddTypeToType<RationalFunctionOld>(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO");
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra>(theCommands, input, output);
 }
 
@@ -442,13 +465,25 @@ bool CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger(CommandList& t
   if (!input.IsListNElements(3))
     return false;
   Polynomial<Rational> base;
-  Rational exp;
-  if(!input[1].IsOfType(&base))
+  int thePower=0;
+  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
-  if(!input[2].IsOfType(&exp))
+  if (thePower<0)
     return false;
-  int thePower;
-  if (!exp.IsSmallInteger(&thePower))
+  if (base.IsEqualToZero() && thePower<=0)
+    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  base.RaiseToPower(thePower);
+  return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
+}
+
+bool CommandListInnerTypedFunctions::innerPowerEWABySmallInteger(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  ElementWeylAlgebra base;
+  int thePower=0;
+  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
   if (thePower<0)
     return false;
@@ -542,8 +577,12 @@ bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat
   if (baseDouble<0)
   { if(!input[2].IsOfType<Rational>())
       return false;
+    int thePower=0;
     if (exp.IsEven())
-      return false;
+    { if (!exp.IsSmallInteger(&thePower))
+        return false;
+      return output.AssignValue(pow (-baseDouble, thePower), theCommands);
+    }
     baseDouble*=-1;
     return output.AssignValue(-pow (baseDouble, expDouble), theCommands);
   }
@@ -763,8 +802,8 @@ bool CommandListInnerTypedFunctions::innerLieBracketRatOrUEWithRatOrUE(CommandLi
   return false;
 }
 
-bool CommandListInnerTypedFunctions::innerLieBracketRatPolyOrDOWithRatPolyOrDO(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerLieBracketRatPolyOrDOWithRatPolyOrDO");
+bool CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA");
   if (!input.IsListNElements(3))
     return false;
   Expression inputConverted;

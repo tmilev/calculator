@@ -13,11 +13,11 @@ void CommandList::initPredefinedInnerFunctions()
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
   this->AddOperationInnerHandler
   ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
-   "Creates a polynomial coefficient differential operator. First argument denotes differential operator letter, second argument - the \
-   dual polynomial expression. ",
+   "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
+   second argument - the dual polynomial expression. ",
    "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
   this->AddOperationInnerHandler
-  ("PolynomialWithDO", CommandList::innerPolynomialWithDO, "",
+  ("PolynomialWithDO", CommandList::innerPolynomialWithEWA, "",
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
    "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \n\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n\\partial_1 x_1");
   this->AddOperationInnerHandler
@@ -991,22 +991,22 @@ void CommandList::initPredefinedStandardOperations()
    "x:=1+Polynomial{}\\lambda; x+x"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opRational(), this->opElementWeylAlgebra(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opPoly(), this->opElementWeylAlgebra(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opPoly(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrDOToRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
+  ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
@@ -1092,19 +1092,19 @@ void CommandList::initPredefinedStandardOperations()
    page 142, exercise 9. ",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opRational(), this->opElementWeylAlgebra(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; 3\\partial_i", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opPoly(), this->opElementWeylAlgebra(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
    " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\na:=x_1x_2;\nb:=\\partial_1\\partial_2; a b - b a -[a,b] ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrDOByRatOrPolyOrDO, this->opElementWeylAlgebra(), this->opPoly(),
+  ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
    "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1309,6 +1309,14 @@ void CommandList::initPredefinedStandardOperations()
    "Divides two rational numbers. ",
    "4/6; 2/0;", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CommandListInnerTypedFunctions::innerDivideDoubleByDouble, this->opRational(), this->opDouble(),
+   "Divides doubles. ",
+   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", CommandListInnerTypedFunctions::innerDivideDoubleByDouble, this->opDouble(), this->opDouble(),
+   "Divides doubles. ",
+   "a:=0.5; b:=0.5; c:=DoubleValue{}3.3; a/c; c/a; c/c", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
    "Divides rational by polynomial (to get a rational function).",
    "z:=Polynomial{}(x^2+y^2);\n1/z", true);
@@ -1341,6 +1349,11 @@ void CommandList::initPredefinedStandardOperations()
    "Raises poly to integer power. ",
    "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
     \n (g_1+g_2)^2+ g_1^{1/2}",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CommandListInnerTypedFunctions::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
+   "Raises element of weyl algebra to integer power. ",
+   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \na:=x_1\\partial_1; \na^10",
    true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1398,8 +1411,8 @@ void CommandList::initPredefinedStandardOperations()
    \ng_{-1}(v\\otimes v);\
    \ng_{-1}g_{-1}(v\\otimes v)", true);
   this->AddOperationInnerHandler
-  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatPolyOrDOWithRatPolyOrDO, "",
-   "Lie bracket of differential operators. ",
+  ("[]", CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
+   "Lie bracket of elements of weyl algebras=differential operators with polynomial coefficients. ",
    "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
   this->AddOperationInnerHandler
   ("[]", CommandListInnerTypedFunctions::innerLieBracketRatOrUEWithRatOrUE, "",

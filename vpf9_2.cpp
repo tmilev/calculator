@@ -89,24 +89,22 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
-void ElementWeylAlgebra::MultiplyTwoMonomials
-(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
+void ElementWeylAlgebra::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
   tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
   tempSel.MaxMultiplicities.SetSize(theDimensioN);
+  int theExpectedSize=1;
   for (int i=0; i<theDimensioN; i++)
   { int powerDiffOp=0;
     if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp))
-    { std::cout << "This is a programming error. Requested operations "
-      << " with elements of weyl algebra"
-      << " that have monomials of exponent " << left.differentialPart(i)
-      << " which I cannot handle. "
-      << " If this is bad user input, it should have been caught at an earlier level. "
+    { std::cout << "This is a programming error. Requested operations with elements of Weyl algebra that have monomials of exponent "
+      << left.differentialPart(i) << " which I cannot handle. If this is bad user input, it should have been caught at an earlier level. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     tempSel.MaxMultiplicities[i]=powerDiffOp;
+    theExpectedSize*=powerDiffOp;
   }
   tempSel.elements.initFillInObject(theDimensioN, 0);
   MonomialWeylAlgebra buffer;
@@ -114,6 +112,7 @@ void ElementWeylAlgebra::MultiplyTwoMonomials
   output.MakeZero();
   int numCycles= tempSel.getTotalNumSubsets();
   Rational coeffBuff;
+  output.SetExpectedSize(theExpectedSize);
   for (int i=0; i<numCycles; i++)
   { coeffBuff=1;
     for (int k=0; k<theDimensioN; k++)

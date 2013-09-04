@@ -261,10 +261,10 @@ class Expression
   static bool ContextMergeContexts(const Expression& leftContext, const Expression& rightContext, Expression& outputContext);
   bool ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const;
   bool ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const;
-  bool ContextGetPolyAndDOSubFromSuperContext
-  (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const;
-  bool ContextGetPolyAndDOSubFromSuperContextNoFailure
-  (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputDOpart)const;
+  bool ContextGetPolyAndEWASubFromSuperContext
+  (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const;
+  bool ContextGetPolyAndEWASubFromSuperContextNoFailure
+  (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const;
   Expression ContextGetPolynomialVariables()const;
   Expression ContextGetDifferentialOperatorVariables()const;
   Expression ContextGetContextType(int theType)const;
@@ -876,19 +876,11 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
     return true;
   }
-  bool ReplaceXEXByE(int inputFormat=Expression::formatDefault)
-  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=
-    this->conExpression();
-    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
-    this->DecreaseStackSetCharacterRangeS(2);
-    return true;
-  }
+  bool ReplaceXEXByE(int inputFormat=Expression::formatDefault);
   bool ReplaceAXbyEX();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceXEXByOEusingO(int inputOpIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();
@@ -1204,13 +1196,13 @@ public:
   ;
   static bool innerReverseOrder(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursivelyToSimilar(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPolynomialWithDO(CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerDOorPoly(theCommands, input, output, true);
+  static bool innerPolynomialWithEWA(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerEWAorPoly(theCommands, input, output, true);
   }
   static bool innerDifferentialOperator(CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerDOorPoly(theCommands, input, output, false);
+  { return theCommands.innerEWAorPoly(theCommands, input, output, false);
   }
-  static bool innerDOorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly);
+  static bool innerEWAorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly);
   static bool outerUnion(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerUnionNoRepetition(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerOperationBinary(CommandList& theCommands, const Expression& input, Expression& output, int theOp);

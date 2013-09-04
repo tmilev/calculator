@@ -933,8 +933,7 @@ bool CommandList::innerMatrixRationalTensorForm
   return output.AssignValue(outputMat, theCommands);
 }
 
-bool CommandList::innerMatrixRationalFunction
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerMatrixRationalFunction(CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
   if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CommandList::innerRationalFunction))
@@ -945,8 +944,7 @@ bool CommandList::innerMatrixRationalFunction
   return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
 
-bool CommandList::innerDrawPolarRfunctionTheta
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerDrawPolarRfunctionTheta(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDrawPolarRfunctionTheta");
   if (!input.IsListNElements(4))
     return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
@@ -958,11 +956,11 @@ bool CommandList::innerDrawPolarRfunctionTheta
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
-  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
     return false;
   std::stringstream out, resultStream;
   out << CGI::GetHtmlMathSpanPure(input[1].ToString()) << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
   resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
@@ -996,7 +994,7 @@ std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
 
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
 { std::stringstream resultStream;
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
   if (useHtml)
     resultStream << "<br>";
   resultStream << " \\psset{xunit=1cm, yunit=1cm}";
@@ -1040,8 +1038,7 @@ void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbed
     }
 }
 
-bool CommandList::innerPlot2DWithBars
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPlot2DWithBars(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2DWithBars");
   //std::cout << input.ToString();
   if (input.children.size<5)
@@ -1159,8 +1156,7 @@ bool CommandList::innerPlot2DWithBars
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CommandList::innerPlot2D
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPlot2D(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
   //std::cout << input.ToString();
   if (input.children.size<4)
@@ -1173,7 +1169,7 @@ bool CommandList::innerPlot2D
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
-  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
     return false;
   CalculusFunctionPlot thePlot;
   thePlot.thePlotElements.AddOnTop
@@ -1183,8 +1179,7 @@ bool CommandList::innerPlot2D
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CommandList::innerSuffixNotationForPostScript
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)

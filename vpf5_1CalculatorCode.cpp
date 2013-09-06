@@ -545,12 +545,10 @@ bool CommandList::innerPrintSSsubalgebras
     std::fstream theFile;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     if(!CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
-    { std::cout << "<br>This may or may not be a programming error. "
-      << " I requested to create file "
-      << theTitlePageFileName << " for output. However, the file failed to create. "
+    { std::cout << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileName
+      << " for output. However, the file failed to create. "
       << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
-      << " folder in which the file is located. "
-      << "3. The folder does not exist for some reason lying outside of the calculator. "
+      << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -565,10 +563,8 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
     theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
-    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
-    << "</title>" << "<script src=\"" << theCommands.DisplayPathServerBase
-    << "jsmath/easy/load.js\"></script> " << "<body>"
-    << theSSsubalgebras.ToString(&theFormat)
+    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString() << "</title>" << "<script src=\"" << theCommands.DisplayPathServerBase
+    << "jsmath/easy/load.js\"></script> " << "<body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
@@ -592,20 +588,15 @@ bool CommandList::innerSSsubalgebras
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
   } else
-    out << "<b>This code is completely experimental. Use the following printouts on "
-    << "your own risk</b>";
-
+    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   SemisimpleSubalgebras tempSSsas(ownerSS);
   SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras
-  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
-  ;
+  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
-bool CommandList::innerEmbedSSalgInSSalg
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))
@@ -629,13 +620,10 @@ bool CommandList::innerEmbedSSalgInSSalg
     return output.AssignValue(out.str(), theCommands);
   }
   else
-    out << "<b>This code is completely experimental. Use the following printouts on "
-    << "your own risk</b>";
+    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   SemisimpleSubalgebras tempSSsas(ownerSS);
   SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras
-  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
-  ;
+  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   DynkinSimpleType theType;
   if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
     return output.SetError("I've been instructed to act on simple types only. ", theCommands);
@@ -658,8 +646,7 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.children.size!=3)
-    return output.SetError
-    ("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
+    return output.SetError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);
@@ -673,10 +660,8 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
 //  std::cout << "<br>The elts: " <<  theOperators.ToString();
 //  std::cout << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << CGI::GetHtmlMathSpanPure("F:="+theF.ToString() + ";") << "<br>"
-    << CGI::GetHtmlMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
-    << CGI::GetHtmlMathSpanPure("E:="+theE.ToString() + ";")
-    << "<br><br>The log stream of the computation follows. " << logStream.str();
+    out << CGI::GetHtmlMathSpanPure("F:="+theF.ToString() + ";") << "<br>" << CGI::GetHtmlMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
+    << CGI::GetHtmlMathSpanPure("E:="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
@@ -685,8 +670,7 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
 bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
   if (input.children.size<3)
-    return output.SetError
-    ("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
+    return output.SetError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);

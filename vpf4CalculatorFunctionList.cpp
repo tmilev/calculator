@@ -3,6 +3,7 @@
 #include "vpf.h"
 #include "vpfCharacters_CalculatorInterface.h"
 #include "vpf6_1innerTypedFunctions.h"
+#include "vpf6_2innerFunctions.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
@@ -129,6 +130,22 @@ void CommandList::initPredefinedInnerFunctions()
 \ns_2:=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
 \ns_3:=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
 \nGenerateMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("GenerateSetClosedWRTLieBracket", CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket, "",
+   "Generates a vecstor space closed with respect to the Lie bracket from input of type elements of weyl algebra. The output is a vector space \
+   basis printout. Fails if the dimension of the vector space is larger than a hard-coded upper bound.",
+   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \
+\ng_1:=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
+\n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
+\ng_-1:=x_5;\
+\ng_2:=x_{5} \\partial_{4} -x_{2} \\partial_{1} ;\
+\ng_-2:=(x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
+\ng_3:=(2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
+\ng_-3:=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
+\nGenerateSetClosedWRTLieBracket{}(g_1, g_-1, g_2, g_-2, g_3, g_-3);\
+\nGenerateSetClosedWRTLieBracket{}(g_1,g_2, g_-2, g_3, g_-3);\
+\nGenerateSetClosedWRTLieBracket{}(g_1, g_-1, g_2, g_-2, g_3);", true, false)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",

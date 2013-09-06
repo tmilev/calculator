@@ -383,6 +383,17 @@ public:
   { whichDigit=theChar-'0';
     return whichDigit<10 && whichDigit>=0;
   }
+  template <class theType>
+  static bool GenerateVectorSpaceClosedWRTLieBracket
+  (List<theType>& inputOutputElts, int upperDimensionBound, GlobalVariables* theGlobalVariables=0)
+  { return MathRoutines::GenerateVectorSpaceClosedWRTOperation(inputOutputElts, upperDimensionBound, theType::LieBracket, theGlobalVariables);
+  }
+  template <class theType>
+  static bool GenerateVectorSpaceClosedWRTOperation
+  (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output),
+   GlobalVariables* theGlobalVariables=0)
+  ;
+
 //  static void NChooseK(int n, int k, LargeInt& output);//
   static void NChooseK(int n, int k, LargeInt& result);
   static int NChooseK(int n, int k)
@@ -5314,8 +5325,7 @@ public:
   }
   template <class MonomialCollectionTemplate>
   static void GaussianEliminationByRowsDeleteZeroRows
-  (List<MonomialCollectionTemplate >& theList,
-   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0)
+  (List<MonomialCollectionTemplate >& theList, bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0)
   { MonomialCollectionTemplate::GaussianEliminationByRows(theList, IvemadeARowSwitch, seedMonomials);
     for (int j=theList.size-1; j>=0; j--)
       if (theList[j].IsEqualToZero())

@@ -139,6 +139,21 @@ void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra
 { this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
 }
 
+void ElementWeylAlgebra::LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output)
+{ if (&output==&right || &output==&left)
+  { ElementWeylAlgebra leftCopy=left;
+    ElementWeylAlgebra rightCopy=right;
+    ElementWeylAlgebra::LieBracket(leftCopy, rightCopy, output);
+    return;
+  }
+  output=right;
+  output.MultiplyOnTheLeft(left);
+  ElementWeylAlgebra subtracand;
+  subtracand=left;
+  subtracand.MultiplyOnTheLeft(right);
+  output-=subtracand;
+}
+
 void ElementWeylAlgebra::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
   tempEl1=(*this);

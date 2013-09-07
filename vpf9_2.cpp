@@ -315,8 +315,7 @@ void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 }
 
 void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO,
- Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
+(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
 { outputDenominator.MakeOne();
   MonomialWeylAlgebra tempMon;
   outputDO.MakeZero();
@@ -355,7 +354,7 @@ void ElementWeylAlgebra::Substitution(const PolynomialSubstitution<Rational>& Su
       for (int k=0; k<DOpart.size(); k++)
       { theMon.polynomialPart=polyPart[j];
         theMon.differentialPart=DOpart[k];
-        output.AddMonomial(theMon, polyPart.theCoeffs[j]*DOpart.theCoeffs[k]);
+        output.AddMonomial(theMon, polyPart.theCoeffs[j]*DOpart.theCoeffs[k]*this->theCoeffs[i]);
       }
   }
   *this=output;

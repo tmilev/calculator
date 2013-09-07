@@ -19,14 +19,17 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   for (int i=0; i<inputOutputElts.size; i++)
     for (int j=i; j<inputOutputElts.size; j++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
+      int oldNumElts=inputOutputElts.size;
       inputOutputElts.AddOnTop(theOpResult);
       inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+      if (oldNumElts<inputOutputElts.size)
+        std::cout << "<hr>Operation between <br>" << inputOutputElts[i].ToString() << " <br> " << inputOutputElts[j].ToString() << " <br>=<br> "
+        << theOpResult.ToString();
       if (upperDimensionBound>0 && inputOutputElts.size>upperDimensionBound)
         return false;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "Accunted Lie bracket out operation between elements " << i+1 << " and " << j+1 << " out of "
-        << inputOutputElts.size;
+        reportStream << "Accounted operation between elements " << i+1 << " and " << j+1 << " out of " << inputOutputElts.size;
         theReport2.Report(reportStream.str());
       }
     }
@@ -42,12 +45,14 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   std::stringstream out;
-  out << "Starting elements: " << theOps.ToString(&theFormat);
-  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, 100, theCommands.theGlobalVariableS);
+  out << "Starting elements: <br>";
+  for (int i=0; i<theOps.size; i++)
+    out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
+  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, 50, theCommands.theGlobalVariableS);
   if (!success)
-    out << "<br>Did not succeed with generating vector space.";
+    out << "<br>Did not succeed with generating vector space, instead got this: " << theOps.ToString();
   else
-    out << "<br>Lie bracket generates vector space with basis: " << theOps.ToString();
+    out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis: <br>" << theOps.ToString();
 
   return output.AssignValue(out.str(), theCommands);
 }

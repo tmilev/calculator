@@ -19,12 +19,12 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   for (int i=0; i<inputOutputElts.size; i++)
     for (int j=i; j<inputOutputElts.size; j++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
-      int oldNumElts=inputOutputElts.size;
+      //int oldNumElts=inputOutputElts.size;
       inputOutputElts.AddOnTop(theOpResult);
       inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
-      if (oldNumElts<inputOutputElts.size)
-        std::cout << "<hr>Operation between <br>" << inputOutputElts[i].ToString() << " <br> " << inputOutputElts[j].ToString() << " <br>=<br> "
-        << theOpResult.ToString();
+      //if (oldNumElts<inputOutputElts.size)
+        //std::cout << "<hr>Operation between <br>" << inputOutputElts[i].ToString() << " <br> " << inputOutputElts[j].ToString() << " <br>=<br> "
+        //<< theOpResult.ToString();
       if (upperDimensionBound>0 && inputOutputElts.size>upperDimensionBound)
         return false;
       if (theGlobalVariables!=0)
@@ -40,7 +40,16 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
 { MacroRegisterFunctionWithName("CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket");
   Vector<ElementWeylAlgebra> theOps;
   Expression theContext;
-  if (!theCommands.GetVectorFromFunctionArguments(input, theOps, &theContext))
+  if (!input.children.size>1)
+    return false;
+  int upperBound=-1;
+  if (!input[1].IsSmallInteger(&upperBound))
+  { theCommands.Comments << "<hr>Failed to extract upper bound for the vector space dimension from the first argument. ";
+    return false;
+  }
+  Expression inputModded=input;
+  inputModded.children.RemoveIndexShiftDown(1);
+  if (!theCommands.GetVectorFromFunctionArguments(inputModded, theOps, &theContext))
     return false;
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
@@ -48,11 +57,21 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
   out << "Starting elements: <br>";
   for (int i=0; i<theOps.size; i++)
     out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
-  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, 50, theCommands.theGlobalVariableS);
+  bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound, theCommands.theGlobalVariableS);
   if (!success)
     out << "<br>Did not succeed with generating vector space, instead got this: " << theOps.ToString();
   else
     out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis: <br>" << theOps.ToString();
 
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerFourierTransformEWA");
+  if (!input.IsOfType<ElementWeylAlgebra>())
+    return false;
+  ElementWeylAlgebra theElt;
+  theElt= input.GetValue<ElementWeylAlgebra>();
+  theElt.FourierTransformMe();
+  return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

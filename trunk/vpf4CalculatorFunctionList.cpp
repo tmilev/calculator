@@ -40,6 +40,13 @@ void CommandList::initPredefinedInnerFunctions()
   ("MatrixRFs", this->innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of rational functions. \
    ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
+  this->AddOperationInnerHandler
+  ("FourierTransformDO", CommandListFunctions::innerFourierTransformEWA, "",
+   "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \
+   (total degree= sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
+   "x:=PolynomialWithDO{}(\\partial, x); \n\\partial:=DifferentialOperator{}(\\partial, x);\
+   \n a:=x; b:=\\partial; \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
+
 
   this->AddOperationInnerHandler
   ("PerturbSplittingNormal", CommandList::innerPerturbSplittingNormal, "",
@@ -132,9 +139,11 @@ void CommandList::initPredefinedInnerFunctions()
 \nGenerateMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
    ;
   this->AddOperationInnerHandler
-  ("GenerateSetClosedWRTLieBracket", CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket, "",
-   "Generates a vecstor space closed with respect to the Lie bracket from input of type elements of weyl algebra. The output is a vector space \
-   basis printout. Fails if the dimension of the vector space is larger than a hard-coded upper bound.",
+  ("GenerateVectorSpaceClosedWRTLieBracket", CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket, "",
+   "Generates a vector space closed with respect to the Lie bracket from input of type elements of weyl algebra. \
+   The first argument of the input is an upper bound for the dimension of the vector space. The remaining \
+   arguments must be differential operators. The output is a vector space \
+   basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
    "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \
 \ng_1:=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
 \n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
@@ -143,9 +152,9 @@ void CommandList::initPredefinedInnerFunctions()
 \ng_-2:=(x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
 \ng_3:=(2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
 \ng_-3:=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
-\nGenerateSetClosedWRTLieBracket{}(g_1, g_-1, g_2, g_-2, g_3, g_-3);\
-\nGenerateSetClosedWRTLieBracket{}(g_1,g_2, g_-2, g_3, g_-3);\
-\nGenerateSetClosedWRTLieBracket{}(g_1, g_-1, g_2, g_-2, g_3);", true, false)
+\nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_-1, g_2, g_-2, g_3, g_-3);\
+\nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
+\nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3);", true, false)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",

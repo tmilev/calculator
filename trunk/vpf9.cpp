@@ -1003,7 +1003,7 @@ void Rational::AssignFracValue()
   }
   LargeIntUnsigned newNum, tempI;
   this->Extended->num.value.DivPositive(this->Extended->den, tempI, newNum);
-  this->Extended->num.value.Assign(newNum);
+  this->Extended->num.value=newNum;
   if (this->Extended->num.IsNegative())
     this->Extended->num.AddLargeIntUnsigned(this->Extended->den);
   assert(this->Extended->num.IsPositiveOrZero());
@@ -1064,6 +1064,18 @@ void Rational::AssignInteger(int x)
 { this->FreeExtended();
   this->DenShort=1;
   this->NumShort=x;
+}
+
+bool Rational::ShrinkExtendedPartIfPossible()
+{ if (this->Extended==0)
+    return true;
+  if (this->Extended->num.value.theDigits.size>1 || this->Extended->den.theDigits.size>1 || this->Extended->num.value.theDigits[0]>=(unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound ||
+      this->Extended->den.theDigits[0]>= (unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound)
+    return false;
+  this->NumShort= this->Extended->num.GetIntValueTruncated();
+  this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
+  this->FreeExtended();
+  return true;
 }
 
 Rational Rational::Factorial(int n, GlobalVariables* theGlobalVariables)
@@ -1169,15 +1181,15 @@ void Rational::Simplify()
 inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
 { assert(x<LargeIntUnsigned::CarryOverBound);
   while (x>0)
-  { if (shift>=this->size)
-    { int oldsize=this->size;
-      this->SetSize(shift+1);
-      for (int i=oldsize; i<this->size; i++)
-        this->TheObjects[i]=0;
+  { if (shift>=this->theDigits.size)
+    { int oldsize=this->theDigits.size;
+      this->theDigits.SetSize(shift+1);
+      for (int i=oldsize; i<this->theDigits.size; i++)
+        this->theDigits[i]=0;
     }
-    this->TheObjects[shift]+=x;
-    if (this->TheObjects[shift]>=LargeIntUnsigned::CarryOverBound)
-    { this->TheObjects[shift]-=LargeIntUnsigned::CarryOverBound;
+    this->theDigits[shift]+=x;
+    if (this->theDigits[shift]>=LargeIntUnsigned::CarryOverBound)
+    { this->theDigits[shift]-=LargeIntUnsigned::CarryOverBound;
       x=1;
       shift++;
     } else
@@ -1191,46 +1203,46 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
   { this->MakeZero();
     return;
   }
-  this->SetSize(shift+1);
+  this->theDigits.SetSize(shift+1);
   for (int i=0; i<shift; i++)
-    this->TheObjects[i]=0;
+    this->theDigits[i]=0;
   unsigned int tempX= x%LargeIntUnsigned::CarryOverBound;
-  this->TheObjects[shift]=tempX;
+  this->theDigits[shift]=tempX;
   x= x/LargeIntUnsigned::CarryOverBound;
   while (x!=0)
   { tempX= x%LargeIntUnsigned::CarryOverBound;
-    this->AddOnTop(tempX);
+    this->theDigits.AddOnTop(tempX);
     x= x/LargeIntUnsigned::CarryOverBound;
   }
 }
 
 inline void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x)
 { MacroIncrementCounter(Rational::TotalLargeAdditions);
-  int oldsize= this->size;
-  this->SetSize(MathRoutines::Maximum(this->size, x.size)+1);
-  for (int i=oldsize; i<this->size; i++)
-    this->TheObjects[i]=0;
+  int oldsize= this->theDigits.size;
+  this->theDigits.SetSize(MathRoutines::Maximum(this->theDigits.size, x.theDigits.size)+1);
+  for (int i=oldsize; i<this->theDigits.size; i++)
+    this->theDigits[i]=0;
   unsigned int CarryOver=0;
-  for(int i=0; i<x.size; i++)
-  { this->TheObjects[i]+=x.TheObjects[i]+CarryOver;
-    if (this->TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
-    { this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
+  for(int i=0; i<x.theDigits.size; i++)
+  { this->theDigits[i]+=x.theDigits[i]+CarryOver;
+    if (this->theDigits[i]>=LargeIntUnsigned::CarryOverBound)
+    { this->theDigits[i]-=LargeIntUnsigned::CarryOverBound;
       CarryOver=1;
     }
     else
       CarryOver=0;
   }
   if (CarryOver!=0)
-    for(int i=x.size; i<this->size; i++)
-    { this->TheObjects[i]+=1;
-      if (this->TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
-        this->TheObjects[i]-=LargeIntUnsigned::CarryOverBound;
+    for(int i=x.theDigits.size; i<this->theDigits.size; i++)
+    { this->theDigits[i]+=1;
+      if (this->theDigits[i]>=LargeIntUnsigned::CarryOverBound)
+        this->theDigits[i]-=LargeIntUnsigned::CarryOverBound;
       else
         break;
     }
 }
 
-void LargeIntUnsigned::Add(const LargeIntUnsigned& x)
+void LargeIntUnsigned::operator+=(const LargeIntUnsigned& x)
 { this->AddNoFitSize(x);
   this->FitSize();
 }
@@ -1249,39 +1261,43 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  for (int i=0; i<x.size; i++)
-    if (this->TheObjects[i]<x.TheObjects[i]+CarryOver)
-    { this->TheObjects[i]+=LargeIntUnsigned::CarryOverBound;
-      this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);
+  for (int i=0; i<x.theDigits.size; i++)
+    if (this->theDigits[i]<x.theDigits[i]+CarryOver)
+    { this->theDigits[i]+=LargeIntUnsigned::CarryOverBound;
+      this->theDigits[i]-=(x.theDigits[i]+CarryOver);
       CarryOver=1;
     }
     else
-    { this->TheObjects[i]-=(x.TheObjects[i]+CarryOver);
+    { this->theDigits[i]-=(x.theDigits[i]+CarryOver);
       CarryOver=0;
     }
   if (CarryOver!=0)
-  { for (int i=x.size; i<this->size; i++)
-      if (this->TheObjects[i]>0)
-      { this->TheObjects[i]--;
+  { for (int i=x.theDigits.size; i<this->theDigits.size; i++)
+      if (this->theDigits[i]>0)
+      { this->theDigits[i]--;
         break;
       }
       else
-        this->TheObjects[i]=LargeIntUnsigned::CarryOverBound-1;
+        this->theDigits[i]=LargeIntUnsigned::CarryOverBound-1;
   }
   this->FitSize();
 //  assert(this->CheckForConsistensy());
 }
 
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
-{ assert(this!=&output && &x!=&output);
+{ if (this==&output || &x==&output)
+  { LargeIntUnsigned thisCopy=*this;
+    LargeIntUnsigned xCopy=x;
+    return thisCopy.MultiplyBy(xCopy, output);
+  }
   MacroIncrementCounter(Rational::TotalLargeMultiplications);
-  output.SetSize(x.size+output.size);
-  for(int i=0; i<output.size; i++)
-    output.TheObjects[i]=0;
-  for (int i=0; i<this->size; i++)
-    for(int j=0; j<x.size; j++)
-    { unsigned long long tempLong= this->TheObjects[i];
-      unsigned long long tempLong2= x.TheObjects[j];
+  output.theDigits.SetSize(x.theDigits.size+this->theDigits.size);
+  for(int i=0; i<output.theDigits.size; i++)
+    output.theDigits[i]=0;
+  for (int i=0; i<this->theDigits.size; i++)
+    for(int j=0; j<x.theDigits.size; j++)
+    { unsigned long long tempLong= this->theDigits[i];
+      unsigned long long tempLong2= x.theDigits[j];
       tempLong= tempLong*tempLong2;
       unsigned long long lowPart= tempLong%LargeIntUnsigned::CarryOverBound;
       unsigned long long highPart= tempLong/LargeIntUnsigned::CarryOverBound;
@@ -1293,13 +1309,13 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
 }
 
 void LargeIntUnsigned::FitSize()
-{ int newSize=this->size;
-  for (int i=this->size-1; i>=1; i--)
-    if (this->TheObjects[i]==0)
+{ int newSize=this->theDigits.size;
+  for (int i=this->theDigits.size-1; i>=1; i--)
+    if (this->theDigits[i]==0)
       newSize--;
     else
       break;
-  this->SetSize(newSize);
+  this->theDigits.SetSize(newSize);
 //  assert(this->CheckForConsistensy());
 }
 
@@ -1312,7 +1328,7 @@ void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x)
 { LargeIntUnsigned tempInt;
   this->MultiplyBy(x, tempInt);
-  this->Assign(tempInt);
+  *this=tempInt;
 //  assert(this->CheckForConsistensy());
 }
 
@@ -1328,12 +1344,12 @@ void LargeIntUnsigned::ToString(std::string& output)const
   { output="0";
     return;
   }
-  if (this->size>1)
+  if (this->theDigits.size>1)
   { this->ElementToStringLargeElementDecimal(output);
     return;
   }
   std::stringstream out;
-  out << this->TheObjects[0];
+  out << this->theDigits[0];
   output=out.str();
 }
 
@@ -1344,14 +1360,14 @@ bool LargeInt::operator==(const LargeInt& x)const
     else
       return false;
   }
-  return this->value.IsEqualTo(x.value);
+  return this->value==x.value;
 }
 
 bool LargeInt::CheckForConsistensy()
 { if (this->sign!=-1 && this->sign!=1)
     return false;
-  for (int i=0; i<this->value.size; i++)
-    if (this->value.TheObjects[i]>=LargeIntUnsigned::CarryOverBound)
+  for (int i=0; i<this->value.theDigits.size; i++)
+    if (this->value.theDigits[i]>=LargeIntUnsigned::CarryOverBound)
       return false;
   return true;
 }
@@ -1388,32 +1404,47 @@ void LargeInt::AssignInt(int x)
 //  assert(this->CheckForConsistensy());
 }
 
+
+bool LargeInt::GetDivisors(List<int>& output, bool includeNegative)
+{ if (this->value.theDigits.size>1)
+    return false;
+  int val= this->value.theDigits[0];
+  if (val>50000)
+    return false;
+  output.SetSize(0);
+  for (int i=1; i<= val; i++)
+    if (val% i==0)
+    { output.AddOnTop(i);
+      if (includeNegative)
+        output.AddOnTop(-i);
+    }
+  return true;
+}
+
 void LargeInt::AddLargeIntUnsigned(const LargeIntUnsigned& x)
 { if (this->sign==1)
-  { this->value.Add(x);
+  { this->value+=x;
     return;
   }
   if (this->value.IsGEQ(x))
     this->value.SubtractSmallerPositive(x);
   else
-  { LargeIntUnsigned tempI;
-    tempI.Assign(x);
+  { LargeIntUnsigned tempI=x;
     tempI.SubtractSmallerPositive(this->value);
-    this->value.Assign(tempI);
+    this->value=tempI;
     this->sign=1;
   }
 }
 
 void LargeInt::operator+=(const LargeInt& x)
 { if (this->sign==x.sign)
-    this->value.Add(x.value);
+    this->value+=x.value;
   else
   { if (this->value.IsGEQ(x.value))
       this->value.SubtractSmallerPositive(x.value);
     else
-    { LargeIntUnsigned tempI;
-      tempI.Assign(this->value);
-      this->value.Assign(x.value);
+    { LargeIntUnsigned tempI=this->value;
+      this->value=x.value;
       this->value.SubtractSmallerPositive(tempI);
       this->sign= x.sign;
     }
@@ -1422,67 +1453,27 @@ void LargeInt::operator+=(const LargeInt& x)
 }
 
 int LargeIntUnsigned::GetUnsignedIntValueTruncated()
-{ return  (int) this->TheObjects[0];
-}
-
-bool LargeIntUnsigned::IsEqualTo(const LargeIntUnsigned &right)const
-{ if (this->size!=right.size)
-    return false;
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=right.TheObjects[i])
-      return false;
-  return true;
+{ return (int) this->theDigits[0];
 }
 
 double LargeIntUnsigned::GetDoubleValue()
 { double result=0;
-  for (int i=this->size-1; i>=0; i--)
-    result=result*LargeIntUnsigned::CarryOverBound+this->TheObjects[i];
+  for (int i=this->theDigits.size-1; i>=0; i--)
+    result=result*LargeIntUnsigned::CarryOverBound+this->theDigits[i];
   return result;
 }
 
 void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
 { MacroIncrementCounter(Rational::TotalLargeGCDcalls);
   LargeIntUnsigned p, q, r, temp;
-//  std::string tempSP, tempSQ, tempSR, tempS;
-  p.Assign(a);
-  q.Assign(b);
-  /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-  { p.ToString(tempSP);
-    q.ToString(tempSQ);
-    r.ToString(tempSR);
-    temp.ToString(tempS);
-  }*/
-  while(!q.IsEqualToZero() )
-  { /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ToString(tempSP);
-      q.ToString(tempSQ);
-      r.ToString(tempSR);
-      temp.ToString(tempS);
-    }*/
-    p.DivPositive(q, temp, r);
-    /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ToString(tempSP);
-      q.ToString(tempSQ);
-      r.ToString(tempSR);
-      temp.ToString(tempS);
-    }*/
-    p.Assign(q);
-    /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ToString(tempSP);
-      q.ToString(tempSQ);
-      r.ToString(tempSR);
-      temp.ToString(tempS);
-    }*/
-    q.Assign(r);
-    /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ToString(tempSP);
-      q.ToString(tempSQ);
-      r.ToString(tempSR);
-      temp.ToString(tempS);
-    }*/
+  p=a;
+  q=b;
+  while(!q.IsEqualToZero())
+  { p.DivPositive(q, temp, r);
+    p=q;
+    q=r;
   }
-  output.Assign(p);
+  output=p;
 //  assert(output.CheckForConsistensy());
 }
 
@@ -1493,9 +1484,8 @@ void LargeInt::MakeZero()
 
 void LargeInt::operator=(const Rational& other)
 { if (!other.IsInteger(this))
-  { std::cout << "This is a programming error: converting implicitly rational number "
-    << other.ToString() << " to integer is not possible as the Rational number is not integral. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: converting implicitly rational number " << other.ToString()
+    << " to integer is not possible as the Rational number is not integral. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
 //  assert(this->CheckForConsistensy());
@@ -1541,10 +1531,10 @@ int LargeInt::operator%(int x)
     x=-x;
   tempX.AssignShiftedUInt(x, 0);
   this->value.DivPositive(tempX, result, remainder);
-  if (remainder.size ==0)
+  if (remainder.theDigits.size ==0)
     return 0;
   else
-    return remainder.TheObjects[0];
+    return remainder.theDigits[0];
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
@@ -1570,36 +1560,35 @@ int LargeIntUnsigned::operator%(unsigned int x)
   LargeIntUnsigned tempX;
   tempX.AssignShiftedUInt(x, 0);
   this->DivPositive(tempX, result, remainder);
-  return remainder.TheObjects[0];
+  return remainder.theDigits[0];
 }
 
 void LargeIntUnsigned::MakeOne()
-{ this->SetSize(1);
-  this->TheObjects[0]=1;
+{ this->theDigits.SetSize(1);
+  this->theDigits[0]=1;
 }
 
 void LargeIntUnsigned::MakeZero()
-{ this->SetSize(1);
-  this->TheObjects[0]=0;
+{ this->theDigits.SetSize(1);
+  this->theDigits[0]=0;
 }
 
 bool LargeIntUnsigned::IsGEQ(const LargeIntUnsigned& x)const
-{ if (this->size>x.size)
+{ if (this->theDigits.size>x.theDigits.size)
     return true;
-  if (this->size<x.size)
+  if (this->theDigits.size<x.theDigits.size)
     return false;
-  for (int i=this->size-1; i>=0; i--)
-  { if (x.TheObjects[i]>this->TheObjects[i])
+  for (int i=this->theDigits.size-1; i>=0; i--)
+  { if (x.theDigits[i]>this->theDigits[i])
       return false;
-    if (x.TheObjects[i]<this->TheObjects[i])
+    if (x.theDigits[i]<this->theDigits[i])
       return true;
   }
   return true;
 }
 
 bool PartFraction::reduceOnceTotalOrderMethod
-(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, PartFractions& owner)
+(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
 { for (int i=0; i<this->IndicesNonZeroMults.size; i++)
     for (int j=0; j<this->IndicesNonZeroMults.size; j++)
     { //assert (this->IndicesNonZeroMults[i]<this->IndicesNonZeroMults[j]);
@@ -1608,14 +1597,12 @@ bool PartFraction::reduceOnceTotalOrderMethod
       int Aminus2Bindex = owner.TableAllowedAminus2B.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
       if (AminusBindex!=-1 &&  AminusBindex>this->IndicesNonZeroMults.TheObjects[j])
       { this->decomposeAMinusNB
-        (this->IndicesNonZeroMults.TheObjects[i], this->IndicesNonZeroMults.TheObjects[j], 1, AminusBindex, output,
-         theGlobalVariables, Indicator, owner);
+        (this->IndicesNonZeroMults[i], this->IndicesNonZeroMults[j], 1, AminusBindex, output, theGlobalVariables, Indicator, owner);
         return true;
       }
-      if (Aminus2Bindex!=-1 &&  Aminus2Bindex>this->IndicesNonZeroMults.TheObjects[j])
+      if (Aminus2Bindex!=-1 &&  Aminus2Bindex>this->IndicesNonZeroMults[j])
       { this->decomposeAMinusNB
-        (this->IndicesNonZeroMults.TheObjects[i], this->IndicesNonZeroMults.TheObjects[j], 2, Aminus2Bindex, output,
-         theGlobalVariables, Indicator, owner);
+        (this->IndicesNonZeroMults[i], this->IndicesNonZeroMults[j], 2, Aminus2Bindex, output, theGlobalVariables, Indicator, owner);
         return true;
       }
     }
@@ -1629,13 +1616,13 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis
 { if (this->IndicesNonZeroMults.size==owner.AmbientDimension)
     return false;
   Vectors<Rational>& tempRoots=bufferVectors;
-  Matrix<Rational> & tempMat= bufferMat;
+  Matrix<Rational>& tempMat= bufferMat;
   tempRoots.size=0;
   int IndexInLinRelationOfLastGainingMultiplicityIndex=-1;
   Vector<Rational> tempRoot;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { tempRoot.SetSize(owner.AmbientDimension);
-    int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
+    int currentIndex= this->IndicesNonZeroMults[i];
     if (currentIndex== this->LastDistinguishedIndex)
       IndexInLinRelationOfLastGainingMultiplicityIndex=i;
     tempRoot= owner.startingVectors[currentIndex]*this->TheObjects[currentIndex].GetLargestElongation();
@@ -1649,9 +1636,7 @@ bool PartFraction::reduceOnceGeneralMethodNoOSBasis
         ShouldDecompose = !tempMat.elements[IndexInLinRelationOfLastGainingMultiplicityIndex][0].IsEqualToZero();
     }
     if (ShouldDecompose)
-    { this->DecomposeFromLinRelation
-      (tempMat, output, Indicator, theGlobalVariables, owner.flagUsingOrlikSolomonBasis, owner.startingVectors)
-      ;
+    { this->DecomposeFromLinRelation(tempMat, output, Indicator, theGlobalVariables, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
       return true;
     }
   }
@@ -1672,7 +1657,7 @@ bool PartFraction::ReduceOnceGeneralMethod
   Vector<Rational> tempRoot;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { tempRoot.SetSize(owner.AmbientDimension);
-    int currentIndex= this->IndicesNonZeroMults.TheObjects[i];
+    int currentIndex= this->IndicesNonZeroMults[i];
     if (currentIndex== this->LastDistinguishedIndex)
       IndexInLinRelationOfLastGainingMultiplicityIndex=i;
     tempRoot= owner.startingVectors[currentIndex];
@@ -1694,9 +1679,7 @@ bool PartFraction::ReduceOnceGeneralMethod
     { if (this->flagAnErrorHasOccurredTimeToPanic)
       {
       }
-      this->DecomposeFromLinRelation
-      (tempMat, output, Indicator, theGlobalVariables, owner.flagUsingOrlikSolomonBasis, owner.startingVectors)
-      ;
+      this->DecomposeFromLinRelation(tempMat, output, Indicator, theGlobalVariables, owner.flagUsingOrlikSolomonBasis, owner.startingVectors);
       if (this->flagAnErrorHasOccurredTimeToPanic)
       {
       }
@@ -1758,8 +1741,7 @@ void PartFraction::ReadFromFile(PartFractions& owner, std::fstream& input, Globa
   this->ComputeIndicesNonZeroMults();
 }
 
-void PartFraction::ComputeOneCheckSuM
-(PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
+void PartFraction::ComputeOneCheckSuM(PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
 { if (this->flagAnErrorHasOccurredTimeToPanic)
   { //this->Coefficient.ComputeDebugString();
   }
@@ -1830,11 +1812,10 @@ bool PartFraction::rootIsInFractionCone(PartFractions& owner, Vector<Rational>* 
 }
 
 void PartFraction::PrepareFraction
-(int indexA, int indexB, int AminusNBindex, bool indexAisNullified, PartFraction& output,
- Polynomial<LargeInt>& AminusNbetaPoly, Polynomial<LargeInt>& outputCommonCoeff)
+(int indexA, int indexB, int AminusNBindex, bool indexAisNullified, PartFraction& output, Polynomial<LargeInt>& AminusNbetaPoly, Polynomial<LargeInt>& outputCommonCoeff)
 { output.AssignNoIndicesNonZeroMults(*this);
-  int powerDropA = this->TheObjects[indexA].Multiplicities.TheObjects[0];
-  int powerDropB = this->TheObjects[indexB].Multiplicities.TheObjects[0];
+  int powerDropA = this->TheObjects[indexA].Multiplicities[0];
+  int powerDropB = this->TheObjects[indexB].Multiplicities[0];
   if (indexAisNullified)
     powerDropB=0;
   else
@@ -1903,8 +1884,7 @@ int PartFraction::ComputeGainingMultiplicityIndexInLinearRelation
 
 bool PartFraction::DecomposeFromLinRelation
 (Matrix<Rational> & theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
- Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis,
- List<Vector<Rational> >& startingVectors)
+ Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
 {//  theLinearRelation.ComputeDebugString();
   //theLinearRelation.ComputeDebugString();
   int GainingMultiplicityIndexInLinRelation=-1;

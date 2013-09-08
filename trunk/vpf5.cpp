@@ -2246,14 +2246,14 @@ bool CommandList::fDifferential
 }
 
 bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites)
-{ if (this->size>1)
+{ if (this->theDigits.size>1)
     return false;
   if (this->IsEqualToZero())
   { std::cout << "This is a programming error: it was requested that I factor 0, which is forbidden."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  unsigned int n=(*this)[0];
+  unsigned int n=this->theDigits[0];
   outputPrimeFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
   while (n%2==0)
@@ -2366,8 +2366,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     { theValuesAtPoints[i].IsInteger(&tempLI);
       if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
       { if (comments!=0)
-          *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
-          << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
+          *comments << "<br>Aborting polynomial factorization: failed to factor the integer " << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
 //      std::cout << "=+/- ";
@@ -2459,9 +2458,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
     this->DivideBy(output, interPoly, checkRemainder);
     if (!checkRemainder.IsEqualToZero())
-    { std::cout << "This is a programming error: polynomial " << output.ToString()
-      << " was computed to be a divisor of " << this->ToString() << " but it is not. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: polynomial " << output.ToString() << " was computed to be a divisor of " << this->ToString()
+      << " but it is not. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     *this=interPoly;
@@ -2473,14 +2471,13 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   return true;
 }
 
-bool CommandList::innerFactorPoly
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  std::cout << "here I am .";
+  //std::cout << "here I am .";
   if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial, input, output))
     return false;
-  std::cout << "here I am .";
+  //std::cout << "here I am .";
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
@@ -2490,8 +2487,7 @@ bool CommandList::innerFactorPoly
   while (!thePoly.IsAConstant())
   { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, &theCommands.Comments))
       return false;
-    std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString()
-    << "</b>";
+//    std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
     Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     thePoly/=tempRat;
     theFactors.AddOnTop(smallestDiv);
@@ -2504,12 +2500,11 @@ bool CommandList::innerFactorPoly
     output.AddChildOnTop(tempE);
   }
   output.format=output.formatMatrix;
-  std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
+//  std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }
 
-bool CommandList::innerZmodP
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerZmodP(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerZmodP");
   if (!input.IsListNElements(3))
     return false;
@@ -2534,8 +2529,7 @@ bool CommandList::innerZmodP
 
 }
 
-bool CommandList::innerDouble
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerDouble(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDouble");
   Rational ratValue;
   if (input.IsOfType<double>())
@@ -2549,8 +2543,7 @@ bool CommandList::innerDouble
   return output.AssignValue(ratValue.DoubleValue(), theCommands);
 }
 
-bool CommandList::innerSqrt
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<Rational>())
     return false;
   AlgebraicNumber theNumber;
@@ -2559,8 +2552,7 @@ bool CommandList::innerSqrt
   return output.AssignValue(theNumber, theCommands);
 }
 
-bool CommandList::innerInterpolatePoly
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerInterpolatePoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
   if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2))
@@ -2577,8 +2569,7 @@ bool CommandList::innerInterpolatePoly
   return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 
-bool CommandList::innerPrintZnEnumeration
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPrintZnEnumeration(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPrintZnEnumeration");
   if (!input.IsListNElements(3))
     return false;
@@ -2600,8 +2591,7 @@ bool CommandList::innerPrintZnEnumeration
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::AssignMatrixExpressions
-(const Matrix<Expression>& input, CommandList& owner)
+bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, CommandList& owner)
 { this->reset(owner, input.NumRows+1);
   this->AddChildAtomOnTop(owner.opSequence());
   Expression currentRow;
@@ -2618,8 +2608,7 @@ bool Expression::AssignMatrixExpressions
   return true;
 }
 
-bool CommandList::GetMatrixExpressions
-(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
+bool CommandList::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
 { if (!input.IsSequenceNElementS())
   { output.init(1,1);
     output(0,0)=input;

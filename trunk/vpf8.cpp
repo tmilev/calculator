@@ -2771,38 +2771,58 @@ std::string Lattice::ToString(bool useHtml, bool useLatex)const
   return out.str();
 }
 
+bool LargeIntUnsigned::IsEven()const
+{ //std::cout << "<br>remainder by 2 is " << ((*this)%2).ToString()
+  //<< " and ((*this)%2)==0 is " << (((*this)%2)==0);
+  return ((*this)%2)==0;
+}
+
+bool LargeIntUnsigned::operator==(const LargeIntUnsigned& other)const
+{ return this->theDigits==other.theDigits;
+}
+
+bool LargeIntUnsigned::operator!=(const LargeIntUnsigned& other)const
+{ return ! ((*this)==other);
+}
+
+bool LargeInt::IsEven()const
+{ return this->value.IsEven();
+}
+
 #ifdef WIN32
 #pragma warning(disable:4244)//warning 4244: data loss from conversion
 #endif
 void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const
-{ if (x.size==1 && this->size==1)
-  { quotientOutput.AssignShiftedUInt((*this)[0]/x[0],0);
-    remainderOutput.AssignShiftedUInt((*this)[0]%x[0],0);
+{ if (x.theDigits.size==1 && this->theDigits.size==1)
+  { quotientOutput.AssignShiftedUInt(this->theDigits[0]/x.theDigits[0], 0);
+    remainderOutput.AssignShiftedUInt(this->theDigits[0]%x.theDigits[0], 0);
+//    std::cout << "Dividing " << this->ToString() << " by " << x.ToString() << " yields quotient " << quotientOutput.ToString()
+//    << " and remainder " << remainderOutput.ToString();
     return;
   }
   LargeIntUnsigned remainder, quotient, divisor;
-  remainder.Assign(*this);
-  divisor.Assign(x);
+  remainder=(*this);
+  divisor=(x);
   assert(!divisor.IsEqualToZero());
   quotient.MakeZero();
   //std::string tempS1, tempS2, tempS3;
   while (remainder.IsGEQ(divisor))
   { unsigned int q;
     LargeIntUnsigned current, Total;
-    if (*remainder.LastObject()>*divisor.LastObject())
-    { q=*remainder.LastObject()/(*divisor.LastObject()+1);
-      current.AssignShiftedUInt(q, remainder.size-divisor.size);
+    if (*remainder.theDigits.LastObject()>*divisor.theDigits.LastObject())
+    { q=*remainder.theDigits.LastObject()/(*divisor.theDigits.LastObject()+1);
+      current.AssignShiftedUInt(q, remainder.theDigits.size-divisor.theDigits.size);
     }
     else
-    { if (remainder.size==divisor.size)
+    { if (remainder.theDigits.size==divisor.theDigits.size)
         current.AssignShiftedUInt(1, 0);
       else
-      { q=this->CarryOverBound/(divisor.TheObjects[divisor.size-1]+1);
-        current.AssignShiftedUInt(q, remainder.size- divisor.size-1);
-        current.MultiplyByUInt(remainder.TheObjects[remainder.size-1]);
+      { q=this->CarryOverBound/(divisor.theDigits[divisor.theDigits.size-1]+1);
+        current.AssignShiftedUInt(q, remainder.theDigits.size- divisor.theDigits.size-1);
+        current.MultiplyByUInt(remainder.theDigits[remainder.theDigits.size-1]);
       }
     }
-    Total.Assign(divisor);
+    Total=(divisor);
     Total.MultiplyBy(current);
     //if (!remainder.IsGEQ(Total))
     //{ tempS1= remainder.ToString();
@@ -2810,10 +2830,12 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
     //  remainder.IsGEQ(Total);
     //}
     remainder.SubtractSmallerPositive(Total);
-    quotient.Add(current);
+    quotient+=(current);
   }
-  remainderOutput.Assign(remainder);
-  quotientOutput.Assign(quotient);
+  remainderOutput=(remainder);
+  quotientOutput=(quotient);
+//  std::cout << "Dividing " << this->ToString() << " by " << x.ToString() << " yields quotient " << quotientOutput.ToString()
+//  << " and remainder " << remainderOutput.ToString();
 //  assert(remainderOut.CheckForConsistensy());
 }
 #ifdef WIN32
@@ -2822,8 +2844,7 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
 
 //returning false means that the lattice given as rougher is not actually rougher than the current lattice
 //or that there are too many representatives
-bool Lattice::GetAllRepresentatives
-  (const Lattice& rougherLattice, Vectors<Rational>& output)const
+bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Rational>& output)const
 { output.size=0;
   if (this->basis.NumRows!=rougherLattice.basis.NumRows)
     return false;
@@ -2841,12 +2862,12 @@ bool Lattice::GetAllRepresentatives
       col++;
     currentPeriod=rougherLattice.basisRationalForm.elements[i][col]/this->basisRationalForm.elements[i][col];
     currentPeriod.GetNumerator(currentPeriodInt);
-    if (currentPeriodInt.value.size>1)
+    if (currentPeriodInt.value.theDigits.size>1)
 //    { std::cout << "exited at point 1 counter i is " << i;
       return false;
 //    }
     else
-      thePeriods[i]=currentPeriodInt.value[0];
+      thePeriods[i]=currentPeriodInt.value.theDigits[0];
     this->basisRationalForm.GetVectorFromRow(i, thePeriodVectors[i]);
     rougherLattice.basisRationalForm.GetVectorFromRow(i, tempRoot2);
     tempRoot=thePeriodVectors[i];
@@ -2861,15 +2882,15 @@ bool Lattice::GetAllRepresentatives
 //  for (int i=0; i<thePeriods.size; i++)
 //    std::cout << thePeriods.TheObjects[i] << ", ";
   for (int i=0; i<thePeriods.size; i++)
-    thePeriods.TheObjects[i]--;
+    thePeriods[i]--;
   SelectionWithDifferentMaxMultiplicities theCoeffSelection;
   theCoeffSelection.initFromInts(thePeriods);
   int NumCycles=theCoeffSelection.getTotalNumSubsets();
   output.SetSize(NumCycles);
   for (int i=0; i<NumCycles; i++, theCoeffSelection.IncrementSubset())
-  { output.TheObjects[i].MakeZero(theDim);
+  { output[i].MakeZero(theDim);
     for (int j=0; j<theCoeffSelection.Multiplicities.size; j++)
-      output.TheObjects[i]+=thePeriodVectors.TheObjects[j]*theCoeffSelection.Multiplicities.TheObjects[j];
+      output[i]+=thePeriodVectors[j]*theCoeffSelection.Multiplicities[j];
   }
 //  std::cout << "The representatives: " << output.ToString(false, true, false);
   return true;
@@ -2902,8 +2923,7 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
   return true;
 }
 
-bool Lattice::GetAllRepresentativesProjectingDownTo
-  (const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output)const
+bool Lattice::GetAllRepresentativesProjectingDownTo(const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output)const
 { Vectors<Rational> tempRepresentatives;
   if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
     return false;
@@ -2933,8 +2953,8 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
   this->valueOnEachLatticeShift.SetSize(this->LatticeShifts.size);
   for (int i=0; i<OldLatticeShifts.size; i++)
     for (int j=0; j<representativesQuotientLattice.size; j++)
-    { this->LatticeShifts.TheObjects[i*representativesQuotientLattice.size+j]=OldLatticeShifts.TheObjects[i]+representativesQuotientLattice.TheObjects[j];
-      this->valueOnEachLatticeShift.TheObjects[i*representativesQuotientLattice.size+j]=oldValues.TheObjects[i];
+    { this->LatticeShifts[i*representativesQuotientLattice.size+j]=OldLatticeShifts[i]+representativesQuotientLattice[j];
+      this->valueOnEachLatticeShift[i*representativesQuotientLattice.size+j]=oldValues[i];
     }
 }
 
@@ -2964,8 +2984,7 @@ bool Lattice::FindOnePreimageInLatticeOf
   return result;
 }
 
-void Lattice::IntersectWithPreimageOfLattice
-  (const Matrix<Rational> & theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
+void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
   Vectors<Rational> resultNonKernelPart, resultKernelPart, result, tempRoots;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
@@ -2987,10 +3006,10 @@ void Lattice::IntersectWithPreimageOfLattice
   //std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ToString();
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i=0; i<resultNonKernelPart.size; i++)
-  { Vector<Rational>& currentRoot=resultNonKernelPart.TheObjects[i];
+  { Vector<Rational>& currentRoot=resultNonKernelPart[i];
     currentRoot.MakeZero(this->GetDim());
     for (int j=0; j<startingBasis.size; j++)
-      currentRoot+=startingBasis.TheObjects[j]*ImageBasisInImageStartingBasisCoords.TheObjects[i].TheObjects[j];
+      currentRoot+=startingBasis[j]*ImageBasisInImageStartingBasisCoords[i][j];
   }
   //std::cout << "<br> Result non-kernel part (representatives): " << resultNonKernelPart.ToString();
   Lattice KernelPart;
@@ -3070,7 +3089,7 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
   tempQP.MakeRougherLattice(this->AmbientLatticeReduced);
   //std::cout << "roughened: " << this->AmbientLatticeReduced.ToString() << "<br><br><br><br>*******<br><br><br>";
   for(int i=0; i<tempQP.LatticeShifts.size; i++)
-    this->AddLatticeShift(tempQP.valueOnEachLatticeShift.TheObjects[i], tempQP.LatticeShifts.TheObjects[i]);
+    this->AddLatticeShift(tempQP.valueOnEachLatticeShift[i], tempQP.LatticeShifts[i]);
 }
 
 std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat)
@@ -3093,7 +3112,7 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
       else
         out << "<span class=\"math\">";
     }
-    out << this->valueOnEachLatticeShift.TheObjects[i].ToString(thePolyFormat);
+    out << this->valueOnEachLatticeShift[i].ToString(thePolyFormat);
     if (useLatex)
     { if(!useHtml)
         out << "\\end{array}$";
@@ -3107,8 +3126,8 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
         out << " \\mathrm{~over~}";
       else
         out << " over ";
-    if (!this->LatticeShifts.TheObjects[i].IsEqualToZero())
-      out << this->LatticeShifts.TheObjects[i].ToString() << " + ";
+    if (!this->LatticeShifts[i].IsEqualToZero())
+      out << this->LatticeShifts[i].ToString() << " + ";
     if (useLatex)
     { if (!useHtml)
         out << "$\\Lambda$, \\\\\\hline\n ";
@@ -3136,7 +3155,7 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
     Vectors<Rational> tempRoots;
     tempRoots.AssignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
     for (int i=0; i<tempRoots.size; i++)
-    { out << tempRoots.TheObjects[i].ToString();
+    { out << tempRoots[i].ToString();
       if (i!=tempRoots.size-1)
       { out << ", ";
         if (useLatex)
@@ -3152,9 +3171,9 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
   } else
     if (useLatex)
     { if (!useHtml)
-        out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
+        out << ", where $\\Lambda=\\mathbb{Z}^{" << this->GetNumVars() << "}$";
       else
-        out << ", \\mathrm{~where~} \\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}";
+        out << ", \\mathrm{~where~} \\Lambda=\\mathbb{Z}^{" << this->GetNumVars() << "}";
     }
     else
       out << "Z^" <<  this->GetNumVars();
@@ -3166,17 +3185,16 @@ std::string QuasiPolynomial::ToString(bool useHtml, bool useLatex, FormatExpress
 }
 
 void QuasiPolynomial::MakeFromPolyShiftAndLattice
-(const Polynomial<Rational>& inputPoly, const MonomialP& theShift,
- const Lattice& theLattice, GlobalVariables& theGlobalVariables)
+(const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { this->AmbientLatticeReduced=theLattice;
   this->LatticeShifts.SetSize(1);
   Vector<Rational>& firstShift=this->LatticeShifts[0];
   firstShift.SetSize(theLattice.GetDim());
   for (int i=0; i<theLattice.GetDim(); i++)
     firstShift[i]=theShift(i);
-  this->AmbientLatticeReduced.ReduceVector(this->LatticeShifts.TheObjects[0]);
+  this->AmbientLatticeReduced.ReduceVector(this->LatticeShifts[0]);
   this->valueOnEachLatticeShift.SetSize(1);
-  this->valueOnEachLatticeShift.TheObjects[0]=inputPoly;
+  this->valueOnEachLatticeShift[0]=inputPoly;
 }
 
 bool Lattice::ReduceVector(Vector<Rational>& theVector)const
@@ -3191,10 +3209,10 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)const
     return false;
   }
   for (int i=0; i<output.size; i++)
-    output.TheObjects[i].AssignFracValue();
+    output[i].AssignFracValue();
   theVector.MakeZero(theVector.size, (Rational) 0);
   for (int i=0; i<basisRoots.size; i++)
-    theVector+=basisRoots.TheObjects[i]*output.TheObjects[i];
+    theVector+=basisRoots[i]*output[i];
   //std::cout << "the vector " << theVector.ToString() << " in the basis " << basisRoots.ToString() << " has coordinates: " << output.ToString();
   return true;
 }
@@ -3218,8 +3236,7 @@ void QuasiPolynomial::MakeZeroLatTiceZn(int theDim)
   this->valueOnEachLatticeShift.size=0;
 }
 
-void PartFraction::GetRootsFromDenominator
-(PartFractions& owner, Vectors<Rational>& output)const
+void PartFraction::GetRootsFromDenominator(PartFractions& owner, Vectors<Rational>& output)const
 { output.SetSize(this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { output[i]=owner.startingVectors[this->IndicesNonZeroMults[i]];
@@ -3230,8 +3247,7 @@ void PartFraction::GetRootsFromDenominator
 }
 
 void PartFraction::ComputePolyCorrespondingToOneMonomial
-  (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals,
-   Lattice& theLattice, GlobalVariables& theGlobalVariables)const
+  (QuasiPolynomial& outputQP, const MonomialP& theMon, Vectors<Rational>& normals, Lattice& theLattice, GlobalVariables& theGlobalVariables)const
 { Polynomial<Rational> tempP, outputPolyPart;
   Rational tempRat2;
   outputPolyPart.MakeOne(theMon.GetMinNumVars());
@@ -3293,8 +3309,7 @@ void PartFraction::GetVectorPartitionFunction
 //  Accum.ComputeDebugString();
 }
 
-bool PartFractions::GetVectorPartitionFunction
-  (QuasiPolynomial& output, Vector<Rational>& newIndicator, GlobalVariables& theGlobalVariables)
+bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator, GlobalVariables& theGlobalVariables)
 { ProgressReport theReport(&theGlobalVariables);
   if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
   { theGlobalVariables.theIndicatorVariables.modifiedRoot=(newIndicator);
@@ -3429,16 +3444,14 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
 //  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
 //  this->theChambersOld.thePauseController.ExitComputation();
   this->theChambers.DrawMeProjective(0, true, theGlobalVariables.theDrawingVariables, theFormat);
-  outHtml <<
-    theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName
-    (this->AmbientDimension);
+  outHtml << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
   Vector<Rational> tempRoot; tempRoot.MakeZero(this->AmbientDimension);
   tempRoot.MakeZero(this->AmbientDimension);
   assert(false);
 //  this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
-        << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
+  << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
   assert(false);
 //  out << this->theChambersOld.theDirections.ElementToStringGeneric();
   out << "\n\n The corresponding generating function is: " << this->ToString(theGlobalVariables, theFormat) << "= (after splitting acording to algorithm)";
@@ -3502,8 +3515,7 @@ void QuasiPolynomial::AddLatticeShift
 }
 
 void QuasiPolynomial::Substitution
-(const Matrix<Rational>& mapFromNewSpaceToOldSpace,
- const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+(const Matrix<Rational>& mapFromNewSpaceToOldSpace, const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("QuasiPolynomial::Substitution");
   //Format of the substitution.
   //If we want to carry out a substitution in P(y_1, ..., y_m),
@@ -3537,8 +3549,7 @@ void QuasiPolynomial::Substitution
   { tempP=this->valueOnEachLatticeShift[i];
     bool tempB=tempP.Substitution(theSub);
     if (!tempB)
-    { std::cout << "This is a programming error: "
-      << " substitution   " << theSub.ToString() << " into polynomial "
+    { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
       << tempP.ToString() << " failed but the current function does not handle this properly. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -3566,8 +3577,7 @@ void QuasiPolynomial::Substitution
   { tempP=this->valueOnEachLatticeShift[i];
     bool tempB=tempP.Substitution(theSub);
     if (!tempB)
-    { std::cout << "This is a programming error: "
-      << " substitution   " << theSub.ToString() << " into polynomial "
+    { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
       << tempP.ToString() << " failed but the current function does not handle this properly. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -3584,12 +3594,9 @@ void QuasiPolynomial::Substitution
   tempQP.Substitution(mapFromNewSpaceToOldSpace, ambientLatticeNewSpace, output, theGlobalVariables);
 }
 
-bool QuasiPolynomial::SubstitutionLessVariables
-(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output,
- GlobalVariables& theGlobalVariables)const
+bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
 { Matrix<Rational> theLatticeSub;
-  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms
-      (theSub, theLatticeSub, theGlobalVariables))
+  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))
     return false;
   Matrix<Rational> theSubLatticeShift;
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
@@ -3608,14 +3615,12 @@ bool QuasiPolynomial::SubstitutionLessVariables
   for (int i=0; i<this->LatticeShifts.size; i++)
   { shiftMatForm.AssignVectorColumn(this->LatticeShifts.TheObjects[i]);
     shiftMatForm-=theSubLatticeShift;
-    if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
-        (theLatticeSub, shiftMatForm, theShiftImage))
+    if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage))
     { tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
       tempP=this->valueOnEachLatticeShift[i];
       bool tempB=tempP.Substitution(theSub);
       if (!tempB)
-      { std::cout << "This is a programming error: "
-        << " substitution   " << theSub.ToString() << " into polynomial "
+      { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
         << tempP.ToString() << " failed but the current function does not handle this properly. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
@@ -3626,8 +3631,7 @@ bool QuasiPolynomial::SubstitutionLessVariables
   return true;
 }
 
-bool Lattice::SubstitutionHomogeneous
-    (const PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
+bool Lattice::SubstitutionHomogeneous(const PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
 { Matrix<Rational>  matSub;
   if (!this->GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, matSub, theGlobalVariables))
     return false;
@@ -4512,10 +4516,10 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
 { std::stringstream out;
   if (this->CarryOverBound==1000000000UL)
   { std::string tempS;
-    out << (this->TheObjects[this->size-1]);
-    for (int i=this->size-2; i>=0; i--)
+    out << (*this->theDigits.LastObject());
+    for (int i=this->theDigits.size-2; i>=0; i--)
     { std::stringstream tempStream;
-      tempStream << this->TheObjects[i];
+      tempStream << this->theDigits[i];
       tempS=tempStream.str();
       int numZeroesToPad=9-tempS.length();
       for (int j=0; j<numZeroesToPad; j++)
@@ -4528,7 +4532,7 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
   unsigned int base=10;
   int MaxNumIntegersPerCarryOverBound=11;
   List<LargeIntUnsigned> bufferPowersOfBase;
-  int initialNumDigitsEstimate=MaxNumIntegersPerCarryOverBound*this->size;
+  int initialNumDigitsEstimate=MaxNumIntegersPerCarryOverBound*this->theDigits.size;
   int sizeBufferPowersOfBase=MathRoutines::Minimum(initialNumDigitsEstimate, 10000);
   bufferPowersOfBase.SetSize(sizeBufferPowersOfBase);
   LargeIntUnsigned currentPower;
@@ -4575,6 +4579,61 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
   output=out.str();
 }
 
+LargeIntUnsigned::LargeIntUnsigned()
+{ this->theDigits.SetSize(1);
+  this->theDigits[0]=0;
+}
+
+LargeIntUnsigned::LargeIntUnsigned(unsigned int x)
+{ this->AssignShiftedUInt(x,0);
+}
+
+LargeIntUnsigned::  LargeIntUnsigned(const LargeIntUnsigned& x)
+{ (*this)=x;
+}
+
+void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
+{ LargeIntUnsigned tempUI, tempUI2;
+  if (a.IsEqualToZero() || b.IsEqualToZero())
+  { std::cout << "This is a programming error: calling lcm on zero elements is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  LargeIntUnsigned::gcd(a, b, tempUI);
+  a.MultiplyBy(b, tempUI2);
+  output=(tempUI2);
+  output.DivPositive(tempUI, output, tempUI2);
+  assert(!output.IsEqualToZero());
+}
+
+void LargeIntUnsigned::operator=(const LargeIntUnsigned& x)
+{ this->theDigits=x.theDigits;
+}
+
+void LargeIntUnsigned::operator=(unsigned int x)
+{ this->AssignShiftedUInt(x,0);
+}
+
+unsigned int LargeIntUnsigned::HashFunction()const
+{ int numCycles=MathRoutines::Minimum(this->theDigits.size, SomeRandomPrimesSize);
+  unsigned int result=0;
+  for (int i=0; i<numCycles; i++)
+    result+=this->theDigits[i]*SomeRandomPrimes[i];
+  return result;
+}
+
+bool LargeIntUnsigned::IsPositive()const
+{ return this->theDigits.size>1 || this->theDigits[0]>0;
+}
+
+bool LargeIntUnsigned::IsEqualToOne()const
+{ return this->theDigits.size==1 && this->theDigits[0]==1;
+}
+
+bool LargeIntUnsigned::IsEqualToZero()const
+{ return this->theDigits.size==1 && this->theDigits[0]==0;
+}
+
 void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables)
 { this->MakeOne();
   List<unsigned int> primesBelowX;
@@ -4604,11 +4663,8 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
 }
 
 void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
-  (const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
-   Vectors<Rational>& outputRepresentatives,
-   Vectors<Rational>& movementInDirectionPerRepresentative,
-   Lattice& outputRougherLattice,
-   GlobalVariables& theGlobalVariables)
+(const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
+ Vectors<Rational>& outputRepresentatives, Vectors<Rational>& movementInDirectionPerRepresentative, Lattice& outputRougherLattice, GlobalVariables& theGlobalVariables)
 { Vector<Rational> theNormal=theAffineHyperplane;
   theNormal.SetSize(theNormal.size-1);
   if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
@@ -4654,7 +4710,7 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
 }
 
 bool slTwoInSlN::ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables)
+(List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables)
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);

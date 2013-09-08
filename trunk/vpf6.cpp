@@ -3551,7 +3551,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << "ElementWeylAlgebra{}(";
     out << this->GetValue<ElementWeylAlgebra>().ToString(&contextFormat.GetElement());
     out << ")";
-    out << "[" << this->GetContext().ToString() << "]";
+//    out << "[" << this->GetContext().ToString() << "]";
     result=true;
   }
   output=out.str();
@@ -3618,9 +3618,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
     if(this->format!=this->formatUseFrac)
-    { bool firstNeedsBrackets=
-      !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
-        (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
+    { bool firstNeedsBrackets= !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
       bool secondNeedsBrackets=true;
       if ((*this)[2].IsOfType<Rational>())
         if ((*this)[2].GetValue<Rational>().IsInteger())
@@ -3692,8 +3690,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
-    { std::cout << "This is a programming error: the minus function expects"
-      << "1 or 2 arguments, instead there are " << this->children.size-1
+    { std::cout << "This is a programming error: the minus function expects" << "1 or 2 arguments, instead there are " << this->children.size-1
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -3792,8 +3789,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       { out << "<hr> ";
         if (!this->theBoss->flagHideLHS)
         { if (i<(*startingExpression).children.size)
-            out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-            ((*startingExpression)[i].ToString(theFormat));
+            out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL((*startingExpression)[i].ToString(theFormat));
           else
             out << "No matching starting expression- possible use of the Melt keyword.";
         } else

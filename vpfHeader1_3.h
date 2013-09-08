@@ -304,7 +304,7 @@ public:
     this->theValue--;
   }
   void CheckEqualModuli(const ElementZmodP& other)
-  { if (!this->theModulo.IsEqualTo(other.theModulo))
+  { if (this->theModulo!=other.theModulo)
     { std::cout << "This is a programming error: "
       << " attempting to make an operation with two elemetns of Z mod P with different moduli, "
       << this->theModulo.ToString() << " and " << other.theModulo.ToString()

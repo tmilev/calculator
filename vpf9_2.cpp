@@ -360,6 +360,22 @@ void ElementWeylAlgebra::Substitution(const PolynomialSubstitution<Rational>& Su
   *this=output;
 }
 
+void ElementWeylAlgebra::FourierTransformMe()
+{ MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
+  LargeInt totalDeg;
+  for (int i=0; i<this->size(); i++)
+  { const MonomialWeylAlgebra& currentMon=(*this)[i];
+    if (!(currentMon.polynomialPart.TotalDegree()+currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
+    { std::cout << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    std::cout << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
+    if (!totalDeg.IsEven())
+      this->theCoeffs[i]*=-1;
+  }
+}
+
 bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
 { Polynomial<Rational> result;
   result.MakeZero();
@@ -460,9 +476,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
 }
 
 void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
-(int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,
- Vectors<Rational>& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables,
- Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
+(int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
+ int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
  Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved)
 { Vector<Rational> tempRoot;
   MonomialP tempM;

@@ -2768,7 +2768,7 @@ inline void Matrix<Element>::init(int r, int c)
 { this->Resize(r, c, false);
 }
 
-class LargeIntUnsigned: public List<unsigned int>
+class LargeIntUnsigned
 { void AddNoFitSize(const LargeIntUnsigned& x);
 public:
   //The zero element is assumed to have length one array with a zero entry.
@@ -2782,6 +2782,7 @@ public:
   ////////////////////////////////////////////////////////
   //On a 32 bit machine any number smaller than or equal to 2^31 will work.
   //If you got no clue what to put just leave CarryOverBound as it is below.
+  List<unsigned int> theDigits;
   static const unsigned int CarryOverBound=1000000000UL;
   //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   //relatively small loss of speed and RAM memory.
@@ -2800,13 +2801,16 @@ public:
   }
   void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
-  void Add(const LargeIntUnsigned& x);
-  void AddUInt(unsigned int x){static LargeIntUnsigned tempI; tempI.AssignShiftedUInt(x, 0); this->Add(tempI); }
+  void AddUInt(unsigned int x)
+  { LargeIntUnsigned tempI;
+    tempI.AssignShiftedUInt(x, 0);
+    (*this)+=tempI;
+  }
   void MakeZero();
-  bool IsEqualToZero()const{return this->size==1 && this->TheObjects[0]==0; }
-  bool IsEqualTo(const LargeIntUnsigned& right)const;
-  bool IsPositive()const{ return this->size>1 || this->TheObjects[0]>0; }
-  bool IsEqualToOne()const{ return this->size==1 && this->TheObjects[0]==1; }
+  bool IsEqualToZero()const;
+  bool IsEven()const;
+  bool IsPositive()const;
+  bool IsEqualToOne()const;
   bool IsGEQ(const LargeIntUnsigned& x)const;
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
   { List<int> theSieve;
@@ -2827,26 +2831,8 @@ public:
     LargeIntUnsigned::lcm(a, b, output);
     return output;
   }
-  static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
-  { LargeIntUnsigned tempUI, tempUI2;
-    if (a.IsEqualToZero() || b.IsEqualToZero())
-    { std::cout << "This is a programming error: calling lcm on zero elements is not allowed. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    LargeIntUnsigned::gcd(a, b, tempUI);
-    a.MultiplyBy(b, tempUI2);
-    output.Assign(tempUI2);
-    output.DivPositive(tempUI, output, tempUI2);
-    assert(!output.IsEqualToZero());
-  }
-  unsigned int HashFunction()const
-  { int numCycles=MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
-    unsigned int result=0;
-    for (int i=0; i<numCycles; i++)
-      result+=this->TheObjects[i]*SomeRandomPrimes[i];
-    return result;
-  }
+  static void lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output);
+  unsigned int HashFunction()const;
   void MultiplyBy(const LargeIntUnsigned& right);
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
   inline void operator*=(unsigned int x){this->MultiplyByUInt(x);}
@@ -2868,8 +2854,7 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
-  inline void AccountPrimeFactor
-  (unsigned int theP, List<unsigned int>& outputPrimeFactors, List<int>& outputMults)
+  inline void AccountPrimeFactor(unsigned int theP, List<unsigned int>& outputPrimeFactors, List<int>& outputMults)
   { if (outputPrimeFactors.size==0)
     { outputPrimeFactors.AddOnTop(theP);
       outputMults.AddOnTop(1);
@@ -2883,9 +2868,6 @@ public:
     }
   }
   bool Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites);
-  inline void Assign(const LargeIntUnsigned& x)
-  { this->::List<unsigned int>::operator =(x);
-  }
   void AssignString(const std::string& input);
   int GetUnsignedIntValueTruncated();
   LargeIntUnsigned operator%(const LargeIntUnsigned& other)const
@@ -2895,13 +2877,14 @@ public:
   }
   LargeIntUnsigned operator-(const LargeIntUnsigned& other)const;
   int operator%(unsigned int x);
-  inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
-  inline void operator=(unsigned int x){ this->AssignShiftedUInt(x,0); }
-  inline void operator+=(const LargeIntUnsigned& other){this->Add(other);}
+  void operator=(const LargeIntUnsigned& x);
+  void operator=(unsigned int x);
+  void operator+=(const LargeIntUnsigned& other);
+  bool operator==(const LargeIntUnsigned& other)const;
+  bool operator!=(const LargeIntUnsigned& other)const;
   inline void operator--(int)
   { if (this->IsEqualToZero())
-    { std::cout << "This is a programming error: attempting to subtract 1 from a large unsigned "
-      << " integer with value 0. "
+    { std::cout << "This is a programming error: attempting to subtract 1 from a large unsigned integer with value 0. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -2923,11 +2906,9 @@ public:
     this->MultiplyBy(x, result);
     return result;
   }
-  LargeIntUnsigned(unsigned int x)
-  { this->AssignShiftedUInt(x,0);
-  }
-  LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); ParallelComputing::SafePointDontCallMeFromDestructors();}
-  LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; ParallelComputing::SafePointDontCallMeFromDestructors(); }
+  LargeIntUnsigned(unsigned int x);
+  LargeIntUnsigned(const LargeIntUnsigned& x);
+  LargeIntUnsigned();
 //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
 //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
   static inline LargeIntUnsigned GetOne()
@@ -2991,11 +2972,12 @@ public:
   bool IsEqualToZero()const
   { return this->value.IsEqualToZero();
   }
+  bool IsEven()const;
   bool IsEqualToOne()const
   { return this->value.IsEqualToOne() && this->sign==1;
   }
   void AssignLargeIntUnsigned(const LargeIntUnsigned& x)
-  { this->value.Assign(x);
+  { this->value=x;
     this->sign=1;
   }
   void AssignInt(int x);
@@ -3012,21 +2994,7 @@ public:
   void ReadFromFile(std::fstream& input);
   void checkConsistency(){}
   void MakeZero();
-  bool GetDivisors(List<int>& output, bool includeNegative)
-  { if (this->value.size>1)
-      return false;
-    int val= this->value[0];
-    if (val>50000)
-      return false;
-    output.SetSize(0);
-    for (int i=1; i<= val; i++)
-      if (val% i==0)
-      { output.AddOnTop(i);
-        if (includeNegative)
-          output.AddOnTop(-i);
-      }
-    return true;
-  }
+  bool GetDivisors(List<int>& output, bool includeNegative);
   void MakeOne()
   { this->value.MakeOne();
     this->sign=1;
@@ -3288,16 +3256,7 @@ ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();
 #endif
   }
-  bool ShrinkExtendedPartIfPossible()
-  { if (this->Extended==0)
-      return true;
-    if (this->Extended->num.value.size>1 || this->Extended->den.size>1 || this->Extended->num.value.TheObjects[0]>=(unsigned int) LargeIntUnsigned::SquareRootOfCarryOverBound || this->Extended->den.TheObjects[0]>= (unsigned int)  LargeIntUnsigned::SquareRootOfCarryOverBound)
-      return false;
-    this->NumShort= this->Extended->num.GetIntValueTruncated();
-    this->DenShort= this->Extended->den.GetUnsignedIntValueTruncated();
-    this->FreeExtended();
-    return true;
-  }
+  bool ShrinkExtendedPartIfPossible();
 public:
   inline static std::string GetXMLClassName(){ return "Rational";}
   int NumShort;
@@ -3341,7 +3300,7 @@ public:
       output.AssignShiftedUInt(tempI, 0);
     }
     else
-      output.Assign(this->Extended->den);
+      output=(this->Extended->den);
   }
   bool BeginsWithMinus(){ return this->IsNegative();}
 
@@ -3368,7 +3327,7 @@ public:
         output.AssignShiftedUInt((unsigned int) this->NumShort, 0);
     }
     else
-      output.Assign(this->Extended->num.value);
+      output=(this->Extended->num.value);
   }
   Rational RationalValue()
   { return *this;

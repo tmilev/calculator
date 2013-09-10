@@ -71,7 +71,6 @@ bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, co
   if (!input.IsOfType<ElementWeylAlgebra>())
     return false;
   ElementWeylAlgebra theElt;
-  theElt= input.GetValue<ElementWeylAlgebra>();
-  theElt.FourierTransformMe();
+  input.GetValue<ElementWeylAlgebra>().FourierTransform(theElt);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

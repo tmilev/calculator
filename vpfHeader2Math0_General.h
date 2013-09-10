@@ -9,6 +9,7 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 class WeylGroup;
+class AlgebraicClosureRationals;
 
 class Lattice
 {
@@ -2980,7 +2981,7 @@ public:
   void Makexidj(int i, int j, int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   (const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables);
-  void FourierTransform(ElementWeylAlgebra& output)const;
+  void FourierTransform (ElementWeylAlgebra<coefficient>& output, AlgebraicClosureRationals& ownerField)const;
   bool ActOnPolynomial(Polynomial<Rational>& thePoly);
   void SetNumVariables(int newNumVars);
   void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);

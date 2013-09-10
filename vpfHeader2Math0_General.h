@@ -3,8 +3,8 @@
 #ifndef vpfHeader1_2_h_already_included
 #define vpfHeader1_2_h_already_included
 
-#include "vpfHeader1.h"
-#include "vpfHeader3ListReferences.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader1General1_ListReferences.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
@@ -2960,11 +2960,12 @@ public:
   ElementUniversalEnveloping<coefficient>(const ElementUniversalEnveloping<coefficient>& other){this->operator=(other);}
 };
 
-class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, Rational>
+template <class coefficient>
+class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, coefficient>
 {
 public:
   unsigned inline int HashFunction()const
-  { return this->::MonomialCollection<MonomialWeylAlgebra, Rational>::HashFunction();
+  { return this->::MonomialCollection<MonomialWeylAlgebra, coefficient>::HashFunction();
   }
   static inline unsigned int HashFunction(const ElementWeylAlgebra& input)
   { return input.HashFunction();
@@ -3007,8 +3008,8 @@ public:
     }
   }
   void operator=(const std::string& input);
-  inline void operator*=(const Rational& other)
-  { this->MonomialCollection<MonomialWeylAlgebra, Rational>::operator*=(other);
+  inline void operator*=(const coefficient& other)
+  { this->MonomialCollection<MonomialWeylAlgebra, coefficient>::operator*=(other);
   }
   void operator*=(const ElementWeylAlgebra& other);
   bool IsLetter(char theLetter);
@@ -3797,7 +3798,7 @@ public:
   //Universal enveloping,
   //i.e. inputElt is not allowed to have non-small integer exponents.
   bool GetActionGenVermaModuleAsDiffOperator(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output, GlobalVariables& theGlobalVariables);
-  bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables);
+  bool GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables);
   ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
   {}
 };

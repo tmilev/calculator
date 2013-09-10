@@ -3,9 +3,8 @@
 #ifndef vpfHeader1_4_h_already_included
 #define vpfHeader1_4_h_already_included
 
-#include "vpfHeader1_2.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_4
-(__FILE__, "Header, math routines concerning semisimple Lie algebras. ");
+#include "vpfHeader2Math0_General.h"
+static ProjectInformationInstance ProjectInfoVpfHeader1_4(__FILE__, "Header, math routines concerning semisimple Lie algebras. ");
 
 class slTwoSubalgebra
 {

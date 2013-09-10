@@ -1,11 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfHeader1_5_h_already_included
-#define vpfHeader1_5_h_already_included
+#ifndef vpfHeader1_2SubsetsSelections_already_included
+#define vpfHeader1_2SubsetsSelections_already_included
 
-#include "vpfHeader1.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_5
-(__FILE__, "Header: basic data structures: selections, subsets, etc. ");
+#include "vpfHeader1General0_General.h"
+static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header: basic data structures: selections, subsets, etc. ");
 
 class SelectionOneItem
 {

@@ -1,9 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpfCharacters_CalculatorInterface.h"
-#include "vpf6_1innerTypedFunctions.h"
-#include "vpf6_2innerFunctions.h"
+#include "vpfHeader3Calculator3_WeylGroupCharacters.h"
+#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "vpfHeader3Calculator2_InnerFunctions.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 

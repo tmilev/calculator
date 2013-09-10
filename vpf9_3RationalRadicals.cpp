@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1_3.h"
-#include "vpf1_5SubsetsSelections.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "vpfHeader2Math5_SubsetsSelections.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Implementation of rational radical extensions. ");
 
 std::string MonomialVector::ToString(FormatExpressions* theFormat)const
@@ -14,11 +14,9 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
 }
 
 bool AlgebraicClosureRationals::CheckConsistency()const
-{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParenT.size !=this->thePairs.size ||
-      this->injectionsRightParenT.size!=this->thePairs.size)
-  { std::cout << "This is a programming error: I have " << this->thePairs.size << " pairs, " << this->thePairPairing.size
-    << " pair pairings, " << this->injectionsLeftParenT.size << " left injections, "
-    << this->injectionsRightParenT.size << " right injections."
+{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParenT.size !=this->thePairs.size || this->injectionsRightParenT.size!=this->thePairs.size)
+  { std::cout << "This is a programming error: I have " << this->thePairs.size << " pairs, " << this->thePairPairing.size << " pair pairings, "
+    << this->injectionsLeftParenT.size << " left injections, " << this->injectionsRightParenT.size << " right injections."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -481,6 +479,20 @@ unsigned int AlgebraicNumber::HashFunction()const
   return this->owner->HashFunction()+this->theElt.HashFunction();
 }
 
+bool AlgebraicNumber::operator==(int other)const
+{ if (this->theElt.IsEqualToZero())
+    return other==0;
+  if (this->theElt.size()!=1)
+    return false;
+  if (this->theElt[0]==0)
+    return false;
+  return this->theElt[0]==other;
+}
+
+bool AlgebraicNumber::NeedsBrackets()const
+{ return false;
+}
+
 bool AlgebraicNumber::CheckNonZeroOwner()const
 { if (this->owner==0)
   { std::cout << "This is a programming error: algebraic number with non-initialized owner not permitted in the "
@@ -540,6 +552,13 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   this->theElt+=otherCopy.theElt;
 }
 
+void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
+{ MacroRegisterFunctionWithName("AlgebraicNumber::operator-=");
+  AlgebraicNumber otherCopy=other;
+  AlgebraicNumber::ConvertToCommonOwner(*this, otherCopy);
+  this->theElt-=otherCopy.theElt;
+}
+
 void AlgebraicNumber::Invert()
 { MatrixTensor<Rational> theInverted;
   Matrix<Rational> tempMat2;
@@ -557,6 +576,10 @@ void AlgebraicNumber::operator/=(const AlgebraicNumber& other)
   otherCopy.Invert();
 //  std::cout << "<hr>other: " << other.theElt.ToString() << " inverted: " << otherCopy.ToString();
   *this*=otherCopy;
+}
+
+void AlgebraicNumber::operator*=(const Rational& other)
+{ this->theElt*=(other);
 }
 
 void AlgebraicNumber::operator*=(const AlgebraicNumber& other)

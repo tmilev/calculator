@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math0_General.h"
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Main implementation file, part 1. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.

@@ -1,10 +1,30 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
-#include "vpfHeader1_3.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Main implementation file, part 3. ");
+
+std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
+{ if (this->IsAConstant())
+    return "1";
+  std::stringstream out;
+  FormatExpressions tempFormat;
+  if (theFormat==0)
+    tempFormat.polyDefaultLetter="\\partial";
+  else
+  { tempFormat.polyDefaultLetter=theFormat->WeylAlgebraDefaultLetter;
+    tempFormat.polyAlphabeT=theFormat->weylAlgebraLetters;
+  }
+  std::string firstS=this->polynomialPart.ToString(theFormat);
+  std::string secondS=this->differentialPart.ToString(&tempFormat);
+  if (firstS!="1")
+    out << firstS;
+  if (secondS!="1")
+    out << secondS;
+  return out.str();
+}
 
 void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "generator_reflections: ";
@@ -86,337 +106,6 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }*/
   }
-  return true;
-}
-
-void ElementWeylAlgebra::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
-{ SelectionWithDifferentMaxMultiplicities tempSel;
-  int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
-  tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
-  tempSel.MaxMultiplicities.SetSize(theDimensioN);
-  int theExpectedSize=1;
-  for (int i=0; i<theDimensioN; i++)
-  { int powerDiffOp=0;
-    if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp))
-    { std::cout << "This is a programming error. Requested operations with elements of Weyl algebra that have monomials of exponent "
-      << left.differentialPart(i) << " which I cannot handle. If this is bad user input, it should have been caught at an earlier level. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    tempSel.MaxMultiplicities[i]=powerDiffOp;
-    theExpectedSize*=powerDiffOp;
-  }
-  tempSel.elements.initFillInObject(theDimensioN, 0);
-  MonomialWeylAlgebra buffer;
-  buffer.MakeOne(theDimensioN);
-  output.MakeZero();
-  int numCycles= tempSel.getTotalNumSubsets();
-  Rational coeffBuff;
-  output.SetExpectedSize(theExpectedSize);
-  for (int i=0; i<numCycles; i++)
-  { coeffBuff=1;
-    for (int k=0; k<theDimensioN; k++)
-    { int multDrop=tempSel.Multiplicities[k];
-      int theDOPower=0;
-      int thePolPower=0;
-      left.differentialPart(k).IsSmallInteger(&theDOPower);
-      right.polynomialPart(k).IsSmallInteger(&thePolPower);
-      coeffBuff*=Rational::NChooseK(theDOPower, multDrop)
-      *Rational::NChooseK(thePolPower, multDrop)* Rational::Factorial(multDrop);
-      buffer.polynomialPart[k]=left.polynomialPart(k)+right.polynomialPart(k)-multDrop;
-      buffer.differentialPart[k]= left.differentialPart(k)+right.differentialPart(k)-multDrop;
-    }
-    output.AddMonomial(buffer, coeffBuff);
-    tempSel.IncrementSubset();
-  }
-}
-
-void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
-{ this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
-}
-
-void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
-{ this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
-}
-
-void ElementWeylAlgebra::LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output)
-{ if (&output==&right || &output==&left)
-  { ElementWeylAlgebra leftCopy=left;
-    ElementWeylAlgebra rightCopy=right;
-    ElementWeylAlgebra::LieBracket(leftCopy, rightCopy, output);
-    return;
-  }
-  output=right;
-  output.MultiplyOnTheLeft(left);
-  ElementWeylAlgebra subtracand;
-  subtracand=left;
-  subtracand.MultiplyOnTheLeft(right);
-  output-=subtracand;
-}
-
-void ElementWeylAlgebra::LieBracketOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
-{ ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1=(*this);
-  tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
-  //tempEl1.ComputeDebugString(false);
-  tempEl2=(standsOnTheLeft);
-  tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
-  //tempEl2.ComputeDebugString(false);
-  *this=(tempEl1);
-  *this-=(tempEl2);
-  //this->ComputeDebugString(false);
-}
-
-void ElementWeylAlgebra::LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables)
-{ ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1=(standsOnTheRight);
-  tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
-  //tempEl1.ComputeDebugString(false);
-  tempEl2=(*this);
-  tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
-  //tempEl2.ComputeDebugString(false);
-  *this=(tempEl1);
-  *this-=(tempEl2);
-  //this->ComputeDebugString(false);
-}
-
-void ElementWeylAlgebra::MultiplyOnTheLeft(const  ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables)
-{ ElementWeylAlgebra buffer;
-  ElementWeylAlgebra Accum;
-  Accum.MakeZero();
-  for (int j=0; j<standsOnTheLeft.size(); j++)
-    for (int i=0; i<this->size(); i++)
-    { this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
-      buffer*=standsOnTheLeft.theCoeffs[j]*this->theCoeffs[i];
-      Accum+=(buffer);
-    }
-  *this=Accum;
-}
-
-void ElementWeylAlgebra::operator*=(const ElementWeylAlgebra& standsOnTheRight)
-{ ElementWeylAlgebra buffer;
-  ElementWeylAlgebra Accum;
-  Accum.MakeZero();
-  for (int j=0; j<standsOnTheRight.size(); j++)
-    for (int i=0; i<this->size(); i++)
-    { this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
-      buffer*=this->theCoeffs[i]*standsOnTheRight.theCoeffs[j];
-      Accum+=(buffer);
-    }
-  *this=Accum;
-}
-
-void ElementWeylAlgebra::RaiseToPower(int thePower)
-{ ElementWeylAlgebra WeylOne;
-  WeylOne.MakeOne(this->GetMinNumVars());
-  MathRoutines::RaiseToPower(*this, thePower, WeylOne);
-}
-
-std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
-{ if (this->IsAConstant())
-    return "1";
-  std::stringstream out;
-  FormatExpressions tempFormat;
-  if (theFormat==0)
-    tempFormat.polyDefaultLetter="\\partial";
-  else
-  { tempFormat.polyDefaultLetter=theFormat->WeylAlgebraDefaultLetter;
-    tempFormat.polyAlphabeT=theFormat->weylAlgebraLetters;
-  }
-  std::string firstS=this->polynomialPart.ToString(theFormat);
-  std::string secondS=this->differentialPart.ToString(&tempFormat);
-  if (firstS!="1")
-    out << firstS;
-  if (secondS!="1")
-    out << secondS;
-  return out.str();
-}
-
-void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i]=1;
-  tempMon.differentialPart[j+NumVars]=1;
-  this->AddMonomial(tempMon, 1);
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[j]=1;
-  tempMon.differentialPart[i+NumVars]=1;
-  this->AddMonomial(tempMon,1);
-}
-
-void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i]=1;
-  tempMon.differentialPart[j]=1;
-  this->AddMonomial(tempMon,1);
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[j+NumVars]=1;
-  tempMon.differentialPart[i+NumVars]=1;
-  this->AddMonomial(tempMon,1);
-}
-
-void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i+NumVars]=1;
-  tempMon.differentialPart[j]=1;
-  this->AddMonomial(tempMon, 1);
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[j+NumVars]=1;
-  tempMon.differentialPart[i]=1;
-  this->AddMonomial(tempMon,1);
-}
-
-void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.differentialPart[i]=1;
-  tempMon.differentialPart[j]=1;
-  this->AddMonomial(tempMon, 1);
-}
-
-void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i]=1;
-  tempMon.polynomialPart[j]=1;
-  this->AddMonomial(tempMon, 1);
-}
-
-void ElementWeylAlgebra::Makexi(int i, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i]=1;
-  this->AddMonomial(tempMon, 1);
-}
-
-void ElementWeylAlgebra::Makedi(int i, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.differentialPart[i]=1;
-  this->AddMonomial(tempMon, 1);
-}
-
-void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
-{ this->MakeZero();
-  MonomialWeylAlgebra tempMon;
-  tempMon.MakeOne(NumVars);
-  tempMon.polynomialPart[i]=1;
-  tempMon.differentialPart[j]=1;
-  this->AddMonomial(tempMon, 1);
-}
-
-void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
-{ outputDenominator.MakeOne();
-  MonomialWeylAlgebra tempMon;
-  outputDO.MakeZero();
-  int inputPower=0;
-  if (!inputRationalPower.IsSmallInteger(&inputPower))
-  { std::cout << "This is a programming error: " << " I can give you a differential operator only from integer exponent. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  if (inputPower>=0)
-    tempMon.polynomialPart.MakeEi(indexVar, inputPower);
-  else
-    tempMon.differentialPart.MakeEi(indexVar, -inputPower);
-  outputDO.AddMonomial(tempMon, 1);
-  inputPower*=-1;
-  Polynomial<Rational> newMult;
-  newMult.MakeDegreeOne(0, indexVar, 1);
-  for (int i=0; i<inputPower; i++)
-  { outputDenominator*=newMult;
-    newMult-=1;
-  }
-//  output/=den;
-}
-
-void ElementWeylAlgebra::Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt)
-{ MacroRegisterFunctionWithName("ElementWeylAlgebra::Substitution");
-  Polynomial<Rational> DOpart, polyPart;
-  MonomialWeylAlgebra theMon;
-  ElementWeylAlgebra output;
-  output.MakeZero();
-  for (int i=0; i<this->size(); i++)
-  { const MonomialWeylAlgebra& currentMon =(*this)[i];
-    currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart);
-    currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart);
-    for (int j=0; j<polyPart.size(); j++)
-      for (int k=0; k<DOpart.size(); k++)
-      { theMon.polynomialPart=polyPart[j];
-        theMon.differentialPart=DOpart[k];
-        output.AddMonomial(theMon, polyPart.theCoeffs[j]*DOpart.theCoeffs[k]*this->theCoeffs[i]);
-      }
-  }
-  *this=output;
-}
-
-void ElementWeylAlgebra::FourierTransform(ElementWeylAlgebra& output)const
-{ MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
-  if (&output==this)
-  { ElementWeylAlgebra thisCopy=*this;
-    thisCopy.FourierTransform(output);
-    return;
-  }
-  LargeInt totalDeg;
-  Rational theCoeff;
-  output.MakeZero();
-  MonomialWeylAlgebra theMon;
-  for (int i=0; i<this->size(); i++)
-  { const MonomialWeylAlgebra& currentMon=(*this)[i];
-    if (!(currentMon.polynomialPart.TotalDegree()+currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
-    { std::cout << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-//    std::cout << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
-    theMon.differentialPart=currentMon.polynomialPart;
-    theMon.polynomialPart=currentMon.differentialPart;
-    theCoeff=this->theCoeffs[i];
-    if (!totalDeg.IsEven())
-      theCoeff*=-1;
-    output.AddMonomial(theMon, theCoeff);
-  }
-}
-
-bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
-{ Polynomial<Rational> result;
-  result.MakeZero();
-  MonomialP resultMon;
-  Rational coeff;
-  for (int i=0; i<this->size(); i++)
-    for (int j=0; j<thePoly.size(); j++)
-    { const MonomialP& currentPolMon=thePoly[j];
-      const MonomialWeylAlgebra& currentOpMon=(*this)[i];
-      resultMon=currentPolMon;
-      coeff=thePoly.theCoeffs[j];
-      coeff*=this->theCoeffs[i];
-      for (int k=0; k<currentOpMon.GetMinNumVars(); k++)
-      { int numDiff=0;
-        if (!currentOpMon.differentialPart(k).IsSmallInteger(&numDiff))
-          return false;
-        for (; numDiff>0; numDiff--)
-        { coeff*=resultMon[k];
-          if (coeff.IsEqualToZero())
-            break;
-          resultMon[k]-=1;
-        }
-        if (coeff.IsEqualToZero())
-          break;
-      }
-      resultMon*=currentOpMon.polynomialPart;
-      result.AddMonomial(resultMon, coeff);
-    }
-  thePoly=result;
   return true;
 }
 

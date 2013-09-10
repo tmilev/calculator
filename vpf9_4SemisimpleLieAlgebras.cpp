@@ -1,9 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1_4SemisimpleLieAlgebras.h"
-#include "vpf1_5SubsetsSelections.h"
-ProjectInformationInstance ProjectInfoVpf9_4cpp
-(__FILE__, "Implementation of semisimple subalgebra routines. ");
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfHeader2Math5_SubsetsSelections.h"
+ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Implementation of semisimple subalgebra routines. ");
 
 template<>
 typename List<DynkinSimpleType>::OrderLeftGreaterThanRight

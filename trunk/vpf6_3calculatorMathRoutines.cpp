@@ -71,6 +71,6 @@ bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, co
   if (!input.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
     return false;
   ElementWeylAlgebra<AlgebraicNumber> theElt;
-  input.GetValue<ElementWeylAlgebra<AlgebraicNumber> >().FourierTransform(theElt);
+  input.GetValue<ElementWeylAlgebra<AlgebraicNumber> >().FourierTransform(theElt, theCommands.theObjectContainer.theAlgebraicClosure);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

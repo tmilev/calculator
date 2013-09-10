@@ -1,10 +1,11 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfHeader1_4h_already_included
-#define vpfHeader1_4h_already_included
+#ifndef vpfImplementationHeaderWeylAlgebras_already_included
+#define vpfImplementationHeaderWeylAlgebras_already_included
 
-#include "vpfHeader1General0_General.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_6(__FILE__, "Header, implementation of Weyl algebra routines. ");
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(__FILE__, "Header, implementation of Weyl algebra routines. ");
 
 template <class coefficient>
 void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
@@ -287,11 +288,11 @@ void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra& output)const
+void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coefficient>& output, AlgebraicClosureRationals& ownerField)const
 { MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
   if (&output==this)
   { ElementWeylAlgebra thisCopy=*this;
-    thisCopy.FourierTransform(output);
+    thisCopy.FourierTransform(output, ownerField);
     return;
   }
   LargeInt totalDeg;

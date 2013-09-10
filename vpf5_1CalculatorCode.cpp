@@ -1639,8 +1639,12 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
 { MacroRegisterFunctionWithName("CommandList::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
-    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  if (input.IsListNElementsStartingWithAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
+  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
+      return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  } else
+    if (!theCommands.GetVectoR(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
+      return output.SetError("Failed to extract list of polynomials. ", theCommands);
   //int numVars=theContext.GetNumContextVariables();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
@@ -1766,8 +1770,7 @@ bool CommandList::innerRootSubsystem(CommandList& theCommands, const Expression&
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerPerturbSplittingNormal
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPerturbSplittingNormal(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPerturbSplittingNormal");
   std::stringstream out;
   if (input.children.size!=4)
@@ -1789,9 +1792,7 @@ bool CommandList::innerPerturbSplittingNormal
   for (int i =0; i<NonStrictCone.size; i++)
     if (splittingNormal.ScalarEuclidean(NonStrictCone[i])<0)
       return output.SetError
-      ("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " +
-       NonStrictCone[i].ToString(), theCommands);
-
+      ("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
   out << "Perturbing " << splittingNormal.ToString() << " relative to cone " << NonStrictCone.ToString() << " and vectors "
   << VectorsToPerturbRelativeTo.ToString();
   splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);

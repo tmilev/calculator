@@ -360,9 +360,17 @@ void ElementWeylAlgebra::Substitution(const PolynomialSubstitution<Rational>& Su
   *this=output;
 }
 
-void ElementWeylAlgebra::FourierTransformMe()
+void ElementWeylAlgebra::FourierTransform(ElementWeylAlgebra& output)const
 { MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
+  if (&output==this)
+  { ElementWeylAlgebra thisCopy=*this;
+    thisCopy.FourierTransform(output);
+    return;
+  }
   LargeInt totalDeg;
+  Rational theCoeff;
+  output.MakeZero();
+  MonomialWeylAlgebra theMon;
   for (int i=0; i<this->size(); i++)
   { const MonomialWeylAlgebra& currentMon=(*this)[i];
     if (!(currentMon.polynomialPart.TotalDegree()+currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
@@ -370,9 +378,13 @@ void ElementWeylAlgebra::FourierTransformMe()
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    std::cout << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
+//    std::cout << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
+    theMon.differentialPart=currentMon.polynomialPart;
+    theMon.polynomialPart=currentMon.differentialPart;
+    theCoeff=this->theCoeffs[i];
     if (!totalDeg.IsEven())
-      this->theCoeffs[i]*=-1;
+      theCoeff*=-1;
+    output.AddMonomial(theMon, theCoeff);
   }
 }
 

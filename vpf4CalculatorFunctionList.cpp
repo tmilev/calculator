@@ -45,7 +45,7 @@ void CommandList::initPredefinedInnerFunctions()
    "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \
    (total degree= sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
    "x:=PolynomialWithDO{}(\\partial, x); \n\\partial:=DifferentialOperator{}(\\partial, x);\
-   \n a:=x; b:=\\partial; \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
+   \n  a:=x^3+x\\partial; b:=\\partial x+\\partial^3+\\partial;  \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
 
 
   this->AddOperationInnerHandler

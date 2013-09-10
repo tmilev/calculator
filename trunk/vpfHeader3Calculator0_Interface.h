@@ -4,12 +4,12 @@
 #define vpfHeader2_h_already_included
 
 //the following  include contains all the c++ math routines used in the calculator.
-#include "vpfHeader1_2.h"
-#include "vpfCharacters.h"
-#include "vpfGraph.h"
-#include "vpfHeader1_3.h"
-#include "vpfHeader3ListReferences.h"
-#include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math4_Graph.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "vpfHeader1General1_ListReferences.h"
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
@@ -506,7 +506,7 @@ public:
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
-  HashedListReferences<ElementWeylAlgebra> theWeylAlgebraElements;
+  HashedListReferences<ElementWeylAlgebra<AlgebraicNumber> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedListReferences<RationalFunctionOld> theRFs;
   HashedListReferences<Rational> theRationals;

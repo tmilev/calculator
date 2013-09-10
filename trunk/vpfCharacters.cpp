@@ -1,10 +1,9 @@
-#include "vpfHeader1_2.h"
-#include "vpfCharacters.h"
-#include "vpfGraph.h"
+#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math4_Graph.h"
 
-#include "vpfHeader1_2.h"
-static ProjectInformationInstance ProjectInfoVpfCharacters
-(__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
+#include "vpfHeader2Math0_General.h"
+static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 
 extern FormatExpressions testformat;

@@ -3,9 +3,8 @@
 #ifndef vpfHeader3_already_included
 #define vpfHeader3_already_included
 
-#include "vpfHeader1.h"
-static ProjectInformationInstance ProjectInfoVpfHeader3
-(__FILE__, "Header, ListReferences and HashedListReferences implementation. ");
+#include "vpfHeader1General0_General.h"
+static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListReferences and HashedListReferences implementation. ");
 
 
 //class ListReferences is to be used in the same way as class List.

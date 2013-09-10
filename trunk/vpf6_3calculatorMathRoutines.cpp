@@ -1,10 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpf6_2innerFunctions.h"
+#include "vpfHeader3Calculator2_InnerFunctions.h"
+#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 
-ProjectInformationInstance ProjectInfoVpf6_3cpp
-(__FILE__, "Implementation file: calculator front-end math routines. ");
+ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Implementation file: calculator front-end math routines. ");
 
 template <class theType>
 bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
@@ -38,7 +38,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
 
 bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket");
-  Vector<ElementWeylAlgebra> theOps;
+  Vector<ElementWeylAlgebra<AlgebraicNumber> > theOps;
   Expression theContext;
   if (!input.children.size>1)
     return false;
@@ -68,9 +68,9 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
 
 bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerFourierTransformEWA");
-  if (!input.IsOfType<ElementWeylAlgebra>())
+  if (!input.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
     return false;
-  ElementWeylAlgebra theElt;
-  input.GetValue<ElementWeylAlgebra>().FourierTransform(theElt);
+  ElementWeylAlgebra<AlgebraicNumber> theElt;
+  input.GetValue<ElementWeylAlgebra<AlgebraicNumber> >().FourierTransform(theElt);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

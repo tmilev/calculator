@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math0_General.h"
 
 ProjectInformationInstance ProjectInfoVpf7cpp
 (__FILE__, "Implementation file intended for small fast changes. ");

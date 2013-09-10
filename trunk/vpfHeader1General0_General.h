@@ -5078,9 +5078,7 @@ class MonomialWeylAlgebra
   { return this->HashFunction(*this);
   }
   int GetMinNumVars()const
-  { return
-    MathRoutines::Maximum
-    (this->polynomialPart.GetMinNumVars(), this->differentialPart.GetMinNumVars());
+  { return MathRoutines::Maximum(this->polynomialPart.GetMinNumVars(), this->differentialPart.GetMinNumVars());
   }
   bool operator==(const MonomialWeylAlgebra& other)const
   { return this->polynomialPart==other.polynomialPart &&

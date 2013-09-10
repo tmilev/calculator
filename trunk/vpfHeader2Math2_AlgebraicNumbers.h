@@ -3,9 +3,8 @@
 #ifndef vpfHeader1_3_h_already_included
 #define vpfHeader1_3_h_already_included
 
-#include "vpfHeader1_2.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_3
-(__FILE__, "Header, math routines. ");
+#include "vpfHeader2Math0_General.h"
+static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, math routines. ");
 
 class AlgebraicExtensionRationals;
 class AlgebraicClosureRationals;
@@ -15,6 +14,13 @@ class AlgebraicNumber
   AlgebraicExtensionRationals* owner;
   VectorSparse<Rational> theElt;
   AlgebraicNumber():owner(0){}
+  AlgebraicNumber(const Rational& other):owner(0)
+  { this->operator=(other);
+  }
+  AlgebraicNumber(int other):owner(0)
+  { this->operator=((Rational)other);
+  }
+  bool NeedsBrackets()const;
   bool CheckNonZeroOwner()const;
   unsigned int HashFunction()const;
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
@@ -32,8 +38,14 @@ class AlgebraicNumber
   void Invert();
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other)const;
+  bool operator==(int other)const;
   void operator+=(const AlgebraicNumber& other);
+  void operator-=(const AlgebraicNumber& other);
   void operator*=(const AlgebraicNumber& other);
+  void operator*=(const Rational& other);
+  void operator*=(int other)
+  { this->operator*=((Rational)other);
+  }
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 

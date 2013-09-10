@@ -1,7 +1,7 @@
 #ifndef vpfCharacterHeader_alreadyIncluded
 #define vpfCharacterHeader_alreadyIncluded
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math0_General.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersHEader
 (__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");

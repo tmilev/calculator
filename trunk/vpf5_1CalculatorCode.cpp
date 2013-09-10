@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader2.h"
-#include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");

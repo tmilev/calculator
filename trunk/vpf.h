@@ -60,11 +60,11 @@
 //This header file includes the various sub-headers.
 //The splitting into sub-headers is needed to speed up compilation times.
 #include "vpfMacros.h"
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
-//#include "vpfHeader1_3.h"
-#include "vpfHeader1_4SemisimpleLieAlgebras.h"
-#include "vpfCharacters.h"
-#include "vpfHeader2.h"
+#include "vpfHeader1General0_General.h"
+#include "vpfHeader2Math0_General.h"
+//#include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader3Calculator0_Interface.h"
 //static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

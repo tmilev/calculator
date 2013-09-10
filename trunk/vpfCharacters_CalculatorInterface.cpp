@@ -1,7 +1,7 @@
 #include "vpf.h"
-#include "vpfCharacters.h"
-#include "vpfGraph.h"
-#include "vpfCharacters_CalculatorInterface.h"
+#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math4_Graph.h"
+#include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP
 (__FILE__, "Weyl group calculator interface");

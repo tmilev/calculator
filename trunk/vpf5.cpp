@@ -1,7 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpf1_5SubsetsSelections.h"
+#include "vpfHeader2Math5_SubsetsSelections.h"
+#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for the calculator parser part 2: meant for built-in functions. ");
 
 //If you get a the C++ multiple definition error:
@@ -2663,7 +2664,7 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
   }
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(theCommands, startContext.ContextGetContextVariable(letterPol), startContext.ContextGetContextVariable(letterDiff));
-  ElementWeylAlgebra outputEWA;
+  ElementWeylAlgebra<AlgebraicNumber> outputEWA;
   if (assignPoly)
     outputEWA.Makexi(0,1);
   else

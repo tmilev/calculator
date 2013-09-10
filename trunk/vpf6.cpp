@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
+#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
 
 //If you get a specialization after instantiation error:
@@ -87,7 +88,7 @@ int Expression::GetTypeOperation<Polynomial<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylAlgebra>()const
+int Expression::GetTypeOperation<ElementWeylAlgebra<AlgebraicNumber> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementWeylAlgebra();
 }
@@ -241,7 +242,7 @@ Polynomial<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementWeylAlgebra
+ElementWeylAlgebra<AlgebraicNumber>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theWeylAlgebraElements
@@ -476,8 +477,8 @@ Polynomial<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
-ElementWeylAlgebra& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<ElementWeylAlgebra>())
+ElementWeylAlgebra<AlgebraicNumber>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
   { std::cout << "This is a programming error: expression not of required type ElementWeylAlgebra."
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
@@ -681,20 +682,20 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
 }
 
 template< >
-bool Expression::ConvertToType<ElementWeylAlgebra>(Expression& output)const
+bool Expression::ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
-  { ElementWeylAlgebra resultEWA;
+  { ElementWeylAlgebra<AlgebraicNumber> resultEWA;
     resultEWA.MakeConst(this->GetValue<Rational>());
     return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
-  { ElementWeylAlgebra resultEWA;
+  { ElementWeylAlgebra<AlgebraicNumber> resultEWA;
     resultEWA.AssignPolynomial(this->GetValue<Polynomial<Rational> >());
     return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
   }
-  if (this->IsOfType<ElementWeylAlgebra>())
+  if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
   { output=*this;
     return true;
   }
@@ -897,11 +898,11 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
       return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
-  if (this->IsOfType<ElementWeylAlgebra>())
+  if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
   { PolynomialSubstitution<Rational> subEWApart;
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
-    ElementWeylAlgebra outputEWA=this->GetValue<ElementWeylAlgebra>();
+    ElementWeylAlgebra<AlgebraicNumber> outputEWA =this->GetValue<ElementWeylAlgebra<AlgebraicNumber> >();
     outputEWA.Substitution(subPolyPart, subEWApart);
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
   }
@@ -1766,7 +1767,7 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
 template <class coefficient>
 void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& standsOnTheRight)
 { quasiDiffOp<coefficient> output;
-  ElementWeylAlgebra leftElt, rightElt, tempElt;
+  ElementWeylAlgebra<Rational> leftElt, rightElt, tempElt;
   quasiDiffMon outputMon;
   output.MakeZero();
   for (int j=0; j<standsOnTheRight.size; j++)
@@ -1794,9 +1795,9 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
     combineWeylPart=theFormat->flagQuasiDiffOpCombineWeylPart;
   if (!combineWeylPart)
     return this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat);
-  MatrixTensor<ElementWeylAlgebra> reordered;
+  MatrixTensor<ElementWeylAlgebra<Rational> > reordered;
   reordered.MakeZero();
-  ElementWeylAlgebra tempP;
+  ElementWeylAlgebra<Rational> tempP;
   for (int i=0; i<this->size(); i++)
   { const quasiDiffMon& currentMon=(*this)[i];
     tempP.MakeZero();
@@ -1815,12 +1816,12 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
 }
 
 template <class coefficient>
-bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
+bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
 //  int varShift=this->GetMinNumVars();
 //  std::cout << "<br>varShift for Euler operator: " << varShift;
   int powerMonCoeff=0;
-  ElementWeylAlgebra currentMonContribution;
+  ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.MakeOne();
 //  std::cout << "<br>Getting Euler part contribution of " << theCoeff.ToString()
 //  <<  " with min num vars equal to " << theCoeff.GetMinNumVars();
@@ -1866,7 +1867,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 
   int varShift=this->GetMinNumVars();
 //  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
-  ElementWeylAlgebra weylPartSummand, exponentContribution, oneIndexContribution,
+  ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
   quasiDiffMon monQDO, monQDO2;
@@ -1901,7 +1902,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
         //std::cout << "ere be problem!";
       //problemCounter++;
       currentMon.Powers[j].GetConstantTerm(currentShift);
-      ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+      ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
       (currentShift, j+varShift, oneIndexContribution, negativeExponentDenominatorContribution, theGlobalVariables);
 //      std::cout << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
 //      << negativeExponentDenominatorContribution.ToString() << " divided by "
@@ -1965,7 +1966,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra<Rational> theGenerator;
   ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
-  List<ElementWeylAlgebra> actionNilrad;
+  List<ElementWeylAlgebra<Rational> > actionNilrad;
   List<int> vectorIndices, dualIndices;
   List<quasiDiffOp<Rational> > theQDOs;
   FormatExpressions theWeylFormat, theUEformat;
@@ -3544,12 +3545,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex=true;
     out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<ElementWeylAlgebra>())
+  } else if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseLatex=true;
     out << "ElementWeylAlgebra{}(";
-    out << this->GetValue<ElementWeylAlgebra>().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementWeylAlgebra<AlgebraicNumber> >().ToString(&contextFormat.GetElement());
     out << ")";
 //    out << "[" << this->GetContext().ToString() << "]";
     result=true;

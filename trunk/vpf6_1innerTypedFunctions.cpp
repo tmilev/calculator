@@ -1,7 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpf6_1innerTypedFunctions.h"
+#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
+#include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 ProjectInformationInstance ProjectInfoVpf6_1cpp
 (__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
 
@@ -318,7 +319,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor(CommandList& th
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
-  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra>(theCommands, input, output);
+  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
@@ -336,7 +337,7 @@ bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
 bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
-  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra>(theCommands, input, output);
+  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly
@@ -481,7 +482,7 @@ bool CommandListInnerTypedFunctions::innerPowerEWABySmallInteger(CommandList& th
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  ElementWeylAlgebra base;
+  ElementWeylAlgebra<AlgebraicNumber> base;
   int thePower=0;
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
@@ -811,19 +812,19 @@ bool CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA
     return false;
   const Expression& leftE=inputConverted[1];
   const Expression& rightE=inputConverted[2];
-  bool leftEisGood =leftE.IsOfType<Rational>()  || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra>();
-  bool rightEisGood=rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra>();
+  bool leftEisGood =leftE.IsOfType<Rational>()  || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >();
+  bool rightEisGood=rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >();
   if (!leftEisGood || !rightEisGood)
     return false;
-  if (!leftE.IsOfType<ElementWeylAlgebra>() && !rightE.IsOfType<ElementWeylAlgebra>())
+  if (!leftE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >() && !rightE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
     return output.AssignValue(0, theCommands);
   Expression leftConverted, rightConverted;
-  if (!leftE.ConvertToType<ElementWeylAlgebra>(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra>(rightConverted))
+  if (!leftE.ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(rightConverted))
   { theCommands.Comments << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
-  ElementWeylAlgebra resultE=rightConverted.GetValue<ElementWeylAlgebra>();
-  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra>(), theCommands.theGlobalVariableS);
+  ElementWeylAlgebra<AlgebraicNumber> resultE=rightConverted.GetValue<ElementWeylAlgebra<AlgebraicNumber> >();
+  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<AlgebraicNumber> >(), theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
 

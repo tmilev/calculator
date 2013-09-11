@@ -88,7 +88,7 @@ int Expression::GetTypeOperation<Polynomial<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylAlgebra<AlgebraicNumber> >()const
+int Expression::GetTypeOperation<ElementWeylAlgebra<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementWeylAlgebra();
 }
@@ -242,7 +242,7 @@ Polynomial<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementWeylAlgebra<AlgebraicNumber>
+ElementWeylAlgebra<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theWeylAlgebraElements
@@ -477,8 +477,8 @@ Polynomial<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
-ElementWeylAlgebra<AlgebraicNumber>& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+ElementWeylAlgebra<Rational>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementWeylAlgebra<Rational> >())
   { std::cout << "This is a programming error: expression not of required type ElementWeylAlgebra."
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
@@ -682,20 +682,20 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
 }
 
 template< >
-bool Expression::ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(Expression& output)const
+bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_ElementWeylAlgebra");
   this->CheckInitialization();
   if (this->IsOfType<Rational>())
-  { ElementWeylAlgebra<AlgebraicNumber> resultEWA;
+  { ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.MakeConst(this->GetValue<Rational>());
     return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
-  { ElementWeylAlgebra<AlgebraicNumber> resultEWA;
+  { ElementWeylAlgebra<Rational> resultEWA;
     resultEWA.AssignPolynomial(this->GetValue<Polynomial<Rational> >());
     return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
   }
-  if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+  if (this->IsOfType<ElementWeylAlgebra<Rational> >())
   { output=*this;
     return true;
   }
@@ -898,11 +898,11 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
       return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
-  if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+  if (this->IsOfType<ElementWeylAlgebra<Rational> >())
   { PolynomialSubstitution<Rational> subEWApart;
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
-    ElementWeylAlgebra<AlgebraicNumber> outputEWA =this->GetValue<ElementWeylAlgebra<AlgebraicNumber> >();
+    ElementWeylAlgebra<Rational> outputEWA =this->GetValue<ElementWeylAlgebra<Rational> >();
     outputEWA.Substitution(subPolyPart, subEWApart);
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
   }
@@ -3545,12 +3545,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex=true;
     out << this->GetValue<Matrix<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+  } else if (this->IsOfType<ElementWeylAlgebra<Rational> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseLatex=true;
     out << "ElementWeylAlgebra{}(";
-    out << this->GetValue<ElementWeylAlgebra<AlgebraicNumber> >().ToString(&contextFormat.GetElement());
+    out << this->GetValue<ElementWeylAlgebra<Rational> >().ToString(&contextFormat.GetElement());
     out << ")";
 //    out << "[" << this->GetContext().ToString() << "]";
     result=true;

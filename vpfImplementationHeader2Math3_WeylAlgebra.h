@@ -296,8 +296,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
     return;
   }
   LargeInt totalDeg;
-  AlgebraicNumber theCoeff, ImaginaryUnit;
-  ImaginaryUnit.AssignRationalQuadraticRadical(-1, ownerField);
+  coefficient theCoeff;
   output.MakeZero();
   MonomialWeylAlgebra theMon;
   for (int i=0; i<this->size(); i++)

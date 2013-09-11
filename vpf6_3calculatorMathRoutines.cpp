@@ -38,7 +38,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
 
 bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket");
-  Vector<ElementWeylAlgebra<AlgebraicNumber> > theOps;
+  Vector<ElementWeylAlgebra<Rational> > theOps;
   Expression theContext;
   if (!input.children.size>1)
     return false;
@@ -68,9 +68,9 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
 
 bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerFourierTransformEWA");
-  if (!input.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+  if (!input.IsOfType<ElementWeylAlgebra<Rational> >())
     return false;
-  ElementWeylAlgebra<AlgebraicNumber> theElt;
-  input.GetValue<ElementWeylAlgebra<AlgebraicNumber> >().FourierTransform(theElt, theCommands.theObjectContainer.theAlgebraicClosure);
+  ElementWeylAlgebra<Rational> theElt;
+  input.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt, theCommands.theObjectContainer.theAlgebraicClosure);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

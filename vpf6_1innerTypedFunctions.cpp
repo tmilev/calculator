@@ -319,7 +319,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor(CommandList& th
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
-  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra<AlgebraicNumber> >(theCommands, input, output);
+  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra<Rational> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
@@ -337,7 +337,7 @@ bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
 bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
-  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra<AlgebraicNumber> >(theCommands, input, output);
+  return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra<Rational> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly
@@ -482,7 +482,7 @@ bool CommandListInnerTypedFunctions::innerPowerEWABySmallInteger(CommandList& th
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  ElementWeylAlgebra<AlgebraicNumber> base;
+  ElementWeylAlgebra<Rational> base;
   int thePower=0;
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
@@ -812,19 +812,19 @@ bool CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA
     return false;
   const Expression& leftE=inputConverted[1];
   const Expression& rightE=inputConverted[2];
-  bool leftEisGood =leftE.IsOfType<Rational>()  || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >();
-  bool rightEisGood=rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >();
+  bool leftEisGood =leftE.IsOfType<Rational>()  || leftE.IsOfType<Polynomial<Rational> >()  || leftE.IsOfType<ElementWeylAlgebra<Rational> >();
+  bool rightEisGood=rightE.IsOfType<Rational>() || rightE.IsOfType<Polynomial<Rational> >() || rightE.IsOfType<ElementWeylAlgebra<Rational> >();
   if (!leftEisGood || !rightEisGood)
     return false;
-  if (!leftE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >() && !rightE.IsOfType<ElementWeylAlgebra<AlgebraicNumber> >())
+  if (!leftE.IsOfType<ElementWeylAlgebra<Rational> >() && !rightE.IsOfType<ElementWeylAlgebra<Rational> >())
     return output.AssignValue(0, theCommands);
   Expression leftConverted, rightConverted;
-  if (!leftE.ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra<AlgebraicNumber> >(rightConverted))
+  if (!leftE.ConvertToType<ElementWeylAlgebra<Rational> >(leftConverted) || !rightE.ConvertToType<ElementWeylAlgebra<Rational> >(rightConverted))
   { theCommands.Comments << "<hr>Failed with conversion to Element weyl algebra - possible programming error?";
     return false;
   }
-  ElementWeylAlgebra<AlgebraicNumber> resultE=rightConverted.GetValue<ElementWeylAlgebra<AlgebraicNumber> >();
-  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<AlgebraicNumber> >(), theCommands.theGlobalVariableS);
+  ElementWeylAlgebra<Rational> resultE=rightConverted.GetValue<ElementWeylAlgebra<Rational> >();
+  resultE.LieBracketOnTheLeft(leftConverted.GetValue<ElementWeylAlgebra<Rational> >(), theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
 

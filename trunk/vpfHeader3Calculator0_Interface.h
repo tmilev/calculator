@@ -506,7 +506,7 @@ public:
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
-  HashedListReferences<ElementWeylAlgebra<AlgebraicNumber> > theWeylAlgebraElements;
+  HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedListReferences<RationalFunctionOld> theRFs;
   HashedListReferences<Rational> theRationals;

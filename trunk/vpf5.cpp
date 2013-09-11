@@ -2664,7 +2664,7 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
   }
   Expression endContext;
   endContext.MakeContextWithOnePolyVarOneDiffVar(theCommands, startContext.ContextGetContextVariable(letterPol), startContext.ContextGetContextVariable(letterDiff));
-  ElementWeylAlgebra<AlgebraicNumber> outputEWA;
+  ElementWeylAlgebra<Rational> outputEWA;
   if (assignPoly)
     outputEWA.Makexi(0,1);
   else

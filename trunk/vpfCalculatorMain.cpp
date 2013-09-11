@@ -114,9 +114,7 @@ void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
 
-std::string GetSelectHTMLStringTEmp
-(List<std::string>& optionsType, List<std::string>& optionsRank,
-  std::string& selectedType, std::string& selectedRank, bool usePreamble)
+std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<std::string>& optionsRank, std::string& selectedType, std::string& selectedRank, bool usePreamble)
 { std::stringstream out;
   out << "\n<script language=\"javascript\">\n"
   << "function updatePreamble(){\n"
@@ -485,8 +483,7 @@ int main(int argc, char **argv)
 //  std::cout << "Raw input: " << inputString << "<hr>";
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
-  CGI::ChopCGIInputStringToMultipleStrings
-  (theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
   //std::cout << "Chopped strings: ";
   //for (int i=0; i<inputStrings.size; i++)
   //  std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
@@ -519,6 +516,7 @@ int main(int argc, char **argv)
 //  civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
 //  civilizedInput="g_{{a}}:=getChevalleyGenerator{} (G_2, a);hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
 //civilizedInput="\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); ";
+  //civilizedInput="\\partial:=DifferentialOperator{}(\\partial, x); x:=PolynomialWithDO{}(\\partial, x); GenerateVectorSpaceClosedWRTLieBracket{}(50, x, \\partial);";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

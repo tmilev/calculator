@@ -354,8 +354,7 @@ void AlgebraicExtensionRationals::ChooseGeneratingElement()
   }
 }
 
-void AlgebraicExtensionRationals::ReduceMeOnCreation
-(MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
+void AlgebraicExtensionRationals::ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMeOnCreation");
 //  double timeStart=0;
 //  if (this->owner!=0)
@@ -560,7 +559,24 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
 }
 
 void AlgebraicNumber::Invert()
-{ MatrixTensor<Rational> theInverted;
+{ MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
+  if (this->owner==0)
+  { if (this->theElt.IsEqualToZero())
+    { std::cout << "This is a programming error: division by zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    bool isGood=(this->theElt.size()==1);
+    if (isGood)
+      isGood=(this->theElt[0].theIndex==0);
+    if (!isGood)
+    { std::cout << "This is a programming error: Algebraic number has no owner, so it must be rational, but it appears to be not. "
+      << " as its theElt vector is: " << this->theElt.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->theElt.theCoeffs[0].Invert();
+    return;
+  }
+  MatrixTensor<Rational> theInverted;
   Matrix<Rational> tempMat2;
   this->GetMultiplicationByMeMatrix(theInverted);
   theInverted.GetMatrix(tempMat2, this->owner->DimOverRationals);
@@ -744,7 +760,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames=this->owner->DisplayNamesBasisElements;
-  out << this->theElt.ToString(&tempFormat) << "~ in~ the~ field~ " << this->owner->ToString();
+  out << this->theElt.ToString(&tempFormat) ;//<< "~ in~ the~ field~ " << this->owner->ToString();
   return out.str();
 }
 

@@ -6574,17 +6574,8 @@ public:
 };
 
 template <class Element>
-bool MonomialP::SubstitutioN
-(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)const
+bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)const
 { MacroRegisterFunctionWithName("MonomialP::Substitution");
-  if (TheSubstitution.size<this->GetMinNumVars())
-  { std::cout << "This is a programming error. Attempting to carry out "
-    << "a substitution in a monomial with " << this->GetMinNumVars()
-    << " variables but the substition has "
-    << TheSubstitution.size << " variable images. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
   output.MakeConst(1);
   if (this->IsAConstant())
     return true;
@@ -6593,12 +6584,17 @@ bool MonomialP::SubstitutioN
 //  output.ComputeDebugString();
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
-    { int theExponent=0;
-      if (!this->monBody[i].IsSmallInteger(&theExponent))
-      { std::cout << " I cannot carry out a substitution in a monomial "
-        << " that has exponent which is not a small integer: it is "
-        << this->monBody[i] << " instead. "
+    { if(i>=TheSubstitution.size)
+      { std::cout << "This is a programming error. Attempting to carry out a substitution in the monomial"
+        << this->ToString() << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has "
+        << TheSubstitution.size << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      int theExponent=0;
+      if (!this->monBody[i].IsSmallInteger(&theExponent))
+      { std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
+        << "which is not a small integer: it is " << this->monBody[i] << " instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         return false;
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();

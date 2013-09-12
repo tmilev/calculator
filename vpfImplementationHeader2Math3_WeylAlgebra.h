@@ -270,6 +270,7 @@ void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
   ElementWeylAlgebra output;
   output.MakeZero();
   coefficient theNewCoeff;
+//  std::cout << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
   for (int i=0; i<this->size(); i++)
   { const MonomialWeylAlgebra& currentMon =(*this)[i];
     currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart);

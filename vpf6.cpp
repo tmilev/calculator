@@ -1802,10 +1802,10 @@ void quasiDiffOp<coefficient>::operator*=(const quasiDiffOp<coefficient>& stands
   ElementWeylAlgebra<Rational> leftElt, rightElt, tempElt;
   quasiDiffMon outputMon;
   output.MakeZero();
-  for (int j=0; j<standsOnTheRight.size; j++)
+  for (int j=0; j<standsOnTheRight.size(); j++)
   { rightElt.MakeZero();
     rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.theCoeffs[j]);
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
     { leftElt.MakeZero();
       leftElt.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
       outputMon.theMatMon= (*this)[i].theMatMon;
@@ -2051,7 +2051,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   Vector<RationalFunctionOld> tempV;
   int numStartingVars=hwContext.ContextGetNumContextVariables();
   //std::cout << "<br>num starting vars:" << numStartingVars;
-  std::stringstream reportFourierTransformedCalculatorCommands;
+  std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
@@ -2149,40 +2149,45 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     out << "</tr>";
     if (theHws[i].IsEqualToZero())
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << ", Fourier transformed</td>";
       reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
-      << ", Fourier transformed differential operators - formatted for calculator input. <br><br>";
+      << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportFourierTransformedCalculatorCommands << "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n";
+      reportCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
+      << ", differential operators - formatted for calculator input. <br><br>";
+      reportCalculatorCommands << "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n";
+
       for (int j=0; j<theGeneratorsItry.size; j++)
       { theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
         diffOpPart.FourierTransform(transformedDO);
-        theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
-        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+transformedDO.ToString(&theWeylFormat)+"\\end{array}")
-        << "</td>";
-        theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
-        theWeylFormat.MaxLineLength=300;
-        reportFourierTransformedCalculatorCommands <<"<br>" << theGeneratorsItry[j].ToString() << ":="
-        << transformedDO.ToString() << ";";
+        reportFourierTransformedCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << ":=" << transformedDO.ToString() << ";";
+        reportCalculatorCommands << "<br>" << theGeneratorsItry[j].ToString() << ":=" << diffOpPart.ToString() << ";";
       }
-      out << "</tr>";
       reportFourierTransformedCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
+      reportCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
       for (int j=0; j<theGeneratorsItry.size; j++)
       { reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].ToString();
+        reportCalculatorCommands << theGeneratorsItry[j].ToString();
         if (j!=theGeneratorsItry.size-1)
-          reportFourierTransformedCalculatorCommands << ", ";
+        { reportFourierTransformedCalculatorCommands << ", ";
+          reportCalculatorCommands << ", ";
+        }
       }
       reportFourierTransformedCalculatorCommands << ");";
       reportFourierTransformedCalculatorCommands << "<hr>";
+      reportCalculatorCommands << ");";
+      reportCalculatorCommands << "<hr>";
     }
-    //theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
-    //std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
-    //std::cout << "<br>The qdos: ";
-    //for (int j=0; j<theQDOs.size; j++)
-    //  std::cout << "<br>" << theQDOs[j].ToString();
+    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
+    std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
+    std::cout << "<br>The qdos: ";
+    for (int j=0; j<theQDOs.size; j++)
+      std::cout << "<br>" << theQDOs[j].ToString();
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
+  out << reportCalculatorCommands.str();
   out << reportFourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();

@@ -12,7 +12,6 @@ class CommandListFunctions
 public:
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output);
-
 };
 
 #endif

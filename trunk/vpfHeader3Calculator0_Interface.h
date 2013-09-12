@@ -1166,6 +1166,8 @@ public:
     { output=input;
       return true;
     }
+    if (theFun==0)
+      return false;
     if (!theFun(*this, input, output))
     { this->Comments << "<hr>Conversion function failed on " << input.ToString() << ". ";
       return false;
@@ -1380,7 +1382,7 @@ public:
    Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose=true);
   bool innerWriteGenVermaModAsDiffOperatorInner
   (CommandList& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
-   Selection& selInducing, SemisimpleLieAlgebra* owner, std::string* xLetter=0, std::string* partialLetter=0, std::string* exponentVariableLetter=0);
+   Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter=0, std::string* partialLetter=0, std::string* exponentVariableLetter=0);
   template<class coefficient>
   static bool TypeHighestWeightParabolic
   (CommandList& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeight, Selection& outputInducingSel, Expression* outputContext=0);
@@ -1392,9 +1394,15 @@ public:
   static bool innerZmodP(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAdCommonEigenSpaces(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedG2inB3(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output, bool AllGenerators);
+  static bool innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false);
+  }
+  static bool innerWriteGenVermaModAsDiffOperatorsAllGens(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, true);
+  }
   static bool innerCasimir(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos);

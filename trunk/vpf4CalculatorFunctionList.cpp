@@ -577,7 +577,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
   this->AddOperationInnerHandler
   ("WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-   this->fWriteGenVermaModAsDiffOperatorUpToLevel, "",
+   this->innerWriteGenVermaModAsDiffOperatorUpToLevel, "",
    "<b>Experimental, please don't use</b>. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The third argument gives the highest weight. \
@@ -586,7 +586,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    The second argument gives the weight level to which the computation should be carried out",
    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, y)); ");
   this->AddOperationInnerHandler
-  ("EmbedSSalgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
+  ("EmbedSSalgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly, "",
    "Experimental, please don't use. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The second argument gives the highest weight. \
@@ -595,7 +595,7 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    The first argument gives the type of the Lie algebra. ",
    "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ", false, false);
   this->AddOperationInnerHandler
-  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperators, "",
+  ("MapSemisimpleLieAlgebraInWeylAlgebra", this->innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly, "",
    "Constructs a parabolically induced map from a semisimple Lie algebra \
    to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
    generalized Verma module and writes it using differential operators with matrix coefficients. \
@@ -610,6 +610,22 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
    accepts further optional arguments, customizing the notation of the final printout.",
    "MapSemisimpleLieAlgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
+  this->AddOperationInnerHandler
+  ("MapSemisimpleLieAlgebraInWeylAlgebraAllGens", this->innerWriteGenVermaModAsDiffOperatorsAllGens, "",
+   "Constructs a parabolically induced map from a semisimple Lie algebra \
+   to a Weyl algebra with matrix coefficients. More precisely, this function constructs a \
+   generalized Verma module and writes it using differential operators with matrix coefficients. \
+   The first argument gives the type of the semisimple Lie algebra, the second argument \
+   gives the highest weight in fundamental coordinates. The third argument gives the\
+   parabolic subalgebra selection with 0 standing for non-crossed out roots and 1 for \
+   crossed-out roots. In all non crossed-out root positions, \
+   the coordinates of the highest weight \
+   vector must be small integers (because the highest\
+   weight must be dominant and integral with respect to the Levi part of the inducing parabolic\
+   subalgebra). In the crossed-out root positions, the coordiantes of the highest weight vector\
+   can be arbitrary polynomial expressions. In addition to the first 3 arguments, this function\
+   accepts further optional arguments, customizing the notation of the final printout.",
+   "MapSemisimpleLieAlgebraInWeylAlgebraAllGens{}(B_3, (0,0,0), (0, 0, 1), x, \\partial, a); ", true, false);
   this->AddOperationInnerHandler
   ("KLcoeffs", this->fKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \

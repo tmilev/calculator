@@ -1498,8 +1498,9 @@ bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Ex
   return theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
-bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel");
+bool CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError
@@ -1565,7 +1566,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theComma
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.innerWriteGenVermaModAsDiffOperatorInner(theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
+  return theCommands.innerWriteGenVermaModAsDiffOperatorInner(theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra, false);
 }
 
 template <class coefficient>
@@ -1683,7 +1684,38 @@ public:
     tempRight=standsOnTheRight;
     MathRoutines::LieBracket(*this, tempRight, *this);
   }
+  void FourierTransformDiffPartOnly(quasiDiffOp<coefficient>& output)const;
+  void GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output)const;
 };
+
+template <class coefficient>
+void quasiDiffOp<coefficient>::FourierTransformDiffPartOnly(quasiDiffOp<coefficient>& output)const
+{ if (& output==this)
+  { quasiDiffOp<coefficient> thisCopy;
+    thisCopy.FourierTransformDiffPartOnly(output);
+    return;
+  }
+  output.MakeZero();
+  ElementWeylAlgebra<coefficient> startDO, finalDO;
+  quasiDiffMon theMon;
+  for (int i=0; i<this->size(); i++)
+  { startDO.MakeZero();
+    startDO.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+    startDO.FourierTransform(finalDO);
+    for (int j=0; j<finalDO.size(); j++)
+    { theMon.theMatMon=(*this)[i].theMatMon;
+      theMon.theWeylMon=finalDO[j];
+      output.AddMonomial(theMon, finalDO.theCoeffs[j]);
+    }
+  }
+}
+
+template <class coefficient>
+void quasiDiffOp<coefficient>::GetEWAsetMatrixPartsToId(ElementWeylAlgebra<coefficient>& output)const
+{ output.MakeZero();
+  for (int i=0; i<this->size(); i++)
+    output.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
+}
 
 template<class Element>
 void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output)
@@ -1954,8 +1986,8 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 }
 
 bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
-(CommandList& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws,  Expression& hwContext,
- Selection& selInducing, SemisimpleLieAlgebra* owner, std::string* xLetter, std::string* partialLetter, std::string* exponentVariableLetter)
+(CommandList& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
+ Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter, std::string* partialLetter, std::string* exponentVariableLetter)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
@@ -1984,21 +2016,23 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
   hwContext.ContextGetFormatExpressions(theWeylFormat);
   List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
-  for (int j=0; j<theSSalgebra.GetRank(); j++)
-  { Vector<Rational> ei;
-    ei.MakeEi(theSSalgebra.GetRank(), j);
-    theGenerator.MakeGGenerator(ei, theSSalgebra);
-    theGeneratorsItry.AddOnTop(theGenerator);
-    theGenerator.MakeHgenerator(ei, theSSalgebra);
-    theGeneratorsItry.AddOnTop(theGenerator);
-    ei.Minus();
-    theGenerator.MakeGGenerator(ei, theSSalgebra);
-    theGeneratorsItry.AddOnTop(theGenerator);
-  }
-  for (int j=0; j<theSSalgebra.theWeyl.RootSystem.size; j++)
-  { theGenerator.MakeGGenerator(theSSalgebra.theWeyl.RootSystem[j], theSSalgebra);
-    theGeneratorsItry.AddOnTop(theGenerator);
-  }
+  if (!AllGenerators)
+    for (int j=0; j<theSSalgebra.GetRank(); j++)
+    { Vector<Rational> ei;
+      ei.MakeEi(theSSalgebra.GetRank(), j);
+      theGenerator.MakeGGenerator(ei, theSSalgebra);
+      theGeneratorsItry.AddOnTop(theGenerator);
+      theGenerator.MakeHgenerator(ei, theSSalgebra);
+      theGeneratorsItry.AddOnTop(theGenerator);
+      ei.Minus();
+      theGenerator.MakeGGenerator(ei, theSSalgebra);
+      theGeneratorsItry.AddOnTop(theGenerator);
+    }
+  else
+    for (int j=0; j<theSSalgebra.theWeyl.RootSystem.size; j++)
+    { theGenerator.MakeGGenerator(theSSalgebra.theWeyl.RootSystem[j], theSSalgebra);
+      theGeneratorsItry.AddOnTop(theGenerator);
+    }
   theQDOs.SetSize(theGeneratorsItry.size);
 /*  if (false)
     if (theSSalgebra.GetRank()==3 && theSSalgebra.theWeyl.WeylLetter=='B')
@@ -2010,14 +2044,14 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
   latexReport << "\\begin{longtable}{rll";
   for (int i =0; i<theGeneratorsItry.size; i++)
     latexReport << "l";
-  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
-  << "} Differential operators corresponding to actions of simple positive generators for the "
-  << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
+  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString() << "} Differential operators corresponding to actions"
+  << " of simple positive generators for the " << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
   List<ModuleSSalgebra<RationalFunctionOld > > theMods;
   theMods.SetSize(theHws.size);
   Vector<RationalFunctionOld> tempV;
   int numStartingVars=hwContext.ContextGetNumContextVariables();
   //std::cout << "<br>num starting vars:" << numStartingVars;
+  std::stringstream reportFourierTransformedCalculatorCommands;
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
@@ -2052,8 +2086,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
         tempStream4 << theFinalPartialLetter << "_{" << k-numStartingVars+1 << "}";
         if (theWeylFormat.polyAlphabeT.Contains(tempstream2.str()) || theWeylFormat.polyAlphabeT.Contains(tempstream3.str()))
           return output.SetError
-          ("Error: the variable "+ tempstream2.str()+
-           " is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
+          ("Error: the variable "+ tempstream2.str()+" is reserved for me: you are not allowed to use it as a coordinate of the highest weight. ", theCommands);
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
       }
@@ -2100,7 +2133,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}") << "</td>";
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
+      << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
       theWeylFormat.MaxLineLength=300;
       latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
@@ -2110,17 +2144,46 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
+    latexReport2 << "\\end{longtable}";
+    latexReport << "\\\\\\hline<br>";
+    out << "</tr>";
+    if (theHws[i].IsEqualToZero())
+    { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
+      out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << ", Fourier transformed</td>";
+      reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
+      << ", Fourier transformed differential operators - formatted for calculator input. <br><br>";
+      reportFourierTransformedCalculatorCommands << "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n";
+      for (int j=0; j<theGeneratorsItry.size; j++)
+      { theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);
+        diffOpPart.FourierTransform(transformedDO);
+        theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
+        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+transformedDO.ToString(&theWeylFormat)+"\\end{array}")
+        << "</td>";
+        theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
+        theWeylFormat.MaxLineLength=300;
+        reportFourierTransformedCalculatorCommands <<"<br>" << theGeneratorsItry[j].ToString() << ":="
+        << transformedDO.ToString() << ";";
+      }
+      out << "</tr>";
+      reportFourierTransformedCalculatorCommands << "<br>GenerateVectorSpaceClosedWRTLieBracket{}(248," ;
+      for (int j=0; j<theGeneratorsItry.size; j++)
+      { reportFourierTransformedCalculatorCommands << theGeneratorsItry[j].ToString();
+        if (j!=theGeneratorsItry.size-1)
+          reportFourierTransformedCalculatorCommands << ", ";
+      }
+      reportFourierTransformedCalculatorCommands << ");";
+      reportFourierTransformedCalculatorCommands << "<hr>";
+    }
     //theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
     //std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
     //std::cout << "<br>The qdos: ";
     //for (int j=0; j<theQDOs.size; j++)
     //  std::cout << "<br>" << theQDOs[j].ToString();
-    latexReport2 << "\\end{longtable}";
-    latexReport << "\\\\\\hline<br>";
-    out << "</tr>";
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
+  out << reportFourierTransformedCalculatorCommands.str();
   out << "<br>" << latexReport.str();
   out << "<br><br>" << latexReport2.str();
   return output.AssignValue<std::string>(out.str(), theCommands);
@@ -4617,7 +4680,7 @@ void CommandList::initDefaultFolderAndFileNames(const std::string& inputPathBina
 
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output, bool AllGenerators)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
@@ -4652,7 +4715,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands,
 //  theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, &letterString, &partialString, &exponentLetterString);
+  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, AllGenerators, &letterString, &partialString, &exponentLetterString);
 }
 
 bool CommandList::innerFreudenthalFull(CommandList& theCommands, const Expression& input, Expression& output)

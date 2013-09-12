@@ -59,7 +59,8 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
     out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
   bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound, theCommands.theGlobalVariableS);
   if (!success)
-    out << "<br>Did not succeed with generating vector space, instead got this: " << theOps.ToString();
+    out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theOps.size << " exceeding the limit. "
+    << "The basis generated before exceeding the limit was: " << theOps.ToString();
   else
     out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis: <br>" << theOps.ToString();
 
@@ -71,6 +72,6 @@ bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, co
   if (!input.IsOfType<ElementWeylAlgebra<Rational> >())
     return false;
   ElementWeylAlgebra<Rational> theElt;
-  input.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt, theCommands.theObjectContainer.theAlgebraicClosure);
+  input.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
 }

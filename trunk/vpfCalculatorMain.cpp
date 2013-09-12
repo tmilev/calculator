@@ -517,6 +517,7 @@ int main(int argc, char **argv)
 //  civilizedInput="g_{{a}}:=getChevalleyGenerator{} (G_2, a);hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
 //civilizedInput="\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); ";
   //civilizedInput="\\partial:=DifferentialOperator{}(\\partial, x); x:=PolynomialWithDO{}(\\partial, x); GenerateVectorSpaceClosedWRTLieBracket{}(50, x, \\partial);";
+  //civilizedInput="GenerateVectorSpaceClosedWRTLieBracket{}(248, h_{1} );";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

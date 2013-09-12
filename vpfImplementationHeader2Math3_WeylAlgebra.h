@@ -288,11 +288,11 @@ void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coefficient>& output, AlgebraicClosureRationals& ownerField)const
+void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coefficient>& output)const
 { MacroRegisterFunctionWithName("ElementWeylAlgebra::FourierTransformMe");
   if (&output==this)
   { ElementWeylAlgebra thisCopy=*this;
-    thisCopy.FourierTransform(output, ownerField);
+    thisCopy.FourierTransform(output);
     return;
   }
   LargeInt totalDeg;

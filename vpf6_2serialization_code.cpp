@@ -20,8 +20,7 @@ bool Serialization::innerStoreChevalleyGenerator(CommandList& theCommands, const
 }
 
 template <>
-bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
-(CommandList& theCommands, const Expression& input, Expression& outputContext)
+bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>(CommandList& theCommands, const Expression& input, Expression& outputContext)
 { if (!input.IsListNElements(4))
   { theCommands.Comments << "<hr>Failed to get ChevalleyGenerator context: input is not a sequence of 4 elements, instead it has "
     << input.children.size << " elements, i.e., is " << input.ToString() << "</hr>";
@@ -194,10 +193,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, c
   if (input.children.size!=2)
   { //    std::cout << "here i am again 1.002. ";
   //std::cout.flush();
-
-    theCommands.Comments
-    << "<hr>Error while extracting Dynkin simple type: the monomial "
-    << input.ToString() << " appears not to be a Dynkin simple type<hr>";
+    theCommands.Comments << "<hr>Error while extracting Dynkin simple type: the monomial " << input.ToString() << " appears not to be a Dynkin simple type<hr>";
     return false;
   }
     //std::cout << "here i am again 1.05. ";

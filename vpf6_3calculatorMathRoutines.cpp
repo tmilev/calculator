@@ -16,12 +16,16 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   if (theGlobalVariables!=0)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
+  List<theType> theEltsForGaussianElimination;
   for (int i=0; i<inputOutputElts.size; i++)
     for (int j=i; j<inputOutputElts.size; j++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts=inputOutputElts.size;
-      inputOutputElts.AddOnTop(theOpResult);
-      inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
+      theEltsForGaussianElimination=inputOutputElts;
+      theEltsForGaussianElimination.AddOnTop(theOpResult);
+      theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
+      if (theEltsForGaussianElimination.size>inputOutputElts.size)
+        inputOutputElts.AddOnTop(theOpResult);
       //if (oldNumElts<inputOutputElts.size)
         //std::cout << "<hr>Operation between <br>" << inputOutputElts[i].ToString() << " <br> " << inputOutputElts[j].ToString() << " <br>=<br> "
         //<< theOpResult.ToString();
@@ -33,6 +37,7 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
         theReport2.Report(reportStream.str());
       }
     }
+  inputOutputElts[0].GaussianEliminationByRowsDeleteZeroRows(inputOutputElts);
   return true;
 }
 

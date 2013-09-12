@@ -26,12 +26,12 @@ void getPath(char* path, std::string& output)
   for (int i=length-1; i>=0; i--)
   {
 #ifdef WIN32
-		if (output[i]=='\\' )
+	if (output[i]=='\\' )
     { output.resize(i+1);
       return;
     }
 #else
-		if (output[i]=='/')
+    if (output[i]=='/')
     { output.resize(i+1);
       return;
     }

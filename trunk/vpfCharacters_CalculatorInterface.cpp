@@ -866,7 +866,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
     ;
     if (useRho)
     { currentWeight=theHWsimpleCoords;
-      standardElt.MakeConst(*theSSalgebra);
+      standardElt.MakeOne(*theSSalgebra);
       bool isGood=true;
       for (int j=0; j<orbitGeneratingSet.theElements[i].size; j++)
       { int simpleIndex=orbitGeneratingSet.theElements[i][j];

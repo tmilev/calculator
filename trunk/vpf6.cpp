@@ -1616,7 +1616,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
   Polynomial<Rational> tempRF;
   output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
-  tempMon.MakeConst(*this->owneR);
+  tempMon.MakeOne(*this->owneR);
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
     varShift=this->GetMinNumVars();
@@ -2029,8 +2029,8 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       theGeneratorsItry.AddOnTop(theGenerator);
     }
   else
-    for (int j=0; j<theSSalgebra.theWeyl.RootSystem.size; j++)
-    { theGenerator.MakeGGenerator(theSSalgebra.theWeyl.RootSystem[j], theSSalgebra);
+    for (int j=0; j<theSSalgebra.GetNumGenerators(); j++)
+    { theGenerator.MakeGenerator(j, theSSalgebra);
       theGeneratorsItry.AddOnTop(theGenerator);
     }
   theQDOs.SetSize(theGeneratorsItry.size);
@@ -2147,7 +2147,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";
-    if (theHws[i].IsEqualToZero())
+    if (theMod.GetDim()==1)
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
       reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
@@ -2179,11 +2179,11 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       reportCalculatorCommands << ");";
       reportCalculatorCommands << "<hr>";
     }
-    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
-    std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
-    std::cout << "<br>The qdos: ";
-    for (int j=0; j<theQDOs.size; j++)
-      std::cout << "<br>" << theQDOs[j].ToString();
+//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
+//    std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
+//    std::cout << "<br>The qdos: ";
+//    for (int j=0; j<theQDOs.size; j++)
+ //     std::cout << "<br>" << theQDOs[j].ToString();
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
@@ -2448,7 +2448,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
    &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit);
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunctionOld> > theCentralCharacters;
-  theCasimir.MakeCasimir(*theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
+  theCasimir.MakeCasimir(*theSSalgebra);
   Vector<RationalFunctionOld> currentHWsimplecoords, currentHWdualcoords, currentWeightDiff;
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength=60;
@@ -2721,9 +2721,7 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
   out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
   if (Verbose)
-  { out
-    << " The resulting Lie bracket pairing table follows. <hr> "
-    << theSSalgebra.ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
+  { out << " The resulting Lie bracket pairing table follows. <hr> " << theSSalgebra.ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
     out << "Ready for LaTeX consumption version of the first three columns: ";
     out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
     << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
@@ -2873,8 +2871,7 @@ bool CommandList::innerIsInteger(CommandList& theCommands, const Expression& inp
   return true;
 }
 
-bool CommandList::innerIsRational
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerIsRational(CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
     return false;
   if (input.IsOfType<Rational>())
@@ -3006,8 +3003,7 @@ bool CommandList::outerCheckRule(CommandList& theCommands, const Expression& inp
   if (input[1]!=input[2])
     return false;
   std::stringstream out;
-  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself (" << input[2] << ")"
-  << " which is an infinite substitution cycle. ";
+  out << "Bad rule: you are asking me to substitute " << input[1] << " by itself (" << input[2] << ")" << " which is an infinite substitution cycle. ";
   return output.SetError(out.str(), theCommands);
 }
 
@@ -3233,8 +3229,7 @@ bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, E
   { output=summandsWithCoeff[0];
     return true;
   }
-  output.MakeXOX
-  (theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1], summandsWithCoeff[summandsWithCoeff.size-2]);
+  output.MakeXOX(theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1], summandsWithCoeff[summandsWithCoeff.size-2]);
   Expression result;
   for (int i=summandsWithCoeff.size-3; i>=0; i--)
   { result.reset(theCommands, 3);

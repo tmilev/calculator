@@ -3,6 +3,7 @@
 #include "vpf.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for the calculator parser part 2: meant for built-in functions. ");
 
 //If you get a the C++ multiple definition error:

@@ -3,6 +3,7 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
+#include "vpfHeader2Math15_UniversalEnveloping.h"
 
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Main implementation file, part 3. ");
 

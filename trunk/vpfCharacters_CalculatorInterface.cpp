@@ -857,13 +857,9 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
     << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
-    latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $"
-    << orbitEltStringEpsilonCoords
-    << "$ & $"
-    <<  weightEltString << "$ & $"
-    << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
-    << "$\\\\\n<br>"
-    ;
+    latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
+    << "$ & $" <<  weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
+    << "$\\\\\n<br>";
     if (useRho)
     { currentWeight=theHWsimpleCoords;
       standardElt.MakeOne(*theSSalgebra);
@@ -880,8 +876,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
           { isGood=false;
             break;
           }
-        standardElt.MultiplyByGeneratorPowerOnTheLeft
-        (theSSalgebra->GetNumPosRoots() -simpleIndex-1, theExp);
+        standardElt.MultiplyByGeneratorPowerOnTheLeft(theSSalgebra->GetNumPosRoots() -simpleIndex-1, theExp);
       }
       out << "<td>";
       if (isGood)
@@ -919,8 +914,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
   out << CGI::GetHtmlMathSpanPure(charMat.ToString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i=0; i<theGroup.irreps.size; i++)
-  { out << "<hr>"
-    << theGroup.irreps[i].ToString(&tempFormat);
+  { out << "<hr>" << theGroup.irreps[i].ToString(&tempFormat);
   }
   out << theGroup.ToString(&tempFormat);
   return output.AssignValue(out.str(), theCommands);
@@ -1014,14 +1008,12 @@ bool WeylGroupCalculatorFunctions::innerTensorWeylReps
   //std::cout << "<br>left rep is: " << leftRep.ToString(&theFormat);
   //std::cout << "<br>right rep is: " << rightRep.ToString(&theFormat);
   if (leftRep.OwnerGroup!=rightRep.OwnerGroup)
-    return output.SetError
-    ("Error: attempting to tensor irreps with different owner groups. ", theCommands);
+    return output.SetError("Error: attempting to tensor irreps with different owner groups. ", theCommands);
   leftRep*=rightRep;
   return output.AssignValue(leftRep, theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps");
   Expression theTensor;
   if (!input.children.size==3)
@@ -1037,8 +1029,7 @@ bool WeylGroupCalculatorFunctions::innerTensorAndDecomposeWeylReps
   return output.AssignValue(outputRep, theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerDecomposeWeylRep");
   if (!input.IsOfType<WeylGroupRepresentation<Rational> > ())
     return false;
@@ -1050,8 +1041,7 @@ bool WeylGroupCalculatorFunctions::innerDecomposeWeylRep
   return output.AssignValue(outputRep, theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep");
   if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses
       (theCommands, input, output))
@@ -1067,8 +1057,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep
   return output.AssignValue(tempRep, theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerCoxeterElement
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
 { //if (!input.IsSequenceNElementS(2))
   //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
   if(input.children.size<2){
@@ -1090,8 +1079,7 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement
   }
   WeylGroup theGroup;
   theGroup=thePointer->theWeyl;
-  int indexOfOwnerGroupInObjectContainer=
-  theCommands.theObjectContainer.theWeylGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  int indexOfOwnerGroupInObjectContainer=theCommands.theObjectContainer.theWeylGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
   //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
   //<< indexOfOwnerGroupInObjectContainer;
 
@@ -1107,8 +1095,7 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement
   return output.AssignValue(theElt, theCommands);
 }
 
-bool CommandList::innerMinPolyMatrix
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerMinPolyMatrix(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!theCommands.innerMatrixRational(theCommands, input, output))
     return false;
   Matrix<Rational> theMat;
@@ -1128,8 +1115,7 @@ bool CommandList::innerMinPolyMatrix
   return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
 }
 
-bool CommandList::innerGenerateMultiplicativelyClosedSet
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerGenerateMultiplicativelyClosedSet(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerGenerateMultiplicativelyClosedSet");
   if (input.children.size<=2)
     return output.SetError("I need at least two arguments - upper bound and at least one element to multiply.", theCommands);

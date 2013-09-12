@@ -10,6 +10,7 @@
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfHeader2Math15_UniversalEnveloping.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 

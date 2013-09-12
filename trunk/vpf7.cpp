@@ -2,13 +2,12 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math15_UniversalEnveloping.h"
 
-ProjectInformationInstance ProjectInfoVpf7cpp
-(__FILE__, "Implementation file intended for small fast changes. ");
+ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Implementation file intended for small fast changes. ");
 
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
-  (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
-   Rational& outputMultiplyLieBracketsToGetGenerator)
+(int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens");
   outputIndicesFormatAd0Ad1Ad2etc.size=0;
   if (this->IsGeneratorFromCartan(generatorIndex))
@@ -204,8 +203,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin "
-    << "acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

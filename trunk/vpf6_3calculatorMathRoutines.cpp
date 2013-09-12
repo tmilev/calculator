@@ -62,7 +62,15 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
     out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theOps.size << " exceeding the limit. "
     << "The basis generated before exceeding the limit was: " << theOps.ToString();
   else
-    out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis: <br>" << theOps.ToString();
+  { out << "<br>Lie bracket generates vector space of dimension " << theOps.size << " with basis:";
+    for (int i=0; i<theOps.size; i++)
+    { out << "<br>";
+      if (theOps.size>50)
+        out << theOps[i].ToString(&theFormat);
+      else
+        out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat));
+    }
+  }
 
   return output.AssignValue(out.str(), theCommands);
 }

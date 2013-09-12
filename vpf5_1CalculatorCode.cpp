@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");

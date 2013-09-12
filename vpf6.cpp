@@ -2,6 +2,8 @@
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
+
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
 
 //If you get a specialization after instantiation error:

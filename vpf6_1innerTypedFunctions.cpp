@@ -3,6 +3,8 @@
 #include "vpf.h"
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
+
 ProjectInformationInstance ProjectInfoVpf6_1cpp
 (__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
 

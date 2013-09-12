@@ -63,6 +63,7 @@
 		<Unit filename="vpfHeader1General0_General.h" />
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />
+		<Unit filename="vpfHeader2Math15_UniversalEnveloping.h" />
 		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2Math2_AlgebraicNumbers.h" />
 		<Unit filename="vpfHeader2Math3_Characters.h" />
@@ -72,6 +73,7 @@
 		<Unit filename="vpfHeader3Calculator1_InnerTypedFunctions.h" />
 		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />
 		<Unit filename="vpfHeader3Calculator3_WeylGroupCharacters.h" />
+		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />
 		<Unit filename="vpfImplementationHeader2Math3_WeylAlgebra.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>

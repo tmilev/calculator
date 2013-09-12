@@ -912,14 +912,13 @@ bool ReflectionSubgroupWeylGroup::DrawContour
 }
 
 template <class coefficient>
-bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff
-(ElementUniversalEnveloping<Rational>& output)
+bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output)
 { output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<Rational> tempMon;
   Rational theCoeff;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<coefficient>& currentMon=this->TheObjects[i];
-    tempMon.MakeZero(0,*this->owner);
+    tempMon.MakeOne(*this->owner);
     if (!this->theCoeffs[i].IsAConstant(theCoeff))
       return false;
     for (int j=0; j<currentMon.Powers.size; j++)

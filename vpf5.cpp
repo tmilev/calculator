@@ -351,7 +351,7 @@ bool CommandList::innerCasimir
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
-  theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS);
+  theCasimir.MakeCasimir(theSSowner);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
   theCommands.Comments << "Context Lie algebra: " << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
@@ -1193,8 +1193,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
   theg2b3data.theFormat.flagUseLatex=true;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCentralCharacter, resultChar;
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theCentralChars;
-
-  theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain(), *theCommands.theGlobalVariableS);
+  theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain());
   WeylGroup& smallWeyl=theg2b3data.theHmm.theDomain().theWeyl;
 //  WeylGroup& largeWeyl=theg2b3data.theHmm.theRange().theWeyl;
   for (int k=0; k<theHWs.size; k++)
@@ -1440,7 +1439,7 @@ bool CommandList::fSplitFDpartB3overG2inner
     theG2B3Data.theSmallCharFDpart+=tempMon;
   }
   ElementUniversalEnveloping<RationalFunctionOld> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
-  theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
+  theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain());
   Vector<RationalFunctionOld> highestWeightG2dualCoords=*theG2B3Data.g2DualWeights.LastObject();
 
   theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);

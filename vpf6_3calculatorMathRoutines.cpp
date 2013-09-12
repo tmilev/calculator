@@ -16,12 +16,11 @@ bool MathRoutines::GenerateVectorSpaceClosedWRTOperation
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
   if (theGlobalVariables!=0)
     theReport1.Report("Extending vector space to closed with respect to binary operation. ");
-  List<theType> theEltsForGaussianElimination;
+  List<theType> theEltsForGaussianElimination=inputOutputElts;
   for (int i=0; i<inputOutputElts.size; i++)
     for (int j=i; j<inputOutputElts.size; j++)
     { theBinaryOperation(inputOutputElts[i], inputOutputElts[j], theOpResult);
       //int oldNumElts=inputOutputElts.size;
-      theEltsForGaussianElimination=inputOutputElts;
       theEltsForGaussianElimination.AddOnTop(theOpResult);
       theEltsForGaussianElimination[0].GaussianEliminationByRowsDeleteZeroRows(theEltsForGaussianElimination);
       if (theEltsForGaussianElimination.size>inputOutputElts.size)

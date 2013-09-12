@@ -669,21 +669,16 @@ bool Serialization::innerStoreCandidateSA
   return true;
 }
 
-bool Serialization::innerLoadCandidateSA
-(CommandList& theCommands, const Expression& input, Expression& output,
- CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
+bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
 { if (!input.IsListNElements(4) && !input.IsListNElements(5))
-  { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to "
-    << " get a list of 4 or 5 children, "
-    << " but got one with " << input.children.size << " children instead.<hr> ";
+  { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
+    << input.children.size << " children instead.<hr> ";
     return false;
   }
   outputSubalgebra.owner=&owner;
   Expression tempE;
-  if (!Serialization::DeSerializeMonCollection
-      (theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
-  { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "
-    << input[2].ToString() << "<hr>";
+  if (!Serialization::DeSerializeMonCollection(theCommands, input[2], outputSubalgebra.theWeylNonEmbeddeD.theDynkinType))
+  { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
     return false;
   }
 //  std::cout << "<br> input[2]: " << input[2].ToString();

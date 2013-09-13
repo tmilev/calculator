@@ -6712,15 +6712,13 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
   int theRank=this->OwnerGroup->GetDim();
   LargeIntUnsigned theLCM, theDen;
   this->GetLargestDenominatorSimpleGens(theLCM, theDen);
-  out << "\n<br>\n LCM denominators simple generators: "
-  << theLCM.ToString() << ", largest denominator: " << theDen.ToString();
+  out << "\n<br>\n LCM denominators simple generators: " << theLCM.ToString() << ", largest denominator: " << theDen.ToString();
   out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
   for (int i=1; i<theRank+1; i++)
     if (this->theElementIsComputed[i])
     { std::stringstream tempStream;
-      tempStream << "s_" << i << ":=MatrixRationals{}"
-      << this->theElementImages[i].ToString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i << ":=MatrixRationals{}" << this->theElementImages[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
     } else

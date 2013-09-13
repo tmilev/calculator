@@ -324,39 +324,33 @@ bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
   return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra<Rational> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
   return CommandListInnerTypedFunctions::innerMultiplyTypeByType<RationalFunctionOld>(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
   return CommandListInnerTypedFunctions::innerAddTypeToType<RationalFunctionOld>(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA");
   return CommandListInnerTypedFunctions::innerAddTypeToType<ElementWeylAlgebra<Rational> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerDivideRFOrPolyOrRatByRFOrPoly");
   return CommandListInnerTypedFunctions::innerDivideTypeByType<RationalFunctionOld>(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   return CommandListInnerTypedFunctions::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddUEToAny
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddUEToAny(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddUEToAny");
   //std::cout << "<br>adding ue to any";
   return CommandListInnerTypedFunctions::innerAddTypeToType<ElementUniversalEnveloping<RationalFunctionOld> >(theCommands, input, output);

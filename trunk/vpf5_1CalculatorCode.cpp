@@ -1400,8 +1400,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::BackSubstituteIntoPolySystem
- (List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables)
 { PolynomialSubstitution<coefficient> FinalSub;
   this->GetSubFromPartialSolutionSerreLikeSystem(FinalSub);
   for (int i=theImpliedSubs.size-1; i>=0; i--)
@@ -1410,8 +1409,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoPolySystem
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
- (List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables);
@@ -1529,8 +1527,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 }
 
 template <class coefficient>
-std::string GroebnerBasisComputation<coefficient>::GetCalculatorInputFromSystem
-(const List<Polynomial<coefficient> >& inputSystem)
+std::string GroebnerBasisComputation<coefficient>::GetCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem)
 { std::stringstream out;
   out << "FindOneSolutionSerreLikePolynomialSystem{}(";
   for (int j=0; j<inputSystem.size; j++)
@@ -1559,8 +1556,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem
   this->solutionsFound.GetElement().init(numVars);
   this->SolveSerreLikeSystemRecursively(workingSystem, theGlobalVariables);
   if (this->flagSystemSolvedOverBaseField)
-  { if (this->solutionsFound.GetElement().CardinalitySelection!=
-        this->solutionsFound.GetElement().MaxSize)
+  { if (this->solutionsFound.GetElement().CardinalitySelection!= this->solutionsFound.GetElement().MaxSize)
       for (int i=0; i<this->solutionsFound.GetElement().MaxSize; i++)
         if (!this->solutionsFound.GetElement().selected[i])
           this->SetSerreLikeSolutionIndex(i, 0);
@@ -1696,11 +1692,6 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
     result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;
-}
-
-template <class coefficient>
-void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots)
-{
 }
 
 template <class coefficient>

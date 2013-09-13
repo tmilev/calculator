@@ -3,6 +3,7 @@
 #include "vpf.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Implementation file: calculator front-end math routines. ");
 
@@ -86,4 +87,30 @@ bool CommandListFunctions::innerFourierTransformEWA(CommandList& theCommands, co
   ElementWeylAlgebra<Rational> theElt;
   input.GetValue<ElementWeylAlgebra<Rational> >().FourierTransform(theElt);
   return output.AssignValueWithContext(theElt, input.GetContext(), theCommands);
+}
+
+bool CommandListFunctions::innerCasimirWRTlevi(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCasimir");
+  RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  if (!input.IsListNElements(3))
+    return false;
+  SemisimpleLieAlgebra* theSSalg=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
+    theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
+  Vector<Rational> leviSelection;
+  if(!theCommands.GetVectoR(input[2], leviSelection, 0, theSSalg->GetRank()))
+  { theCommands.Comments << "<hr>Failed to extract parabolic selection. ";
+    return false;
+  }
+  Selection theParSel;
+  theParSel=leviSelection;
+  theParSel.InvertSelection();
+  ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
+  theCasimir.MakeCasimirWRTLeviParabolic(*theSSalg, theParSel);
+//  theCasimir.Simplify(*theCommands.theGlobalVariableS);
+  Expression contextE;
+  contextE.MakeContextSSLieAlg(theCommands, *theSSalg);
+  return output.AssignValueWithContext(theCasimir, contextE, theCommands);
 }

@@ -342,29 +342,6 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   return output.AssignValue(report, theCommands);
 }
 
-template <class coefficient>
-coefficient SemisimpleLieAlgebra::GetKillingFormProductWRTLevi
-(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right, const Selection& rootsNotInLevi)
-{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingFormWRTLevi");
-  coefficient result=0;
-  ElementSemisimpleLieAlgebra<coefficient> adadAppliedToMon, tempElt;
-  ChevalleyGenerator baseGen;
-  Vector<Rational> rootsNotInLeviVectorForm=rootsNotInLevi;
-  Vector<Rational> theWeight;
-  for (int i=0; i<this->GetNumGenerators(); i++)
-  { theWeight= this->GetWeightOfGenerator(i);
-    if (theWeight.ScalarEuclidean(rootsNotInLeviVectorForm)!=0)
-      continue;
-    baseGen.MakeGenerator(*this, i);
-    adadAppliedToMon.MakeZero();
-    adadAppliedToMon.AddMonomial(baseGen, 1);
-    this->LieBracket(right, adadAppliedToMon, tempElt);
-    this->LieBracket(left, tempElt, adadAppliedToMon);
-    result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
-  }
-  return result;
-}
-
 bool CommandList::innerCasimir(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;

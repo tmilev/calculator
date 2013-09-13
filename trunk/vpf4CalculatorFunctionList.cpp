@@ -506,6 +506,11 @@ this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
   ("Casimir", this->innerCasimir, "",
    "Gives the Casimir element. ",
    "Casimir{}(G_2)");
+   this->AddOperationInnerHandler
+  ("CasimirWRTLevi", CommandListFunctions::innerCasimirWRTlevi, "",
+   "Gives the Casimir element of a Levi part of a parabolic subalgebra. First argument = ambient Lie algebra. Second argument \
+   = parabolic selection =1 stands for simple root outside of the Levi component, 0 stands for simple root of the Levi component.",
+   "CasimirWRTLevi{}(B_3, (1,0,0))");
   this->AddOperationInnerHandler
   ("hmmG2inB3", this->innerEmbedG2inB3, "",
    "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",

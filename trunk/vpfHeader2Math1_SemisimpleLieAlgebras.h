@@ -37,8 +37,7 @@ public:
   slTwoSubalgebra(): owneR(0), container(0), indexInContainer(-1){}
   SltwoSubalgebras& GetContainerSl2s()
   { if (this->container==0)
-    { std::cout << "This is a programming error: attempting to access the container "
-      << " list of a non-initialized sl(2)-subalgebra. "
+    { std::cout << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -47,8 +46,7 @@ public:
   WeylGroup& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
   { if (this->owneR==0)
-    { std::cout << "This is a programming error: attempting to access the ambient "
-      << " Lie algebra of a non-initialized sl(2)-subalgebra. "
+    { std::cout << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -72,41 +70,7 @@ public:
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
   void ElementToHtml(std::string& filePath);
   void ElementToHtmlCreateFormulaOutputReference
-  (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml,
-   SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
-  void operator=(const slTwoSubalgebra& right)
-  { this->highestWeights=right.highestWeights;
-    this->multiplicitiesHighestWeights=right.multiplicitiesHighestWeights;
-    this->weightSpaceDimensions=right.weightSpaceDimensions;
-    this->HighestWeightsDecompositionMinimalContainingRootSA=
-    right.HighestWeightsDecompositionMinimalContainingRootSA;
-    this->MultiplicitiesDecompositionMinimalContainingRootSA=
-    right.MultiplicitiesDecompositionMinimalContainingRootSA;
-    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
-    this->CentralizerDiagram=right.CentralizerDiagram;
-    this->DiagramM=right.DiagramM;
-    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
-    this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
-    this->RootsWithScalar2WithH=right.RootsWithScalar2WithH;
-    this->DynkinsEpsilon=right.DynkinsEpsilon;
-    this->hCharacteristic=right.hCharacteristic;
-    this->hElementCorrespondingToCharacteristic=right.hElementCorrespondingToCharacteristic;
-    this->owneR=right.owneR;
-    this->theE=right.theE;
-    this->theH=right.theH;
-    this->theF=right.theF;
-    this->bufferEbracketF=right.bufferEbracketF;
-    this->bufferHbracketE=right.bufferHbracketE;
-    this->bufferHbracketF=right.bufferHbracketF;
-    this->theSystemToBeSolved=right.theSystemToBeSolved;
-    this->theSystemMatrixForm=right.theSystemMatrixForm;
-    this->theSystemColumnVector=right.theSystemColumnVector;
-    this->IndicesContainingRootSAs=right.IndicesContainingRootSAs;
-    this->preferredAmbientSimpleBasis=right.preferredAmbientSimpleBasis;
-    this->container=right.container;
-    this->indexInContainer=right.indexInContainer;
-    this->LengthHsquared=right.LengthHsquared;
-  }
+  (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
   bool operator==(const slTwoSubalgebra& right)const;
   unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
@@ -135,19 +99,6 @@ public:
   List<std::string> texStringsEachFile;
   List<std::string> listSystemCommandsLatex;
   List<std::string> listSystemCommandsDVIPNG;
-  void operator=(const SltwoSubalgebras& other)
-  { this->MultiplicitiesFixedHweight=other.MultiplicitiesFixedHweight;
-    this->IndicesSl2sContainedInRootSA=other.IndicesSl2sContainedInRootSA;
-    this->IndicesSl2decompositionFlas=other.IndicesSl2decompositionFlas;
-    this->BadHCharacteristics =other.BadHCharacteristics;
-    this->IndexZeroWeight =other.IndexZeroWeight;
-    this->owner =other.owner;
-    this->theRootSAs =other.theRootSAs;
-    this->texFileNamesForPNG =other.texFileNamesForPNG;
-    this->texFileNamesForPNG =other.texFileNamesForPNG;
-    this->listSystemCommandsLatex =other.listSystemCommandsLatex;
-    this->listSystemCommandsDVIPNG =other.listSystemCommandsDVIPNG;
-  }
   bool operator==(const SltwoSubalgebras& other)const
   { if (this->owner==0)
       return other.owner==0;

@@ -1699,6 +1699,11 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
 }
 
 template <class coefficient>
+void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(SemisimpleLieAlgebra& theOwner, const Selection& theLeviRoots)
+{
+}
+
+template <class coefficient>
 coefficient SemisimpleLieAlgebra::GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::GetKillingForm");
   coefficient result=0;

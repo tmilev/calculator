@@ -2061,12 +2061,8 @@ public:
   }
   bool IsASimpleGenerator(int generatorIndex)
   { return
-    (generatorIndex< this->GetNumPosRoots() &&
-     generatorIndex>=this->GetNumPosRoots()-this->GetRank())
-    ||
-    (generatorIndex>=this->GetNumPosRoots()+this->GetRank() &&
-     generatorIndex<this->GetNumPosRoots()+this->GetRank()*2
-     );
+    (generatorIndex< this->GetNumPosRoots() && generatorIndex>=this->GetNumPosRoots()-this->GetRank()) ||
+    (generatorIndex>=this->GetNumPosRoots()+this->GetRank() && generatorIndex<this->GetNumPosRoots()+this->GetRank()*2);
   }
   SemisimpleLieAlgebra(){ }
   template <class coefficient>
@@ -2077,16 +2073,11 @@ public:
   }
   template <class coefficient>
   void GetCommonCentralizer
-  (const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize,
-   List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
-   ;
+  (const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements);
   void GetChevalleyGeneratorAsLieBracketsSimpleGens
-  (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
-   Rational& outputMultiplyLieBracketsToGetGenerator)
-  ;
+  (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator);
   std::string ToString(FormatExpressions* inputFormat=0);
-  std::string GetStringFromChevalleyGenerator
-  (int theIndex, FormatExpressions* thePolynomialFormat)const
+  std::string GetStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat)const
   ;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
@@ -2095,7 +2086,7 @@ public:
   { return this->theWeyl.theDynkinType.GetLieAlgebraName();
   }
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
-  void GenerateWeightSupportMethod2(Vector<Rational> & theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
@@ -2156,21 +2147,15 @@ public:
     int right=this->GetRootIndexFromGenerator(rightIndex);
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
-  void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables)
-  ;
-  void ComputeChevalleyConstantS
-(GlobalVariables* theGlobalVariables)
-  ;
+  void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
+  void ComputeChevalleyConstantS(GlobalVariables* theGlobalVariables);
   template<class coefficient>
-  coefficient GetKillingForm
-  (const ElementSemisimpleLieAlgebra<coefficient>& left,
-   const ElementSemisimpleLieAlgebra<coefficient>& right)
-   ;
+  coefficient GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right);
+  template <class coefficient>
+  coefficient GetKillingFormProductWRTLevi
+  (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right, const Selection& rootsNotInLevi);
   template<class coefficient>
-  void LieBracket
-  (const ElementSemisimpleLieAlgebra<coefficient>& g1,
-   const ElementSemisimpleLieAlgebra<coefficient>& g2,
-   ElementSemisimpleLieAlgebra<coefficient>& output);
+  void LieBracket(const ElementSemisimpleLieAlgebra<coefficient>& g1, const ElementSemisimpleLieAlgebra<coefficient>& g2, ElementSemisimpleLieAlgebra<coefficient>& output);
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
   //then the below function computes n_{-\epsilon, -\zeta}
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);

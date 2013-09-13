@@ -215,8 +215,7 @@ void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 
 void LittelmannPath::ActByEalpha(int indexAlpha)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner "
-    << "is begin acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -301,8 +300,7 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
 { if (this->Waypoints.size==0)
     return;
   if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized "
-    << "owner is begin acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

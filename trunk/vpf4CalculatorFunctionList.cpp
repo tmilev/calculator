@@ -1393,10 +1393,16 @@ void CommandList::initPredefinedStandardOperations()
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
-   "Raises poly to integer power. ",
+   "Raises poly to small integer power. ",
    "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
     \n (g_1+g_2)^2+ g_1^{1/2}",
    true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CommandListInnerTypedFunctions::innerPowerAlgebraicNumberBySmallInteger, this->opAlgNumber(), this->opRational(),
+   "Raises algebraic number to small integer power. ",
+   "a:=3/2; b:=-15/2; c:=33/4;\
+    \nx:=(-b+\\sqrt{}(b^2-4a c))/(2a);\
+    \nB:=c+a x^{2}+b x;", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of weyl algebra to integer power. ",

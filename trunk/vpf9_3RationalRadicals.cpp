@@ -683,7 +683,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& input, Alge
     tempLI.RaiseToPower(theMults[i]/2);
     squareRootRationalPart*=tempLI;
   }
-  squareRootRationalPart*=input.GetDenominator();
+//  squareRootRationalPart/=input.GetDenominator();
   if (squareFreeInput.IsEqualToOne())
   { this->AssignRational(squareRootRationalPart, inputOwner);
     return true;
@@ -760,7 +760,7 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames=this->owner->DisplayNamesBasisElements;
-  out << this->theElt.ToString(&tempFormat) ;//<< "~ in~ the~ field~ " << this->owner->ToString();
+  out << this->theElt.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();
   return out.str();
 }
 

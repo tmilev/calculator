@@ -3051,15 +3051,13 @@ bool MonomialP::IsGEQpartialOrder(MonomialP& m)
 }
 
 void MonomialP::operator*=(const MonomialP& other)
-{ this->SetNumVariablesSubDeletedVarsByOne
-  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+{ this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
   for (int i=0; i<other.monBody.size; i++)
     this->monBody[i]+=other.monBody[i];
 }
 
 void MonomialP::operator/=(const MonomialP& other)
-{ this->SetNumVariablesSubDeletedVarsByOne
-  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+{ this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->monBody.size, other.monBody.size));
   for (int i=0; i<other.monBody.size; i++)
     this->monBody[i]-=other.monBody[i];
 }

@@ -159,6 +159,11 @@ bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, 
   } else
     return false;
   const ElementWeylAlgebra<Rational>& theEWA=theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
+  if (theEWA.HasNonSmallPositiveIntegerDerivation())
+  { theCommands.Comments << "<hr> I cannot apply " << theEWA.ToString() << " onto " << theArgumentPoly.ToString() << " as "
+    << "the differential operator contains non-integral differential operator exponents. ";
+    return false;
+  }
   if (!theEWA.ActOnPolynomial(theArgumentPoly))
   { std::stringstream out;
     out << "Failed to act by operator " << theEWA.ToString() << " on polynomial " << theArgumentPoly.ToString()

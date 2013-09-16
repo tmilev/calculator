@@ -2351,7 +2351,7 @@ public:
   void LieBracketOnTheLeftMakeReport(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
   void LieBracketOnTheRightMakeReport(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
   void LieBracketOnTheRight(const ElementWeylAlgebra& standsOnTheRight, GlobalVariables* theGlobalVariables=0);
-  void Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt);
+  bool Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt);
   void MakeOne(int ExpectedNumVars=0)
   { MonomialWeylAlgebra tempMon;
     tempMon.polynomialPart.MakeOne(ExpectedNumVars);
@@ -2360,6 +2360,7 @@ public:
     this->AddMonomial(tempMon, 1);
   }
   bool IsPolynomial(Polynomial<coefficient>* whichPoly=0)const;
+  bool HasNonSmallPositiveIntegerDerivation()const;
   void RaiseToPower(int thePower);
   void MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const;
   void AssignPolynomial(const Polynomial<Rational>& input)

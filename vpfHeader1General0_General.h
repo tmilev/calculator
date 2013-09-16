@@ -4988,6 +4988,12 @@ class MonomialWeylAlgebra
       return false;
     return false;
   }
+  bool HasNonSmallPositiveIntegerDerivation()const
+  { for (int i=0; i<this->differentialPart.GetMinNumVars(); i++)
+      if (!this->differentialPart(i).IsSmallInteger())
+        return true;
+    return false;
+  }
   void MakeOne(int ExpectedNumVars=0)
   { this->polynomialPart.MakeOne(ExpectedNumVars);
     this->differentialPart.MakeOne(ExpectedNumVars);
@@ -5603,6 +5609,11 @@ public:
       return tempC.IsEqualToOne();
     return false;
   }
+  bool IsMonomialCoeffOne()const
+  { if (this->size()!=1)
+      return false;
+    return this->theCoeffs[0].IsEqualToOne();
+  }
   bool IsOneLetterFirstDegree(int* whichLetter=0)const
   { if(this->size()!=1)
       return false;
@@ -5771,7 +5782,7 @@ public:
   }
   void operator*=(const MonomialP& other)
   { Polynomial<coefficient> otherP;
-    otherP.MakeZero(this->NumVars);
+    otherP.MakeZero();
     otherP.AddMonomial(other, 1);
     (*this)*=otherP;
   }
@@ -6379,8 +6390,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
   if (this->IsAConstant())
     return true;
   Polynomial<Element> tempPoly;
-//  std::cout << "<hr>subbing in monomial " << this->ToString();
-//  output.ComputeDebugString();
+  std::cout << "<hr>subbing in monomial " << this->ToString();
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
@@ -6392,7 +6402,13 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
       }
       int theExponent=0;
       if (!this->monBody[i].IsSmallInteger(&theExponent))
-      { std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
+      { if (TheSubstitution[i].IsMonomialCoeffOne())
+        { MonomialP tempMon=TheSubstitution[i][0];
+          tempMon.RaiseToPower(this->monBody[i]);
+          output*=tempMon;
+          continue;
+        }
+        std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
         << "which is not a small integer: it is " << this->monBody[i] << " instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         return false;
       }
@@ -6403,8 +6419,8 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
       output*=(tempPoly);
 //      output.ComputeDebugString();
     }
+  std::cout << " to get: " << output.ToString();
   return true;
-//  std::cout << " to get: " << output.ToString();
 }
 
 template <class Element>
@@ -7074,9 +7090,7 @@ Rational Polynomial<Element>::TotalDegree()const
 }
 
 template <class coefficient>
-bool Polynomial<coefficient>::Substitution
-(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit,
- const coefficient& theRingZero)
+bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("Polynomial<coefficient>::Substitution");
   if (TheSubstitution.size<this->GetMinNumVars())
   { std::cout << "This is a programming error: attempting to carry out a substitution in a polynomial of "

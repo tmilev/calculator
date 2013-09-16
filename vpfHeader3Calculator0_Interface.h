@@ -1733,7 +1733,8 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<mergedContexts.children.size; i++)
-  { if (!mergedContexts[i].ConvertToType<theType>(convertedE))
+  { std::cout << "<hr>Converting: " << mergedContexts[i].ToString();
+    if (!mergedContexts[i].ConvertToType<theType>(convertedE))
     { this->theBoss->Comments << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
     }

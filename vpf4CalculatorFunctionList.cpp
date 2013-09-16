@@ -1415,7 +1415,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of weyl algebra to integer power. ",
-   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \na:=x_1\\partial_1; \na^10",
+   "\\partial:=DifferentialOperator{}(\\partial, x); \nx:=PolynomialWithDO{}(\\partial, x); \na:=x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
    true);
 
   this->AddOperationBinaryInnerHandlerWithTypes

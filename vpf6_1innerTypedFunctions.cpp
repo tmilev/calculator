@@ -318,10 +318,24 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByEltTensor(CommandList& th
   return output.AssignValueWithContext(outputElt, inputConverted[2].GetContext(), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA");
-  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<ElementWeylAlgebra<Rational> >(theCommands, input, output);
+  if (input.children.size!=3)
+    return false;
+  Expression inputContextsMerged;
+  std::cout << "<hr>Merging contexts: " << input.ToString();
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational>>(inputContextsMerged))
+    return false;
+  std::cout << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+  if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
+      inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation())
+  { theCommands.Comments << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
+    << " one of the two differential operators has differential operator exponent that is not a small integer. ";
+    return false;
+  }
+  ElementWeylAlgebra<Rational> result=inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
+  result*=inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
+  return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output)
@@ -356,8 +370,7 @@ bool CommandListInnerTypedFunctions::innerAddUEToAny(CommandList& theCommands, c
   return CommandListInnerTypedFunctions::innerAddTypeToType<ElementUniversalEnveloping<RationalFunctionOld> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyUEByAny");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (input.children.size!=3)
@@ -371,8 +384,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyLRObyLRO");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -397,8 +409,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLRO
   return output.AssignValue(result, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -417,8 +428,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
   for (int i=theLRO.generatorsIndices.size-1; i>=0; i--)
     if (theLRO.generatorsIndices[i]==0 || theLRO.generatorsIndices[i]< -theWeyl.GetDim() || theLRO.generatorsIndices[i]> theWeyl.GetDim())
     { std::stringstream out;
-      out << " The Littelmann root operator must have an index whose absolute value is "
-      << "between 1 and the rank of the ambient Lie algebra, instead I get index  "
+      out << " The Littelmann root operator must have an index whose absolute value is between 1 and the rank of the ambient Lie algebra, instead I get index  "
       << theLRO.generatorsIndices[i];
       return output.SetError(out.str(), theCommands);
     } else
@@ -427,21 +437,18 @@ bool CommandListInnerTypedFunctions::innerMultiplyLRObyLSPath
   return output.AssignValue(result, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor");
 //  std::cout << "<hr>HERE I am!";
   return CommandListInnerTypedFunctions::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly");
   return CommandListInnerTypedFunctions::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
 }
 
-bool CommandListInnerTypedFunctions::innerAddPlotToPlot
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddPlotToPlot(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddPlotToPlot");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -497,10 +504,38 @@ bool CommandListInnerTypedFunctions::innerPowerEWABySmallInteger(CommandList& th
     return false;
   ElementWeylAlgebra<Rational> base;
   int thePower=0;
-  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
+  if(!input[1].IsOfType(&base))
     return false;
-  if (thePower<0)
-    return false;
+  bool mustCheckForRationalPower=false;
+  mustCheckForRationalPower=!input[2].IsSmallInteger(&thePower);
+  if (mustCheckForRationalPower || thePower<0)
+  { Rational powerRat;
+    if (!input[2].IsOfType<Rational>(&powerRat))
+      return false;
+    bool isMon=true;
+    if (base.size()!=1)
+      isMon=false;
+    else if (base.theCoeffs[0]!=1)
+      isMon=false;
+    if (!isMon)
+    { theCommands.Comments << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+      << " small integer and the base is not a coefficient one monomial. ";
+      return false;
+    }
+    ElementWeylAlgebra<Rational> finalOutput;
+    MonomialWeylAlgebra theMon=base[0];
+    theMon.polynomialPart.RaiseToPower(powerRat);
+    theMon.differentialPart.RaiseToPower(powerRat);
+    for (int i=0; i<theMon.polynomialPart.GetMinNumVars(); i++)
+      if (theMon.polynomialPart[i]!=0 && theMon.differentialPart[i]!=0)
+      { theCommands.Comments << "<hr>Failed to raise " << base.ToString() << " to power " << powerRat.ToString() << ": the exponent is not a "
+        << " small integer, the base is a monomial, however the monomial contains derivative and polynomial with respect to the same variable. ";
+        return false;
+      }
+    finalOutput.MakeZero();
+    finalOutput.AddMonomial(theMon, 1);
+    return output.AssignValueWithContext(finalOutput, input[1].GetContext(), theCommands);
+  }
   if (base.IsEqualToZero() && thePower<=0)
     return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   base.RaiseToPower(thePower);
@@ -558,8 +593,7 @@ bool CommandListInnerTypedFunctions::innerPowerElementUEbyRatOrPolyOrRF(CommandL
   return output.AssignValueWithContext(outputUE, copyBase.GetContext(), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerPowerSequenceByT
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerPowerSequenceByT(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerSequenceByT");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -571,8 +605,7 @@ bool CommandListInnerTypedFunctions::innerPowerSequenceByT
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 
-bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -606,8 +639,7 @@ bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat
   return output.AssignValue(pow(baseDouble, expDouble), theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -625,8 +657,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat
   return output.AssignValue(leftD*rightD, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -645,8 +676,7 @@ bool CommandListInnerTypedFunctions::innerAddDoubleOrRatToDoubleOrRat
   return output.AssignValue(leftD+rightD, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg");
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
@@ -657,23 +687,19 @@ bool CommandListInnerTypedFunctions::innerMultiplyCharSSLieAlgByCharSSLieAlg
   if (!input[2].IsOfType(&rightC))
     return false;
   if (leftC.GetOwner()!=rightC.GetOwner())
-  { theCommands.Comments
-    << "You asked me to multiply characters over different semisimple Lie algebras. "
-    << "Could this be a typo?";
+  { theCommands.Comments << "You asked me to multiply characters over different semisimple Lie algebras. Could this be a typo?";
     return false;
   }
   std::string successString=(leftC*=rightC);
   if (successString!="")
-  { theCommands.Comments << "I tried to multiply character " << leftC.ToString() << " by "
-    << rightC.ToString() << " but I failed with the following message: "
-    << successString;
+  { theCommands.Comments << "I tried to multiply character " << leftC.ToString() << " by " << rightC.ToString()
+    << " but I failed with the following message: " << successString;
     return false;
   }
   return output.AssignValue(leftC, theCommands);
 }
 
-bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyRationalBySequence(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyRationalBySequence");
   //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))

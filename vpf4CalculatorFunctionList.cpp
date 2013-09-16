@@ -1578,3 +1578,14 @@ void CommandList::initPredefinedStandardOperations()
    the union of all members; all repeating members are discarded.",
    "(x,y,x)\\sqcup(1,x,y,2)", true);
 }
+
+void CommandList::initPredefinedOperationsComposite()
+{ this->AddOperationComposite
+  ("Sequence", CommandListFunctions::innerCompositeSequenceDereference, "",
+   "Dereferences a sequence. The syntax is as illustrated by the example. ",
+   "X:=(a,b,c); X_1; X_2; X_3; X_4; X_j; j:=3; X_j", true);
+ this->AddOperationComposite
+  ("ElementWeylAlgebra", CommandListFunctions::innerCompositeEWAactOnPoly, "",
+   "Differential operation acting on a polynomial. ",
+   "x:=PolynomialWithDO{}(\\partial, x);\\partial:=DifferentialOperator{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)", true);
+}

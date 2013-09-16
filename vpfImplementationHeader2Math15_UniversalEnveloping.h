@@ -77,7 +77,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
       killingRestrictedToCartan(i,j)=theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
       killingRestrictedToCartan(j,i)=killingRestrictedToCartan(i,j);
     }
-  std::cout << "<br>The killing restricted to cartan: " << killingRestrictedToCartan.ToString();
+  std::cout << "<br>The killing restricted to Cartan: " << killingRestrictedToCartan.ToString();
   killingRestrictedToCartan.Invert();
   ElementUniversalEnveloping<coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;

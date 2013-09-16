@@ -61,11 +61,15 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 
   this->controlSequences.Clear();
   this->operations.Clear();
+  this->operationsComposite.Clear();
+  this->operationsCompositeHandlers.SetSize(0);
   this->builtInTypes.Clear();
   this->FunctionHandlers.SetSize(0);
   this->operations.SetExpectedSize(300);
   this->FunctionHandlers.SetExpectedSize(300);
   this->builtInTypes.SetExpectedSize(50);
+  this->operationsComposite.SetExpectedSize(50);
+  this->operationsCompositeHandlers.SetExpectedSize(50);
 
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
@@ -204,6 +208,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
+  this->initPredefinedOperationsComposite();
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;

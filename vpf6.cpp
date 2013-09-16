@@ -4112,6 +4112,24 @@ void CommandList::AddOperationHandler
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
+void CommandList::AddOperationComposite
+(const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
+ const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
+{ MacroRegisterFunctionWithName("CommandList::AddOperationComposite");
+  if (this->operationsComposite.Contains(theOpName))
+  { std::cout << "This is a programming error. At the moment, only one composite operation handler is allowed, but the programmer attempted to "
+    << " register function " << theOpName << " twice. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (opArgumentListIgnoredForTheTimeBeing!="")
+  { std::cout << "This section of code is not implemented yet. Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
+  this->operationsComposite.AddOnTop(theOpName);
+  this->operationsCompositeHandlers.AddOnTop(theFun);
+}
+
 std::string CommandList::ElementToStringNonBoundVars()
 { std::stringstream out;
   std::string openTag1="<span style=\"color:#0000FF\">";
@@ -4199,7 +4217,7 @@ std::string CommandList::ToStringFunctionHandlers()
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
   for (int i=0; i<this->operations.size; i++)
-    if (this->FunctionHandlers[i].size>0)
+  { if (this->FunctionHandlers[i].size>0)
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
         if (this->FunctionHandlers[i][j].flagIamVisible)
         { if (found)
@@ -4210,6 +4228,16 @@ std::string CommandList::ToStringFunctionHandlers()
             out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
           out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
         }
+    int indexCompositeHander=this->operationsComposite.GetIndex(this->operations[i]);
+    if (indexCompositeHander!=-1)
+      if (this->operationsCompositeHandlers[indexCompositeHander].flagIamVisible)
+      { if (found)
+          out << "<br>\n";
+        found=true;
+        out << openTag2 << this->operations[i] << closeTag2;
+        out << "\n" << this->operationsCompositeHandlers[indexCompositeHander].GetString(*this);
+      }
+  }
   return out.str();
 }
 

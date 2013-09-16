@@ -26,16 +26,12 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
   if (!input.IsLisT())
     return false;
   const Expression& functionNameNode =input[0];
-  int theIndex;
-//  std::cout << "<br>Simplifying with standard fn " << input.ToString();
-//  std::cout.flush();
-  if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
-    if (input.children.size==2)
-      if (input[1].IsSmallInteger(&theIndex))
-        if (theIndex>0 && theIndex<functionNameNode.children.size)
-        { output=input[theIndex];
-          return true;
-        }
+  if (functionNameNode.IsListNElementsStartingWithAtom())
+  { const Function* theHandler=theCommands.GetOperationCompositeHandler(functionNameNode[0].theData);
+    if (theHandler!=0)
+      if (theHandler->theFunction(theCommands, input, output))
+        return true;
+  }
   if (!functionNameNode.IsAtoM())
     return false;
 //  std::cout << "<br>Evaluating: " << input.ToString();

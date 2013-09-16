@@ -8,6 +8,12 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(__FILE__, "Header, implementation of Weyl algebra routines. ");
 
 template <class coefficient>
+bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly)const
+{
+  return false;
+}
+
+template <class coefficient>
 void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());

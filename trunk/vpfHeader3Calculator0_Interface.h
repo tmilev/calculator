@@ -569,6 +569,8 @@ class CommandList
   HashedList<std::string, MathRoutines::hashString> operations;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   List<List<Function> > FunctionHandlers;
+  HashedList<std::string, MathRoutines::hashString> operationsComposite;
+  List<Function> operationsCompositeHandlers;
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -707,10 +709,7 @@ public:
   std::string ToStringFunctionHandlers();
   std::string ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat=0);
   std::string ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat=0);
-  void GetOutputFolders
-(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay,
- FormatExpressions& outputFormat)
-  ;
+  void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
   //to make operations read only, we make operations private and return const pointer to it.
@@ -719,6 +718,12 @@ public:
   }
   inline const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes()
   { return this->builtInTypes;
+  }
+  const Function* GetOperationCompositeHandler(int theOp)
+  { int theIndex=this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
+    if (theIndex==-1)
+      return 0;
+    return &this->operationsCompositeHandlers[theIndex];
   }
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
@@ -745,13 +750,9 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
-
   std::string ElementToStringSyntacticStack();
-  std::string ElementToStringSyntactic(bool usePolishForm=false)
-  ;
-  std::string WriteDefaultLatexFileReturnHtmlLink
-  (const std::string& fileContent, bool useLatexDviPSpsTopdf=false)
-  ;
+  std::string ElementToStringSyntactic(bool usePolishForm=false);
+  std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsTopdf=false);
   std::string GetCalculatorLink(const std::string& input)
   { return CGI::GetCalculatorLink(this->DisplayNameCalculator, input);
   }
@@ -766,16 +767,12 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
-  Expression::FunctionAddress GetInnerFunctionFromOp
-  (int theOp, const Expression& left, const Expression& right)
-;
+  Expression::FunctionAddress GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right);
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
-  bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
-;
-  bool AllowsPlusInPreceding(const std::string& lookAhead)
-  ;
+  bool LookAheadAllowsApplyFunction(const std::string& lookAhead);
+  bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInPreceding(const std::string& lookAhead);
   bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool LookAheadAllowsDivide(const std::string& lookAhead);
@@ -807,8 +804,7 @@ public:
   bool ReplaceYXBySequenceX(int theControlIndex, int inputFormat=Expression::formatDefault)
   { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
   }
-  bool ReplaceXOXbyEusingO(int theControlIndex, int inputFormat=Expression::formatDefault)
-  ;
+  bool ReplaceXOXbyEusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
   { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 0);
   }
@@ -1443,6 +1439,9 @@ public:
   int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
   void AddOperationNoRepetitionAllowed(const std::string& theOpName);
   void AddOperationBuiltInType(const std::string& theOpName);
+  void AddOperationComposite
+  (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
+   const std::string& opExample, bool isInner, bool visible=true, bool experimental=false);
   void AddOperationBinaryInnerHandlerWithTypes
   (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
    const std::string& opExample, bool visible=true, bool experimental=false);
@@ -1462,6 +1461,7 @@ public:
   void init(GlobalVariables& inputGlobalVariables);
   void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions();
+  void initPredefinedOperationsComposite();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
   bool EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree);

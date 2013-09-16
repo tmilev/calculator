@@ -122,3 +122,42 @@ bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& 
 bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& input, Expression& output)
 { return false;
 }
+
+bool CommandListFunctions::innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeSequenceDereference");
+  if (input.children.size!=2)
+    return false;
+  if (!input[0].IsListStartingWithAtom(theCommands.opSequence()))
+    return false;
+  int theIndex;
+  if (!input[1].IsSmallInteger(&theIndex))
+    return false;
+  if (theIndex>0 && theIndex<input[0].children.size)
+  { output=input[0][theIndex];
+    return true;
+  }
+  return false;
+}
+
+bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeSequenceDereference");
+  if (input.children.size!=2)
+    return false;
+  Expression theEWA=input[0];
+  Expression theArgument=input[1];
+  if (!theEWA.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
+    return false;
+  if (!theEWA.MergeContexts(theEWA, theArgument))
+    return false;
+  Polynomial<Rational> theArgumentPoly;
+  Expression theArgumentConverted;
+  if (theArgument.ConvertToType<Polynomial<Rational> >(theArgumentConverted))
+    theArgumentPoly=theArgumentConverted.GetValue<Polynomial<Rational> >();
+  else if (theArgument.ConvertToType<ElementWeylAlgebra<Rational> >(theArgumentConverted))
+  { if(!theArgumentConverted.GetValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly))
+        return false;
+  } else
+    return false;
+  return false;
+}
+

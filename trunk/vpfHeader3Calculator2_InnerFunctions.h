@@ -19,6 +19,8 @@ public:
   static bool innerArcsin(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

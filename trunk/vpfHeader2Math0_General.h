@@ -2359,6 +2359,7 @@ public:
     this->MakeZero();
     this->AddMonomial(tempMon, 1);
   }
+  bool IsPolynomial(Polynomial<coefficient>* whichPoly=0)const;
   void RaiseToPower(int thePower);
   void MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const;
   void AssignPolynomial(const Polynomial<Rational>& input)

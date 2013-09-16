@@ -9,8 +9,15 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly)const
-{
-  return false;
+{ if (whichPoly!=0)
+    whichPoly->MakeZero();
+  for (int i=0; i<this->size(); i++)
+  { if (!(*this)[i].differentialPart.IsAConstant())
+      return false;
+    if (whichPoly!=0)
+      whichPoly->AddMonomial((*this)[i].polynomialPart, this->theCoeffs[i]);
+  }
+  return true;
 }
 
 template <class coefficient>
@@ -329,7 +336,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
 }
 
 template <class coefficient>
-bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& thePoly)
+bool ElementWeylAlgebra<coefficient>::ActOnPolynomial(Polynomial<Rational>& thePoly)const
 { Polynomial<Rational> result;
   result.MakeZero();
   MonomialP resultMon;

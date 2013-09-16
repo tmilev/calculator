@@ -114,3 +114,11 @@ bool CommandListFunctions::innerCasimirWRTlevi(CommandList& theCommands, const E
   contextE.MakeContextSSLieAlg(theCommands, *theSSalg);
   return output.AssignValueWithContext(theCasimir, contextE, theCommands);
 }
+
+bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& input, Expression& output)
+{ return false;
+}
+
+bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& input, Expression& output)
+{ return false;
+}

@@ -4489,6 +4489,13 @@ bool CommandList::ReplaceXByCon(int theCon, int theFormat)
   return true;
 }
 
+bool CommandList::ReplaceXByEusingO(int theOperation)
+{ (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=this->conExpression();
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.MakeAtom(theOperation, *this);
+  //    this->DecreaseStackSetCharacterRanges(2);
+  return true;
+}
+
 bool CommandList::ReplaceXByConCon(int con1, int con2, int format1, int format2)
 { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size+1);
   (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);

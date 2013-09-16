@@ -13,6 +13,12 @@ public:
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerSin(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCos(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerTan(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerArcsin(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerArccos(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerArctan(CommandList& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

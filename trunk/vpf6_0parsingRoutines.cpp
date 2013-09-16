@@ -159,6 +159,12 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
   this->controlSequences.AddOnTop("\"");
+  this->controlSequences.AddOnTop("sin");
+  this->controlSequences.AddOnTop("cos");
+  this->controlSequences.AddOnTop("tan");
+  this->controlSequences.AddOnTop("arctan");
+  this->controlSequences.AddOnTop("arcsin");
+  this->controlSequences.AddOnTop("arccos");
   this->controlSequences.AddOnTop("SequenceStatements");
   this->controlSequences.AddOnTop("MakeSequence");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
@@ -966,10 +972,17 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else
   //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
+  //Some synonyms:
+  if (lastS=="sin")
+    return this->ReplaceXByEusingO(this->opSin());
+  if (lastS=="cos")
+    return this->ReplaceXByEusingO(this->opCos());
+  if (lastS=="tan")
+    return this->ReplaceXByEusingO(this->opTan());
+  //end of some synonyms
   if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceEOEXByEX();
-  if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" &&
-      (lastS=="," || lastS==")" || lastS=="}"))
+  if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" && (lastS=="," || lastS==")" || lastS=="}"))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
@@ -977,11 +990,9 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXXYBySequenceY(this->conSequence());
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
     return this->ReplaceXXYXBySequenceYX(this->conSequence());
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" &&
-      secondToLastS=="Sequence" && lastS==")")
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
-  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" &&
-      secondToLastS=="Sequence" && lastS=="}")
+  if (fifthToLastS=="Expression" && fourthToLastS== "{}" && thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
     return this->ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence();
   if (secondToLastS=="Sequence" && lastS!=",")
     return this->ReplaceOXbyEX();
@@ -1022,8 +1033,7 @@ bool CommandList::ApplyOneRule()
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
   if (this->isSeparatorFromTheLeftForDefinition(eighthToLastS) && seventhToLastS=="Expression" && sixthToLastS==":" &&
-      fifthToLastS=="if" && fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" &&
-      this->isSeparatorFromTheRightForDefinition(lastS))
+      fifthToLastS=="if" && fourthToLastS=="Expression" && thirdToLastS==":=" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEXXEXEXByEXusingO(this->conDefineConditional());
   if (lastS==";")
   { this->NonBoundVariablesStack.LastObject()->Clear();

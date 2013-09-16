@@ -223,6 +223,17 @@ void CommandList::initPredefinedInnerFunctions()
    ", true, false)
    ;
   this->AddOperationInnerHandler
+  ("\\sin", CommandListFunctions::innerSin, "",
+   "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
+   "\\sin{}(3.1415)", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\cos", CommandListFunctions::innerCos, "",
+   "Cosine function. Evaluates to a decimal approximation if the input is a double number. ",
+   "\\cos{}(3.1415)", true, false)
+   ;
+
+  this->AddOperationInnerHandler
   ("DoubleValue", this->innerDouble, "",
    "Double value of a rational number.",
    "DoubleValue{}(3/7)", true, false)
@@ -340,12 +351,10 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "plot2D{}(\\sin{}x+cos{}x, 0, 5)")
    ;
 this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
-   "<b>Calculus teaching function.</b> Same as plot2D but plots bars under the function, used to \
-   demo definite integrals.\
-   ",
-   "plot2DWithBars{}(x^2, 0, 5, 1)")
+   "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
+   , used to illustrate approximations to definite integrals.",
+   "\nA:=3/2- ((-3/4+1/4 (x))^{2});\nB:= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)")
    ;
-
   this->AddOperationInnerHandler
 ("IsInteger", this->innerIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",

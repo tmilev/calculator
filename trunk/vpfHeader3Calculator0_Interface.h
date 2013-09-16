@@ -476,21 +476,20 @@ class SyntacticElement
 //the following class is meant to use to draw plots for calculus students.
 class CalculusFunctionPlot
 { public:
-  List<std::string> thePlotElements;
-  List<std::string> thePlotElementsWithHtml;
-
+  List<std::string> thePlotStrings;
+  List<std::string> thePlotStringsWithHtml;
+  List<Rational> lowerBounds;
+  List<Rational> upperBounds;
+  List<Expression> thePlotElementS;
   std::string GetPlotStringAddLatexCommands(bool useHtml);
+  void AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, const Rational& inputLowerBound, const Rational& inputUpperBound);
   std::string GetPlotStringFromFunctionStringAndRanges
-  (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound,
-   const Rational& upperBound);
-  void operator=(const CalculusFunctionPlot& other)
-  { this->thePlotElements=other.thePlotElements;
-    this->thePlotElementsWithHtml=other.thePlotElementsWithHtml;
-  }
-  bool operator==(const CalculusFunctionPlot& other)const
-  { return this->thePlotElements==other.thePlotElements;
-  }
+  (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound, const Rational& upperBound);
   void operator+=(const CalculusFunctionPlot& other);
+  bool operator==(const CalculusFunctionPlot& other)const
+  { return this->thePlotStrings==other.thePlotStrings && this->thePlotStringsWithHtml==other.thePlotStringsWithHtml &&
+    this->lowerBounds==other.lowerBounds && this->upperBounds==other.upperBounds && this->thePlotElementS==other.thePlotElementS;
+  }
 };
 
 class ObjectContainer
@@ -829,10 +828,8 @@ public:
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
   { return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex, formatOptions);
   }
-  bool ReplaceXEXEXByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
-  ;
-  bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
-  ;
+  bool ReplaceXEXEXByEusingO(int theOperation, int formatOptions=Expression::formatDefault);
+  bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault);
   bool ReplaceXYByConY(int theCon, int theFormat=Expression::formatDefault)
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=theCon;
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
@@ -843,6 +840,7 @@ public:
     return this->DecreaseStackSetCharacterRangeS(1);
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault);
+  bool ReplaceXByEusingO(int theOperation);
   bool ReplaceXByConCon(int con1, int con2, int format1=Expression::formatDefault, int format2=Expression::formatDefault);
   bool ReplaceXXXByCon(int theCon);
   bool ReplaceXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
@@ -1080,6 +1078,15 @@ public:
   int opCandidateSSsubalgebra()
   { return this->operations.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
+  int opSin()
+  { return this->operations.GetIndexIMustContainTheObject("\\sin");
+  }
+  int opCos()
+  { return this->operations.GetIndexIMustContainTheObject("\\cos");
+  }
+  int opTan()
+  { return this->operations.GetIndexIMustContainTheObject("\\tan");
+  }
   int opLittelmannPath()
   { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
   }
@@ -1138,8 +1145,7 @@ public:
   { return this->operations.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
-  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
-  (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
   bool AppendSummandsReturnTrueIfOrderNonCanonical(const Expression& theExpression, List<Expression>& output)
@@ -1153,8 +1159,7 @@ public:
   (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog=0, bool logAttempts=false);
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
   { if (&input==&output)
-    { std::cout << "This is a programming error: the input expression, equal to "
-      << input.ToString() << " has the same address as the output expression. "
+    { std::cout << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -1194,9 +1199,7 @@ public:
     return !output.IsError();
   }
   bool ExpressionMatchesPattern
-  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
-   std::stringstream* theLog=0)
-  ;
+  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog=0);
   static bool innerReverseOrder(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerReverseOrderRecursivelyToSimilar(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialWithEWA(CommandList& theCommands, const Expression& input, Expression& output)
@@ -1553,8 +1556,7 @@ public:
 };
 
 template <class TemplateList>
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
+bool Serialization::innerStoreObject(CommandList& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
 { output.reset(theCommands);
   output.children.ReservE(input.size+1);
   Expression tempE;
@@ -1605,8 +1607,7 @@ bool Serialization::innerStoreMonCollection
 }
 
 template <class TemplateMonomial, typename coefficient>
-bool Serialization::DeSerializeMonCollection
-(CommandList& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
+bool Serialization::DeSerializeMonCollection(CommandList& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
@@ -1618,8 +1619,7 @@ bool Serialization::DeSerializeMonCollection
       return false;
     }
     if (!finalContext.ContextMergeContexts(finalContext, currentContext, finalContext))
-    { theCommands.Comments << "<hr>Failed to merge monomial contexts: "
-      << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
+    { theCommands.Comments << "<hr>Failed to merge monomial contexts: " << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
       return false;
     }
   }

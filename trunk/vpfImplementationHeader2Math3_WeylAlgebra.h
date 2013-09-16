@@ -21,6 +21,14 @@ bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whic
 }
 
 template <class coefficient>
+bool ElementWeylAlgebra<coefficient>::HasNonSmallPositiveIntegerDerivation()const
+{ for (int i=0; i<this->size(); i++)
+    if ((*this)[i].HasNonSmallPositiveIntegerDerivation())
+      return true;
+  return false;
+}
+
+template <class coefficient>
 void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlgebra& left, const MonomialWeylAlgebra& right, ElementWeylAlgebra& output)const
 { SelectionWithDifferentMaxMultiplicities tempSel;
   int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
@@ -49,12 +57,9 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   { coeffBuff=1;
     for (int k=0; k<theDimensioN; k++)
     { int multDrop=tempSel.Multiplicities[k];
-      int theDOPower=0;
-      int thePolPower=0;
-      left.differentialPart(k).IsSmallInteger(&theDOPower);
-      right.polynomialPart(k).IsSmallInteger(&thePolPower);
-      coeffBuff*=Rational::NChooseK(theDOPower, multDrop)
-      *Rational::NChooseK(thePolPower, multDrop)* Rational::Factorial(multDrop);
+      Rational theDOPower =left.differentialPart(k);
+      Rational thePolPower=right.polynomialPart(k);
+      coeffBuff*=Rational::NChooseK(theDOPower, multDrop)*Rational::NChooseK(thePolPower, multDrop)* Rational::Factorial(multDrop);
       buffer.polynomialPart[k]=left.polynomialPart(k)+right.polynomialPart(k)-multDrop;
       buffer.differentialPart[k]= left.differentialPart(k)+right.differentialPart(k)-multDrop;
     }
@@ -276,7 +281,7 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
 }
 
 template <class coefficient>
-void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt)
+bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<Rational>& SubPolyPart, const PolynomialSubstitution<Rational>& SubDiffPArt)
 { MacroRegisterFunctionWithName("ElementWeylAlgebra::Substitution");
   Polynomial<Rational> DOpart, polyPart;
   MonomialWeylAlgebra theMon;
@@ -286,8 +291,10 @@ void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
 //  std::cout << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
   for (int i=0; i<this->size(); i++)
   { const MonomialWeylAlgebra& currentMon =(*this)[i];
-    currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart);
-    currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart);
+    if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart))
+      return false;
+    if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart))
+      return false;
     for (int j=0; j<polyPart.size(); j++)
       for (int k=0; k<DOpart.size(); k++)
       { theMon.polynomialPart=polyPart[j];
@@ -299,6 +306,7 @@ void ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
       }
   }
   *this=output;
+  return true;
 }
 
 template <class coefficient>

@@ -74,8 +74,7 @@ public:
 };
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerMultiplyTypeByType
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerMultiplyTypeByType(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyTypeByType");
   if (input.children.size!=3)
     return false;
@@ -89,8 +88,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyTypeByType
 }
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerAddTypeToType
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerAddTypeToType(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
   if (input.children.size!=3)
     return false;
@@ -103,8 +101,7 @@ bool CommandListInnerTypedFunctions::innerAddTypeToType
 }
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerDivideTypeByType
-  (CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListInnerTypedFunctions::innerDivideTypeByType(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
   if (input.children.size!=3)
     return false;

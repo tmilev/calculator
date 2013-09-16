@@ -2343,7 +2343,7 @@ public:
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   (const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO, Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables);
   void FourierTransform (ElementWeylAlgebra<coefficient>& output)const;
-  bool ActOnPolynomial(Polynomial<Rational>& thePoly);
+  bool ActOnPolynomial(Polynomial<Rational>& thePoly)const;
   void SetNumVariables(int newNumVars);
   void MultiplyOnTheLeft(const ElementWeylAlgebra& standsOnTheLeft, GlobalVariables* theGlobalVariables=0);
   static void LieBracket(const ElementWeylAlgebra& left, const ElementWeylAlgebra& right, ElementWeylAlgebra& output);

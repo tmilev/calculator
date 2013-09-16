@@ -143,11 +143,11 @@ bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, 
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeSequenceDereference");
   if (input.children.size!=2)
     return false;
-  Expression theEWA=input[0];
+  Expression theEWAE=input[0];
   Expression theArgument=input[1];
-  if (!theEWA.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
+  if (!theEWAE.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
     return false;
-  if (!theEWA.MergeContexts(theEWA, theArgument))
+  if (!theEWAE.MergeContexts(theEWAE, theArgument))
     return false;
   Polynomial<Rational> theArgumentPoly;
   Expression theArgumentConverted;
@@ -155,9 +155,16 @@ bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, 
     theArgumentPoly=theArgumentConverted.GetValue<Polynomial<Rational> >();
   else if (theArgument.ConvertToType<ElementWeylAlgebra<Rational> >(theArgumentConverted))
   { if(!theArgumentConverted.GetValue<ElementWeylAlgebra<Rational> >().IsPolynomial(&theArgumentPoly))
-        return false;
+      return false;
   } else
     return false;
-  return false;
+  const ElementWeylAlgebra<Rational>& theEWA=theEWAE.GetValue<ElementWeylAlgebra<Rational> >();
+  if (!theEWA.ActOnPolynomial(theArgumentPoly))
+  { std::stringstream out;
+    out << "Failed to act by operator " << theEWA.ToString() << " on polynomial " << theArgumentPoly.ToString()
+    << " (possibly the weyl algebra element has non-integral exponents)";
+    return output.SetError(out.str(), theCommands);
+  }
+  return output.AssignValueWithContext(theArgumentPoly, theEWAE.GetContext(), theCommands);
 }
 

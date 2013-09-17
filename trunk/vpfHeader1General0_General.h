@@ -6390,7 +6390,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
   if (this->IsAConstant())
     return true;
   Polynomial<Element> tempPoly;
-  std::cout << "<hr>subbing in monomial " << this->ToString();
+//  std::cout << "<hr>subbing in monomial " << this->ToString();
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
@@ -6419,7 +6419,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
       output*=(tempPoly);
 //      output.ComputeDebugString();
     }
-  std::cout << " to get: " << output.ToString();
+//  std::cout << " to get: " << output.ToString();
   return true;
 }
 

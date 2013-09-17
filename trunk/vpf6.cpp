@@ -905,13 +905,13 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA =this->GetValue<ElementWeylAlgebra<Rational> >();
-    std::cout << "<hr>Subbing in: " << outputEWA.ToString();
+//    std::cout << "<hr>Subbing in: " << outputEWA.ToString();
     if (!outputEWA.Substitution(subPolyPart, subEWApart))
     { this->theBoss->Comments << "<hr>Failed to convert " << outputEWA.ToString() << ": failed to carry out substitution "
       << subEWApart.ToString() << ", " << subPolyPart.ToString();
       return false;
     }
-    std::cout << "... to get: " << outputEWA.ToString();
+//    std::cout << "... to get: " << outputEWA.ToString();
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
@@ -2118,6 +2118,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+        theSSalgebra.OrderSetNilradicalNegativeMostReversed(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
         out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
@@ -4857,12 +4858,12 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   Expression convertedE;
   for (int i=1; i<this->children.size; i++)
   { convertedE=(*this)[i];
-    std::cout << "<hr>Setting context of: " << convertedE.ToString();
+//    std::cout << "<hr>Setting context of: " << convertedE.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
     { this->theBoss->Comments << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
       return false;
     }
-    std::cout << "... and the result is: " << convertedE.ToString();
+ //   std::cout << "... and the result is: " << convertedE.ToString();
     output.AddChildOnTop(convertedE);
   }
   return true;

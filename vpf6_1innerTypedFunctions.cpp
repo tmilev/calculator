@@ -323,10 +323,10 @@ bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
   if (input.children.size!=3)
     return false;
   Expression inputContextsMerged;
-  std::cout << "<hr>Merging contexts: " << input.ToString();
+//  std::cout << "<hr>Merging contexts: " << input.ToString();
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational>>(inputContextsMerged))
     return false;
-  std::cout << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+//  std::cout << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
       inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation())
   { theCommands.Comments << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "

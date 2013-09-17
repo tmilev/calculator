@@ -2357,7 +2357,7 @@ void coneRelations::ToString
     if (this->flagIncludeCoordinateRepresentation)
     { lineCounter+=2;
       out << "\\multicolumn{5}{c}{$\\varepsilon$-form~relative~to~the~subalgebra~generated~by~$\\mathfrak{k}$~and~the~relation}\\\\\n";
-      //(*this)[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.GetOwnerWeyl(), theGlobalVariables);
+      // (*this)[i].GetEpsilonCoords(this->TheObjects[i].Alphas, tempAlphas, owners.GetOwnerWeyl(), theGlobalVariables);
       //this->TheObjects[i].GetEpsilonCoords(this->TheObjects[i].Betas, tempBetas, owners.GetOwnerWeyl(), theGlobalVariables);
       this->TheObjects[i].RelationOneSideToStringCoordForm(tempS, this->TheObjects[i].AlphaCoeffs, tempAlphas, true);
       out << "\\multicolumn{5}{c}{" << tempS;

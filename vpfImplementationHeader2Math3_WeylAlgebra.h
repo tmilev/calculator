@@ -291,10 +291,14 @@ bool ElementWeylAlgebra<coefficient>::Substitution(const PolynomialSubstitution<
 //  std::cout << "<hr>Substituting " << SubPolyPart.ToString() << " into " << this->ToString();
   for (int i=0; i<this->size(); i++)
   { const MonomialWeylAlgebra& currentMon =(*this)[i];
+    //std::cout << "<hr>Substituting " << SubPolyPart.ToString() << " into " << currentMon.polynomialPart.ToString();
     if (!currentMon.polynomialPart.SubstitutioN(SubPolyPart, polyPart))
       return false;
+    //std::cout << " to get " << polyPart.ToString();
+    //std::cout << "<hr>Substituting " << SubPolyPart.ToString() << " into " << currentMon.differentialPart.ToString();
     if (!currentMon.differentialPart.SubstitutioN(SubDiffPArt, DOpart))
       return false;
+    //std::cout << " to get " << DOpart.ToString();
     for (int j=0; j<polyPart.size(); j++)
       for (int k=0; k<DOpart.size(); k++)
       { theMon.polynomialPart=polyPart[j];

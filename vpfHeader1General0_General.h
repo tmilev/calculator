@@ -5666,6 +5666,11 @@ public:
   void RaiseToPower(int d, const coefficient& theRingUniT=1)
   { if (d==1)
       return;
+    if (d<0)
+    { std::cout << "This is a programming error: attempting to raise the polynomial " << this->ToString() << " to the negative power "
+      << d << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     Polynomial<coefficient> theOne;
     theOne.MakeOne(this->GetMinNumVars());
     MathRoutines::RaiseToPower(*this, d, theOne);
@@ -5730,9 +5735,9 @@ public:
       return false;
     int thisMaxMonIndex= this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
     int otherMaxMonIndex= other.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-    if( (*this)[thisMaxMonIndex]>other[otherMaxMonIndex])
+    if((*this)[thisMaxMonIndex]>other[otherMaxMonIndex])
       return true;
-    if( other[otherMaxMonIndex]>(*this)[thisMaxMonIndex])
+    if(other[otherMaxMonIndex]>(*this)[thisMaxMonIndex])
       return false;
     if(this->theCoeffs[thisMaxMonIndex]>other.theCoeffs[otherMaxMonIndex])
       return true;
@@ -5745,8 +5750,7 @@ public:
   }
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
-  static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic
-  (const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
+  static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
   { if (left.IsEqualToZero())
       return right.IsEqualToZero();
     if (right.IsEqualToZero())
@@ -5755,8 +5759,7 @@ public:
     .MonomialP::IsGEQTotalDegThenLexicographic
     (right[right.GetIndexMaxMonomialTotalDegThenLexicographic()]);
   }
-  static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest
-  (const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
+  static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right)
   { if (left.IsEqualToZero())
       return right.IsEqualToZero();
     if (right.IsEqualToZero())
@@ -6401,7 +6404,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, 
         assert(false);
       }
       int theExponent=0;
-      if (!this->monBody[i].IsSmallInteger(&theExponent))
+      if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i]<0)
       { if (TheSubstitution[i].IsMonomialCoeffOne())
         { MonomialP tempMon=TheSubstitution[i][0];
           tempMon.RaiseToPower(this->monBody[i]);
@@ -6450,8 +6453,7 @@ void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRin
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex
-(int index, coefficient& output, const coefficient& theRingZero)
+void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output, const coefficient& theRingZero)
 { MonomialP tempM;
   tempM.MakeEi(index);
   int i=this->theMonomials.GetIndex(tempM);
@@ -6493,8 +6495,7 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==(const 
 }
 
 template <class TemplateMonomial, class coefficient>
-void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile
-(std::fstream& output)
+void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile(std::fstream& output)
 { output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << " numMons: " << this->size();
   for (int i=0; i<this->size(); i++)
@@ -6510,8 +6511,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile
 }
 
 template <class TemplateMonomial, class coefficient>
-inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile
-(std::fstream& input, GlobalVariables* theGlobalVariables)
+inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { int numReadWords, targetSize;
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string ReaderString;
@@ -6707,8 +6707,7 @@ bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int* whichInt
 }
 
 template <class Element>
-void Polynomial<Element>::MakeLinPolyFromRootLastCoordConst
-(const Vector<Rational>& input)
+void Polynomial<Element>::MakeLinPolyFromRootLastCoordConst(const Vector<Rational>& input)
 { this->MakeZero();
   MonomialP tempM;
   for (int i=0; i<input.size-1; i++)
@@ -6750,8 +6749,7 @@ void Polynomial<coefficient>::MakeMonomiaL(int LetterIndex, const Rational& Powe
 }
 
 template <class TemplateMonomial, class coefficient>
-void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff
-(const MonomialCollection<TemplateMonomial, coefficient>& other, coefficient* inputcf)
+void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff(const MonomialCollection<TemplateMonomial, coefficient>& other, coefficient* inputcf)
 { if (this==&other)
   { if (inputcf==0)
     { this->MakeZero();
@@ -6773,8 +6771,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff
 }
 
 template <class TemplateMonomial, class coefficient>
-void MonomialCollection<TemplateMonomial, coefficient>::
-operator+=(const MonomialCollection<TemplateMonomial, coefficient>& other)
+void MonomialCollection<TemplateMonomial, coefficient>::operator+=(const MonomialCollection<TemplateMonomial, coefficient>& other)
 { this->SetExpectedSize(other.size()+this->size());
   for (int i=0; i<other.size(); i++)
   { ParallelComputing::SafePointDontCallMeFromDestructors();
@@ -6831,8 +6828,7 @@ bool Polynomial<Element>::IsProportionalTo(const Polynomial<Element>& other, Ele
 }
 
 template <class Element>
-void Polynomial<Element>::DivideBy
-(const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
+void Polynomial<Element>::DivideBy(const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
 { MacroRegisterFunctionWithName("Polynomial_Element::DivideBy");
   if (&outputRemainder==this || &outputQuotient==this || &outputRemainder==&inputDivisor || &outputQuotient==&inputDivisor)
   { Polynomial<Element> newQuot, newRemaind;
@@ -7022,8 +7018,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
 }
 
 template <class TemplateMonomial, class coefficient>
-int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex
-(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
+int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
@@ -7031,9 +7026,8 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j>=this->size())
-  { std::cout << "This is a programming error: function GetIndex "
-    << " evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
-    << " returns index " << j << " but I have only " << this->size() << " elements "
+  { std::cout << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function "
+    << inputMon.HashFunction(inputMon) << " returns index " << j << " but I have only " << this->size() << " elements "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -7045,8 +7039,7 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
   { ///
 //    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
     if (j>=this->theCoeffs.size)
-    { std::cout << "This is a programming error. "
-      << " Looking for coefficient index " << j << " when number of coefficients is "
+    { std::cout << "This is a programming error. Looking for coefficient index " << j << " when number of coefficients is "
       << this->theCoeffs.size <<  ". " <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -7057,8 +7050,7 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
 }
 
 template <class TemplateMonomial, class coefficient>
-int MonomialCollection<TemplateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
-(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
+int MonomialCollection<TemplateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
 { if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
@@ -7162,9 +7154,7 @@ void PolynomialSubstitution<Element>::MakeIdSubstitution(int numVars, const Elem
 }
 
 template <class Element>
-void PolynomialSubstitution<Element>::
-MakeIdLikeInjectionSub
-(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Element& theRingUnit)
+void PolynomialSubstitution<Element>::MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Element& theRingUnit)
 { assert(numStartingVars<=numTargetVarsMustBeLargerOrEqual);
   this->SetSize(numStartingVars);
   for (int i=0; i<this->size; i++)
@@ -7816,8 +7806,8 @@ std::string Vectors<coefficient>::ElementsToInequalitiesString(bool useLatex, bo
 
 template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
-(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors,
- Matrix<coefficient>& bufferMat, const coefficient& theRingUnit, const coefficient& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
+ const coefficient& theRingUnit, const coefficient& theRingZero)
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
@@ -7828,9 +7818,8 @@ bool Vectors<coefficient>::GetCoordsInBasis
 
 template <class coefficient>
 bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output, Matrix<coefficient>& bufferMatGaussianEliminationCC,
- Matrix<coefficient>& bufferMatGaussianElimination, const coefficient& theRingUnit, const coefficient& theRingMinusUnit,
- const coefficient& theRingZero)
+(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output, Matrix<coefficient>& bufferMatGaussianEliminationCC, Matrix<coefficient>& bufferMatGaussianElimination,
+ const coefficient& theRingUnit, const coefficient& theRingMinusUnit, const coefficient& theRingZero)
 { int theDim=this->size;
   bufferMatGaussianElimination.init(inputBasis.size, theDim);
   for (int i=0; i<inputBasis.size; i++)
@@ -7867,8 +7856,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
 }
 
 template <class coefficient>
-bool Vector<coefficient>::GetCoordsInBasiS
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output)const
+bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output)const
 { if(inputBasis.size==0)
     return false;
   MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
@@ -7900,8 +7888,7 @@ bool Vector<coefficient>::GetCoordsInBasiS
 }
 
 template <class coefficient>
-void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra
-  (Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
+void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
 { MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
   if (this->size==0)
     return;
@@ -7930,8 +7917,7 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
 }
 
 template<typename Element>
-void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm
-(Selection& TheNonPivotPoints, Matrix<Element>& output)
+void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<Element>& output)
 { int RowCounter=0;
   output.init(this->NumCols, 1);
   for (int i=0; i<this->NumCols; i++)
@@ -7945,8 +7931,7 @@ void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm
 }
 
 template<typename Element>
-void Matrix<Element>::NonPivotPointsToEigenVector
-(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+void Matrix<Element>::NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 { int RowCounter=0;
   output.SetSize(this->NumCols);
   for (int i=0; i<this->NumCols; i++)
@@ -8225,8 +8210,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
 (const List<Vector<coefficient> >& input, List<Vector<coefficient> >& output, Selection& outputSelectedPivotColumns, GlobalVariables* theGlobalVariables)
 { if (&input==&output)
   { List<Vector<coefficient> > inputCopy=input;
-    Vectors<coefficient>::SelectABasisInSubspace
-    (inputCopy, output, outputSelectedPivotColumns, theGlobalVariables);
+    Vectors<coefficient>::SelectABasisInSubspace(inputCopy, output, outputSelectedPivotColumns, theGlobalVariables);
     return;
   }
   if (input.size==0)
@@ -8261,8 +8245,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
     theMat.GetVectorFromRow(i, output[i]);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "Selecting a basis of a vector space with "
-    << input.size << "generators in dimension " << theDim << "... DONE! " ;
+    reportStream << "Selecting a basis of a vector space with " << input.size << "generators in dimension " << theDim << "... DONE! " ;
     theReport.Report(reportStream.str());
   }
 }
@@ -8437,7 +8420,7 @@ public:
    const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero, GlobalVariables* theGlobalVariables);
   bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other)const
-  { Vector<Rational>  tempRoot1, tempRoot2;
+  { Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
    return tempRoot1.IsProportionalTo(tempRoot2);
@@ -8564,16 +8547,15 @@ Element Matrix<Element> ::GetDeterminant()
 template <class Element>
 Element Matrix<Element>::GetTrace()const
 { if (this->NumCols!=this->NumRows)
-  { std::cout << "This is either programming error, a mathematical error,"
-    << " or requires a more general definition of trace. Requesting the trace of "
-    << " a non-square matrix of " << this->NumRows << " rows and " << this->NumCols << " columns "
-    << " is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is either programming error, a mathematical error, or requires a more general definition of trace. Requesting the trace of "
+    << " a non-square matrix of " << this->NumRows << " rows and " << this->NumCols << " columns is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-    Element acc = 0;
-    for(int i=0; i<this->NumCols; i++)
-        acc += this->elements[i][i];
-    return acc;
+  Element acc = 0;
+  for(int i=0; i<this->NumCols; i++)
+    acc += this->elements[i][i];
+  return acc;
 }
 
 template <class Element>
@@ -8587,8 +8569,7 @@ Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
 template <class Element>
 Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
 { if(v.size != NumCols)
-  { std::cout << "matrix application mismatch: matrix with" << NumCols
-    << "columns attempted to multiply vector of length" << v.size
+  { std::cout << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size
     << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
     assert(false);
   }
@@ -8611,9 +8592,7 @@ void Matrix<Element>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const Lar
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::IsRegular
-(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, GlobalVariables& theGlobalVariables,
- int theDimension)
+bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension)
 { //this function needs a complete rewrite
   Selection WallSelection=theGlobalVariables.selWallSelection.GetElement();
   WallSelection.init(this->size);
@@ -8635,8 +8614,7 @@ bool Vectors<coefficient>::IsRegular
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalExcludingIndex
-(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
+bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
 { Selection NonPivotPoints;
   if (this->size==0)
     return false;
@@ -8658,8 +8636,7 @@ bool Vectors<coefficient>::ComputeNormalExcludingIndex
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelection
-(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
+bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
 { Selection NonPivotPoints;
   output.SetSize(theDimension);
   bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
@@ -8675,8 +8652,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelection
 
 template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot,
- Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
 { if (this->size==0)
     return false;
   int theDimension= this->TheObjects[0].size;
@@ -8687,8 +8663,8 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
   matOutputEmpty.init(-1, -1);
   for(int j=0; j<theDimension; j++)
   { for(int i=0; i<theSelection.CardinalitySelection; i++)
-      bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-    bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot.TheObjects[j]);
+      bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]][j]);
+    bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
   }
   bufferMatrix.GaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
   if (NonPivotPoints.CardinalitySelection!=1)
@@ -8699,8 +8675,7 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
 
 template<class coefficient>
 bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2,
- Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
+(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2, Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
 { Selection& NonPivotPoints= bufferSel;
   if (this->size==0)
     return false;
@@ -8721,14 +8696,12 @@ bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
 }
 
 template<class coefficient>
-void Vectors<coefficient>::GetGramMatrix
-(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm) const
+void Vectors<coefficient>::GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm) const
 { output.Resize(this->size, this->size, false);
   for (int i=0; i<this->size; i++)
     for(int j=i; j<this->size; j++)
     { if (theBilinearForm!=0)
-        Vector<coefficient>::ScalarProduct
-        (this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
+        Vector<coefficient>::ScalarProduct(this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
       else
         output(i,j)=(*this)[i].ScalarEuclidean((*this)[j]);
       if (i!=j)
@@ -8737,8 +8710,7 @@ void Vectors<coefficient>::GetGramMatrix
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::ContainsARootNonPerpendicularTo
-(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm)
+bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm)
 { for (int i=0; i<this->size; i++)
     if (!Vector<coefficient>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero())
       return true;
@@ -8746,8 +8718,7 @@ bool Vectors<coefficient>::ContainsARootNonPerpendicularTo
 }
 
 template<class coefficient>
-int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank
-(Matrix<coefficient>& bufferMat, Selection& bufferSel)
+int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coefficient>& bufferMat, Selection& bufferSel)
 { if (this->size==0)
     return 0;
   int theDimension= this->GetDimensionOfElements();
@@ -8772,8 +8743,7 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank
 }
 
 template <class coefficient>
-void Polynomial<coefficient> ::MakePolyFromDirectionAndNormal
-(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction)
+void Polynomial<coefficient> ::MakePolyFromDirectionAndNormal(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction)
 { Rational tempRat2= Vector<coefficient>::ScalarEuclidean(direction, normal);
   this->MakeZero(direction.size);
   MonomialP tempM;
@@ -8786,18 +8756,14 @@ void Polynomial<coefficient> ::MakePolyFromDirectionAndNormal
 
 template <class coefficient>
 bool Vectors<coefficient>::GetNormalSeparatingCones
-(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs,
-  List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
-  GlobalVariables* theGlobalVariables)
+(List<Vector<coefficient> >& coneStrictlyPositiveCoeffs, List<Vector<coefficient> >& coneNonNegativeCoeffs, Vector<coefficient>& outputNormal,
+ GlobalVariables* theGlobalVariables)
 { MemorySaving<Matrix<Rational> > tempA;
   MemorySaving<Matrix<Rational> > tempB;
   MemorySaving<Vector<Rational> > tempX;
-  Matrix<Rational>& matA=
-  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
-  Matrix<Rational>& matb=
-  theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
-  Vector<Rational>& matX=
-  theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+  Matrix<Rational>& matA=theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
+  Matrix<Rational>& matb=theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
+  Vector<Rational>& matX=theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
   int theDimension=coneStrictlyPositiveCoeffs[0].size;
   if (coneStrictlyPositiveCoeffs.size==0)
   { if (coneNonNegativeCoeffs.size>0)
@@ -8830,8 +8796,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  bool result=Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-  (matA, matb, &matX, theGlobalVariables);
+  bool result=Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, &matX, theGlobalVariables);
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
@@ -8855,8 +8820,7 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
 
 template<class coefficient>
 void Matrix<coefficient>::ComputePotentialChangeGradient
-(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex,
- Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
+(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable)
 { hasAPotentialLeavingVariable = false;
   outputChangeGradient.MakeZero();
   for (int j=0; j<matA.NumRows; j++)
@@ -8870,8 +8834,7 @@ void Matrix<coefficient>::ComputePotentialChangeGradient
 
 template<class Element>
 void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
-  (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables,
-   Matrix<Element>& tempMatA, Vector<Element>& inputVectorX, Selection& BaseVariables)
+(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<Element>& tempMatA, Vector<Element>& inputVectorX, Selection& BaseVariables)
 { LeavingVariableRow=-1;
   maxMovement.MakeZero();
   for(int i=0; i<tempMatA.NumRows; i++)
@@ -8919,8 +8882,7 @@ void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
 }
 
 template <typename Element>
-inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator
-(const MonomialP& input, Polynomial<Rational>& output)
+inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output)
 { assert(this->NumRows==this->NumCols);
   MonomialP tempMon;
   output.MakeZero();
@@ -9025,8 +8987,7 @@ void List<Object>::IntersectWith(const List<Object>& other, List<Object>& output
 }
 
 template <class coefficient>
-std::string Vector<coefficient>::ToStringLetterFormat
-(const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
+std::string Vector<coefficient>::ToStringLetterFormat(const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out;
@@ -9062,8 +9023,7 @@ std::string Vector<coefficient>::ToStringLetterFormat
 }
 
 template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
-(int theGeneratorIndexStandsOnTheLeft, const coefficient& thePower)
+void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsOnTheLeft, const coefficient& thePower)
 { if (thePower==0)
     return;
   List<int> newGeneratorIndices;
@@ -9080,8 +9040,7 @@ void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnT
 }
 
 template <class coefficient, unsigned int inputHashFunction(const coefficient&)>
-void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
-(int theGeneratorIndex, const coefficient& thePower)
+void MonomialTensor<coefficient, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const coefficient& thePower)
 { if (thePower==0)
     return;
   if (this->generatorsIndices.size>0)
@@ -9179,8 +9138,7 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
 
 template <class TemplateMonomial, class coefficient>
 std::string MonomialCollection<TemplateMonomial, coefficient>::GetBlendCoeffAndMon
-(const TemplateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront,
- FormatExpressions* theFormat)
+(const TemplateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat)
 { std::stringstream out;
   std::string coeffStr=inputCoeff.ToString();
   if (inputMon.IsAConstant())
@@ -9209,8 +9167,7 @@ std::string MonomialCollection<TemplateMonomial, coefficient>::GetBlendCoeffAndM
 }
 
 template <class TemplateMonomial, class coefficient>
-std::string MonomialCollection<TemplateMonomial, coefficient>::ToString
-(FormatExpressions* theFormat)const
+std::string MonomialCollection<TemplateMonomial, coefficient>::ToString(FormatExpressions* theFormat)const
 { if (this->size()==0)
     return "0";
   MacroRegisterFunctionWithName("MonomialCollection::ToString");
@@ -9298,9 +9255,7 @@ std::string MonomialCollection<TemplateMonomial, coefficient>::ToString
 }
 
 template <typename Element>
-inline void Matrix<Element>::AddTwoRows
-(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar,
- GlobalVariables* theGlobalVariables)
+inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, GlobalVariables* theGlobalVariables)
 { ProgressReport theReport(theGlobalVariables);
   bool doProgressReport=
   theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
@@ -9318,9 +9273,7 @@ inline void Matrix<Element>::AddTwoRows
 }
 
 template <typename Element>
-void Matrix<Element>::GaussianEliminationByRows
-( Matrix<Element>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns,
-  GlobalVariables* theGlobalVariables)
+void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns, GlobalVariables* theGlobalVariables)
 { //Checking for bees
   if (this->NumRows==0)
   { std::cout << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
@@ -9329,9 +9282,9 @@ void Matrix<Element>::GaussianEliminationByRows
   }
   if (carbonCopyMat!=0)
     if (carbonCopyMat->NumRows!=this->NumRows)
-    { std::cout << "This is a programming error: requesting to do Gaussian elimination with carbon copy, "
-      << " however the matrix has " << this->NumRows << " rows, while the carbon copy has "
-      << carbonCopyMat->NumRows << " rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: requesting to do Gaussian elimination with carbon copy, however the matrix has "
+      << this->NumRows << " rows, while the carbon copy has " << carbonCopyMat->NumRows << " rows. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   ///////////////////
@@ -9376,10 +9329,8 @@ void Matrix<Element>::GaussianEliminationByRows
           tempElement.Minus();
           if (doProgressReport)
           { std::stringstream reportStream;
-            reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols
-            << "): column " << i+1 << " out of " << this->NumCols
-            << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row "
-            << j+1 << " out of " << this->NumRows;
+            reportStream << "Gaussian elimination (" << this->NumRows << "x" << this->NumCols << "): column " << i+1 << " out of " << this->NumCols
+            << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row " << j+1 << " out of " << this->NumRows;
             theReport.Report(reportStream.str());
           }
           this->AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
@@ -9393,8 +9344,7 @@ void Matrix<Element>::GaussianEliminationByRows
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
-  (List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
@@ -9429,9 +9379,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis
           }
         if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
-          out << "Computing Sopoly of indices " << i +1 << " out of "
-          << this->theBasiS.size << " and "
-          << j+1 << " out of " << this->theBasiS.size;
+          out << "Computing Sopoly of indices " << i +1 << " out of " << this->theBasiS.size << " and " << j+1 << " out of " << this->theBasiS.size;
           theReport.Report(out.str());
         }
         this->bufPoly=currentLeft;
@@ -9487,8 +9435,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis
         }
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
-        out << "Reducing: " << theBasiS.size << " basis elements, "
-        << this->basisCandidates.size << " candidates. ";
+        out << "Reducing: " << theBasiS.size << " basis elements, " << this->basisCandidates.size << " candidates. ";
         theReport.Report(out.str());
 //          std::cout << "<br>" << out.str();
       }
@@ -9501,9 +9448,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis
     { this->bufPolyForGaussianElimination=this->theBasiS[i];
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
-        out << "Verifying basis element " << i+1 << " out of "
-        << theBasiS.size << " basis elements, " << this->basisCandidates.size
-        << " candidates. ";
+        out << "Verifying basis element " << i+1 << " out of " << theBasiS.size << " basis elements, " << this->basisCandidates.size << " candidates. ";
         theReport.Report(out.str());
 //        std::cout << "<br>" << out.str();
       }
@@ -9558,9 +9503,7 @@ void GroebnerBasisComputation<coefficient>::MakeMinimalBasis()
 
 template<class coefficient>
 bool GroebnerBasisComputation<coefficient>::CriterionCLOsh
-(HashedListSpecialized
- <Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >&
- thePairs, List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM)
+(HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >&thePairs, List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM)
 { //page 107,  Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
   Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity >&
@@ -9581,12 +9524,8 @@ bool GroebnerBasisComputation<coefficient>::CriterionCLOsh
 }
 
 template<class coefficient>
-bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImprovedAlgorithm
-(List<Polynomial<coefficient> >& inputOutpuT,
- GlobalVariables* theGlobalVariables, int upperComputationBound
-)
-{ MacroRegisterFunctionWithName
-  ("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
+bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables, int upperComputationBound)
+{ MacroRegisterFunctionWithName("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
    //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
@@ -9604,8 +9543,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
   }
   if (this->theBasiS.size<=0)
-  { std::cout << "This is a programming error: "
-    << "transforming to Groebner basis not allowed for empty basis. "
+  { std::cout << "This is a programming error: transforming to Groebner basis not allowed for empty basis. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -9624,9 +9562,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     MonomialP& rightHighestMon=this->leadingMons[lastPair.Object2];
     if (theGlobalVariables!=0 && this->flagDoProgressReport)
     { std::stringstream out;
-      out
-      << "Basis size: " << this->theBasiS.size
-      << ".\n<br>Remaining cases current round: " << indexPairs.size;
+      out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
       reportOuter.Report(out.str());
     }
     int numVars=MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
@@ -9655,14 +9591,10 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
 //        std::cout << "<br>testing sopoly: "
 //        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
 //        ;
-        this->RemainderDivisionWithRespectToBasis
-        (leftBuf, &outputRemainder, theGlobalVariables)
-        ;
+        this->RemainderDivisionWithRespectToBasis(leftBuf, &outputRemainder, theGlobalVariables);
         if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
-          out
-          << "Basis size: " << this->theBasiS.size
-          << ".\n<br>Remaining cases current round: " << indexPairs.size;
+          out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
           reportOuter.Report(out.str());
         }
 //        std::cout << "<br>and sopoly divided by "
@@ -9701,10 +9633,8 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
     theFormat->thePolyMonOrder=this->theMonOrdeR;
   HashedList<MonomialP> totalMonCollection;
   std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
-  std::string underlineStyleHighlighted=
-  " style=\"textcolor=red; white-space: nowrap; border-bottom:1px solid black;\"";
-  std::string HighlightedStyle=
-  " style=\"textcolor=red; white-space: nowrap;\"";
+  std::string underlineStyleHighlighted=" style=\"textcolor=red; white-space: nowrap; border-bottom:1px solid black;\"";
+  std::string HighlightedStyle=" style=\"textcolor=red; white-space: nowrap;\"";
   totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement().theMonomials);
   for (int i=0; i<theRemainders.size; i++)
   { totalMonCollection.AddOnTopNoRepetition(theRemainders[i].theMonomials);
@@ -9748,8 +9678,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
         continue;
       }
       out << "<td>" << Polynomial<Rational>::GetBlendCoeffAndMon
-      (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j],
-       true, theFormat);
+      (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j], true, theFormat);
       out << "</td>";
     }
     out << "</tr></table>";
@@ -9757,19 +9686,14 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   }
   out << "<tr><td></td>";
   out << this->GetPolynomialStringSpacedMonomials
-  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, theFormat,
-   &this->intermediateHighlightedMons.GetElement()[0] );
+  (this->startingPoly.GetElement(), totalMonCollection, "", HighlightedStyle, theFormat, &this->intermediateHighlightedMons.GetElement()[0]);
   out << "</tr>";
   for (int i=0; i<theRemainders.size; i++)
   { out << "<tr><td>-</td></tr>";
-    out << "<tr><td></td>"  << this->GetPolynomialStringSpacedMonomials
-    (theSubtracands[i], totalMonCollection, underlineStyle,
-     underlineStyleHighlighted, theFormat)
+    out << "<tr><td></td>"  << this->GetPolynomialStringSpacedMonomials(theSubtracands[i], totalMonCollection, underlineStyle, underlineStyleHighlighted, theFormat)
     << "</tr>";
     out << "<tr><td></td>"
-    << this->GetPolynomialStringSpacedMonomials
-    (theRemainders[i], totalMonCollection, "", HighlightedStyle, theFormat,
-     &this->intermediateHighlightedMons.GetElement()[i+1])
+    << this->GetPolynomialStringSpacedMonomials(theRemainders[i], totalMonCollection, "", HighlightedStyle, theFormat, &this->intermediateHighlightedMons.GetElement()[i+1])
     << "</tr>";
   }
   out << "</table>";
@@ -9778,19 +9702,14 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
-(Polynomial<coefficient>& inputOutput,
- Polynomial<coefficient>* outputRemainder, GlobalVariables* theGlobalVariables,
- int basisIndexToIgnore
- )
+(Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder, GlobalVariables* theGlobalVariables, int basisIndexToIgnore)
 { //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
   MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
   if (&inputOutput==outputRemainder ||
       &inputOutput==&this->bufPoly || outputRemainder==&this->bufPoly)
   { std::cout
-    << "This is a programming error: the input, the output  "
-    << " and the buffer member object must be pairwise distinct when carrying out "
-    << " multi-polynomial division. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << "This is a programming error: the input, the output and the buffer member object must be pairwise distinct when carrying out "
+    << " multi-polynomial division. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   MemorySaving<Polynomial<Rational> > tempPoly;
@@ -9826,23 +9745,20 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
     highestMonCurrentDivHighestMonOther=currentRemainder[indexLeadingMonRemainder];
     while (i<this->theBasiS.size && !divisionOcurred)
     { MonomialP& highestMonBasis=this->leadingMons[i];
-      bool shouldDivide=(i==basisIndexToIgnore)
-      ? false :highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
+      bool shouldDivide=(i==basisIndexToIgnore) ? false :highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
       if (shouldDivide)
       { numIntermediateRemainders++;
         highestMonCurrentDivHighestMonOther/=highestMonBasis;
         if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents())
-        { std::cout << "This is a programming error: the pivot monomial in the polynomial "
-          << " division algorithm has negative exponent(s). This is not allowed. "
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        { std::cout << "This is a programming error: the pivot monomial in the polynomial division algorithm has negative exponent(s). "
+          << "This is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
         if (this->flagDoLogDivision)
         { this->intermediateHighestMonDivHighestMon.GetElement().
           AddOnTop(highestMonCurrentDivHighestMonOther);
           this->intermediateSelectedDivisors.GetElement().AddOnTop(i);
-          this->intermediateHighlightedMons.GetElement().SetSize
-          (this->intermediateHighlightedMons.GetElement().size+1);
+          this->intermediateHighlightedMons.GetElement().SetSize(this->intermediateHighlightedMons.GetElement().size+1);
           this->intermediateHighlightedMons.GetElement().LastObject()->size=0;
         }
         this->bufPoly=this->theBasiS[i];
@@ -9854,19 +9770,14 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
           this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
         if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
-          out
-          << "Total number of polynomial operations so far: " << this->NumberOfComputations;
+          out << "Total number of polynomial operations so far: " << this->NumberOfComputations;
           if (this->MaxNumComputations>0)
             out << ", with a limit of no more than " << this->MaxNumComputations << " operations.";
           out
-          << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders
-          << "\n<br> Highest mon of current remainder: "
-          << currentRemainder[indexLeadingMonRemainder].ToString() << ". "
-          << "\n<br>Current index we are dividing by: " << i+1
-          << " out of " << this->theBasiS.size
-          << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
-          << "\n<br>" << outputRemainder->size() << " monomials in output remainder."
-          ;
+          << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
+          << currentRemainder[indexLeadingMonRemainder].ToString() << ". \n<br>Current index we are dividing by: " << i+1
+          << " out of " << this->theBasiS.size << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
+          << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
           theReport.Report(out.str());
           //std::cout << out.str();
         }
@@ -9908,8 +9819,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
     if (!divisionOcurred)
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       if (this->flagDoLogDivision)
-        (*this->intermediateHighlightedMons.GetElement().LastObject()).
-        AddOnTop(highestMonCurrentDivHighestMonOther);
+        (*this->intermediateHighlightedMons.GetElement().LastObject()).AddOnTop(highestMonCurrentDivHighestMonOther);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
       this->NumberOfComputations++;
       /*if (this->NumberOfComputations>this->MaxNumComputations+1000)
@@ -9925,11 +9835,8 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
       }*/
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
-        out << "Number of intermediate remainders: " << numIntermediateRemainders
-        << "\n<br> Highest mon of current remainder is no longer reducible. "
-        << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
-        << "\n<br>" << outputRemainder->size() << " monomials in output remainder."
-        ;
+        out << "Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder is no longer reducible. "
+        << "\n<br>" << currentRemainder.size() << " monomials in current remainder.\n<br>" << outputRemainder->size() << " monomials in output remainder.";
         theReport.Report(out.str());
           //std::cout << out.str();
       }
@@ -9941,11 +9848,9 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis
- (GlobalVariables* theGlobalVariables)
+bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis(GlobalVariables* theGlobalVariables)
 { if (this->leadingMons.size!=this->theBasiS.size)
-  { std::cout << "This is a programming error: the number of leading monomials does not equal "
-    << " the number of polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
@@ -9996,12 +9901,10 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
 }
 
 template <class coefficient>
-void GroebnerBasisComputation <coefficient>::initForDivisionAlone
-(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation <coefficient>::initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
   if (inputOutpuT.size<=0)
-  { std::cout << "This is a programming error: I cannot transform an "
-    << "empty list to a Groebner basis. "
+  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -10012,12 +9915,9 @@ void GroebnerBasisComputation <coefficient>::initForDivisionAlone
   { Polynomial<Rational>& curPoly=theBasiS[i];
     int theIndex=curPoly.GetIndexMaxMonomial(this->theMonOrdeR);
     if (theIndex==-1)
-    { std::cout << "This is a programming error: initialization for polynomial division "
-      << " with respect to at least one zero polynomial. If this is a bad user input, "
-      << " it should be handled at an earlier level. "
-      << " Here is the current basis by which we need to divide. "
-      << this->theBasiS.ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: initialization for polynomial division with respect to at least one zero polynomial. "
+      << "If this is a bad user input, it should be handled at an earlier level. Here is the current basis by which we need to divide. "
+      << this->theBasiS.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     this->leadingMons[i]=curPoly[theIndex];
@@ -10027,12 +9927,10 @@ void GroebnerBasisComputation <coefficient>::initForDivisionAlone
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::initForGroebnerComputation
-(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
   if (inputOutpuT.size<=0)
-  { std::cout << "This is a programming error: I cannot transform an "
-    << "empty list to a Groebner basis. "
+  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -10061,9 +9959,8 @@ void GroebnerBasisComputation<coefficient>::ConsistencyCheck()
 
 template<class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomials
-(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
- const std::string& extraStyle, const std::string& extraHighlightStyle,
- FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
+(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
+ const std::string& extraHighlightStyle, FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
   bool wasFirst=true;
   bool isFirst;
@@ -10084,8 +9981,7 @@ std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMono
     out << "<td" << extraStyle << ">";
     if (useHighlightStyle)
       out << "<span style=\"color:red\">";
-    out << Polynomial<Rational>::GetBlendCoeffAndMon
-    (thePoly[theIndex], thePoly.theCoeffs[theIndex], !isFirst, theFormat);
+    out << Polynomial<Rational>::GetBlendCoeffAndMon(thePoly[theIndex], thePoly.theCoeffs[theIndex], !isFirst, theFormat);
     if (useHighlightStyle)
       out << "</span>";
     out << "</td>";

@@ -466,11 +466,8 @@ int main(int argc, char **argv)
 //  << "></script>";
 //  << " djConfig = \"parseOnLoad: true\"></script>";
 
-  std::cout << "<script src=\"" << theParser.DisplayPathServerBase
-  << "jsmath/easy/load.js\"></script> ";
-  std::cout << "\n"
-//  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
-  << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
+  std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
+  std::cout << "\n" << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
   //std::cout << IPAdressCaller;
 //  std::stringstream tempStreamX;
 //  static_html3(tempStreamX);

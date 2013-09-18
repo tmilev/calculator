@@ -140,12 +140,14 @@ bool CommandListFunctions::innerCompositeSequenceDereference(CommandList& theCom
 }
 
 bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeSequenceDereference");
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeEWAactOnPoly");
   if (input.children.size!=2)
     return false;
   Expression theEWAE=input[0];
   Expression theArgument=input[1];
   if (!theEWAE.IsListStartingWithAtom(theCommands.opElementWeylAlgebra()))
+    return false;
+  if (!theArgument.IsBuiltInType())
     return false;
   if (!theEWAE.MergeContexts(theEWAE, theArgument))
     return false;

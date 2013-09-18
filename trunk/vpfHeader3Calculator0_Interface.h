@@ -117,8 +117,7 @@ class Expression
   //The status of the following data has not been decided:
   int format;
 //////
-  typedef bool (*FunctionAddress)
-  (CommandList& theCommands, const Expression& input, Expression& output);
+  typedef bool (*FunctionAddress) (CommandList& theCommands, const Expression& input, Expression& output);
 //////
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
   { output << theMon.ToString();
@@ -227,9 +226,7 @@ class Expression
   bool AssignValue(const theType& inputValue, CommandList& owner);
   //note: the following always returns true:
   template <class theType>
-  bool AssignValueWithContext
-  (const theType& inputValue, const Expression& theContext, CommandList& owner);
-
+  bool AssignValueWithContext(const theType& inputValue, const Expression& theContext, CommandList& owner);
   template <class theType>
   bool AddChildValueOnTop(const theType& inputValue)
   { this->CheckInitialization();
@@ -238,8 +235,7 @@ class Expression
     return this->AddChildOnTop(tempE);
   }
   template <class theType>
-  bool AssignValueWithContextToChild
-  (int childIndex, const theType& inputValue, const Expression& theContext, CommandList& owner)
+  bool AssignValueWithContextToChild(int childIndex, const theType& inputValue, const Expression& theContext, CommandList& owner)
   { Expression tempE;
     tempE.AssignValueWithContext(inputValue, theContext, owner);
     return this->SetChilD(childIndex, tempE);
@@ -360,11 +356,7 @@ class Expression
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
-  { return
-    this->theBoss==other.theBoss &&
-    this->theData==other.theData &&
-    this->children.size==other.children.size
-    ;
+  { return this->theBoss==other.theBoss && this->theData==other.theData && this->children.size==other.children.size;
   }
 //  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
@@ -413,9 +405,8 @@ class Function
   { this->theFunction=0;
   }
   Function
-  (const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes,
-   const std::string& description, const std::string& inputExample, bool inputflagIsInner,
-   bool inputIsVisible=true, bool inputIsExperimental=false, bool inputflagMayActOnBoundVars=false)
+  (const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes, const std::string& description, const std::string& inputExample,
+   bool inputflagIsInner, bool inputIsVisible=true, bool inputIsExperimental=false, bool inputflagMayActOnBoundVars=false)
   { this->theFunction=functionPointer;
     this->theDescription=description;
     this->theExample=inputExample;
@@ -552,13 +543,10 @@ struct ExpressionTripleCrunchers
     this->theOp=other.theOp;
   }
   ExpressionTripleCrunchers():theOp(-1), leftType(-1), rightType(-1){}
-  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight)
-  : theOp(inputOp), leftType(inputLeft), rightType(inputRight)
+  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight): theOp(inputOp), leftType(inputLeft), rightType(inputRight)
   {}
   static unsigned int HashFunction(const ExpressionTripleCrunchers& input)
-  { return (unsigned int) input.leftType*SomeRandomPrimes[0]+
-    (unsigned int) input.rightType*SomeRandomPrimes[1]+
-    (unsigned int) input.theOp*SomeRandomPrimes[2];
+  { return (unsigned int) input.leftType*SomeRandomPrimes[0]+(unsigned int) input.rightType*SomeRandomPrimes[1]+(unsigned int) input.theOp*SomeRandomPrimes[2];
   }
 };
 

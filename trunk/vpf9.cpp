@@ -76,6 +76,28 @@ GlobalVariables::GlobalVariables()
   this->flagGaussianEliminationProgressReport=false;
 }
 
+void ProgressReport::Report(const std::string& theReport)
+{ if (this->pointerGV==0)
+    return;
+  this->pointerGV->theIndicatorVariables.ProgressReportStringS[currentLevel]=theReport;
+  this->pointerGV->MakeReport();
+}
+
+void ProgressReport::initFromGV(GlobalVariables* theGlobalVariables)
+{ this->pointerGV=theGlobalVariables;
+  if (this->pointerGV==0)
+    return;
+  currentLevel=this->pointerGV->theIndicatorVariables.ProgressReportStringS.size;
+  this->pointerGV->theIndicatorVariables.ProgressReportStringS.SetSize(this->pointerGV->theIndicatorVariables.ProgressReportStringS.size+1);
+  *this->pointerGV->theIndicatorVariables.ProgressReportStringS.LastObject()="";
+}
+
+ProgressReport::~ProgressReport()
+{ if (this->pointerGV==0)
+    return;
+  pointerGV->theIndicatorVariables.ProgressReportStringS.size--;
+}
+
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
 { ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
 }
@@ -111,10 +133,8 @@ std::string ProjectInformation::GetStackTraceReport()
 
 std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
 { std::stringstream out;
-  out << "<br>A partial stack trace follows (function calls not explicitly logged not included). "
-  << "<br>The first two stack trace lines may belong to the same function.";
-  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> "
-  << CGI::GetHtmlLinkFromProjectFileName(file) << "</td><td> " << line << "</td></tr>";
+  out << "<br>A partial stack trace follows (function calls not explicitly logged not included). <br>The first two stack trace lines may belong to the same function.";
+  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromProjectFileName(file) << "</td><td> " << line << "</td></tr>";
   out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
   out  << "</table>";
   return out.str();
@@ -207,9 +227,8 @@ void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, i
 
 void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
 { std::string tempS;
-  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension
-  << "); " << "\t" << lineTypeName << "2[" << lineCounter << "]= new Array(" << theDimension << "); "
-  << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
+  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2["
+  << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
   { CGI::outputStream >> tempS;
     std::cout << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
@@ -672,10 +691,10 @@ unsigned int Selection::HashFunction() const
   return result;
 }
 
+
 void Rational::operator=(const Polynomial<Rational>& other)
 { if (!other.IsAConstant(this))
-  { std::cout << "This is a programming error: attempting to assign"
-    << " non-constant polynomial to a Rational number is not allowed. "
+  { std::cout << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -1403,7 +1422,6 @@ void LargeInt::AssignInt(int x)
   this->value.AssignShiftedUInt( (unsigned int)x, 0);
 //  assert(this->CheckForConsistensy());
 }
-
 
 bool LargeInt::GetDivisors(List<int>& output, bool includeNegative)
 { if (this->value.theDigits.size>1)

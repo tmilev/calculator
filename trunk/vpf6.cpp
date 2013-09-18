@@ -126,12 +126,6 @@ int Expression::GetTypeOperation<charSSAlgMod<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<AlgebraicNumberOld>()const
-{ this->CheckInitialization();
-  return this->theBoss->opAlgNumber();
-}
-
-template < >
 int Expression::GetTypeOperation<CalculusFunctionPlot>()const
 { this->CheckInitialization();
   return this->theBoss->opCalculusPlot();

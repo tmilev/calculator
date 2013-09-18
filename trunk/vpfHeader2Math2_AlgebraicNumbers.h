@@ -10,6 +10,10 @@ class AlgebraicExtensionRationals;
 class AlgebraicClosureRationals;
 class AlgebraicNumber
 {
+  friend std::ostream& operator <<(std::ostream& output, const AlgebraicNumber& theNumber)
+  { output << theNumber.ToString();
+    return output;
+  }
   public:
   AlgebraicExtensionRationals* owner;
   VectorSparse<Rational> theElt;
@@ -26,12 +30,26 @@ class AlgebraicNumber
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
   }
+  bool IsRational(Rational* whichRational=0)const;
+  bool IsNegative()const
+  { Rational theRationalValue;
+    if (this->IsRational(&theRationalValue))
+      return theRationalValue.IsNegative();
+    return false;
+  }
   bool IsEqualToZero()const;
+  bool IsEqualToOne()const
+  { return (*this==1);
+  }
   void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
   void operator=(const Rational& other);
+  void operator=(int other)
+  { *this=(Rational) other;
+  }
   bool AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
-
+  Rational GetDenominatorRationalPart()const;
+  Rational GetNumeratorRationalPart()const;
   void SqrtMeDefault();
   static void ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
   void RadicalMeDefault(int theRad);
@@ -39,6 +57,12 @@ class AlgebraicNumber
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other)const;
   bool operator==(int other)const;
+  inline bool operator!=(const AlgebraicNumber& other)const
+  { return !(*this==other);
+  }
+  inline bool operator!=(int other)const
+  { return !(*this==other);
+  }
   void operator+=(const AlgebraicNumber& other);
   void operator-=(const AlgebraicNumber& other);
   void operator*=(const AlgebraicNumber& other);
@@ -105,172 +129,24 @@ public:
 
   bool CheckConsistency()const;
   AlgebraicClosureRationals():theGlobalVariables(0){}
-  int GetIndexIMustContainPair
-  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right)
-  ;
+  int GetIndexIMustContainPair(const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right);
   void GetLeftAndRightInjections
-  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
-   Matrix<Rational>*& outputInjectionFromLeft, Matrix<Rational>*& outputInjectionFromRight)
-   ;
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right, Matrix<Rational>*& outputInjectionFromLeft, Matrix<Rational>*& outputInjectionFromRight);
   void GetLeftAndRightInjectionsTensorForm
-  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right,
-   MatrixTensor<Rational>*& outputInjectionFromLeft, MatrixTensor<Rational>*& outputInjectionFromRight)
-   ;
+  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right, MatrixTensor<Rational>*& outputInjectionFromLeft,
+   MatrixTensor<Rational>*& outputInjectionFromRight);
   void AddPairWithInjection
-  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right,
-   const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
-   MatrixTensor<Rational>& inputInjectionFromRight)
-  ;
-
+  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right, const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
+   MatrixTensor<Rational>& inputInjectionFromRight);
   void MergeTwoExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0)
-  ;
+   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
   void MergeTwoQuadraticRadicalExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0)
-  ;
-  AlgebraicExtensionRationals* MergeTwoExtensionsAddOutputToMe
-  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right)
-  ;
+   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
+  AlgebraicExtensionRationals* MergeTwoExtensionsAddOutputToMe(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right);
   std::string ToString(FormatExpressions* theFormat=0)const;
   void AddMustBeNew(AlgebraicExtensionRationals& input);
-};
-
-class AlgebraicNumberRegistryOld;
-
-class AlgebraicNumberOld
-{
-  friend class List<AlgebraicNumberOld>;
-  friend class Matrix<AlgebraicNumberOld>;
-  AlgebraicNumberOld():rootIndex(-1),minPolyIndex(-1), theRegistry(0){}
-
-public:
-  //Format of minPoly.
-  //0. If the algebraic integer is in fact an honest integer
-  //"minPoly" is defined to be the empty polynomial. This is different from the mathematical
-  //minimal polynomial.
-  //1. If the number is an algebraic integer but not an integer, minPoly is defined
-  // to be the minimal polynomial of the number with the following assumptions:
-  //1.1. Minimal polynomials have relatively prime coefficients.
-  //1.2. The leading coefficient of the minimal polynomial is 1.
-  int rootIndex;
-  int minPolyIndex;
-  //  Polynomial<Rational> minPoly;
-  std::string DisplayString;
-  AlgebraicNumberRegistryOld* theRegistry;
-  friend std::ostream& operator << (std::ostream& output, const AlgebraicNumberOld& theRat)
-  { output << theRat.ToString();
-    return output;
-  }
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  static unsigned int HashFunction(const AlgebraicNumberOld& input)
-  { return input.minPolyIndex*SomeRandomPrimes[0]+input.rootIndex*SomeRandomPrimes[1];
-  }
-  AlgebraicNumberOld(AlgebraicNumberRegistryOld& owner) :rootIndex(-1), minPolyIndex(-1)
-  { this->theRegistry=&owner;
-  }
-  AlgebraicNumberOld(const AlgebraicNumberOld& other)
-  { this->operator=(other);
-  }
-  void operator=(const AlgebraicNumberOld& other)
-  { this->minPolyIndex=other.minPolyIndex;
-    this->rootIndex=other.rootIndex;
-    this->theRegistry=other.theRegistry;
-  }
-  void operator=(const Rational& other);
-  bool AssignOperation
-  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumberOld>& theOperationArguments)
-  ;
-  void ReduceMod
-(Polynomial<Rational>& toBeReduced, const List<Polynomial<Rational> >& thePolys,
- List<int>& theNs, Polynomial<Rational>& buffer
- )const
-  ;
-  bool operator+=(const AlgebraicNumberOld& other)
-  { MacroRegisterFunctionWithName("AlgebraicNumberOld::operator+=");
-    Polynomial<Rational> theOperation;
-    theOperation.MakeZero();
-    MonomialP tempM;
-    tempM.MakeOne(2);
-    tempM[0]=1;
-    theOperation.AddMonomial(tempM, 1);
-    tempM[0]=0;
-    tempM[1]=1;
-    theOperation.AddMonomial(tempM, 1);
-    List<AlgebraicNumberOld> tempList;
-    tempList.SetSize(2);
-    tempList[0]=*this;
-    tempList[1]=other;
-    return this->AssignOperation(theOperation, tempList);
-  }
-  bool operator*=(const AlgebraicNumberOld& other)
-  { MacroRegisterFunctionWithName("AlgebraicNumberOld::operator+=");
-    Polynomial<Rational> theOperation;
-    theOperation.MakeZero();
-    MonomialP tempM;
-    tempM.MakeOne(2);
-    tempM[0]=1;
-    tempM[1]=1;
-    theOperation.AddMonomial(tempM, 1);
-    List<AlgebraicNumberOld> tempList;
-    tempList.SetSize(2);
-    tempList[0]=*this;
-    tempList[1]=other;
-    return this->AssignOperation(theOperation, tempList);
-  }
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  bool AssignRadical(const LargeInt& undertheRadical, int theRadical);
-  const Polynomial<Rational>& GetMinPoly()const;
-  bool IsAConstant()
-  { return this->GetMinPoly().TotalDegree()==1;
-  }
-  bool operator==(const AlgebraicNumberOld& other)const
-  { if (this->theRegistry!=other.theRegistry)
-    { std::cout << "This is a programming error: comparing two algebraic numbers whose "
-      << " algebraic number registries are different."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    return this->rootIndex==other.rootIndex && this->minPolyIndex==other.minPolyIndex;
-  }
-  inline bool IsEqualToZero()const
-  { return false;
-  }
-  bool operator> (const AlgebraicNumberOld& other) const
-  { if (this->GetMinPoly()>other.GetMinPoly())
-      return true;
-    if (other.GetMinPoly()>this->GetMinPoly())
-      return false;
-    return this->rootIndex>other.rootIndex;
-  }
-};
-
-class AlgebraicNumberOriginOld
-{
-  public:
-  List<List<AlgebraicNumberOld> > theParents;
-  List<Polynomial<Rational> > theOriginOperation;
-};
-
-class AlgebraicNumberRegistryOld
-{
-  public:
-  HashedList<Polynomial<Rational> > theMinPolys;
-  List<AlgebraicNumberOriginOld> theOrigins;
-  int RegisterRational(const Rational& theRational)
-  { Polynomial<Rational> theMinP;
-    theMinP.MakeDegreeOne(1,0, 1, -theRational);
-    theMinP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (!theMinPolys.Contains(theMinP))
-    { this->theMinPolys.AddOnTop(theMinP);
-//      this->theOrigins.SetSize(this->theOrigins.size+1);
-      return this->theMinPolys.size-1;
-    }
-    return theMinPolys.GetIndex(theMinP);
-  }
 };
 
 class ElementZmodP
@@ -290,14 +166,12 @@ public:
   ElementZmodP(const ElementZmodP& other){this->operator=(other);}
   void CheckIamInitialized()
   { if (this->theModulo.IsEqualToZero())
-    { std::cout << "This is a programming error: computing with non-initialized "
-      << " element the ring Z mod p (the number p has not been initialized!)."
+    { std::cout << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)."
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
-  std::string ToString(FormatExpressions* theFormat=0)const
-  ;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   bool IsEqualToZero()const
   { return this->theValue.IsEqualToZero();
   }
@@ -317,10 +191,8 @@ public:
   }
   void CheckEqualModuli(const ElementZmodP& other)
   { if (this->theModulo!=other.theModulo)
-    { std::cout << "This is a programming error: "
-      << " attempting to make an operation with two elemetns of Z mod P with different moduli, "
-      << this->theModulo.ToString() << " and " << other.theModulo.ToString()
-      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
+      << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
@@ -380,9 +252,7 @@ public:
     }
   }
   void operator/=(const ElementZmodP& den);
-  void ScaleToIntegralMinHeightAndGetPoly
-  (const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output,
-   const LargeIntUnsigned& newModulo)
+  void ScaleToIntegralMinHeightAndGetPoly(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo)
   { Polynomial<Rational> rescaled;
     rescaled=input;
     rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();

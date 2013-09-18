@@ -40,15 +40,12 @@ public:
   int size;
   Object& operator[](int i)const
   { if (i<0 || i>=this->size)
-    { std::cout << "This is a programing error: attempting to access "
-      << " element of index " << i << " in ListReferences that has only "
-      << this->size << " elements. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programing error: attempting to access element of index " << i << " in ListReferences that has only "
+      << this->size << " elements. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     if (this->theReferences[i]==0)
-    { std::cout << "This is a programing error: element of index "
-      << i << " in ListReferences has zero pointer. This is not allowed. "
+    { std::cout << "This is a programing error: element of index " << i << " in ListReferences has zero pointer. This is not allowed. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -105,10 +102,8 @@ public:
 template<class Object>
 void ListReferences<Object>::AllocateElements(int newSize)
 { if (newSize<0)
-  { std::cout << "This is a programming error: requested to set "
-    << "negative size " << newSize << " of List of References. If a "
-    << " List is to be set empty, then one should call SetSize(0), rather "
-    << " than provide a negative argument to SetSize."
+  { std::cout << "This is a programming error: requested to set negative size " << newSize << " of List of References. If a "
+    << " List is to be set empty, then one should call SetSize(0), rather than provide a negative argument to SetSize."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

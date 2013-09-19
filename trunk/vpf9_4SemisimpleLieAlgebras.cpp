@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
+#include "vpfImplementationHeader2Math05_PolynomialComputations.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Implementation of semisimple subalgebra routines. ");
 
 template<>
@@ -69,7 +70,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
     for (int i=0; i<theSystem.size; i++)
       *logStream << "<br>" << theSystem[i].ToString() << " = 0 ";
   }
-  theComputation.SolveSerreLikeSystem(theSystem, theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(theSystem, 0, theGlobalVariables);
   if (!theComputation.flagSystemSolvedOverBaseField)
   { if (logStream!=0)
     { if (theComputation.flagSystemProvenToHaveNoSolution)
@@ -2284,7 +2285,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
-  theComputation.SolveSerreLikeSystem(this->transformedSystem, theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(this->transformedSystem, 0, theGlobalVariables);
 //  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;

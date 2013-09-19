@@ -3,27 +3,23 @@
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
+#include "vpfImplementationHeader2Math05_PolynomialComputations.h"
 
-static ProjectInformationInstance ProjectInfoVpf5_1cpp
-(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
+static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
 template<class Element>
 bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution,
- GlobalVariables* theGlobalVariables)
+(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution, GlobalVariables* theGlobalVariables)
 //this function return true if Ax=b>=0 has a solution with x>=0 and records a solution x at outputPoint
 //else returns false, where b is a given nonnegative column vector, A is an n by m matrix
 //and x is a column vector with m entries
 { MemorySaving<Matrix<Rational> > tempA;
   MemorySaving<Vector<Rational> > tempX;
-  Matrix<Rational>& tempMatA=
-  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matSimplexAlgorithm1.GetElement();
-  Vector<Rational>& matX=
-  theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
+  Matrix<Rational>& tempMatA=theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matSimplexAlgorithm1.GetElement();
+  Vector<Rational>& matX=theGlobalVariables==0 ? tempX.GetElement() : theGlobalVariables->vectConeCondition3.GetElement();
 
   MemorySaving<Selection> tempSel;
-  Selection& BaseVariables =
-  theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
+  Selection& BaseVariables =theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
   Rational GlobalGoal;
   GlobalGoal.MakeZero();
   assert (matA.NumRows== matb.NumRows);
@@ -77,8 +73,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       }
     if (EnteringVariable!=-1)
     { int LeavingVariableRow;  Rational MaxMovement;
-      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow
-      (MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
+      Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
       assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
@@ -171,9 +166,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 
 template <class coefficient>
 bool Vectors<coefficient>::ConesIntersect
-(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
- Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal,
- GlobalVariables* theGlobalVariables)
+(List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal, GlobalVariables* theGlobalVariables)
 { MemorySaving<Matrix<Rational> > tempA, tempB;
   Matrix<Rational>& matA=
   theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
@@ -209,8 +202,7 @@ bool Vectors<coefficient>::ConesIntersect
   if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
       (matA, matb, outputLinearCombo, theGlobalVariables))
   { if (outputSplittingNormal!=0)
-    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones
-      (StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
+    { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
       if (!tempBool)
       { std::cout << "This is an algorithmic/mathematical (hence also programming) error: "
         << "I get that two cones do not intersect, yet there exists no plane separating them. "
@@ -231,8 +223,7 @@ bool Vectors<coefficient>::ConesIntersect
 
 template <class coefficient>
 void SemisimpleLieAlgebra::GetCommonCentralizer
-(const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize,
- List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
+(const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
 { Matrix<Rational> tempAd, commonAd;
   for (int i=0; i<inputElementsToCentralize.size; i++)
   { this->GetAd(tempAd, inputElementsToCentralize[i]);
@@ -265,13 +256,11 @@ void SemisimpleLieAlgebra::GetAd
   }
 }
 
-bool CommandList::innerGCDOrLCM
-(CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
+bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
-  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  std::cout << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
@@ -287,11 +276,9 @@ bool CommandList::innerGCDOrLCM
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
-bool CommandList::GetListPolysVariableLabelsInLex
-(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
+bool CommandList::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
 { Expression theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments
-      (input, output, &theContextStart, 0, Serialization::innerPolynomial))
+  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, Serialization::innerPolynomial))
     return false;
   if (output.size<2)
     return false;
@@ -321,8 +308,7 @@ bool CommandList::GetListPolysVariableLabelsInLex
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
-bool CommandList::innerPolynomialDivisionRemainder
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerPolynomialDivisionRemainder(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
@@ -344,33 +330,23 @@ bool CommandList::innerPolynomialDivisionRemainder
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseGrLex
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPolynomialDivisionVerbose
-  (theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
+bool CommandList::innerPolynomialDivisionVerboseGrLex(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseGrLexRev
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPolynomialDivisionVerbose
-  (theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest);
+bool CommandList::innerPolynomialDivisionVerboseGrLexRev(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseLex
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPolynomialDivisionVerbose
-  (theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
+bool CommandList::innerPolynomialDivisionVerboseLex(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseLexRev
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPolynomialDivisionVerbose
-  (theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest);
+bool CommandList::innerPolynomialDivisionVerboseLexRev(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest);
 }
 
-bool CommandList::innerPolynomialDivisionVerbose
-(CommandList& theCommands, const Expression& input, Expression& output,
- List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
+bool CommandList::innerPolynomialDivisionVerbose(CommandList& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomialDivisionVerbose");
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
@@ -448,8 +424,7 @@ std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, Fo
   return out.str();
 }
 
-bool CommandList::innerGetLinksToSimpleLieAlgerbas
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, const Expression& input, Expression& output)
 { std::stringstream out, out2;
   out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
@@ -494,9 +469,8 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas
 }
 
 bool CommandList::innerPrintSSsubalgebras
-  (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute,
-   bool doAttemptToSolveSystems, bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals
-   )
+(CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
+ bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   std::stringstream out;
@@ -535,8 +509,7 @@ bool CommandList::innerPrintSSsubalgebras
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
     input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras
-    [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
-    ;
+    [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
@@ -575,8 +548,7 @@ bool CommandList::innerPrintSSsubalgebras
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerSSsubalgebras
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   SemisimpleLieAlgebra* ownerSSPointer;
@@ -643,8 +615,7 @@ bool MathRoutines::IsPrime(int theInt)
   return true;
 }
 
-bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.children.size!=3)
     return output.SetError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
@@ -696,8 +667,7 @@ bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expre
   return true;
 }
 
-bool CommandList::innerGroebner
-(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
+bool CommandList::innerGroebner(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
 { MacroRegisterFunctionWithName("CommandList::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
@@ -1382,7 +1352,7 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   theComputation.MaxNumComputations=1000;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
   std::cout << "<br>The context vars:<br>" << theContext.ToString();
-  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, theCommands.theGlobalVariableS);
+  theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
   out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theFormat);

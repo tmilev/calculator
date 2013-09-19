@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Main implementation file, part 1. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
@@ -122,8 +123,7 @@ RegisterFunctionCall::~RegisterFunctionCall()
 std::string ProjectInformation::GetStackTraceReport()
 { std::stringstream out;
   for (int i=this->CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(this->CustomStackTrace[i].fileName)
-    << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
+  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(this->CustomStackTrace[i].fileName) << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
     if (this->CustomStackTrace[i].functionName!="")
       out << "<td>" << this->CustomStackTrace[i].functionName << "</td>";
     out << "</tr>";
@@ -136,7 +136,7 @@ std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
   out << "<br>A partial stack trace follows (function calls not explicitly logged not included). <br>The first two stack trace lines may belong to the same function.";
   out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromProjectFileName(file) << "</td><td> " << line << "</td></tr>";
   out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
-  out  << "</table>";
+  out << "</table>";
   return out.str();
 }
 
@@ -220,9 +220,8 @@ void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 
 void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
 { std::cout << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
-  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); "
-  << "  \tvar " << lineTypeName << "2= new Array(" << numberLines << "); " << "  \tvar clr"
-  << lineTypeName << "= new Array("  << numberLines << "); ";
+  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array("
+  << numberLines << "); " << "  \tvar clr" << lineTypeName << "= new Array("  << numberLines << "); ";
 }
 
 void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)

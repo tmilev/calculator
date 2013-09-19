@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 

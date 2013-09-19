@@ -3,7 +3,8 @@
 #include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
-#include "vpfImplementationHeader2Math05_PolynomialComputations.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
@@ -204,12 +205,9 @@ bool Vectors<coefficient>::ConesIntersect
   { if (outputSplittingNormal!=0)
     { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
       if (!tempBool)
-      { std::cout << "This is an algorithmic/mathematical (hence also programming) error: "
-        << "I get that two cones do not intersect, yet there exists no plane separating them. "
-        << "Something is wrong with the implementation of the simplex algorithm. "
-        << "The input which manifested the problem was: <br>StrictCone: <br>" << StrictCone.ToString()
-        << "<br>Non-strict cone: <br>" << NonStrictCone.ToString()
-        << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      { std::cout << "This is an algorithmic/mathematical (hence also programming) error: I get that two cones do not intersect, yet there exists no plane separating them. "
+        << "Something is wrong with the implementation of the simplex algorithm. The input which manifested the problem was: <br>StrictCone: <br>"
+        << StrictCone.ToString() << "<br>Non-strict cone: <br>" << NonStrictCone.ToString() << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
     }
@@ -242,8 +240,7 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
 }
 
 template <class coefficient>
-void SemisimpleLieAlgebra::GetAd
-(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
+void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
 { int NumGenerators=this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);
   output.NullifyAll();
@@ -325,8 +322,7 @@ bool CommandList::innerPolynomialDivisionRemainder(CommandList& theCommands, con
 //  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
-  theGB.RemainderDivisionWithRespectToBasis
-  (thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
@@ -363,8 +359,7 @@ bool CommandList::innerPolynomialDivisionVerbose(CommandList& theCommands, const
 //  Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
   theGB.theMonOrdeR= theMonOrder;
-  theGB.RemainderDivisionWithRespectToBasis
-  (thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
+  theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
@@ -390,8 +385,7 @@ std::string CommandList::ToStringLinksToCalculatorDirectlyFromHD(const DynkinTyp
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/"
-    << theType.ToString() << "/" << theTitlePageFileNameNoPath << "\">"
+    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPath << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
@@ -671,7 +665,6 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
 { MacroRegisterFunctionWithName("CommandList::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
-  List<Polynomial<Rational> > outputGroebner, outputGroebner2;
   Expression theContext;
   if (input.children.size<3)
     return output.SetError("Function takes at least two arguments. ", theCommands);
@@ -694,8 +687,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     if (!MathRoutines::IsPrime(theMod))
       return output.SetError("Error: modulo not prime. ", theCommands);
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
-      (output, inputVector, &theContext, -1, Serialization::innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, Serialization::innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
@@ -718,11 +710,13 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     GroebnerBasisComputation<ElementZmodP> theGroebnerComputationZmodP;
   }
 //  int theNumVars=theContext.VariableImages.size;
+  List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner=inputVector;
   outputGroebner2=inputVector;
 //  std::cout << outputGroebner.ToString(&theFormat);
 
-  GroebnerBasisComputation<Rational> theGroebnerComputation;
+
+  GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   if (useGr)
   { if (!useRevLex)
     { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
@@ -740,9 +734,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
   }
   theGroebnerComputation.MaxNumComputations=upperBoundComputations;
-  bool success=
-  theGroebnerComputation.TransformToReducedGroebnerBasis
-  (outputGroebner, theCommands.theGlobalVariableS);
+  bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "Letter/expression ordrer: ";
   for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
@@ -752,21 +744,15 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for(int i=0; i<inputVector.size; i++)
-    out << "<br>"
-    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
+    out << "<br>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
   if (success)
-  { out << "<br>Minimal Groebner basis with "
-    << outputGroebner.size << " elements, computed using algorithm 1, "
-    << " using " << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
+  { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
+    << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
-      out << "<br> "
-      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner[i].ToString(&theFormat));
+      out << "<br> " << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner[i].ToString(&theFormat));
   } else
-  { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  "
-    << upperBoundComputations << " polynomial operations. ";
-    out << "<br>A partial result, a (non-Groebner) basis of the ideal with "
-    << theGroebnerComputation.theBasiS.size
-    << " elements follows ";
+  { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
+    out << "<br>A partial result, a (non-Groebner) basis of the ideal with " << theGroebnerComputation.theBasiS.size << " elements follows ";
     out << "<br>GroebnerLexUpperLimit{}(";
     for (int i=0; i<theGroebnerComputation.theBasiS.size; i++)
     { out << theGroebnerComputation.theBasiS[i].ToString(&theFormat);
@@ -786,8 +772,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerDeterminant
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerDeterminant(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDeterminant");
   Matrix<Rational> matRat;
   Matrix<RationalFunctionOld> matRF;
@@ -825,8 +810,7 @@ bool CommandList::innerDeterminant
     return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
 }
 
-bool CommandList::innerDeterminantPolynomial
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerDeterminantPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
@@ -838,10 +822,8 @@ bool CommandList::innerDeterminantPolynomial
     return output.SetError("<hr>Failed to compute determinant: matrix is non-square. ", theCommands);
   if (matPol.NumRows>8)
   { theCommands.Comments << "<hr>Failed to compute determinant: matrix is larger than 8 x 8, and your matrix had "
-    << matPol.NumRows << " rows. Note that you can compute determinant using the \\det "
-    << "function which does Gaussian elimination "
-    << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. "
-    ;
+    << matPol.NumRows << " rows. Note that you can compute determinant using the \\det function which does Gaussian elimination "
+    << " and will work for large rational matrices. This function is meant to be used with honest polynomial entries. ";
     return false;
   }
   Polynomial<Rational> outputPoly;
@@ -849,8 +831,7 @@ bool CommandList::innerDeterminantPolynomial
   return output.AssignValueWithContext(outputPoly, theContext, theCommands);
 }
 
-bool CommandList::innerMatrixRational
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerMatrixRational(CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> outputMat;
   if (input.IsOfType<Matrix<Rational> >())
   { output=input;
@@ -863,8 +844,7 @@ bool CommandList::innerMatrixRational
   return output.AssignValue(outputMat, theCommands);
 }
 
-bool CommandList::innerTranspose
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerTranspose(CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
   Matrix<Expression> theMat;
   output=input;
@@ -875,8 +855,7 @@ bool CommandList::innerTranspose
   return output.AssignMatrixExpressions(theMat, theCommands);
 }
 
-bool CommandList::innerMatrixRationalTensorForm
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerMatrixRationalTensorForm(CommandList& theCommands, const Expression& input, Expression& output)
 { MatrixTensor<Rational> outputMat;
   output=input;
   if (!output.IsOfType<Matrix<Rational> >())

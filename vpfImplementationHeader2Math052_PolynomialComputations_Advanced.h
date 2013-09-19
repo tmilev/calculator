@@ -80,8 +80,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
   while (this->basisCandidates.size>0)
   { bool addedNew=false;
     while (this->basisCandidates.size>0)
-    { this->RemainderDivisionWithRespectToBasis
-      (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
+    { this->RemainderDivisionWithRespectToBasis(*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
       this->basisCandidates.RemoveLastObject();
       if(this->AddRemainderToBasis(theGlobalVariables))
       { changed=true;
@@ -321,9 +320,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   out << theRemainders.size  << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
-  out << this->GetPolynomialStringSpacedMonomials
-  (this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, theFormat,
-   &this->remainderDivision.theMonomials) << "</td></tr>";
+  out << this->GetPolynomialStringSpacedMonomials(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, theFormat, &this->remainderDivision.theMonomials) << "</td></tr>";
   for (int i=0; i<this->theBasiS.size; i++)
   { //if (i==this->theBasiS.size-1)
 //    else
@@ -655,10 +652,28 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 }
 
 template <class coefficient>
-bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure)
+bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+{ int indexVar=-1;
+  if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
+  { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
+    << thePoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  PolynomialSubstitution<coefficient> theSub;
+  theSub.MakeIdSubstitution(indexVar+1);
+  theSub[indexVar].MakeMonomiaL(0, 1, 1);
+  Polynomial<coefficient> minPoly, polyVariableIsFirst=thePoly;
+  polyVariableIsFirst.Substitution(theSub);
+  assert(false);
+}
+
+template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
+(List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
 { int numVars=this->systemSolution.GetElement().size;
   MonomialP tempM;
   Polynomial<coefficient> tempP;
+  coefficient theCF;
   for (int i=0; i<inputSystem.size; i++)
   { tempP=inputSystem[i];
     for (int j=0; j<numVars; j++)
@@ -666,22 +681,22 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(List<Polynom
       int indexTempM=tempP.theMonomials.GetIndex(tempM);
       if (indexTempM==-1)
         continue;
-      coefficient tempCF=tempP.theCoeffs[indexTempM];
-      tempP.SubtractMonomial(tempM, tempCF);
+      theCF=tempP.theCoeffs[indexTempM];
+      tempP.SubtractMonomial(tempM, theCF);
       bool isGood=true;
       for (int k=0; k<tempP.size(); k++)
         if (!(tempP[k](j)==0))
         { isGood=false;
-          tempP.AddMonomial(tempM, tempCF);
+          tempP.AddMonomial(tempM, theCF);
           break;
         }
       if (!isGood)
         continue;
       outputSub.MakeIdSubstitution(numVars);
       outputSub[j]=tempP;
-      tempCF*=-1;
-      outputSub[j]/=tempCF;
-      coefficient theConst;
+      theCF*=-1;
+      outputSub[j]/=theCF;
+//      coefficient theConst;
 //      std::cout << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
 //      if (outputSub[j].IsAConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
@@ -690,8 +705,12 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(List<Polynom
     }
     int oneVarIndex;
     if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
-    {
-    }
+      if (theAlgebraicClosure!=0)
+        if (this->GetOneVarPolySolution(tempP, theCF, *theAlgebraicClosure, theGlobalVariables))
+        { outputSub.MakeIdSubstitution(numVars);
+          outputSub[oneVarIndex].MakeConst(theCF);
+          return true;
+        }
   }
   return false;
 }
@@ -758,7 +777,8 @@ bool GroebnerBasisComputation<coefficient>::IsContradictoryReducedSystem(const L
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
+void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
+(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables);
@@ -798,7 +818,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
       }
     }
     //std::cout << "<hr>input system: " << inputSystem.ToString();
-    changed=this->HasImpliedSubstitutions(inputSystem, theSub);
+    changed=this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
     if (changed)
     { theImpliedSubs.AddOnTop(theSub);
       for (int i=0; i<inputSystem.size; i++)
@@ -844,7 +864,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub first recursive call. " << inputSystem.ToString();
 
-  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
   { *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -872,7 +892,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
   for (int i=0; i<inputSystem.size; i++)
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
-  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theGlobalVariables);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
   { *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -910,7 +930,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
   this->systemSolution.GetElement().initFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
-  this->SolveSerreLikeSystemRecursively(workingSystem, theGlobalVariables);
+  this->SolveSerreLikeSystemRecursively(workingSystem, theAlgebraicClosure, theGlobalVariables);
   if (this->flagSystemSolvedOverBaseField)
   { if (this->solutionsFound.GetElement().CardinalitySelection!= this->solutionsFound.GetElement().MaxSize)
       for (int i=0; i<this->solutionsFound.GetElement().MaxSize; i++)
@@ -946,8 +966,7 @@ std::string GroebnerBasisComputation<coefficient>::ToStringSerreLikeSolution(For
 }
 
 template <class coefficient>
-void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex
-(int theIndex, const coefficient& theConst)
+void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   if (this->solutionsFound.GetElement().selected[theIndex])
   { std::cout << "This a programming error: attempting to set value to a variable whose value has already been computed. "

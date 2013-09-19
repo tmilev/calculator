@@ -150,8 +150,8 @@ int AlgebraicExtensionRationals::GetIndexFromRadicalSelection(const Selection& t
 }
 
 void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
-(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
- MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
+(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output, MatrixTensor<Rational>* injectionFromLeftParent,
+ MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!left.flagIsQuadraticRadicalExtensionRationals || !right.flagIsQuadraticRadicalExtensionRationals)
   { std::cout << "Thi is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "

@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
-#include "vpfImplementationHeader2Math05_PolynomialComputations.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Implementation of semisimple subalgebra routines. ");
 
 template<>
@@ -139,24 +139,21 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra)c
   return result;
 }
 
-std::string SemisimpleSubalgebras::GetPhysicalFileNameSubalgebra
-(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::GetPhysicalFileNameFKFTNilradicals
-(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebra
-(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
@@ -382,8 +379,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void SemisimpleSubalgebras::FindAllEmbeddings
-(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindAllEmbeddings");
   this->owneR=&theOwner;
   this->GetSSowner().FindSl2Subalgebras(theOwner, this->theSl2s, *theGlobalVariables);
@@ -1018,8 +1014,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theHsScaledToActByTwo[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
-    this->GetAmbientSS().LieBracket
-    (this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
+    this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
     //std::cout << "<hr>[" << this->theUnknownPosGens[i].ToString() << ", "
     //<< this->theUnknownNegGens[i].ToString() << "] = " << lieBracketMinusGoalValue.ToString();
     lieBracketMinusGoalValue-=goalValue;
@@ -1520,8 +1515,7 @@ Vector<Rational> NilradicalCandidate::GetNilradicalLinearCombi()const
   return theNilradLinCombi;
 }
 
-void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC
-(GlobalVariables* theGlobalVariables)
+void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("NilradicalCandidate::ComputeParabolicACextendsToParabolicAC");
   Vector<Rational> projectionRoot;
   WeylGroup& theWeyl=this->owner->owner->owneR->theWeyl;
@@ -1831,9 +1825,8 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(const 
 { MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
   for (int i=0; i<NonStrictConeNonPositiveScalar.size; i++)
     if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])<0)
-    { std::cout << "This is a programming error: the splitting normal " << this->ToString()
-      << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
-      << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: the splitting normal " << this->ToString() << " is supposed to have non-negative scalar product with the vector "
+      << NonStrictConeNonPositiveScalar[i].ToString() << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   Vector<Rational> oldThis=*this;
@@ -2161,8 +2154,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         this->HighestVectors.LastObject()->AddListOnTop(this->HighestVectors[this->HighestVectors.size-2]);
         for (int j=0; j<tempModules[i].size; j++)
         { this->HighestVectors.LastObject()->AddOnTop(tempModules[i][j]);
-          if (MonomialCollection<ChevalleyGenerator, Rational>::GetRankOfSpanOfElements(*this->HighestVectors.LastObject())<
-              this->HighestVectors.LastObject()->size)
+          if (MonomialCollection<ChevalleyGenerator, Rational>::GetRankOfSpanOfElements(*this->HighestVectors.LastObject())<this->HighestVectors.LastObject()->size)
             this->HighestVectors.LastObject()->RemoveLastObject();
         }
         this->HighestVectors.LastObject()->RemoveIndexSwapWithLast(0);
@@ -3473,8 +3465,7 @@ void rootSubalgebra::ToString
     List<int> hCharacteristics_S_subalgebras;
     //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
     hCharacteristics_S_subalgebras.size=0;
-    out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total "
-    << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
+    out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total " << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
     for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size; i++)
     { int theSl2index=sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i];
       const slTwoSubalgebra& theSl2 = (*sl2s)[theSl2index];
@@ -3503,8 +3494,7 @@ void rootSubalgebra::ToString
   }
   if (useHtml)
   { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
-    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2)"
-    << " simple coordinates w.r.t. g <br> ";
+    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2) simple coordinates w.r.t. g <br> ";
     std::stringstream //tempStream1,
     tempStream2, tempStream3;
     for(int i=0; i<this->HighestWeightsGmodK.size; i++)

@@ -506,6 +506,15 @@ public:
   void MakeLinPolyFromRootNoConstantTerm(const Vector<Rational> & r);
   void MakeLinPolyFromRootLastCoordConst(const Vector<Rational> & input);
   void MakePolyFromDirectionAndNormal(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction);
+  bool IsOneVariablePoly(int* whichVariable=0)const;
+  bool IsOneVariableNonConstPoly(int* whichVariable=0)const
+  { int tempInt;
+    if (whichVariable==0)
+      whichVariable=&tempInt;
+    if (!this->IsOneVariablePoly(whichVariable))
+      return false;
+    return *whichVariable!=-1;
+  }
   Polynomial<coefficient> GetOne()const
   { Polynomial<coefficient> result;
     result.MakeOne();
@@ -978,12 +987,7 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
-  static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input)
-  { if (input.size==1)
-      if (input[0].IsEqualToOne())
-        return true;
-    return false;
-  }
+  static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
   void RemainderDivisionWithRespectToBasis
   (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0, int basisIndexToIgnore=-1);
   static std::string GetCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
@@ -1345,90 +1349,6 @@ public:
   void Minus(){this->operator*=((Rational) -1); assert(this->checkConsistency());}
 };
 
-template <class Element>
-bool MonomialP::SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)const
-{ MacroRegisterFunctionWithName("MonomialP::Substitution");
-  output.MakeConst(1);
-  if (this->IsAConstant())
-    return true;
-  Polynomial<Element> tempPoly;
-//  std::cout << "<hr>subbing in monomial " << this->ToString();
-  for (int i=0; i<this->monBody.size; i++)
-    if (this->monBody[i]!=0)
-    { if(i>=TheSubstitution.size)
-      { std::cout << "This is a programming error. Attempting to carry out a substitution in the monomial"
-        << this->ToString() << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has "
-        << TheSubstitution.size << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
-      int theExponent=0;
-      if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i]<0)
-      { if (TheSubstitution[i].IsMonomialCoeffOne())
-        { MonomialP tempMon=TheSubstitution[i][0];
-          tempMon.RaiseToPower(this->monBody[i]);
-          output*=tempMon;
-          continue;
-        }
-        std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
-        << "which is not a small integer: it is " << this->monBody[i] << " instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        return false;
-      }
-      //TheSubstitution.TheObjects[i]->ComputeDebugString();
-      tempPoly=TheSubstitution[i];
-      tempPoly.RaiseToPower(theExponent, 1);
-//      tempPoly.ComputeDebugString();
-      output*=(tempPoly);
-//      output.ComputeDebugString();
-    }
-//  std::cout << " to get: " << output.ToString();
-  return true;
-}
-
-template <class Element>
-int Polynomial<Element>::GetMaxPowerOfVariableIndex(int VariableIndex)
-{ int result=0;
-  for (int i=0; i<this->size(); i++)
-  { result= MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
-    if (!(*this)[i](VariableIndex).IsSmallInteger())
-    { std::cout << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
-      << " have degrees that are not small integers. This neesd to be fixed! "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-  }
-  return result;
-}
-
-template <class Element>
-void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRingZero)const
-{ MonomialP tempM;
-  tempM.MakeOne();
-  int i=this->theMonomials.GetIndex(tempM);
-  if (i==-1)
-    output=theRingZero;
-  else
-    output=this->theCoeffs[i];
-}
-
-template <class coefficient>
-void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output, const coefficient& theRingZero)
-{ MonomialP tempM;
-  tempM.MakeEi(index);
-  int i=this->theMonomials.GetIndex(tempM);
-  if (i==-1)
-    output=theRingZero;
-  else
-    output=this->theCoeffs[i];
-}
-
-template <class coefficient>
-void Polynomial<coefficient>::AddConstant(const coefficient& theConst)
-{ MonomialP tempMon;
-  tempMon.MakeOne();
-  this->AddMonomial(tempMon, theConst);
-}
-
 template <class TemplateMonomial, class coefficient>
 inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==(int x)const
 { if (x==0)
@@ -1498,113 +1418,6 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std:
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   assert(numReadWords==0);
   return result;
-}
-
-template <class coefficient>
-void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
-{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::SetNumVariablesSubDeletedVarsByOne");
-  if (newNumVars>=this->GetMinNumVars())
-    return;
-  if (newNumVars<0)
-  { std::cout << "This is a programming error. Requesting negative number of variables (more precisely, " << newNumVars << ") is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  Polynomial<coefficient> Accum;
-  Accum.MakeZero();
-  Accum.SetExpectedSize(this->size());
-  MonomialP tempM;
-  for (int i=0; i<this->size(); i++)
-  { tempM.MakeOne(newNumVars);
-    for (int j=0; j<newNumVars; j++)
-      tempM[j]=(*this)[i](j);
-    Accum.AddMonomial(tempM, this->theCoeffs[i]);
-  }
-  this->operator=(Accum);
-}
-
-template <class coefficient>
-void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift)
-{ if (VarIndexShift<0)
-  { std::cout << "This is a programming error. Requesting negative variable shift (more precisely, " << VarIndexShift << ") not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  if (VarIndexShift==0)
-    return;
-  int oldNumVars=this->GetMinNumVars();
-  int newNumVars=oldNumVars+VarIndexShift;
-  Polynomial<coefficient> Accum;
-  Accum.MakeZero();
-  Accum.SetExpectedSize(this->size());
-  MonomialP tempM;
-  for (int i=0; i<this->size(); i++)
-  { tempM.MakeOne(newNumVars);
-    for (int j=0; j<oldNumVars; j++)
-      tempM[j+VarIndexShift]=(*this)[i](j);
-    Accum.AddMonomial(tempM, this->theCoeffs[i]);
-  }
-  *this=Accum;
-}
-
-template <class coefficient>
-Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix<coefficient>& input)//for univariate polynomials only
-{ MacroRegisterFunctionWithName("Polynomial::EvaluateUnivariatePoly");
-  Matrix<coefficient> output, tempElt, idMat;
-  idMat.MakeIdMatrix(input.NumCols);
-  output.MakeZeroMatrix(input.NumCols);
-  for (int i=0; i<this->size; i++)
-  { const MonomialP& currentMon=(*this)[i];
-    int numCycles=0;
-    if (!currentMon(0).IsSmallInteger(&numCycles) )
-    { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
-      << currentMon(0).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
-      << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    bool isPositive=numCycles>0;
-    if (numCycles<0)
-      numCycles=-numCycles;
-    tempElt=input;
-    MathRoutines::RaiseToPower(tempElt, numCycles, idMat);
-    if (!isPositive)
-      tempElt.Invert();
-    tempElt*=this->theCoeffs[i];
-    output+=(tempElt);
-  }
-  return output;
-}
-
-template <class coefficient>
-coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
-{ MacroRegisterFunctionWithName("Polynomial::Evaluate");
-  coefficient output=0;
-  for (int i=0; i<this->size(); i++)
-  { const MonomialP& currentMon=(*this)[i];
-    coefficient accum=this->theCoeffs[i];
-    coefficient tempElt;
-    for (int j=0; j<currentMon.GetMinNumVars(); j++)
-    { int numCycles;
-      if (!(*this)[i](j).IsSmallInteger(&numCycles) )
-      { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1
-        << "^{th} variable is raised to the power " << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
-        << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
-      bool isPositive=numCycles>0;
-      if (numCycles<0)
-        numCycles=-numCycles;
-      tempElt=input[j];
-      MathRoutines::RaiseToPower(tempElt, numCycles, (coefficient) 1);
-      if (!isPositive)
-        tempElt.Invert();
-      accum*=tempElt;
-    }
-    output+=accum;
-  }
-  return output;
 }
 
 template <class TemplateMonomial, class coefficient>
@@ -1692,21 +1505,6 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
   }
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff, int ExpectedNumVars)
-{ if (LetterIndex<0 )
-  { std::cout << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  int numVars=MathRoutines::Maximum(LetterIndex+1, ExpectedNumVars);
-  this->MakeZero();
-  MonomialP tempM;
-  tempM.MakeOne(numVars);
-  tempM[LetterIndex]=Power;
-  this->AddMonomial(tempM, Coeff);
-}
-
 template <class TemplateMonomial, class coefficient>
 void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff(const MonomialCollection<TemplateMonomial, coefficient>& other, coefficient* inputcf)
 { if (this==&other)
@@ -1749,140 +1547,14 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
   return false;
 }
 
-template <class Element>
-int Polynomial<Element>::GetIndexMaxMonomialLexicographicLastVariableStrongest()const
-{ return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
-}
-
-template <class Element>
-void Polynomial<Element>::ScaleToPositiveMonomials(MonomialP& outputScale)
-{ int numVars=this->GetMinNumVars();
-  outputScale.MakeOne(numVars);
-  for (int i=0; i<numVars; i++)
-    for (int j=0; j<this->size(); j++)
-      outputScale[i]=MathRoutines::Minimum(outputScale(i), (*this)[j](i));
-  outputScale.Invert();
-  this->MultiplyBy(outputScale, 1);
-}
-
-template <class Element>
-bool Polynomial<Element>::IsProportionalTo(const Polynomial<Element>& other, Element& TimesMeEqualsOther, const Element& theRingUnit)const
-{ if (this->size()!=other.size())
-    return false;
-  if (other.size()==0)
-  { TimesMeEqualsOther=theRingUnit;
-    return true;
-  }
-  const MonomialP& firstMon= (*this)[0];
-  int indexInOther=other.theMonomials.GetIndex(firstMon);
-  if (indexInOther==-1)
-    return false;
-  TimesMeEqualsOther=other.theCoeffs[indexInOther];
-  TimesMeEqualsOther/=this->theCoeffs[0];
-  Polynomial<Element> tempP;
-  tempP=*this;
-  tempP*=TimesMeEqualsOther;
-  tempP-=other;
-  return tempP.IsEqualToZero();
-}
-
-template <class Element>
-void Polynomial<Element>::DivideBy(const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
-{ MacroRegisterFunctionWithName("Polynomial_Element::DivideBy");
-  if (&outputRemainder==this || &outputQuotient==this || &outputRemainder==&inputDivisor || &outputQuotient==&inputDivisor)
-  { Polynomial<Element> newQuot, newRemaind;
-    this->DivideBy(inputDivisor, newQuot, newRemaind);
-    outputQuotient=newQuot;
-    outputRemainder=newRemaind;
-    return;
-  }
-  outputRemainder=(*this);
-  MonomialP scaleRemainder;
-  MonomialP scaleInput;
-  Polynomial tempInput;
-  tempInput=(inputDivisor);
-  outputRemainder.ScaleToPositiveMonomials(scaleRemainder);
-  tempInput.ScaleToPositiveMonomials(scaleInput);
-  int remainderMaxMonomial=outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-  int inputMaxMonomial= tempInput.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-  outputQuotient.MakeZero();
-  if (remainderMaxMonomial==-1)
-    return;
-  outputQuotient.SetExpectedSize(this->size());
-  MonomialP tempMon;
-  int numVars=MathRoutines::Maximum(this->GetMinNumVars(), inputDivisor.GetMinNumVars());
-  tempMon.MakeOne(numVars);
-  Polynomial<Element> tempP;
-  tempP.SetExpectedSize(this->size());
-  //if (this->flagAnErrorHasOccuredTimeToPanic)
-  //{ this->ComputeDebugString();
-   // tempInput.ComputeDebugString();
-  //}
-  assert(remainderMaxMonomial<outputRemainder.size());
-  if (inputMaxMonomial>=tempInput.size() || inputMaxMonomial<0)
-  { std::cout << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial
-    << " while the polynomial has " << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString()
-    << " by " << inputDivisor.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-//  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
-//  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
-//  << " and " << tempInput[inputMaxMonomial].ToString();
-  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest
-        (tempInput[inputMaxMonomial]))
-  { assert(remainderMaxMonomial<outputRemainder.size());
-    tempMon=outputRemainder[remainderMaxMonomial];
-    tempMon/=tempInput[inputMaxMonomial];
-    if (!tempMon.HasPositiveOrZeroExponents())
-      break;
-    Element tempCoeff=outputRemainder.theCoeffs[remainderMaxMonomial];
-    tempCoeff/=tempInput.theCoeffs[inputMaxMonomial] ;
-    outputQuotient.AddMonomial(tempMon, tempCoeff);
-    tempP=(tempInput);
-    tempP.MultiplyBy(tempMon, tempCoeff);
-/*    std::cout << "<br>hash function tempMon: " <<  tempMon.HashFunction();
-    std::cout << "<br>HashFunctions of outputRemainder monomials: ";
-    for (int i=0; i<outputRemainder.size; i++)
-      std::cout << outputRemainder[i].HashFunction() << ", ";
-    std::cout << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();*/
-    outputRemainder-=(tempP);
-//    std::cout << " to get " << outputRemainder.ToString();
-    remainderMaxMonomial= outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
-    if (remainderMaxMonomial==-1)
-      break;
-  }
-  scaleInput.Invert();
-  outputQuotient.MultiplyBy(scaleInput, 1);
-  outputQuotient.MultiplyBy(scaleRemainder, 1);
-  outputRemainder.MultiplyBy(scaleRemainder, 1);
-//  std::cout << "<br> " << this->ToString() << " divided by " << inputDivisor.ToString() << " yields " << outputQuotient.ToString()
-//  << " with remainder " << outputRemainder.ToString();
-
-}
-
-template <class Element>
-void Polynomial<Element>::DivideByConstant(const Element& r)
-{ for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Coefficient/=r;
-}
-
-template <class Element>
-void Polynomial<Element>::TimesInteger(int a)
-{ Rational r;
-  r.AssignInteger(a);
-  this->TimesRational(r);
-}
-
 template <class TemplateMonomial, class coefficient>
 template <class MonomialCollectionTemplate>
 void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows
-(List<MonomialCollectionTemplate>& theList, bool *IvemadeARowSwitch, HashedList<TemplateMonomial>* seedMonomials,
- Matrix<coefficient>* carbonCopyMatrix, List<MonomialCollectionTemplate>* carbonCopyList)
+(List<MonomialCollectionTemplate>& theList, bool *IvemadeARowSwitch, HashedList<TemplateMonomial>* seedMonomials, Matrix<coefficient>* carbonCopyMatrix, List<MonomialCollectionTemplate>* carbonCopyList)
 { MacroRegisterFunctionWithName("MonomialCollection::GaussianEliminationByRows");
   if (carbonCopyMatrix!=0)
     if (carbonCopyMatrix->NumRows!=theList.size)
-    { std::cout << "This is a programming error: carbon copy matrix has " << carbonCopyMatrix->NumRows
-      << " rows, while the gaussian-eliminated list has " << theList.size
+    { std::cout << "This is a programming error: carbon copy matrix has " << carbonCopyMatrix->NumRows << " rows, while the gaussian-eliminated list has " << theList.size
       << " elements; the two numbers must be the same!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -1985,9 +1657,8 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j>=this->size())
-  { std::cout << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function "
-    << inputMon.HashFunction(inputMon) << " returns index " << j << " but I have only " << this->size() << " elements "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
+    << " returns index " << j << " but I have only " << this->size() << " elements " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (j==-1)
@@ -2024,74 +1695,11 @@ int MonomialCollection<TemplateMonomial, coefficient>::SubtractMonomialNoCoeffCl
 }
 
 template <class TemplateMonomial, class coefficient>
-void ElementMonomialAlgebra<TemplateMonomial, coefficient>::RaiseToPower
-(int d, ElementMonomialAlgebra<TemplateMonomial, coefficient>& output, const coefficient& theRingUniT)
+void ElementMonomialAlgebra<TemplateMonomial, coefficient>::RaiseToPower(int d, ElementMonomialAlgebra<TemplateMonomial, coefficient>& output, const coefficient& theRingUniT)
 { ElementMonomialAlgebra<TemplateMonomial, coefficient> tempOne;
   tempOne.MakeConst(theRingUniT);
   output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);
-}
-
-template <class Element>
-Rational Polynomial<Element>::TotalDegree()const
-{ Rational result=0;
-  for (int i=0; i<this->size(); i++)
-    result=MathRoutines::Maximum((*this)[i].TotalDegree(), result);
-  return result;
-}
-
-template <class coefficient>
-bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ MacroRegisterFunctionWithName("Polynomial<coefficient>::Substitution");
-  if (TheSubstitution.size<this->GetMinNumVars())
-  { std::cout << "This is a programming error: attempting to carry out a substitution in a polynomial of "
-    << this->GetMinNumVars() << " variables while specifying the images of only " << TheSubstitution.size
-    << " of the variables. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  Polynomial<coefficient> Accum, TempPoly;
-//  int commentGrandMasterCheckWhenDone;
-//  this->GrandMasterConsistencyCheck();
-  for(int i=0; i<this->size(); i++)
-  { if(!(*this)[i].SubstitutioN(TheSubstitution, TempPoly, theRingUnit))
-      return false;
-    TempPoly*=this->theCoeffs[i];
-    Accum+=(TempPoly);
-    //std::cout << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
-  }
-  *this=(Accum);
-//  this->GrandMasterConsistencyCheck();
-  //std::cout << "<hr>to finally get<br>" << output.ToString(theFormat);
-  return true;
-}
-
-template <class Element>
-void Polynomial<Element>::MakeOne(int ExpectedNumVars)
-{ this->MakeConst(1, ExpectedNumVars);
-}
-
-template <class Element>
-void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex, const Element& coeff)
-{ this->MakeZero();
-  MonomialP tempM;
-  tempM.MakeEi(NonZeroIndex, 1, NVar);
-  this->AddMonomial(tempM, coeff);
-}
-
-template <class Element>
-void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const Element& coeff1, const Element& coeff2)
-{ this->MakeZero();
-  MonomialP tempM;
-  tempM.MakeEi(NonZeroIndex1);
-  this->AddMonomial(tempM, coeff1);
-  tempM.MakeEi(NonZeroIndex2);
-  this->AddMonomial(tempM, coeff2);
-}
-
-template <class Element>
-void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex, const Element& coeff1, const Element& ConstantTerm)
-{ this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
-  *this+=ConstantTerm;
 }
 
 template <class Element>
@@ -2172,9 +1780,7 @@ public:
   bool operator==(oneFracWithMultiplicitiesAndElongations& right);
   std::string ToString(int index, bool LatexFormat);
   void OneFracToStringBasisChange
-  (PartFractions& owner, int indexElongation, Matrix<LargeInt>& VarChange, bool UsingVarChange,
-   std::string& output, bool LatexFormat, int indexInFraction, int theDimension,
-   FormatExpressions& PolyFormatLocal);
+  (PartFractions& owner, int indexElongation, Matrix<LargeInt>& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension, FormatExpressions& PolyFormatLocal);
 };
 
 class LaTeXProcedures
@@ -2203,7 +1809,9 @@ public:
   void initPermutation(List<int>& disjointSubsets, int TotalNumElements);
   void incrementAndGetPermutation(List<int>& output);
   void GetPermutationLthElementIsTheImageofLthIndex(List<int>& output);
-  int GetNumPermutations() {return this->getTotalNumSubsets();}
+  int GetNumPermutations()
+  { return this->getTotalNumSubsets();
+  }
 };
 
 struct IndicatorWindowVariables
@@ -2455,7 +2063,7 @@ public:
     if (y1<0)
       y1=-y1;
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
-  };
+  }
   bool mouseMoveRedraw(int X, int Y, GlobalVariables& theGlobalVariables)
   { if (this->SelectedCircleMinus2noneMinus1Center==-2)
       return false;
@@ -2547,9 +2155,7 @@ public:
 //the following items are a part of a dirty hack i need to do for an
 //under-stress presentation. Please do not use them !
 //they need a rewrite!
-  std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName
-  (int theDimension)
-  ;
+  std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension);
   List<DrawingVariables> theFrames;
   DrawOperations theBuffer;
 ////////////////////////////////////////end of dirty hack
@@ -2822,9 +2428,8 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size!=inputBasis[0].size)
-  { std::cout << "This is a programming error: asking to get coordinates of vector of " << this->size
-    << " coordinates using a basis whose first vector has " << inputBasis[0].size << " coordinates."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: asking to get coordinates of vector of " << this->size << " coordinates using a basis whose first vector has "
+    << inputBasis[0].size << " coordinates." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   }
   bufferVectors.ReservE(inputBasis.size+1);
   bufferVectors.AddListOnTop(inputBasis);
@@ -3083,8 +2688,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       while (ExploringRow<this->NumRows)
       { if (theGlobalVariables!=0)
         { std::stringstream out;
-          out << "Pivotting on row of index " << row +1 << " with exploring row of index "
-          << ExploringRow+1 << "; total rows: " << this->NumRows;
+          out << "Pivotting on row of index " << row +1 << " with exploring row of index " << ExploringRow+1 << "; total rows: " << this->NumRows;
           theReport.Report(out.str());
         }
         Element& PivotElt=this->elements[row][col];
@@ -3774,36 +3378,6 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
       }
     }
   }
-}
-
-template<class coefficient>
-void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
-{ if(this->size()==0)
-    return;
-  int indexHighestMon=0;
-  LargeIntUnsigned tempInt1, tempInt2, accumNum, accumDen;
-  accumDen.MakeOne();
-  this->theCoeffs[0].GetNumerator(accumNum);
-  for (int i=0; i<this->size(); i++)
-  { if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon]))
-      indexHighestMon=i;
-    Rational& tempRat=this->theCoeffs[i];
-    tempRat.GetDenominator(tempInt1);
-    tempRat.GetNumerator(tempInt2);
-    LargeIntUnsigned::lcm(tempInt1, accumDen, accumDen);
-    LargeIntUnsigned::gcd(tempInt2, accumNum, accumNum);
-  }
-  Rational theMultiple;
-  theMultiple.MakeOne();
-  if (this->theCoeffs[indexHighestMon].IsNegative())
-    theMultiple.MakeMOne();
-  theMultiple.MultiplyByLargeIntUnsigned(accumDen);
-  Rational tempRat2;
-  LargeInt tempInt3;
-  tempInt3.AssignLargeIntUnsigned(accumNum);
-  tempRat2.AssignLargeInteger(tempInt3);
-  theMultiple.DivideBy(tempRat2);
-  *this*=(theMultiple);
 }
 
 template <typename Element>

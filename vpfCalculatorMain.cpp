@@ -78,14 +78,11 @@ void* RunTimer(void* ptr)
   }
   if (!ComputationComplete)
   { std::cout << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
-    std::cout << "<br>The maximum allowed run time for " << " the entire system is  "
-    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-    << " seconds (twice the amount of time allowed for calculator interpretation). "
-    << "<br>This safety limit is hard coded in this particular server. "
-    << "<br>However, if you install the calculator on your own machine you may "
-    << "<br>allow arbitrarily large execution time by modifying "
-    << " the variable theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit"
-    << " located in file " << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
+    std::cout << "<br>The maximum allowed run time for " << " the entire system is  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+    << " seconds (twice the amount of time allowed for calculator interpretation). <br>This safety limit is hard coded in this particular server. "
+    << "<br>However, if you install the calculator on your own machine you may <br>allow arbitrarily large execution time by modifying "
+    << " the variable theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit located in file "
+    << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
     std::cout.flush();
     assert(false);
   } else
@@ -515,6 +512,7 @@ int main(int argc, char **argv)
 //civilizedInput="\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); ";
   //civilizedInput="\\partial:=DifferentialOperator{}(\\partial, x); x:=PolynomialWithDO{}(\\partial, x); GenerateVectorSpaceClosedWRTLieBracket{}(50, x, \\partial);";
   //civilizedInput="GenerateVectorSpaceClosedWRTLieBracket{}(248, h_{1} );";
+  //civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}( x y -2 )";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

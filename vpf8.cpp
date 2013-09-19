@@ -2,6 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Second main implementation file. ");
 
 
@@ -16,12 +17,9 @@ void LargeIntUnsigned::AssignString(const std::string& input)
   { this->operator*=(10);
     int whichDigit=input[i]-'0';
     if (whichDigit>9 || whichDigit<0)
-    { std::cout << "This is a programming error: LargeIntUnsigned::AssignString"
-      << " called on the string " << input << " which does not consist entirely of digits. "
-      << " Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
-      << " internal use only. "
-      << " If you want to parse arbitrary unsafe expressions coming from the user, please use the "
-      << " big gun (a.k.a. CommandList). "
+    { std::cout << "This is a programming error: LargeIntUnsigned::AssignString" << " called on the string " << input
+      << " which does not consist entirely of digits. Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
+      << " internal use only. If you want to parse arbitrary unsafe expressions coming from the user, please use the big gun (a.k.a. CommandList). "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -62,8 +60,7 @@ void Rational::AssignString(const std::string& input)
     this->Minus();
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjective
-  (int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal)
+void GeneralizedVermaModuleCharacters::TransformToWeylProjective(int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal)
 { Matrix<Rational>  theOperatorExtended=this->theLinearOperatorsExtended[indexOperator];
   Vector<Rational>& theTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
@@ -76,21 +73,17 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   *outputNormal.LastObject()=-theConst;
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1
-(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1(GlobalVariables& theGlobalVariables)
 { this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   ProgressReport theReport1(&theGlobalVariables);
   ProgressReport theReport2(&theGlobalVariables);
   theReport1.Report(this->smallerAlgebraChamber.ToString(false, false));
-  this->log << "Directions for making the chamber basis changed: "
-  << this->GmodKNegWeightsBasisChanged.ToString()
-  << "\n Resulting chamber before projectivization:\n "
+  this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.ToString() << "\n Resulting chamber before projectivization:\n "
   << this->smallerAlgebraChamber.ToString(false, false);
   theReport2.Report(this->log.str());
 }
 
-void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
-(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   ConeComplex projectivizedChamberFinal;
   Cone currentProjectiveCone;
@@ -144,8 +137,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
   theReport.Report(out.str());
 }
 
-void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-  (const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
+void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
   output.MakeZero();
   for (int i=0; i<input.size(); i++)
@@ -172,8 +164,7 @@ Vector<Rational> ReflectionSubgroupWeylGroup::GetRho()
   return result;
 }
 
-void ReflectionSubgroupWeylGroup::GetMatrixOfElement
-(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
+void ReflectionSubgroupWeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
@@ -181,8 +172,7 @@ void ReflectionSubgroupWeylGroup::GetMatrixOfElement
   outputMatrix.Transpose();
 }
 
-void GeneralizedVermaModuleCharacters::initFromHomomorphism
-  (Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> tempRoots;
   this->WeylLarger=input.theRange().theWeyl;
   this->WeylSmaller=input.theDomain().theWeyl;
@@ -257,8 +247,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ToString();
   tempRoot= this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
-  theSubgroup.MakeParabolicFromSelectionSimpleRoots
-  (theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theWeYl, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
 
   this->theLinearOperators.SetSize(theSubgroup.size);
   this->theLinearOperatorsExtended.SetSize(theSubgroup.size);
@@ -2040,8 +2029,7 @@ void ConeComplex::GetNewVerticesAppend
 }
 
 bool ConeComplex::SplitChamber
-(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal,
- GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables)
 { Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
 /*  if (!myDyingCone.flagHasSufficientlyManyVertices)
   { this->flagChambersHaveTooFewVertices=true;
@@ -2128,8 +2116,7 @@ bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVa
   return true;
 }
 
-bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition
-(const Cone& newCone, GlobalVariables& theGlobalVariables)
+bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition(const Cone& newCone, GlobalVariables& theGlobalVariables)
 { Cone theConeSorted;
   theConeSorted=newCone;
   theConeSorted.Normals.QuickSortAscending();
@@ -2189,8 +2176,7 @@ void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
   }
 }
 
-void Cone::ComputeVerticesFromNormalsNoFakeVertices
-(GlobalVariables* theGlobalVariables)
+void Cone::ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables* theGlobalVariables)
 { this->Vertices.size=0;
   Selection theSel, nonPivotPoints;
   for (int i=0; i<this->Normals.size; i++)
@@ -2241,8 +2227,7 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
   }
 }
 
-bool Cone::EliminateFakeNormalsUsingVertices
-(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables)
+bool Cone::EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables)
 { if(this->Vertices.size==0)
   { this->flagIsTheZeroCone=true;
     this->Normals.SetSize(0);
@@ -2328,8 +2313,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
   return numAddedFakeWalls==0;
 }
 
-bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection
-  (Vector<Rational>& SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output)
+bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection(Vector<Rational>& SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output)
 { // we are looking for a normal n of the form n=t1*normal1+t2*normal2
   // such that  <t1*normal1+t2*normal2, slicingDirection>=0
   Rational normal1ScalarDirection=normal1.ScalarEuclidean(SlicingDirection);
@@ -2404,9 +2388,7 @@ bool Cone::CreateFromVertices(const Vectors<Rational>& inputVertices, GlobalVari
   return this->CreateFromNormals(this->Normals, theGlobalVariables);
 }
 
-bool Cone::CreateFromNormalS
-  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices,
-   GlobalVariables* theGlobalVariables)
+bool Cone::CreateFromNormalS(Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables* theGlobalVariables)
 { this->flagIsTheZeroCone=false;
   this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
@@ -2448,8 +2430,7 @@ bool Cone::CreateFromNormalS
   return this->EliminateFakeNormalsUsingVertices(theDim, numAddedFakeWalls, theGlobalVariables);
 }
 
-void ConeComplex::initFromCones
-(List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+void ConeComplex::initFromCones(List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { List<Vectors<Rational> > tempRoots;
   tempRoots.SetSize(NormalsOfCones.size);
   for (int i=0; i<NormalsOfCones.size; i++)
@@ -2486,8 +2467,7 @@ void ConeComplex::initFromCones
     }
 }
 
-std::string Cone::ToString
-(FormatExpressions* theFormat)const
+std::string Cone::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool PrepareMathReport= theFormat==0 ? false: theFormat->flagUseLatex;
   bool useHtml= theFormat==0 ? false: theFormat->flagUseHTML;
@@ -2530,7 +2510,7 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
   out << "Number of chambers: " << this->size;
   if (useHtml)
     out << "<br>";
-  out  << " Next non-refined chamber: " << this->indexLowestNonRefinedChamber+1;
+  out << " Next non-refined chamber: " << this->indexLowestNonRefinedChamber+1;
   if (useHtml)
     out << "<br>";
   out << "Normals of walls to refine by: ";
@@ -2560,17 +2540,13 @@ int RationalFunctionOld::GetMinNumVars()const
     case RationalFunctionOld::typePoly:
       return this->Numerator.GetElementConst().GetMinNumVars();
     case RationalFunctionOld::typeRationalFunction:
-      return MathRoutines::Maximum
-      (this->Numerator.GetElementConst().GetMinNumVars(),
-       this->Denominator.GetElementConst().GetMinNumVars());
+      return MathRoutines::Maximum(this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars());
     default: //this should never happen! maybe assert(false) here...
       return -1;
   }
 }
 
-void RationalFunctionOld::GetRelations
-  ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
-   )
+void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables)
 { if (theGenerators.size==0)
     return;
   List<Polynomial<Rational> > theGroebnerBasis;
@@ -2579,12 +2555,11 @@ void RationalFunctionOld::GetRelations
 
   int numStartingVariables=0;
   for (int i=0; i<theGenerators.size; i++)
-    numStartingVariables=MathRoutines::Maximum
-    (numStartingVariables, theGenerators[0].GetMinNumVars());
+    numStartingVariables=MathRoutines::Maximum(numStartingVariables, theGenerators[0].GetMinNumVars());
   Polynomial<Rational> tempP;
   FormatExpressions tempFormat;
   for (int i=0; i<numStartingGenerators; i++)
-  { Polynomial<Rational> & currentPoly=theGroebnerBasis.TheObjects[i];
+  { Polynomial<Rational>& currentPoly=theGroebnerBasis[i];
     currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
     tempP.MakeDegreeOne(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
     currentPoly+=tempP;
@@ -2592,8 +2567,7 @@ void RationalFunctionOld::GetRelations
   }
   GroebnerBasisComputation<Rational> theComputation;
   theComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
-  theComputation.TransformToReducedGroebnerBasis
-  (theGroebnerBasis, &theGlobalVariables);
+  theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis, &theGlobalVariables);
 //  std::cout << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { std::cout << theGroebnerBasis.TheObjects[i].ToString(false, tempFormat) << "<br>";

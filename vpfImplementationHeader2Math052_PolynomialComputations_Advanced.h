@@ -1,10 +1,10 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfImplementationHeaderWeylAlgebras_already_included
-#define vpfImplementationHeaderWeylAlgebras_already_included
+#ifndef vpfImplementationHeaderPolyComputationsAdvanced_already_included
+#define vpfImplementationHeaderPolyComputationsAdvanced_already_included
 
-#include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Header, implementation of polynomial computations. ");
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Header, implementation polynomial computations, more advanced. ");
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
@@ -688,6 +688,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions(List<Polynom
       //std::cout << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
       return true;
     }
+    int oneVarIndex;
+    if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
+    {
+    }
   }
   return false;
 }
@@ -746,6 +750,14 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoPolySystem(List<Po
 }
 
 template <class coefficient>
+bool GroebnerBasisComputation<coefficient>::IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input)
+{ if (input.size==1)
+    if (input[0].IsAConstant())
+      return true;
+  return false;
+}
+
+template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
@@ -762,7 +774,10 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
   theImpliedSubs.ReservE(inputSystem.size);
   while (changed)
   { this->NumberOfComputations=0;
+    //std::cout << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
     bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+    //if (!success)
+    //  std::cout << "<br>Failed to reduce system!";
     if (success)
     { //std::cout << "<hr>System groebner reduced successfully, output:";
       //for (int i=0; i <inputSystem.size; i++)
@@ -790,7 +805,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
         inputSystem[i].Substitution(theSub);
     }
   }
-//  std::cout << "<br>System has no more implied subs. ";
+  //std::cout << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
   if (theGlobalVariables!=0)
   { //std::cout << "<hr>The system solution candidate at recursion depth "
     //<< this->RecursionCounterSerreLikeSystem << ": "
@@ -815,6 +830,11 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively(List
   newComputation.flagSystemProvenToHaveSolution=false;
 
   int theVarIndex=this->GetPreferredSerreSystemSubIndex();
+  if (theVarIndex==-1)
+  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system equals: " << inputSystem.ToString()
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=0;
   //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";

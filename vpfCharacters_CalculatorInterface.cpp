@@ -294,8 +294,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
 }
 
 template <class coefficient>
-bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrreps
-(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
+bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrreps(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeMeIntoIrreps");
   this->CheckInitialization();
   this->OwnerGroup->CheckInitializationFDrepComputation();
@@ -303,48 +302,8 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrreps
   return this->DecomposeMeIntoIrrepsRecursive(outputIrrepMults, theGlobalVariables);
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
-{ if (input.NumCols!=input.NumRows)
-  { std::cout << "Programming error: requesting the minimimal polynomial of a non-square matrix. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  int theDim = input.NumCols;
-  this->MakeOne(1);
-  Vectors<coefficient> theBasis;
-  Vector<coefficient> theVectorPowers;
-  Vector<coefficient> firstDependentPower;
-  Polynomial<coefficient> currentFactor;
-  MonomialP tempM;
-  for(int col = 0; col < theDim; col++)
-  { theVectorPowers.MakeEi(theDim,col);
-    theBasis.SetSize(0);
-    theBasis.AddOnTop(theVectorPowers);
-    for(int i=0; i<theDim; i++)
-    { input.ActOnVectorColumn(*theBasis.LastObject(), theVectorPowers);
-      if(theBasis.LinSpanContainsVector(theVectorPowers))
-        break;
-      theBasis.AddOnTop(theVectorPowers);
-    }
-    theVectorPowers.GetCoordsInBasiS(theBasis, firstDependentPower);
-    currentFactor.SetExpectedSize(theBasis.size+1);
-    currentFactor.MakeZero();
-    for(int i=0; i<theBasis.size; i++)
-    { tempM.MakeEi(0, i, 1);
-      currentFactor.AddMonomial(tempM, -firstDependentPower[i]);
-    }
-    tempM.MakeEi(0, theBasis.size,1);
-    currentFactor.AddMonomial(tempM, 1);
-//    std::cout << "current factor: " << currentFactor.ToString();
-    *this = MathRoutines::lcm(*this, currentFactor);
-  }
-  this->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-}
-
 template <class Element>
-bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim
-(List<Vectors<Element> >& output)const
+bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<Element> >& output)const
 { int upperLimitComputations = 100000;
   output.SetSize(0);
   int found = 0;

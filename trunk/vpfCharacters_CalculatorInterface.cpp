@@ -614,8 +614,7 @@ void WeylGroup::ComputeIrreducibleRepresentations
 bool WeylGroupCalculatorFunctions::innerWeylRaiseToMaximallyDominant
 (CommandList& theCommands, const Expression& input, Expression& output, bool useOuter)
 { if (input.children.size<2)
-    return output.SetError
-    ("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
+    return output.SetError("Raising to maximally dominant takes at least 2 arguments, type and vector", theCommands);
   const Expression& theSSalgebraNode=input[1];
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, theSSalgebraNode, theSSalgebra))
@@ -674,8 +673,7 @@ bool WeylGroup::GenerateOuterOrbit
   return true;
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return output.SetError("innerWeylOrbit takes two arguments", theCommands);
   const Expression& theSSalgebraNode=input[1];
@@ -688,7 +686,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple
       return false;
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), Serialization::innerPolynomial))
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theType.GetRank(), Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract highest weight", theCommands);
   WeylGroup theWeyl;
   theWeyl.MakeFromDynkinType(theType);
@@ -763,7 +761,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
     return output.SetError("Error extracting Lie algebra.", theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), Serialization::innerPolynomial))
+  if (!theCommands.GetVectoR(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract highest weight", theCommands);
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (!useFundCoords)

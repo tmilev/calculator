@@ -653,7 +653,8 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables)
-{ int indexVar=-1;
+{ return false;
+  int indexVar=-1;
   if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
   { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
     << thePoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

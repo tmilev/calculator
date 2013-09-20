@@ -1487,6 +1487,7 @@ class Serialization
 public:
   static bool innerStore(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerLoad(CommandList& theCommands, const Expression& input, Expression& output);
+  template <class coefficient>
   static bool innerPolynomial(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs(CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner);
   static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs

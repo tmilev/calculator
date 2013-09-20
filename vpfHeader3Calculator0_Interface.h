@@ -256,8 +256,10 @@ class Expression
   void ContextGetFormatExpressions(FormatExpressions& output)const;
   int ContextGetNumContextVariables()const;
   static bool ContextMergeContexts(const Expression& leftContext, const Expression& rightContext, Expression& outputContext);
-  bool ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const;
-  bool ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const;
+  template <class coefficient>
+  bool ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<coefficient>& output)const;
+  template <class coefficient>
+  bool ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<coefficient>& output)const;
   bool ContextGetPolyAndEWASubFromSuperContext
   (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const;
   bool ContextGetPolyAndEWASubFromSuperContextNoFailure
@@ -497,6 +499,7 @@ public:
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
+  HashedListReferences<Polynomial<AlgebraicNumber> > thePolysOverANs;
   HashedListReferences<ElementWeylAlgebra<Rational> > theWeylAlgebraElements;
   HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedListReferences<RationalFunctionOld> theRFs;
@@ -1022,6 +1025,9 @@ public:
   }
   int opPoly()
   { return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
+  }
+  int opPolyOverANs()
+  { return this->operations.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
   int opRationalFunction()
   { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
@@ -1569,8 +1575,7 @@ bool Serialization::innerStoreMonCollection
   for (int i=input.size()-1; i>=0; i--)
   { const TemplateMonomial& currentMon=input[i];
     bool isNonConst=true;
-    if (!Serialization::innerStoreObject
-        (theCommands, currentMon, termE, theContext, &isNonConst))
+    if (!Serialization::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
     }
@@ -1616,8 +1621,7 @@ bool Serialization::DeSerializeMonCollection(CommandList& theCommands, const Exp
   TemplateMonomial tempM;
   for (int i=0; i<theSum.size(); i++)
   { if (!Serialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
-    { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString()
-      << " using monomial context " << finalContext.ToString() << ". </hr>";
+    { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
       return false;
     }
     output.AddMonomial(tempM, theSum.theCoeffs[i]);
@@ -1730,5 +1734,67 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
     output.AddChildOnTop(convertedE);
   }
   return true;
+}
+
+template <class coefficient>
+bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerPolynomial");
+  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+  std::cout << "Extracting poly from: " << input.ToString();
+  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
+  { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
+    << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
+    return false;
+  }
+  if (input.IsOfType<Polynomial<coefficient> >())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
+  { if (!input.ConvertToType<Polynomial<coefficient> >(output))
+    { std::cout << "This is a programming error: failed to convert coefficient to polynomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return true;
+  }
+  Expression theConverted, theComputed;
+  bool isGood=false;
+  if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
+  { isGood=true;
+    theComputed.reset(theCommands, input.children.size);
+    theComputed.AddChildOnTop(input[0]);
+    for (int i=1; i<input.children.size; i++)
+    { if (!Serialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
+        isGood=false;
+        break;
+      }
+      theComputed.AddChildOnTop(theConverted);
+    }
+  } else if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  { isGood=true;
+    if(!Serialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+      isGood=false;
+    }
+    theComputed.reset(theCommands, input.children.size);
+    theComputed.AddChildAtomOnTop(theCommands.opThePower());
+    theComputed.AddChildOnTop(theConverted);
+    theComputed.AddChildOnTop(input[2]);
+  }
+  if (isGood)
+  { BoundVariablesSubstitution tmpBVS;
+    bool tempBool;
+//    std::cout << "Evaluating: " << theComputed.ToString();
+    if (theCommands.EvaluateExpression(theComputed, output, tmpBVS, tempBool))
+      if (output.IsOfType<Polynomial<coefficient> >())
+        return true;
+  }
+  //Make Expression with context consisting of one monomial:
+  Polynomial<coefficient> JustAmonomial;
+  JustAmonomial.MakeMonomiaL(0,1,1);
+  Expression theContext;
+  theContext.MakeContextWithOnePolyVar(theCommands, input);
+  return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
 }
 #endif

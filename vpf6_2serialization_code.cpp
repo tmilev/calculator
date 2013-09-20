@@ -285,68 +285,6 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const DynkinSimpl
   return true;
 }
 
-template <class coefficient>
-bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerPolynomial");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-//  std::cout << "Extracting poly from: " << input.ToString();
-  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-  { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
-    << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
-    return false;
-  }
-  if (input.IsOfType<Polynomial<coefficient> >())
-  { output=input;
-    return true;
-  }
-  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
-  { if (!input.ConvertToType<Polynomial<coefficient> >(output))
-    { std::cout << "This is a programming error: failed to convert coefficient to polynomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    return true;
-  }
-  Expression theConverted, theComputed;
-  bool isGood=false;
-  if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
-  { isGood=true;
-    theComputed.reset(theCommands, input.children.size);
-    theComputed.AddChildOnTop(input[0]);
-    for (int i=1; i<input.children.size; i++)
-    { if (!Serialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
-      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
-        isGood=false;
-        break;
-      }
-      theComputed.AddChildOnTop(theConverted);
-    }
-  } else if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
-  { isGood=true;
-    if(!Serialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
-    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
-      isGood=false;
-    }
-    theComputed.reset(theCommands, input.children.size);
-    theComputed.AddChildAtomOnTop(theCommands.opThePower());
-    theComputed.AddChildOnTop(theConverted);
-    theComputed.AddChildOnTop(input[2]);
-  }
-  if (isGood)
-  { BoundVariablesSubstitution tmpBVS;
-    bool tempBool;
-//    std::cout << "Evaluating: " << theComputed.ToString();
-    if (theCommands.EvaluateExpression(theComputed, output, tmpBVS, tempBool))
-      if (output.IsOfType<Polynomial<coefficient> >())
-        return true;
-  }
-  //Make Expression with context consisting of one monomial:
-  Polynomial<coefficient> JustAmonomial;
-  JustAmonomial.MakeMonomiaL(0,1,1);
-  Expression theContext;
-  theContext.MakeContextWithOnePolyVar(theCommands, input);
-  return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
-}
-
 bool Serialization::innerSSLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
   return Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
@@ -388,8 +326,8 @@ bool Serialization::innerLoadDynkinType(CommandList& theCommands, const Expressi
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
-    { theCommands.Comments << "I failed to convert the coefficient " << theType.theCoeffs[i]
-      << " of " << currentMon.ToString(&theFormat) << " to a small integer";
+    { theCommands.Comments << "I failed to convert the coefficient " << theType.theCoeffs[i] << " of " << currentMon.ToString(&theFormat)
+      << " to a small integer";
       return false;
     }
     output.AddMonomial(simpleComponent, theMultiplicity);

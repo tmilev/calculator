@@ -12,8 +12,7 @@ SyntacticElement CommandList::GetEmptySyntacticElement()
 
 std::string SyntacticElement::ToString(CommandList& theBoss)const
 { std::stringstream out;
-  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError()
-  || this->controlIndex==theBoss.conSequence() ;
+  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError() || this->controlIndex==theBoss.conSequence();
   if (makeTable)
     out << "<table border=\"1\"><tr><td>";
   if (this->controlIndex<0)
@@ -123,6 +122,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("Double");
   this->AddOperationBuiltInType("AlgebraicNumberOld");
   this->AddOperationBuiltInType("PolynomialRational");
+  this->AddOperationBuiltInType("PolynomialOverANs");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
@@ -405,8 +405,7 @@ void CommandList::ParseFillDictionary(const std::string& input)
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
       } else
       { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
-        currentElement.theData.MakeAtom
-        (this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
+        currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
        // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
       }

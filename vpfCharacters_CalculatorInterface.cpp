@@ -740,8 +740,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple(CommandList& t
     << "$ & $"
     <<  weightEltString << "$ & $"
     << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
-    << "$\\\\\n<br>"
-    ;
+    << "$\\\\\n<br>";
     out << "</tr>";
   }
   latexReport << "\\end{longtable}";
@@ -749,9 +748,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple(CommandList& t
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylOrbit
-(CommandList& theCommands, const Expression& input, Expression& output,
- bool useFundCoords, bool useRho)
+bool WeylGroupCalculatorFunctions::innerWeylOrbit(CommandList& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho)
 { if (!input.IsListNElements(3))
     return output.SetError("innerWeylOrbit takes two arguments", theCommands);
   const Expression& theSSalgebraNode=input[1];
@@ -786,8 +783,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
   latexReport
   << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& "
   << "Hw minus wt. \\\\\n<br>";
-  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> "
-  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
+  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>Epsilon coords</td><td>Fundamental coords</td>";
   if (useRho)
     out << "<td>Corresponding b-singular vector candidate</td>";
   out << "</tr>";
@@ -849,8 +845,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!WeylGroupCalculatorFunctions::innerWeylGroupConjugacyClasses(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
@@ -877,8 +872,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint(CommandList& theCommands, const Expression& input, Expression& output)
 { DynkinType theType;
   if (!Serialization::innerLoadDynkinType(theCommands, input, theType))
     return output.SetError("Failed to extract Dynkin type from argument. ", theCommands);
@@ -903,13 +897,11 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitFundRho
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitFundRho(CommandList& theCommands, const Expression& input, Expression& output)
 { return WeylGroupCalculatorFunctions::innerWeylOrbit(theCommands, input, output, true, true);
 }
 
-bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitFund
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitFund(CommandList& theCommands, const Expression& input, Expression& output)
 { return WeylGroupCalculatorFunctions::innerWeylOrbit(theCommands, input, output, true, false);
 }
 

@@ -13,9 +13,7 @@ class WeylGroupVirtualRepresentation
   Vector<Rational> coefficientsIrreps;
   WeylGroupVirtualRepresentation():ownerGroup(0){}
   std::string ToString(FormatExpressions* theFormat)const;
-  void AssignWeylGroupRep
-  (const WeylGroupRepresentation<Rational>& input, GlobalVariables* theGlobalVariables=0)
-  ;
+  void AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& input, GlobalVariables* theGlobalVariables=0);
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }

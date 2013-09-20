@@ -2240,7 +2240,7 @@ bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& in
 { MacroRegisterFunctionWithName("CommandList::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   //std::cout << "here I am .";
-  if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial, input, output))
+  if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial<Rational>, input, output))
     return false;
   //std::cout << "here I am .";
   Expression theContext=output.GetContext();
@@ -2417,7 +2417,7 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
 //    return false;
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
-  if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, Serialization::innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, Serialization::innerPolynomial<Rational>))
   { theCommands.Comments << "<hr>Failed to extract polynomials from arguments of " << input.ToString();
     return false;
   }

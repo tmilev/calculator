@@ -1518,7 +1518,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial))
+  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial<Rational>))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -4733,7 +4733,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands,
       truncatedInput.children.RemoveLastObject();
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, Serialization::innerPolynomial))
+      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;

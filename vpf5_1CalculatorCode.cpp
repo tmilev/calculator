@@ -259,7 +259,7 @@ bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& inpu
   Expression theContext(theCommands);
   std::cout << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  std::cout << "<br>Input lispified: " << input.Lispify();
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: "
   << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
@@ -275,7 +275,7 @@ bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& inpu
 
 bool CommandList::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
 { Expression theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, Serialization::innerPolynomial))
+  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, Serialization::innerPolynomial<Rational>))
     return false;
   if (output.size<2)
     return false;
@@ -687,7 +687,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     if (!MathRoutines::IsPrime(theMod))
       return output.SetError("Error: modulo not prime. ", theCommands);
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, Serialization::innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
   //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
@@ -814,7 +814,7 @@ bool CommandList::innerDeterminantPolynomial(CommandList& theCommands, const Exp
 { MacroRegisterFunctionWithName("CommandList::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
-  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, Serialization::innerPolynomial))
+  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, Serialization::innerPolynomial<Rational>))
   { theCommands.Comments << "<hr>Failed to convert the input to matrix of polynomials. ";
     return false;
   }
@@ -1317,10 +1317,10 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
   if (input.IsListNElementsStartingWithAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
-  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial))
+  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial<Rational>))
       return output.SetError("Failed to extract list of polynomials. ", theCommands);
   } else
-    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial))
+    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial<Rational>))
       return output.SetError("Failed to extract list of polynomials. ", theCommands);
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic=thePolysRational;
@@ -1405,8 +1405,7 @@ bool CommandList::innerKillingForm(CommandList& theCommands, const Expression& i
     return false;
   Expression theContext=leftE.GetContext();
   ElementUniversalEnveloping<RationalFunctionOld> left, right;
-  if (!leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) ||
-      !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right))
+  if (!leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&left) || !rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >(&right))
     return false;
   if (left.IsEqualToZero() || right.IsEqualToZero())
     return output.AssignValue(0, theCommands);

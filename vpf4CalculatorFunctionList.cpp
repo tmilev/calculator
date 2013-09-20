@@ -9,9 +9,13 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
-  ("Polynomial", Serialization::innerPolynomial, "",
-   "Creates a polynomial expression. ",
+  ("Polynomial", Serialization::innerPolynomial<Rational>, "",
+   "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
+//  this->AddOperationInnerHandler
+//  ("PolynomialAlgebraic", Serialization::innerPolynomial<AlgebraicNumber>, "",
+//   "Creates a polynomial expression with algebraic number coefficients. ",
+//   "Polynomial{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
   this->AddOperationInnerHandler
   ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \

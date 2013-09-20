@@ -90,6 +90,12 @@ int Expression::GetTypeOperation<Polynomial<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Polynomial<AlgebraicNumber> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opPolyOverANs();
+}
+
+template < >
 int Expression::GetTypeOperation<ElementWeylAlgebra<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementWeylAlgebra();
@@ -233,6 +239,15 @@ Polynomial<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.thePolys
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Polynomial<AlgebraicNumber>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.thePolysOverANs
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -473,6 +488,17 @@ Polynomial<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
+Polynomial<AlgebraicNumber>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Polynomial<AlgebraicNumber> >())
+  { std::cout << "This is a programming error: expression not of required type Polynomial_Rational."
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
+}
+
+template < >
 ElementWeylAlgebra<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementWeylAlgebra<Rational> >())
   { std::cout << "This is a programming error: expression not of required type ElementWeylAlgebra."
@@ -639,6 +665,32 @@ WeylGroupVirtualRepresentation& Expression::GetValueNonConst()const
 
 //end Expression::GetValueNonConst specializations.
 //start Expression::ConvertToType specializations.
+template< >
+bool Expression::ConvertToType<Polynomial<AlgebraicNumber> >(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_Polynomial_AlgebraicNumber");
+  this->CheckInitialization();
+  if (this->IsOfType<Rational>())
+  { Polynomial<AlgebraicNumber> resultP;
+    resultP.MakeConst(this->GetValue<Rational>());
+    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<AlgebraicNumber>())
+  { Polynomial<AlgebraicNumber> resultP;
+    resultP.MakeConst(this->GetValue<AlgebraicNumber>());
+    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<Polynomial<Rational> >())
+  { Polynomial<AlgebraicNumber> resultP;
+    resultP=this->GetValue<Polynomial<Rational> >();
+    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<Polynomial<AlgebraicNumber> >())
+  { output=*this;
+    return true;
+  }
+  return false;
+}
+
 template< >
 bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
@@ -873,14 +925,13 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     return true;
   inputOutputMinContext=newContext;
   if (this->IsOfType<Rational>())
-  { //std::cout << "HERE i am!";
-    this->SetChilD(1, inputOutputMinContext);
-    return true;
-  }
+    return this->SetChilD(1, inputOutputMinContext);
+  if (this->IsOfType<AlgebraicNumber>())
+    return this->SetChilD(1, inputOutputMinContext);
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
   { ElementUniversalEnveloping<RationalFunctionOld> newUE=this->GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
     PolynomialSubstitution<Rational> subPolyPart;
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
     newUE.Substitution(subPolyPart);
     return this->AssignValueWithContext(newUE, inputOutputMinContext, *this->theBoss);
   }
@@ -889,7 +940,17 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     //std::cout << "<br>Subbing " << polySub.ToString() << " in "
     PolynomialSubstitution<Rational> subPolyPart;
     //<< newPoly.ToString();
-    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
+    if (!newPoly.Substitution(subPolyPart))
+      return false;
+    return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
+  }
+  if (this->IsOfType<Polynomial<AlgebraicNumber> >())
+  { Polynomial<AlgebraicNumber> newPoly=this->GetValue<Polynomial<AlgebraicNumber> >();
+    //std::cout << "<br>Subbing " << polySub.ToString() << " in "
+    PolynomialSubstitution<AlgebraicNumber> subPolyPart;
+    //<< newPoly.ToString();
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure<AlgebraicNumber>(newContext, subPolyPart);
     if (!newPoly.Substitution(subPolyPart))
       return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
@@ -3428,8 +3489,9 @@ Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->IsBuiltInType())
     return (*this)[1];
-  std::cout << "This is a programming error: GetContext called on an Expression that is not a built-in data type, namely,  "
-  << "on expression " << this->ToString() << " (lisp: " << this->ToStringFull() << ")" << ". Here's  a stack trace. "
+  std::cout << "This is a programming error: GetContext called on an Expression that is not a built-in data type.  "
+  << " I can't display the expression as this may cause ``infinite'' recursion if the error is caused by the ToString method. Here is however the lisp form "
+  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. "
   << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   assert(false);
   Expression output;
@@ -3511,6 +3573,12 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement()) << ")";
 //    out << "[" << this->GetContext().ToString() << "]";
     result=true;
+  } else if (this->IsOfType<Polynomial<AlgebraicNumber> >())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    out << "PolynomialAlgebraicNumbers{}(";
+    out << this->GetValue<Polynomial<AlgebraicNumber> >().ToString(&contextFormat.GetElement()) << ")";
+    out << "[" << this->GetContext().ToString() << "]";
+    result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "RationalFunction{}("
@@ -3533,7 +3601,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML=false;
     if (this->GetValue<MatrixTensor<Rational> >().GetMaxNumColsNumRows()<20)
       out << "MatrixRationalsTensorForm{}("
-      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatForm(&contextFormat.GetElement()) << ")";
+      << this->GetValue<MatrixTensor<Rational> > ().ToStringMatForm(&contextFormat.GetElement())
+      << ")";
     else
       out << this->GetValue<MatrixTensor<Rational> >().ToString();
     result=true;
@@ -3706,30 +3775,32 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opChoose(),3) )
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
-  { std::string firstE= (*this)[1].ToString(theFormat);
-    std::string secondE=(*this)[2].ToString(theFormat);
-    bool firstNeedsBrackets=
-    (!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide())))
-    && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
-    bool secondNeedsBrackets=true;
-    if ((*this)[2].IsOfType<Rational>())
-      secondNeedsBrackets=(*this)[2].GetValue<Rational>().IsNonPositive();
-    if (firstE=="-1" )
-      firstE="-";
-    if (firstE=="1")
-      firstE="";
-    if (firstNeedsBrackets)
-      out << "(" << firstE << ")";
+  { std::string secondE=(*this)[2].ToString(theFormat);
+    if ((*this)[1].IsAtoM(this->theBoss->opSqrt()))
+      out << "\\sqrt{" << secondE << "}";
     else
-      out << firstE;
-    if (this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="")
-      out << "*";
-    else
-      out << " ";
-    if (secondNeedsBrackets)
-      out << "(" << secondE << ")";
-    else
-      out << secondE;
+    { std::string firstE= (*this)[1].ToString(theFormat);
+      bool firstNeedsBrackets=(!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()))) && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
+      bool secondNeedsBrackets=true;
+      if ((*this)[2].IsOfType<Rational>())
+        secondNeedsBrackets=(*this)[2].GetValue<Rational>().IsNonPositive();
+      if (firstE=="-1" )
+        firstE="-";
+      if (firstE=="1")
+        firstE="";
+      if (firstNeedsBrackets)
+        out << "(" << firstE << ")";
+      else
+        out << firstE;
+      if (this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="")
+        out << "*";
+      else
+        out << " ";
+      if (secondNeedsBrackets)
+        out << "(" << secondE << ")";
+      else
+        out << secondE;
+    }
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=(*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
@@ -4547,7 +4618,8 @@ void ObjectContainer::reset()
   this->theLittelmannOperators.Clear();
 }
 
-bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
+template <class coefficient>
+bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<coefficient>& output)const
 { bool mustBeTrue= this->ContextGetPolySubFromSuperContext(largerContext, output);
   if (!mustBeTrue)
   { std::cout << "This is a programming error: I was not able to extract a polynomial substitution from smaller context "
@@ -4558,7 +4630,8 @@ bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& la
   return mustBeTrue;
 }
 
-bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
+template <class coefficient>
+bool Expression::ContextGetPolySubFromSuperContext(const Expression& largerContext, PolynomialSubstitution<coefficient>& output)const
 { Expression polyVarsElargerContext=largerContext.ContextGetPolynomialVariables();
   Expression polyVarsEsmallContext=this->ContextGetPolynomialVariables();
   output.SetSize(polyVarsElargerContext.children.size-1);

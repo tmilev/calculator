@@ -12,10 +12,10 @@ void CommandList::initPredefinedInnerFunctions()
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
-//  this->AddOperationInnerHandler
-//  ("PolynomialAlgebraic", Serialization::innerPolynomial<AlgebraicNumber>, "",
-//   "Creates a polynomial expression with algebraic number coefficients. ",
-//   "Polynomial{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
+  this->AddOperationInnerHandler
+  ("PolynomialAlgebraicNumbers", Serialization::innerPolynomial<AlgebraicNumber>, "",
+   "Creates a polynomial expression with algebraic number coefficients. ",
+   "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
   this->AddOperationInnerHandler
   ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
@@ -248,20 +248,20 @@ void CommandList::initPredefinedInnerFunctions()
    "ModP{}(7, 3)", true, false)
    ;
   this->AddOperationInnerHandler
-("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
+  ("AdCommonEigenspace", &this->innerAdCommonEigenSpaces, "",
    "Computes common eigenspace of the adjoint action of semisimple Lie algebra elemets inside the \
    semisimple Lie algebra. ",
    "AdCommonEigenspace{}(F_4, -5 (g_{9})+3 (g_{13})+5 (g_{16})+4 (g_{10}), g_{14}+g_{22}+g_{20})")
    ;
   this->AddOperationInnerHandler
-("AttemptExtendingEtoHEFwithHinCartan", &this->innerAttemptExtendingEtoHEFwithHinCartan, "",
+  ("AttemptExtendingEtoHEFwithHinCartan", &this->innerAttemptExtendingEtoHEFwithHinCartan, "",
    "Attempts to embed an element E into an sl(2)-triple over the rationals, such that the element H is in the \
    ambient Cartan algebra. ",
    "AttemptExtendingEtoHEFwithHinCartan{}(F_4, g_1+2g_2+3g_3+4g_4)")
    ;
 
   this->AddOperationInnerHandler
-("gcdPoly", &this->fGCD, "",
+  ("gcdPoly", &this->fGCD, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -276,7 +276,7 @@ void CommandList::initPredefinedInnerFunctions()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddOperationInnerHandler
-("lcmPoly", &this->innerLCM, "",
+  ("lcmPoly", &this->innerLCM, "",
    "Least common multiple of two polynomials.\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -309,7 +309,7 @@ void CommandList::initPredefinedInnerFunctions()
    "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
-("PolyDivStringGrLexRev", &this->innerPolynomialDivisionVerboseGrLexRev, "",
+  ("PolyDivStringGrLexRev", &this->innerPolynomialDivisionVerboseGrLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using total degree (graded) order with \
    equal total degrees compared by lex order with reversed order of the letters, \
@@ -317,13 +317,13 @@ void CommandList::initPredefinedInnerFunctions()
    "PolyDivStringGrLexRev{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
-("PolyDivStringLex", &this->innerPolynomialDivisionVerboseLex, "",
+  ("PolyDivStringLex", &this->innerPolynomialDivisionVerboseLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order, for example, x^2 y^4 > x y^1000 > x y^2. ",
    "PolyDivStringLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
    ;
   this->AddOperationInnerHandler
-("PolyDivStringLexRev", &this->innerPolynomialDivisionVerboseLexRev, "",
+  ("PolyDivStringLexRev", &this->innerPolynomialDivisionVerboseLexRev, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the lex order with reversed order of variables, \
    for example, y^2 > x^1000 y > x y. ",
@@ -343,7 +343,7 @@ this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta,
    ",
    "drawPolar{}(1+sin {} t, 0, 6.283)")
    ;
-this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
+  this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
@@ -354,7 +354,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    ",
    "plot2D{}(\\sin{}x+cos{}x, 0, 5)")
    ;
-this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
+  this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",
    "\nA:=3/2- ((-3/4+1/4 (x))^{2});\nB:= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)")
@@ -1050,6 +1050,43 @@ void CommandList::initPredefinedStandardOperations()
    "Adds a polynomial to a polynomial. ",
    "x:=1+Polynomial{}\\lambda; x+x"
    , true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opPolyOverANs(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(\\sqrt{12}x)+PolynomialAlgebraicNumbers(-\\sqrt{3}x)"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opAlgNumber(), this->opPolyOverANs(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(\\sqrt{12})+PolynomialAlgebraicNumbers(\\sqrt{3}x)"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opAlgNumber(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(\\sqrt{12}x)+PolynomialAlgebraicNumbers(-\\sqrt{3})"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opRational(), this->opPolyOverANs(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "1+PolynomialAlgebraicNumbers(\\sqrt{12}x)"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opRational(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(\\sqrt{12}x)+1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPoly(), this->opAlgNumber(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(x)+\\sqrt{2}"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opAlgNumber(), this->opPoly(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "\\sqrt{2}+PolynomialAlgebraicNumbers(x)"
+   , true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
@@ -1179,6 +1216,32 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
    "Multiplies two polynomials. ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opPolyOverANs(), this->opPolyOverANs(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*PolynomialAlgebraicNumbers{}(\\sqrt{6}y);", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opPolyOverANs(), this->opAlgNumber(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*\\sqrt{6};", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opAlgNumber(), this->opPolyOverANs(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "\\sqrt{6}*PolynomialAlgebraicNumbers{}(\\sqrt{3}x);", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opRational(), this->opPolyOverANs(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers{}(\\sqrt{3}x)*2;", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opPoly(), this->opAlgNumber(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "Polynomial{}(x)*\\sqrt{2};", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly, this->opAlgNumber(), this->opPoly(),
+   "Multiplies two polynomials over the algebraic numbers. ",
+   "\\sqrt{3}*PolynomialAlgebraicNumbers{}(x);", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatrixRational,
    this->opMatRat(), this->opMatRat(),
@@ -1236,12 +1299,12 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
    "Multiplies rational number by an element universal enveloping algebra.",
    "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
-[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
+   \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Multiplies elment Universal enveloping by element universal enveloping algebra.",
    "g_{{i}}:= getChevalleyGenerator{}(F_1, i); h_{{i}}:=getCartanGenerator{}(F_1, i) ; \
-[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
+   \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),

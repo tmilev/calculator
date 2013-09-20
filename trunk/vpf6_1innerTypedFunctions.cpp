@@ -364,6 +364,12 @@ bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly(CommandLi
   return CommandListInnerTypedFunctions::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
 }
 
+bool CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyAlgNumPolyByAlgNumPoly");
+  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  return CommandListInnerTypedFunctions::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
+}
+
 bool CommandListInnerTypedFunctions::innerAddUEToAny(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddUEToAny");
   //std::cout << "<br>adding ue to any";
@@ -446,6 +452,11 @@ bool CommandListInnerTypedFunctions::innerAddEltTensorToEltTensor(CommandList& t
 bool CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddRatOrPolyToRatOrPoly");
   return CommandListInnerTypedFunctions::innerAddTypeToType<Polynomial<Rational> >(theCommands, input, output);
+}
+
+bool CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly");
+  return CommandListInnerTypedFunctions::innerAddTypeToType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CommandListInnerTypedFunctions::innerAddPlotToPlot(CommandList& theCommands, const Expression& input, Expression& output)

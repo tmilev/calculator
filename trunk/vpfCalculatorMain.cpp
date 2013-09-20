@@ -513,6 +513,7 @@ int main(int argc, char **argv)
   //civilizedInput="\\partial:=DifferentialOperator{}(\\partial, x); x:=PolynomialWithDO{}(\\partial, x); GenerateVectorSpaceClosedWRTLieBracket{}(50, x, \\partial);";
   //civilizedInput="GenerateVectorSpaceClosedWRTLieBracket{}(248, h_{1} );";
   //civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}( x y -2 )";
+//  civilizedInput="PolynomialAlgebraicNumbers{}(\\sqrt{}5); ";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

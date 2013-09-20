@@ -22,6 +22,7 @@ public:
   static bool innerAddUEToAny(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltTensorToEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddRatOrPolyToRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAddAlgNumPolyToAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddPlotToPlot(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddSequenceToSequence(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAddMatrixRationalToMatrixRational(CommandList& theCommands, const Expression& input, Expression& output);
@@ -31,6 +32,7 @@ public:
   static bool innerAddAlgebraicNumberToAlgebraicNumber(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAlgNumPolyByAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyByRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyLRObyLRO(CommandList& theCommands, const Expression& input, Expression& output);

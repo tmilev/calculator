@@ -494,10 +494,10 @@ bool CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger(CommandList& t
 bool CommandListInnerTypedFunctions::innerPowerAlgNumPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerAlgNumPolyBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  std::cout << "evaluating ..." << input.ToString();
+//  std::cout << "evaluating ..." << input.ToString();
   if (!input.IsListNElements(3))
     return false;
-  std::cout << "evaluating ..." << input.ToString();
+//  std::cout << "evaluating ..." << input.ToString();
   Polynomial<AlgebraicNumber> base;
   int thePower=0;
   if (!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))

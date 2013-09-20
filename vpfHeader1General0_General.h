@@ -47,6 +47,7 @@ class Rational;
 //More involved mathematical types
 template<class Base>
 class CompleX;
+class AlgebraicNumber;
 class RationalFunctionOld;
 class SemisimpleLieAlgebra;
 class rootSubalgebra;
@@ -3565,6 +3566,7 @@ ParallelComputing::GlobalPointerCounter++;
       return this->DenShort>0;
     return true;
   }
+  void operator=(const AlgebraicNumber& other);
   inline void operator=(const LargeIntUnsigned& right)
   { LargeInt tempI;
     tempI=right;

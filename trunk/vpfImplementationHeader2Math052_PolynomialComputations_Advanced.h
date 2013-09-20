@@ -4,6 +4,7 @@
 #define vpfImplementationHeaderPolyComputationsAdvanced_already_included
 
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "vpfHeader2Math2_AlgebraicNumbers.h"
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Header, implementation polynomial computations, more advanced. ");
 
 template <class coefficient>
@@ -428,8 +429,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
           out << "Total number of polynomial operations so far: " << this->NumberOfComputations;
           if (this->MaxNumComputations>0)
             out << ", with a limit of no more than " << this->MaxNumComputations << " operations.";
-          out
-          << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
+          out << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder: "
           << currentRemainder[indexLeadingMonRemainder].ToString() << ". \n<br>Current index we are dividing by: " << i+1
           << " out of " << this->theBasiS.size << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
           << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
@@ -653,19 +653,11 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables)
-{ return false;
-  int indexVar=-1;
-  if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
-  { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
-    << thePoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  PolynomialSubstitution<coefficient> theSub;
-  theSub.MakeIdSubstitution(indexVar+1);
-  theSub[indexVar].MakeMonomiaL(0, 1, 1);
-  Polynomial<coefficient> minPoly, polyVariableIsFirst=thePoly;
-  polyVariableIsFirst.Substitution(theSub);
-  assert(false);
+{ AlgebraicNumber theAN;
+  if (!theAN.ConstructFromMinPoly(thePoly, theAlgebraicClosure))
+    return false;
+  outputSolution=theAN;
+  return true;
 }
 
 template <class coefficient>

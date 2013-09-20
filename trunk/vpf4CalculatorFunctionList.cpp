@@ -17,6 +17,11 @@ void CommandList::initPredefinedInnerFunctions()
    "Creates a polynomial expression with algebraic number coefficients. ",
    "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
   this->AddOperationInnerHandler
+  ("AlgebraicNumberFromPoly", CommandListFunctions::innerGetAlgebraicNumberFromMinPoly, "",
+   "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
+   "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
+
+  this->AddOperationInnerHandler
   ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",

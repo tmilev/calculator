@@ -46,6 +46,12 @@ class AlgebraicNumber
   void operator=(int other)
   { *this=(Rational) other;
   }
+  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
+  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
+  { Polynomial<AlgebraicNumber> polyConverted;
+    polyConverted=thePoly;
+    return this->ConstructFromMinPoly(polyConverted, inputOwner);
+  }
   bool AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart()const;
@@ -101,10 +107,10 @@ class AlgebraicExtensionRationals
   {}
   bool CheckNonZeroOwner()const;
   bool CheckBasicConsistency()const;
-  void MakeRationals(AlgebraicClosureRationals& inputOwners);
   inline unsigned int HashFunction()const
   { return this->AlgebraicBasisElements.HashFunction();
   }
+  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
   void ChooseGeneratingElement();
   void ComputeDisplayStringsFromRadicals();
   int GetIndexFromRadicalSelection(const Selection& theSel);
@@ -113,7 +119,8 @@ class AlgebraicExtensionRationals
   static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
   { return input.HashFunction();
   }
-  void ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
+  void reset();
+  bool ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
@@ -138,7 +145,7 @@ public:
   void AddPairWithInjection
   (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right, const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
    MatrixTensor<Rational>& inputInjectionFromRight);
-  void MergeTwoExtensions
+  bool MergeTwoExtensions
   (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
    MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
   void MergeTwoQuadraticRadicalExtensions

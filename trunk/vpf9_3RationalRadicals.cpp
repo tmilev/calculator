@@ -236,17 +236,22 @@ void AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions
   output.ComputeDisplayStringsFromRadicals();
 }
 
-void AlgebraicClosureRationals::MergeTwoExtensions
+bool AlgebraicClosureRationals::MergeTwoExtensions
 (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output, MatrixTensor<Rational>* injectionFromLeftParent,
  MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoExtensions");
   if (&left==&right)
   { output=left;
-    return;
+    return true;
+  }
+  if (&output==&right || &output==&left)
+  { AlgebraicExtensionRationals leftCopy=left, rightCopy=right;
+    this->MergeTwoExtensions(leftCopy, rightCopy, output, injectionFromLeftParent, injectionFromRightParent);
+    return true;
   }
   if (left.flagIsQuadraticRadicalExtensionRationals && right.flagIsQuadraticRadicalExtensionRationals)
   { this->MergeTwoQuadraticRadicalExtensions(left, right, output, injectionFromLeftParent, injectionFromRightParent);
-    return;
+    return true;
   }
   output.DimOverRationals=left.DimOverRationals*right.DimOverRationals;
   output.AlgebraicBasisElements.SetSize(output.DimOverRationals);
@@ -281,6 +286,7 @@ void AlgebraicClosureRationals::MergeTwoExtensions
   output.ReduceMeOnCreation(injectionFromLeftParent, injectionFromRightParent);
   if (this->theGlobalVariables!=0)
     std::cout << "<hr> Time needed to reduce me on creation: " << this->theGlobalVariables->GetElapsedSeconds()-timeStart;
+  return true;
 }
 
 void AlgebraicClosureRationals::AddMustBeNew(AlgebraicExtensionRationals& input)
@@ -353,7 +359,7 @@ void AlgebraicExtensionRationals::ChooseGeneratingElement()
   }
 }
 
-void AlgebraicExtensionRationals::ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
+bool AlgebraicExtensionRationals::ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent, MatrixTensor<Rational>* injectionFromRightParent)
 { MacroRegisterFunctionWithName("AlgebraicExtensionRationals::ReduceMeOnCreation");
 //  double timeStart=0;
 //  if (this->owner!=0)
@@ -365,20 +371,19 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation(MatrixTensor<Rational>* inj
 //      std::cout << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
 //  std::cout << "Reducing: " << this->ToString();
   if (this->flagIsQuadraticRadicalExtensionRationals)
-    return;
+    return true;
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   Rational oldDeg=theMinPoly.TotalDegree();
 //  std::cout << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
   bool mustBeTrue=theMinPoly.FactorMeOutputIsSmallestDivisor(smallestFactor, 0);
   if (!mustBeTrue)
-  { std::cout << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString()
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegree()==oldDeg)
-    return;
+    return true;
   std::cout << "<br>Min poly factors.";
   MatrixTensor<Rational> theBasisChangeMat, theBasisChangeMatInverse;
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
@@ -434,6 +439,7 @@ void AlgebraicExtensionRationals::ReduceMeOnCreation(MatrixTensor<Rational>* inj
     this->GeneratingElemenT.theElt.MaKeEi(0, 1);
   this->GeneratingElemenT.GetMultiplicationByMeMatrix(this->GeneratingElementTensorForm);
   this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, this->DimOverRationals);
+  return true;
 }
 
 bool AlgebraicExtensionRationals::CheckNonZeroOwner()const
@@ -443,14 +449,6 @@ bool AlgebraicExtensionRationals::CheckNonZeroOwner()const
     assert(false);
   }
   return true;
-}
-
-void AlgebraicExtensionRationals::MakeRationals(AlgebraicClosureRationals& inputOwner)
-{ this->owner=&inputOwner;
-  this->AlgebraicBasisElements.SetSize(1);
-  this->AlgebraicBasisElements[0].MakeId(1);
-  this->DimOverRationals=1;
-  this->GeneratingElemenT.theElt.MaKeEi(0, 1);
 }
 
 void AlgebraicNumber::GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output)
@@ -558,6 +556,51 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   AlgebraicNumber otherCopy=other;
   AlgebraicNumber::ConvertToCommonOwner(*this, otherCopy);
   this->theElt+=otherCopy.theElt;
+}
+
+bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
+{ AlgebraicExtensionRationals theExtension;
+  if (!theExtension.ConstructFromMinPoly(thePoly, inputOwner))
+    return false;
+
+}
+
+void AlgebraicExtensionRationals::reset()
+{ this->owner=0;
+  this->indexInOwner=-1;
+  this->AlgebraicBasisElements.SetSize(0);
+  this->DimOverRationals=0;
+  this->DisplayNamesBasisElements.SetSize(0);
+  this->flagIsQuadraticRadicalExtensionRationals=false;
+  this->theGeneratingElementPowersBasis.SetSize(0);
+  this->theQuadraticRadicals.Clear();
+}
+
+bool AlgebraicExtensionRationals::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
+{ int indexVar=-1;
+  if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
+  { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
+    << thePoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  PolynomialSubstitution<AlgebraicNumber> theSub;
+  theSub.MakeIdSubstitution(indexVar+1);
+  theSub[indexVar].MakeMonomiaL(0, 1, 1);
+  Polynomial<AlgebraicNumber> minPoly, polyVariableIsFirst=thePoly;
+  polyVariableIsFirst.Substitution(theSub);
+  std::cout << polyVariableIsFirst.ToString();
+  this->reset();
+  for (int i=1; i<polyVariableIsFirst.size(); i++)
+    if (polyVariableIsFirst.theCoeffs[i].owner!=0)
+    { if (this->owner==0)
+      { *this=*polyVariableIsFirst.theCoeffs[i].owner;
+        continue;
+      }
+      if (!inputOwner.MergeTwoExtensions(*this, *polyVariableIsFirst.theCoeffs[i].owner, (*this)))
+        return false;
+    }
+  Matrix<Rational> theMat;
+ // theMat.MakeIdMatrix()
 }
 
 void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
@@ -782,6 +825,15 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 void AlgebraicNumber::operator=(const Rational& other)
 { this->owner=0;
   this->theElt.MaKeEi(0, other);
+}
+
+void Rational::operator=(const AlgebraicNumber& other)
+{ bool isGood=other.IsRational(this);
+  if (!isGood)
+  { std::cout << "This is a programming error: attempting to assign the non-rational algebraic number " << other.ToString() << "to a rational number. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
 }
 
 std::string ElementZmodP::ToString(FormatExpressions* theFormat)const

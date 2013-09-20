@@ -139,6 +139,28 @@ bool CommandListFunctions::innerCompositeSequenceDereference(CommandList& theCom
   return false;
 }
 
+bool CommandListFunctions::innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerGetAlgebraicNumberFromMinPoly");
+  Expression polyE;
+  if (!Serialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
+    return false;
+  }
+  Polynomial<AlgebraicNumber> thePoly;
+  if (!polyE.IsOfType<Polynomial<AlgebraicNumber> >(&thePoly))
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial, instead got " << polyE.ToString();
+    return false;
+  }
+  if (polyE.GetNumContextVariables()!=1)
+  { theCommands.Comments << "<hr>After conversion, I got the polynomial " << polyE.ToString() << ", which is not in one variable.";
+    return false;
+  }
+  AlgebraicNumber theAN;
+  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure))
+    return false;
+  return output.AssignValue(theAN, theCommands);
+}
+
 bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeEWAactOnPoly");
   if (input.children.size!=2)

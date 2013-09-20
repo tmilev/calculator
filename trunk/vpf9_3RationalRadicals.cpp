@@ -494,13 +494,13 @@ bool AlgebraicNumber::operator==(int other)const
 }
 
 bool AlgebraicNumber::NeedsBrackets()const
-{ return false;
+{ return (this->theElt.size()>1);
 }
 
 bool AlgebraicNumber::CheckNonZeroOwner()const
 { if (this->owner==0)
-  { std::cout << "This is a programming error: algebraic number with non-initialized owner not permitted in the "
-    << "current context." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: algebraic number with non-initialized owner not permitted in the current context."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return true;

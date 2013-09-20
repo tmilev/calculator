@@ -121,7 +121,7 @@ class AlgebraicClosureRationals
 {
 public:
   ListReferences<AlgebraicExtensionRationals> theAlgebraicExtensions;
-  HashedList<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> > thePairs;
+  HashedList<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> > theAlgebraicExtensionPairs;
   List<int> thePairPairing;
   List<MatrixTensor<Rational> > injectionsLeftParenT;
   List<MatrixTensor<Rational> > injectionsRightParenT;

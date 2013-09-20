@@ -1740,7 +1740,7 @@ template <class coefficient>
 bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  std::cout << "Extracting poly from: " << input.ToString();
+//  std::cout << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
   { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";

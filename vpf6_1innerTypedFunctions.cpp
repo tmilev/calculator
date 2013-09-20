@@ -491,6 +491,23 @@ bool CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger(CommandList& t
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
 
+bool CommandListInnerTypedFunctions::innerPowerAlgNumPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  Polynomial<AlgebraicNumber> base;
+  int thePower=0;
+  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
+    return false;
+  if (thePower<0)
+    return false;
+  if (base.IsEqualToZero() && thePower<=0)
+    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  base.RaiseToPower(thePower);
+  return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
+}
+
 bool CommandListInnerTypedFunctions::innerPowerAlgebraicNumberBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerPowerAlgebraicNumberBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);

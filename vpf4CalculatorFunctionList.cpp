@@ -1082,6 +1082,16 @@ void CommandList::initPredefinedStandardOperations()
    "PolynomialAlgebraicNumbers(x)+\\sqrt{2}"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPoly(), this->opPolyOverANs(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "Polynomial{}x+ PolynomialAlgebraicNumbers(\\sqrt{2}x)"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opPolyOverANs(), this->opPoly(),
+   "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
+   "PolynomialAlgebraicNumbers(\\sqrt{2}x)+Polynomial{}x"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddAlgNumPolyToAlgNumPoly, this->opAlgNumber(), this->opPoly(),
    "Adds a polynomial over the algebraic numbers to a polynomial over the algebraic numbers. ",
    "\\sqrt{2}+PolynomialAlgebraicNumbers(x)"
@@ -1470,8 +1480,12 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
-   "g_{{i}}:= getChevalleyGenerator{}(G_2, i); h_{{i}}:=getCartanGenerator{}(G_2, i) ;\
-    \n (g_1+g_2)^2+ g_1^{1/2}",
+   "x:=Polynomial{}x; y:=Polynomial{}y;(x+2y+x y+x^2+3y^2)^3",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CommandListInnerTypedFunctions::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),
+   "Raises poly over algebraic numbers to small integer power. ",
+   " x:=Polynomial{}x; y:=Polynomial{}y;(x+\\sqrt{2}y+x y+x^2+\\sqrt{3}y^2)^3",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerAlgebraicNumberBySmallInteger, this->opAlgNumber(), this->opRational(),

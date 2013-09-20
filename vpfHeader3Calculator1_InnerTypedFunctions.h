@@ -62,6 +62,7 @@ public:
 
   static bool innerPowerRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerAlgNumPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgebraicNumberBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerEWABySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPowerElementUEbyRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);

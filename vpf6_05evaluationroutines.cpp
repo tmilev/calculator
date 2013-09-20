@@ -413,8 +413,7 @@ void CommandList::EvaluateCommands()
   this->flagAbortComputationASAP=false;
   bool tempBool;
   this->Comments.clear();
-  this->EvaluateExpression
-  (this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
+  this->EvaluateExpression(this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
   if (this->RecursionDeptH!=0)
   { std::cout << "This is a programming error: the starting recursion depth "
     << "before evaluation was 0, but after evaluation it is "

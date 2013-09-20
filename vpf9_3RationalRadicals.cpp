@@ -15,8 +15,8 @@ std::string MonomialVector::ToString(FormatExpressions* theFormat)const
 }
 
 bool AlgebraicClosureRationals::CheckConsistency()const
-{ if (this->thePairPairing.size!=this->thePairs.size || this->injectionsLeftParenT.size !=this->thePairs.size || this->injectionsRightParenT.size!=this->thePairs.size)
-  { std::cout << "This is a programming error: I have " << this->thePairs.size << " pairs, " << this->thePairPairing.size << " pair pairings, "
+{ if (this->thePairPairing.size!=this->theAlgebraicExtensionPairs.size || this->injectionsLeftParenT.size !=this->theAlgebraicExtensionPairs.size || this->injectionsRightParenT.size!=this->theAlgebraicExtensionPairs.size)
+  { std::cout << "This is a programming error: I have " << this->theAlgebraicExtensionPairs.size << " pairs, " << this->thePairPairing.size << " pair pairings, "
     << this->injectionsLeftParenT.size << " left injections, " << this->injectionsRightParenT.size << " right injections."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -39,10 +39,10 @@ void AlgebraicClosureRationals::AddPairWithInjection
 { Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
   currentPair.Object1=left.indexInOwner;
   currentPair.Object2=right.indexInOwner;
-  if (this->thePairs.Contains(currentPair))
+  if (this->theAlgebraicExtensionPairs.Contains(currentPair))
     return;
-  this->thePairs.AddOnTop(currentPair);
-  this->thePairPairing.AddOnTop(tensorProd.indexInOwner);
+  this->theAlgebraicExtensionPairs.AddOnTop(currentPair);
+  this->thePairPairing.AddOnTop(this->theAlgebraicExtensions.AddNoRepetitionOrReturnIndexFirst(tensorProd));
 //  std::cout << "<br><br>\n\n\n\n<br><br>left and right injections: "
 //  << (inputInjectionFromLeft.ToString())
 //  << " and<br><br> "
@@ -63,9 +63,17 @@ AlgebraicExtensionRationals* AlgebraicClosureRationals::MergeTwoExtensionsAddOut
   Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
   currentPair.Object1=left.indexInOwner;
   currentPair.Object2=right.indexInOwner;
-  int indexPairing=this->thePairs.GetIndex(currentPair);
+  int indexPairing=this->theAlgebraicExtensionPairs.GetIndex(currentPair);
   if (indexPairing!=-1)
-    return &this->theAlgebraicExtensions[this->thePairPairing[indexPairing]];
+  { int newIndex=this->thePairPairing[indexPairing];
+    if (newIndex==-1)
+    { std::cout << "This is a programming error: while merging " << CGI::GetHtmlMathSpanPure( left.ToString() ) << " and " << CGI::GetHtmlMathSpanPure( right.ToString())
+      << " I got that the pairing of the two extensions is a field extension of index -1. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return &this->theAlgebraicExtensions[newIndex];
+  }
   MatrixTensor<Rational> leftInjection, rightInjection;
   AlgebraicExtensionRationals output;
   this->MergeTwoExtensions(left, right, output, &leftInjection, &rightInjection);
@@ -244,8 +252,7 @@ void AlgebraicClosureRationals::MergeTwoExtensions
   output.AlgebraicBasisElements.SetSize(output.DimOverRationals);
   for (int i=0; i<left.AlgebraicBasisElements.size; i++)
     for (int j=0; j<right.AlgebraicBasisElements.size; j++)
-      output.AlgebraicBasisElements[i*right.DimOverRationals+j].
-      AssignTensorProduct(left.AlgebraicBasisElements[i], right.AlgebraicBasisElements[j]);
+      output.AlgebraicBasisElements[i*right.DimOverRationals+j].AssignTensorProduct(left.AlgebraicBasisElements[i], right.AlgebraicBasisElements[j]);
   if (injectionFromLeftParent!=0)
   { injectionFromLeftParent->MakeZero();
     for (int i=0; i<left.AlgebraicBasisElements.size; i++)
@@ -510,7 +517,7 @@ int AlgebraicClosureRationals::GetIndexIMustContainPair(const AlgebraicExtension
 { Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> currentPair;
   currentPair.Object1=left->indexInOwner;
   currentPair.Object2=right->indexInOwner;
-  return this->thePairs.GetIndexIMustContainTheObject(currentPair);
+  return this->theAlgebraicExtensionPairs.GetIndexIMustContainTheObject(currentPair);
 }
 
 void AlgebraicClosureRationals::GetLeftAndRightInjectionsTensorForm

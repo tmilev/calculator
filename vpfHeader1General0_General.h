@@ -4831,6 +4831,15 @@ public:
   }
   bool operator>(const MonomialP& other)const;
   bool IsDivisibleBy(const MonomialP& other)const;
+  int TotalDegreeInt()const
+  { int result=-1;
+    if (!this->TotalDegree().IsSmallInteger(&result))
+    { std::cout << "This is a programming error: total degree of monomial must be a small integer to call this function. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return result;
+  }
   Rational TotalDegree()const
   { Rational result=0;
     for (int i=0; i<this->monBody.size; i++)

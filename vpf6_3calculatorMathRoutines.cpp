@@ -156,7 +156,7 @@ bool CommandListFunctions::innerGetAlgebraicNumberFromMinPoly(CommandList& theCo
     return false;
   }
   AlgebraicNumber theAN;
-  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure))
+  if (!theAN.ConstructFromMinPoly(thePoly, theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS))
     return false;
   return output.AssignValue(theAN, theCommands);
 }

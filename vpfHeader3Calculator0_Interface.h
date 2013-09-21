@@ -1685,7 +1685,6 @@ bool CommandList::GetMatrix
   if (inputOutputStartingContext!=0)
     *inputOutputStartingContext=theContext;
   return true;
-
 }
 
 template <class theType>
@@ -1701,8 +1700,8 @@ bool Expression::AssignValue(const theType& inputValue, CommandList& owner)
 { Expression tempE;
   tempE.theBoss=&owner;
   int curType=tempE.GetTypeOperation<theType>();
-  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() ||
-      curType==owner.opElementUEoverRF() || curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra())
+  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
+      curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra())
   { std::cout << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

@@ -46,18 +46,19 @@ class AlgebraicNumber
   void operator=(int other)
   { *this=(Rational) other;
   }
-  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
-  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner)
+  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables);
+  bool ConstructFromMinPoly(const Polynomial<Rational>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables)
   { Polynomial<AlgebraicNumber> polyConverted;
     polyConverted=thePoly;
-    return this->ConstructFromMinPoly(polyConverted, inputOwner);
+    return this->ConstructFromMinPoly(polyConverted, inputOwner, theGlobalVariables);
   }
   bool AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart()const;
   Rational GetNumeratorRationalPart()const;
   void SqrtMeDefault();
-  static void ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
+  static bool ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
+  static bool ConvertToCommonOwner(List<AlgebraicNumber>& theNumbers);
   void RadicalMeDefault(int theRad);
   void Invert();
   void operator/=(const AlgebraicNumber& other);
@@ -110,7 +111,6 @@ class AlgebraicExtensionRationals
   inline unsigned int HashFunction()const
   { return this->AlgebraicBasisElements.HashFunction();
   }
-  bool ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner);
   void ChooseGeneratingElement();
   void ComputeDisplayStringsFromRadicals();
   int GetIndexFromRadicalSelection(const Selection& theSel);
@@ -136,6 +136,9 @@ public:
 
   bool CheckConsistency()const;
   AlgebraicClosureRationals():theGlobalVariables(0){}
+  bool ConstructFromMinPoly
+  (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicExtensionRationals*& outputField, GlobalVariables* theGlobalVariables)
+  ;
   int GetIndexIMustContainPair(const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right);
   void GetLeftAndRightInjections
   (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right, Matrix<Rational>*& outputInjectionFromLeft, Matrix<Rational>*& outputInjectionFromRight);

@@ -525,17 +525,34 @@ void AlgebraicClosureRationals::GetLeftAndRightInjectionsTensorForm
   outputInjectionFromRight=&this->injectionsRightParenT[theIndex];
 }
 
-void AlgebraicNumber::ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right)
+bool AlgebraicNumber::ConvertToCommonOwner(List<AlgebraicNumber>& theNumbers)
+{ MacroRegisterFunctionWithName("AlgebraicNumber::ConvertToCommonOwner");
+  if (theNumbers.size==0)
+    return true;
+  for (int i=1; i<theNumbers.size; i++)
+  { AlgebraicExtensionRationals *oldExtension=theNumbers[0].owner;
+    if (theNumbers[0].owner!=theNumbers[i].owner)
+    { if (!AlgebraicNumber::ConvertToCommonOwner(theNumbers[0], theNumbers[i]))
+        return false;
+      else
+        if (oldExtension!=theNumbers[0].owner)
+          i=0;
+    }
+  }
+  return true;
+}
+
+bool AlgebraicNumber::ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right)
 { MacroRegisterFunctionWithName("AlgebraicNumber::ConvertToCommonOwner");
   if (left.owner==right.owner)
-    return;
+    return true;
   if (left.owner==0)
   { left.owner=right.owner;
-    return;
+    return true;
   }
   if (right.owner==0)
   { right.owner=left.owner;
-    return;
+    return true;
   }
   left.CheckNonZeroOwner();
   right.CheckNonZeroOwner();
@@ -558,25 +575,25 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   this->theElt+=otherCopy.theElt;
 }
 
-bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
-{ AlgebraicExtensionRationals theExtension;
-  if (!theExtension.ConstructFromMinPoly(thePoly, inputOwner))
+bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables)
+{ AlgebraicExtensionRationals* theAlgebraicExension=0;
+  if (!inputOwner.ConstructFromMinPoly(thePoly, theAlgebraicExension, theGlobalVariables))
     return false;
-
 }
 
 void AlgebraicExtensionRationals::reset()
 { this->owner=0;
   this->indexInOwner=-1;
   this->AlgebraicBasisElements.SetSize(0);
-  this->DimOverRationals=0;
+  this->DimOverRationals=1;
   this->DisplayNamesBasisElements.SetSize(0);
   this->flagIsQuadraticRadicalExtensionRationals=false;
   this->theGeneratingElementPowersBasis.SetSize(0);
   this->theQuadraticRadicals.Clear();
 }
 
-bool AlgebraicExtensionRationals::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner)
+bool AlgebraicClosureRationals::ConstructFromMinPoly
+(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicExtensionRationals*& outputField, GlobalVariables* theGlobalVariables)
 { int indexVar=-1;
   if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
   { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
@@ -589,18 +606,62 @@ bool AlgebraicExtensionRationals::ConstructFromMinPoly(const Polynomial<Algebrai
   Polynomial<AlgebraicNumber> minPoly, polyVariableIsFirst=thePoly;
   polyVariableIsFirst.Substitution(theSub);
   std::cout << polyVariableIsFirst.ToString();
-  this->reset();
-  for (int i=1; i<polyVariableIsFirst.size(); i++)
-    if (polyVariableIsFirst.theCoeffs[i].owner!=0)
-    { if (this->owner==0)
-      { *this=*polyVariableIsFirst.theCoeffs[i].owner;
-        continue;
+  if (!AlgebraicNumber::ConvertToCommonOwner(polyVariableIsFirst.theCoeffs))
+    return false;
+  std::cout << polyVariableIsFirst.ToString();
+  AlgebraicExtensionRationals startingExtension;
+  if (polyVariableIsFirst.theCoeffs[0].owner==0)
+    startingExtension.reset();
+  else
+    startingExtension=*polyVariableIsFirst.theCoeffs[0].owner;
+  Matrix<Rational> theGenMat;
+  int degreeMinPoly=polyVariableIsFirst.TotalDegreeInt();
+  theGenMat.MakeIdMatrix(startingExtension.DimOverRationals*degreeMinPoly,startingExtension.DimOverRationals*degreeMinPoly);
+  for (int i=0; i<degreeMinPoly-1; i++)
+    for (int j=0; j<startingExtension.DimOverRationals; j++)
+      theGenMat((i+1)*startingExtension.DimOverRationals+j, i*startingExtension.DimOverRationals+j)=1;
+  Polynomial<AlgebraicNumber> polyVariableMinusMaxMon=polyVariableIsFirst;
+  int indexMaxMon=polyVariableMinusMaxMon.GetIndexMaxMonomial(MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest);
+  const MonomialP maxMon=polyVariableMinusMaxMon[indexMaxMon];
+  AlgebraicNumber maxMonCoeff=polyVariableMinusMaxMon.theCoeffs[indexMaxMon];
+  polyVariableMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);
+  polyVariableMinusMaxMon/=maxMonCoeff;
+  polyVariableMinusMaxMon/=-1;
+  MatrixTensor<Rational> currentCoeffMatForm;
+  for (int i=0; i<polyVariableMinusMaxMon.size(); i++)
+  { AlgebraicNumber& currentCoeff=polyVariableMinusMaxMon.theCoeffs[i];
+    const MonomialP& currentMon=polyVariableMinusMaxMon[i];
+    currentCoeff.GetMultiplicationByMeMatrix(currentCoeffMatForm);
+    for (int j=0; j<currentCoeffMatForm.size(); j++)
+    { int relRowIndex=currentCoeffMatForm[j].vIndex;
+      int relColIndex=currentCoeffMatForm[j].dualIndex;
+      if (relRowIndex==-1 || relColIndex==-1)
+      { std::cout << "This is a programming error: non initialized monomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
       }
-      if (!inputOwner.MergeTwoExtensions(*this, *polyVariableIsFirst.theCoeffs[i].owner, (*this)))
-        return false;
+      theGenMat(currentMon.TotalDegreeInt()*startingExtension.DimOverRationals+relRowIndex, startingExtension.DimOverRationals*(degreeMinPoly-1)+relColIndex)=currentCoeffMatForm.theCoeffs[j];
     }
-  Matrix<Rational> theMat;
- // theMat.MakeIdMatrix()
+  }
+  AlgebraicExtensionRationals finalExtension;
+  Matrix<Rational> theGenMatPowers;
+  finalExtension.DimOverRationals=degreeMinPoly*startingExtension.DimOverRationals;
+  finalExtension.AlgebraicBasisElements.SetSize(finalExtension.DimOverRationals);
+  MatrixTensor<Rational> matIdRankDegreeMinPoly;
+  matIdRankDegreeMinPoly.MakeId(degreeMinPoly);
+  for (int i=0; i<startingExtension.DimOverRationals; i++)
+    finalExtension.AlgebraicBasisElements[i].AssignTensorProduct(matIdRankDegreeMinPoly, startingExtension.AlgebraicBasisElements[i]);
+  theGenMatPowers=theGenMat;
+  for (int i=1; i<degreeMinPoly; i++)
+  { for (int j=0; j<startingExtension.DimOverRationals; j++)
+    { finalExtension.AlgebraicBasisElements[i*startingExtension.DimOverRationals+j]=theGenMatPowers;
+      finalExtension.AlgebraicBasisElements[i*startingExtension.DimOverRationals+j]*=finalExtension.AlgebraicBasisElements[0];
+    }
+    if (i!=degreeMinPoly-1)
+      theGenMatPowers*=theGenMat;
+  }
+  if (!finalExtension.ReduceMeOnCreation(0,0))
+    return false;
+  return true;
 }
 
 void AlgebraicNumber::operator-=(const AlgebraicNumber& other)

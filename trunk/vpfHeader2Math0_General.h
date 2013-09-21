@@ -572,6 +572,7 @@ public:
   void DecreaseNumVariables(int increment, Polynomial<coefficient>& output);
   bool Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   Rational TotalDegree()const;
+  int TotalDegreeInt()const;
   bool IsEqualToOne()const
   { coefficient tempC;
     if (this->IsAConstant(&tempC))

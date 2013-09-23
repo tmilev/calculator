@@ -515,6 +515,7 @@ int main(int argc, char **argv)
   //civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}( x y -2 )";
 //  civilizedInput="PolynomialAlgebraicNumbers{}(\\sqrt{}5); ";
 //  civilizedInput="PolynomialAlgebraicNumbers(\\sqrt{2}+\\sqrt{3}x)^3";
+//civilizedInput="\\sqrt{2}+\\sqrt{3}";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

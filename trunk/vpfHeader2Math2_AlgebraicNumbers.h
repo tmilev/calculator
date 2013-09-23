@@ -6,7 +6,6 @@
 #include "vpfHeader2Math0_General.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, math routines. ");
 
-class AlgebraicExtensionRationals;
 class AlgebraicClosureRationals;
 class AlgebraicNumber
 {
@@ -15,10 +14,11 @@ class AlgebraicNumber
     return output;
   }
   public:
-  AlgebraicExtensionRationals* owner;
-  VectorSparse<Rational> theElt;
+  AlgebraicClosureRationals* owner;
+  int basisIndex;
+  VectorSparse<Rational> theElT;
   AlgebraicNumber():owner(0){}
-  AlgebraicNumber(const Rational& other):owner(0)
+  AlgebraicNumber(const Rational& other):owner(0), basisIndex(-1)
   { this->operator=(other);
   }
   AlgebraicNumber(int other):owner(0)
@@ -26,6 +26,7 @@ class AlgebraicNumber
   }
   bool NeedsBrackets()const;
   bool CheckNonZeroOwner()const;
+  bool CheckCommonOwner(const AlgebraicNumber& other)const;
   unsigned int HashFunction()const;
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
@@ -41,7 +42,11 @@ class AlgebraicNumber
   bool IsEqualToOne()const
   { return (*this==1);
   }
-  void GetMultiplicationByMeMatrix(MatrixTensor<Rational>& output);
+  void operator=(const AlgebraicNumber& other)
+  { this->basisIndex=other.basisIndex;
+    this->owner=other.owner;
+    this->theElT=other.theElT;
+  }
   void operator=(const Rational& other);
   void operator=(int other)
   { *this=(Rational) other;
@@ -52,13 +57,11 @@ class AlgebraicNumber
     polyConverted=thePoly;
     return this->ConstructFromMinPoly(polyConverted, inputOwner, theGlobalVariables);
   }
-  bool AssignRationalQuadraticRadical(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  bool AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner);
   void AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner);
   Rational GetDenominatorRationalPart()const;
   Rational GetNumeratorRationalPart()const;
   void SqrtMeDefault();
-  static bool ConvertToCommonOwner(AlgebraicNumber& left, AlgebraicNumber& right);
-  static bool ConvertToCommonOwner(List<AlgebraicNumber>& theNumbers);
   void RadicalMeDefault(int theRad);
   void Invert();
   void operator/=(const AlgebraicNumber& other);
@@ -80,83 +83,51 @@ class AlgebraicNumber
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
-class AlgebraicExtensionRationals
+class AlgebraicClosureRationals
 {
-  public:
-  List<MatrixTensor<Rational> > AlgebraicBasisElements;
+public:
+  List<MatrixTensor<Rational> > theBasisMultiplicative;
+  List<List<VectorSparse<Rational> > > theBasesAdditive;
+
   MatrixTensor<Rational> GeneratingElementTensorForm;
   Matrix<Rational> GeneratingElementMatForm;
   AlgebraicNumber GeneratingElemenT;
   Vectors<Rational> theGeneratingElementPowersBasis;
 
-  AlgebraicClosureRationals* owner;
   bool flagIsQuadraticRadicalExtensionRationals;
   HashedList<LargeInt> theQuadraticRadicals;
-//  Matrix<Rational> injectionFromLeftParent;
-//  Matrix<Rational> injectionFromRightParent;
-//  Matrix<Rational> injectionFromLeftParentToMeMatForm;
-//  MatrixTensor<Rational> injectionFromLeftParentToMeTensorForm;
-//  Matrix<Rational> injectionFromRightParentToMeMatForm;
-//  MatrixTensor<Rational> injectionFromRightParentToMeTensorForm;
-//  AlgebraicExtensionRationals* leftParent;
-//  AlgebraicExtensionRationals* rightParent;
-//  AlgebraicExtensionRationals* heir;
-  List<std::string> DisplayNamesBasisElements;
-  int indexInOwner;
-  int DimOverRationals;
-  AlgebraicExtensionRationals(): owner(0), flagIsQuadraticRadicalExtensionRationals(false), indexInOwner(-1), DimOverRationals(0)//, leftParent(0), rightParent(0), heir(0), indexInOwner(-1), DimOverRationals(-1)
-  {}
-  bool CheckNonZeroOwner()const;
-  bool CheckBasicConsistency()const;
-  inline unsigned int HashFunction()const
-  { return this->AlgebraicBasisElements.HashFunction();
-  }
-  void ChooseGeneratingElement();
-  void ComputeDisplayStringsFromRadicals();
-  int GetIndexFromRadicalSelection(const Selection& theSel);
-  void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
-  bool operator==(const AlgebraicExtensionRationals& input)const;
-  static inline unsigned int HashFunction(const AlgebraicExtensionRationals& input)
-  { return input.HashFunction();
-  }
-  void reset();
-  bool ReduceMeOnCreation(MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
-  std::string ToString(FormatExpressions* theFormat=0);
-};
 
-class AlgebraicClosureRationals
-{
-public:
-  ListReferences<AlgebraicExtensionRationals> theAlgebraicExtensions;
-  HashedList<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> > theAlgebraicExtensionPairs;
-  List<int> thePairPairing;
-  List<MatrixTensor<Rational> > injectionsLeftParenT;
-  List<MatrixTensor<Rational> > injectionsRightParenT;
   GlobalVariables* theGlobalVariables;
 
-  bool CheckConsistency()const;
-  AlgebraicClosureRationals():theGlobalVariables(0){}
-  bool ConstructFromMinPoly
-  (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicExtensionRationals*& outputField, GlobalVariables* theGlobalVariables)
+  List<std::string> DisplayNamesBasisElements;
+  void AddNewBasis();
+
+  void RegisterNewBasis
+(const MatrixTensor<Rational>& theInjection)
   ;
-  int GetIndexIMustContainPair(const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right);
-  void GetLeftAndRightInjections
-  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right, Matrix<Rational>*& outputInjectionFromLeft, Matrix<Rational>*& outputInjectionFromRight);
-  void GetLeftAndRightInjectionsTensorForm
-  (const AlgebraicExtensionRationals* left, const AlgebraicExtensionRationals* right, MatrixTensor<Rational>*& outputInjectionFromLeft,
-   MatrixTensor<Rational>*& outputInjectionFromRight);
-  void AddPairWithInjection
-  (const AlgebraicExtensionRationals& left, const AlgebraicExtensionRationals& right, const AlgebraicExtensionRationals& tensorProd, MatrixTensor<Rational>& inputInjectionFromLeft,
-   MatrixTensor<Rational>& inputInjectionFromRight);
-  bool MergeTwoExtensions
-  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
-  void MergeTwoQuadraticRadicalExtensions
-  (AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right, AlgebraicExtensionRationals& output,
-   MatrixTensor<Rational>* injectionFromLeftParent=0, MatrixTensor<Rational>* injectionFromRightParent=0);
-  AlgebraicExtensionRationals* MergeTwoExtensionsAddOutputToMe(AlgebraicExtensionRationals& left, AlgebraicExtensionRationals& right);
+  void reset();
+  bool CheckConsistency()const;
+  AlgebraicClosureRationals():theGlobalVariables(0)
+  { this->reset();
+  }
+  bool MergeRadicals(const List<LargeInt>& theRadicals);
+  void ChooseGeneratingElement();
+  bool ReduceMe();
+  void ComputeDisplayStringsFromRadicals();
+  static int GetIndexFromRadicalSelection(const Selection& theSel);
+  void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
+  void GetMultiplicationBy
+  (const AlgebraicNumber& input, MatrixTensor<Rational>& output)
+  ;
+  void GetAdditionTo
+  (const AlgebraicNumber& input, VectorSparse<Rational>& output)
+  ;
+
+
+  bool AdjoinRootMinPoly
+  (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
+  ;
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void AddMustBeNew(AlgebraicExtensionRationals& input);
 };
 
 class ElementZmodP

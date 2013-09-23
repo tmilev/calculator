@@ -4608,13 +4608,33 @@ bool CommandList::ReplaceXByConCon(int con1, int con2, int format1, int format2)
 }
 
 void ObjectContainer::reset()
-{ this->theTensorElts.Clear();
+{ this->theWeylGroupElements.Clear();
+  this->theWeylGroupReps.Clear();
+  this->theWeylGroupVirtualReps.Clear();
+  this->theWeylGroups.SetSize(0);
   this->theCategoryOmodules.SetSize(0);
-//  this->theCategoryOmodulesContexts.SetSize();
   this->theLieAlgebras.SetSize(0);
+  this->theSSsubalgebras.SetSize(0);
+  this->theTensorElts.Clear();
   this->thePolys.Clear();
+  this->thePolysOverANs.Clear();
+  this->theWeylAlgebraElements.Clear();
+  this->theUEs.Clear();
   this->theRFs.Clear();
+  this->theRationals.Clear();
+  this->theCharsSSLieAlgFD.Clear();
+  this->theDoubles.Clear();
+  this->theStrings.Clear();
+  this->ExpressionNotation.Clear();
+  this->ExpressionWithNotation.Clear();
   this->theLSpaths.Clear();
+  this->theMatRats.Clear();
+  this->theMatTensorRats.Clear();
+  this->theMatRFs.Clear();
+  this->theEltsModP.Clear();
+  this->thePlots.SetSize(0);
+  theAlgebraicClosure.reset();
+  this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
 }
 

@@ -9,9 +9,13 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
-  ("AutomatedTest", this->innerTestMe, "",
+  ("AutomatedTest", this->innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
    "AutomatedTest{}(0)");
+  this->AddOperationInnerHandler
+  ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTest, "",
+   "Runs a big bad automated test of all built in functions to create a file containing a set of known good results. ",
+   "AutomatedTestSetGoodKnownCopy{}(0)");
 
   this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",

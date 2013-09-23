@@ -66,7 +66,11 @@ class AlgebraicNumber
   void Invert();
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other)const;
-  bool operator==(int other)const;
+  bool operator==(const Rational& other)const;
+  bool operator==(int other)const
+  { return *this==(Rational)other;
+  }
+
   inline bool operator!=(const AlgebraicNumber& other)const
   { return !(*this==other);
   }

@@ -1460,6 +1460,7 @@ public:
   { this->AddOperationHandler(theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription, opExample, false, visible, experimental);
   }
   void init(GlobalVariables& inputGlobalVariables);
+  void reset();
   void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions();
   void initPredefinedOperationsComposite();

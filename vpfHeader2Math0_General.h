@@ -60,6 +60,7 @@ public:
   { this->theMonomials.RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);
   }
+  void AddOtherTimesConst(MonomialCollection<TemplateMonomial, coefficient>& other, const coefficient& theConst);
   void PopMonomial(int index, TemplateMonomial& outputMon, coefficient& outputCoeff)
   { outputMon=(*this)[index];
     outputCoeff=this->theCoeffs[index];
@@ -1528,6 +1529,18 @@ void MonomialCollection<TemplateMonomial, coefficient>::SubtractOtherTimesCoeff(
     if (inputcf!=0)
       tempCF*=*inputcf;
     this->SubtractMonomial(other[i], tempCF);
+  }
+}
+
+template <class TemplateMonomial, class coefficient>
+void MonomialCollection<TemplateMonomial, coefficient>::AddOtherTimesConst(MonomialCollection<TemplateMonomial, coefficient>& other, const coefficient& theConst)
+{ this->SetExpectedSize(other.size()+this->size());
+  coefficient tempCF;
+  for (int i=0; i<other.size(); i++)
+  { ParallelComputing::SafePointDontCallMeFromDestructors();
+    tempCF=theConst;
+    tempCF*=other.theCoeffs[i];
+    this->AddMonomial(other[i], tempCF);
   }
 }
 

@@ -2309,7 +2309,8 @@ bool CommandList::innerDouble(CommandList& theCommands, const Expression& input,
 }
 
 bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsOfType<Rational>())
+{ MacroRegisterFunctionWithName("CommandList::innerSqrt");
+  if (!input.IsOfType<Rational>())
     return false;
   AlgebraicNumber theNumber;
   if (!theNumber.AssignRationalQuadraticRadical(input.GetValue<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))

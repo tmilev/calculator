@@ -432,9 +432,11 @@ void CommandList::EvaluateCommands()
     << "Output:<br>" << this->theProgramExpression.ToStringFull();
   }
   this->outputString=out.str();
+  std::stringstream commentsStream;
+  if (this->theObjectContainer.theAlgebraicClosure.theBasisMultiplicative.size>1)
+    commentsStream << "<b>Algebraic number closure status. </b><br>" << this->theObjectContainer.theAlgebraicClosure.ToString();
   if (this->Comments.str()!="")
-  { std::stringstream commentsStream;
     commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
-    this->outputCommentsString=commentsStream.str();
-  }
+
+  this->outputCommentsString=commentsStream.str();
 }

@@ -1134,6 +1134,7 @@ public:
   int opDivide()
   { return this->operations.GetIndexIMustContainTheObject("/");
   }
+  bool ReadTestFromFile(std::fstream& theFile, List<std::string>& commandStrings, List<std::string>& commandResultStrings);
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
@@ -1206,6 +1207,7 @@ public:
   static bool innerTimes(CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
+  static bool innerTestMe(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerTranspose(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerUnion(CommandList& theCommands, const Expression& input, Expression& output);

@@ -2437,6 +2437,42 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
+bool CommandList::ReadTestFromFile(std::fstream& theFile, List<std::string>& commandStrings, List<std::string>& commandResultStrings)
+{
+  return false;
+}
+
+bool CommandList::innerTestMe(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerTestMe");
+  std::stringstream out;
+  double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  CommandList theTester;
+  theTester.init(*theCommands.theGlobalVariableS);
+  std::fstream theTestFile;
+  std::string theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.html";
+  List<std::string> testInputStrings, testOutputStrings;
+  if (CGI::FileExists(theTestFileName))
+  { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, false, false))
+    { std::cout << "This is a programming error or worse: failed to open an existing file: " << theTestFileName << ". "
+      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    if (!theCommands.ReadTestFromFile(theTestFile, testInputStrings, testOutputStrings))
+    { std::cout << "Failed to get input/output strings from file: " << theTestFileName << ". "
+      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  } else
+  { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, true, false))
+    { std::cout << "This is a programming error or worse: file " << theTestFileName << " does not exist but cannot be created. "
+      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 class DoxygenInstance
 {
   public:

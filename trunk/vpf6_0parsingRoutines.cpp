@@ -31,15 +31,8 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
   return out.str();
 }
 
-void CommandList::init(GlobalVariables& inputGlobalVariables)
-{ MacroRegisterFunctionWithName("CommandList::init");
-  //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
-  this->theGlobalVariableS=&inputGlobalVariables;
-  this->theObjectContainer.reset();
-  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
-//  this->MaxAlgTransformationsPerExpression=100000;
-  this->formatVisibleStrings.flagExpressionIsFinal=true;
-  this->MaxAlgTransformationsPerExpression=100;
+void CommandList::reset()
+{ this->MaxAlgTransformationsPerExpression=100;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->NumErrors=0;
@@ -54,23 +47,13 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
-
-  this->theExpressionContainer.Clear();
-//  this->theExpressionContainer.SetExpectedSize(1000);
-
-
+  this->theObjectContainer.reset();
   this->controlSequences.Clear();
   this->operations.Clear();
   this->operationsComposite.Clear();
   this->operationsCompositeHandlers.SetSize(0);
   this->builtInTypes.Clear();
   this->FunctionHandlers.SetSize(0);
-  this->operations.SetExpectedSize(300);
-  this->FunctionHandlers.SetExpectedSize(300);
-  this->builtInTypes.SetExpectedSize(50);
-  this->operationsComposite.SetExpectedSize(50);
-  this->operationsCompositeHandlers.SetExpectedSize(50);
-
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
   this->flagTimeLimitErrorDetected=false;
@@ -79,13 +62,30 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagMaxRecursionErrorEncountered=false;
   this->flagAbortComputationASAP=false;
   this->ExpressionStack.Clear();
-
   this->theCruncherIds.Clear();
   this->theCruncherS.SetSize(0);
   this->syntaxErrors="";
   this->evaluationErrors.SetSize(0);
   this->CurrentSyntacticStacK=&this->syntacticStacK;
   this->CurrrentSyntacticSouP=&this->syntacticSouP;
+  this->cachedExpressions.Clear();
+  //The expression container must be cleared last!
+  this->theExpressionContainer.Clear();
+}
+
+void CommandList::init(GlobalVariables& inputGlobalVariables)
+{ MacroRegisterFunctionWithName("CommandList::init");
+  this->reset();
+
+  this->operations.SetExpectedSize(300);
+  this->FunctionHandlers.SetExpectedSize(300);
+  this->builtInTypes.SetExpectedSize(50);
+  this->operationsComposite.SetExpectedSize(50);
+  this->operationsCompositeHandlers.SetExpectedSize(50);
+
+  this->formatVisibleStrings.flagExpressionIsFinal=true;
+  this->theGlobalVariableS=&inputGlobalVariables;
+  this->theObjectContainer.theAlgebraicClosure.theGlobalVariables=&inputGlobalVariables;
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string
   //operation List must always have index 0.

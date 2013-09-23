@@ -382,7 +382,7 @@ unsigned int AlgebraicNumber::HashFunction()const
   return 0;
 }
 
-bool AlgebraicNumber::operator==(int other)const
+bool AlgebraicNumber::operator==(const Rational& other)const
 { if (this->theElT.IsEqualToZero())
     return other==0;
   if (this->theElT.size()!=1)

@@ -1207,7 +1207,12 @@ public:
   static bool innerTimes(CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
-  static bool innerTestMe(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output);
+  void AutomatedTestRun
+(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
+  ;
+
   static bool innerTranspose(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerUnion(CommandList& theCommands, const Expression& input, Expression& output);

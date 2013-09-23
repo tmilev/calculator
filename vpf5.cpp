@@ -2442,22 +2442,71 @@ bool CommandList::ReadTestFromFile(std::fstream& theFile, List<std::string>& com
   return false;
 }
 
-bool CommandList::innerTestMe(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerTestMe");
+void CommandList::AutomatedTestRun
+(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
+{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
+  CommandList theTester;
+  int numFunctionsToTest=0;
+  for (int i=0; i<this->FunctionHandlers.size; i++)
+    numFunctionsToTest+=this->FunctionHandlers[i].size;
+  numFunctionsToTest+=operationsCompositeHandlers.size;
+  inputStringsTest.SetExpectedSize(numFunctionsToTest);
+  inputStringsTest.SetSize(0);
+  for (int i=0; i<this->FunctionHandlers.size; i++)
+    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      if (this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTest &&
+          this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTestSetKnownGoodCopy)
+        inputStringsTest.AddOnTop(this->FunctionHandlers[i][j].theExample);
+  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
+    inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i].theExample);
+  outputStringsTestWithInit.SetSize(inputStringsTest.size);
+  outputStringsTestNoInit.SetSize(inputStringsTest.size);
+  for (int i=0; i<inputStringsTest.size; i++)
+  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    theTester.init(*this->theGlobalVariableS);
+    std::cout << "<hr>Evaluating: " << inputStringsTest[i];
+    theTester.Evaluate(inputStringsTest[i]);
+    outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString();
+    std::cout << "<br>To get: " << outputStringsTestWithInit[i];
+    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+  }
+  theTester.init(*this->theGlobalVariableS);
+  for (int i=0; i<inputStringsTest.size; i++)
+  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    std::cout << "<hr>Evaluating without initialization: " << inputStringsTest[i];
+    theTester.Evaluate(inputStringsTest[i]);
+    outputStringsTestNoInit[i]=theTester.theProgramExpression.ToString();
+    std::cout << "<br>To get: " << outputStringsTestNoInit[i];
+    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+  }
+}
+
+bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTestSetKnownGoodCopy");
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
+  List<std::string> inputStringsTest,outputStringsTestWithInit, outputStringsTestNoInit;
+  std::stringstream out;
+  double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
+  out << "Test run completed in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startTime << " seconds.";
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   std::stringstream out;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  CommandList theTester;
-  theTester.init(*theCommands.theGlobalVariableS);
   std::fstream theTestFile;
   std::string theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.html";
-  List<std::string> testInputStrings, testOutputStrings;
+  List<std::string> goodInputStrings, goodOutputStrings;
   if (CGI::FileExists(theTestFileName))
   { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, false, false))
     { std::cout << "This is a programming error or worse: failed to open an existing file: " << theTestFileName << ". "
       << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    if (!theCommands.ReadTestFromFile(theTestFile, testInputStrings, testOutputStrings))
+    if (!theCommands.ReadTestFromFile(theTestFile, goodInputStrings, goodOutputStrings))
     { std::cout << "Failed to get input/output strings from file: " << theTestFileName << ". "
       << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -2468,7 +2517,7 @@ bool CommandList::innerTestMe(CommandList& theCommands, const Expression& input,
       << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-
+    return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
   return output.AssignValue(out.str(), theCommands);
 }

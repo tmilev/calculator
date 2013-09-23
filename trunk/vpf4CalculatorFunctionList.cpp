@@ -9,6 +9,11 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("AutomatedTest", this->innerTestMe, "",
+   "Runs a big bad automated test of all built in functions against a set of known good results. ",
+   "AutomatedTest{}(0)");
+
+  this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");

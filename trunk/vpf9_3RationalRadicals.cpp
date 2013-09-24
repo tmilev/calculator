@@ -410,7 +410,8 @@ bool AlgebraicNumber::CheckNonZeroOwner()const
 }
 
 bool AlgebraicNumber::ConstructFromMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicClosureRationals& inputOwner, GlobalVariables* theGlobalVariables)
-{ return inputOwner.AdjoinRootMinPoly(thePoly, *this, theGlobalVariables);
+{ MacroRegisterFunctionWithName("AlgebraicNumber::ConstructFromMinPoly");
+  return inputOwner.AdjoinRootMinPoly(thePoly, *this, theGlobalVariables);
 }
 
 void AlgebraicClosureRationals::reset()
@@ -490,8 +491,8 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theGenMatPower=theGenMat;
   for (int i=1; i<degreeMinPoly; i++)
   { for (int j=0; j<startingDim; j++)
-    { this->theBasisMultiplicative[i*degreeMinPoly+j]=theGenMatPower;
-      this->theBasisMultiplicative[i*degreeMinPoly+j]*=finalBasis[j];
+    { this->theBasisMultiplicative[i*startingDim+j]=theGenMatPower;
+      this->theBasisMultiplicative[i*startingDim+j]*=finalBasis[j];
     }
     if (i!=degreeMinPoly-1)
       theGenMatPower*=theGenMat;

@@ -34,7 +34,13 @@ public:
   Matrix<Rational> theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
-  slTwoSubalgebra(): owneR(0), container(0), indexInContainer(-1){}
+  bool flagDeallocated;
+  slTwoSubalgebra(): owneR(0), container(0), indexInContainer(-1), flagDeallocated(false){}
+  ~slTwoSubalgebra()
+  { this->flagDeallocated=true;
+  }
+  bool CheckConsistency()const;
+
   SltwoSubalgebras& GetContainerSl2s()
   { if (this->container==0)
     { std::cout << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. "
@@ -295,7 +301,11 @@ public:
   std::string nilradicalGenerationLog;
   Rational centralizerRank;
 
+  bool flagDeallocated;
   CandidateSSSubalgebra();
+  ~CandidateSSSubalgebra()
+  { this->flagDeallocated=true;
+  }
   int GetPrimalRank()const;
 
   void GetHsByType
@@ -451,6 +461,7 @@ public:
   double timeComputationEndInSeconds;
   int numAdditions;
   int numMultiplications;
+  bool flagDeallocated;
   int GetNumPossibleSAs()const;
   void ScaleDynkinType(DynkinType& theType)const;
   std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
@@ -485,13 +496,17 @@ public:
     this->theSl2s.owner=&inputOwner;
   }
   void reset();
-  SemisimpleSubalgebras()
+  ~SemisimpleSubalgebras()
+  { this->flagDeallocated=true;
+  }
+  SemisimpleSubalgebras(): flagDeallocated(false)
   { this->reset();
   }
-  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner)
+  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner): flagDeallocated(false)
   { this->reset();
     this->initHookUpPointers(inputOwner);
   }
+  bool CheckConsistency()const;
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;

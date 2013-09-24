@@ -2390,14 +2390,15 @@ template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
 (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
  const coefficient& theRingUnit, const coefficient& theRingZero)
-{ if (this==0 || &outputCoords==0 || this==&outputCoords)
+{ MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
+  if (this==0 || &outputCoords==0 || this==&outputCoords)
   { std::cout << "This is a programming error: input and output addresses are zero or coincide. this address: " << this << "; output address: " << &outputCoords
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
-    if (!this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i]))
+    if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i])))
       return false;
   return true;
 }
@@ -2466,12 +2467,12 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
-  coefficient tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
+  coefficient tempCF=bufferMat(bufferMat.NumRows-1,0);
   bufferMat/=tempCF;
   output.SetSize(bufferMat.NumRows-1);
   for (int i=0; i<bufferMat.NumRows-1; i++)
-  { bufferMat.elements[i][0].Minus();
-    output[i]=(bufferMat.elements[i][0]);
+  { bufferMat(i,0).Minus();
+    output[i]=(bufferMat(i,0));
   }
 //  std::cout << "outpuf final: " << output.ToString();
   return true;
@@ -4892,6 +4893,7 @@ public:
   List<Vector<Rational> > characterTable;
 
   static bool flagAnErrorHasOcurredTimeToPanic;
+  bool flagDeallocated;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init()
   { this->flagFundamentalToSimpleMatricesAreComputed=false;
@@ -4902,6 +4904,7 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void ComputeExternalAutos();
+  bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
@@ -4927,6 +4930,9 @@ public:
   { return this->HashFunction(*this);
   }
   WeylGroup();
+  ~WeylGroup()
+  { this->flagDeallocated=true;
+  }
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theDynkinType.IsOfSimpleType(desiredType, desiredRank);
   }
@@ -5010,13 +5016,13 @@ public:
   bool GetAlLDominantWeightsHWFDIM
   (Vector<coefficient> & highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
    int upperBoundDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
-template <class coefficient>
+  template <class coefficient>
   bool FreudenthalEval
   (Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoords,
    List<coefficient>& outputMultsSimpleCoords, std::string* outputDetails, GlobalVariables* theGlobalVariables, int UpperBoundFreudenthal);
   void GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables);
   std::string GenerateWeightSupportMethoD1
-  (Vector<Rational> & highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables);
+  (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables);
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
@@ -5042,7 +5048,7 @@ template <class coefficient>
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(Vector<Rational> & orthonormalBasisVector1, Vector<Rational> & orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   void GetLowestElementInOrbit
-  (Vector<Rational>  & inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign=0,
+  (Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign=0,
    bool* stabilizerFound=0)
   { this->GetExtremeElementInOrbit(inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
@@ -5052,9 +5058,9 @@ template <class coefficient>
   { this->GetExtremeElementInOrbit(inputOutput, outputWeylElt, bufferEiBAsis, false, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetExtremeElementInOrbit
-  (Vector<Rational> & inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis,
+  (Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis,
    bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound);
-  void GetLongestWeylElt(ElementWeylGroup& outputWeylElt) ;
+  void GetLongestWeylElt(ElementWeylGroup& outputWeylElt);
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational> & input);
   void GetCoxeterElement(ElementWeylGroup& outputWeylElt)
   { outputWeylElt.SetSize(this->GetDim());
@@ -5139,16 +5145,14 @@ template <class coefficient>
   template <class coefficient>
   bool IsDominantWeight(const Vector<coefficient>& theWeight);
   static void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
-  static void TransformToSimpleBasisGeneratorsArbitraryCoords
-  (Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
+  static void TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   bool operator==(const WeylGroup& other)const;
   void operator+=(const WeylGroup& other);
 };
 
 template <class Element>
-void WeylGroup::SimpleReflectionRhoModified
-(int index, Vector<Element>& theVector)const
+void WeylGroup::SimpleReflectionRhoModified(int index, Vector<Element>& theVector)const
 { Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -5162,8 +5166,7 @@ void WeylGroup::SimpleReflectionRhoModified
 }
 
 template <class Element>
-void WeylGroup::SimpleReflectionMinusRhoModified
-  (int index, Vector<Element>& theVector)const
+void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& theVector)const
 { Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -5177,8 +5180,7 @@ void WeylGroup::SimpleReflectionMinusRhoModified
 }
 
 template <class Element>
-void WeylGroup::SimpleReflection
-(int index, Vector<Element>& theVector)const
+void WeylGroup::SimpleReflection(int index, Vector<Element>& theVector)const
 { Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -5237,9 +5239,9 @@ public:
 //Apparently the algorithm of making an oriented acyclic graph totally ordered is a too difficult task for the designers of c++
 // so I have to do it for them.
   template <class coefficient>
-  bool IsDominantWeight(const Vector<coefficient> & theWeight);
+  bool IsDominantWeight(const Vector<coefficient>& theWeight);
   template <class coefficient>
-  bool IsDominantWRTgenerator(const Vector<coefficient> & theWeight, int generatorIndex);
+  bool IsDominantWRTgenerator(const Vector<coefficient>& theWeight, int generatorIndex);
   template <class coefficient>
   coefficient WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit=1);
   void FindQuotientRepresentatives(int UpperLimit);
@@ -5420,8 +5422,8 @@ public:
   List<std::string> CoordinateReps;
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
   void ToString
-(std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
- std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator);
+  (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+   std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator);
   void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
   { this->ToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables, "");
   }
@@ -5714,6 +5716,7 @@ public:
   Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
 //  List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
+  bool flagDeallocated;
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
@@ -5730,7 +5733,13 @@ public:
     (generatorIndex< this->GetNumPosRoots() && generatorIndex>=this->GetNumPosRoots()-this->GetRank()) ||
     (generatorIndex>=this->GetNumPosRoots()+this->GetRank() && generatorIndex<this->GetNumPosRoots()+this->GetRank()*2);
   }
-  SemisimpleLieAlgebra(){ }
+  SemisimpleLieAlgebra()
+  { this->flagDeallocated=false;
+  }
+  ~SemisimpleLieAlgebra()
+  { this->flagDeallocated=true;
+  }
+  bool CheckConsistency()const;
   template <class coefficient>
   void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
   void ComputeMultTable(GlobalVariables& theGlobalVariables);

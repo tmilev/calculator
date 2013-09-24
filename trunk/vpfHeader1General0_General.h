@@ -707,7 +707,7 @@ inline void ListLight<Object>::SetSize(int theSize)
 { if (theSize== this->size)
     return;
   if (theSize<0)
-    theSize=-1;
+    theSize=0;
   if (theSize==0)
   {
 #ifdef CGIversionLimitRAMuse
@@ -818,8 +818,10 @@ private:
   { this->TheObjects=0;
     this->ActualSize=0;
     this->size=0;
+    this->flagDeallocated=false;
     MacroIncrementCounter(NumListsCreated);
   }
+  bool flagDeallocated;
   int ActualSize;
 public:
   Object* TheObjects;
@@ -831,6 +833,13 @@ public:
   List(const ListLight<Object>& other)
   { this->initConstructorCallOnly();
     this->AssignLight(other);
+  }
+  bool CheckConsistency()const
+  { if (this->flagDeallocated)
+    { std::cout << "This is a programming error: use after free of List. " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return true;
   }
   inline static std::string GetXMLClassName()
   { std::string result="List_";
@@ -1051,6 +1060,7 @@ public:
       << this->size << " elements. " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
+    this->CheckConsistency();
     return this->TheObjects[i];
   }
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
@@ -5392,6 +5402,7 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 #endif
   this->size=0;
   this->ActualSize=0;
+  this->flagDeallocated=true;
 }
 
 template <class Object>

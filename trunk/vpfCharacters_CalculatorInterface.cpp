@@ -6,6 +6,14 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP
 (__FILE__, "Weyl group calculator interface");
 
+bool WeylGroup::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of WeylGroup. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
+}
+
 bool WeylGroup::CheckInitializationFDrepComputation()const
 { if (this->conjugacyClasses.size==0 || this->theElements.size==0)
   { std::cout << "This is a programming error: requesting to compute character hermitian product "

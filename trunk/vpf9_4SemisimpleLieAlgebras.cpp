@@ -24,6 +24,14 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebr
     }
 }
 
+bool SemisimpleLieAlgebra::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
 void SemisimpleLieAlgebra::GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
 { output.MakeZero();
   ChevalleyGenerator theGen;
@@ -398,7 +406,8 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner,
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2(GlobalVariables* theGlobalVariables)
-{ CandidateSSSubalgebra emptyCandidate;
+{ this->CheckConsistency();
+  CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
   this->ExtendCandidatesRecursive(emptyCandidate, true, theGlobalVariables);
   this->HookUpCentralizers(theGlobalVariables);
@@ -717,7 +726,12 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 }
 
 bool CandidateSSSubalgebra::CheckInitialization()const
-{ if (this->owner==0)
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (this->owner==0)
   { std::cout << "This is a programming error: use of non-initialized semisimple subalgebra candidate. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -1247,7 +1261,7 @@ owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
 totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1),
-NumBadParabolics(0), NumCentralizerConditionFailsConeConditionHolds(0)
+NumBadParabolics(0), NumCentralizerConditionFailsConeConditionHolds(0), flagDeallocated(false)
 {
 }
 
@@ -2252,6 +2266,14 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
   }
 }
 
+bool SemisimpleSubalgebras::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of semisimple subalgebras. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
+}
+
 void SemisimpleSubalgebras::reset()
 { this->owneR=0;
   this->theRecursionCounter=0;
@@ -2753,6 +2775,15 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
+bool slTwoSubalgebra::CheckConsistency()const
+{ { if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of slTwoSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
+}
+}
+
 void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
 {//outdates, must be erased as soon as I implement an equivalent
   this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
@@ -3111,7 +3142,15 @@ void slTwoSubalgebra::MakeReportPrecomputations
 void slTwoSubalgebra::ComputePrimalModuleDecomposition
 (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights,
  List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
-{ int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::ComputePrimalModuleDecomposition");
+  this->CheckConsistency();
+  positiveRootsContainingRegularSA.CheckConsistency();
+  if (positiveRootsContainingRegularSA.size<=0)
+  { std::cout << "This is a programming error: positiveRootsContainingRegularSA has less than one element. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
   outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
   outputWeightSpaceDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
   List<int> BufferHighestWeights;

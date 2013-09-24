@@ -517,6 +517,7 @@ int main(int argc, char **argv)
 //  civilizedInput="PolynomialAlgebraicNumbers(\\sqrt{2}+\\sqrt{3}x)^3";
 //civilizedInput="\\sqrt{2}+\\sqrt{3}";
 //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
+//  civilizedInput="AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

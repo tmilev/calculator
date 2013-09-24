@@ -2390,10 +2390,14 @@ template <class coefficient>
 bool Vectors<coefficient>::GetCoordsInBasis
 (const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
  const coefficient& theRingUnit, const coefficient& theRingZero)
-{ assert(this!=&outputCoords);
+{ if (this==0 || &outputCoords==0 || this==&outputCoords)
+  { std::cout << "This is a programming error: input and output addresses are zero or coincide. this address: " << this << "; output address: " << &outputCoords
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
-    if (!(*this)[i].GetCoordsInBasiS(inputBasis, outputCoords[i]))
+    if (!this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i]))
       return false;
   return true;
 }
@@ -2406,7 +2410,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
   bufferMatGaussianElimination.init(inputBasis.size, theDim);
   for (int i=0; i<inputBasis.size; i++)
     for (int j=0; j<theDim; j++)
-      bufferMatGaussianElimination.elements[i][j]=inputBasis.TheObjects[i].TheObjects[j];
+      bufferMatGaussianElimination.elements[i][j]=inputBasis[i][j];
   bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
   //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);

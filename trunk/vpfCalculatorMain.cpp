@@ -398,40 +398,36 @@ int main(int argc, char **argv)
 
 	std::cout << "Content-Type: text/html\n\n";
 
-  theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
   ParallelComputing::cgiLimitRAMuseNumPointersInList=100000000;
-  std::string inputPatH;
-  std::string inputDisplayPath="trunk/";
+  theGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
-  { getPath(argv[0], inputPatH);
+  { getPath(argv[0], theGlobalVariables.inputPatH);
 //    std::cout << "input path: " << inputPatH << "\n\n";
     bool found=false;
-    for (int j=inputPatH.size()-2; j>=0; j--)
-    { if (inputPatH[j]=='/')
+    for (int j=theGlobalVariables.inputPatH.size()-2; j>=0; j--)
+    { if (theGlobalVariables.inputPatH[j]=='/')
       { if (found)
           break;
-        inputDisplayPath="";
+        theGlobalVariables.inputDisplayPath="";
         found=true;
       }
       if (found)
-        inputDisplayPath.push_back(inputPatH[j]);
+        theGlobalVariables.inputDisplayPath.push_back(theGlobalVariables.inputPatH[j]);
     }
     if (found)
-      for (unsigned j=0; j<inputDisplayPath.size()/2; j++)
-        MathRoutines::swap(inputDisplayPath[j], inputDisplayPath[inputDisplayPath.size()-1-j]);
+      for (unsigned j=0; j<theGlobalVariables.inputDisplayPath.size()/2; j++)
+        MathRoutines::swap(theGlobalVariables.inputDisplayPath[j], theGlobalVariables.inputDisplayPath[theGlobalVariables.inputDisplayPath.size()-1-j]);
 //    std::cout << "<br>input display path: " << inputDisplayPath;
-    std::string::size_type foundExperimental=inputDisplayPath.find("experimental");
+    std::string::size_type foundExperimental=theGlobalVariables.inputDisplayPath.find("experimental");
     if (foundExperimental!=std::string::npos)
       std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
 
   }
   std::string tempS;
 //  std::cout << "input path: " << inputDisplayPath << "\n\n";
-  theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
-  theParser.InitJavaScriptDisplayIndicator();
-
+  theParser.init(theGlobalVariables);
 	if (argc>1)
     return main_command_input(argc, argv);
   else
@@ -471,6 +467,7 @@ int main(int argc, char **argv)
 //  static_html5(tempStreamX);
 //  std::cout << tempStreamX.str() << std::endl;
 //  std::cout << inputString;
+
 #ifndef WIN32
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
@@ -518,6 +515,8 @@ int main(int argc, char **argv)
 //civilizedInput="\\sqrt{2}+\\sqrt{3}";
 //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
 //  civilizedInput="AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);";
+//civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}(   x_{7}x_{19}+1,x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{2}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{1}x_{13}-1)";
+  //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

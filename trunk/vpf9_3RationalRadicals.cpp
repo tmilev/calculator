@@ -475,8 +475,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
         assert(false);
       }
       theGenMat.AddMonomial
-      (MonomialMatrix(currentMon.TotalDegreeInt()*startingDim+relRowIndex, startingDim*(degreeMinPoly-1)+relColIndex),
-       currentCoeffMatForm.theCoeffs[j]);
+      (MonomialMatrix(currentMon.TotalDegreeInt()*startingDim+relRowIndex, startingDim*(degreeMinPoly-1)+relColIndex), currentCoeffMatForm.theCoeffs[j]);
     }
   }
   int finalDim=degreeMinPoly*startingDim;

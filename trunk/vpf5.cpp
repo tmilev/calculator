@@ -1570,8 +1570,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
   FormatExpressions theFormat;
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.GetSizeWeylGroupByFormula('E', 6) <=
-        theSubgroup.AmbientWeyl.theDynkinType.GetSizeWeylGroupByFormula())
+  { if (theSubgroup.AmbientWeyl.GetSizeWeylGroupByFormula('E', 6) <= theSubgroup.AmbientWeyl.theDynkinType.GetSizeWeylGroupByFormula())
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
@@ -2461,16 +2460,22 @@ void CommandList::AutomatedTestRun
     inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i].theExample);
   outputStringsTestWithInit.SetSize(inputStringsTest.size);
   outputStringsTestNoInit.SetSize(inputStringsTest.size);
-  for (int i=0; i<inputStringsTest.size; i++)
+  for (int i=219; i<inputStringsTest.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
     theTester.init(*this->theGlobalVariableS);
-    std::cout << "<hr>Evaluating: " << inputStringsTest[i];
+    Expression dummyCommands, tempE;
+    tempE.AssignValue<std::string>("Input suppressed", theTester);
+    dummyCommands.reset(theTester);
+    dummyCommands.AddChildAtomOnTop(theTester.opEndStatement());
+    dummyCommands.AddChildOnTop(tempE);
+
+    std::cout << "<hr>Evaluating command of index " << i << ": " << inputStringsTest[i];
     theTester.Evaluate(inputStringsTest[i]);
-    outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString();
-    std::cout << "<br>To get: " << outputStringsTestWithInit[i];
+    outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
+    std::cout << "<br>To get: " << theTester.theProgramExpression.ToString();
     std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
   }
-  theTester.init(*this->theGlobalVariableS);
+/*  theTester.init(*this->theGlobalVariableS);
   for (int i=0; i<inputStringsTest.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
     std::cout << "<hr>Evaluating without initialization: " << inputStringsTest[i];
@@ -2478,7 +2483,7 @@ void CommandList::AutomatedTestRun
     outputStringsTestNoInit[i]=theTester.theProgramExpression.ToString();
     std::cout << "<br>To get: " << outputStringsTestNoInit[i];
     std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
-  }
+  }*/
 }
 
 bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output)
@@ -2494,6 +2499,7 @@ bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, c
 
 bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
+  return output.AssignValue<std::string>("Not implemented yet. ", theCommands);
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   std::stringstream out;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();

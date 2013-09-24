@@ -200,8 +200,7 @@ bool Vectors<coefficient>::ConesIntersect
   //matA.ComputeDebugString();
   //matb.ComputeDebugString();
   //matX.ComputeDebugString();
-  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution
-      (matA, matb, outputLinearCombo, theGlobalVariables))
+  if (!Matrix<Rational>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(matA, matb, outputLinearCombo, theGlobalVariables))
   { if (outputSplittingNormal!=0)
     { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
       if (!tempBool)
@@ -261,8 +260,7 @@ bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& inpu
 //  std::cout << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
-  std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: "
-  << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+  std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
 //  std::cout << "<br>context: " << theContext.ToString();
 //  std::cout << "<br>The polys: " << thePolys.ToString();
@@ -390,31 +388,25 @@ std::string CommandList::ToStringLinksToCalculatorDirectlyFromHD(const DynkinTyp
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
-  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
-  << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
 std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
-  << theType[0].theLetter << "_" << theType[0].theRank << "\">"
-  << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
+  << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
     out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
-    << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
-    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
+    << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
-  << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " sl(2) triples</a></td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printRootSubalgebras%7B%7D%28"
-  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">"
-  << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
+  << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " root subalgebras</a></td>\n";
   return out.str();
 }
 
@@ -468,20 +460,20 @@ bool CommandList::innerPrintSSsubalgebras
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   std::stringstream out;
-  SemisimpleLieAlgebra* ownerSSPointer;
+  SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
   { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
       return output.SetError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>4)
-    { out << "<b>This code is completely experimental and has been set to run up to rank 4."
-      << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else
-      out << "<b>This code is completely experimental. Use the following printouts on "
-      << "your own risk</b>";
+      out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   } else
     ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owneR;
+  if (ownerSSPointer==0)
+    assert(false);
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
@@ -531,7 +523,7 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
     theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
-    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString() << "</title>" << "<script src=\"" << theCommands.DisplayPathServerBase
+    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString() << "</title><script src=\"" << theCommands.DisplayPathServerBase
     << "jsmath/easy/load.js\"></script> " << "<body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
@@ -582,8 +574,7 @@ bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Express
   SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
-    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+  { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
   }
   else
@@ -621,8 +612,7 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theComma
     return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theF, theH;
   std::stringstream out, logStream;
-  bool success=
-  ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
+  bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
 //  std::cout << "<br>The elts: " <<  theOperators.ToString();
 //  std::cout << "<br> The common ad: " << commonAd.ToString();
   if (success)

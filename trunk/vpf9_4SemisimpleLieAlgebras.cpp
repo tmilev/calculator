@@ -2803,14 +2803,25 @@ void slTwoSubalgebra::ElementToHtml(std::string& filePath)
   CGI::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SltwoSubalgebras::init(SemisimpleLieAlgebra& inputOwner)
-{ this->owner=& inputOwner;
+void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
+{ MacroRegisterFunctionWithName("SltwoSubalgebras::reset");
+  MultiplicitiesFixedHweight.SetSize(0);
+  this->IndicesSl2sContainedInRootSA.SetSize(0);
+  this->IndicesSl2decompositionFlas.SetSize(0);
+  this->BadHCharacteristics.SetSize(0);
+  this->IndexZeroWeight=-1;
+  this->texFileNamesForPNG.SetSize(0);
+  this->texStringsEachFile.SetSize(0);
+  this->listSystemCommandsLatex.SetSize(0);
+  this->listSystemCommandsDVIPNG.SetSize(0);
+
+  this->owner=& inputOwner;
   this->theRootSAs.owneR=&inputOwner;
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
-  output.init(inputOwner);
+  output.reset(inputOwner);
   output.GetOwner().ComputeChevalleyConstantS(&theGlobalVariables);
   output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
@@ -2834,8 +2845,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     { bool isMinimalContaining=true;
 //      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
       for (int k=0; k<theSl2.IndicesContainingRootSAs.size; k++)
-      { rootSubalgebra& theOtherRootSA =
-        output.theRootSAs[theSl2.IndicesContainingRootSAs[k]];
+      { rootSubalgebra& theOtherRootSA = output.theRootSAs[theSl2.IndicesContainingRootSAs[k]];
         if (theOtherRootSA.indicesSubalgebrasContainingK.Contains(theSl2.IndicesContainingRootSAs[j]))
         { isMinimalContaining=false;
           break;
@@ -3002,6 +3012,14 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 //  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
+void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+{ this->GrandMasterConsistencyCheck();
+  for(int i=0; i<this->size; i++)
+    this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
+  this->GrandMasterConsistencyCheck();
+}
+
+
 bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex)
 { if (outputIndex!=0)
     *outputIndex=-1;
@@ -3042,9 +3060,7 @@ void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool use
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
-{ this->ComputePrimalModuleDecomposition
-  (this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights,
-   this->weightSpaceDimensions, theGlobalVariables);
+{ this->ComputePrimalModuleDecomposition(this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
@@ -3053,9 +3069,7 @@ void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(Sl
   List<int> buffer;
   for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
   { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[i]];
-    this->ComputePrimalModuleDecomposition
-    (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i],
-     this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
+    this->ComputePrimalModuleDecomposition(theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i], this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
   }
 }
 
@@ -3104,8 +3118,7 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
   Rational tempRat;
   Vectors<Rational> coordsInPreferredSimpleBasis, tempRoots2;
   Matrix<Rational> tempMat;
-  positiveRootsContainingRegularSA.GetCoordsInBasis
-  (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
+  positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
   { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     assert(tempRat.DenShort==1);

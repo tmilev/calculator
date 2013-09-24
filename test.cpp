@@ -1,8 +1,6 @@
 #include "vpf.h"
 // ^ that is first for precompilation
 
-#include "vpfCharacters.h"
-#include "vpfGraph.h"
 //#include "testlib.h"
 #include <iostream>
 
@@ -704,11 +702,13 @@ class AnotherWeylGroup
   List<vector> RootSystem;
   HashedList<vector> rhoOrbit;
   List<List<int> > conjugacyClasses;
+  List<int> classMap;
+  List<Matrix<Rational> > classMatrices;
 
   // needed
   List<Vector<Rational> > characterTable;
 
-  int GetDim() const; // idk lol
+  int GetRank() const; // idk lol
   void SimpleReflection(int i, const vector& v, vector& out) const;
   void SimpleReflection(int i, vector& v) const;
   void GetSimpleReflections(const vector& v, List<int>& out) const;
@@ -722,6 +722,10 @@ class AnotherWeylGroup
   void ComputeRho();
   void ComputeAllElements();
   void ComputeConjugacyClasses();
+  void ComputeClassMap();
+  Matrix<Rational>& GetClassMatrix(int cc);
+  void ComputeClassMatrices(); // O(W.size)
+  void ComputeTauSignatures();
   Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
 
   int GetRootReflection(int i) const;
@@ -729,7 +733,7 @@ class AnotherWeylGroup
 
   // own stuff
   int size; // useful b/c its nice to not axcidently depend on logically stuff
-  int nGens;
+  int rank;
   vector twiceRho;
   Matrix<scalar> unrationalCartanSymmetric;
   vector* ucsm;
@@ -742,7 +746,7 @@ void AnotherWeylGroup<scalar, vector>::SimpleReflection(int i, vector& v) const
 { // next i'll put some printfs in addition
   //std::cout << "Debugging simple reflections: vector " << v << " transformed by reflection " << i;
   scalar x=0;
-  for(int j=0;j<this->nGens;j++)
+  for(int j=0;j<this->rank;j++)
       x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
   // so, under ordinary circumstances, this is just out[i] -= x;
   // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] !∈ {1,2}
@@ -762,9 +766,9 @@ template <typename scalar, typename vector>
 void AnotherWeylGroup<scalar, vector>::GetSimpleReflections(const vector& v, List<int>& out) const
 { vector w = v;
   while(w != this->twiceRho)
-  { for(int i=0; i<this->nGens; i++)
+  { for(int i=0; i<this->rank; i++)
     { scalar x=0;
-      for(int j=0; j<this->nGens; j++)
+      for(int j=0; j<this->rank; j++)
         if(this->unrationalCartanSymmetric.elements[i][j] != 0)
           x += this->unrationalCartanSymmetric.elements[i][j] * w[j];
       if(x>0)
@@ -787,7 +791,7 @@ void AnotherWeylGroup<scalar, vector>::ApplyReflectionList(const List<int>& simp
   {//this->SimpleReflection(simpleReflections[i],v);
     int i = simpleReflections[ii];
     scalar x=0;
-    for(int j=0;j<this->nGens;j++)
+    for(int j=0;j<this->rank;j++)
       x += this->unrationalCartanSymmetric.elements[i][j] * v[j];
   // so, under ordinary circumstances, this is just out[i] -= x;
   // silent corruption occurs if UnrationalCartanSymmetric.elements[i][i] !∈ {1,2}
@@ -850,10 +854,10 @@ void AnotherWeylGroup<scalar, vector>::ComputeRho()
       std::cout << unrationalCartanSymmetric.elements[i][j] << '\t';
     std::cout << '\n';
   }
-  this->nGens = this->unrationalCartanSymmetric.NumRows;
-  for(int rvi=0; rvi<nGens; rvi++)
+  this->rank = this->unrationalCartanSymmetric.NumRows;
+  for(int rvi=0; rvi<rank; rvi++)
   { vector vi;
-    vi.MakeEi(nGens,rvi);
+    vi.MakeEi(rank,rvi);
     if(this->RootSystem.Contains(vi))
       continue;
     this->RootSystem.AddOnTop(vi);
@@ -862,7 +866,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeRho()
     newelts.AddOnTop(this->RootSystem.GetIndex(vi));
     while(newelts.size > 0)
     { int i = newelts.PopLastObject();
-      for(int si=0; si<this->nGens; si++)
+      for(int si=0; si<this->rank; si++)
       { this->SimpleReflection(si,this->RootSystem[i],w);
         if(this->RootSystem.GetIndex(w) == -1)
         { this->RootSystem.AddOnTop(w);
@@ -873,7 +877,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeRho()
     }
   }
   this->RootSystem.QuickSortAscending();
-  this->twiceRho.MakeZero(nGens);
+  this->twiceRho.MakeZero(rank);
   for(int i=0; i<this->RootSystem.size; i++)
   { bool usethis = true;
     for(int j=0; j<this->RootSystem[i].size; j++)
@@ -901,7 +905,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeAllElements()
   newelts.AddOnTop(this->rhoOrbit.GetIndex(twiceRho));
   while(newelts.size > 0)
   { int i = newelts.PopLastObject();
-    for(int si=0; si<this->nGens; si++)
+    for(int si=0; si<this->rank; si++)
     { this->SimpleReflection(si,this->rhoOrbit[i],w);
       if(this->rhoOrbit.GetIndex(w) == -1)
       { this->rhoOrbit.AddOnTop(w);
@@ -926,7 +930,7 @@ void AnotherWeylGroup<scalar, vector>::ComputeConjugacyClasses()
   this->conjugacyClasses.ReservE(50);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->size);
-  int theRank=this->GetDim();
+  int theRank=this->GetRank();
   vector theRhoImage;
   for (int i=0; i<this->size; i++)
     if (!Accounted[i])
@@ -949,8 +953,40 @@ void AnotherWeylGroup<scalar, vector>::ComputeConjugacyClasses()
   std::cout << conjugacyClasses.size << std::endl;
 }
 
+template<typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ComputeClassMap()
+{ this->classMap.SetSize(this->size);
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+    for(int j=0; j<this->conjugacyClasses[i].size; j++)
+      this->classmap[this->conjugacyClasses[i][j]] = i;
+}
+
+template<typename scalar, typename vector>
+Matrix<Rational>& AnotherWeylGroup<scalar, vector>::GetClassMatrix(int cc)
+{ if(this->classMatrices.size == 0)
+  { if(this->conjugacyClasses.size == 0)
+      this.ComputeConjugacyClasses();
+    this->classMatrices.SetSize(this->conjugacyClasses.size);
+  }
+  if(this->classMap.size == 0)
+    this->ComputeClassMap();
+  this->classMatrices[cc] = GetClassMatrix(*this, cc, &(this->classmap));
+  return this->classMatrices[cc];
+}
+
+template<typename scalar, typename vector>
+void AnotherWeylGroup<scalar, vector>::ComputeClassMatrices()
+{ if(this->conjugacyClasses.size == 0)
+    this->ComputeConjugacyClasses();
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+  { std::cout << "//getting class matrix " << i << std::endl;
+    this->GetClassMatrix(i);
+  }
+}
+
+
 template <typename scalar, typename vector>
-int AnotherWeylGroup<scalar, vector>::GetDim() const
+int AnotherWeylGroup<scalar, vector>::GetRank() const
 { return this->CartanSymmetric.NumRows;
 }
 
@@ -1646,7 +1682,7 @@ void AllTauSignatures(weylgroup* G, List<List<bool> >& tauSignatures, bool pseud
 
 
 template <typename weylgroup>
-void PrettyPrintTauSignatures(weylgroup& G, JSData& data)
+void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 {  if(G.characterTable.size == 0)
      ComputeCharacterTable(G);
 /* this doesn't belong here
@@ -1739,6 +1775,9 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data)
    std::cout << "\\end{array} \\]" << std::endl;
 
 // now the pseudo tau signatures
+  if(pseudo)
+  {
+
   if(ts[0].size > numCycles)
   { std::cout << "hr is ";
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
@@ -1776,6 +1815,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data)
        std::cout << "\\\\\n";
     }
     std::cout << "\\end{array} \\]" << std::endl;
+  }
   }
 }
 
@@ -2164,9 +2204,7 @@ List<Vector<coefficient> > getunion(const List<Vector<coefficient> > &V, const L
    for(int i=0; i<W.size; i++)
       for(int j=0; j<d; j++)
          M.elements[V.size+i][j] = W[i][j];
-   Matrix<coefficient> one;
-   Selection two;
-   M.GaussianEliminationByRows(M,one,two);
+   M.GaussianEliminationByRows();
    List<Vector<coefficient> > out;
    for(int i=0; i<M.NumRows; i++)
    {  Vector<coefficient> v;
@@ -2242,9 +2280,7 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
             outm.elements[i][j] -= VM.elements[k][i] * W[k][j];
       }
    }
-   Matrix<coefficient> tmp;
-   Selection s;
-   outm.GaussianEliminationByRows(outm,tmp,s);
+   outm.GaussianEliminationByRows();
    List<Vector<coefficient> > out;
    for(int i=0; i<outm.NumRows; i++)
    {  Vector<coefficient> v;
@@ -2297,7 +2333,7 @@ List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M)
 {  Matrix<coefficient> MM; // idk what this does
    Selection s;
 //  std::cout << "DestructiveKernel: GaussianEliminationByRows" << std::endl;
-   M.GaussianEliminationByRows(M,MM,s);
+   M.GaussianEliminationByRows(0,0,s);
 //  std::cout << "DestructiveKernel: calculating kernel space" << std::endl;
    List<Vector<coefficient> > V;
    for(int i=0; i<s.selected.size; i++)
@@ -2327,9 +2363,7 @@ List<Vector<coefficient> > DestructiveEigenspace(Matrix<coefficient> &M, const c
 template <typename coefficient>
 List<Vector<coefficient> > DestructiveColumnSpace(Matrix<coefficient>& M)
 {  M.Transpose();
-   Matrix<coefficient> dummy1;
-   Selection dummy2;
-   M.GaussianEliminationByRows(M,dummy1,dummy2);
+   M.GaussianEliminationByRows();
    List<Vector<coefficient> > out;
    bool zerov;
    for(int i=0; i<M.NumRows; i++)
@@ -2536,6 +2570,71 @@ int chartable[10][10] =
    {3,  1, -1,  1, -1,  0,  0, -1, -1,  3}
 };
 
+void make_macdonald_polynomial(const WeylGroup& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly)
+{  List<MonomialP> vars;
+   vars.SetSize(G.GetDim());
+   for(int i=0; i<G.GetDim(); i++)
+     vars[i].MakeEi(i);
+
+   macdonaldPoly.MakeOne();
+   for(int i=0; i<roots.size; i++)
+   { Polynomial<Rational> pj;
+     for(int j=0; j<G.GetDim(); j++)
+       pj.AddMonomial(vars[j], roots[i][j]);
+     macdonaldPoly *= pj;
+   }
+}
+
+void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Rational>& p, Polynomial<Rational>& q)
+{ Rational one = 1;
+  q = q.GetZero();
+  List<MonomialP> vars;
+  vars.SetSize(m.NumCols);
+  for(int i=0; i<m.NumCols; i++)
+    vars[i].MakeEi(i);
+  for(int i=0; i<p.theMonomials.size; i++)
+  { Polynomial<Rational> qi;
+    qi = qi.GetOne();
+    for(int j=0; j<p.theMonomials[i].GetMinNumVars(); j++)
+      if(p.theMonomials[i](j) != 0){
+        Polynomial<Rational> qj;
+        qj = qj.GetZero();
+        for(int k=0; k<m.NumCols; k++)
+          qj.AddMonomial(vars[k],m.elements[k][j]);
+        qj.RaiseToPower((p.theMonomials[i](j)).floorIfSmall(),one);
+        qi *= qj;
+      }
+    qi *= p.theCoeffs[i];
+    q += qi;
+  }
+}
+
+template <class templateMonomial, class coefficient>
+bool GetCoordsInBasisInputIsGaussianEliminated
+(const List<MonomialCollection<templateMonomial, coefficient> > &inputReducedBasis,
+  const MonomialCollection<templateMonomial, coefficient> & input,
+  Vector<coefficient>* outputCoordinatesInBasis=0)
+{ MacroRegisterFunctionWithName("GetCoordsInBasiS");
+  MonomialCollection<templateMonomial, coefficient>  summand, v=input;
+  coefficient currentCoeff;
+  if (outputCoordinatesInBasis!=0)
+    outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
+  for(int i=0; i<inputReducedBasis.size; i++)
+  { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
+    if (!currentCoeff.IsEqualToZero())
+    { summand=inputReducedBasis[i];
+      if (outputCoordinatesInBasis!=0)
+        (*outputCoordinatesInBasis)[i]=currentCoeff;
+      currentCoeff*=-1;
+      summand*=currentCoeff;
+      v-=summand;
+    }
+  }
+  return v.IsEqualToZero();
+}
+
+
+
 int main(void)
 {  testformat.flagUseHTML = false;
    testformat.flagUseLatex = false;
@@ -2731,8 +2830,8 @@ int main(void)
      powers.AddOnTop(v);
      powers2.AddOnTop(w);
    }
-   std::cout << powers2.GetDim() << std::endl;
-   std::cout << powers.GetDim() << std::endl;
+   std::cout << powers2.GetRank() << std::endl;
+   std::cout << powers.GetRank() << std::endl;
 
    ClassFunction<Rational> X;
    X.G = &G;
@@ -2758,7 +2857,7 @@ int main(void)
    //  Vectors<Rational> V;
    //  XP.GetZeroEigenSpace(V);
    //  std::cout << V << std::endl;
-   //  std::cout << V.GetDim() << std::endl;
+   //  std::cout << V.GetRank() << std::endl;
 
    /*
    Matrix<Rational> A;
@@ -3080,7 +3179,7 @@ int main(void)
    /*    std::cout << V2.GetCharacter() << std::endl;
        CoxeterRepresentation<Rational> V2x2 = V2*V2;
        std::cout << V2x2.GetCharacter() << std::endl;
-       for(int i=0; i<G.nGens; i++)
+       for(int i=0; i<G.rank; i++)
        { std::cout << V2x2.gens[i].ToString(&testformat);
          std::cout << V2x2.gens[i].GetDeterminant() << ' ' << V2x2.gens[i].GetTrace() << std::endl;
        }
@@ -3180,7 +3279,7 @@ int main(void)
    std::cout << "trying to break up one isotypic component" << std::endl;
    int cmpx = 2;
    std::cout << isocomps[cmpx].ToString(&testformat) << std::endl;
-   int d = isocomps[cmpx].GetDim();
+   int d = isocomps[cmpx].GetRank();
    std::cout << "the smoothed-out inner product" << std::endl;
    Matrix<Rational> B;
    B.init(d,d);
@@ -3218,25 +3317,64 @@ int main(void)
 
    GlobalVariables localGlobalVariables;
    localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
-   AnotherWeylGroup<int, PackedVector<int> > G;
-   DynkinType D;
-   D.MakeSimpleType('E',7);
-   D.GetCartanSymmetric(G.CartanSymmetric);
+   //AnotherWeylGroup<int, PackedVector<int> > G;
+   SemisimpleLieAlgebra theSSlieAlg;
+   theSSlieAlg.theWeyl.MakeArbitrarySimple('B',3);
+   theSSlieAlg.ComputeChevalleyConstantS(&localGlobalVariables);
+   WeylGroup& G=theSSlieAlg.theWeyl;
    G.ComputeConjugacyClasses();
+
+   rootSubalgebras theRootSAs;
+   theRootSAs.owneR=&theSSlieAlg;
+   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+   (localGlobalVariables, 'B', 3, true, false);
+   List<Vector<Rational> > roots;
+//   for(int i=0; i<G.RootSystem.size; i++)
+//      if(G.rho.ScalarProduct(G.RootSystem[i], G.CartanSymmetric) > 0)
+   for (int k=0; k<theRootSAs.size; k++)
+   { rootSubalgebra& currentRootSA=theRootSAs[k];
+     roots=currentRootSA.PositiveRootsK;
+     Polynomial<Rational> macdonaldPoly;
+     make_macdonald_polynomial(G,roots,macdonaldPoly);
+     std::cout << macdonaldPoly << std::endl;
+     Polynomial<Rational> p;
+     Matrix<Rational> m;
+     G.GetStandardRepresentationMatrix(4,m);
+     matrix_acts_on_polynomial(m,macdonaldPoly,p);
+     std::cout << p << std::endl;
+     List<Polynomial<Rational> > module;
+     module.SetSize(G.size);
+     for(int i=0; i<G.size; i++)
+     { G.GetStandardRepresentationMatrix(i,m);
+       matrix_acts_on_polynomial(m,macdonaldPoly,module[i]);
+     }
+     std::cout << "I am processing root subalgebra of type "
+     << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(G.theDynkinType[0]);
+
+//     for (int i=0; i<module.size; i++)
+//       std::cout << " \n\n\nelement number" << i+1 << " out of " << module.size << ": " << module[i].ToString();
+     Polynomial<Rational>::GaussianEliminationByRowsDeleteZeroRows(module);
+     std::cout << "...rank is " << module.size << std::endl;
+
+//     for (int i=0; i<module.size; i++)
+//       std::cout << " \n\n\nelement number" << i+1 << " out of " << module.size << ": " << module[i].ToString();
+   }
+
+/*
    JSData data;
-   data.readfile("e7ct");
+   data.readfile("c7ct");
    if(data.type != JSNULL)
    { std::cout << data << std::endl;
      AddCharTable(data,G);
    } else
    { ComputeCharacterTable(G);
      PrintCharTable(G, NULL);
-     PrintCharTable(G, "e7ct");
+     PrintCharTable(G, "c7ct");
    }
    JSData ts;
    PrettyPrintTauSignatures(G,ts);
-   ts.writefile("e7ts");
-
+   ts.writefile("c7ts");
+*/
 //   G.ComputeConjugacyClasses();
 //   std::cout << "Conjugacy class representatives" << std::endl;
 //   for(int i=0; i<G.conjugacyClasses.size; i++)

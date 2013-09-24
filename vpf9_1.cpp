@@ -2147,10 +2147,8 @@ void rootSubalgebras::ElementToHtml
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  output << "<html><title> Root subsystems of "
-  << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
-  output << "<meta name=\"keywords\" content=\""
-  << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
+  output << "<html><title> Root subsystems of " << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
+  output << "<meta name=\"keywords\" content=\"" << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
   << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
@@ -2163,14 +2161,11 @@ void rootSubalgebras::ElementToHtml
 }
 
 void rootSubalgebras::ToString
-(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords,
- std::string* htmlPathPhysical, std::string* htmlPathServer,
+(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer,
  GlobalVariables* theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out; std::string tempS;
   if (useHtml)
-    out << " <a href=\"" << DisplayNameCalculator
-    << "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">"
-    << "Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    out << " <a href=\"" << DisplayNameCalculator << "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\"> Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);
@@ -2379,9 +2374,7 @@ void coneRelations::ToString
   if (useLatex)
     out << footer;
   if (this->flagIncludeSubalgebraDataInDebugString)
-  { owners.ToString
-    (tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer,
-     &theGlobalVariables, DisplayNameCalculator);
+  { owners.ToString(tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer, &theGlobalVariables, DisplayNameCalculator);
     out << "\n\n\\newpage" << tempS;
   }
   output=out.str();
@@ -2403,8 +2396,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
   ProgressReport theReport(theGlobalVariables);
   double startTimer=-1;
   if (theGlobalVariables!=0)
-  { out << "Initializing matrix for structure constant computation of "
-    << this->GetLieAlgebraName() << "... ";
+  { out << "Initializing matrix for structure constant computation of " << this->GetLieAlgebraName() << "... ";
     startTimer= theGlobalVariables->GetElapsedSeconds();
     theReport.Report(out.str());
   }
@@ -2421,8 +2413,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
     }
   double startStructureConstantComputation=-1;
   if (theGlobalVariables!=0)
-  { out << "done in " << theGlobalVariables->GetElapsedSeconds()- startTimer
-    << " seconds.<br> " << "Computing structure constants...";
+  { out << "done in " << theGlobalVariables->GetElapsedSeconds()- startTimer << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
     startStructureConstantComputation= theGlobalVariables->GetElapsedSeconds();
   }
@@ -2490,16 +2481,12 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
   }
   this->ComputeMultTable(*theGlobalVariables);
   if (theGlobalVariables!=0)
-  { out << " done in " << theGlobalVariables->GetElapsedSeconds()-startMultTable
-    << " seconds. Total structure constant computation time: "
-    << theGlobalVariables->GetElapsedSeconds()- startTimer
-    << " seconds. ";
+  { out << " done in " << theGlobalVariables->GetElapsedSeconds()-startMultTable << " seconds. Total structure constant computation time: "
+    << theGlobalVariables->GetElapsedSeconds()- startTimer << " seconds. ";
     theReport.Report(out.str());
   }
   if (this->GetNumPosRoots()<=0)
-  { std::cout
-    << "This is a programming error: number of positive roots of a semisimple "
-    << "Lie algebra is reported to be zero. "
+  { std::cout << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -2631,8 +2618,8 @@ bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
 { output=-1;
   Vector<Rational> tempRoot=beta;
   if (alpha.IsEqualToZero())
-  { std::cout << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot"
-    << " with zero value for alpha is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   bool foundRoot=false;
@@ -2691,14 +2678,11 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
         temp+=g231;
         temp+=g312;
         if (!temp.IsEqualToZero())
-        { std::cout << "This is a programming error. The computed structure constants are wrong: "
-          << " the Jacobi identity fails. More precisely, I get that "
+        { std::cout << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
           << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "]=" << g12.ToString(&theFormat)
           << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "]=" << g23.ToString(&theFormat)
           << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "]=" << g31.ToString(&theFormat)
-          << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231="
-          << g231.ToString(&theFormat)
-          << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
+          << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231=" << g231.ToString(&theFormat) << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
           return false;
@@ -2741,8 +2725,7 @@ void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Tota
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);
-  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of "
-  << Total << " k: " << k+1 << " of " << Total;
+  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(out2.str()+out3.str());

@@ -2442,6 +2442,11 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
 { if(inputBasis.size==0)
     return false;
   MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
+  if (this==0)
+  { std::cout << "This is a programming error: this pointer of a vector is zero when it shouldn't be. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size!=inputBasis[0].size)
@@ -2544,6 +2549,11 @@ public:
   DrawingVariables theDrawingVariables;
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
+
+
+  std::string inputPatH;
+  std::string inputDisplayPath;
+  std::string IPAdressCaller;
 
   //buffers:
   MemorySaving<Selection> selWallSelection;
@@ -2927,8 +2937,7 @@ public:
     SemisimpleLieAlgebra* owner= (*this)[0].owneR;
     for (int i=1; i<this->size(); i++)
       if (owner!=(*this)[i].owneR)
-      { std::cout << "This is a programming error: ElementSemisimpleLieAlgebra "
-        << " contains Chevalley generators with different owners. "
+      { std::cout << "This is a programming error: ElementSemisimpleLieAlgebra contains Chevalley generators with different owners. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }

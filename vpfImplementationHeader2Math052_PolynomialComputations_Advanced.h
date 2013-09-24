@@ -653,7 +653,9 @@ void GroebnerBasisComputation<coefficient>::GetSubFromPartialSolutionSerreLikeSy
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::GetOneVarPolySolution(const Polynomial<coefficient>& thePoly, coefficient& outputSolution, AlgebraicClosureRationals& theAlgebraicClosure, GlobalVariables* theGlobalVariables)
-{ AlgebraicNumber theAN;
+{ return false;
+  int warnMe;
+  AlgebraicNumber theAN;
   if (!theAN.ConstructFromMinPoly(thePoly, theAlgebraicClosure, theGlobalVariables))
     return false;
   outputSolution=theAN;

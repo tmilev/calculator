@@ -505,8 +505,7 @@ void Selection::operator=(const Vector<Rational>& other)
   this->ComputeIndicesFromSelection();
 }
 
-void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
-(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;

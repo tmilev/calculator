@@ -38,6 +38,9 @@
 		<Linker>
 			<Add library="libpthread" />
 		</Linker>
+		<Unit filename="test.cpp">
+			<Option target="test" />
+		</Unit>
 		<Unit filename="vpf.h" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />

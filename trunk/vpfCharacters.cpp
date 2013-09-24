@@ -1167,6 +1167,19 @@ void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output
     this->irreps.AddOnTop(output);
 }
 
+void WeylGroup::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
+{ // the rank is the number of rows of the Cartan form
+  output.init(this->CartanSymmetric.NumRows,this->CartanSymmetric.NumRows);
+  for(int i=0; i<this->CartanSymmetric.NumRows; i++)
+  { Vector<Rational> v;
+    v.MakeEi(this->CartanSymmetric.NumRows,i);
+    this->ActOn(g,v);
+    for(int j=0; j<this->CartanSymmetric.NumRows; j++)
+      output.elements[j][i] = v[j];
+  }
+}
+
+
 CoxeterRepresentation<Rational> CoxeterGroup::StandardRepresentation()
 { List<Matrix<Rational> > gens;
   for(int i=0; i<this->nGens; i++)

@@ -653,16 +653,21 @@ public:
   coefficient Evaluate(const Vector<coefficient>& input);
   bool IsProportionalTo(const Polynomial<coefficient>& other, coefficient& TimesMeEqualsOther, const coefficient& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
-  const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
+  const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder=0)const
   { return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
   }
-  int GetIndexMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
+  int GetIndexMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder=0)const
   { if (this->size()==0)
       return -1;
     int result=0;
     for (int i=1; i<this->size(); i++)
-      if (theMonOrder((*this)[i], (*this)[result]))
-        result=i;
+    { if(theMonOrder!=0)
+      { if (theMonOrder((*this)[i], (*this)[result]))
+          result=i;
+      } else
+        if ((*this)[i]>(*this)[result])
+          result=i;
+    }
     return result;
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest()const;
@@ -4993,6 +4998,7 @@ public:
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeight, bool useOuterAutos);
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetSimpleReflectionMatrix(int indexSimpleRoot, Matrix<Rational>& output)const;
+  void GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const;
   void DrawRootSystem
   (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables, bool drawWeylChamber, Vector<Rational> * bluePoint=0,
    bool LabelDynkinDiagramVertices=false, Vectors<Rational>* predefinedProjectionPlane=0);

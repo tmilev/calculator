@@ -75,6 +75,7 @@ GlobalVariables::GlobalVariables()
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->callSystem=0;
   this->flagGaussianEliminationProgressReport=false;
+  this->getElapsedTimePrivate=0;
 }
 
 void ProgressReport::Report(const std::string& theReport)

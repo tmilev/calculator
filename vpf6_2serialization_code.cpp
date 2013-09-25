@@ -729,7 +729,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagComputePairingTable=true;
-  theSAs.flagComputeNilradicals=true;
+  theSAs.flagComputeNilradicals=false;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)

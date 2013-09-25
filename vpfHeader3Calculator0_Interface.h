@@ -11,6 +11,7 @@
 #include "vpfHeader1General1_ListReferences.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
+#include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 

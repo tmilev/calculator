@@ -1787,6 +1787,7 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   reportStream << "Enumerating recursively nilradicals of type " << this->ToStringTypeAndHs() << "...";
   theReport.Report(reportStream.str());
   //std::cout << reportStream.str();
+  this->FKNilradicalCandidates.SetSize(0);
   List<int> theSel;
   this->RecursionDepthCounterForNilradicalGeneration=0;
   //0 stands for not selected, 1 for selected from nilradical, 3 for selected from semisimple part, 2 stands for unknown.
@@ -1794,6 +1795,12 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
   for(int i=0; i<this->primalSubalgebraModules.size; i++)
     theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
+  if (theSel.size!=this->NilradicalPairingTable.size || theSel.size!=this->ModulesIsotypicallyMerged.size)
+  { std::cout << "This is a programming error: selection has " << theSel.size << ", nilraidcal pairing table has "
+    << this->NilradicalPairingTable.size << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size
+    << " elements." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
   if (this->FKNilradicalCandidates.size<1)
   { std::cout << "This is a programming error:" << " while enumerating nilradicals of "
@@ -2002,8 +2009,8 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateNilradicalsRecursively");
   RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
   if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size+1)
-  { std::cout << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot "
-    << "exceed the number of nilradicals! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot exceed the number of nilradicals! "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   ProgressReport theReport(theGlobalVariables);

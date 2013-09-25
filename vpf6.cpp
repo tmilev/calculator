@@ -3,6 +3,8 @@
 #include "vpf.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
+#include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
+
 
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
 
@@ -1552,8 +1554,7 @@ bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Ex
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.GetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, theCommands.innerRationalFunction) )
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -1561,13 +1562,11 @@ bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Ex
   return theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
-    return output.SetError
-    ("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ", theCommands);
+    return output.SetError("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& genVemaWeightNode=input[3];
   const Expression& levelNode=input[2];
@@ -2383,14 +2382,12 @@ bool CommandList::innerHWVCommon
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
-  ListReferences<ModuleSSalgebra<RationalFunctionOld> >& theMods=
-  theCommands.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunctionOld> >& theMods= theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule=-1;
 
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& currentMod=theMods[i];
-    if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField &&
-        selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
+    if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField && selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi && currentMod.owneR==owner)
     { indexOfModule=i;
       break;
     }
@@ -2398,18 +2395,27 @@ bool CommandList::innerHWVCommon
   if (indexOfModule==-1)
   { indexOfModule=theMods.size;
     theMods.SetSize(theMods.size+1);
+    theMods.LastObject().reset();
   }
   ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { bool isGood=theMod.MakeFromHW
-    (*owner, highestWeightFundCoords, selectionParSel,
-     *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
+  { bool isGood=theMod.MakeFromHW(*owner, highestWeightFundCoords, selectionParSel, *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
     if (Verbose)
       theCommands.Comments << theMod.ToString();
     if (!isGood)
       return output.SetError("Error while generating highest weight module. See comments for details. ", theCommands);
   }
+  if (&theMod.GetOwner()!=owner)
+  { std::cout << "This is a programming error: module has owner that is not what it should be. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   theElt.MakeHWV(theMod, RFOne);
+  if (&theElt.GetOwnerSS()!=owner)
+  { std::cout << "This is a programming error: just created an ElementTensorsGeneralizedVermas whose owner is not "
+    << "what it should be. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
 }
 
@@ -2461,7 +2467,6 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   RationalFunctionOld RFOne, RFZero;
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   RFZero.MakeZero(theCommands.theGlobalVariableS);
-  std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
   Selection selParSel1, selFD;
@@ -2480,14 +2485,16 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
     if (!isGood)
       return output.SetError("Error: the third argument of innerSplitGenericGenVermaTensorFD must be a list of small non-negative integers.", theCommands);
   }
-  theCommands.innerHWVCommon(theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra);
+  if (!theCommands.innerHWVCommon(theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra))
+    return false;
   if (hwvGenVerma.IsError())
   { output=hwvGenVerma;
     return true;
   }
   Vector<RationalFunctionOld> theFDhwRF;
   theFDhwRF=theFDhw;
-  theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra);
+  if (!theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra))
+    return false;
   if (hwvFD.IsError())
   { output=hwvFD;
     return true;
@@ -2500,13 +2507,30 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   ModuleSSalgebra<RationalFunctionOld>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
   //int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
   ModuleSSalgebra<RationalFunctionOld>& theFDMod=theHWfd[0].theMons[0].GetOwner();
+  if (theGenMod.owneR!=theFDMod.owneR ||
+      theGenMod.GetOwner().GetRank()!=theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
+      theFDMod.GetOwner().GetRank()!=theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
+      )
+  { std::cout << "This is a programming error: the two modules have owners, " << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
+    << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.ToString() << ", and parabolic selections of max size "
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " and "
+    << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   //int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theSSalgebra);
-  ReflectionSubgroupWeylGroup tempSG;
   List<ElementUniversalEnveloping<RationalFunctionOld> > theLeviEigenVectors;
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
+  if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize!=theGenMod.GetOwner().GetRank())
+  { std::cout << "This is a programming error: module has parabolic selection with max size "
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
+    << theGenMod.GetOwner().GetRank() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  std::string report;
   theFDMod.SplitOverLevi
   (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
    &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit);

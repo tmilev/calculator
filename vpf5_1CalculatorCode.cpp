@@ -168,11 +168,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 template <class coefficient>
 bool Vectors<coefficient>::ConesIntersect
 (List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone, Vector<Rational>* outputLinearCombo, Vector<Rational>* outputSplittingNormal, GlobalVariables* theGlobalVariables)
-{ MemorySaving<Matrix<Rational> > tempA, tempB;
-  Matrix<Rational>& matA=
-  theGlobalVariables==0 ? tempA.GetElement() : theGlobalVariables->matConeCondition1.GetElement();
-  Matrix<Rational>& matb=
-  theGlobalVariables==0 ? tempB.GetElement() : theGlobalVariables->matConeCondition2.GetElement();
+{ Matrix<Rational> matA;
+  Matrix<Rational> matb;
   if (StrictCone.size==0)
   { if (outputSplittingNormal!=0)
       if (NonStrictCone.size>0)

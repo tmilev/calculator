@@ -11,6 +11,7 @@ bool WeylGroup::CheckConsistency()const
   { std::cout << "This is a programming error: use after free of WeylGroup. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  this->RootsOfBorel.CheckConsistency();
   return true;
 }
 

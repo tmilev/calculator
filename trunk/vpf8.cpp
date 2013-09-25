@@ -417,20 +417,22 @@ void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)
 
 bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
-{ Vectors<Rational> selectedRoots;
-  selectedRoots.ReservE
-  (ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize-
-   ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots");
+  Vectors<Rational> selectedRoots;
+  selectedRoots.ReservE(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
+  if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
+  { std::cout << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
+    << " elements while the weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
     { selectedRoots.SetSize(selectedRoots.size+1);
       selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
     }
   List<Vectors<Rational> > tempRootsCol;
-  return
-  this->ComputeSubGroupFromGeneratingReflections
-  (&selectedRoots, &tempRootsCol, &theGlobalVariables, UpperLimitNumElements, true);
+  return this->ComputeSubGroupFromGeneratingReflections(&selectedRoots, &tempRootsCol, &theGlobalVariables, UpperLimitNumElements, true);
 }
 
 void WeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
@@ -441,7 +443,7 @@ void WeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rationa
   { tempRoot.MakeEi(theDim, i);
     this->ActOn(input, tempRoot);
     for (int j=0; j<theDim; j++)
-      outputMatrix.elements[j][i]=tempRoot.TheObjects[j];
+      outputMatrix(j,i)=tempRoot[j];
   }
 }
 

@@ -198,7 +198,7 @@ class NilradicalCandidate
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
-  NilradicalCandidate():owner(0),flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
+  NilradicalCandidate():owner(0), flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
   void reset();
   void CheckInitialization()const;
   bool IsStronglySingular(int moduleIndex);

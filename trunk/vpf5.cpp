@@ -4,6 +4,7 @@
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
+#include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for the calculator parser part 2: meant for built-in functions. ");
@@ -2460,7 +2461,8 @@ void CommandList::AutomatedTestRun
     inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i].theExample);
   outputStringsTestWithInit.SetSize(inputStringsTest.size);
   outputStringsTestNoInit.SetSize(inputStringsTest.size);
-  for (int i=219; i<inputStringsTest.size; i++)
+  ProgressReport theReport(this->theGlobalVariableS);
+  for (int i=190; i<inputStringsTest.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
     theTester.init(*this->theGlobalVariableS);
     Expression dummyCommands, tempE;
@@ -2474,6 +2476,9 @@ void CommandList::AutomatedTestRun
     outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
     std::cout << "<br>To get: " << theTester.theProgramExpression.ToString();
     std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+    std::stringstream reportStream;
+    reportStream << "Testing expression " << i << " out of " << inputStringsTest.size << ". ";
+    theReport.Report(reportStream.str());
   }
 /*  theTester.init(*this->theGlobalVariableS);
   for (int i=0; i<inputStringsTest.size; i++)
@@ -2525,6 +2530,7 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
     }
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
+  out << "Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
   return output.AssignValue(out.str(), theCommands);
 }
 

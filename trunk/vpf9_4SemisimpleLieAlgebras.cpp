@@ -26,10 +26,11 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebr
 
 bool SemisimpleLieAlgebra::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  this->theWeyl.CheckConsistency();
+  return true;
 }
 
 void SemisimpleLieAlgebra::GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
@@ -2544,6 +2545,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     { std::stringstream tempStream;
       tempStream << "\nGenerating simple Lie algebra " << theType.ToString() << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
       theProgressReport2.Report(tempStream.str());
+      theSmallAlgebra.CheckConsistency();
       theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
       theSmallAlgebra.FindSl2Subalgebras(theSmallAlgebra, theSmallSl2s, *theGlobalVariables);
       tempStream << " done.";
@@ -2776,12 +2778,13 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
 }
 
 bool slTwoSubalgebra::CheckConsistency()const
-{ { if (this->flagDeallocated)
+{ if (this->flagDeallocated)
   { std::cout << "This is a programming error: use after free of slTwoSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  if (this->owneR!=0)
+    this->owneR->CheckConsistency();
   return true;
-}
 }
 
 void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
@@ -2868,23 +2871,25 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     theReport.Report(tempStream.str());
     output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }
+  inputOwner.CheckConsistency();
   for (int i=0; i<output.size; i++)
-  { slTwoSubalgebra& theSl2= output.GetElement(i);
-    theSl2.IndicesMinimalContainingRootSA.ReservE(theSl2.IndicesContainingRootSAs.size);
-    theSl2.IndicesMinimalContainingRootSA.size=0;
-    for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
+  { //slTwoSubalgebra& theSl2= output.GetElement(i);
+    output.GetElement(i).IndicesMinimalContainingRootSA.ReservE(output.GetElement(i).IndicesContainingRootSAs.size);
+    output.GetElement(i).IndicesMinimalContainingRootSA.size=0;
+    for (int j=0; j<output.GetElement(i).IndicesContainingRootSAs.size; j++)
     { bool isMinimalContaining=true;
 //      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
-      for (int k=0; k<theSl2.IndicesContainingRootSAs.size; k++)
-      { rootSubalgebra& theOtherRootSA = output.theRootSAs[theSl2.IndicesContainingRootSAs[k]];
-        if (theOtherRootSA.indicesSubalgebrasContainingK.Contains(theSl2.IndicesContainingRootSAs[j]))
+      for (int k=0; k<output.GetElement(i).IndicesContainingRootSAs.size; k++)
+      { rootSubalgebra& theOtherRootSA = output.theRootSAs[output.GetElement(i).IndicesContainingRootSAs[k]];
+        if (theOtherRootSA.indicesSubalgebrasContainingK.Contains(output.GetElement(i).IndicesContainingRootSAs[j]))
         { isMinimalContaining=false;
           break;
         }
       }
       if (isMinimalContaining)
-        theSl2.IndicesMinimalContainingRootSA.AddOnTopNoRepetition(theSl2.IndicesContainingRootSAs[j]);
+        output.GetElement(i).IndicesMinimalContainingRootSA.AddOnTopNoRepetition(output.GetElement(i).IndicesContainingRootSAs[j]);
     }
+    output.CheckConsistency();
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
 //  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
@@ -3043,10 +3048,23 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 //  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
+bool SltwoSubalgebras::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (this->owner!=0)
+    this->owner->CheckConsistency();
+  for(int i=0; i<this->size; i++)
+    (*this)[i].CheckConsistency();
+  return true;
+}
+
 void SltwoSubalgebras::ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
 { this->GrandMasterConsistencyCheck();
+  this->CheckConsistency();
   for(int i=0; i<this->size; i++)
-    this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
+    (*this).GetElement(i).ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
   this->GrandMasterConsistencyCheck();
 }
 
@@ -3091,7 +3109,8 @@ void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool use
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
-{ this->ComputePrimalModuleDecomposition(this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
+{ this->CheckConsistency();
+  this->ComputePrimalModuleDecomposition(this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)

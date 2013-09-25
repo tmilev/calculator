@@ -105,6 +105,13 @@ public:
   List<std::string> texStringsEachFile;
   List<std::string> listSystemCommandsLatex;
   List<std::string> listSystemCommandsDVIPNG;
+  bool flagDeallocated;
+  ~SltwoSubalgebras()
+  { this->flagDeallocated=true;
+  }
+  SltwoSubalgebras(): owner(0), flagDeallocated(false){}
+  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner): owner(&inputOwner), flagDeallocated(false)
+  {}
   bool operator==(const SltwoSubalgebras& other)const
   { if (this->owner==0)
       return other.owner==0;
@@ -112,6 +119,7 @@ public:
       return false;
     return this->GetOwner()==other.GetOwner();
   }
+  bool CheckConsistency()const;
   void CheckForCorrectInitializationCrashIfNot()const
   { if (this->owner==0)
     { std::cout << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. "
@@ -128,10 +136,6 @@ public:
   }
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void reset(SemisimpleLieAlgebra& inputOwners);
-  SltwoSubalgebras(): owner(0){}
-  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner)
-  : owner(&inputOwner)
-  {}
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
   { std::cout << "This is a programming error. This function used to work in an older version of the program, but, as the requirements have changed, now needs a rewrite. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -446,9 +450,9 @@ class SemisimpleSubalgebras
 public:
   SemisimpleLieAlgebra* owneR;
   SltwoSubalgebras theSl2s;
-  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
+  ListReferences<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
   HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
-  List<SltwoSubalgebras> theSl2sOfSubalgebras;
+  ListReferences<SltwoSubalgebras> theSl2sOfSubalgebras;
 
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
   int theRecursionCounter;

@@ -1565,8 +1565,8 @@ public:
   const Object& operator[](int i)const
   { return TemplateList::operator[](i);
   }
-  Object& GetElement(int i)const
-  { return TemplateList::operator[](i);
+  Object& GetElement(int theObjectIndex)const
+  { return TemplateList::operator[](theObjectIndex);
   }
   void operator=(const TemplateList& other)
   { if (this==&other)

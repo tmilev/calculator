@@ -516,7 +516,7 @@ int main(int argc, char **argv)
 //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
 //  civilizedInput="AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);";
 //civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}(   x_{7}x_{19}+1,x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{2}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{1}x_{13}-1)";
-  //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
+  civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

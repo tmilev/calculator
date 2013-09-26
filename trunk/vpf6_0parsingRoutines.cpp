@@ -167,6 +167,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
   this->controlSequences.AddOnTop("\"");
+  this->controlSequences.AddOnTop("pi");
   this->controlSequences.AddOnTop("sin");
   this->controlSequences.AddOnTop("cos");
   this->controlSequences.AddOnTop("tan");
@@ -198,7 +199,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("FullTree");
   this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("EndProgram");
-//additional operations treated like regular expressions.
+  //additional operations treated like function names but otherwise not parsed as syntactic elements.
   this->AddOperationBuiltInType("PolynomialWithDO");
   this->AddOperationBuiltInType("DifferentialOperator");
 
@@ -213,6 +214,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initPredefinedOperationsComposite();
+  //additional operations with the same status as user-input expressions.
+  this->AddOperationNoRepetitionAllowed("\\pi");
+
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;
@@ -981,6 +985,8 @@ bool CommandList::ApplyOneRule()
   //else
   //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   //Some synonyms:
+  if (lastS=="pi")
+    return this->ReplaceXByEusingO(this->opPi());
   if (lastS=="sin")
     return this->ReplaceXByEusingO(this->opSin());
   if (lastS=="cos")

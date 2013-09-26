@@ -356,6 +356,7 @@ class Expression
   bool CheckConsistency()const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
+  bool IsDouble(double* whichDouble=0)const;
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
@@ -1068,6 +1069,9 @@ public:
   }
   int opCandidateSSsubalgebra()
   { return this->operations.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
+  }
+  int opPi()
+  { return this->operations.GetIndexIMustContainTheObject("\\pi");
   }
   int opSin()
   { return this->operations.GetIndexIMustContainTheObject("\\sin");

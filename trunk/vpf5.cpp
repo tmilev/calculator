@@ -2462,7 +2462,7 @@ void CommandList::AutomatedTestRun
   outputStringsTestWithInit.SetSize(inputStringsTest.size);
   outputStringsTestNoInit.SetSize(inputStringsTest.size);
   ProgressReport theReport(this->theGlobalVariableS);
-  for (int i=190; i<inputStringsTest.size; i++)
+  for (int i=0; i<inputStringsTest.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
     theTester.init(*this->theGlobalVariableS);
     Expression dummyCommands, tempE;

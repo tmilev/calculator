@@ -3398,6 +3398,17 @@ bool Expression::IsSmallInteger(int* whichInteger)const
   return theRat.IsSmallInteger(whichInteger);
 }
 
+bool Expression::IsDouble(double* whichDouble)const
+{ if (this->IsOfType<double>(whichDouble))
+    return true;
+  if (this->IsOfType<Rational>())
+  { if (whichDouble!=0)
+      *whichDouble=this->GetValue<Rational>().DoubleValue();
+    return true;
+  }
+  return false;
+}
+
 bool Expression::IsInteger(LargeInt* whichInteger)const
 { Rational theRat;
   if (!this->IsOfType<Rational>(&theRat))

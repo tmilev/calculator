@@ -116,11 +116,31 @@ bool CommandListFunctions::innerCasimirWRTlevi(CommandList& theCommands, const E
 }
 
 bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& input, Expression& output)
-{ return false;
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerSin");
+  double theArgument;
+  if (!input.IsDouble(&theArgument))
+  { if (input.IsAtoM(theCommands.opPi()))
+      return output.AssignValue(0, theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+      if (input[1].IsDouble(&theArgument) && input[2].IsAtoM(theCommands.opPi()))
+        return output.AssignValue(sin (theArgument*MathRoutines::Pi()), theCommands);
+    return false;
+  }
+  return output.AssignValue(sin(theArgument), theCommands );
 }
 
 bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& input, Expression& output)
-{ return false;
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCos");
+  double theArgument;
+  if (!input.IsDouble(&theArgument))
+  { if (input.IsAtoM(theCommands.opPi()))
+      return output.AssignValue(-1, theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+      if (input[1].IsDouble(&theArgument) && input[2].IsAtoM(theCommands.opPi()))
+        return output.AssignValue(cos (theArgument*MathRoutines::Pi()), theCommands);
+    return false;
+  }
+  return output.AssignValue(cos(theArgument), theCommands );
 }
 
 bool CommandListFunctions::innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output)

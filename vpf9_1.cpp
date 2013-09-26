@@ -2475,7 +2475,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
   double startMultTable=-1;
   if (theGlobalVariables!=0)
   { out << "done in " << theGlobalVariables->GetElapsedSeconds() - startStructureConstantComputation
-    << " seconds.<br> Computing Lie bracket pairing (``multplication'') table...";
+    << " seconds.<br> Computing Lie bracket pairing (``multiplication'') table...";
     theReport.Report(out.str());
     startMultTable=theGlobalVariables->GetElapsedSeconds();
   }

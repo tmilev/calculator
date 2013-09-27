@@ -446,8 +446,9 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theSub.MakeIdSubstitution(indexVar+1);
   theSub[indexVar].MakeMonomiaL(0, 1, 1);
   Polynomial<AlgebraicNumber> minPoly=thePoly;
+  std::cout << "<hr>" << minPoly.ToString() << "<br>";
   minPoly.Substitution(theSub);
-  std::cout << minPoly.ToString();
+  std::cout << "<hr>" << minPoly.ToString() << "<br>";
   MatrixTensor<Rational> theGenMat;
   int degreeMinPoly=minPoly.TotalDegreeInt();
   int startingDim=this->theBasisMultiplicative.size;

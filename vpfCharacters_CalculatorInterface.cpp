@@ -25,8 +25,7 @@ bool WeylGroup::CheckInitializationFDrepComputation()const
   }
   for (int i=0; i<this->irreps.size; i++)
     if (this->irreps[i].theCharacter.IsEqualToZero())
-    { std::cout << "This is a programming error: irrep number " << i+1
-      << " has zero character!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: irrep number " << i+1 << " has zero character!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
       return false;
     }
@@ -41,8 +40,7 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
     if (this->theElementImages[i+1].NumRows==0)
       isOK=false;
     if (!isOK)
-    { std::cout << "This is a programming error: working with a representation in which "
-      << " the action of the simple generators is not computed. "
+    { std::cout << "This is a programming error: working with a representation in which the action of the simple generators is not computed. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
       return false;
@@ -55,8 +53,7 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
 template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
 { if (this->OwnerGroup==0)
-  { std::cout << "This is a programming error: working with a representation with "
-    << " non-initialized owner Weyl group. "
+  { std::cout << "This is a programming error: working with a representation with non-initialized owner Weyl group. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
     return false;
@@ -65,8 +62,7 @@ bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
 }
 
 template <typename coefficient>
-void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed
-()
+void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed()
 { HashedList<Matrix<Rational> > tempList;
   tempList.AddOnTop(this->theElementImages);
   Matrix<Rational> tempMat;
@@ -80,9 +76,8 @@ void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed
       tempElt.MakeCanonical();
       int targetIndex=this->OwnerGroup->theElements.GetIndex(tempElt);
       if (!(tempMat==this->theElementImages[targetIndex]))
-      { std::cout << "this is a programming error: element " << i+1 << " times element "
-        << j+1 << " is outside of the set, i.e.,  " << tempList[i].ToString() << " * "
-        << tempList[j].ToString() << " is bad. ";
+      { std::cout << "this is a programming error: element " << i+1 << " times element "<< j+1 << " is outside of the set, i.e.,  "
+        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
     }
@@ -143,8 +138,8 @@ void WeylGroupRepresentation<coefficient>::operator*=
   }
   //////////////////////////////////
   if (this->OwnerGroup!=other.OwnerGroup)
-  { std::cout << "This is a programming error: attempting to multiply representations with "
-    << " different owner groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: attempting to multiply representations with different owner groups. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   WeylGroupRepresentation<coefficient> output;
@@ -168,8 +163,8 @@ void WeylGroupRepresentation<coefficient>::Restrict
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size==0)
-  { std::cout << "This is a programming error: restriction of representation to a zero "
-    << " subspace is not allowed. ";
+  { std::cout << "This is a programming error: restriction of representation to a zero subspace is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   output.reset(this->OwnerGroup);
@@ -186,9 +181,7 @@ void WeylGroupRepresentation<coefficient>::Restrict
         reportStream << "Restricting the action of generator of index " << i;
         theReport.Report(reportStream.str());
       }
-      Matrix<coefficient>::MatrixInBasis
-      (this->theElementImages[i], output.theElementImages[i], output.vectorSpaceBasis,
-       output.gramMatrixInverted);
+      Matrix<coefficient>::MatrixInBasis(this->theElementImages[i], output.theElementImages[i], output.vectorSpaceBasis, output.gramMatrixInverted);
 
     }
   /*
@@ -267,9 +260,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
       // classFunctionMatrices does not have to be initialized.
       bool useParent=false;
       if (this->parent!=0)
-        useParent=
-        (this->parent->classFunctionMatrices.size == this->OwnerGroup->conjugacyClasses.size) &&
-        (this->parent->classFunctionMatricesComputed[cci]);
+        useParent=(this->parent->classFunctionMatrices.size == this->OwnerGroup->conjugacyClasses.size) && (this->parent->classFunctionMatricesComputed[cci]);
       if(useParent)
       { Matrix<coefficient>::MatrixInBasis(this->parent->classFunctionMatrices[cci], this->classFunctionMatrices[cci], this->vectorSpaceBasis,this->gramMatrixInverted);
       } else {
@@ -281,16 +272,14 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
           this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
           if (theGlobalVariables!=0)
           { std::stringstream reportstream;
-            reportstream << " Computing conjugacy class " << currentConjugacyClass[i]+1
-            << " (total num classes is " << numClasses << ").";
+            reportstream << " Computing conjugacy class " << currentConjugacyClass[i]+1 << " (total num classes is " << numClasses << ").";
             theReport.Report(reportstream.str());
           }
         }
       }
       if (theGlobalVariables!=0)
       { std::stringstream reportstream;
-        reportstream << "<br>Class function matrix of conjugacy class "
-        << cci+1 << " (total num classes is " << numClasses << ") computed to be: "
+        reportstream << "<br>Class function matrix of conjugacy class " << cci+1 << " (total num classes is " << numClasses << ") computed to be: "
         << this->classFunctionMatrices[cci].ToString();
         theReport.Report(reportstream.str());
       }

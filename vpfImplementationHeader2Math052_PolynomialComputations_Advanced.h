@@ -771,7 +771,7 @@ bool GroebnerBasisComputation<coefficient>::IsContradictoryReducedSystem(const L
 
 template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
-(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+(List<Polynomial<coefficient> >& inputSystem, bool firstRun, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::SolveSerreLikeSystemRecursively");
   RecursionDepthCounter theCounter(&this->RecursionCounterSerreLikeSystem);
   ProgressReport theReport1(theGlobalVariables);
@@ -811,7 +811,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
       }
     }
     //std::cout << "<hr>input system: " << inputSystem.ToString();
-    changed=this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
+    changed=firstRun ? this->HasImpliedSubstitutions(inputSystem, theSub, 0, theGlobalVariables) :
+    this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
     if (changed)
     { theImpliedSubs.AddOnTop(theSub);
       for (int i=0; i<inputSystem.size; i++)
@@ -857,7 +858,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub first recursive call. " << inputSystem.ToString();
 
-  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
   { *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -885,7 +886,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   for (int i=0; i<inputSystem.size; i++)
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
-  newComputation.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
+  newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
   { *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -894,6 +895,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   if (newComputation.flagSystemProvenToHaveSolution)
     this->flagSystemProvenToHaveSolution=true;
   inputSystem=oldSystem;
+  if (firstRun)
+    this->SolveSerreLikeSystemRecursively(inputSystem, false, theAlgebraicClosure, theGlobalVariables);
 }
 
 template <class coefficient>
@@ -923,7 +926,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());
   this->systemSolution.GetElement().initFillInObject(numVars, 0);
   this->solutionsFound.GetElement().init(numVars);
-  this->SolveSerreLikeSystemRecursively(workingSystem, theAlgebraicClosure, theGlobalVariables);
+  this->SolveSerreLikeSystemRecursively(workingSystem, true, theAlgebraicClosure, theGlobalVariables);
   if (this->flagSystemSolvedOverBaseField)
   { if (this->solutionsFound.GetElement().CardinalitySelection!= this->solutionsFound.GetElement().MaxSize)
       for (int i=0; i<this->solutionsFound.GetElement().MaxSize; i++)

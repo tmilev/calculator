@@ -1000,10 +1000,10 @@ class GroebnerBasisComputation
   static std::string GetCalculatorInputFromSystem(const List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystem(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure=0, GlobalVariables* theGlobalVariables=0);
   bool HasImpliedSubstitutions
-(List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
+  (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
   ;
   int GetPreferredSerreSystemSubIndex();
-  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
+  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, bool firstRun, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);
   bool AddRemainderToBasis(GlobalVariables* theGlobalVariables);

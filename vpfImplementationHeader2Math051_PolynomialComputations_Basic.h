@@ -17,8 +17,8 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
-      { std::cout << "This is a programming error. Attempting to carry out a substitution in the monomial"
-        << this->ToString() << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has "
+      { std::cout << "This is a programming error. Attempting to carry out a substitution in the monomial" << this->ToString()
+        << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has "
         << TheSubstitution.size << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
@@ -114,12 +114,13 @@ int Polynomial<coefficient>::TotalDegreeInt()const
 
 template <class coefficient>
 bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit, const coefficient& theRingZero)
-{ MacroRegisterFunctionWithName("Polynomial<coefficient>::Substitution");
-  if (TheSubstitution.size<this->GetMinNumVars())
+{ MacroRegisterFunctionWithName("Polynomial::Substitution");
+  /*if (TheSubstitution.size<this->GetMinNumVars())
   { std::cout << "This is a programming error: attempting to carry out a substitution in a polynomial of " << this->GetMinNumVars()
-    << " variables while specifying the images of only " << TheSubstitution.size << " of the variables. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << " variables while specifying the images of only " << TheSubstitution.size << " of the variables. The current polynomial is "
+    << this->ToString() << " and the substitution is " << TheSubstitution.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
-  }
+  }*/
   Polynomial<coefficient> Accum, TempPoly;
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
@@ -168,7 +169,7 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const co
 
 template <class coefficient>
 void Polynomial<coefficient>::MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff, int ExpectedNumVars)
-{ if (LetterIndex<0 )
+{ if (LetterIndex<0)
   { std::cout << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -192,8 +193,8 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
     { int numCycles;
       if (!(*this)[i](j).IsSmallInteger(&numCycles) )
-      { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1
-        << "^{th} variable is raised to the power " << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
+      { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
+        << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
         << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
@@ -359,9 +360,9 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   //}
   assert(remainderMaxMonomial<outputRemainder.size());
   if (inputMaxMonomial>=tempInput.size() || inputMaxMonomial<0)
-  { std::cout << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial
-    << " while the polynomial has " << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString()
-    << " by " << inputDivisor.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial << " while the polynomial has "
+    << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString() << " by " << inputDivisor.ToString() << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
 //  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();

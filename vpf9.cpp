@@ -4556,8 +4556,7 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
 }
 
-void WeylGroup::GetEpsilonCoordsWRTsubalgebra
-(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
 { Matrix<Rational> basisChange;
   Matrix<Rational> tempMat;
   DynkinDiagramRootSubalgebra tempDyn;
@@ -4593,8 +4592,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
 //  output.ComputeDebugString();
 }
 
-void WeylGroup::GetEpsilonCoords
-(const List<Vector<Rational> >& input, Vectors<Rational>& output)
+void WeylGroup::GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output)
 { if (&input==&output)
   { List<Vector<Rational> > newInput=input;
     this->GetEpsilonCoords(newInput, output);
@@ -4605,8 +4603,7 @@ void WeylGroup::GetEpsilonCoords
     this->GetEpsilonCoords(input[i], output[i]);
 }
 
-void WeylGroup::GetEpsilonCoords
-(const Vector<Rational>& input, Vector<Rational>& output)
+void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
 { if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer())
     this->theDynkinType.GetEpsilonMatrix
     (this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
@@ -4680,10 +4677,8 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
   tempRoots.QuickSortAscending();
   this->RootSubsystem=(tempRoots);
   if (this->RootSubsystem.size%2!=0)
-  { std::cout << "This is a programming error. I am getting that the number of weights of "
-    << " a root system is odd. The generating set of simple weights is "
-    << this->simpleGenerators.ToString()
-    << ", and the generated weight subsystem is " << tempRoots.ToString()
+  { std::cout << "This is a programming error. I am getting that the number of weights of a root system is odd. The generating set of simple weights is "
+    << this->simpleGenerators.ToString() << ", and the generated weight subsystem is " << tempRoots.ToString()
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -4817,10 +4812,8 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
   if (this->theKLcoeffs.size==this->TheWeylGroup->theElements.size)
   { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
-    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
-    << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
-    << " in " <<  CGI::GetHtmlMathSpanPure(" M_{w_1\\cdot \\lambda }  ")
-    << " where \\cdot stands for the \\rho-modified action"
+    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  CGI::GetHtmlMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: "
     << "<br><table border=\"1\"><tr><td>Weyl elt.</td>";
@@ -4928,12 +4921,10 @@ int KLpolys::ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator)
     bool tempBool1, tempBool2;
     bool haveSameSigns=true;
     for (int j=0; j<this->TheWeylGroup->RootSystem.size; j++)
-    { this->TheWeylGroup->RootScalarCartanRoot
-      (ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem.TheObjects[j], tempRat1);
+    { this->TheWeylGroup->RootScalarCartanRoot(ChamberIndicatorPlusRho, this->TheWeylGroup->RootSystem[j], tempRat1);
       tempRoot=(*this)[i];
       tempRoot+=(this->TheWeylGroup->rho);
-      this->TheWeylGroup->RootScalarCartanRoot
-      (tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
+      this->TheWeylGroup->RootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
       tempBool1=tempRat1.IsPositive();
       tempBool2=tempRat2.IsPositive();
       assert(!tempRat1.IsEqualToZero());
@@ -5025,8 +5016,7 @@ void KLpolys::ComputeRPolys()
         }
       if (!tempBool)
       { std::cout
-        << "This is a programming error: an algorithmic check failed while computing R-polynomials. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
       ExploredFromTop[a]=true;
@@ -5098,10 +5088,8 @@ void KLpolys::ComputeKLxy(int x, int y)
       tempP1*=tempP2;
       tempP1*=(this->theKLPolys[i][y]);
       if (!this->Explored[i])
-      { std::cout << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial "
-        << " computation fails. More precisely, while computing KL poly of indices "
-        << x << ", " << y << " I am using KL poly with indices "
-        << i << ", " << y << " which hasn't been computed yet. "
+      { std::cout << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
+        << "KL poly of indices " << x << ", " << y << " I am using KL poly with indices " << i << ", " << y << " which hasn't been computed yet. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
@@ -5289,8 +5277,7 @@ void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
   for (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
     if (this->rootIsInCentralizer(this->GetAmbientWeyl().RootsOfBorel[i]))
       this->SimpleBasisCentralizerRoots.AddOnTop(this->GetAmbientWeyl().RootsOfBorel[i]);
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput
-  (this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
@@ -5303,8 +5290,7 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
   this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput
-  (this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
 void rootSubalgebra::ComputeAll()
@@ -5387,15 +5373,13 @@ void Vector<coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<coe
   for (int i=0; i<inputVectors.size; i++)
     if (this->ScalarEuclidean(inputVectors[i])==0)
     { std::cout << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
-      << this->ToString() << " is orthogonal to "
-      << "input vector " << inputVectors[i].ToString() << ". The full list of vectors is "
+      << this->ToString() << " is orthogonal to input vector " << inputVectors[i].ToString() << ". The full list of vectors is "
       << inputVectors.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
 }
 
-void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords
-(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
+void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
 { if (theGens.size==0)
     return;
   MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
@@ -5712,8 +5696,7 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
   this->MakeProgressReportPossibleNilradicalComputation(&theGlobalVariables, owner, indexInOwner);
 }
 
-void rootSubalgebra::MakeProgressReportGenAutos
-(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
 { ProgressReport theReport(&theGlobalVariables);
   std::stringstream out4, out5;
   out5 << progress+1 << " out of " << outOf << " checked; ";
@@ -5721,8 +5704,7 @@ void rootSubalgebra::MakeProgressReportGenAutos
   theReport.Report(out5.str());
 }
 
-void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
-(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
 { MacroRegisterFunctionWithName("rootSubalgebra::MakeProgressReportPossibleNilradicalComputation");
   if (theGlobalVariables==0)
     return;
@@ -5771,8 +5753,7 @@ void rootSubalgebra::GenerateKmodMultTable
     { this->KmodTimesKmod(i, j, oppositeKmods, output[i][j]);
       if (theGlobalVariables!=0)
       { std::stringstream out5;
-        out5 << "Computing pairing table: " << i*this->kModules.size+j+1
-        << " out of " << numTotal;
+        out5 << "Computing pairing table: " << i*this->kModules.size+j+1 << " out of " << numTotal;
         theReport2.Report(out5.str());
       }
     }
@@ -5868,10 +5849,8 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(Vector<Rational>& input)
 }
 
 bool rootSubalgebra::ConeConditionHolds
-(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
- Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
-{ if (Vectors<Rational>::ConesIntersect
-      (NilradicalRoots, Ksingular, 0, 0, &theGlobalVariables))
+(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
+{ if (Vectors<Rational>::ConesIntersect(NilradicalRoots, Ksingular, 0, 0, &theGlobalVariables))
   { if (doExtractRelations)
       this->ExtractRelations
       (theGlobalVariables.matConeCondition1.GetElement(), theGlobalVariables.matConeCondition3.GetElement(),
@@ -5882,8 +5861,7 @@ bool rootSubalgebra::ConeConditionHolds
 }
 
 template<class coefficient>
-bool Vectors<coefficient>::PerturbVectorToRegular
-(Vector<coefficient>& output, GlobalVariables& theGlobalVariables)
+bool Vectors<coefficient>::PerturbVectorToRegular(Vector<coefficient>& output, GlobalVariables& theGlobalVariables)
 { Vector<coefficient> normal;
   bool result=false;
   while (!this->IsRegular(output, normal, theGlobalVariables, output.size))

@@ -29,8 +29,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
         int rightIndex=currentRight.GetIndexMaxMonomial(this->theMonOrdeR);
         const MonomialP& leftHighestMon=currentLeft[leftIndex];
         const MonomialP& rightHighestMon=currentRight[rightIndex];
-        int numVars=
-        MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+        int numVars=MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
         this->SoPolyLeftShift.MakeOne(numVars);
         this->SoPolyRightShift.MakeOne(numVars);
         for (int k=0; k<numVars; k++)
@@ -203,8 +202,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
   }
   if (this->theBasiS.size<=0)
-  { std::cout << "This is a programming error: transforming to Groebner basis not allowed for empty basis. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   MonomialP leftShift, rightShift, monLCM;
@@ -585,8 +583,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
   if (inputOutpuT.size<=0)
-  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->basisCandidates.SetSize(0);
@@ -612,8 +609,8 @@ void GroebnerBasisComputation<coefficient>::ConsistencyCheck()
 
 template<class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetPolynomialStringSpacedMonomials
-(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle,
- const std::string& extraHighlightStyle, FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
+(const Polynomial<coefficient>& thePoly, const HashedList<MonomialP>& theMonomialOrder, const std::string& extraStyle, const std::string& extraHighlightStyle,
+ FormatExpressions* theFormat, List<MonomialP>* theHighLightedMons)
 { std::stringstream out;
   bool wasFirst=true;
   bool isFirst;
@@ -895,7 +892,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   if (newComputation.flagSystemProvenToHaveSolution)
     this->flagSystemProvenToHaveSolution=true;
   inputSystem=oldSystem;
-  if (firstRun)
+  if (firstRun && theAlgebraicClosure!=0)
     this->SolveSerreLikeSystemRecursively(inputSystem, false, theAlgebraicClosure, theGlobalVariables);
 }
 

@@ -14,14 +14,19 @@
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="`wx-config --libs`" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
-			<Add option="`wx-config --cflags`" />
+			<Add option="`wx-config --cxxflags` `wx-config --libs`" />
 		</Compiler>
 		<Linker>
-			<Add option="`wx-config --libs`" />
+			<Add option="`wx-config --cxxflags` `wx-config --libs`" />
+			<Add directory="wx" />
 		</Linker>
 		<Unit filename="vpf.h" />
 		<Unit filename="vpf1_5SubsetsSelections.h" />
@@ -30,9 +35,12 @@
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
 		<Unit filename="vpf5_2javascript_graphics.cpp" />
 		<Unit filename="vpf6.cpp" />
+		<Unit filename="vpf6_05evaluationroutines.cpp" />
+		<Unit filename="vpf6_0parsingRoutines.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.h" />
 		<Unit filename="vpf6_2serialization_code.cpp" />
+		<Unit filename="vpf6_3calculatorMathRoutines.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />
@@ -47,11 +55,30 @@
 		<Unit filename="vpfGraph.cpp" />
 		<Unit filename="vpfGraph.h" />
 		<Unit filename="vpfHeader1.h" />
+		<Unit filename="vpfHeader1General0_General.h" />
+		<Unit filename="vpfHeader1General1_ListReferences.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfHeader2Math0_General.h" />
+		<Unit filename="vpfHeader2Math15_UniversalEnveloping.h" />
+		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />
+		<Unit filename="vpfHeader2Math2_AlgebraicNumbers.h" />
+		<Unit filename="vpfHeader2Math3_Characters.h" />
+		<Unit filename="vpfHeader2Math4_Graph.h" />
+		<Unit filename="vpfHeader2Math5_SubsetsSelections.h" />
+		<Unit filename="vpfHeader2Math6_ModulesSSLieAlgebras.h" />
+		<Unit filename="vpfHeader3Calculator0_Interface.h" />
+		<Unit filename="vpfHeader3Calculator1_InnerTypedFunctions.h" />
+		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />
+		<Unit filename="vpfHeader3Calculator3_WeylGroupCharacters.h" />
 		<Unit filename="vpfHeader3ListReferences.h" />
+		<Unit filename="vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
+		<Unit filename="vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
+		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />
+		<Unit filename="vpfImplementationHeader2Math3_WeylAlgebra.h" />
+		<Unit filename="vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="wxDrawPanel.cpp" />
 		<Unit filename="wxDrawPanel.h" />

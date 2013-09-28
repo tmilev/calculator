@@ -3713,6 +3713,11 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   if (thePrimalRank<2)
     return "";
   std::stringstream out;
+  if (thePrimalRank!=this->BilinearFormFundPrimal.NumCols)
+  { out << "<br>The primal rank was computed to be " << thePrimalRank << " but the bilinear form in fundamental coordinates relative to "
+    << " the subalgebra was not computed: this->BilinearFormFundPrimal has " << this->BilinearFormFundPrimal.NumRows << " rows. ";
+    return out.str();
+  }
   out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the subalgerba are fundamental.  "
   << "<br>The bilinear form is therefore given relative to the fundamental coordinates.<br> ";
   Vectors<Rational> BasisToDrawCirclesAt;

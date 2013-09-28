@@ -164,7 +164,7 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
   //  return;
   theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
-  for (int i=0; i<output.ProgressReportStringS.size; i++)
+  for (int i=output.ProgressReportStringS.size-1; i>=0; i--)
     if (output.ProgressReportStringS[i]!="")
       out << output.ProgressReportStringS[i] << "\n";
   theMainWindow->ProgressReportString=out.str();

@@ -478,8 +478,7 @@ bool CommandList::innerPrintSSsubalgebras
   std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
   std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
   out << "<br>Output file: <a href= \"" << displayFolder << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
-  out << "<script> var reservedCountDownToRefresh = 5; "
-  << "setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
+  out << "<script> var reservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
@@ -489,10 +488,8 @@ bool CommandList::innerPrintSSsubalgebras
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas(ownerSS);
-    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ?
-    input.GetValueNonConst<SemisimpleSubalgebras>() :
-    theCommands.theObjectContainer.theSSsubalgebras
-    [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ? input.GetValueNonConst<SemisimpleSubalgebras>() :
+    theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.flagComputeNilradicals=doComputeNilradicals;
@@ -503,8 +500,7 @@ bool CommandList::innerPrintSSsubalgebras
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     if(!CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
     { std::cout << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileName
-      << " for output. However, the file failed to create. "
-      << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
+      << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -519,9 +515,8 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseHTML=true;
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
-    theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of "
-    << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString() << "</title><script src=\"" << theCommands.DisplayPathServerBase
-    << "jsmath/easy/load.js\"></script> " << "<body>" << theSSsubalgebras.ToString(&theFormat)
+    theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
+    << "</title><script src=\"" << theCommands.DisplayPathServerBase << "jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);

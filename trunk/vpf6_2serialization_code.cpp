@@ -73,9 +73,7 @@ bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& i
     return false;
   std::string theOperation;
   if (!input[1].IsOperation(&theOperation))
-  { theCommands.Comments
-    << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is "
-    << input[1].ToString();
+  { theCommands.Comments << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is " << input[1].ToString();
     return false;
   }
   outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras[AlgIndex];
@@ -91,8 +89,7 @@ bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& i
     return false;
   }
   if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
-  { theCommands.Comments << "<hr>Failed to load Chevalley generator: final generator index is "
-    << generatorIndex << ". ";
+  { theCommands.Comments << "<hr>Failed to load Chevalley generator: final generator index is " << generatorIndex << ". ";
     return false;
   }
   outputMon.theGeneratorIndex=generatorIndex;
@@ -221,8 +218,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, c
     return false;
   }
   if (theTypeName.size()!=1)
-  { theCommands.Comments << "<hr>Error while extracting Dynkin simple type:"
-    << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
+  { theCommands.Comments << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
     << "Instead, it is " << theTypeName + ". Error encountered while processing "
     << input.ToString();
     return false;
@@ -244,17 +240,19 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, c
   }
   int theRank;
   if (!rankE.IsSmallInteger(&theRank))
-  { theCommands.Comments << "I wasn't able to extract rank from "
-    << input.ToString();
+  { theCommands.Comments << "I wasn't able to extract rank from " << input.ToString();
     return false;
   }
   if (theRank<1 || theRank>20)
-  { theCommands.Comments << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing "
-    << input.ToString();
+  { theCommands.Comments << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing " << input.ToString();
     return false;
   }
   if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
   { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
+    return false;
+  }
+  if (theWeylLetter=='D' &&(theRank<3))
+  { theCommands.Comments << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
     return false;
   }
   //std::cout << "here i am again 3. ";

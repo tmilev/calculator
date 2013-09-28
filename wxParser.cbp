@@ -29,7 +29,6 @@
 			<Add directory="wx" />
 		</Linker>
 		<Unit filename="vpf.h" />
-		<Unit filename="vpf1_5SubsetsSelections.h" />
 		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
@@ -38,7 +37,6 @@
 		<Unit filename="vpf6_05evaluationroutines.cpp" />
 		<Unit filename="vpf6_0parsingRoutines.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
-		<Unit filename="vpf6_1innerTypedFunctions.h" />
 		<Unit filename="vpf6_2serialization_code.cpp" />
 		<Unit filename="vpf6_3calculatorMathRoutines.cpp" />
 		<Unit filename="vpf7.cpp" />
@@ -49,18 +47,10 @@
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
 		<Unit filename="vpfCharacters.cpp" />
-		<Unit filename="vpfCharacters.h" />
 		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />
-		<Unit filename="vpfCharacters_CalculatorInterface.h" />
 		<Unit filename="vpfGraph.cpp" />
-		<Unit filename="vpfGraph.h" />
-		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1General0_General.h" />
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
-		<Unit filename="vpfHeader1_2.h" />
-		<Unit filename="vpfHeader1_3.h" />
-		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
-		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />
 		<Unit filename="vpfHeader2Math15_UniversalEnveloping.h" />
 		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />
@@ -73,7 +63,6 @@
 		<Unit filename="vpfHeader3Calculator1_InnerTypedFunctions.h" />
 		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />
 		<Unit filename="vpfHeader3Calculator3_WeylGroupCharacters.h" />
-		<Unit filename="vpfHeader3ListReferences.h" />
 		<Unit filename="vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
 		<Unit filename="vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
 		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />

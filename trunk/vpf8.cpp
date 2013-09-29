@@ -3626,7 +3626,7 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
     if (!currentPoly.IsLinear())
       return false;
     for (int j=0; j<theTargetDim; j++)
-      currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, output.elements[i][j], (Rational) 0);
+      currentPoly.GetCoeffInFrontOfLinearTermVariableIndex(j, output.elements[i][j]);
   }
   return true;
 }
@@ -3651,14 +3651,14 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   eigenSpacePlusOrthogonalComponent.SetSize(theScalarProducts.size);
   for (int i=0; i<theScalarProducts.size; i++)
     if (i!=pivotColumnIndex)
-    { Vector<Rational>& currentRoot=eigenSpacePlusOrthogonalComponent.TheObjects[i];
+    { Vector<Rational>& currentRoot=eigenSpacePlusOrthogonalComponent[i];
       currentRoot.MakeZero(theScalarProducts.size);
       currentRoot[i]=1;
-      currentRoot.TheObjects[pivotColumnIndex]=theScalarProducts.TheObjects[i];
+      currentRoot[pivotColumnIndex]=theScalarProducts[i];
     }
   theScalarProducts.ScaleByPositiveRationalToIntegralMinHeight();
   //std::cout << "<br>the scalar products after scaling to integral: " << theScalarProducts.ToString();
-  eigenSpacePlusOrthogonalComponent.TheObjects[pivotColumnIndex]=theScalarProducts;
+  eigenSpacePlusOrthogonalComponent[pivotColumnIndex]=theScalarProducts;
   //std::cout << "<br>The eigenspace before intersection: " << eigenSpacePlusOrthogonalComponent.ToString();
   Lattice eigenLattice, theZnLattice;
   eigenLattice.MakeFromRoots(eigenSpacePlusOrthogonalComponent);
@@ -3677,7 +3677,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
     if (!tempRoot.IsEqualToZero())
     { resultRoot.MakeZero(this->GetDim());
       for (int j=0; j<startingBasis.size; j++)
-        resultRoot+=startingBasis.TheObjects[j]*tempRoot.TheObjects[j];
+        resultRoot+=startingBasis[j]*tempRoot[j];
       resultBasis.AddOnTop(resultRoot);
     }
   }
@@ -3697,7 +3697,7 @@ void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theS
 void Lattice::IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals)
 { //std::cout << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
   for (int i=0; i<theSubspaceNormals.size; i++)
-    this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals.TheObjects[i]);
+    this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals[i]);
   //std::cout << "<br>********************End of debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
 }
 

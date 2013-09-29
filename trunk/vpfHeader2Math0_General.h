@@ -499,7 +499,7 @@ public:
   bool FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments);
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVarRatRoots(List<Rational>& output);
-  void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output, const coefficient& theRingZero);
+  void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
   void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff=1, int ExpectedNumVars=0);
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
   void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2);

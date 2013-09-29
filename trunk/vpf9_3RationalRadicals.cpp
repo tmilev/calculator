@@ -287,8 +287,7 @@ bool AlgebraicClosureRationals::ReduceMe()
   return true;
 }
 
-void AlgebraicClosureRationals::GetAdditionTo
-  (const AlgebraicNumber& input, VectorSparse<Rational>& output)
+void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::GetAdditionTo");
   if (&output==&input.theElT)
   { AlgebraicNumber anCopy=input;
@@ -296,7 +295,8 @@ void AlgebraicClosureRationals::GetAdditionTo
     return;
   }
   if (input.owner==0)
-  { output.MaKeEi(0, input.theElT.theCoeffs[0]);
+  { if (input.theElT.size()>0)
+      output.MaKeEi(0, input.theElT.theCoeffs[0]);
     return;
   }
   if (input.basisIndex<0 || input.basisIndex>=this->theBasesAdditive.size)
@@ -311,9 +311,8 @@ void AlgebraicClosureRationals::GetAdditionTo
   for (int i=0; i<input.theElT.size(); i++)
   { int currentIndex=input.theElT[i].theIndex;
     if (currentIndex<0 || currentIndex>=this->theBasesAdditive[input.basisIndex].size)
-    { std::cout << "This is a programming error: I am getting basis index " << input.basisIndex << " with "
-      << "current index " << currentIndex << ". A printout of the algebraic closure follows. "
-      << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: I am getting basis index " << input.basisIndex << " with current index " << currentIndex
+      << ". A printout of the algebraic closure follows. " << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     output.AddOtherTimesConst(this->theBasesAdditive[input.basisIndex][currentIndex], input.theElT.theCoeffs[i]);
@@ -431,27 +430,73 @@ void AlgebraicClosureRationals::reset()
   this->GeneratingElemenT.owner=this;
   this->GeneratingElemenT.theElT.MaKeEi(0);
 }
+bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension
+(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");
+  if (thePoly.TotalDegree()!=2|| !this->flagIsQuadraticRadicalExtensionRationals)
+    return false;
+  Polynomial<AlgebraicNumber> algNumPoly;
+  this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, algNumPoly);
+  Polynomial<Rational> minPoly;
+  minPoly.MakeZero();
+  Rational theLinearTermCFdividedByTwo, theConstTermShifted;
+  for (int i=0; i<algNumPoly.size(); i++)
+    if (!algNumPoly.theCoeffs[i].IsRational(&theLinearTermCFdividedByTwo))
+      return false;
+    else
+      minPoly.AddMonomial(algNumPoly[i], theLinearTermCFdividedByTwo);
+  minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
+  theLinearTermCFdividedByTwo/=2;
+  minPoly.GetConstantTerm(theConstTermShifted);
+  theConstTermShifted-=theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
+  theConstTermShifted*=-1;
+  std::cout << "<hr>Adjoining radical of: " << theConstTermShifted;
+  if (!outputRoot.AssignRationalQuadraticRadical(theConstTermShifted, *this))
+    return false;
+  std::cout << " ... to get: " << outputRoot.ToString();
+  outputRoot-=theLinearTermCFdividedByTwo;
+  return true;
 
-bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
-  AlgebraicClosureRationals backUpCopy;
-  backUpCopy=*this;
+}
+
+void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail
+(const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
   int indexVar=-1;
-  if (!thePoly.IsOneVariableNonConstPoly(&indexVar))
-  { std::cout << "This is a programming error: I am being asked to find a solution of a polynomial which is not a one-variable polynomial. The input poly is: "
-    << thePoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  if (!input.IsOneVariableNonConstPoly(&indexVar))
+  { std::cout << "This is a programming error: I am being asked convert to a one-variable polynomial a polynomial "
+    << "depending on more than one variables. The input poly is: " << input.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar+1);
   theSub[indexVar].MakeMonomiaL(0, 1, 1);
-  Polynomial<AlgebraicNumber> minPoly=thePoly;
-  std::cout << "<hr>" << minPoly.ToString() << "<br>";
-  minPoly.Substitution(theSub);
-  std::cout << "<hr>" << minPoly.ToString() << "<br>";
+  output=input;
+  std::cout << "<hr>" << output.ToString() << "<br>";
+  output.Substitution(theSub);
+  std::cout << "<hr>" << output.ToString() << "<br>";
+}
+
+bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootMinPoly");
+  if(this->AdjoinRootQuadraticPolyToQuadraticRadicalExtension(thePoly, outputRoot, theGlobalVariables))
+    return true;
+  Polynomial<AlgebraicNumber> minPoly;
+  this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
+  AlgebraicClosureRationals backUpCopy;
+  backUpCopy=*this;
   MatrixTensor<Rational> theGenMat;
   int degreeMinPoly=minPoly.TotalDegreeInt();
   int startingDim=this->theBasisMultiplicative.size;
+  if (degreeMinPoly*startingDim> 10000 || startingDim>10000 || degreeMinPoly>10000)
+  { std::cout << "<hr>Adjoining root of minimial polynomial failed: the current field extension dimension over the rationals is "
+    << startingDim << ", the degree of the minimial polynomial is " << degreeMinPoly << ", yielding expected final dimension "
+    << startingDim << "*" << degreeMinPoly << " = " << startingDim*degreeMinPoly << " over the rationals. The calculator is hard-coded "
+    << " to accept dimension over the rationals no larger than 10000 (multiplication in such a field corresponds to a "
+    << " 10000x10000 matrix (100 000 000 entries). If you do indeed want to carry out such large computations, you need to "
+    << " compile the calculator on your own, modifying file " << __FILE__ << ", line " << __LINE__ << ".";
+    return false;
+  }
   theGenMat.MakeZero();
   for (int i=0; i<degreeMinPoly-1; i++)
     for (int j=0; j<startingDim; j++)
@@ -503,6 +548,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   outputRoot.owner=this;
   outputRoot.theElT.MaKeEi(startingDim);
   outputRoot.basisIndex=this->theBasesAdditive.size-1;
+  this->flagIsQuadraticRadicalExtensionRationals=false;
   if (!this->ReduceMe())
   { *this=backUpCopy;
     return false;

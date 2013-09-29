@@ -1688,18 +1688,18 @@ std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat)
   return output;
 }
 
-template <typename Element>
+template <typename coefficient>
 class Matrix
-{ // friend std::iostream& operator<< <Element>(std::iostream& output, const Matrix<Element>& theMat);
-  friend std::ostream& operator<< (std::ostream& output, const Matrix<Element>& theMat)
+{ // friend std::iostream& operator<< <coefficient>(std::iostream& output, const Matrix<coefficient>& theMat);
+  friend std::ostream& operator<< (std::ostream& output, const Matrix<coefficient>& theMat)
   { output << theMat.ToString();
     return output;
   }
-//  friend std::iostream& operator>> <Element>(std::iostream& input, Matrix<Element>& theMat);
+//  friend std::iostream& operator>> <coefficient>(std::iostream& input, Matrix<coefficient>& theMat);
 public:
   int NumRows; int ActualNumRows;
   int NumCols; int ActualNumCols;
-  Element** elements;
+  coefficient** elements;
   static bool flagComputingDebugInfo;
   void init(int r, int c);
   void ReleaseMemory();
@@ -1711,14 +1711,14 @@ public:
           return false;
     return true;
   }
-  void Resize(int r, int c, bool PreserveValues, const Element* TheRingZero=0);
+  void Resize(int r, int c, bool PreserveValues, const coefficient* TheRingZero=0);
   inline static std::string GetXMLClassName()
   { std::string result="Matrix_";
-    result.append(Element::GetXMLClassName());
+    result.append(coefficient::GetXMLClassName());
     return result;
   }
   Matrix():NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0){}
-  Matrix(const Matrix<Element>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0)
+  Matrix(const Matrix<coefficient>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0)
   { *this=other;
   }
   ~Matrix()
@@ -1728,32 +1728,32 @@ public:
   { if (this->NumCols==this->NumRows)
     { for (int i=0; i<this->NumRows; i++)
         for (int j=i+1; j<this->NumCols; j++)
-          MathRoutines::swap<Element>(this->elements[j][i], this->elements[i][j]);
+          MathRoutines::swap<coefficient>(this->elements[j][i], this->elements[i][j]);
       return;
     }
-    Matrix<Element> tempMat;
+    Matrix<coefficient> tempMat;
     tempMat.init(this->NumCols, this->NumRows);
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         tempMat.elements[j][i]=this->elements[i][j];
     *this=tempMat;
   }
-  void AppendMatrixOnTheRight(const Matrix<Element>& standsOnTheRight)
+  void AppendMatrixOnTheRight(const Matrix<coefficient>& standsOnTheRight)
   { if (&standsOnTheRight==this)
-    { Matrix<Element> copyThis=*this;
+    { Matrix<coefficient> copyThis=*this;
       this->AppendMatrixOnTheRight(copyThis);
       return;
     }
     if (standsOnTheRight.NumRows<this->NumRows)
-    { Element theZero;
+    { coefficient theZero;
       theZero=0;
-      Matrix<Element> standsOnTheRightNew=standsOnTheRight;
+      Matrix<coefficient> standsOnTheRightNew=standsOnTheRight;
       standsOnTheRightNew.Resize(this->NumRows, standsOnTheRight.NumCols, true, &theZero);
       this->AppendMatrixOnTheRight(standsOnTheRightNew);
       return;
     }
     if (this->NumRows<standsOnTheRight.NumRows)
-    { Element theZero;
+    { coefficient theZero;
       theZero=0;
       this->Resize(standsOnTheRight.NumRows, this->NumCols, true, &theZero);
     }
@@ -1763,22 +1763,22 @@ public:
       for (int j=oldNumCols; j<this->NumCols; j++)
         this->elements[i][j]=standsOnTheRight.elements[i][j-oldNumCols];
   }
-  void AppendMatrixToTheBottom(const Matrix<Element>& standsBelow)
+  void AppendMatrixToTheBottom(const Matrix<coefficient>& standsBelow)
   { if (&standsBelow==this)
-    { Matrix<Element> copyThis=*this;
+    { Matrix<coefficient> copyThis=*this;
       this->AppendMatrixToTheBottom(copyThis);
       return;
     }
     if (standsBelow.NumCols<this->NumCols)
-    { Element theZero;
+    { coefficient theZero;
       theZero=0;
-      Matrix<Element> standsBelowNew=standsBelow;
+      Matrix<coefficient> standsBelowNew=standsBelow;
       standsBelowNew.Resize(standsBelow.NumRows, this->NumCols, true, &theZero);
       this->AppendMatrixOnTheRight(standsBelowNew);
       return;
     }
     if (this->NumCols<standsBelow.NumCols)
-    { Element theZero;
+    { coefficient theZero;
       theZero=0;
       this->Resize(this->NumRows, standsBelow.NumCols, true, &theZero);
     }
@@ -1790,7 +1790,7 @@ public:
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j]=standsBelow(i-oldNumRows, j);
   }
-  static void MatrixInBasis(const Matrix<Element>& input, Matrix<Element>& output, const List<Vector<Element> >& basis, const Matrix<Element>& gramMatrixInverted)
+  static void MatrixInBasis(const Matrix<coefficient>& input, Matrix<coefficient>& output, const List<Vector<coefficient> >& basis, const Matrix<coefficient>& gramMatrixInverted)
   { int d = basis.size;
     output.init(d, d);
     Vector<Rational> tempV;
@@ -1801,13 +1801,13 @@ public:
     }
     output.MultiplyOnTheLeft(gramMatrixInverted);
   }
-  void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
-  void ActOnVectorROWSOnTheLeft(List<Vector<Element> >& standOnTheRightAsVectorRow)const
-  { List<Vector<Element> > output;
+  void ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne=1, const coefficient& theRingZero=0);
+  void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow)const
+  { List<Vector<coefficient> > output;
     this->ActOnVectorROWSOnTheLeft(standOnTheRightAsVectorRow, output);
     standOnTheRightAsVectorRow=output;
   }
-  void ActOnVectorROWSOnTheLeft(List<Vector<Element> >& standOnTheRightAsVectorRow, List<Vector<Element> >& output)const
+  void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow, List<Vector<coefficient> >& output)const
   { if (this->NumCols!=standOnTheRightAsVectorRow.size)
     { std::cout << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
       << this->NumCols << " columns, by a matrix, standing on the right, with " << standOnTheRightAsVectorRow.size << " rows. "
@@ -1821,16 +1821,16 @@ public:
         output[i]+= standOnTheRightAsVectorRow[j]*(*this)(i,j);
     }
   }
-  void ActMultiplyVectorRowOnTheRight(Vector<Element>& standsOnTheLeft, const Element& TheRingZero=0)const
-  { Vector<Element> output;
+  void ActMultiplyVectorRowOnTheRight(Vector<coefficient>& standsOnTheLeft, const coefficient& TheRingZero=0)const
+  { Vector<coefficient> output;
     this->ActMultiplyVectorRowOnTheRight(standsOnTheLeft, output, TheRingZero);
     standsOnTheLeft=output;
   }
-  void ActMultiplyVectorRowOnTheRight(const Vector<Element>& standsOnTheLeft, Vector<Element>& output, const Element& TheRingZero=0)const
+  void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output, const coefficient& TheRingZero=0)const
   { assert(&standsOnTheLeft!=&output);
     assert(this->NumRows==standsOnTheLeft.size);
     output.MakeZero(this->NumCols, TheRingZero);
-    Element tempElt;
+    coefficient tempElt;
     for (int i=0; i<this->NumCols; i++)
       for (int j=0; j<this->NumRows; j++)
       { tempElt=this->elements[j][i];
@@ -1838,7 +1838,7 @@ public:
         output[i]+=tempElt;
       }
   }
-  void GetNSquaredVectorForm(Vector<Element>& output)
+  void GetNSquaredVectorForm(Vector<coefficient>& output)
   { output.SetSize(this->NumRows*this->NumCols);
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
@@ -1868,7 +1868,7 @@ public:
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  static unsigned int HashFunction(const Matrix<Element>& input)
+  static unsigned int HashFunction(const Matrix<coefficient>& input)
   { unsigned int result=0;
     int counter=0;
     for (int i=0; i<input.NumRows; i++, counter++)
@@ -1906,7 +1906,7 @@ public:
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
-  void MakeIdMatrix(int theDimension, const Element& theRingUnit=1, const Element& theRingZero=0)
+  void MakeIdMatrix(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->init(theDimension, theDimension);
     for (int i=0; i<theDimension; i++)
       for (int j=0; j<theDimension; j++)
@@ -1915,7 +1915,7 @@ public:
         else
           this->elements[i][j]=theRingUnit;
   }
-  void MakeZeroMatrix(int theDimension, const Element& theRingZero=0)
+  void MakeZeroMatrix(int theDimension, const coefficient& theRingZero=0)
   { this->init(theDimension, theDimension);
     for (int i=0; i<theDimension; i++)
       for (int j=0; j<theDimension; j++)
@@ -1923,7 +1923,7 @@ public:
   }
   void ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output);
   void SwitchTwoRows(int row1, int row2);
-  inline void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<Element>* theCarbonCopy)
+  inline void SwitchTwoRowsWithCarbonCopy(int row1, int row2, Matrix<coefficient>* theCarbonCopy)
   { this->SwitchTwoRows(row1, row2);
     if (theCarbonCopy!=0)
       theCarbonCopy->SwitchTwoRows(row1, row2);
@@ -1935,12 +1935,12 @@ public:
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub)
   ;
-  inline Element ScalarProduct(const Vector<Element>& left, const Vector<Element>& right)
-  { return this->ScalarProduct(left, right, (Element) 0);
+  inline coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right)
+  { return this->ScalarProduct(left, right, (coefficient) 0);
   }
-  Element ScalarProduct(const Vector<Element>& left, const Vector<Element>& right, const Element& theRingZero)
+  coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right, const coefficient& theRingZero)
   { assert(left.size==this->NumCols && right.size==this->NumRows);
-    Element Result, tempElt;
+    coefficient Result, tempElt;
     Result=theRingZero;
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
@@ -1951,7 +1951,7 @@ public:
       }
     return Result;
   }
-  inline Element& operator()(int i, int j)const
+  inline coefficient& operator()(int i, int j)const
   { if (i<0 || i>=this->NumRows || j<0 || j>=this->NumCols)
     { std::cout << "This is a programming error: requesting row, column indexed by " << i+1 << " and " << j+1 << " but I am a matrix with "
       << this->NumRows << " rows and " << this->NumCols << " colums. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -1972,10 +1972,10 @@ public:
             return false;
      return true;
   }
-  void GetVectorFromColumn(int colIndex, Vector<Element>& output)const;
-  void GetVectorFromRow(int rowIndex, Vector<Element>& output)const;
+  void GetVectorFromColumn(int colIndex, Vector<coefficient>& output)const;
+  void GetVectorFromRow(int rowIndex, Vector<coefficient>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex);
-  bool FindFirstNonZeroElementSearchEntireRow(Element& output)
+  bool FindFirstNonZeroElementSearchEntireRow(coefficient& output)
   { for (int i=0; i<this->NumCols; i++)
       for(int j=0; j<this->NumRows; j++)
         if (!this->elements[i][j].IsEqualToZero())
@@ -1984,42 +1984,42 @@ public:
         }
     return false;
   }
-  void MakeLinearOperatorFromDomainAndRange(Vectors<Element>& domain, Vectors<Element>& range)
-  { Matrix<Element> A;
-    Matrix<Element> B;
+  void MakeLinearOperatorFromDomainAndRange(Vectors<coefficient>& domain, Vectors<coefficient>& range)
+  { Matrix<coefficient> A;
+    Matrix<coefficient> B;
     A.AssignVectorsToRows(domain);
     B.AssignVectorsToRows(range);
     A.Invert();
     (*this)=A*B;
     this->Transpose();
   }
-  void RowTimesScalar(int rowIndex, const Element& scalar);
-  inline void RowTimesScalarWithCarbonCopy(int rowIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  void RowTimesScalar(int rowIndex, const coefficient& scalar);
+  inline void RowTimesScalarWithCarbonCopy(int rowIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy)
   { this->RowTimesScalar(rowIndex, scalar);
     if (theCarbonCopy!=0)
       theCarbonCopy->RowTimesScalar(rowIndex, scalar);
   }
-  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, GlobalVariables* theGlobalVariables=0);
-  inline void AddTwoRowsWithCarbonCopy(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, GlobalVariables* theGlobalVariables=0);
+  inline void AddTwoRowsWithCarbonCopy(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy)
   { this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
     if (theCarbonCopy!=0)
       theCarbonCopy->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
   }
-  void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar);
-  inline void SubtractRowsWithCarbonCopy(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
+  void SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const coefficient& scalar);
+  inline void SubtractRowsWithCarbonCopy(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const coefficient& scalar, Matrix<coefficient>* theCarbonCopy)
   { this->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
     if (theCarbonCopy!=0)
       theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
   }
-  void MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero=0);
-  void MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, const Element& theRingZero=0);
-  void MultiplyOnTheRight(const Matrix<Element>& standsOnTheRight, const Element& theRingZero=0)
-  { Matrix<Element> temp=*this;
+  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, Matrix<coefficient>& output, const coefficient& theRingZero=0);
+  void MultiplyOnTheLeft(const Matrix<coefficient>& standsOnTheLeft, const coefficient& theRingZero=0);
+  void MultiplyOnTheRight(const Matrix<coefficient>& standsOnTheRight, const coefficient& theRingZero=0)
+  { Matrix<coefficient> temp=*this;
     *this=standsOnTheRight;
     this->MultiplyOnTheLeft(temp);
   }
-  void NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<Element>& output);
-  void GetVectorsFromRows(List<Vector<Element> >& output)
+  void NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<coefficient>& output);
+  void GetVectorsFromRows(List<Vector<coefficient> >& output)
   { output.SetSize(this->NumRows);
     for (int i=0; i<this->NumRows; i++)
     { output[i].SetSize(this->NumCols);
@@ -2027,22 +2027,22 @@ public:
         output[i][j]=this->elements[i][j];
     }
   }
-  void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit=1, const Element& theRingZero=0);
+  void NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<coefficient>& output, const coefficient& theRingUnit=1, const coefficient& theRingZero=0);
   //returns true if successful, false otherwise
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
-//    (Matrix<Element>& inputColumn, Matrix<Element>* outputTheGaussianTransformations Matrix<Element>& outputColumn);
+//    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert(GlobalVariables* theGlobalVariables=0);
-  void NullifyAll(const Element& theRingZero=0);
+  void NullifyAll(const coefficient& theRingZero=0);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
   //this means you write the matrix m1 in the upper left corner m2 in the lower right
   // and everything else you fill with zeros
-  void AssignDirectSum(Matrix<Element>& m1,  Matrix<Element>& m2);
+  void AssignDirectSum(Matrix<coefficient>& m1,  Matrix<coefficient>& m2);
   // if S and T are endomorphisms of V and W, build the matrix of SⓧT that acts on
   // VⓧW with basis (v1ⓧw1,v1ⓧw2,...,v2ⓧw1,v2ⓧw2,...vnⓧwn)
-  void AssignTensorProduct(const Matrix<Element>& left, const Matrix<Element>& right);
-  void AssignVectorsToRows(const Vectors<Element>& input)
+  void AssignTensorProduct(const Matrix<coefficient>& left, const Matrix<coefficient>& right);
+  void AssignVectorsToRows(const Vectors<coefficient>& input)
   { int numCols=-1;
     if (input.size>0)
       numCols=input[0].size;
@@ -2051,34 +2051,34 @@ public:
       for (int j=0; j<numCols; j++)
         this->elements[i][j]=input[i][j];
   }
-  void AssignVectorsToColumns(const Vectors<Element>& input)
+  void AssignVectorsToColumns(const Vectors<coefficient>& input)
   { this->init(input[0].size, input.size);
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         (*this)(i,j)=input[j][i];
   }
-  void AssignVectorColumn(const Vector<Element>& input)
+  void AssignVectorColumn(const Vector<coefficient>& input)
   { this->init(input.size, 1);
     for (int i=0; i<input.size; i++)
       this->elements[i][0]=input.TheObjects[i];
   }
-  void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<Element>& input)
+  void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input)
   { assert(input.size==this->NumCols && rowIndex<this->NumRows && rowIndex>=0);
     for (int i=0; i<this->NumCols; i++)
       this->elements[rowIndex][i]=input[i];
   }
-  void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<Element>& input)
+  void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<coefficient>& input)
   { assert(input.size==this->NumRows && colIndex<this->NumCols && colIndex>=0);
     for (int i=0; i<this->NumRows; i++)
       this->elements[i][colIndex]=input[i];
   }
-  void AssignVectorRow(const Vector<Element>& input)
+  void AssignVectorRow(const Vector<coefficient>& input)
   { this->init(1, input.size);
     for (int i=0; i<input.size; i++)
       this->elements[0][i]=input.TheObjects[i];
   }
-  void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero=0);
-  inline bool operator==(const Matrix<Element>& other)const
+  void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero=0);
+  inline bool operator==(const Matrix<coefficient>& other)const
   { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)
       return false;
     for(int i=0; i<this->NumRows; i++)
@@ -2094,7 +2094,7 @@ public:
           return false;
     return true;
   }
-  bool IsProportionalTo(const Matrix<Element>& input, Element& outputTimesMeEqualsInput)
+  bool IsProportionalTo(const Matrix<coefficient>& input, coefficient& outputTimesMeEqualsInput)
   { if (input.NumCols!=this->NumCols || input.NumRows!=this->NumRows)
       return false;
     bool found=false;
@@ -2108,15 +2108,15 @@ public:
         }
     if (!found)
       return input.IsEqualToZero();
-    Matrix<Element> tempMat;
+    Matrix<coefficient> tempMat;
     tempMat=*this;
     tempMat*=outputTimesMeEqualsInput;
     tempMat-=(input);
     return tempMat.IsEqualToZero();
   }
   //returns true if the system has a solution, false otherwise
-  bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
-  void operator+=(const Matrix<Element>& right)
+  bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<coefficient>& inputRightHandSide, Matrix<coefficient>& outputSolution);
+  void operator+=(const Matrix<coefficient>& right)
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
     { std::cout << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and "
       << this->NumCols << " columns " << " to a matrix with " << right.NumRows << " rows and " << right.NumCols
@@ -2128,7 +2128,7 @@ public:
         this->elements[i][j]+=(right.elements[i][j]);
   }
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
-  void operator-=(const Matrix<Element>& right)
+  void operator-=(const Matrix<coefficient>& right)
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
     { std::cout << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and "
       << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. "
@@ -2137,7 +2137,7 @@ public:
     }
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
-        this->elements[i][j].Subtract(right.elements[i][j]);
+        (*this)(i,j)-=right(i,j);
   }
   void WriteToFile(std::fstream& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -2147,27 +2147,27 @@ public:
   { return this->ReadFromFile(input);
   }
   bool ReadFromFile(std::fstream& input);
-  void operator/=(const Element& input)
+  void operator/=(const coefficient& input)
   { for (int j=0; j<this->NumRows; j++)
       for (int i=0; i<this->NumCols; i++)
         this->elements[j][i]/=input;
   }
-  void operator*=(const Element& input)
+  void operator*=(const coefficient& input)
   { for (int j=0; j<this->NumRows; j++)
       for (int i=0; i<this->NumCols; i++)
         this->elements[j][i]*=input;
   }
-  void operator*=(const Matrix<Element>& input)
+  void operator*=(const Matrix<coefficient>& input)
   { this->MultiplyOnTheRight(input);
   }
-  void LieBracketWith(Matrix<Element>& right)
-  { Matrix<Element> tempMat;
+  void LieBracketWith(Matrix<coefficient>& right)
+  { Matrix<coefficient> tempMat;
     this->LieBracket(*this, right, tempMat);
     *this=tempMat;
   }
-  static void LieBracket(const Matrix<Element>& left, const Matrix<Element>& right, Matrix<Element>& output)
+  static void LieBracket(const Matrix<coefficient>& left, const Matrix<coefficient>& right, Matrix<coefficient>& output)
   { assert(left.NumCols==left.NumRows && right.NumCols==right.NumRows && left.NumCols==right.NumCols);
-    Matrix<Element> tempPlus, tempMinus;
+    Matrix<coefficient> tempPlus, tempMinus;
     tempPlus=(right);
     tempPlus.MultiplyOnTheLeft(left);
     tempMinus=(left);
@@ -2184,49 +2184,52 @@ public:
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void GaussianEliminationByRows
-  (Matrix<Element>* carbonCopyMat=0, Selection* outputNonPivotColumns=0, Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0);
-  void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
+  (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0, Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0);
+  void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<coefficient>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
   void GaussianEliminationEuclideanDomain
-  (Matrix<Element>* otherMatrix=0, const Element& theRingMinusUnit=-1, const Element& theRingUnit=1,
-   bool (*comparisonGEQFunction) (const Element& left, const Element& right)=0, GlobalVariables* theGlobalVariables=0);
-  static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
-  Element GetDeterminant();
-  Element GetTrace()const;
+  (Matrix<coefficient>* otherMatrix=0, const coefficient& theRingMinusUnit=-1, const coefficient& theRingUnit=1,
+   bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right)=0, GlobalVariables* theGlobalVariables=0);
+  static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<coefficient>& A, Matrix<coefficient>& b, Matrix<coefficient>& output);
+  coefficient GetDeterminant();
+  coefficient GetTrace()const;
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
   void ScaleToIntegralForMinRationalHeightNoSignChange();
   void GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen);
-  void LieBracketWith(const Matrix<Element>& right);
+  void LieBracketWith(const Matrix<coefficient>& right);
   void ApproximateLargestEigenSpace(Vectors<Rational>& outputBasis, const Rational& DesiredError, int SuggestedOrder, int numIterations);
   void MatrixToRoot(Vector<Rational> & output);
-  bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<Element> >& output)const;
-  void GetZeroEigenSpace(List<Vector<Element> >& output)const
-  { Matrix<Element> tempMat=*this;
+  bool GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(List<Vectors<coefficient> >& output)const;
+  void GetZeroEigenSpace(List<Vector<coefficient> >& output)const
+  { Matrix<coefficient> tempMat=*this;
     tempMat.GetZeroEigenSpaceModifyMe(output);
   }
-  void GetZeroEigenSpaceModifyMe(List<Vector<Element> >& output);
-  void GetEigenspaceModifyMe(const Element &inputEigenValue, List<Vector<Element> >& outputEigenspace)
+  void GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& output);
+  void GetEigenspaceModifyMe(const coefficient &inputEigenValue, List<Vector<coefficient> >& outputEigenspace)
   { for(int i=0; i<this->NumCols; i++)
       this->elements[i][i] -= inputEigenValue;
     this->GetZeroEigenSpaceModifyMe(outputEigenspace);
   }
-  static bool SystemLinearInequalitiesHasSolution(Matrix<Element>& matA, Matrix<Element>& matb, Matrix<Element>& outputPoint);
-  static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(Matrix<Element>& matA, Matrix<Element>& matb, Vector<Element>* outputSolution=0, GlobalVariables* theGlobalVariables=0);
-  static void ComputePotentialChangeGradient(Matrix<Element>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
+  static bool SystemLinearInequalitiesHasSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Matrix<coefficient>& outputPoint);
+  static bool SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegativeNonZeroSolution(Matrix<coefficient>& matA, Matrix<coefficient>& matb, Vector<coefficient>* outputSolution=0, GlobalVariables* theGlobalVariables=0);
+  static void ComputePotentialChangeGradient(Matrix<coefficient>& matA, Selection& BaseVariables, int NumTrueVariables, int ColumnIndex, Rational& outputChangeGradient, bool& hasAPotentialLeavingVariable);
   static void GetMaxMovementAndLeavingVariableRow
-  (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<Element>& tempMatA, Vector<Element>& inputVectorX,
+  (Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<coefficient>& tempMatA, Vector<coefficient>& inputVectorX,
    Selection& BaseVariables);
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
-  Matrix<Element> operator-(const Matrix<Element>& right)const
-  { Matrix<Element> tempMat;
+  Matrix<coefficient> operator-(const Matrix<coefficient>& right)const
+  { Matrix<coefficient> tempMat;
     tempMat.Assign(*this);
     tempMat.Subtract(right);
     return tempMat;
   }
-  Matrix<Element> operator*(const Matrix<Element>& right)const;
-  Vector<Element> operator*(const Vector<Element>& v) const;
-  inline void operator=(const Matrix<Element>& other);
+  Matrix<coefficient> operator*(const Matrix<coefficient>& right)const;
+  Vector<coefficient> operator*(const Vector<coefficient>& v) const;
+
+  void operator=(const Matrix<coefficient>& other);
+  template<class otherType>
+  void operator=(const Matrix<otherType>& other);
 };
 
 template <typename Element>

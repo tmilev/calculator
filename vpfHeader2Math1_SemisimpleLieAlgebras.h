@@ -188,13 +188,13 @@ class NilradicalCandidate
   Vectors<Rational> leviRootsAmbienT;
   Vectors<Rational> leviRootsSmallPrimalFundCoords;
 
-  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectors;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKHVectorsStronglyTwoSided;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNilradical;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalElementOpposites;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectors;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKHVectorsStronglyTwoSided;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradical;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalElementOpposites;
   Selection theNilradSubsel;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNilradicalSubset;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNonFKhwVectorsStrongRelativeToSubset;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalSubset;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectorsStrongRelativeToSubset;
   Vectors<Rational> theNilradicalSubsetWeights;
   Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
 
@@ -206,8 +206,8 @@ class NilradicalCandidate
   Vector<Rational> GetConeStrongIntersectionWeight()const;
   Vector<Rational> GetNilradicalLinearCombi()const;
   void GetModGeneratedByNonHWVandNilradElt
-  (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<Rational> >& outputLeft,
-   List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
+  (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputLeft,
+   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputRight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputBrackets)const
   ;
   bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
   void ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables);
@@ -215,7 +215,7 @@ class NilradicalCandidate
   bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
   void ProcessMe(GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<Rational> >& theElts, const Vectors<Rational>& theWeights)const;
+  std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights)const;
   void ComputeTheTwoCones(GlobalVariables* theGlobalVariables)
   ;
   void ComputeTheTwoConesRelativeToNilradicalSubset();
@@ -234,14 +234,14 @@ public:
   Vectors<Rational> theHs;
   Matrix<Rational> BilinearFormSimplePrimal;
   Matrix<Rational> BilinearFormFundPrimal;
-  List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
-  List<ElementSemisimpleLieAlgebra<Rational> > theBasis;
-  List<ElementSemisimpleLieAlgebra<Rational> > fullBasisByModules;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fullBasisByModules;
   List<int> fullBasisOwnerModules;
-  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownCartanCentralizerBasis;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownPosGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownNegGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
 
   List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
@@ -253,8 +253,8 @@ public:
   charSSAlgMod<Rational> thePrimalChaR;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   Vectors<Rational> CartanOfCentralizer;
-  List<Polynomial<Rational> > theSystemToSolve;
-  List<Polynomial<Rational> > transformedSystem;
+  List<Polynomial<AlgebraicNumber> > theSystemToSolve;
+  List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
   int indexInOwnersOfNonEmbeddedMe;
@@ -275,16 +275,16 @@ public:
   int NumBadParabolics;
   int NumCentralizerConditionFailsConeConditionHolds;
   //The highest weight vectors are by definition cartan-centralizer-split
-  List<ElementSemisimpleLieAlgebra<Rational> > HighestVectorsNonSorted;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > HighestVectorsNonSorted;
   List<Vector<Rational> > HighestWeightsPrimalNonSorted;
   List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
 
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > HighestVectors;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > HighestVectors;
   HashedList<Vector<Rational> > HighestWeightsPrimal;
 
-  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > Modules;
-  List<List<List<ElementSemisimpleLieAlgebra<Rational> > > > ModulesSl2opposite;
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesIsotypicallyMerged;
+  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > Modules;
+  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > ModulesSl2opposite;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > ModulesIsotypicallyMerged;
 //  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
 
   List<Vectors<Rational> > WeightsModulesNONprimal;
@@ -319,74 +319,51 @@ public:
   bool IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
 
   void GetGenericCartanCentralizerLinearCombination
-  (int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+  (int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
   ;
   void GetGenericPosGenLinearCombination
-  (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+  (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
 ;
   bool IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const;
-  void GetGenericNegGenLinearCombination
-  (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-  ;
+  void GetGenericNegGenLinearCombination(int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   bool AmRegularSA()const;
   bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
   void GetGenericLinearCombination
-  (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
-   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-  ;
+  (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void GetGenericLinearCombinationInvolvedPosGens
-  (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-;
+  (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void ComputeCentralizerIsWellChosen();
   void AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables);
   void AddToSystem
-  (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
+  (const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish)
   ;
-  void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables)
-;
+  void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
-  void EnumerateNilradicalsRecursively
-  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0)
-  ;
+  void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
-  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables,
-   std::stringstream* logStream)
-  ;
+  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables, std::stringstream* logStream);
   bool IsPossibleNilradicalCarryOutSelectionImplications
-  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0)
-  ;
-  void ExtendToModule
-(List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
-  ;
-  Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<Rational>& input)const;
+  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
+  void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables);
+  Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
   void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
   void ComputeKsl2triplesGetOppositeEltsInOppositeModule
-  (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule,
-   List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+  (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule,
+   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts)
    ;
-  void ComputeKsl2triplesGetOppositeEltsAll
-  (const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
-   ;
+  void ComputeKsl2triplesGetOppositeEltsAll(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts);
   bool ComputeKsl2tripleSetUpAndSolveSystem
-  (const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
-   ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
-   ;
+  (const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
+   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, GlobalVariables* theGlobalVariables);
   void ComputeCharsPrimalModules();
   void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputeSinglePair
-(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
-;
+  void ComputeSinglePair(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
   int GetNumModules()const;
   void ComputePairKweightElementAndModule
-(const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex,
- List<int>& output, GlobalVariables* theGlobalVariables)
-;
-  bool IsWeightSystemSpaceIndex
-(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
+  (const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
+  bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
-  void AddHincomplete
-  (const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
-  ;
+  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit);
   bool CheckInitialization()const;
   bool CheckModuleDimensions()const;
 
@@ -396,8 +373,7 @@ public:
   void ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables);
   void ComputePrimalModuleDecompositionHWsHWVsOnly(GlobalVariables* theGlobalVariables);
   void ComputePrimalModuleDecompositionHWVsOnly
-  (GlobalVariables* theGlobalVariables,
-   HashedList<Vector<Rational> >& inputHws)
+  (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
    ;
   void ComputePrimalModuleDecompositionHighestWeightsOnly
   (GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsCoords)
@@ -411,13 +387,13 @@ public:
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
   ;
   bool ComputeSystem
-(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
- ;
+  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
+  ;
   bool ComputeSystemPart2
-(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
- ;
+  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
+  ;
   bool ComputeChar
-(bool allowBadCharacter, GlobalVariables* theGlobalVariables)
+  (bool allowBadCharacter, GlobalVariables* theGlobalVariables)
   ;
   bool AttemptToSolveSytem
   (GlobalVariables* theGlobalVariables)
@@ -488,8 +464,7 @@ public:
 
   SemisimpleLieAlgebra& GetSSowner()const
   { if (this->owneR==0)
-    { std::cout << "This is a programming error: attempted to access non-initialized "
-      << " semisimple Lie subalgerbas. "
+    { std::cout << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -536,12 +511,10 @@ public:
    GlobalVariables* theGlobalVariables)
   ;
   void ExtendOneComponentOneTypeAllLengthsRecursive
-  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType,
-   bool propagateRecursion, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion, GlobalVariables* theGlobalVariables)
 ;
   void ExtendOneComponentRecursive
-  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
-   GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
   ;
 };
 

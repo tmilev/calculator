@@ -1521,9 +1521,9 @@ public:
   static bool innerStoreObject(CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output);
   static bool innerStoreCandidateSA(CommandList& theCommands, const CandidateSSSubalgebra& input, Expression& output);
   static bool innerStoreObject(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-  { return Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input, output);
+  { return Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
   }
-  static bool innerStoreElementSemisimpleLieAlgebra
+  static bool innerStoreElementSemisimpleLieAlgebraRationals
   (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
   static bool innerStoreObject(CommandList& theCommands, const Rational& input, Expression& output, Expression* theContext=0);
   static bool innerLoadFromObject(CommandList& theCommands, const Expression& input, slTwoSubalgebra& output);

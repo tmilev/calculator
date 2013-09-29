@@ -3,6 +3,8 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+
 ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Second main implementation file. ");
 
 
@@ -312,10 +314,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
   this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
   tempRoot.Minus();
-  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" <<
-  theSubgroup.GetRho().ToStringLetterFormat("\\eta")
-  << "$; $\\pr(\\rho)=" << tempRoot.ToStringLetterFormat("\\alpha") << "$."
-  ;
+  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" << theSubgroup.GetRho().ToStringLetterFormat("\\eta") << "$; $\\pr(\\rho)="
+  << tempRoot.ToStringLetterFormat("\\alpha") << "$.";
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.ToString(&theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
@@ -381,10 +381,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, &theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
-  this->log << "\nThe first operator extended:\n"
-  << this->theLinearOperatorsExtended.TheObjects[0].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
-  this->log << "\nThe second operator extended:\n"
-  << this->theLinearOperatorsExtended.TheObjects[1].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
+  this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended[0].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
+  this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended[1].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
   tempMat.Transpose();
   tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
@@ -625,8 +623,7 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   return out.str();
 }
 
-void ConeComplex::InitFromAffineDirectionsAndRefine
-  (Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables)
+void ConeComplex::InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables)
 { assert(inputDirections.size==inputAffinePoints.size);
   assert(inputDirections.size>0);
   Vectors<Rational> projectivizedDirections;
@@ -645,8 +642,7 @@ void ConeComplex::InitFromAffineDirectionsAndRefine
   this->InitFromDirectionsAndRefine(projectivizedDirections, theGlobalVariables);
 }
 
-void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne
-  (Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
+void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=this);
   output.init();
   Cone tempCone;
@@ -671,8 +667,7 @@ Vector<coefficient> Vector<coefficient>::GetProjectivizedNormal(Vector<coefficie
   return result;
 }
 
-void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
-(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
+void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
   Vectors<Rational> theBasis;
   Vector<Rational> tempRoot;
@@ -698,8 +693,7 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
 }
 
 bool Cone::GetLatticePointsInCone
-(Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
- Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)const
+(Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne, Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)const
 { if (upperBoundPointsInEachDim<=0)
     upperBoundPointsInEachDim=5;
   Vector<Rational> theActualShift=theShift;
@@ -760,8 +754,7 @@ void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other)
   }
 }
 
-bool PiecewiseQuasipolynomial::MakeVPF
-  (Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
+bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
 { if (theRoots.size<=0)
   { outputstring = "Error.";
     return false;
@@ -804,8 +797,7 @@ bool PiecewiseQuasipolynomial::MakeVPF
   return true;
 }
 
-bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
-(Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
+bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
 { Vector<Rational> coordsInBasis;
   coneContainingOutputPoint.GetInternalPoint(output);
   Vectors<Rational> basisRoots;
@@ -929,9 +921,7 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
   return out.str();
 }
 
-void PiecewiseQuasipolynomial::DrawMe
-(DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber,
- Vector<Rational>* distinguishedPoint)
+void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber, Vector<Rational>* distinguishedPoint)
 { FormatExpressions theFormat;
   Vectors<Rational> latticePoints;
   HashedList<Vector<Rational> > theLatticePointsFinal;
@@ -1019,12 +1009,10 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
         FormatExpressions tempFormat;
         std::cout << "<hr>Error!!! Failed on chamber " << theIndex+1 << " and " << i+1;
         std::cout << "<br>Evaluating at point " << AffineInput.ToString() << "<br>";
-        std::cout << "<br>Chamber " << theIndex+1 << ": "
-        << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
+        std::cout << "<br>Chamber " << theIndex+1 << ": " << this->theProjectivizedComplex[theIndex].ToString(&tempFormat);
         std::cout << "<br>QP: " << this->theQPs[theIndex].ToString(true, false);
         std::cout << "<br>value: " << result.ToString();
-        std::cout << "<br><br>Chamber " << i+1 << ": "
-        << this->theProjectivizedComplex[i].ToString(&tempFormat);
+        std::cout << "<br><br>Chamber " << i+1 << ": " << this->theProjectivizedComplex[i].ToString(&tempFormat);
         std::cout << "<br>QP: " << this->theQPs[i].ToString(true, false);
         std::cout << "<br>value: " << altResult.ToString();
         if (firstFail)
@@ -1036,10 +1024,8 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
           tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
           tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 10, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
           tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
-          std::cout << "<br>"
-          << " <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
-          std::cout
-          << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim()-1);
+          std::cout << "<br> <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
+          std::cout << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim()-1);
 
         }
         firstFail=false;
@@ -1066,8 +1052,7 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
   }
 }
 
-void Lattice::GetDefaultFundamentalDomainInternalPoint
-(Vector<Rational>& output)
+void Lattice::GetDefaultFundamentalDomainInternalPoint(Vector<Rational>& output)
 { output.MakeZero(this->GetDim());
   Vector<Rational> tempRoot;
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
@@ -2836,7 +2821,7 @@ bool Lattice::GetAllRepresentatives(const Lattice& rougherLattice, Vectors<Ratio
   { while (this->basisRationalForm.elements[i][col].IsEqualToZero())
       col++;
     currentPeriod=rougherLattice.basisRationalForm.elements[i][col]/this->basisRationalForm.elements[i][col];
-    currentPeriod.GetNumerator(currentPeriodInt);
+    currentPeriodInt=currentPeriod.GetNumerator();
     if (currentPeriodInt.value.theDigits.size>1)
 //    { std::cout << "exited at point 1 counter i is " << i;
       return false;

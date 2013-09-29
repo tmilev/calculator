@@ -2643,7 +2643,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
     Polynomial<Rational> tmpGCD, tmpRF;
     tempFormat.MaxLineLength=80;
     if (theNumVars==1)
-    { tmpGCD= theElt.FindGCDCoefficientNumerators<Polynomial<Rational> >();
+    { tmpGCD= theElt.FindGCDCoefficientNumeratorsOverRationals();
       tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
       out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tmpGCD.ToString(&tempFormat)) << "</td>";
     }

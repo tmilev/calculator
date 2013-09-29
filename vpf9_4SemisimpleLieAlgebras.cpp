@@ -33,35 +33,13 @@ bool SemisimpleLieAlgebra::CheckConsistency()const
   return true;
 }
 
-void SemisimpleLieAlgebra::GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
-{ output.MakeZero();
-  ChevalleyGenerator theGen;
-  Polynomial<Rational> theCf;
-  for (int i=0; i<this->GetRank(); i++)
-  { theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
-    theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
-    output.AddMonomial(theGen, theCf);
-  }
-}
-
-void SemisimpleLieAlgebra::GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar)
-{ output.MakeZero();
-  ChevalleyGenerator theGen;
-  Polynomial<Rational> theCf;
-  for (int i=0; i<this->GetNumPosRoots(); i++)
-  { theGen.MakeGenerator(*this, i);
-    theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
-    output.AddMonomial(theGen, theCf);
-  }
-}
-
 bool SemisimpleLieAlgebra::AttempTFindingHEF
-(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
- ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputF, std::stringstream* logStream, GlobalVariables* theGlobalVariables)
+(ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
+ ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptFindingHEF");
-  List<Polynomial<Rational> > theSystem;
-  GroebnerBasisComputation<Rational> theComputation;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > mustBeZero, tempE;
+  List<Polynomial<AlgebraicNumber> > theSystem;
+  GroebnerBasisComputation<AlgebraicNumber> theComputation;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > mustBeZero, tempE;
   this->LieBracket(inputOutputH, inputOutputE, mustBeZero);
   mustBeZero-=inputOutputE*2;
   for (int i=0; i<mustBeZero.size(); i++)
@@ -91,7 +69,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
   }
   if (logStream!=0)
     *logStream << "Solved successfully! One solution: " << theComputation.ToStringSerreLikeSolution();
-  PolynomialSubstitution<Rational> theSolutionSub;
+  PolynomialSubstitution<AlgebraicNumber> theSolutionSub;
   theComputation.GetSubFromPartialSolutionSerreLikeSystem(theSolutionSub);
   inputOutputF.SubstitutionCoefficients(theSolutionSub);
   inputOutputH.SubstitutionCoefficients(theSolutionSub);
@@ -102,12 +80,12 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
 }
 
 bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
-(ElementSemisimpleLieAlgebra<Rational>& theE, ElementSemisimpleLieAlgebra<Rational>& outputH, ElementSemisimpleLieAlgebra<Rational>& outputF,
+(ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH, ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF,
  std::stringstream* logStream, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan");
-  Matrix<Rational> theM;
+  Matrix<AlgebraicNumber> theM;
   this->GetAd(theM, theE);
-  MatrixTensor<Rational> theMatTensor, theId;
+  MatrixTensor<AlgebraicNumber> theMatTensor, theId;
   theMatTensor=theM;
   theId.MakeId(theM.NumRows);
   MathRoutines::RaiseToPower(theMatTensor, this->GetNumPosRoots(), theId);
@@ -116,7 +94,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingEtoHEFwithHinCartan
       *logStream << "The input E element " << theE.ToString() << " is not nilpotent. The matrix tensor is: " << theMatTensor.ToString() ;
     return false;
   }
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > unknownH, unknownF, knownE;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > unknownH, unknownF, knownE;
   knownE=theE;
   this->GetGenericElementCartan(unknownH, 0);
   this->GetGenericElementNegativeBorelNilradical(unknownF, this->GetRank());
@@ -169,8 +147,7 @@ std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebra(int ActualIndexS
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals
-(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
@@ -916,7 +893,7 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CheckGensBracketToHs");
   if (this->theNegGens.size!=this->thePosGens.size || this->theNegGens.size!=this->theWeylNonEmbeddeD.GetDim())
     return false;
-  ElementSemisimpleLieAlgebra<Rational> goalH, lieBracket;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> goalH, lieBracket;
   for (int i=0; i<this->theNegGens.size; i++)
   { goalH.MakeHgenerator(this->theHsScaledToActByTwo[i], *this->owner->owneR);
     this->GetAmbientSS().LieBracket(this->thePosGens[i], this->theNegGens[i], lieBracket);
@@ -927,40 +904,10 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   return true;
 }
 
-template <class coefficient>
-void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat)
-{ if(theMat.NumCols!=theMat.NumRows)
-    assert(false);
-  permutation thePerm;
-  thePerm.initPermutation(theMat.NumRows);
-  int numCycles=thePerm.GetNumPermutations();
-  //std::cout << "<hr>" << numCycles << " total cycles";
-  List<int> permutationIndices;
-  thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
-  Polynomial<coefficient> result, theMonomial;
-  result.MakeZero();
-  result.SetExpectedSize(numCycles);
-  for (int i=0; i<numCycles; i++, thePerm.incrementAndGetPermutation(permutationIndices))
-  { theMonomial.MakeOne();
-    for (int j=0; j<permutationIndices.size; j++)
-      theMonomial*=theMat(j, permutationIndices[j]);
-    //the following can be made much faster, but no need right now as it won't be a bottleneck.
-    int sign=1;
-    for(int j=0; j<permutationIndices.size; j++)
-      for (int k=j+1; k<permutationIndices.size; k++)
-        if (permutationIndices[k]<permutationIndices[j])
-          sign*=-1;
-    //std::cout << "<hr>" << permutationIndices << " sign: " << sign;
-    theMonomial*=sign;
-    result+=theMonomial;
-  }
-  *this=result;
-}
-
 bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > lieBracketMinusGoalValue, goalValue;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
@@ -968,8 +915,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknownsNoCentralizer=0;
   if (this->theHs.size==0)
-  { std::cout << "This is a programming error: the number of involved H's cannot be zero. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: the number of involved H's cannot be zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (this->theInvolvedNegGenerators.size!=this->theHs.size)
@@ -1006,9 +952,10 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
     //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
+
   if (this->theUnknownCartanCentralizerBasis.size>0)
-  { Matrix<Polynomial<Rational> > theCentralizerCartanVars;
-    Vectors<Polynomial<Rational> > theCentralizerCartanElts;
+  { Matrix<Polynomial<AlgebraicNumber> > theCentralizerCartanVars;
+    Vectors<Polynomial<AlgebraicNumber> > theCentralizerCartanElts;
     theCentralizerCartanElts.SetSize(this->theUnknownCartanCentralizerBasis.size);
     for (int i=0; i<this->theUnknownCartanCentralizerBasis.size; i++)
     { this->GetGenericCartanCentralizerLinearCombination(i, this->theUnknownCartanCentralizerBasis[i]);
@@ -1019,7 +966,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
       //    << this->theUnknownCartanCentralizerBasis[i].ToString();
     }
     theCentralizerCartanElts.GetGramMatrix(theCentralizerCartanVars, &this->GetAmbientWeyl().CartanSymmetric);
-    Polynomial<Rational> theDeterminant, theDetMultiplier;
+    Polynomial<AlgebraicNumber> theDeterminant, theDetMultiplier;
     theDeterminant.MakeDeterminantFromSquareMatrix(theCentralizerCartanVars);
     theDetMultiplier.MakeMonomiaL(this->totalNumUnknownsWithCentralizer-1, 1, 1);
     theDeterminant*=theDetMultiplier;
@@ -1091,10 +1038,10 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   return true;
 }
 
-void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<Rational> >& inputOutput, GlobalVariables* theGlobalVariables)
+void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ExtendToModule");
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
-  List<ElementSemisimpleLieAlgebra<Rational> > theVectorSpace;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theVectorSpace;
   HashedList<ChevalleyGenerator> bufferList;
   theVectorSpace=inputOutput;
   ProgressReport theReport(theGlobalVariables);
@@ -1120,7 +1067,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::IntersectVectorSpaces
   List<MonomialCollectionTemplate> vectorSpace2eliminated=vectorSpace2;
   MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, 0, seedMonomials);
   MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, 0, seedMonomials);
-  Matrix<Rational> theLinCombiMat;
+  Matrix<coefficient> theLinCombiMat;
   int firstSpaceDim=theVspaces.size;
   theLinCombiMat.MakeIdMatrix(theVspaces.size+vectorSpace2eliminated.size);
   theVspaces.AddListOnTop(vectorSpace2eliminated);
@@ -1218,7 +1165,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
         this->WeightsModulesPrimal[i].SetSize(this->Modules[i][0].size);
       }
       for (int j=0; j<this->Modules[i][k].size; j++)
-      { ElementSemisimpleLieAlgebra<Rational>& currentElt=this->Modules[i][k][j];
+      { ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt=this->Modules[i][k][j];
         Vector<Rational> currentRoot=this->GetAmbientSS().GetWeightOfGenerator(currentElt[0].theGeneratorIndex);
         this->GetWeightProjectionFundCoords(currentRoot, theProjection);
         this->GetPrimalWeightProjectionFundCoords(currentRoot, thePrimalProjection);
@@ -1266,10 +1213,10 @@ NumBadParabolics(0), NumCentralizerConditionFailsConeConditionHolds(0), flagDeal
 {
 }
 
-void CandidateSSSubalgebra::ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<Rational>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
+void CandidateSSSubalgebra::ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePairKweightElementAndModule");
-  List<ElementSemisimpleLieAlgebra<Rational> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
-  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> theLieBracket;
   ProgressReport theReport(theGlobalVariables);
   Vector<Rational> coordsInFullBasis;
   output.SetSize(0);
@@ -1300,7 +1247,7 @@ void CandidateSSSubalgebra::ComputeSinglePair(int leftIndex, int rightIndex, Lis
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSinglePair");
   output.SetSize(0);
   List<int> tempList;
-  List<ElementSemisimpleLieAlgebra<Rational> >& leftModule=this->ModulesIsotypicallyMerged[leftIndex];
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& leftModule=this->ModulesIsotypicallyMerged[leftIndex];
   ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<leftModule.size; i++)
   { if (theGlobalVariables!=0)
@@ -1384,7 +1331,7 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules()
 }
 
 void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule
-(const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<Rational> >& inputOppositeModule, List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+(const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule");
   outputElts.SetSize(0);
   for (int i=0; i<inputOppositeModule.size; i++)
@@ -1392,14 +1339,14 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule
       outputElts.AddOnTop(inputOppositeModule[i]);
 }
 
-Vector<Rational> CandidateSSSubalgebra::GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<Rational>& input)const
+Vector<Rational> CandidateSSSubalgebra::GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const
 { Vector<Rational> output;
   Vector<Rational> tempV=this->GetAmbientSS().GetWeightOfGenerator(input[0].theGeneratorIndex);
   this->GetPrimalWeightProjectionFundCoords(tempV, output);
   return output;
 }
 
-void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<Rational> >& outputElts)
+void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll");
   Vector<Rational> otherWeight, tempV;
   outputElts.SetSize(0);
@@ -1417,14 +1364,14 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(const Vector<Ra
 }
 
 bool CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem
-(const ElementSemisimpleLieAlgebra<Rational>& theE, const List<ElementSemisimpleLieAlgebra<Rational> >& FisLinearCombiOf,
- ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables)
+(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
+ ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeKsl2tripleSetUpAndSolveSystem");
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > Ecopy, theH, theF, tempElt;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > Ecopy, theH, theF, tempElt;
   Ecopy=theE;
   this->GetAmbientSS().GetGenericElementCartan(theH, 0);
   theF.MakeZero();
-  Polynomial<Rational> tempP;
+  Polynomial<AlgebraicNumber> tempP;
   for (int i=0; i<FisLinearCombiOf.size; i++)
   { tempElt=FisLinearCombiOf[i];
     tempP.MakeMonomiaL(i+this->GetAmbientSS().GetRank(), 1, 1);
@@ -1442,7 +1389,7 @@ void CandidateSSSubalgebra::ComputeKsl2triples(GlobalVariables* theGlobalVariabl
   if (!this->owner->flagComputeNilradicals)
     return;
   this->ModulesSl2opposite.SetSize(this->Modules.size);
-  List<ElementSemisimpleLieAlgebra<Rational> > FmustBeAlinCombiOf;
+  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > FmustBeAlinCombiOf;
   for (int i=0; i<this->Modules.size; i++)
   { this->ModulesSl2opposite[i].SetSize(this->Modules[i].size);
     for (int j=0; j<this->Modules[i].size; j++)
@@ -1485,14 +1432,14 @@ Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
 bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inputNilradSel)
 { if (inputNilradSel.CardinalitySelection==1)
     return true;
-  ElementSemisimpleLieAlgebra<Rational> mustBeZero;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
   for (int i=0; i<inputNilradSel.CardinalitySelection; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& leftElt=this->theNilradical[inputNilradSel.elements[i]];
+  { ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftElt=this->theNilradical[inputNilradSel.elements[i]];
     for (int j=0; j<inputNilradSel.CardinalitySelection; j++)
     { if (i==j)
         continue;
-      ElementSemisimpleLieAlgebra<Rational>& rightEltPositive=this->theNilradical[inputNilradSel.elements[j]];
-      ElementSemisimpleLieAlgebra<Rational>& rightEltNegative=this->theNilradicalElementOpposites[inputNilradSel.elements[j]];
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltPositive=this->theNilradical[inputNilradSel.elements[j]];
+      ElementSemisimpleLieAlgebra<AlgebraicNumber>& rightEltNegative=this->theNilradicalElementOpposites[inputNilradSel.elements[j]];
       this->owner->GetAmbientSS().LieBracket(leftElt, rightEltPositive, mustBeZero);
       if (!mustBeZero.IsEqualToZero())
         return false;
@@ -1699,7 +1646,7 @@ bool NilradicalCandidate::IsStronglySingularRelativeToSubset(int nonFKweightInde
 //  std::stringstream out;
 //  out << "<br>Checking out module index " << moduleIndex;
   //this->FKnilradicalLog+=out.str();
-  ElementSemisimpleLieAlgebra<Rational> mustBeZero;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> mustBeZero;
   for (int j=0; j<this->theNilradSubsel.CardinalitySelection; j++)
   { this->owner->owner->owneR->LieBracket(this->theNilradical[this->theNilradSubsel.elements[j]], this->theNonFKhwVectors[nonFKweightIndex], mustBeZero);
     if (!mustBeZero.IsEqualToZero())
@@ -2048,7 +1995,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHighestWeightsOnly(G
   outputHWsDualCoords.Clear();
   Vector<Rational> currentWeight, currentRootSpace;
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& currentVector=this->HighestVectorsNonSorted[i];
+  { ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentVector=this->HighestVectorsNonSorted[i];
     for (int j=0; j<currentVector.size(); j++)
     { currentRootSpace= this->GetAmbientSS().GetWeightOfGenerator(currentVector[j].theGeneratorIndex);
       currentWeight.SetSize(this->theHs.size+ this->CartanOfCentralizer.size);
@@ -2122,7 +2069,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     sortingWeights.AddOnTop(currentHWPrimal);
   }
   sortingWeights.QuickSortAscendingCustom(*this, &this->HighestVectorsNonSorted);
-  List<List<ElementSemisimpleLieAlgebra<Rational> > > tempModules;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > tempModules;
   HashedList<Vector<Rational> > tempHWs;
   tempModules.SetExpectedSize(this->HighestVectorsNonSorted.size);
   tempHWs.SetExpectedSize(this->HighestVectorsNonSorted.size);
@@ -2158,7 +2105,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     this->HighestVectors.LastObject()->SetSize(0);
     this->HighestWeightsPrimal.AddOnTop(tempHWs[i]);
     if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis))
-    { MonomialCollection<ChevalleyGenerator, Rational>::IntersectVectorSpaces(tempModules[i], this->theBasis, *this->HighestVectors.LastObject());
+    { MonomialCollection<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(tempModules[i], this->theBasis, *this->HighestVectors.LastObject());
       if (this->HighestVectors.LastObject()->size!=1)
       { std::cout << "This is a programming error: simple component has more than one highest weight vector"
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -2234,8 +2181,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly");
-  List<Matrix<Rational> > theAdsOfHs;
-  Matrix<Rational> tempAd, temp, commonAd, adIncludingCartanActions;
+  List<Matrix<AlgebraicNumber> > theAdsOfHs;
+  Matrix<AlgebraicNumber> tempAd, temp, commonAd, adIncludingCartanActions;
   //std::cout << "<hr>Type "  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
   //<< ", ads of: " << this->thePosGens.ToString();
   for (int i=0; i<this->thePosGens.size; i++)
@@ -2243,7 +2190,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
     commonAd.AppendMatrixToTheBottom(tempAd);
 //    std::cout << "Getting ad of: " << this->thePosGens[i].ToString();
   }
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
   Vectors<Rational> allHs;
   allHs.AddListOnTop(this->theHs);
   allHs.AddListOnTop(this->CartanOfCentralizer);
@@ -2252,7 +2199,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
   { tempElt.MakeHgenerator(allHs[j], this->GetAmbientSS());
     this->GetAmbientSS().GetAd(theAdsOfHs[j], tempElt);
   }
-  Vectors<Rational> outputV;
+  Vectors<AlgebraicNumber> outputV;
   this->HighestVectorsNonSorted.SetSize(0);
   for (int i=0; i<inputHws.size; i++)
   { adIncludingCartanActions=commonAd;
@@ -2303,7 +2250,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
   this->transformedSystem=this->theSystemToSolve;
 //  std::cout << "<br>Ere i am j h.";
 //  return true;
-  GroebnerBasisComputation<Rational> theComputation;
+  GroebnerBasisComputation<AlgebraicNumber> theComputation;
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
@@ -2316,12 +2263,12 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
   { //std::cout << "The system was solved!!!!";
     this->theNegGens.SetSize(this->theUnknownNegGens.size);
     this->thePosGens.SetSize(this->theUnknownPosGens.size);
-    PolynomialSubstitution<Rational> theSub;
+    PolynomialSubstitution<AlgebraicNumber> theSub;
     theSub.SetSize(theComputation.systemSolution.GetElement().size);
     for (int i=0; i<theSub.size; i++)
       theSub[i].MakeConst(theComputation.systemSolution.GetElement()[i]);
-    ElementSemisimpleLieAlgebra<Polynomial<Rational> > currentNegElt;
-    ElementSemisimpleLieAlgebra<Polynomial<Rational> > currentPosElt;
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > currentNegElt;
+    ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > currentPosElt;
     for (int i=0; i<this->theUnknownNegGens.size; i++)
     { currentNegElt=this->theUnknownNegGens[i];
       currentPosElt=this->theUnknownPosGens[i];
@@ -2347,14 +2294,14 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
-void CandidateSSSubalgebra::GetGenericNegGenLinearCombination(int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+void CandidateSSSubalgebra::GetGenericNegGenLinearCombination(int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
 { int offsetIndex=0;
   for (int i=0; i<indexNegGens; i++)
     offsetIndex+=this->theInvolvedNegGenerators[i].size;
   this->GetGenericLinearCombination(this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
 }
 
-void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
 { int offsetIndex=this->totalNumUnknownsNoCentralizer+indexCartanCentralizerGen*this->GetAmbientWeyl().GetDim() ;
   List<ChevalleyGenerator> eltsCartan;
   eltsCartan.SetSize(this->GetAmbientWeyl().GetDim());
@@ -2365,7 +2312,7 @@ void CandidateSSSubalgebra::GetGenericCartanCentralizerLinearCombination(int ind
   this->GetGenericLinearCombination(this->totalNumUnknownsWithCentralizer, offsetIndex, eltsCartan, output);
 }
 
-void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
 { int offsetIndex=0;
   for (int i=0; i<indexPosGens; i++)
     offsetIndex+=this->theInvolvedPosGenerators[i].size;
@@ -2373,8 +2320,8 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination(int indexPosGens, 
   this->GetGenericLinearCombination(this->totalNumUnknownsWithCentralizer, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
 }
 
-void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
-{ Polynomial<Rational> thePoly;
+void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish)
+{ Polynomial<AlgebraicNumber> thePoly;
 //  std::cout << "<hr>I must vanish: " << elementThatMustVanish.ToString();
   for (int i=0; i<elementThatMustVanish.size(); i++)
   { thePoly=elementThatMustVanish.theCoeffs[i];
@@ -2383,9 +2330,9 @@ void CandidateSSSubalgebra::AddToSystem(const ElementSemisimpleLieAlgebra<Polyno
   }
 }
 
-void CandidateSSSubalgebra::GetGenericLinearCombination(int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ Polynomial<Rational> theCF;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > tempMon;
+void CandidateSSSubalgebra::GetGenericLinearCombination(int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output)
+{ Polynomial<AlgebraicNumber> theCF;
+  ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > tempMon;
   output.MakeZero();
   for (int i=0; i<involvedGens.size; i++)
   { theCF.MakeDegreeOne(numVars, varOffset+i, 1);
@@ -3907,7 +3854,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
   << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0])
   << " \\oplus \\mathfrak h_c$\\label{tableModuleDecompo} }\\\\"
   << "Component &Module & elements & elt. weights& $h$-element $\\mathfrak k-sl(2)$-triple& $f$-element $\\mathfrak k-sl(2)$-triple\\\\";
-  ElementSemisimpleLieAlgebra<Rational> tempLieBracket;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i=0; i<this->Modules.size; i++)
   { int numRowsIsoCompo=this->Modules[i].size*this->Modules[i][0].size;
     if (numRowsIsoCompo>1)
@@ -3933,7 +3880,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompoLaTeX(FormatExpressions*
             if (k<this->ModulesSl2opposite[i][j].size)
               OpsAreGood=true;
         if (OpsAreGood)
-        { List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
+        { List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentOpModule=this->ModulesSl2opposite[i][j];
           if (!currentOpModule[k].IsEqualToZero())
           { this->GetAmbientSS().LieBracket(this->Modules[i][j][k], currentOpModule[k], tempLieBracket);
             out << "$" << tempLieBracket.ToString() << "$&";
@@ -3990,7 +3937,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   out << "</tr>";
   out <<"<tr><td>Module elements (weight vectors). <span style=\"color:#0000FF\">In blue - corresp. F element</span>. "
   << "<span style=\"color:#FF0000\">In red -corresp. H element</span>. </td>";
-  ElementSemisimpleLieAlgebra<Rational> tempLieBracket;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> tempLieBracket;
   for (int i=0; i<this->Modules.size; i++)
   { out << "<td>";
     if (this->primalSubalgebraModules.Contains(i))
@@ -4001,7 +3948,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
     }
     out << "<table border=\"1\"><tr>";
     for (int j=0; j<this->Modules[i].size; j++)
-    { List<ElementSemisimpleLieAlgebra<Rational> >& currentModule=this->Modules[i][j];
+    { List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentModule=this->Modules[i][j];
       out << "<td>";
       out << "<table>";
       for (int k=0; k<currentModule.size; k++)
@@ -4012,7 +3959,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
             if (k<this->ModulesSl2opposite[i][j].size)
               OpsAreGood=true;
         if (OpsAreGood)
-        { List<ElementSemisimpleLieAlgebra<Rational> >& currentOpModule=this->ModulesSl2opposite[i][j];
+        { List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& currentOpModule=this->ModulesSl2opposite[i][j];
           if (!currentOpModule[k].IsEqualToZero())
           { out << "<td><span style=\"color:#0000FF\">" << currentOpModule[k].ToString() << "</span></td>";
             this->GetAmbientSS().LieBracket(currentModule[k], currentOpModule[k], tempLieBracket);
@@ -4097,7 +4044,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   return out.str();
 }
 
-std::string NilradicalCandidate::ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<Rational> >& theElts, const Vectors<Rational>& theWeights)const
+std::string NilradicalCandidate::ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights)const
 { std::stringstream out;
   out << "<table border=\"1\"><tr>";
   for (int i=0; i<theWeights.size; i++)
@@ -4191,12 +4138,12 @@ std::string NilradicalCandidate::ToString(FormatExpressions* theFormat)const
 }
 
 void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt
-(int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<Rational> >& outputLeft, List<ElementSemisimpleLieAlgebra<Rational> >& outputRight, List<ElementSemisimpleLieAlgebra<Rational> >& outputBrackets)const
+(int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputLeft, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputRight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputBrackets)const
 { outputBrackets.SetSize(0);
   outputBrackets.AddOnTop(this->theNilradicalSubset[indexInNilradSubset]);
   outputRight.SetSize(1);
   outputLeft.SetSize(1);
-  ElementSemisimpleLieAlgebra<Rational> theLieBracket;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> theLieBracket;
   for (int i=0; i<outputBrackets.size; i++)
     if (!outputBrackets[i].IsEqualToZero())
       for (int j=0; j<this->theNonFKhwVectorsStrongRelativeToSubset.size; j++)
@@ -4253,7 +4200,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
     FormatExpressions tempFormat;
     if (!this->charFormaT.IsZeroPointer())
       tempFormat= this->charFormaT.GetElementConst();
-    List<ElementSemisimpleLieAlgebra<Rational> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
+    List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets;
     for (int i=0; i<this->FKNilradicalCandidates.size; i++)
     { const NilradicalCandidate& currentNilrad=this->FKNilradicalCandidates[i];
       currentNilradVector=currentNilrad.theNilradicalSelection;
@@ -4311,7 +4258,7 @@ std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFor
         }
         out << "\\end{tabular}\\\\\n<br>";
         out << "&& Relevant Lie brackets: ";
-        ElementSemisimpleLieAlgebra<Rational> tempElt;
+        ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
         std::stringstream tempStream;
         for (int j=0; j<currentNilrad.theNilradicalSubset.size; j++)
         { currentNilrad.GetModGeneratedByNonHWVandNilradElt(j, RelevantBracketsLeft, RelevantBracketsRight, RelevantBrackets);
@@ -4637,8 +4584,7 @@ std::string CandidateSSSubalgebra::ToStringSystem(FormatExpressions* theFormat)c
     out << "<br>";
   }
   for (int i=0; i<this->theHs.size; i++)
-  { out << "h: " << this->theHs[i] << ", "
-    << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
+  { out << "h: " << this->theHs[i] << ", " << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
     << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
   }
   out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
@@ -5167,8 +5113,7 @@ bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
   if (this->theLetter=='G')
   { //std::cout << "<br>Testing input co-root length " << input << " vs current co-root length: "
     //<< this->lengthFirstCoRootSquared;
-    if ((this->lengthFirstCoRootSquared/input)==3 ||
-        (this->lengthFirstCoRootSquared/input)==1)
+    if ((this->lengthFirstCoRootSquared/input)==3 || (this->lengthFirstCoRootSquared/input)==1)
       return true;
     return false;
   }
@@ -5184,7 +5129,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   Vectors<Rational> theCartan;
   theHWsNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& currentElt=this->HighestVectorsNonSorted[i];
+  { ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt=this->HighestVectorsNonSorted[i];
     currentElt.ElementToVectorNegativeRootSpacesFirst(theHWsNonSorted[i]);
   }
   ElementSemisimpleLieAlgebra<Rational> tempElt;

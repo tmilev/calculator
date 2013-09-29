@@ -215,40 +215,6 @@ bool Vectors<coefficient>::ConesIntersect
   return true;
 }
 
-template <class coefficient>
-void SemisimpleLieAlgebra::GetCommonCentralizer
-(const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
-{ Matrix<Rational> tempAd, commonAd;
-  for (int i=0; i<inputElementsToCentralize.size; i++)
-  { this->GetAd(tempAd, inputElementsToCentralize[i]);
-    //tempAd.Transpose();
-    commonAd.AppendMatrixToTheBottom(tempAd);
-  }
-  Vectors<Rational> outputV;
-  commonAd.GetZeroEigenSpace(outputV);
-//  std::cout << "<br>Common ad: " << commonAd.ToString();
-//  std::cout << "<br>Eigenvectors: " << outputV.ToString();
-  outputCentralizingElements.SetSize(outputV.size);
-  for (int i=0; i<outputV.size; i++)
-  { ElementSemisimpleLieAlgebra<Rational>& currentElt=outputCentralizingElements[i];
-    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
-  }
-}
-
-template <class coefficient>
-void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
-{ int NumGenerators=this->GetNumGenerators();
-  output.init(NumGenerators, NumGenerators);
-  output.NullifyAll();
-  ElementSemisimpleLieAlgebra<coefficient> theGen, theResult;
-  for (int i=0; i<NumGenerators; i++)
-  { theGen.MakeGenerator(i, *this);
-    this->LieBracket(e, theGen, theResult);
-    for (int j=0; j<theResult.size(); j++)
-      output(theResult[j].theGeneratorIndex, i)=theResult.theCoeffs[j];
-  }
-}
-
 bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
@@ -599,10 +565,11 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theComma
   SemisimpleLieAlgebra* ownerSS=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);
-  ElementSemisimpleLieAlgebra<Rational> theE;
-  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theE, *ownerSS))
+  ElementSemisimpleLieAlgebra<Rational> theErational;
+  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
     return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
-  ElementSemisimpleLieAlgebra<Rational> theF, theH;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
+  theE=theErational;
   std::stringstream out, logStream;
   bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
 //  std::cout << "<br>The elts: " <<  theOperators.ToString();
@@ -901,10 +868,8 @@ void CalculusFunctionPlot::AddPlotOnTop
 { this->upperBounds.AddOnTop(inputUpperBound);
   this->lowerBounds.AddOnTop(inputLowerBound);
   this->thePlotElementS.AddOnTop(inputE);
-  this->thePlotStrings.AddOnTop
-  (this->GetPlotStringFromFunctionStringAndRanges(false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
-  this->thePlotStringsWithHtml.AddOnTop
-  (this->GetPlotStringFromFunctionStringAndRanges(true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
+  this->thePlotStrings.AddOnTop(this->GetPlotStringFromFunctionStringAndRanges(false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
+  this->thePlotStringsWithHtml.AddOnTop(this->GetPlotStringFromFunctionStringAndRanges(true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
 }
 
 std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges

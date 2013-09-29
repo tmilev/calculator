@@ -1016,34 +1016,6 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   output=out.str();
 }
 
-template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
-{ this->MakeGenerator(inputOwner.GetGeneratorFromRoot(theRoot), inputOwner);
-}
-
-template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
-{ //Changing RootSystem order invalidates this function!
-  this->MakeZero();
-  ChevalleyGenerator tempGenerator;
-  for (int i=0; i<input.size; i++)
-    if (input[i]!=0)
-    { tempGenerator.MakeGenerator(owner, i);
-      this->AddMonomial(tempGenerator, input[i]);
-    }
-}
-
-template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
-{ if (this->IsEqualToZero())
-  { output.MakeZero(0);
-    return;
-  }
-  output.MakeZero(this->GetOwner()->GetNumGenerators());
-  for (int i=0; i<this->size(); i++)
-    output[(*this)[i].theGeneratorIndex]=this->theCoeffs[i];
-}
-
 void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
 { rootSubalgebra theRootSA;
   theRootSA.init(*this);
@@ -2367,7 +2339,7 @@ void RationalFunctionOld::ClearDenominators(RationalFunctionOld& outputWasMultip
   Rational tempRat;
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
-      this->ratValue.GetDenominator(tempRat);
+      tempRat=this->ratValue.GetDenominator();
       outputWasMultipliedBy.MakeConst(tempRat, this->context);
       this->ratValue*=tempRat;
     break;

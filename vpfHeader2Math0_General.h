@@ -584,7 +584,21 @@ public:
     MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size==startSpanSize;
   }
-
+  bool HasRationalCoeffs(MonomialCollection<TemplateMonomial, Rational>* outputConversionToRationals=0)
+  { Rational tempRat;
+    Rational* theCF=0;
+    if (outputConversionToRationals!=0)
+    { theCF=&tempRat;
+      outputConversionToRationals->MakeZero();
+    }
+    for (int i=0; i< this->size(); i++)
+      if (!this->theCoeffs[i].IsRational(theCF))
+        return false;
+      else
+        if (outputConversionToRationals!=0)
+          outputConversionToRationals->AddMonomial((*this)[i], *theCF);
+    return true;
+  }
   template <class MonomialCollectionTemplate>
   static int GetRankOfSpanOfElements(List<MonomialCollectionTemplate>& theList, HashedList<TemplateMonomial>* seedMonomials=0)
   { List<MonomialCollectionTemplate> listCopy=theList;
@@ -604,7 +618,8 @@ public:
       if (this->CleanupMonIndex(i))
         i--;
   }
-  void SubstitutionCoefficients(const List<Polynomial<Rational> >& theSub)
+  template<class baseType>
+  void SubstitutionCoefficients(const List<Polynomial<baseType> >& theSub)
   { coefficient newCoeff;
     for (int i=0; i<this->size(); i++)
     { newCoeff=this->theCoeffs[i];
@@ -634,7 +649,7 @@ public:
       this->theCoeffs[i].checkConsistency();
   }
   template <class baseRing>
-  baseRing FindGCDCoefficientNumerators()
+  baseRing FindGCDCoefficientNumerators()const
   { if (this->size()==0)
       return 1;
     baseRing result, tempCF;
@@ -645,23 +660,24 @@ public:
     }
     return result;
   }
-  Rational FindGCDCoefficientNumeratorsOverRationals()
+  Rational FindGCDCoefficientNumeratorsOverRationals()const
   { if (this->size()==0)
       return 1;
-    LargeIntUnsigned result, tempUI;
-    this->theCoeffs[0].GetNumerator(result);
+    LargeInt result, tempUI;
+    result=this->theCoeffs[0].GetNumeratorRationalPart();
+    result.sign=1;
     for (int i=1; i<this->size(); i++)
-    { this->theCoeffs[i].GetNumerator(tempUI);
-      LargeIntUnsigned::gcd(result, tempUI, result);
+    { tempUI=this->theCoeffs[i].GetNumeratorRationalPart();
+      LargeIntUnsigned::gcd(result.value, tempUI.value, result.value);
     }
     return result;
   }
-  Rational FindLCMCoefficientDenominatorsOverRationals()
-  { LargeIntUnsigned result, tempUI, tempRat;
+  Rational FindLCMCoefficientDenominatorsOverRationals()const
+  { LargeInt result, tempUI, tempRat;
     result=1;
     for (int i=0; i<this->size(); i++)
-    { this->theCoeffs[i].GetDenominator(tempUI);
-      LargeIntUnsigned::lcm(result, tempUI, result);
+    { tempUI=this->theCoeffs[i].GetDenominator();
+      LargeIntUnsigned::lcm(result.value, tempUI.value, result.value);
     }
     return result;
   }
@@ -675,11 +691,12 @@ public:
       *this*=tempRat;
       result*=tempRat;
     }
-    LargeIntUnsigned theGCD, tempUI;
-    this->theCoeffs[0].GetNumeratorRationalPart().GetNumerator(theGCD);
+    LargeInt theGCD, tempUI;
+    theGCD=this->theCoeffs[0].GetNumeratorRationalPart().GetNumerator();
+    theGCD.sign=1;
     for (int i=0; i<this->size(); i++)
-    { this->theCoeffs[i].GetNumeratorRationalPart().GetNumerator(tempUI);
-      LargeIntUnsigned::gcd(theGCD, tempUI, theGCD);
+    { tempUI=this->theCoeffs[i].GetNumeratorRationalPart().GetNumerator();
+      LargeIntUnsigned::gcd(theGCD.value, tempUI.value, theGCD.value);
     }
     tempRat=theGCD;
     *this/=tempRat;
@@ -723,7 +740,7 @@ public:
     Rational tempRat;
     for (int i=0; i<this->size(); i++)
       if (!this->theCoeffs[i].IsInteger())
-      { this->theCoeffs[i].GetDenominator(tempRat);
+      { tempRat=this->theCoeffs[i].GetDenominator();
         *this*=tempRat;
         output*=tempRat;
       }
@@ -1617,8 +1634,7 @@ public:
       case RationalFunctionOld::typePoly:
         return this->Numerator.GetElementConst().HashFunction();
       case RationalFunctionOld::typeRationalFunction:
-        return this->Numerator.GetElementConst().HashFunction()*SomeRandomPrimes[0]+
-        this->Denominator.GetElementConst().HashFunction()*SomeRandomPrimes[1];
+        return this->Numerator.GetElementConst().HashFunction()*SomeRandomPrimes[0]+this->Denominator.GetElementConst().HashFunction()*SomeRandomPrimes[1];
       default:
         return (unsigned)-1;
     }
@@ -3328,33 +3344,27 @@ int Matrix<Element>::FindPositiveLCMCoefficientDenominatorsTruncated()
 template <class Element>
 LargeIntUnsigned Matrix<Element>::FindPositiveLCMCoefficientDenominators()
 { LargeIntUnsigned result=1;
-  LargeIntUnsigned tempI;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
-    { this->elements[i][j].GetDenominator(tempI);
-      result=LargeIntUnsigned::lcm(result, tempI);
-    }
+      result=LargeIntUnsigned::lcm(result, (*this)(i,j).GetDenominator());
   return result;
 }
 
 template <class Element>
-void Matrix<Element>::GetMatrixIntWithDen
-(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
+void Matrix<Element>::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
 { outputDen=this->FindPositiveLCMCoefficientDenominators();
   outputMat.init(this->NumRows, this->NumCols);
   Rational tempRat;
-  LargeIntUnsigned tempI;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
     { tempRat=this->elements[i][j]*outputDen;
-      tempRat.GetDenominator(tempI);
-      outputMat.elements[i][j]=tempI;
+      outputMat(i,j)=tempRat.GetDenominator();
     }
 }
 
 template <class Element>
 int Matrix<Element>::FindPositiveGCDCoefficientNumeratorsTruncated()
-  { int result=1;
+{ int result=1;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       if (this->elements[i][j].NumShort!=0)
@@ -5849,8 +5859,28 @@ public:
   static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
   { return input.theWeyl.HashFunction();
   }
-  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar=0);
-  void GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output, int indexFirstVar=0);
+  template <class coefficient>
+  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  { output.MakeZero();
+    ChevalleyGenerator theGen;
+    Polynomial<coefficient> theCf;
+    for (int i=0; i<this->GetRank(); i++)
+    { theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
+      theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+      output.AddMonomial(theGen, theCf);
+    }
+  }
+  template <class coefficient>
+  void GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  { output.MakeZero();
+    ChevalleyGenerator theGen;
+    Polynomial<coefficient> theCf;
+    for (int i=0; i<this->GetNumPosRoots(); i++)
+    { theGen.MakeGenerator(*this, i);
+      theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+      output.AddMonomial(theGen, theCf);
+    }
+  }
   int GetOppositeGeneratorIndex(int theIndex)
   { return this->GetNumGenerators()-theIndex-1;
   }
@@ -5972,11 +6002,11 @@ public:
   bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool AttempTFindingHEF
-  (ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputE,
-   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+  (ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
+   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
   bool AttemptExtendingEtoHEFwithHinCartan
-  (ElementSemisimpleLieAlgebra<Rational>& theE, ElementSemisimpleLieAlgebra<Rational>& outputH,
-   ElementSemisimpleLieAlgebra<Rational>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+  (ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
+   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
   bool AttemptExtendingHtoHEFwithHinCartan
   (ElementSemisimpleLieAlgebra<Rational>& theH, ElementSemisimpleLieAlgebra<Rational>& outputE,
    ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables);
@@ -8803,8 +8833,7 @@ template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
 { //Changing RootSystem order invalidates this function!
   if (&inputOwner==0)
-  { std::cout << " This is a programming error: 0 pointer to Semisimple Lie algebra. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << " This is a programming error: 0 pointer to Semisimple Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->MakeZero();
@@ -8988,4 +9017,67 @@ std::string Vectors<coefficient>::ElementsToInequalitiesString(bool useLatex, bo
     out << "\\end{array}";
   return out.str();
 }
+
+template <class coefficient>
+void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
+{ int NumGenerators=this->GetNumGenerators();
+  output.init(NumGenerators, NumGenerators);
+  output.NullifyAll();
+  ElementSemisimpleLieAlgebra<coefficient> theGen, theResult;
+  for (int i=0; i<NumGenerators; i++)
+  { theGen.MakeGenerator(i, *this);
+    this->LieBracket(e, theGen, theResult);
+    for (int j=0; j<theResult.size(); j++)
+      output(theResult[j].theGeneratorIndex, i)=theResult.theCoeffs[j];
+  }
+}
+
+template <class coefficient>
+void SemisimpleLieAlgebra::GetCommonCentralizer
+(const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements)
+{ Matrix<coefficient> tempAd, commonAd;
+  for (int i=0; i<inputElementsToCentralize.size; i++)
+  { this->GetAd(tempAd, inputElementsToCentralize[i]);
+    //tempAd.Transpose();
+    commonAd.AppendMatrixToTheBottom(tempAd);
+  }
+  Vectors<coefficient> outputV;
+  commonAd.GetZeroEigenSpace(outputV);
+//  std::cout << "<br>Common ad: " << commonAd.ToString();
+//  std::cout << "<br>Eigenvectors: " << outputV.ToString();
+  outputCentralizingElements.SetSize(outputV.size);
+  for (int i=0; i<outputV.size; i++)
+  { ElementSemisimpleLieAlgebra<coefficient>& currentElt=outputCentralizingElements[i];
+    currentElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputV[i], *this);
+  }
+}
+
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
+{ if (this->IsEqualToZero())
+  { output.MakeZero(0);
+    return;
+  }
+  output.MakeZero(this->GetOwner()->GetNumGenerators());
+  for (int i=0; i<this->size(); i++)
+    output[(*this)[i].theGeneratorIndex]=this->theCoeffs[i];
+}
+
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
+{ this->MakeGenerator(inputOwner.GetGeneratorFromRoot(theRoot), inputOwner);
+}
+
+template <class coefficient>
+void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
+{ //Changing RootSystem order invalidates this function!
+  this->MakeZero();
+  ChevalleyGenerator tempGenerator;
+  for (int i=0; i<input.size; i++)
+    if (input[i]!=0)
+    { tempGenerator.MakeGenerator(owner, i);
+      this->AddMonomial(tempGenerator, input[i]);
+    }
+}
+
 #endif

@@ -691,7 +691,6 @@ unsigned int Selection::HashFunction() const
   return result;
 }
 
-
 void Rational::operator=(const Polynomial<Rational>& other)
 { if (!other.IsAConstant(this))
   { std::cout << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
@@ -863,18 +862,17 @@ inline void Rational::RaiseToPower(int x)
   { x=-x;
     this->Invert();
   }
-  LargeIntUnsigned tempNum, tempDen;
-  this->GetNumerator(tempNum);
+  LargeInt tempNum=this->GetNumerator();
   LargeIntUnsigned oneLI;
   oneLI.MakeOne();
-  MathRoutines::RaiseToPower(tempNum, x, oneLI);
-  this->GetDenominator(tempDen);
+  MathRoutines::RaiseToPower(tempNum.value, x, oneLI);
+  LargeIntUnsigned tempDen= this->GetDenominator();
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
   int theSign= (this->IsPositive() || x%2==0) ? 1 :-1;
   this->AllocateExtended();
   this->Extended->num.sign=(signed char)theSign;
   this->Extended->den=tempDen;
-  this->Extended->num.value=tempNum;
+  this->Extended->num.value=tempNum.value;
   this->ShrinkExtendedPartIfPossible();
 }
 

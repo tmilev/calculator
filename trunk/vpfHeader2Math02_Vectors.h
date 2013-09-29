@@ -490,34 +490,35 @@ public:
 
 template <class coefficient>
 void Vector<coefficient>::ScaleByPositiveRationalToIntegralMinHeight()
-{ LargeIntUnsigned numGCD, tempUI;
+{ LargeInt numGCD, tempUI;
   bool foundNonZero=false;
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].IsEqualToZero())
     { if (foundNonZero)
       { if(!numGCD.IsEqualToOne())
-        { this->TheObjects[i].GetNumerator(tempUI);
-          LargeIntUnsigned::gcd(numGCD, tempUI, numGCD);
+        { tempUI=(*this)[i].GetNumerator();
+          LargeIntUnsigned::gcd(numGCD.value, tempUI.value, numGCD.value);
         }
       } else
-      { this->TheObjects[i].GetNumerator(numGCD);
+      { numGCD=(*this)[i].GetNumerator();
+        numGCD.sign=1;
         foundNonZero=true;
       }
-      this->TheObjects[i].GetDenominator(tempUI);
+      tempUI=(*this)[i].GetDenominator();
       if (!tempUI.IsEqualToOne())
-        *this*= tempUI;
+        (*this)*= (coefficient) tempUI;
     }
   if (foundNonZero)
     if (!numGCD.IsEqualToOne())
-      *this/=(numGCD);
+      *this/=(coefficient)(numGCD);
 }
 
 template <class coefficient>
 void Vector<coefficient>::ScaleToFirstNonZeroCoordinatePositive()
 { for (int i=0; i<this->size; i++)
-  { if (this->TheObjects[i].IsPositive())
+  { if ((*this)[i].IsPositive())
       return;
-    if (this->TheObjects[i].IsNegative())
+    if ((*this)[i].IsNegative())
     { this->Minus();
       return;
     }

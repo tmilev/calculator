@@ -867,6 +867,14 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
   return leftAdditive==rightAdditive;
 }
 
+void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other)
+{ if (!other.IsAConstant(this))
+  { std::cout << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
 void AlgebraicNumber::operator=(const Rational& other)
 { this->owner=0;
   this->theElT.MaKeEi(0, other);

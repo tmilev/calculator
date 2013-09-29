@@ -518,11 +518,6 @@ public:
   static unsigned long long TotalLargeMultiplications;
   static unsigned long long TotalSmallGCDcalls;
   static unsigned long long TotalLargeGCDcalls;
-  void GetDenominator(Rational& output)
-  { LargeIntUnsigned tempInt;
-    this->GetDenominator(tempInt);
-    output.AssignLargeIntUnsigned(tempInt);
-  }
   bool NeedsBrackets()const
   { return false;
     //return this->IsNegative();
@@ -535,46 +530,38 @@ public:
   { return this->GetNumerator();
   }
   inline LargeIntUnsigned GetDenominator()const
-  { LargeIntUnsigned tempI;
-    this->GetDenominator(tempI);
-    return tempI;
-  }
-  inline void GetDenominator(LargeIntUnsigned& output)const
-  { if (this->Extended==0)
+  { LargeIntUnsigned result;
+    if (this->Extended==0)
     { unsigned int tempI= (unsigned int) this->DenShort;
-      output.AssignShiftedUInt(tempI, 0);
+      result.AssignShiftedUInt(tempI, 0);
     }
     else
-      output=(this->Extended->den);
+      result=(this->Extended->den);
+    return result;
   }
   bool BeginsWithMinus()
   { return this->IsNegative();
   }
-  inline LargeInt GetNumerator()const
+  LargeInt GetNumerator()const
   { LargeInt result;
-    this->GetNumerator(result);
+    if (this->Extended==0)
+    { if (this->NumShort<0)
+        result.value.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
+      else
+        result.value.AssignShiftedUInt((unsigned int) this->NumShort, 0);
+    }
+    else
+      result.value=(this->Extended->num.value);
+    result.sign=1;
+    if (this->IsNegative())
+      result.sign=-1;
     return result;
   }
   inline const Rational& GetComplexConjugate()const
   { return *this;
   }
-  inline void GetNumerator(LargeInt& output)const
-  { this->GetNumerator(output.value);
-    output.sign=1;
-    if (this->IsNegative())
-      output.sign=-1;
-  }
-  inline void SetDynamicSubtype(int dummyParameter){}
-  inline void GetNumerator(LargeIntUnsigned& output)const
-  { if (this->Extended==0)
-    { if (this->NumShort<0)
-        output.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
-      else
-        output.AssignShiftedUInt((unsigned int) this->NumShort, 0);
-    }
-    else
-      output=(this->Extended->num.value);
-  }
+  inline void SetDynamicSubtype(int dummyParameter)
+  {}
   Rational RationalValue()
   { return *this;
   }
@@ -819,7 +806,9 @@ ParallelComputing::GlobalPointerCounter++;
     ParallelComputing::SafePointDontCallMeFromDestructors();
   }
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
-  ~Rational(){this->FreeExtended();}
+  ~Rational()
+  { this->FreeExtended();
+  }
   //the below must be called only with positive arguments!
   static inline int gcd(int a, int b)
   { MacroIncrementCounter(Rational::TotalSmallGCDcalls);

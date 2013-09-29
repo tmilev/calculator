@@ -17,11 +17,11 @@ class AlgebraicNumber
   AlgebraicClosureRationals* owner;
   int basisIndex;
   VectorSparse<Rational> theElT;
-  AlgebraicNumber():owner(0){}
-  AlgebraicNumber(const Rational& other):owner(0), basisIndex(-1)
+  AlgebraicNumber():owner(0), basisIndex(0) {}
+  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0)
   { this->operator=(other);
   }
-  AlgebraicNumber(int other):owner(0)
+  AlgebraicNumber(int other):owner(0), basisIndex(0)
   { this->operator=((Rational)other);
   }
   bool NeedsBrackets()const;
@@ -30,6 +30,18 @@ class AlgebraicNumber
   unsigned int HashFunction()const;
   static inline unsigned int HashFunction(const AlgebraicNumber& input)
   { return input.HashFunction();
+  }
+  inline LargeIntUnsigned GetNumerator()const
+  { return this->theElT.FindGCDCoefficientNumeratorsOverRationals().GetNumerator().value;
+  }
+  inline LargeIntUnsigned GetDenominator()const
+  { return this->GetDenominatorRationalPart().GetDenominator();
+  }
+  bool IsPositive()
+  { Rational ratPart;
+    if (this->IsRational(&ratPart))
+      return ratPart.IsPositive();
+    return false;
   }
   bool IsRational(Rational* whichRational=0)const;
   bool IsNegative()const
@@ -77,10 +89,17 @@ class AlgebraicNumber
   inline bool operator!=(int other)const
   { return !(*this==other);
   }
+  void Minus()
+  { this->theElT*=-1;
+  }
+  void operator=(const Polynomial<AlgebraicNumber>& other);
   void operator+=(const AlgebraicNumber& other);
   void operator-=(const AlgebraicNumber& other);
   void operator*=(const AlgebraicNumber& other);
   void operator*=(const Rational& other);
+  void operator*=(LargeInt other)
+  { this->operator*=((LargeInt)other);
+  }
   void operator*=(int other)
   { this->operator*=((Rational)other);
   }

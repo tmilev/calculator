@@ -2281,15 +2281,13 @@ bool CommandList::innerZmodP(CommandList& theCommands, const Expression& input, 
     return false;
   if (base.IsEqualToZero())
     return false;
-  LargeIntUnsigned theDen, theNum, theGCD;
-  left.GetDenominator(theDen);
-  LargeIntUnsigned::gcd(theDen, base.value, theGCD);
+  LargeIntUnsigned theNum, theGCD;
+  LargeIntUnsigned::gcd(left.GetDenominator(), base.value, theGCD);
   if (theGCD>1)
     return false;
-  left.GetNumerator(theNum);
   ElementZmodP outputElt;
   outputElt.theModulo=base.value;
-  outputElt=theNum;
+  outputElt=left.GetNumerator();
   return output.AssignValue(outputElt, theCommands);
 
 }

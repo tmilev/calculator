@@ -63,22 +63,53 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable)const
   return true;
 }
 
+template <class coefficient>
+void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat)
+{ if(theMat.NumCols!=theMat.NumRows)
+    assert(false);
+  permutation thePerm;
+  thePerm.initPermutation(theMat.NumRows);
+  int numCycles=thePerm.GetNumPermutations();
+  //std::cout << "<hr>" << numCycles << " total cycles";
+  List<int> permutationIndices;
+  thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
+  Polynomial<coefficient> result, theMonomial;
+  result.MakeZero();
+  result.SetExpectedSize(numCycles);
+  for (int i=0; i<numCycles; i++, thePerm.incrementAndGetPermutation(permutationIndices))
+  { theMonomial.MakeOne();
+    for (int j=0; j<permutationIndices.size; j++)
+      theMonomial*=theMat(j, permutationIndices[j]);
+    //the following can be made much faster, but no need right now as it won't be a bottleneck.
+    int sign=1;
+    for(int j=0; j<permutationIndices.size; j++)
+      for (int k=j+1; k<permutationIndices.size; k++)
+        if (permutationIndices[k]<permutationIndices[j])
+          sign*=-1;
+    //std::cout << "<hr>" << permutationIndices << " sign: " << sign;
+    theMonomial*=sign;
+    result+=theMonomial;
+  }
+  *this=result;
+}
+
 template<class coefficient>
 void Polynomial<coefficient>::ScaleToIntegralNoGCDCoeffs()
 { if(this->size()==0)
     return;
   int indexHighestMon=0;
-  LargeIntUnsigned tempInt1, tempInt2, accumNum, accumDen;
+  LargeIntUnsigned tempInt1, accumNum, accumDen;
+  LargeInt tempInt2;
   accumDen.MakeOne();
-  this->theCoeffs[0].GetNumerator(accumNum);
+  accumNum=this->theCoeffs[0].GetNumerator().value;
   for (int i=0; i<this->size(); i++)
   { if ((*this)[i].IsGEQLexicographicLastVariableStrongest((*this)[indexHighestMon]))
       indexHighestMon=i;
     Rational& tempRat=this->theCoeffs[i];
-    tempRat.GetDenominator(tempInt1);
-    tempRat.GetNumerator(tempInt2);
+    tempInt1=tempRat.GetDenominator();
+    tempInt2=tempRat.GetNumerator();
     LargeIntUnsigned::lcm(tempInt1, accumDen, accumDen);
-    LargeIntUnsigned::gcd(tempInt2, accumNum, accumNum);
+    LargeIntUnsigned::gcd(tempInt2.value, accumNum, accumNum);
   }
   Rational theMultiple;
   theMultiple.MakeOne();
@@ -527,8 +558,8 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
   tempV.SetSize(1);
   List<int> divisorsH, divisorsS;
   LargeInt hT, lT;
-  highestTerm.GetNumerator(hT);
-  lowestTerm.GetNumerator(lT);
+  hT=highestTerm.GetNumerator();
+  lT=lowestTerm.GetNumerator();
   if (! hT.GetDivisors(divisorsH, false) || !  lT.GetDivisors(divisorsS, true))
     return false;
   for (int i=0; i<divisorsH.size; i++)

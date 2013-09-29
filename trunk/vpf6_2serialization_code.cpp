@@ -407,12 +407,11 @@ void Expression::MakeSerialization(const std::string& secondEntry, CommandList& 
   this->AddChildOnTop(tempE);
 }
 
-bool Serialization::innerStoreObject
-(CommandList& theCommands, const Rational& input, Expression& output, Expression* theContext)
+bool Serialization::innerStoreObject(CommandList& theCommands, const Rational& input, Expression& output, Expression* theContext)
 { return output.AssignValue(input, theCommands);
 }
 
-bool Serialization::innerStoreElementSemisimpleLieAlgebra(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
+bool Serialization::innerStoreElementSemisimpleLieAlgebraRationals(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerStoreElementSemisimpleLieAlgebra");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
@@ -567,19 +566,23 @@ bool Serialization::innerStoreCandidateSA(CommandList& theCommands, const Candid
   Expression emptyContext;
   emptyContext.MakeEmptyContext(theCommands);
   Expression tempE;
-  Serialization::innerStoreMonCollection
-  (theCommands, input.theWeylNonEmbeddeD.theDynkinType, tempE, &emptyContext);
+  Serialization::innerStoreMonCollection(theCommands, input.theWeylNonEmbeddeD.theDynkinType, tempE, &emptyContext);
   output.AddChildOnTop(tempE);
   Serialization::innerStoreObject(theCommands, input.theHs, tempE);
   output.AddChildOnTop(tempE);
+  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
   if (input.flagSystemSolved)
   { Expression listGenerators;
     listGenerators.reset(theCommands);
     listGenerators.AddChildAtomOnTop(theCommands.opSequence());
     for (int i=0; i<input.theNegGens.size; i++)
-    { Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input.theNegGens[i], tempE);
+    { if (!input.theNegGens[i].HasRationalCoeffs(&convertedToRational))
+        return false;
+      Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, convertedToRational, tempE);
       listGenerators.AddChildOnTop(tempE);
-      Serialization::innerStoreElementSemisimpleLieAlgebra(theCommands, input.thePosGens[i], tempE);
+      if (!input.thePosGens[i].HasRationalCoeffs(&convertedToRational))
+        return false;
+      Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, convertedToRational, tempE);
       listGenerators.AddChildOnTop(tempE);
     }
     output.AddChildOnTop(listGenerators);
@@ -624,8 +627,7 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   }
   List<int> theRanks, theMults;
   outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetLettersTypesMults(0, &theRanks, &theMults, 0);
-  outputSubalgebra.CartanSAsByComponent.SetSize
-  (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetNumSimpleComponents());
+  outputSubalgebra.CartanSAsByComponent.SetSize(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.GetNumSimpleComponents());
   int componentCounter=-1;
   int counter=-1;
   for (int i=0; i<theMults.size; i++)
@@ -642,9 +644,8 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   Matrix<Rational> tempMat1;
   outputSubalgebra.theHs.GetGramMatrix(tempMat1, &owner.GetSSowner().theWeyl.CartanSymmetric);
   if (!(outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric== tempMat1))
-  { theCommands.Comments << "<hr>Failed to load semisimple subalgebra: "
-    << " the gram matrix of the elements of its cartan is " <<  tempMat1.ToString()
-    << " but it should be " << outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric.ToString() << "instead.";
+  { theCommands.Comments << "<hr>Failed to load semisimple subalgebra: the gram matrix of the elements of its cartan is "
+    << tempMat1.ToString() << " but it should be " << outputSubalgebra.theWeylNonEmbeddeD.CartanSymmetric.ToString() << "instead.";
     return false;
   }
   outputSubalgebra.thePosGens.SetSize(0);
@@ -652,17 +653,18 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   if (input.children.size==5)
   { Expression theGensE=input[4];
     theGensE.Sequencefy();
-    ElementSemisimpleLieAlgebra<Rational> curGen;
+    ElementSemisimpleLieAlgebra<Rational> curGenRational;
+    ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<theGensE.children.size; i++)
-    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theGensE[i], curGen, *owner.owneR))
-      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression "
-        << theGensE[i].ToString() << ". ";
+    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theGensE[i], curGenRational, *owner.owneR))
+      { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
         return false;
       }
+      curGenAlgebraic=curGenRational;
       if (i%2 ==1)
-        outputSubalgebra.theNegGens.AddOnTop(curGen);
+        outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       else
-        outputSubalgebra.thePosGens.AddOnTop(curGen);
+        outputSubalgebra.thePosGens.AddOnTop(curGenAlgebraic);
     }
     outputSubalgebra.flagSystemProvedToHaveNoSolution=false;
     outputSubalgebra.flagSystemSolved=true;
@@ -817,8 +819,7 @@ bool Serialization::innerLoad(CommandList& theCommands, const Expression& input,
 }
 
 bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
-(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output,
- SemisimpleLieAlgebra& owner)
+(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner)
 { Expression genE;
   ElementUniversalEnveloping<RationalFunctionOld> curGenUErf;
   if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input, genE, owner))
@@ -831,8 +832,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   }
   curGenUErf=genE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> > ();
   if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
-  { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString()
-    << " to an honest Lie algebra element. ";
+  { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
     return false;
   }
   return true;

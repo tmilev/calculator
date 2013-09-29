@@ -67,6 +67,8 @@
 		<Unit filename="vpfGraph.cpp" />
 		<Unit filename="vpfHeader1General0_General.h" />
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
+		<Unit filename="vpfHeader2Math01_LargeIntArithmetic.h" />
+		<Unit filename="vpfHeader2Math02_Vectors.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />
 		<Unit filename="vpfHeader2Math15_UniversalEnveloping.h" />
 		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />

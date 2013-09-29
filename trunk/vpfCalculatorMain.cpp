@@ -576,6 +576,7 @@ int main(int argc, char **argv)
     std::cout << "</td>";
   }
   std::cout << "<td valign=\"top\">";
+  ProjectInformation::GetMainProjectInfo().theFiles.QuickSortAscending();
   std::cout << ProjectInformation::GetMainProjectInfo().ToString();
   std::cout << "<hr><b>CommandList status. </b><br>";
   std::cout << theParser.ToString();

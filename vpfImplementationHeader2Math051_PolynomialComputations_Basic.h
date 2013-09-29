@@ -476,12 +476,12 @@ void Polynomial<coefficient>::GetConstantTerm(coefficient& output, const coeffic
 }
 
 template <class coefficient>
-void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output, const coefficient& theRingZero)
+void Polynomial<coefficient>::GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output)
 { MonomialP tempM;
   tempM.MakeEi(index);
   int i=this->theMonomials.GetIndex(tempM);
   if (i==-1)
-    output=theRingZero;
+    output=0;
   else
     output=this->theCoeffs[i];
 }

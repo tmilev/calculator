@@ -106,9 +106,7 @@ public:
   List<std::string> DisplayNamesBasisElements;
   void AddNewBasis();
 
-  void RegisterNewBasis
-(const MatrixTensor<Rational>& theInjection)
-  ;
+  void RegisterNewBasis(const MatrixTensor<Rational>& theInjection);
   void reset();
   bool CheckConsistency()const;
   AlgebraicClosureRationals():theGlobalVariables(0)
@@ -120,17 +118,12 @@ public:
   void ComputeDisplayStringsFromRadicals();
   static int GetIndexFromRadicalSelection(const Selection& theSel);
   void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
-  void GetMultiplicationBy
-  (const AlgebraicNumber& input, MatrixTensor<Rational>& output)
-  ;
-  void GetAdditionTo
-  (const AlgebraicNumber& input, VectorSparse<Rational>& output)
-  ;
-
-
-  bool AdjoinRootMinPoly
-  (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
-  ;
+  void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);
+  void GetAdditionTo(const AlgebraicNumber& input, VectorSparse<Rational>& output);
+  void ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail
+  (const Polynomial<AlgebraicNumber>& input, Polynomial<AlgebraicNumber>& output);
+  bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
+  bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 

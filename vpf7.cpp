@@ -789,10 +789,10 @@ bool ElementUniversalEnveloping<coefficient>::ConvertToRationalCoeff(ElementUniv
 }
 
 void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
-{ if (this->FileNames.Contains(fileName))
-    return;
-  this->FileNames.AddOnTop(fileName);
-  this->FileDescriptions.AddOnTop(fileDescription);
+{ FileInformation theInfo;
+  theInfo.FileName=fileName;
+  theInfo.FileDescription=fileDescription;
+  this->theFiles.AddOnTopNoRepetition(theInfo);
 }
 
 void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
@@ -804,9 +804,7 @@ void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
 
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
-  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD"
-  << "/tree/trunk/"
-  << CGI::RemovePathFromFileName(fileName) << "\">"
+  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/" << CGI::RemovePathFromFileName(fileName) << "\">"
   << CGI::RemovePathFromFileName(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
@@ -816,14 +814,13 @@ std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, con
 
 std::string ProjectInformation::ToString()
 { std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator "
-  << "(expand/collapse)</button>";
+  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator " << "(expand/collapse)</button>";
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
-  for (int i=0; i<this->FileNames.size; i++)
+  out << this->theFiles.size << " files total. ";
+  out << "<br>svn checkout command:<br>svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code";
+  for (int i=0; i<this->theFiles.size; i++)
   { out << " <br>\n";
-    out << CGI::GetHtmlLinkFromProjectFileName
-    (this->FileNames[i], this->FileDescriptions[i]);
+    out << CGI::GetHtmlLinkFromProjectFileName(this->theFiles[i].FileName, this->theFiles[i].FileDescription);
   }
   out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\")."
   << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
@@ -873,8 +870,7 @@ std::string ProjectInformation::ToString()
   return out.str();
 }
 
-std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput
-(const std::string& address, const std::string& display)
+std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& address, const std::string& display)
 { std::stringstream out;
   out << "\\href{http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?";
   for (unsigned i=0; i<address.size(); i++)
@@ -914,12 +910,9 @@ std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input)
   return out.str();
 }
 
-std::string CGI::GetCalculatorLink
-(const std::string& DisplayNameCalculator, const std::string& input)
+std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << DisplayNameCalculator
-  << "?textInput=" << CGI::UnCivilizeStringCGI(input)
-  << "\"> " << input << "</a>";
+  out << "<a href=\"" << DisplayNameCalculator << "?textInput=" << CGI::UnCivilizeStringCGI(input) << "\"> " << input << "</a>";
   return out.str();
 }
 
@@ -930,13 +923,11 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars
   if (input.size()< (unsigned) upperNumChars)
     out << "<span class=\"math\">" << input << "</span>";
   else
-    out << "<b>LaTeX output is long and I dare not use jsmath. "
-    << "Here is the output as plain LaTeX.</b><br> " << input;
+    out << "<b>LaTeX output is long and I dare not use jsmath. Here is the output as plain LaTeX.</b><br> " << input;
   return out.str();
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
-(GlobalVariables& theGlobalVariables)
+void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
   this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
@@ -1020,13 +1011,9 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
       }
     }
     if (!isGood)
-    { std::cout << "This is either a programming error, or Lemma 3.3, "
-      << "T. Milev, P. Somberg, \"On branching...\""
-      << " is wrong. The question is, which is the more desirable case... "
-      << "The bad apple is element "
-      << this->nilradicalSmall[i].ToString() << " of weight "
-      << this->weightsNilradicalSmall[i].ToString()
-      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      << " is wrong. The question is, which is the more desirable case... The bad apple is element " << this->nilradicalSmall[i].ToString() << " of weight "
+      << this->weightsNilradicalSmall[i].ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
@@ -1075,8 +1062,7 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   return formulaStream1.str();
 }
 
-bool LittelmannPath::IsAdaptedString
-  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
+bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
 { LittelmannPath tempPath=*this;
   LittelmannPath tempPath2;
 //  std::cout << "<hr>";
@@ -1098,12 +1084,9 @@ bool LittelmannPath::IsAdaptedString
   return true;
 }
 
-void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup
-(List<ElementWeylGroup>& output)
+void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output)
 { if (this->ExternalAutomorphisms.size>0)
-  { std::cout << "This is  a programming error: a function meant for subgroups that "
-    << " are Weyl groups of Levi parts of parabolics is called on a subgroup that "
-    << "is not of that type. "
+  { std::cout << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

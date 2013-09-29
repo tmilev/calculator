@@ -5,12 +5,476 @@
 
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader1General1_ListReferences.h"
+#include "vpfHeader2Math01_LargeIntArithmetic.h"
+#include "vpfHeader2Math02_Vectors.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 class WeylGroup;
 class AlgebraicClosureRationals;
 
+class ChevalleyGenerator
+{
+public:
+  SemisimpleLieAlgebra* owneR;
+  int theGeneratorIndex;
+  ChevalleyGenerator(): owneR(0), theGeneratorIndex(-1){}
+  friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen)
+  { output << theGen.ToString();
+    return output;
+  }
+  bool CheckInitialization()const;
+  static const bool IsEqualToZero()
+  { return false;
+  }
+  static inline unsigned int HashFunction(const ChevalleyGenerator& input)
+  { return (unsigned) input.theGeneratorIndex;
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  void MakeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex)
+  { this->owneR=&inputOwner;
+    this->theGeneratorIndex=inputGeneratorIndex;
+  }
+  void operator=(const ChevalleyGenerator& other)
+  { this->owneR=other.owneR;
+    this->theGeneratorIndex=other.theGeneratorIndex;
+  }
+  bool operator>(const ChevalleyGenerator& other)const;
+  std::string ToString(FormatExpressions* inputFormat=0)const;
+  void CheckConsistencyWithOther(const ChevalleyGenerator& other)const;
+  bool operator==(const ChevalleyGenerator& other)const
+  { this->CheckConsistencyWithOther(other);
+    return this->theGeneratorIndex==other.theGeneratorIndex;
+  }
+};
+
+template <class coefficient, unsigned int inputHashFunction(const coefficient&)= coefficient::HashFunction>
+class MonomialTensor
+{
+  friend std::ostream& operator <<(std::ostream& output, const MonomialTensor<coefficient, inputHashFunction>& theMon)
+  { return output << theMon.ToString();
+  }
+private:
+public:
+  List<int> generatorsIndices;
+  List<coefficient> Powers;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  bool IsEqualToOne()const
+  { return this->generatorsIndices.size==0;
+  }
+  void operator=(List<int>& other)
+  { this->generatorsIndices.ReservE(other.size);
+    this->Powers.ReservE(other.size);
+    this->MakeConst();
+    for (int i=0; i<other.size; i++)
+      this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
+  }
+  void operator=(const MonomialTensor<coefficient, inputHashFunction>& other)
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers=other.Powers;
+  }
+  int GetMinNumVars()
+  { int result=0;
+    for (int i=0; i<this->Powers.size; i++)
+      result=MathRoutines::Maximum(result, this->Powers[i].GetMinNumVars());
+    return result;
+  }
+  template<class otherType>
+  void operator=(const MonomialTensor<otherType>& other)
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers.SetSize(other.Powers.size);
+    for (int i=0; i<other.Powers.size; i++)
+      this->Powers[i]=other.Powers[i];
+  }
+  bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
+  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const coefficient& thePower);
+  void MultiplyByGeneratorPowerOnTheLeft(int theGeneratorIndexStandsToTheLeft, const coefficient& thePower);
+  unsigned int HashFunction()const
+  { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
+    unsigned int result=0;
+    for (int i=0; i<top; i++)
+      result+=SomeRandomPrimes[i]*this->generatorsIndices[i] + SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
+    return result;
+  }
+  static inline unsigned int HashFunction(const MonomialTensor<coefficient, inputHashFunction>& input)
+  { return input.HashFunction();
+  }
+  void MakeConst()
+  { this->generatorsIndices.size=0;
+    this->Powers.size=0;
+  }
+  bool operator>(const MonomialTensor<coefficient, inputHashFunction>& other)const
+  { if (other.generatorsIndices.size>this->generatorsIndices.size)
+      return false;
+    if (other.generatorsIndices.size< this->generatorsIndices.size)
+      return true;
+    for (int i=0; i<this->generatorsIndices.size; i++)
+    { if (other.generatorsIndices[i]>this->generatorsIndices[i])
+        return false;
+      if (other.generatorsIndices[i]<this->generatorsIndices[i])
+        return true;
+      if (other.Powers[i]>this->Powers[i])
+        return false;
+      if (this->Powers[i]>other.Powers[i])
+        return true;
+    }
+    return false;
+  }
+  bool operator==(const MonomialTensor<coefficient, inputHashFunction>& other)const
+  { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  }
+  inline void operator*=(const MonomialTensor<coefficient, inputHashFunction>& standsOnTheRight)
+  { if (standsOnTheRight.generatorsIndices.size==0)
+      return;
+    if (this==&standsOnTheRight)
+    { MonomialTensor<coefficient, inputHashFunction> tempMon;
+      tempMon=standsOnTheRight;
+      (*this)*=(tempMon);
+      return;
+    }
+    this->generatorsIndices.SetExpectedSize(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+    this->Powers.SetExpectedSize(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+    int firstIndex=standsOnTheRight.generatorsIndices[0];
+    int i=0;
+    if (this->generatorsIndices.size>0)
+      if (firstIndex==(*this->generatorsIndices.LastObject()))
+      { *this->Powers.LastObject()+=standsOnTheRight.Powers[0];
+        i=1;
+      }
+    for (; i<standsOnTheRight.generatorsIndices.size; i++)
+    { this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
+      this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices[i]);
+    }
+  }
+};
+
+class MonomialP
+{
+private:
+  //monbody contains the exponents of the variables.
+  //IMPORTANT. The monBody of a monomial is NOT unique.
+  //Two monomials whose non-zero entries coincide
+  //(but otherwise one monomial might have more entries filled with zeroes)
+  //are considered to be equal.
+  //Therefore special attention must be paid when performing operations with
+  //MonomialP's, especially with operator== and MonomialP::HashFunction!
+  //Please modify this class in accordance with what was just explained.
+  //Note that by the above token I decided to declare operator[] as non-const
+  //function and operator() as a const function but returning a copy of the
+  //underlying element, rather than a reference to the element.
+  //
+  //IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
+  //last variable strongest order. Other monomial orders are not referred by operator>, but
+  // by their explicit names.
+  //Note that the MonomialCollection::ToString method uses the FormatExpressions::thePolyMonOrder
+  //to sort monomials when displaying polynomials to the screen.
+  List<Rational> monBody;
+public:
+  friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  Rational& operator[](int i)
+  { if (i<0)
+    { std::cout << "This is a programming error: requested exponent of monomial variable with index " << i << " which is negative. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    if (i>=this->monBody.size)
+      this->SetNumVariablesSubDeletedVarsByOne(i+1);
+    return this->monBody[i];
+  }
+  Rational operator()(int i)const
+  { if (i<0)
+    { std::cout << "This is a programming error: requested exponent of monomial variable " << " with index " << i << " which is negative. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    if (i>=this->monBody.size)
+      return 0;
+    return this->monBody[i];
+  }
+  inline static std::string GetXMLClassName()
+  { return "MonomialP";
+  }
+  unsigned  int HashFunction() const
+  { return this->monBody.HashFunction();
+  }
+  bool HasPositiveOrZeroExponents()const
+  { for (int i=0; i<this->monBody.size; i++)
+      if (this->monBody[i].IsNegative())
+        return false;
+    return true;
+  }
+  static const inline bool IsEqualToZero()
+  { return false;
+  }
+  void ExponentMeBy(const Rational& theExp);
+  //Warning: HashFunction must return the same result
+  //for equal monomials represented by different monBodies.
+  // Two such different representation may differ by extra entries filled in with zeroes.
+  static inline unsigned int HashFunction(const MonomialP& input)
+  { unsigned int result=0;
+    int numCycles=MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
+    for (int i=0; i<numCycles; i++)
+      result+=input.monBody[i].HashFunction();
+    return result;
+  }
+  std::string ToString(FormatExpressions* PolyFormat=0)const;
+  void MakeOne(int ExpectedNumVars=0)
+  { this->monBody.initFillInObject(ExpectedNumVars, (Rational) 0);
+  }
+  bool operator>(const MonomialP& other)const;
+  bool IsDivisibleBy(const MonomialP& other)const;
+  int TotalDegreeInt()const
+  { int result=-1;
+    if (!this->TotalDegree().IsSmallInteger(&result))
+    { std::cout << "This is a programming error: total degree of monomial must be a small integer to call this function. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return result;
+  }
+  Rational TotalDegree()const
+  { Rational result=0;
+    for (int i=0; i<this->monBody.size; i++)
+      result+=this->monBody[i];
+    return result;
+  }
+  inline void MultiplyBy(const MonomialP& other)
+  { this->operator*=(other);
+  }
+  inline void DivideBy(const MonomialP& other)
+  { this->operator/=(other);
+  }
+  bool IsLinear()const
+  { return this->IsAConstant() || this->IsLinearNoConstantTerm();
+  }
+  bool IsLinearNoConstantTerm()const
+  { int tempInt;
+    return this->IsOneLetterFirstDegree(&tempInt);
+  }
+  bool IsOneLetterFirstDegree(int* whichLetter=0)const
+  { Rational whichDegree;
+    if (!this->IsOneLetterNthDegree(whichLetter, &whichDegree))
+      return false;
+    return whichDegree==1;
+  }
+  bool IsOneLetterNthDegree(int* whichLetter=0, Rational* whichDegree=0)const
+  { int tempI1;
+    if (whichLetter==0)
+      whichLetter=&tempI1;
+    *whichLetter=-1;
+    for (int i=0; i<this->monBody.size; i++)
+      if (this->monBody[i]!=0)
+      { if (whichDegree!=0)
+          *whichDegree=this->monBody[i];
+        if ((*whichLetter)==-1)
+          *whichLetter=i;
+        else
+          return false;
+      }
+    return (*whichLetter)!=-1;
+  }
+  template <class Element>
+  bool SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit=1)const;
+  void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
+  int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
+  { for (int i=this->monBody.size-1; i>=0; i--)
+      if (this->monBody[i]!=0)
+        return i;
+    return -1;
+  }
+  bool IsGEQpartialOrder(MonomialP& m);
+  static bool LeftIsGEQLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
+  { return left.IsGEQLexicographicLastVariableStrongest(right);
+  }
+  static bool LeftGreaterThanLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
+  { if (left==(right))
+      return false;
+    return left.IsGEQLexicographicLastVariableStrongest(right);
+  }
+  static bool LeftGreaterThanLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right)
+  { if (left==(right))
+      return false;
+    return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
+  static bool LeftIsGEQLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right)
+  { return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
+  static bool LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
+  { if (left==right)
+      return false;
+    return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
+  }
+  static bool LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest(const MonomialP& left, const MonomialP& right)
+  { if (left==right)
+      return false;
+    if (left.TotalDegree()>right.TotalDegree())
+      return true;
+    if (left.TotalDegree() <right.TotalDegree())
+      return false;
+    return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
+  static bool LeftIsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& left, const MonomialP& right)
+  { return left.IsGEQTotalDegThenLexicographicLastVariableStrongest(right);
+  }
+
+  bool IsGEQLexicographicLastVariableStrongest(const MonomialP& other)const;
+  bool IsGEQLexicographicLastVariableWeakest(const MonomialP& other)const;
+  bool IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other)const;
+  void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
+  bool IsAConstant()const
+  { for (int i=0; i<this->monBody.size; i++)
+      if (!this->monBody[i].IsEqualToZero())
+        return false;
+    return true;
+  }
+  inline int GetMinNumVars()const
+  { return this->monBody.size;
+  }
+  void Invert()
+  { for (int i=0; i<this->monBody.size; i++)
+      this->monBody[i].Minus();
+  }
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
+  void RaiseToPower(const Rational& thePower)
+  { for (int i=0; i<this->monBody.size; i++)
+      this->monBody[i]*=thePower;
+  }
+  void operator*=(const MonomialP& other);
+  void operator/=(const MonomialP& other);
+  bool operator==(const MonomialP& other)const;
+  template <class coefficient>
+  void operator=(const Vector<coefficient>& other)
+  { this->monBody=(other);
+  }
+  void operator=(const MonomialP& other)
+  { this->monBody=(other.monBody);
+  }
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+  { this->monBody.ReadFromFile(input);
+  }
+  void ReadFromFile(std::fstream& input)
+  { this->monBody.ReadFromFile(input);
+  }
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const
+  { this->monBody.WriteToFile(output);
+  }
+  void WriteToFile(std::fstream& output)const
+  { this->monBody.WriteToFile(output);
+  }
+};
+
+struct FormatExpressions
+{
+public:
+  //alphabetBases must contain at least two elements
+  std::string chevalleyGgeneratorLetter;
+  std::string chevalleyHgeneratorLetter;
+  std::string fundamentalWeightLetter;
+  std::string polyDefaultLetter;
+  std::string WeylAlgebraDefaultLetter;
+  std::string CustomPlusSign;
+  std::string CustomCoeffMonSeparator;
+  std::string FDrepLetter;
+  std::string simpleRootLetter;
+  std::string PathDisplayNameCalculator;
+  std::string PathPhysicalOutputFolder;
+  std::string PathDisplayOutputFolder;
+  std::string PathDisplayServerBaseFolder;
+  List<std::string> polyAlphabeT;
+  List<std::string> weylAlgebraLetters;
+  List<std::string> vectorSpaceEiBasisNames;
+  std::string GetPolyLetter(int index)const;
+  std::string GetChevalleyHletter(int index)const;
+  std::string GetChevalleyGletter(int index)const;
+  char AmbientWeylLetter;
+  Rational AmbientWeylLengthFirstCoRoot;
+  int ExtraLinesCounterLatex;
+  int NumAmpersandsPerNewLineForLaTeX;
+  int MaxRecursionDepthPerExpression;
+  int MaxLineLength;
+  int MaxLinesPerPage;
+  int MatrixColumnVerticalLineIndex;
+  bool flagPassCustomCoeffMonSeparatorToCoeffs;
+  bool flagMakingExpressionTableWithLatex;
+  bool flagUseLatex;
+  bool flagUsePNG;
+  bool flagUseHTML;
+  bool flagUseHtmlAndStoreToHD;
+//  bool flagDynkinTypeDontUsePlusAndUpperIndex;
+  bool flagUseCalculatorFormatForUEOrdered;
+  bool flagQuasiDiffOpCombineWeylPart;
+  bool flagExpressionIsFinal;
+  bool flagExpressionNewLineAllowed;
+  bool flagIncludeLieAlgebraNonTechnicalNames;
+  bool flagIncludeLieAlgebraTypes;
+  bool flagUseReflectionNotation;
+  bool flagCandidateSubalgebraShortReportOnly;
+
+  List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
+  template <typename TemplateMonomial>
+  typename List<TemplateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
+  FormatExpressions();
+};
+
+
+class MonomialWeylAlgebra
+{
+  public:
+  MonomialP polynomialPart;
+  MonomialP differentialPart;
+  friend std::ostream& operator << (std::ostream& output, const MonomialWeylAlgebra& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  static const inline bool IsEqualToZero()
+  { return false;
+  }
+  bool IsAConstant()const
+  { return this->polynomialPart.IsAConstant() && this->differentialPart.IsAConstant();
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  static unsigned int HashFunction(const MonomialWeylAlgebra& input)
+  { return
+    input.polynomialPart.HashFunction()+
+    input.differentialPart.HashFunction()*SomeRandomPrimes[0];
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  int GetMinNumVars()const
+  { return MathRoutines::Maximum(this->polynomialPart.GetMinNumVars(), this->differentialPart.GetMinNumVars());
+  }
+  bool operator==(const MonomialWeylAlgebra& other)const
+  { return this->polynomialPart==other.polynomialPart &&
+    this->differentialPart==other.differentialPart;
+  }
+  bool operator>(const MonomialWeylAlgebra& other)const
+  { if (this->differentialPart>other.differentialPart)
+      return true;
+    if (other.differentialPart>this->differentialPart)
+      return false;
+    if (this->polynomialPart>other.polynomialPart)
+      return true;
+    if(other.polynomialPart>this->polynomialPart)
+      return false;
+    return false;
+  }
+  bool HasNonSmallPositiveIntegerDerivation()const
+  { for (int i=0; i<this->differentialPart.GetMinNumVars(); i++)
+      if (!this->differentialPart(i).IsSmallInteger())
+        return true;
+    return false;
+  }
+  void MakeOne(int ExpectedNumVars=0)
+  { this->polynomialPart.MakeOne(ExpectedNumVars);
+    this->differentialPart.MakeOne(ExpectedNumVars);
+  }
+};
 
 template <class Element>
 std::iostream& operator <<(std::iostream& output, const Polynomial<Element>& input)
@@ -2319,199 +2783,6 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 	}
 }
 
-template <class coefficient>
-bool Vectors<coefficient>::LinSpanContainsVector(const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const
-{ Vectors<coefficient> tempVectors;
-  tempVectors=(*this);
-  tempVectors.AddOnTop(input);
-//  this->ComputeDebugString();
-//  tempRoots.ComputeDebugString();
-//  input.ComputeDebugString();
-  return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection)==tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
-}
-
-template <class coefficient>
-int Vectors<coefficient>::GetRankOfSpanOfElements(Matrix<coefficient>* buffer, Selection* bufferSelection)const
-{ if (this->size==0)
-    return 0;
-  int theDimension= this->TheObjects[0].size;
-  MemorySaving<Matrix<coefficient> > emergencyMatBuf;
-  MemorySaving<Selection> emergencySelBuf;
-  if (buffer==0)
-    buffer=&emergencyMatBuf.GetElement();
-  if (bufferSelection==0)
-    bufferSelection=&emergencySelBuf.GetElement();
-  this->GaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
-  return (theDimension-bufferSelection->CardinalitySelection);
-}
-
-template <class coefficient>
-void Vectors<coefficient>::GaussianEliminationForNormalComputation(Matrix<coefficient>& inputMatrix, Selection& outputNonPivotPoints, int theDimension) const
-{ inputMatrix.init((int)this->size, (int)theDimension);
-  outputNonPivotPoints.init(theDimension);
-  for(int i=0; i<this->size; i++)
-    for(int j=0; j<theDimension; j++)
-      inputMatrix(i,j)=(*this)[i][j];
-  inputMatrix.GaussianEliminationByRows(0, &outputNonPivotPoints);
-}
-
-template <class coefficient>
-std::string Vectors<coefficient>::ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)const
-{ std::stringstream out;
-  std::string tempS;
-  std::string theLetter="x";
-  if (useLatex)
-    out << "\\begin{array}{l}";
-  for (int i=0; i<this->size; i++)
-  { Vector<Rational>& current=this->TheObjects[i];
-    tempS= current.ToStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
-    if (tempS=="")
-      out << "(0";
-    out << tempS;
-    if (!LastVarIsConstant)
-    { if (useLatex)
-        out << "\\geq 0\\\\";
-      else
-        out << "=>0\n";
-    } else
-    { if (useLatex)
-        out << "\\geq " << (-(*current.LastObject())).ToString() << "\\\\";
-      else
-        out << "=>" <<  (-(*current.LastObject())).ToString();
-    }
-    if (tempS=="")
-      out << ")";
-    if (useHtml)
-      out << "<br>";
-    else
-      out << "\n";
-  }
-  if (useLatex)
-    out << "\\end{array}";
-  return out.str();
-}
-
-template <class coefficient>
-bool Vectors<coefficient>::GetCoordsInBasis
-(const Vectors<coefficient>& inputBasis, Vectors<coefficient>& outputCoords, Vectors<coefficient>& bufferVectors, Matrix<coefficient>& bufferMat,
- const coefficient& theRingUnit, const coefficient& theRingZero)
-{ MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
-  if (this==0 || &outputCoords==0 || this==&outputCoords)
-  { std::cout << "This is a programming error: input and output addresses are zero or coincide. this address: " << this << "; output address: " << &outputCoords
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  outputCoords.SetSize(this->size);
-  for(int i=0; i<this->size; i++)
-    if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i])))
-      return false;
-  return true;
-}
-
-template <class coefficient>
-bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
-(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output, Matrix<coefficient>& bufferMatGaussianEliminationCC, Matrix<coefficient>& bufferMatGaussianElimination,
- const coefficient& theRingUnit, const coefficient& theRingMinusUnit, const coefficient& theRingZero)
-{ int theDim=this->size;
-  bufferMatGaussianElimination.init(inputBasis.size, theDim);
-  for (int i=0; i<inputBasis.size; i++)
-    for (int j=0; j<theDim; j++)
-      bufferMatGaussianElimination.elements[i][j]=inputBasis[i][j];
-  bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
-  //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
-  bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
-  //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
-  Vector<coefficient> tempRoot, theCombination;
-  assert(this!=&output);
-  output.MakeZero(inputBasis.size, theRingZero);
-  theCombination=*this;
-  int col=0;
-//  std::cout << "<br>vector whose coords we wanna find: " << this->ToString();
-  for (int i=0; i<inputBasis.size; i++)
-  { for (; col<theDim; col++)
-      if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero())
-        break;
-    if (col>=theDim)
-       break;
-    bufferMatGaussianElimination.GetVectorFromRow(i, tempRoot);
-    output[i]=this->TheObjects[col];
-    output[i]/=bufferMatGaussianElimination.elements[i][col];
-    tempRoot*=output[i];
-    theCombination-=tempRoot;
-  }
-  if (!theCombination.IsEqualToZero())
-    return false;
-//  std::cout << "<br>" << bufferMatGaussianEliminationCC.ToString(true, false) << " acting on " << output.ToString();
-  bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output, theRingZero);
-//  std::cout << " gives " << output.ToString();
-  return true;
-}
-
-template <class coefficient>
-bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasis, Vector<coefficient>& output)const
-{ if(inputBasis.size==0)
-    return false;
-  MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
-  if (this==0)
-  { std::cout << "This is a programming error: this pointer of a vector is zero when it shouldn't be. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  Vectors<coefficient> bufferVectors;
-  Matrix<coefficient> bufferMat;
-  if (this->size!=inputBasis[0].size)
-  { std::cout << "This is a programming error: asking to get coordinates of vector of " << this->size << " coordinates using a basis whose first vector has "
-    << inputBasis[0].size << " coordinates." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  }
-  bufferVectors.ReservE(inputBasis.size+1);
-  bufferVectors.AddListOnTop(inputBasis);
-  bufferVectors.AddOnTop(*this);
-//  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
-  if(!bufferVectors.GetLinearDependence(bufferMat))
-    return false;
-  //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
-//  tempRoots.ComputeDebugString();
-//  tempMat.ComputeDebugString();
-  coefficient tempCF=bufferMat(bufferMat.NumRows-1,0);
-  bufferMat/=tempCF;
-  output.SetSize(bufferMat.NumRows-1);
-  for (int i=0; i<bufferMat.NumRows-1; i++)
-  { bufferMat(i,0).Minus();
-    output[i]=(bufferMat(i,0));
-  }
-//  std::cout << "outpuf final: " << output.ToString();
-  return true;
-}
-
-template <class coefficient>
-void Vectors<coefficient>::GetLinearDependenceRunTheLinearAlgebra(Matrix<coefficient>& outputTheLinearCombination, Matrix<coefficient>& outputTheSystem, Selection& outputNonPivotPoints)
-{ MacroRegisterFunctionWithName("Vectors::GetLinearDependenceRunTheLinearAlgebra");
-  if (this->size==0)
-    return;
-  int Dimension=(int) (*this)[0].size;
-  outputTheSystem.init(Dimension, (int)this->size);
-  for(int i=0; i<this->size; i++)
-    for(int j=0; j<Dimension; j++)
-      outputTheSystem(j,i)=(*this)[i][j];
-  //outputTheSystem.ComputeDebugString();
-  outputTheSystem.GaussianEliminationByRows(0, &outputNonPivotPoints);
-  //outputTheSystem.ComputeDebugString();
-}
-
-template <class coefficient>
-bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLinearCombination)
-{ Matrix<coefficient> tempMat;
-  Selection nonPivotPoints;
-  this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
-  //std::cout << tempMat.ToString(true, false);
-  if (nonPivotPoints.CardinalitySelection==0)
-    return false;
-//  outputTheLinearCombination.ComputeDebugString();
-  tempMat.NonPivotPointsToEigenVectorMatrixForm(nonPivotPoints, outputTheLinearCombination);
-  //outputTheLinearCombination.ComputeDebugString();
-  return true;
-}
-
 template<typename Element>
 void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<Element>& output)
 { int RowCounter=0;
@@ -3154,157 +3425,6 @@ void Matrix<Element>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const Lar
     { this->elements[i][j]=theMat.elements[i][j];
       this->elements[i][j]/=Den;
     }
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::IsRegular(Vector<coefficient>& r, Vector<coefficient>& outputFailingNormal, GlobalVariables& theGlobalVariables, int theDimension)
-{ //this function needs a complete rewrite
-  Selection WallSelection=theGlobalVariables.selWallSelection.GetElement();
-  WallSelection.init(this->size);
-  int x= MathRoutines::NChooseK(this->size, theDimension-1);
-  Matrix<coefficient> bufferMat;
-  Vector<coefficient> tempRoot;
-  coefficient theScalarProduct;
-  for (int i=0; i<x; i++)
-  { WallSelection.incrementSelectionFixedCardinality(theDimension-1);
-    if (this->ComputeNormalFromSelection(tempRoot, WallSelection, bufferMat, theDimension))
-    { tempRoot.ScalarEuclidean(r, theScalarProduct);
-      if (theScalarProduct.IsEqualToZero())
-      { outputFailingNormal=(tempRoot);
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalExcludingIndex(Vector<coefficient>& output, int index, Matrix<coefficient>& bufferMatrix)
-{ Selection NonPivotPoints;
-  if (this->size==0)
-    return false;
-  int theDimension= this->TheObjects[0].size;
-  output.SetSize(theDimension);
-  bufferMatrix.init((int)this->size-1, (int)theDimension);
-  int k=-1;
-  for(int i=0; i<this->size; i++)
-    if (i!=index)
-    { k++;
-      for(int j=0; j<theDimension; j++)
-        bufferMatrix.elements[k][j]=(*this)[i][j];
-    }
-  bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection!=1)
-    return false;
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
-  return true;
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelection(Vector<coefficient>& output, Selection& theSelection, Matrix<coefficient>& bufferMatrix, int theDimension)
-{ Selection NonPivotPoints;
-  output.SetSize(theDimension);
-  bufferMatrix.init((int)theSelection.CardinalitySelection, (int)theDimension);
-  for(int i=0; i<theSelection.CardinalitySelection; i++)
-    for(int j=0; j<theDimension; j++)
-      bufferMatrix.elements[i][j]=(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-  bufferMatrix.GaussianEliminationByRows(0, &NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection!=1)
-    return false;
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
-  return true;
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndExtraRoot
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot, Selection& theSelection, Matrix<coefficient>& bufferMatrix, Selection& bufferSel)
-{ if (this->size==0)
-    return false;
-  int theDimension= this->TheObjects[0].size;
-  output.SetSize(theDimension);
-  Matrix<coefficient> matOutputEmpty;
-  Selection& NonPivotPoints=bufferSel;
-  bufferMatrix.init((int)theSelection.CardinalitySelection+1, (int)theDimension);
-  matOutputEmpty.init(-1, -1);
-  for(int j=0; j<theDimension; j++)
-  { for(int i=0; i<theSelection.CardinalitySelection; i++)
-      bufferMatrix.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]][j]);
-    bufferMatrix.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot[j]);
-  }
-  bufferMatrix.GaussianEliminationByRows(matOutputEmpty, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection!=1)
-    return false;
-  bufferMatrix.NonPivotPointsToEigenVector(NonPivotPoints, output);
-  return true;
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::ComputeNormalFromSelectionAndTwoExtraRoots
-(Vector<coefficient>& output, Vector<coefficient>& ExtraRoot1, Vector<coefficient>& ExtraRoot2, Selection& theSelection, Matrix<coefficient>& bufferMat, Selection& bufferSel)
-{ Selection& NonPivotPoints= bufferSel;
-  if (this->size==0)
-    return false;
-  int theDimension= this->TheObjects[0].size;
-  output.SetSize(theDimension);
-  bufferMat.init((int)theSelection.CardinalitySelection+2, (int)theDimension);
-  for(int j=0; j<theDimension; j++)
-  { for(int i=0; i<theSelection.CardinalitySelection; i++)
-      bufferMat.elements[i][j].Assign(this->TheObjects[theSelection.elements[i]].TheObjects[j]);
-    bufferMat.elements[theSelection.CardinalitySelection][j].Assign(ExtraRoot1.TheObjects[j]);
-    bufferMat.elements[theSelection.CardinalitySelection+1][j].Assign(ExtraRoot2.TheObjects[j]);
-  }
-  bufferMat.GaussianEliminationByRows(0, NonPivotPoints);
-  if (NonPivotPoints.CardinalitySelection!=1)
-    return false;
-  bufferMat.NonPivotPointsToEigenVector(NonPivotPoints, output);
-  return true;
-}
-
-template<class coefficient>
-void Vectors<coefficient>::GetGramMatrix(Matrix<coefficient>& output, const Matrix<Rational>* theBilinearForm) const
-{ output.Resize(this->size, this->size, false);
-  for (int i=0; i<this->size; i++)
-    for(int j=i; j<this->size; j++)
-    { if (theBilinearForm!=0)
-        Vector<coefficient>::ScalarProduct(this->TheObjects[i], this->TheObjects[j], *theBilinearForm, output.elements[i][j]);
-      else
-        output(i,j)=(*this)[i].ScalarEuclidean((*this)[j]);
-      if (i!=j)
-        output(j,i)=output(i,j);
-    }
-}
-
-template<class coefficient>
-bool Vectors<coefficient>::ContainsARootNonPerpendicularTo(const Vector<coefficient>& input, const Matrix<coefficient>& theBilinearForm)
-{ for (int i=0; i<this->size; i++)
-    if (!Vector<coefficient>::ScalarProduct(this->TheObjects[i], input, theBilinearForm).IsEqualToZero())
-      return true;
-  return false;
-}
-
-template<class coefficient>
-int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coefficient>& bufferMat, Selection& bufferSel)
-{ if (this->size==0)
-    return 0;
-  int theDimension= this->GetDimensionOfElements();
-  Selection NonPivotPoints;
-  Matrix<Rational>  tempMatrix;
-  Vectors<Rational> tempRoots;
-  int oldRank=0;
-  for (int i=0; i<this->size; i++)
-  { tempRoots.AddOnTop(this->TheObjects[i]);
-    int newRank= tempRoots.GetRankOfSpanOfElements(bufferMat, bufferSel);
-    if (newRank==oldRank)
-      tempRoots.RemoveIndexSwapWithLast(tempRoots.size-1);
-    else
-    { this->SwapTwoIndices(oldRank, i);
-      assert(oldRank+1==newRank);
-      oldRank=newRank;
-    }
-    if (oldRank== theDimension)
-      return theDimension;
-  }
-  return (oldRank);
 }
 
 template <class coefficient>
@@ -8831,5 +8951,41 @@ coefficient WeylGroup::GetHermitianProduct(const Vector<coefficient>& leftCharac
     result +=leftCharacter[i].GetComplexConjugate() * rightCharacter[i].GetComplexConjugate() * this->conjugacyClasses[i].size;
   result/=this->theElements.size;
   return result;
+}
+
+template <class coefficient>
+std::string Vectors<coefficient>::ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)const
+{ std::stringstream out;
+  std::string tempS;
+  std::string theLetter="x";
+  if (useLatex)
+    out << "\\begin{array}{l}";
+  for (int i=0; i<this->size; i++)
+  { Vector<Rational>& current=(*this)[i];
+    tempS= current.ToStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
+    if (tempS=="")
+      out << "(0";
+    out << tempS;
+    if (!LastVarIsConstant)
+    { if (useLatex)
+        out << "\\geq 0\\\\";
+      else
+        out << "=>0\n";
+    } else
+    { if (useLatex)
+        out << "\\geq " << (-(*current.LastObject())).ToString() << "\\\\";
+      else
+        out << "=>" <<  (-(*current.LastObject())).ToString();
+    }
+    if (tempS=="")
+      out << ")";
+    if (useHtml)
+      out << "<br>";
+    else
+      out << "\n";
+  }
+  if (useLatex)
+    out << "\\end{array}";
+  return out.str();
 }
 #endif

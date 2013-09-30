@@ -17,14 +17,16 @@ class AlgebraicNumber
   AlgebraicClosureRationals* owner;
   int basisIndex;
   VectorSparse<Rational> theElT;
-  AlgebraicNumber():owner(0), basisIndex(0) {}
-  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0)
+  bool flagDeallocated;
+  AlgebraicNumber():owner(0), basisIndex(0), flagDeallocated(false) {}
+  AlgebraicNumber(const Rational& other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=(other);
   }
-  AlgebraicNumber(int other):owner(0), basisIndex(0)
+  AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=((Rational)other);
   }
   bool NeedsBrackets()const;
+  bool CheckConsistency()const;
   bool CheckNonZeroOwner()const;
   bool CheckCommonOwner(const AlgebraicNumber& other)const;
   unsigned int HashFunction()const;
@@ -98,7 +100,7 @@ class AlgebraicNumber
   void operator*=(const AlgebraicNumber& other);
   void operator*=(const Rational& other);
   void operator*=(LargeInt other)
-  { this->operator*=((LargeInt)other);
+  { this->operator*=((Rational)other);
   }
   void operator*=(int other)
   { this->operator*=((Rational)other);

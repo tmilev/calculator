@@ -504,21 +504,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
-//  civilizedInput="g_{{a}}:=getChevalleyGenerator{} (G_2, a);hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
-//civilizedInput="\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); ";
-  //civilizedInput="\\partial:=DifferentialOperator{}(\\partial, x); x:=PolynomialWithDO{}(\\partial, x); GenerateVectorSpaceClosedWRTLieBracket{}(50, x, \\partial);";
-  //civilizedInput="GenerateVectorSpaceClosedWRTLieBracket{}(248, h_{1} );";
-  //civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}( x y -2 )";
-//  civilizedInput="PolynomialAlgebraicNumbers{}(\\sqrt{}5); ";
-//  civilizedInput="PolynomialAlgebraicNumbers(\\sqrt{2}+\\sqrt{3}x)^3";
-//civilizedInput="\\sqrt{2}+\\sqrt{3}";
-//civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
-//  civilizedInput="AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);";
-//civilizedInput="FindOneSolutionSerreLikePolynomialSystem{}(   x_{7}x_{19}+1,x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{2}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{1}x_{13}-1)";
-  //civilizedInput="AutomatedTestSetGoodKnownCopy{}(0)";
-  //civilizedInput="SemisimpleLieAlgebra(d_2)";
-//  civilizedInput="FindOneSolutionSerreLikePolynomialSystem(x^2+1)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

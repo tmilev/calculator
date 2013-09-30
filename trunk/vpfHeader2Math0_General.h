@@ -1493,7 +1493,7 @@ class GroebnerBasisComputation
   static bool CriterionCLOsh
   (HashedListSpecialized<Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >& thePairs,
    List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM);
-  void ConsistencyCheck();
+  void CheckConsistency();
   void initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
   void initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables);
 };

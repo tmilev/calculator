@@ -2181,6 +2181,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly");
+  this->CheckConsistency();
   List<Matrix<AlgebraicNumber> > theAdsOfHs;
   Matrix<AlgebraicNumber> tempAd, temp, commonAd, adIncludingCartanActions;
   //std::cout << "<hr>Type "  << this->theWeylNonEmbeddeD.theDynkinType.ToString()
@@ -3002,6 +3003,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 //  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
+bool CandidateSSSubalgebra::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
+}
 bool SltwoSubalgebras::CheckConsistency()const
 { if (this->flagDeallocated)
   { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

@@ -310,6 +310,7 @@ public:
   ~CandidateSSSubalgebra()
   { this->flagDeallocated=true;
   }
+  bool CheckConsistency()const;
   int GetPrimalRank()const;
 
   void GetHsByType

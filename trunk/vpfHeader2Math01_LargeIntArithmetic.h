@@ -825,9 +825,9 @@ ParallelComputing::GlobalPointerCounter++;
   { return this->Extended==0;
   }
   inline bool checkConsistency()
-  { return this->ConsistencyCheck();
+  { return this->CheckConsistency();
   }
-  inline bool ConsistencyCheck()
+  inline bool CheckConsistency()
   { if (this->Extended==0)
       return this->DenShort>0;
     return true;

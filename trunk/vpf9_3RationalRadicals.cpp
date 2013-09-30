@@ -657,14 +657,29 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
 //  std::cout << " ... to get: " << this->ToString();
 }
 
+bool AlgebraicNumber::CheckConsistency()const
+{ if (this->flagDeallocated)
+  { std::cout << "This is a programming error: use after free of AlgebraicNumber. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return true;
+}
+
 void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator*=");
+  this->CheckConsistency();
   if (other.owner==0)
-  { this->theElT*=other.theElT.theCoeffs[0];
+  { if (other.IsEqualToZero())
+    { this->theElT.MakeZero();
+      return;
+    }
+    this->theElT*=other.theElT.theCoeffs[0];
     return;
   }
   if (this->owner==0)
-  { Rational tempRat=this->theElT.GetMonomialCoefficient(MonomialVector(0));
+  { if (this->theElT.IsEqualToZero())
+      return;
+    Rational tempRat=this->theElT.GetMonomialCoefficient(MonomialVector(0));
     *this=other;
     *this*=tempRat;
     return;

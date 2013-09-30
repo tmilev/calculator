@@ -91,7 +91,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
         if (this->NumberOfComputations>this->MaxNumComputations)
         { if (!this->flagBasisGuaranteedToGenerateIdeal)
             this->theBasiS.AddListOnTop(this->basisCandidates);
-          this->ConsistencyCheck();
+          this->CheckConsistency();
           return true;
         }
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
@@ -117,7 +117,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
       this->RemainderDivisionWithRespectToBasis(this->bufPolyForGaussianElimination, &this->remainderDivision, theGlobalVariables, i);
       if (this->MaxNumComputations>0)
         if (this->NumberOfComputations>this->MaxNumComputations)
-        { this->ConsistencyCheck();
+        { this->CheckConsistency();
           return true;
         }
       if (!(this->remainderDivision==this->theBasiS[i]))
@@ -597,7 +597,7 @@ void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Poly
 }
 
 template<class coefficient>
-void GroebnerBasisComputation<coefficient>::ConsistencyCheck()
+void GroebnerBasisComputation<coefficient>::CheckConsistency()
 { if (this->NumberOfComputations>this->MaxNumComputations+1000)
   { std::cout
     << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "

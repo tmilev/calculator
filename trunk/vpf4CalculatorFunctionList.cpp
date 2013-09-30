@@ -16,6 +16,10 @@ void CommandList::initPredefinedInnerFunctions()
   ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
    "Runs a big bad automated test of all built in functions to create a file containing a set of known good results. ",
    "AutomatedTestSetGoodKnownCopy{}(0)");
+  this->AddOperationInnerHandler
+  ("!", CommandListFunctions::innerFactorial, "",
+   "Factorial function. ",
+   "5!");
 
   this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",

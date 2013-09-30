@@ -102,6 +102,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("-");
   this->AddOperationNoRepetitionAllowed("/");
   this->AddOperationNoRepetitionAllowed("*");
+  this->AddOperationNoRepetitionAllowed("!");
   this->AddOperationNoRepetitionAllowed("mod");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
@@ -301,6 +302,20 @@ bool CommandList::ReplaceOEXByEX(int formatOptions)
   middle.controlIndex=this->conExpression();
   this->DecreaseStackExceptLast(1);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
+bool CommandList::ReplaceEOByE(int formatOptions)
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(right.controlIndex));
+  newExpr.AddChildOnTop(left.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  this->DecreaseStackSetCharacterRangeS(1);
   return true;
 }
 
@@ -937,6 +952,8 @@ bool CommandList::ApplyOneRule()
   //end of ambiguity.
   if (fourthToLastS=="{"  && thirdToLastS=="{}" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXYYXByYY();
+  if (secondToLastS=="Expression" && lastS=="!")
+    return this->ReplaceEOByE();
   if (secondToLastS=="Expression" && thirdToLastS=="^" && fourthToLastS=="Expression" && this->LookAheadAllowsThePower(lastS) )
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="+" && fourthToLastS=="Expression" && this->AllowsPlusInPreceding(lastS) )

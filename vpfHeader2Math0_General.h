@@ -4905,6 +4905,7 @@ class WeylGroupRepresentation
   Matrix<coefficient> gramMatrixInverted;
   public:
   WeylGroup* OwnerGroup;
+  std::string name;
   WeylGroupRepresentation():parent(0), OwnerGroup(0){}
   unsigned int HashFunction() const;
   bool CheckInitialization()const;

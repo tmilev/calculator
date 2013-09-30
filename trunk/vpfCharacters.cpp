@@ -1397,13 +1397,7 @@ void UDPolynomial<coefficient>::SquareFree()
     data = (*this/q).data;
 }
 
-template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
-{ FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(1);
-  tempFormat.polyAlphabeT[0]="q";
-  return out << p.ToString(&tempFormat);
-}
+
 
 /*
 template <typename coefficient>

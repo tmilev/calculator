@@ -731,6 +731,7 @@ public:
   bool operator==(int other) const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   void AssignMinPoly(const Matrix<coefficient>& input);
+  void AssignCharPoly(const Matrix<coefficient>& input); // method due to Urbain Le Verrier
 };
 
 template <typename coefficient>
@@ -757,6 +758,22 @@ void UDPolynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
     out.data[p.size] = 1;
     *this = MathRoutines::lcm (*this, out);
   }
+}
+
+template <typename coefficient>
+void UDPolynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
+{ int n = input.NumCols;
+  this->data.SetSize(n+1);
+  this->data[0] = 1;
+  Matrix<coefficient> acc;
+  acc = input;
+  for(int i=1; i<n; i++)
+  { this->data[i] = -acc.GetTrace()/i;
+    for(int j=0; j<n; j++)
+      acc.elements[j][j] += this->data[i];
+    acc.MultiplyOnTheLeft(input);
+  }
+  this->data[n] = -acc.GetTrace()/n;
 }
 
 template <typename coefficient>
@@ -854,6 +871,14 @@ std::string UDPolynomial<coefficient>::ToString(FormatExpressions* theFormat)con
     tempP.AddMonomial(tempM, this->data[i]);
   }
   return tempP.ToString(theFormat);
+}
+
+template <typename coefficient>
+std::ostream& operator<<(std::ostream& out, const UDPolynomial<coefficient>& p)
+{ FormatExpressions tempFormat;
+  tempFormat.polyAlphabeT.SetSize(1);
+  tempFormat.polyAlphabeT[0]="q";
+  return out << p.ToString(&tempFormat);
 }
 
 #endif

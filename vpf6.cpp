@@ -3836,6 +3836,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << secondE;
     }
+  } else if (this->IsListStartingWithAtom(this->theBoss->opFactorial()))
+  { out << (*this)[1].ToString(theFormat) << "!";
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=(*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);

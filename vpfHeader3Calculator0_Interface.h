@@ -787,6 +787,7 @@ public:
     return this->DecreaseStackSetCharacterRangeS(numDots);
   }
   bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
@@ -1075,6 +1076,9 @@ public:
   }
   int opSin()
   { return this->operations.GetIndexIMustContainTheObject("\\sin");
+  }
+  int opFactorial()
+  { return this->operations.GetIndexIMustContainTheObject("!");
   }
   int opCos()
   { return this->operations.GetIndexIMustContainTheObject("\\cos");

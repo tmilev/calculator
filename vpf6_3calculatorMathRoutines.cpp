@@ -129,6 +129,15 @@ bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& 
   return output.AssignValue(sin(theArgument), theCommands );
 }
 
+bool CommandListFunctions::innerFactorial(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerSin");
+  int inputInt;
+  if (!input.IsSmallInteger(&inputInt))
+    return false;
+  Rational result;
+  return output.AssignValue(result.Factorial(inputInt), theCommands);
+}
+
 bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCos");
   double theArgument;

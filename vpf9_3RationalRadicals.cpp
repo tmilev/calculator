@@ -445,6 +445,7 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
       return false;
     else
       minPoly.AddMonomial(algNumPoly[i], theLinearTermCFdividedByTwo);
+  minPoly/=minPoly.GetMonomialCoefficient(minPoly.GetMaxMonomial());
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo/=2;
   minPoly.GetConstantTerm(theConstTermShifted);

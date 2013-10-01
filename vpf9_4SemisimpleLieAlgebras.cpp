@@ -2230,8 +2230,15 @@ bool SemisimpleSubalgebras::CheckConsistency()const
   return true;
 }
 
+void SemisimpleSubalgebras:: initHookUpPointers(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField)
+{ this->owneR=&inputOwner;
+  this->theSl2s.owner=&inputOwner;
+  this->ownerField=theField;
+}
+
 void SemisimpleSubalgebras::reset()
 { this->owneR=0;
+  this->ownerField=0;
   this->theRecursionCounter=0;
   this->theSl2s.owner=0;
   this->flagAttemptToSolveSystems=true;

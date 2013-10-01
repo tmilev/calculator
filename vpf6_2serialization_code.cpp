@@ -691,8 +691,7 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
     }
 
   //Serialization::innerLoadFromObject(theCommands,
-  return output.SetError
-  ("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
+  return output.SetError("Candidate subalgebra is not a stand-alone object and its Expression output should not be used. ", theCommands);
 }
 
 bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, const Expression& inpuT, Expression& output)
@@ -707,16 +706,12 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   }
   SemisimpleLieAlgebra* ownerSS;
   if (!Serialization::innerLoadSSLieAlgebra(theCommands, input[1], output, &ownerSS))
-  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple "
-    << " Lie algebra. ";
+  { theCommands.Comments << "<hr>Error loading semisimple subalgebras: failed to extract ambient semisimple Lie algebra. ";
     return false;
   }
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
-  SemisimpleSubalgebras& theSAs=
-  theCommands.theObjectContainer.theSSsubalgebras
-  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)]
-  ;
+  SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
   //FormatExpressions tempFormat;
 //  std::cout << ownerSS->ToString();
   Expression theCandidatesE=input[2];
@@ -725,7 +720,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   Expression tempE;
   theSAs.theSubalgebraCandidates.SetSize(0);
   theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
-  theSAs.initHookUpPointers(*ownerSS);
+  theSAs.initHookUpPointers(*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagComputePairingTable=true;
@@ -738,8 +733,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
     theReport.Report(reportStream.str());
     CandidateSSSubalgebra tempCandidate;
     if (!Serialization::innerLoadCandidateSA(theCommands, theCandidatesE[i], tempE, tempCandidate, theSAs))
-    { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate"
-      << " number " << i << " of type "
+    { theCommands.Comments << "<hr>Error loading candidate subalgebra: failed to load candidate number " << i << " of type "
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
     }
@@ -900,8 +894,8 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(CommandLi
       } else
         isHonestElementUE=false;
       if (!isGood)
-      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString()
-        << " to Chevalley generator of " << owner.GetLieAlgebraName();
+      { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+        << owner.GetLieAlgebraName();
         return false;
       }
       if (isHonestElementUE)

@@ -65,8 +65,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     for (int i=0; i<tempMatA.NumCols; i++)
       if (!BaseVariables.selected[i])
       { Rational PotentialChangeGradient; bool hasAPotentialLeavingVariable;
-        Matrix<Rational> ::ComputePotentialChangeGradient
-        (tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
+        Matrix<Rational> ::ComputePotentialChangeGradient(tempMatA, BaseVariables, NumTrueVariables, i, PotentialChangeGradient, hasAPotentialLeavingVariable);
         if (PotentialChangeGradient.IsGreaterThanOrEqualTo(ChangeGradient) && hasAPotentialLeavingVariable)
         { EnteringVariable= i;
           ChangeGradient.Assign(PotentialChangeGradient);
@@ -428,7 +427,7 @@ bool CommandList::innerPrintSSsubalgebras
   if (!isAlreadySubalgebrasObject)
   { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
       return output.SetError("Error extracting Lie algebra.", theCommands);
-    if (ownerSSPointer->GetRank()>4)
+    if (ownerSSPointer->GetRank()>6)
     { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else
@@ -530,7 +529,7 @@ bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Express
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
   SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
   std::stringstream out;
-  if (ownerSS.GetRank()>4)
+  if (ownerSS.GetRank()>6)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
   }
@@ -669,8 +668,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
       theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
     } else
-    { std::cout << "This is not programmed yet! Crashing to let you know. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is not programmed yet! Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   } else if (!useRevLex)
@@ -860,8 +858,7 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
   this->lowerBounds.AddListOnTop(other.lowerBounds);
 }
 
-void CalculusFunctionPlot::AddPlotOnTop
-(const Expression& inputE, const std::string& inputPostfixNotation, const Rational& inputLowerBound, const Rational& inputUpperBound)
+void CalculusFunctionPlot::AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, const Rational& inputLowerBound, const Rational& inputUpperBound)
 { this->upperBounds.AddOnTop(inputUpperBound);
   this->lowerBounds.AddOnTop(inputLowerBound);
   this->thePlotElementS.AddOnTop(inputE);
@@ -1413,8 +1410,7 @@ bool CommandList::innerPerturbSplittingNormal(CommandList& theCommands, const Ex
   VectorsToPerturbRelativeTo.AssignMatrixRows(theMat);
   for (int i =0; i<NonStrictCone.size; i++)
     if (splittingNormal.ScalarEuclidean(NonStrictCone[i])<0)
-      return output.SetError
-      ("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
+      return output.SetError("The normal vector " + splittingNormal.ToString() + " is has negative scalar product with " + NonStrictCone[i].ToString(), theCommands);
   out << "Perturbing " << splittingNormal.ToString() << " relative to cone " << NonStrictCone.ToString() << " and vectors " << VectorsToPerturbRelativeTo.ToString();
   splittingNormal.PerturbNormalRelativeToVectorsInGeneralPosition(NonStrictCone, VectorsToPerturbRelativeTo);
   out << "<br>End result: " << splittingNormal.ToString();

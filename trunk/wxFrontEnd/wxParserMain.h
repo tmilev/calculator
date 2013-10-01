@@ -27,7 +27,7 @@
 #include <wx/dcmemory.h>
 #include "wx/stdpaths.h"
 #include <wx/image.h>
-#include "vpf.h"
+#include "../vpf.h"
 
 
 

@@ -181,7 +181,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
 
   Create(parent, wxID_ANY, _("Frame"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
   BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalPrintSemisimpleSubalgebrasFull{}(G_2)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalEmbedSemisimpleInSemisimple{}(a_2,e_6)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
   BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
   Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -197,6 +197,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
   Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton2Click);
   //*)
+//  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalPrintSemisimpleSubalgebrasFull{}(G_2)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
   this->theDrawPanel= new wxDrawPanel(this);
   this->theParserOutput= new wxParserOutput(this);
   this->theStatus= new wxStatus(this);

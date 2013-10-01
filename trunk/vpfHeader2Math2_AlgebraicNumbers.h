@@ -25,6 +25,9 @@ class AlgebraicNumber
   AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=((Rational)other);
   }
+  AlgebraicNumber(const AlgebraicNumber& other)
+  { this->operator=(other);
+  }
   bool NeedsBrackets()const;
   bool CheckConsistency()const;
   bool CheckNonZeroOwner()const;

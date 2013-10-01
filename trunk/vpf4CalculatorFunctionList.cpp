@@ -9,6 +9,11 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("MakeMakefile", CommandListFunctions::innerMakeMakeFile, "",
+   "Makes a makefile. ",
+   "MakeMakefile(0)", false);
+
+  this->AddOperationInnerHandler
   ("AutomatedTest", this->innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
    "AutomatedTest{}(0)");

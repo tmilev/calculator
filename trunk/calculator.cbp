@@ -33,7 +33,6 @@
 			<Add option="-fexceptions" />
 			<Add option="-pthread" />
 			<Add option="-Winvalid-pch" />
-			<Add option="-DCGIversionLimitRAMuse" />
 		</Compiler>
 		<Linker>
 			<Add library="libpthread" />

@@ -23,6 +23,7 @@ public:
   static bool innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerMakeMakeFile(CommandList& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

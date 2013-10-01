@@ -1103,7 +1103,7 @@ public:
     return true;
   }
   bool IsLinearGetRootConstantTermLastCoordinate(Vector<coefficient>& outputRoot, const coefficient& theZero)
-  { outputRoot.MakeZero(this->GetMinNumVars()+1, theZero);
+  { outputRoot.MakeZero(this->GetMinNumVars()+1);
     int index;
     for (int i=0; i<this->size(); i++)
       if((*this)[i].IsAConstant())
@@ -3246,9 +3246,9 @@ public:
   bool IsElementCartan()const;
   void MakeHgenerator(const Vector<coefficient>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner);
-  void ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const;
-  void AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<Rational>& input, SemisimpleLieAlgebra& owner);
-  bool GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const;
+  void ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output)const;
+  void AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<coefficient>& input, SemisimpleLieAlgebra& owner);
+  bool GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra<coefficient> >& theBasis, Vector<coefficient>& output, GlobalVariables& theGlobalVariables)const;
   SemisimpleLieAlgebra* GetOwner()const
   { this->CheckConsistency();
     if (this->size()==0)
@@ -5823,9 +5823,9 @@ public:
   void ComputeDebugString(bool useHtml)
   { this->DebugString=this->ToString(useHtml);
   }
-  int ComputeVectorPartitionFunctionSmall(Vector<Rational> & theRoot, Vectors<Rational>& theRoots);
+  int ComputeVectorPartitionFunctionSmall(Vector<Rational>& theRoot, Vectors<Rational>& theRoots);
   void ComputeAllPartitions();
-  void ComputeAllPartitionsRecursive(int currentIndex, List<int>& CurrentPartition, int UpperBoundEachIndex, Vector<Rational> & toBePartitioned);
+  void ComputeAllPartitionsRecursive(int currentIndex, List<int>& CurrentPartition, int UpperBoundEachIndex, Vector<Rational>& toBePartitioned);
 };
 
 class SemisimpleLieAlgebra
@@ -6054,16 +6054,14 @@ public:
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain()
   { if (domainAlg==0)
-    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return *domainAlg;
   }
   SemisimpleLieAlgebra& theRange()
   { if (rangeAlg==0)
-    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return *rangeAlg;
@@ -6104,7 +6102,7 @@ public:
   bool ApplyHomomorphism
   (const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
   bool ApplyHomomorphism
-(const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  (const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
 };
 
 class SemisimpleLieAlgebraOrdered
@@ -6215,10 +6213,9 @@ public:
   std::string ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int>& input);
   std::string ElementToStringOperatorSequenceStartingOnMe(List<int>& input);
   bool GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
- Selection* parabolicNonSelectedAreInLeviPart=0)
-;
-std::string GenerateOrbitAndAnimate(GlobalVariables& theGlobalVariables);
+  (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
+   Selection* parabolicNonSelectedAreInLeviPart=0);
+  std::string GenerateOrbitAndAnimate(GlobalVariables& theGlobalVariables);
   bool MinimaAreIntegral();
   std::string ToString(bool useSimpleCoords=true, bool useArrows=true, bool includeDominance=false)const;
   void Simplify();
@@ -6344,9 +6341,8 @@ public:
     assert(false);
   }
   void AccountSingleWeight
-(const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
- Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
-  ;
+  (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
+   Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const;
   std::string TensorAndDecompose(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
@@ -6399,11 +6395,11 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
   bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables);
   bool GetDominantCharacterWRTsubalgebra
- (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
+  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
   bool FreudenthalEvalMeDominantWeightsOnly
- (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
   bool FreudenthalEvalMeFullCharacter
- (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
   bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
   }
@@ -6421,8 +6417,8 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   }
   bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight
-(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
- ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables);
+  (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
+   ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables);
   int GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
@@ -6811,8 +6807,7 @@ void MatrixTensor<coefficient>::Invert()
   MatrixTensor<coefficient> result=theId;
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this!=theId)
-  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   *this=result;
@@ -6831,9 +6826,7 @@ class MonomialGeneralizedVerma
     return output;
   }
   void MultiplyMeByUEEltOnTheLefT
-  (const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output,
-   GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
-   ;
+  (const ElementUniversalEnveloping<coefficient>& theUE, ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const;
   void operator=(const MonomialGeneralizedVerma<coefficient>& other)
   { this->owneR=other.owneR;
     this->indexFDVector=other.indexFDVector;
@@ -8813,7 +8806,7 @@ bool Matrix<Element>::IsPositiveDefinite()
 }
 
 template <class coefficient>
-bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
+bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { if (theBasis.size==0)
     return false;
   if (this->IsEqualToZero())
@@ -8821,8 +8814,8 @@ bool ElementSemisimpleLieAlgebra<coefficient>::GetCoordsInBasis(const List<Eleme
     return true;
   }
   MacroRegisterFunctionWithName("ElementSemisimpleLieAlgebra::GetCoordsInBasis");
-  Vectors<Rational> tempBasis;
-  Vector<Rational> tempRoot;
+  Vectors<coefficient> tempBasis;
+  Vector<coefficient> tempRoot;
   tempBasis.SetSize(theBasis.size);
   for (int i=0 ; i<theBasis.size; i++)
     theBasis[i].ElementToVectorNegativeRootSpacesFirst(tempBasis[i]);
@@ -8893,12 +8886,19 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
   int theRank=owner->GetRank();
   int numPosRoots=owner->GetNumPosRoots();
   result.MakeZero(theRank);
+  std::cout << "<br>Zero vector in GetCartanPart is: " << result.ToString();
+  if (theRank<=0 || owner==0)
+  { std::cout << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   for (int i=0; i<theRank; i++)
   { tempGen.MakeGenerator(*owner, i+numPosRoots);
     int currentIndex=this->theMonomials.GetIndex(tempGen);
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];
   }
+  std::cout << "<br>GetCartanPart is returning vector: " << result.ToString();
   return result;
 }
 
@@ -9054,7 +9054,7 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const
+void ElementSemisimpleLieAlgebra<coefficient>::ElementToVectorNegativeRootSpacesFirst(Vector<coefficient>& output)const
 { if (this->IsEqualToZero())
   { output.MakeZero(0);
     return;
@@ -9070,7 +9070,7 @@ void ElementSemisimpleLieAlgebra<coefficient>::MakeGGenerator(const Vector<Ratio
 }
 
 template <class coefficient>
-void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
+void ElementSemisimpleLieAlgebra<coefficient>::AssignVectorNegRootSpacesCartanPosRootSpaces(const Vector<coefficient>& input, SemisimpleLieAlgebra& owner)
 { //Changing RootSystem order invalidates this function!
   this->MakeZero();
   ChevalleyGenerator tempGenerator;

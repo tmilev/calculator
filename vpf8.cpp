@@ -3170,7 +3170,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)const
   }
   for (int i=0; i<output.size; i++)
     output[i].AssignFracValue();
-  theVector.MakeZero(theVector.size, (Rational) 0);
+  theVector.MakeZero(theVector.size);
   for (int i=0; i<basisRoots.size; i++)
     theVector+=basisRoots[i]*output[i];
   //std::cout << "the vector " << theVector.ToString() << " in the basis " << basisRoots.ToString() << " has coordinates: " << output.ToString();
@@ -5877,7 +5877,7 @@ void DrawOperations::ComputeProjectionsEiVectors()
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
   Vector<double> tempRoot;
   for (int i=0; i<theDimension; i++)
-  { tempRoot.MakeEi(theDimension, i, 1, 0);
+  { tempRoot.MakeEi(theDimension, i);
     this->ProjectionsEiVectors[i][0]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][0]);
     this->ProjectionsEiVectors[i][1]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][1]);
   }

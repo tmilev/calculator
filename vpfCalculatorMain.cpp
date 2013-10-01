@@ -380,8 +380,11 @@ int main_command_input(int argc, char **argv)
   theParser.inputStringRawestOfTheRaw =theInputStream.str();
   PredefinedStrings(theParser.inputStringRawestOfTheRaw);
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::fstream outputFile;
+  CGI::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
   std::cout << theParser.outputString;
-  std::cout << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.";
+  outputFile << theParser.outputString;
+  std::cout << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
   return 0;
 }
 
@@ -505,6 +508,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
 
   PredefinedStrings(civilizedInput);
 

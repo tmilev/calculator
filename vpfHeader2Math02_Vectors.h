@@ -18,11 +18,16 @@ class Vector: public List<coefficient>
   friend std::ostream& operator<< <coefficient>(std::ostream& output, const Vector<coefficient>& theVector);
 public:
   Vector(){}
+  Vector(const Vector<coefficient>& other)
+  { *this=other;
+  }
   template <class otherCoeff>
   Vector(const Vector<otherCoeff>& other)
   { *this=other;
   }
-  Vector(const Selection& other) {*this=other;}
+  Vector(const Selection& other)
+  { *this=other;
+  }
   inline static std::string GetXMLClassName()
   { std::string result="Vector_" + coefficient::GetXMLClassName();
     return result;
@@ -166,11 +171,13 @@ public:
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]*=-1;
   }
-  void MakeEi(int DesiredDimension, int NonZeroIndex, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
-  { this->MakeZero(DesiredDimension, theRingZero);
-    (*this)[NonZeroIndex]=theRingUnit;
+  void MakeEi(int DesiredDimension, int NonZeroIndex)
+  { this->MakeZero(DesiredDimension);
+    (*this)[NonZeroIndex]=1;
   }
-  inline static unsigned int HashFunction(const Vector<coefficient>& input){return input.HashFunction();}
+  inline static unsigned int HashFunction(const Vector<coefficient>& input)
+  { return input.HashFunction();
+  }
   unsigned int HashFunction() const
   { unsigned int result=0;
     int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
@@ -205,10 +212,10 @@ public:
     }
     return false;
   }
-  void MakeZero(int theDim, const coefficient& theRingZero=0)
+  void MakeZero(int theDim)
   { this->SetSize(theDim);
     for (int i=0; i<theDim; i++)
-      this->TheObjects[i]=theRingZero;
+      (*this)[i]=0;
   }
   int GetNumNonZeroCoords()const
   { int result=0;
@@ -723,7 +730,7 @@ class Vectors: public List<Vector<coefficient> >
   void MakeEiBasis(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->SetSize(theDimension);
     for (int i=0; i<this->size; i++)
-      this->TheObjects[i].MakeEi(theDimension, i, theRingUnit, theRingZero);
+      this->TheObjects[i].MakeEi(theDimension, i);
   }
   bool LinSpanContainsVector(const Vector<coefficient>& input)const
   { Matrix<coefficient> buffer;
@@ -1062,7 +1069,7 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
   //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   Vector<coefficient> tempRoot, theCombination;
   assert(this!=&output);
-  output.MakeZero(inputBasis.size, theRingZero);
+  output.MakeZero(inputBasis.size);
   theCombination=*this;
   int col=0;
 //  std::cout << "<br>vector whose coords we wanna find: " << this->ToString();

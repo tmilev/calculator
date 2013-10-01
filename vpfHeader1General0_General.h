@@ -1829,7 +1829,7 @@ public:
   void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output, const coefficient& TheRingZero=0)const
   { assert(&standsOnTheLeft!=&output);
     assert(this->NumRows==standsOnTheLeft.size);
-    output.MakeZero(this->NumCols, TheRingZero);
+    output.MakeZero(this->NumCols);
     coefficient tempElt;
     for (int i=0; i<this->NumCols; i++)
       for (int j=0; j<this->NumRows; j++)
@@ -1856,7 +1856,7 @@ public:
       << " dimension " << input.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    output.MakeZero(this->NumRows, TheRingZero);
+    output.MakeZero(this->NumRows);
     otherType tempElt;
     for (int i=0; i<this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)

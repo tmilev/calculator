@@ -646,7 +646,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 //        std::cout << out.str();
     }
     if (indexCurrentWeight!=0)
-    { if (! this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 10000))
+    { if (! this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 60000))
       { std::cout << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
         << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
         << "You might wanna work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. "
@@ -1218,7 +1218,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(const ElementSemi
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& rightModule=this->ModulesIsotypicallyMerged[rightIndex];
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theLieBracket;
   ProgressReport theReport(theGlobalVariables);
-  Vector<Rational> coordsInFullBasis;
+  Vector<AlgebraicNumber> coordsInFullBasis;
   output.SetSize(0);
   if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
   { std::cout << "This is a programming error: fullBasisByModules not computed when it should be. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -2262,7 +2262,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
-  theComputation.SolveSerreLikeSystem(this->transformedSystem, 0, theGlobalVariables);
+  theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, theGlobalVariables);
 //  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;
   this->flagSystemProvedToHaveNoSolution=theComputation.flagSystemProvenToHaveNoSolution;
@@ -5140,14 +5140,14 @@ bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
 }
 
 void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables)
-{ Vectors<Rational> theHWsNonSorted;
-  Vectors<Rational> theCartan;
+{ Vectors<AlgebraicNumber> theHWsNonSorted;
+  Vectors<AlgebraicNumber> theCartan;
   theHWsNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   for (int i=0; i<this->HighestVectorsNonSorted.size; i++)
   { ElementSemisimpleLieAlgebra<AlgebraicNumber>& currentElt=this->HighestVectorsNonSorted[i];
     currentElt.ElementToVectorNegativeRootSpacesFirst(theHWsNonSorted[i]);
   }
-  ElementSemisimpleLieAlgebra<Rational> tempElt;
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> tempElt;
   Vector<Rational> tempV;
   theCartan.SetSize(this->GetAmbientSS().GetRank());
   for (int i=0; i<this->GetAmbientSS().GetRank(); i++)
@@ -5155,13 +5155,16 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     tempElt.MakeHgenerator(tempV, this->GetAmbientSS());
     tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
-  Vectors<Rational> outputCartanCentralizer;
+  Vectors<AlgebraicNumber> outputCartanCentralizer;
   theHWsNonSorted.IntersectTwoLinSpaces(theHWsNonSorted, theCartan, outputCartanCentralizer, theGlobalVariables);
   this->CartanOfCentralizer.SetSize(outputCartanCentralizer.size);
   for (int i=0; i<this->CartanOfCentralizer.size; i++)
   { tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owneR);
+    std::cout << "<hr>Temp elt: " << tempElt.ToString();
     this->CartanOfCentralizer[i]=tempElt.GetCartanPart();
+    std::cout << " ... in vector format: " << this->CartanOfCentralizer[i].ToString();
     this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+    std::cout << " ... scaled: " << this->CartanOfCentralizer[i].ToString();
   }
 //  if (this->CartanOfCentralizer.size>0)
 //    this->CartanOfCentralizer[0]*=4;
@@ -5191,6 +5194,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   ////////////////
   this->BilinearFormSimplePrimal=this->theWeylNonEmbeddeD.CartanSymmetric;
   Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
+  std::cout << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
+  << this->owner->owneR->theWeyl.CartanSymmetric.ToString();
   this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owneR->theWeyl.CartanSymmetric);
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted=this->BilinearFormSimplePrimal;

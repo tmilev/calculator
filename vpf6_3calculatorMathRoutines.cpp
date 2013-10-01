@@ -226,3 +226,40 @@ bool CommandListFunctions::innerCompositeEWAactOnPoly(CommandList& theCommands, 
   return output.AssignValueWithContext(theArgumentPoly, theEWAE.GetContext(), theCommands);
 }
 
+bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerMakeMakeFile");
+  ProjectInformation& theProjectInfo=ProjectInformation::GetMainProjectInfo();
+  List<std::string> cppFilesNoExtension;
+  for (int i=0; i<theProjectInfo.theFiles.size; i++)
+  { std::string theFileNameWithPath=theProjectInfo.theFiles[i].FileName;
+    if (theFileNameWithPath[theFileNameWithPath.size()-1]=='h')
+      continue;
+    theFileNameWithPath.resize(theFileNameWithPath.size()-4);
+    std::string theFileNameNoPathNoExtensionReversed, theFileNameNoPathNoExtension;
+    for (int j=theFileNameWithPath.size()-1; j>=0; j--)
+      if (theFileNameWithPath[j]=='/')
+        break;
+      else
+        theFileNameNoPathNoExtensionReversed.push_back(theFileNameWithPath[j]);
+    for (int j=theFileNameNoPathNoExtensionReversed.size()-1; j>=0; j--)
+      theFileNameNoPathNoExtension.push_back(theFileNameNoPathNoExtensionReversed[j]);
+    cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
+  }
+  std::fstream theFileStream;
+  CGI::OpenFileCreateIfNotPresent(theFileStream, theCommands.PhysicalPathOutputFolder+"makefile", false, true, false);
+  std::stringstream outHtml;
+  theFileStream << "all: directories calculator\n\n";
+  theFileStream << "directories: Debug\n";
+  theFileStream << "Debug:\n" << "\tmkdir ./Debug\n";
+  theFileStream << "calculator: ";
+  for (int i=0; i<cppFilesNoExtension.size; i++)
+    theFileStream << cppFilesNoExtension[i] << ".o ";
+  theFileStream << "\n\tg++ -std=c++11 -pthread ";
+  for (int i=0; i<cppFilesNoExtension.size; i++)
+    theFileStream << cppFilesNoExtension[i] << ".o ";
+  theFileStream << "-o ./Debug/calculator\n\n";
+  for (int i=0; i<cppFilesNoExtension.size; i++)
+    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++11 -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
+  outHtml << "<a href=\" " << theCommands.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
+  return output.AssignValue(outHtml.str(), theCommands);
+}

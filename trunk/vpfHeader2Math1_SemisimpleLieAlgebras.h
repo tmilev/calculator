@@ -426,6 +426,7 @@ class SemisimpleSubalgebras
 {
 public:
   SemisimpleLieAlgebra* owneR;
+  AlgebraicClosureRationals* ownerField;
   SltwoSubalgebras theSl2s;
   ListReferences<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
   HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
@@ -471,10 +472,7 @@ public:
     }
     return *this->owneR;
   }
-  void initHookUpPointers(SemisimpleLieAlgebra& inputOwner)
-  { this->owneR=&inputOwner;
-    this->theSl2s.owner=&inputOwner;
-  }
+  void initHookUpPointers(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField);
   void reset();
   ~SemisimpleSubalgebras()
   { this->flagDeallocated=true;
@@ -482,9 +480,9 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false)
   { this->reset();
   }
-  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner): flagDeallocated(false)
+  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField): flagDeallocated(false)
   { this->reset();
-    this->initHookUpPointers(inputOwner);
+    this->initHookUpPointers(inputOwner, theField);
   }
   bool CheckConsistency()const;
   std::string ToString(FormatExpressions* theFormat=0);

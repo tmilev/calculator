@@ -453,7 +453,7 @@ bool CommandList::innerPrintSSsubalgebras
   << "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
-  { SemisimpleSubalgebras tempSSsas(ownerSS);
+  { SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ? input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
@@ -500,13 +500,12 @@ bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression&
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
-  if (ownerSS.GetRank()>4)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
-    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+  if (ownerSS.GetRank()>6)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS);
+  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
@@ -537,15 +536,14 @@ bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Express
   }
   else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS);
+  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   DynkinSimpleType theType;
   if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
     return output.SetError("I've been instructed to act on simple types only. ", theCommands);
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
-  theSSsubalgebras.FindAllEmbeddings
-  (theType, ownerSS, theCommands.theGlobalVariableS);
+  theSSsubalgebras.FindAllEmbeddings(theType, ownerSS, theCommands.theGlobalVariableS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
@@ -729,8 +727,8 @@ bool CommandList::innerDeterminant(CommandList& theCommands, const Expression& i
   if (theCommands.GetMatrix(input, matRat, 0, 0, 0))
   { if (matRat.NumRows==matRat.NumCols)
     { if (matRat.NumRows>100)
-      { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than "
-        << " 100 x 100 " << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
+      { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
+        << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
         << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
         return false;
       }
@@ -748,10 +746,9 @@ bool CommandList::innerDeterminant(CommandList& theCommands, const Expression& i
   }
   if (matRF.NumRows==matRF.NumCols)
   { if (matRF.NumRows>10)
-    { theCommands.Comments << "I have been instructed not to compute determinants of matrices of rational functions "
-      << " larger than " << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. "
-      << "To lift the restriction "
-      << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
+    { theCommands.Comments << "I have been instructed not to compute determinants of matrices of rational functions larger than "
+      << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
+      << __FILE__ << ", line " << __LINE__ << ". ";
       return false;
     }
     return output.AssignValue(matRF.GetDeterminant(), theCommands);

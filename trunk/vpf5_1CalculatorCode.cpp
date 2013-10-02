@@ -1283,7 +1283,7 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theFormat);
   out << "<br>Total number of polynomial computations: " << theComputation.NumberOfComputations;
   if (theComputation.flagSystemProvenToHaveNoSolution)
-    out << "<br>The system does have a solution. ";
+    out << "<br>The system does not have a solution. ";
   else if(theComputation.flagSystemProvenToHaveSolution)
     out << "<br>System proven to have solution.";
   if (!theComputation.flagSystemProvenToHaveNoSolution)

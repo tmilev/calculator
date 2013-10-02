@@ -911,8 +911,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   Vector<Polynomial<Rational> > desiredHpart;
   this->CheckInitialization();
 //  if (this->indexInOwnersOfNonEmbeddedMe<0 || this->indexInOwnersOfNonEmbeddedMe >=this->owner->theSubalgebrasNonEmbedded
-  const SemisimpleLieAlgebra& nonEmbeddedMe=
-  this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
+  const SemisimpleLieAlgebra& nonEmbeddedMe=this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknownsNoCentralizer=0;
   if (this->theHs.size==0)
   { std::cout << "This is a programming error: the number of involved H's cannot be zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -5156,15 +5155,21 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
     tempElt.ElementToVectorNegativeRootSpacesFirst(theCartan[i]);
   }
   Vectors<AlgebraicNumber> outputCartanCentralizer;
+  Vector<AlgebraicNumber> theCentralizerH;
   theHWsNonSorted.IntersectTwoLinSpaces(theHWsNonSorted, theCartan, outputCartanCentralizer, theGlobalVariables);
   this->CartanOfCentralizer.SetSize(outputCartanCentralizer.size);
+  AlgebraicNumber theFirstNonZeroCoeff;
   for (int i=0; i<this->CartanOfCentralizer.size; i++)
   { tempElt.AssignVectorNegRootSpacesCartanPosRootSpaces(outputCartanCentralizer[i], *this->owner->owneR);
-    std::cout << "<hr>Temp elt: " << tempElt.ToString();
-    this->CartanOfCentralizer[i]=tempElt.GetCartanPart();
-    std::cout << " ... in vector format: " << this->CartanOfCentralizer[i].ToString();
+    //std::cout << "<hr>Temp elt: " << tempElt.ToString();
+    theCentralizerH=tempElt.GetCartanPart();
+    theFirstNonZeroCoeff=theCentralizerH[theCentralizerH.GetIndexFirstNonZeroCoordinate()];
+    if (!theFirstNonZeroCoeff.IsRational())
+      theCentralizerH/=theFirstNonZeroCoeff;
+    this->CartanOfCentralizer[i]=theCentralizerH;
+    //std::cout << " ... in vector format: " << this->CartanOfCentralizer[i].ToString();
     this->CartanOfCentralizer[i].ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-    std::cout << " ... scaled: " << this->CartanOfCentralizer[i].ToString();
+    //std::cout << " ... scaled: " << this->CartanOfCentralizer[i].ToString();
   }
 //  if (this->CartanOfCentralizer.size>0)
 //    this->CartanOfCentralizer[0]*=4;
@@ -5194,8 +5199,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   ////////////////
   this->BilinearFormSimplePrimal=this->theWeylNonEmbeddeD.CartanSymmetric;
   Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
-  std::cout << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
-  << this->owner->owneR->theWeyl.CartanSymmetric.ToString();
+//  std::cout << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
+//  << this->owner->owneR->theWeyl.CartanSymmetric.ToString();
   this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owneR->theWeyl.CartanSymmetric);
   this->BilinearFormSimplePrimal.DirectSumWith(centralizerPart);
   bilinearFormInverted=this->BilinearFormSimplePrimal;

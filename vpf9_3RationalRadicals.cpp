@@ -439,12 +439,12 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, algNumPoly);
   Polynomial<Rational> minPoly;
   minPoly.MakeZero();
-  Rational theLinearTermCFdividedByTwo, theConstTermShifted;
+  Rational currentCF, theLinearTermCFdividedByTwo, theConstTermShifted;
   for (int i=0; i<algNumPoly.size(); i++)
-    if (!algNumPoly.theCoeffs[i].IsRational(&theLinearTermCFdividedByTwo))
+    if (!algNumPoly.theCoeffs[i].IsRational(&currentCF))
       return false;
     else
-      minPoly.AddMonomial(algNumPoly[i], theLinearTermCFdividedByTwo);
+      minPoly.AddMonomial(algNumPoly[i], currentCF);
   minPoly/=minPoly.GetMonomialCoefficient(minPoly.GetMaxMonomial());
   minPoly.GetCoeffInFrontOfLinearTermVariableIndex(0, theLinearTermCFdividedByTwo);
   theLinearTermCFdividedByTwo/=2;
@@ -456,6 +456,18 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
     return false;
   std::cout << " ... to get: " << outputRoot.ToString();
   outputRoot-=theLinearTermCFdividedByTwo;
+  //Check our work:
+  PolynomialSubstitution<AlgebraicNumber> checkSub;
+  checkSub.SetSize(1);
+  checkSub[0].MakeConst(outputRoot);
+  algNumPoly.Substitution(checkSub);
+  if (!algNumPoly.IsEqualToZero())
+  { std::cout << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    << " was given by requesting that it has minimial polynomial " << algNumPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
+    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  //check end
   return true;
 
 }
@@ -484,6 +496,9 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     return true;
   Polynomial<AlgebraicNumber> minPoly;
   this->ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail(thePoly, minPoly);
+  int indexMaxMonMinPoly=minPoly.GetIndexMaxMonomial();
+  AlgebraicNumber leadingCF=minPoly.theCoeffs[indexMaxMonMinPoly];
+  minPoly/=leadingCF;
   AlgebraicClosureRationals backUpCopy;
   backUpCopy=*this;
   MatrixTensor<Rational> theGenMat;
@@ -502,17 +517,17 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   for (int i=0; i<degreeMinPoly-1; i++)
     for (int j=0; j<startingDim; j++)
       theGenMat.AddMonomial(MonomialMatrix((i+1)*startingDim+j, i*startingDim+j), 1);
-  Polynomial<AlgebraicNumber> polyVariableMinusMaxMon=minPoly;
-  int indexMaxMon=polyVariableMinusMaxMon.GetIndexMaxMonomial(MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest);
-  const MonomialP maxMon=polyVariableMinusMaxMon[indexMaxMon];
-  AlgebraicNumber maxMonCoeff=polyVariableMinusMaxMon.theCoeffs[indexMaxMon];
-  polyVariableMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);
-  polyVariableMinusMaxMon/=maxMonCoeff;
-  polyVariableMinusMaxMon/=-1;
+  Polynomial<AlgebraicNumber> minusMinPolyMinusMaxMon=minPoly;
+  int indexMaxMon=minusMinPolyMinusMaxMon.GetIndexMaxMonomial(MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest);
+  const MonomialP maxMon=minusMinPolyMinusMaxMon[indexMaxMon];
+  AlgebraicNumber maxMonCoeff=minusMinPolyMinusMaxMon.theCoeffs[indexMaxMon];
+  minusMinPolyMinusMaxMon.SubtractMonomial(maxMon, maxMonCoeff);
+  minusMinPolyMinusMaxMon/=maxMonCoeff;
+  minusMinPolyMinusMaxMon/=-1;
   MatrixTensor<Rational> currentCoeffMatForm;
-  for (int i=0; i<polyVariableMinusMaxMon.size(); i++)
-  { AlgebraicNumber& currentCoeff=polyVariableMinusMaxMon.theCoeffs[i];
-    const MonomialP& currentMon=polyVariableMinusMaxMon[i];
+  for (int i=0; i<minusMinPolyMinusMaxMon.size(); i++)
+  { AlgebraicNumber& currentCoeff=minusMinPolyMinusMaxMon.theCoeffs[i];
+    const MonomialP& currentMon=minusMinPolyMinusMaxMon[i];
     this->GetMultiplicationBy(currentCoeff, currentCoeffMatForm);
     for (int j=0; j<currentCoeffMatForm.size(); j++)
     { int relRowIndex=currentCoeffMatForm[j].vIndex;
@@ -521,8 +536,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
       { std::cout << "This is a programming error: non initialized monomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
-      theGenMat.AddMonomial
-      (MonomialMatrix(currentMon.TotalDegreeInt()*startingDim+relRowIndex, startingDim*(degreeMinPoly-1)+relColIndex), currentCoeffMatForm.theCoeffs[j]);
+      theGenMat.AddMonomial(MonomialMatrix(currentMon.TotalDegreeInt()*startingDim+relRowIndex, startingDim*(degreeMinPoly-1)+relColIndex), currentCoeffMatForm.theCoeffs[j]);
     }
   }
   int finalDim=degreeMinPoly*startingDim;
@@ -554,6 +568,18 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   { *this=backUpCopy;
     return false;
   }
+  //Sanity check code here:
+  PolynomialSubstitution<AlgebraicNumber> theSub;
+  theSub.SetSize(1);
+  theSub[0].MakeConst(outputRoot);
+  minPoly.Substitution(theSub);
+  if (!minPoly.IsEqualToZero())
+  { std::cout << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    << " was given by requesting that it has minimial polynomial " << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
+    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  //
   return true;
 }
 

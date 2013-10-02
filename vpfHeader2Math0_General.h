@@ -8886,7 +8886,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
   int theRank=owner->GetRank();
   int numPosRoots=owner->GetNumPosRoots();
   result.MakeZero(theRank);
-  std::cout << "<br>Zero vector in GetCartanPart is: " << result.ToString();
+//  std::cout << "<br>Zero vector in GetCartanPart is: " << result.ToString();
   if (theRank<=0 || owner==0)
   { std::cout << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -8898,7 +8898,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];
   }
-  std::cout << "<br>GetCartanPart is returning vector: " << result.ToString();
+//  std::cout << "<br>GetCartanPart is returning vector: " << result.ToString();
   return result;
 }
 

@@ -834,7 +834,12 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
 }
 
 bool AlgebraicNumber::IsRational(Rational* whichRational)const
-{ for (int i=0; i<this->theElT.size(); i++)
+{ if (this->IsEqualToZero())
+  { if (whichRational!=0)
+      *whichRational=0;
+    return true;
+  }
+  for (int i=0; i<this->theElT.size(); i++)
     if (this->theElT[i].theIndex!=0)
       return false;
     else

@@ -95,8 +95,8 @@ std::string IPAdressCaller;
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
-//  if (counter%10!=0)
-//    return;
+  //  if (counter%10!=0)
+  //    return;
   std::fstream theFile;
   CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
@@ -375,8 +375,8 @@ int main_command_input(int argc, char **argv)
     if (i<argc-1)
       theInputStream << " ";
   }
-//  std::cout << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
-//  return 0;
+  //  std::cout << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
+  //  return 0;
   theParser.inputStringRawestOfTheRaw =theInputStream.str();
   PredefinedStrings(theParser.inputStringRawestOfTheRaw);
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
@@ -407,7 +407,7 @@ int main(int argc, char **argv)
   theGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
   { getPath(argv[0], theGlobalVariables.inputPatH);
-//    std::cout << "input path: " << inputPatH << "\n\n";
+  //    std::cout << "input path: " << inputPatH << "\n\n";
     bool found=false;
     for (int j=theGlobalVariables.inputPatH.size()-2; j>=0; j--)
     { if (theGlobalVariables.inputPatH[j]=='/')
@@ -422,14 +422,14 @@ int main(int argc, char **argv)
     if (found)
       for (unsigned j=0; j<theGlobalVariables.inputDisplayPath.size()/2; j++)
         MathRoutines::swap(theGlobalVariables.inputDisplayPath[j], theGlobalVariables.inputDisplayPath[theGlobalVariables.inputDisplayPath.size()-1-j]);
-//    std::cout << "<br>input display path: " << inputDisplayPath;
+  //    std::cout << "<br>input display path: " << inputDisplayPath;
     std::string::size_type foundExperimental=theGlobalVariables.inputDisplayPath.find("experimental");
     if (foundExperimental!=std::string::npos)
       std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
 
   }
   std::string tempS;
-//  std::cout << "input path: " << inputDisplayPath << "\n\n";
+  //  std::cout << "input path: " << inputDisplayPath << "\n\n";
   theParser.init(theGlobalVariables);
 	if (argc>1)
     return main_command_input(argc, argv);
@@ -445,36 +445,36 @@ int main(int argc, char **argv)
 		theParser.inputStringRawestOfTheRaw=buffer;
 #else
 		theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
-//		inputString=::getenv("QUERY_STRING");
+  //		inputString=::getenv("QUERY_STRING");
 #endif
     IPAdressCaller=getenv("REMOTE_ADDR");
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-//	inputString="textInput=+asf&buttonGo=Go";
-//  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
+  //	inputString="textInput=+asf&buttonGo=Go";
+  //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
   std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
-//  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
-//  << "></script>";
-//  << " djConfig = \"parseOnLoad: true\"></script>";
+  //  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
+  //  << "></script>";
+  //  << " djConfig = \"parseOnLoad: true\"></script>";
 
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n" << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
   //std::cout << IPAdressCaller;
-//  std::stringstream tempStreamX;
-//  static_html3(tempStreamX);
-//  static_html5(tempStreamX);
-//  std::cout << tempStreamX.str() << std::endl;
-//  std::cout << inputString;
+  //  std::stringstream tempStreamX;
+  //  static_html3(tempStreamX);
+  //  static_html5(tempStreamX);
+  //  std::cout << tempStreamX.str() << std::endl;
+  //  std::cout << inputString;
 
 #ifndef WIN32
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
-//  std::cout << "Raw input: " << inputString << "<hr>";
+  //  std::cout << "Raw input: " << inputString << "<hr>";
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
@@ -498,7 +498,7 @@ int main(int argc, char **argv)
   optionsType.AddOnTop("E");
   optionsType.AddOnTop("F");
   optionsType.AddOnTop("G");
-//  optionsType.AddOnTop("NoPreamble");
+  //  optionsType.AddOnTop("NoPreamble");
   optionsRank.AddOnTop("1");
   optionsRank.AddOnTop("2");
   optionsRank.AddOnTop("3");
@@ -507,8 +507,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
-civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
+  //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+  //civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
 
   PredefinedStrings(civilizedInput);
 
@@ -536,7 +536,7 @@ civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
   std::cout << "\n</FORM>";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
-//  std::cout << "<br>Number of lists created before evaluation: " << NumListsCreated;
+  //  std::cout << "<br>Number of lists created before evaluation: " << NumListsCreated;
   if (civilizedInput!="")
   { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;
@@ -547,15 +547,13 @@ civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
     theParser.Evaluate(civilizedInput);
     ComputationComplete=true;
     if (theParser.flagProduceLatexLink)
-      std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-      << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, civilizedInput);
-
-//    std::cout << "<hr>";
+      std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> " << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, civilizedInput);
+  //    std::cout << "<hr>";
     std::cout << theParser.outputString;
     if (theParser.parsingLog!="")
       std::cout << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
   }
-//  theComputation.flagLogSyntaxRules=inputRankString=="2";
+  //  theComputation.flagLogSyntaxRules=inputRankString=="2";
   std::cout << "\n\n</td>\n\n";
   if (theParser.outputCommentsString!="")
   { std::cout << "<td valign=\"top\">";
@@ -574,10 +572,10 @@ civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
 
   std::cout << "</td></tr></table>";
   std::stringstream tempStream3;
-//  static_html5(tempStream3);
-//  static_html6(tempStream3);
-//  std::cout << tempStream3.str();
-//  std::cout << "</div>";
+  //  static_html5(tempStream3);
+  //  static_html6(tempStream3);
+  //  std::cout << tempStream3.str();
+  //  std::cout << "</div>";
   std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
  /* bool isFirst=true;
   for (int i=0; i<theParser.theObjectContainer.theVariablesNonBound.size; i++)
@@ -590,11 +588,10 @@ civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
     }
   }*/
   std::cout << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
-//  for(int i=0; i<theParser.SystemCommands.size; i++)
-//  { std::cout << "<br>About to execute: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
- //   system(theParser.SystemCommands[i].c_str());
- // }
-
+  //  for(int i=0; i<theParser.SystemCommands.size; i++)
+  //  { std::cout << "<br>About to execute: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
+  //   system(theParser.SystemCommands[i].c_str());
+  // }
   std::cout << "</body></html>";
   std::cout << "<!--";
   std::cout.flush();
@@ -609,86 +606,84 @@ civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
   return 0;
 }
 
-void static_html3(std::stringstream& output){
-output << " <!>\n";
-output << " <script type=\"text/javascript\"> \n";
-output << " var timeOutCounter=0;\n";
-output << " window.setTimeout(\"progressReport()\",1000);\n";
-output << " var newReportString=\"\";\n";
-output << " function progressReport()\n";
-output << " { timeOutCounter++;\n";
-output << "   var oRequest = new XMLHttpRequest();\n";
-output << "   var sURL  = \"/tmp/report.txt\";\n";
-output << "   oRequest.open(\"GET\",sURL,false);\n";
-output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
-output << "   oRequest.send(null)\n";
-output << "   if (oRequest.status==200)\n";
-output << "   { newReportString= oRequest.responseText;\n";
-output << "     if (newReportString!=\"\")\n";
-output << "       el = document.getElementById(\"idProgressReport\").innerHTML= \"Attempting indicator refresh each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
-output << "   }\n";
-output << "   window.setTimeout(\"progressReport()\",1000);\n";
-output << " }\n";
-output << " </script>\n";
-output << " <div id=\"idProgressReport\">\n";
-output << " </div>\n";
-output << " \n";
-output << " \n";
+void static_html3(std::stringstream& output)
+{ output << " <!>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " var timeOutCounter=0;\n";
+  output << " window.setTimeout(\"progressReport()\",1000);\n";
+  output << " var newReportString=\"\";\n";
+  output << " function progressReport()\n";
+  output << " { timeOutCounter++;\n";
+  output << "   var oRequest = new XMLHttpRequest();\n";
+  output << "   var sURL  = \"/tmp/report.txt\";\n";
+  output << "   oRequest.open(\"GET\",sURL,false);\n";
+  output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
+  output << "   oRequest.send(null)\n";
+  output << "   if (oRequest.status==200)\n";
+  output << "   { newReportString= oRequest.responseText;\n";
+  output << "     if (newReportString!=\"\")\n";
+  output << "       el = document.getElementById(\"idProgressReport\").innerHTML= \"Attempting indicator refresh each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+  output << "   }\n";
+  output << "   window.setTimeout(\"progressReport()\",1000);\n";
+  output << " }\n";
+  output << " </script>\n";
+  output << " <div id=\"idProgressReport\">\n";
+  output << " </div>\n";
+  output << " \n";
+  output << " \n";
 }
-void static_html4(std::stringstream& output){
-output << " <!>\n";
-output << " <script type=\"text/javascript\"> \n";
-output << " function switchMenu(obj)\n";
-output << " { var el = document.getElementById(obj);	\n";
-output << "   if ( el.style.display != \"none\" ) \n";
-output << "     el.style.display = 'none';\n";
-output << "   else \n";
-output << "     el.style.display = '';\n";
-output << " }\n";
-output << " function hideItem(obj)\n";
-output << " { document.getElementById(obj).style.display=\"none\";\n";
-output << " }\n";
-output << " function showItem(obj)\n";
-output << " { document.getElementById(obj).style.display=\"\";\n";
-output << " }\n";
-output << " </script>\n";
-output << " <script type=\"text/javascript\"> \n";
-output << " function getCookie(c_name)\n";
-output << " { VPFcookie=document.cookie.split(\";\");\n";
-output << "   for (i=0;i<VPFcookie.length;i++)\n";
-output << "   { x=VPFcookie[i].substr(0,VPFcookie[i].indexOf(\"=\"));\n";
-output << "   	y=VPFcookie[i].substr(VPFcookie[i].indexOf(\"=\")+1);\n";
-output << "     x=x.replace(/^\\s+|\\s+$/g,\"\");\n";
-output << "     if (x==c_name)\n";
-output << "       return unescape(y);\n";
-output << "   }\n";
-output << " }\n";
-output << " function storeSettings()\n";
-output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
-output << "   //alert(theCalculatorForm.style.width);\n";
-output << "   addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n";
-output << "   addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n";
-output << "   //alert(document.cookie);\n";
-output << " }\n";
-output << " \n";
-output << " function addCookie(theName, theValue, exdays)\n";
-output << " { exdate= new Date();\n";
-output << "   exdate.setDate(exdate.getDate() + exdays);\n";
-output << "   c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n";
-output << "   document.cookie=theName + \"=\" + c_value;\n";
-output << " }\n";
-output << " \n";
-output << " function checkCookie()\n";
-output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
-output << "   theOldWidth=getCookie(\"widthCalculatorText\");\n";
-output << "   theOldHeight=getCookie(\"heightCalculatorText\");\n";
-output << "   //alert(\"height: \" + theOldHeight +\" width: \" + theOldWidth);\n";
-output << "   //theCalculatorForm.setStyle(\"width:\"+ theOldWidth);\n";
-output << " //  theCalculatorForm.style.height=theOldHeight;\n";
-output << "   theCalculatorForm.style.width  = theOldWidth;\n";
-output << "   theCalculatorForm.style.height = theOldHeight;\n";
-output << " }\n";
-output << " </script>\n";
+void static_html4(std::stringstream& output)
+{ output << " <!>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " function switchMenu(obj)\n";
+  output << " { var el = document.getElementById(obj);	\n";
+  output << "   if ( el.style.display != \"none\" ) \n";
+  output << "     el.style.display = 'none';\n";
+  output << "   else \n";
+  output << "     el.style.display = '';\n";
+  output << " }\n";
+  output << " function hideItem(obj)\n";
+  output << " { document.getElementById(obj).style.display=\"none\";\n";
+  output << " }\n";
+  output << " function showItem(obj)\n";
+  output << " { document.getElementById(obj).style.display=\"\";\n";
+  output << " }\n";
+  output << " </script>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " function getCookie(c_name)\n";
+  output << " { VPFcookie=document.cookie.split(\";\");\n";
+  output << "   for (i=0;i<VPFcookie.length;i++)\n";
+  output << "   { x=VPFcookie[i].substr(0,VPFcookie[i].indexOf(\"=\"));\n";
+  output << "   	y=VPFcookie[i].substr(VPFcookie[i].indexOf(\"=\")+1);\n";
+  output << "     x=x.replace(/^\\s+|\\s+$/g,\"\");\n";
+  output << "     if (x==c_name)\n";
+  output << "       return unescape(y);\n";
+  output << "   }\n";
+  output << " }\n";
+  output << " function storeSettings()\n";
+  output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
+  output << "   //alert(theCalculatorForm.style.width);\n";
+  output << "   addCookie(\"widthCalculatorText\", theCalculatorForm.style.width, 100);  \n";
+  output << "   addCookie(\"heightCalculatorText\", theCalculatorForm.style.height, 100);\n";
+  output << "   //alert(document.cookie);\n";
+  output << " }\n";
+  output << " \n";
+  output << " function addCookie(theName, theValue, exdays)\n";
+  output << " { exdate= new Date();\n";
+  output << "   exdate.setDate(exdate.getDate() + exdays);\n";
+  output << "   c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n";
+  output << "   document.cookie=theName + \"=\" + c_value;\n";
+  output << " }\n";
+  output << " \n";
+  output << " function checkCookie()\n";
+  output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
+  output << "   theOldWidth=getCookie(\"widthCalculatorText\");\n";
+  output << "   theOldHeight=getCookie(\"heightCalculatorText\");\n";
+  output << "   //alert(\"height: \" + theOldHeight +\" width: \" + theOldWidth);\n";
+  output << "   //theCalculatorForm.setStyle(\"width:\"+ theOldWidth);\n";
+  output << " //  theCalculatorForm.style.height=theOldHeight;\n";
+  output << "   theCalculatorForm.style.width  = theOldWidth;\n";
+  output << "   theCalculatorForm.style.height = theOldHeight;\n";
+  output << " }\n";
+  output << " </script>\n";
 }
-
-

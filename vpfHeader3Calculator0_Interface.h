@@ -1074,6 +1074,9 @@ public:
   int opPi()
   { return this->operations.GetIndexIMustContainTheObject("\\pi");
   }
+  int opLog()
+  { return this->operations.GetIndexIMustContainTheObject("\\ln");
+  }
   int opSin()
   { return this->operations.GetIndexIMustContainTheObject("\\sin");
   }

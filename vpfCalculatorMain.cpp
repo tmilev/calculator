@@ -509,7 +509,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("8");
   //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
   //civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
-
+//  civilizedInput="plot2D(e^x,-0.9,0.9)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

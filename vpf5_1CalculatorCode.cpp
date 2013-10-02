@@ -1082,11 +1082,14 @@ bool CommandList::innerPlot2D(CommandList& theCommands, const Expression& input,
 bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+//  std::cout << "<hr>Converting: " << input.ToString();
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
     return output.AssignValue((std::string) "...", theCommands);
   std::string currentString;
   if (input.IsOperation(&currentString))
-  { if (input.theData>=theCommands.NumPredefinedVars)
+  { if (input.ToString()=="e")
+      return output.AssignValue<std::string>("2.718281828 ", theCommands);
+    if (input.theData>=theCommands.NumPredefinedVars)
       return output.AssignValue(currentString, theCommands);
     if (currentString=="+")
       return output.AssignValue<std::string>("add ", theCommands);
@@ -1098,6 +1101,8 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
       return output.AssignValue<std::string>("div ", theCommands);
     if (currentString=="^")
       return output.AssignValue<std::string>("exp ", theCommands);
+    if (currentString=="\\ln")
+      return output.AssignValue<std::string>("ln ", theCommands);
     if (currentString=="\\sin")
       return output.AssignValue<std::string>(" 57.29578 mul sin ", theCommands);
     if (currentString=="\\cos")

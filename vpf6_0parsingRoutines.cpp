@@ -106,6 +106,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("mod");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
+  this->AddOperationNoRepetitionAllowed("\\ln");
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
@@ -169,6 +170,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop(":");
   this->controlSequences.AddOnTop("\"");
   this->controlSequences.AddOnTop("pi");
+  this->controlSequences.AddOnTop("ln");
   this->controlSequences.AddOnTop("sin");
   this->controlSequences.AddOnTop("cos");
   this->controlSequences.AddOnTop("tan");
@@ -1003,6 +1005,8 @@ bool CommandList::ApplyOneRule()
   //else
   //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   //Some synonyms:
+  if (lastS=="ln")
+    return this->ReplaceXByEusingO(this->opLog());
   if (lastS=="pi")
     return this->ReplaceXByEusingO(this->opPi());
   if (lastS=="sin")

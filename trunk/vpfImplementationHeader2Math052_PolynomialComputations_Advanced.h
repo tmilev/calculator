@@ -788,16 +788,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n" << inputSystem.ToString();
     theReport1.Report(out.str());
   }
-
-
-  std::cout << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
-  for (int i=0; i<inputSystem.size; i++)
-    std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
-
+//  std::cout << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
+//  for (int i=0; i<inputSystem.size; i++)
+//    std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
   bool changed=true;
   PolynomialSubstitution<coefficient> theSub;
   List<PolynomialSubstitution<coefficient> > theImpliedSubs;
   theImpliedSubs.ReservE(inputSystem.size);
+  List<Polynomial<coefficient> > startingSystemNoModifications=inputSystem;
   while (changed)
   { this->NumberOfComputations=0;
     //std::cout << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
@@ -828,14 +826,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
     if (changed)
     { theImpliedSubs.AddOnTop(theSub);
-      std::cout << "<hr>Carrying out IMPLIED sub: " << CGI::GetHtmlMathSpanPure(theImpliedSubs.ToString()) << " in the system ";
-      for (int i=0; i<inputSystem.size; i++)
-        std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
+      //std::cout << "<hr>Carrying out IMPLIED sub: " << CGI::GetHtmlMathSpanPure(theImpliedSubs.ToString()) << " in the system ";
+      //for (int i=0; i<inputSystem.size; i++)
+      //  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
       for (int i=0; i<inputSystem.size; i++)
         inputSystem[i].Substitution(theSub);
-      std::cout << " ... to get: ";
-      for (int i=0; i<inputSystem.size; i++)
-        std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
+      //std::cout << " ... to get: ";
+      //for (int i=0; i<inputSystem.size; i++)
+      //  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(inputSystem[i].ToString());
     }
   }
   //std::cout << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
@@ -851,7 +849,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     //}
     //std::cout << ")";
   }
-  List<Polynomial<coefficient> > oldSystem=inputSystem;
+  List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
   GroebnerBasisComputation newComputation;
   newComputation.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;
 
@@ -879,14 +877,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
-  { std::cout << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
+  { //std::cout << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
     *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
     return;
   }
   if (newComputation.flagSystemProvenToHaveSolution)
     this->flagSystemProvenToHaveSolution=true;
-  inputSystem=oldSystem;
+  inputSystem=systemBeforeHeuristics;
 
   newComputation.MaxNumComputations=this->MaxNumComputations;
   newComputation.systemSolution=this->systemSolution;
@@ -908,14 +906,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
   if (newComputation.flagSystemSolvedOverBaseField)
-  { std::cout << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
+  { //std::cout << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
     *this=newComputation;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
     return;
   }
   if (newComputation.flagSystemProvenToHaveSolution)
     this->flagSystemProvenToHaveSolution=true;
-  inputSystem=oldSystem;
+  inputSystem=startingSystemNoModifications;
   if (firstRun && theAlgebraicClosure!=0)
     this->SolveSerreLikeSystemRecursively(inputSystem, false, theAlgebraicClosure, theGlobalVariables);
 }

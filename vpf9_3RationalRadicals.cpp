@@ -451,10 +451,10 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.GetConstantTerm(theConstTermShifted);
   theConstTermShifted-=theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
   theConstTermShifted*=-1;
-  std::cout << "<hr>Adjoining radical of: " << theConstTermShifted;
+//  std::cout << "<hr>Adjoining radical of: " << theConstTermShifted;
   if (!outputRoot.AssignRationalQuadraticRadical(theConstTermShifted, *this))
     return false;
-  std::cout << " ... to get: " << outputRoot.ToString();
+//  std::cout << " ... to get: " << outputRoot.ToString();
   outputRoot-=theLinearTermCFdividedByTwo;
   //Check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
@@ -485,9 +485,9 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   theSub.MakeIdSubstitution(indexVar+1);
   theSub[indexVar].MakeMonomiaL(0, 1, 1);
   output=input;
-  std::cout << "<hr>" << output.ToString() << "<br>";
+//  std::cout << "<hr>" << output.ToString() << "<br>";
   output.Substitution(theSub);
-  std::cout << "<hr>" << output.ToString() << "<br>";
+//  std::cout << "<hr>" << output.ToString() << "<br>";
 }
 
 bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)

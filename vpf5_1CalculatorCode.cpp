@@ -1080,7 +1080,7 @@ bool CommandList::innerPlot2D(CommandList& theCommands, const Expression& input,
 }
 
 bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
+{ MacroRegisterFunctionWithName("CommandList::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
 //  std::cout << "<hr>Converting: " << input.ToString();
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
@@ -1276,7 +1276,7 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
   theComputation.MaxNumComputations=1000;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
-  std::cout << "<br>The context vars:<br>" << theContext.ToString();
+//  std::cout << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();

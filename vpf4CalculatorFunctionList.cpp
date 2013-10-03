@@ -16,11 +16,11 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("AutomatedTest", this->innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
-   "AutomatedTest{}(0)");
+   "AutomatedTest{}(0)", false);
   this->AddOperationInnerHandler
   ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
    "Runs a big bad automated test of all built in functions to create a file containing a set of known good results. ",
-   "AutomatedTestSetGoodKnownCopy{}(0)");
+   "AutomatedTestSetGoodKnownCopy 0", false);
   this->AddOperationInnerHandler
   ("!", CommandListFunctions::innerFactorial, "",
    "Factorial function. ",

@@ -224,7 +224,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
       break;
     this->thePath.resize(this->thePath.size()-1);
   }
-  this->thePath+="../";
+  this->thePath+="../../";
   this->theSettingsFileName=this->thePath+"Settings.txt";
   this->ReadSettings();
   this->scalePNG=1;

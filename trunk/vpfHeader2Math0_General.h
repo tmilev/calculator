@@ -2076,7 +2076,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
   }
   for (int i=0; i<theList.size; i++)
     allMons.AddOnTopNoRepetition(theList[i].theMonomials);
-  allMons.QuickSortDescending();
+  allMons.QuickSortAscending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
 //  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
@@ -6805,9 +6805,11 @@ void MatrixTensor<coefficient>::Invert()
 { MatrixTensor<coefficient> theId;
   theId.MakeId(this->GetMaxNumColsNumRows());
   MatrixTensor<coefficient> result=theId;
+//  std::cout << "<hr>Inverting: " << this->ToStringMatForm();
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this!=theId)
-  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
+    << this->ToStringMatForm() << " but should instead be equal to " << theId.ToStringMatForm() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   *this=result;

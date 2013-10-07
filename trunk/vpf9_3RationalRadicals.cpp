@@ -227,10 +227,10 @@ bool AlgebraicClosureRationals::ReduceMe()
   { std::cout << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
+//  std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt()==theDim)
     return true;
-  std::cout << "<br>Min poly factors.";
+//  std::cout << "<br>Min poly factors.";
   MatrixTensor<Rational> theBasisChangeMat, theBasisChangeMatInverse;
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse=theBasisChangeMat;
@@ -424,12 +424,14 @@ void AlgebraicClosureRationals::reset()
   this->theBasesAdditive[0].SetSize(1);
   this->theBasesAdditive[0][0].MaKeEi(0);
   this->theQuadraticRadicals.Clear();
-  this->DisplayNamesBasisElements.SetSize(0);
+  this->DisplayNamesBasisElements.SetSize(1);
+  this->DisplayNamesBasisElements[0]="";
   this->GeneratingElementTensorForm.MakeId(1);
   this->GeneratingElementMatForm.MakeIdMatrix(1);
   this->GeneratingElemenT.owner=this;
   this->GeneratingElemenT.theElT.MaKeEi(0);
 }
+
 bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension
 (const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtension");

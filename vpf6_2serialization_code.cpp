@@ -412,13 +412,24 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const Rational& i
 }
 
 bool Serialization::innerStoreElementSemisimpleLieAlgebraRationals(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerStoreElementSemisimpleLieAlgebra");
+{ MacroRegisterFunctionWithName("Serialization::innerStoreElementSemisimpleLieAlgebraRational");
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
   if (!input.IsEqualToZero())
   { tempContext.ContextMakeContextSSLieAlgebrA
     (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
     (*input.GetOwner()), theCommands);
+  }
+  Serialization::innerStoreMonCollection(theCommands, input, output, &tempContext);
+  return true;
+}
+
+bool Serialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(CommandList& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers");
+  Expression tempContext;
+  tempContext.MakeEmptyContext(theCommands);
+  if (!input.IsEqualToZero())
+  { tempContext.ContextMakeContextSSLieAlgebrA(theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(*input.GetOwner()), theCommands);
   }
   Serialization::innerStoreMonCollection(theCommands, input, output, &tempContext);
   return true;
@@ -570,19 +581,15 @@ bool Serialization::innerStoreCandidateSA(CommandList& theCommands, const Candid
   output.AddChildOnTop(tempE);
   Serialization::innerStoreObject(theCommands, input.theHs, tempE);
   output.AddChildOnTop(tempE);
-  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
+//  ElementSemisimpleLieAlgebra<Rational> convertedToRational;
   if (input.flagSystemSolved)
   { Expression listGenerators;
     listGenerators.reset(theCommands);
     listGenerators.AddChildAtomOnTop(theCommands.opSequence());
     for (int i=0; i<input.theNegGens.size; i++)
-    { if (!input.theNegGens[i].HasRationalCoeffs(&convertedToRational))
-        return false;
-      Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, convertedToRational, tempE);
+    { Serialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.theNegGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
-      if (!input.thePosGens[i].HasRationalCoeffs(&convertedToRational))
-        return false;
-      Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, convertedToRational, tempE);
+      Serialization::innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, input.thePosGens[i], tempE);
       listGenerators.AddChildOnTop(tempE);
     }
     output.AddChildOnTop(listGenerators);
@@ -609,20 +616,16 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
 //    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   //std::cout << "<hr>Making subalgebra from type "
   //<< outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType
-  (outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
+  outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
   Matrix<Rational> theHs;
   if (!theCommands.GetMatrix(input[3], theHs, 0, theRank, 0))
-  { theCommands.Comments
-    << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type "
-    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
+  { theCommands.Comments << "<hr>Failed to load matrix of Cartan elements for candidate subalgebra of type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType << "<hr>";
     return false;
   }
   if (theHs.NumRows!=outputSubalgebra.theWeylNonEmbeddeD.GetDim())
-  { theCommands.Comments << "<hr>Failed to load cartan elements: I expected "
-    << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
+  { theCommands.Comments << "<hr>Failed to load cartan elements: I expected " << outputSubalgebra.theWeylNonEmbeddeD.GetDim() << " elements, but failed to get them.";
     return false;
   }
   List<int> theRanks, theMults;
@@ -653,14 +656,12 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   if (input.children.size==5)
   { Expression theGensE=input[4];
     theGensE.Sequencefy();
-    ElementSemisimpleLieAlgebra<Rational> curGenRational;
     ElementSemisimpleLieAlgebra<AlgebraicNumber> curGenAlgebraic;
     for (int i=1; i<theGensE.children.size; i++)
-    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, theGensE[i], curGenRational, *owner.owneR))
+    { if (!Serialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers(theCommands, theGensE[i], curGenAlgebraic, *owner.owneR))
       { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra element from expression " << theGensE[i].ToString() << ". ";
         return false;
       }
-      curGenAlgebraic=curGenRational;
       if (i%2 ==1)
         outputSubalgebra.theNegGens.AddOnTop(curGenAlgebraic);
       else
@@ -671,8 +672,7 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   }
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
-  outputSubalgebra.indexInOwnersOfNonEmbeddedMe=
-  owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
+  outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded.GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS, false);
@@ -685,8 +685,7 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   }
   if (input.children.size==5)
     if (!outputSubalgebra.CheckGensBracketToHs())
-    { theCommands.Comments
-      << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
+    { theCommands.Comments << "<hr>Lie brackets of generators do not equal the desired elements of the Cartan. ";
       return false;
     }
 
@@ -828,6 +827,62 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   if (!curGenUErf.GetLieAlgebraElementIfPossible(output))
   { theCommands.Comments << "<hr> Failed to convert the UE element " << curGenUErf.ToString() << " to an honest Lie algebra element. ";
     return false;
+  }
+  return true;
+}
+
+bool Serialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
+(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<AlgebraicNumber>& output, SemisimpleLieAlgebra& owner)
+{ MacroRegisterFunctionWithName("Serialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers");
+  Expression polyFormE;
+  Polynomial<AlgebraicNumber> polyForm;
+  bool polyFormGood=Serialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyFormE);
+  if (polyFormGood)
+    polyFormGood=polyFormE.IsOfType<Polynomial<AlgebraicNumber> >(&polyForm);
+  if (!polyFormGood)
+  { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial.<hr>";
+    return false;
+  }
+  ChevalleyGenerator theChevGen;
+  theChevGen.owneR=&owner;
+  output.MakeZero();
+  Expression theContext=polyFormE.GetContext();
+  for (int j=0; j<polyForm.size(); j++)
+  { const MonomialP& currentMon=polyForm[j];
+    int theGenIndex=0;
+    if (!currentMon.IsOneLetterFirstDegree(&theGenIndex))
+    { theCommands.Comments << "<hr>Failed to convert semisimple Lie algebra input to linear poly: " << input.ToString() << ".<hr>";
+      return false;
+    }
+    Expression singleChevGenE=theContext.ContextGetContextVariable(theGenIndex);
+    if (!singleChevGenE.IsListNElements(2))
+    { theCommands.Comments << "<hr>Failed to convert a summand of " << input.ToString() << " to Chevalley generator.<hr>";
+      return false;
+    }
+    std::string theLetter;
+    if (!singleChevGenE[0].IsOperation(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+    { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+      << owner.GetLieAlgebraName();
+      return false;
+    }
+    bool isGood=true;
+    if (theLetter=="g")
+    { theChevGen.theGeneratorIndex=owner.GetGeneratorFromDisplayIndex(theChevGen.theGeneratorIndex);
+      if (theChevGen.theGeneratorIndex<0 || theChevGen.theGeneratorIndex>=owner.GetNumGenerators())
+        isGood=false;
+    } else if (theLetter=="h")
+    { if (theChevGen.theGeneratorIndex <1 || theChevGen.theGeneratorIndex>owner.GetRank())
+        isGood=false;
+      else
+        theChevGen.theGeneratorIndex=theChevGen.theGeneratorIndex+owner.GetNumPosRoots()-1;
+    } else
+      isGood=false;
+    if (!isGood)
+    { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
+      << owner.GetLieAlgebraName();
+      return false;
+    }
+    output.AddMonomial(theChevGen, polyForm.theCoeffs[j]);
   }
   return true;
 }

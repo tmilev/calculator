@@ -766,8 +766,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 //  std::cout << "<hr>Getting ue from: " << this->ToString();
   SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner==0)
-  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString()
-    << " to element of universal enveloping -  failed to extract ambient Lie algebra. ";
+  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -3784,7 +3783,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
     out << (*this)[1].ToString(theFormat) << ":=:" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
-    out <<  (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
@@ -3820,7 +3819,9 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if ((*this)[2].IsOfType<Rational>())
         secondNeedsBrackets=(*this)[2].GetValue<Rational>().IsNonPositive();
       if (firstE=="-1" )
-        firstE="-";
+      { firstE="-";
+        firstNeedsBrackets=false;
+      }
       if (firstE=="1")
         firstE="";
       if (firstNeedsBrackets)

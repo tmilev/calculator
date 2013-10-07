@@ -63,7 +63,7 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl.RootSystem);
   this->ComputeRootSubsystem();
   ElementWeylGroup tempEW;
-  tempEW.size=0;
+  tempEW.reflections.size=0;
   Vector<Rational> tempRoot;
   tempRoot=(this->AmbientWeyl.rho);
   // rho is invariant under external graph automorphisms (!)
@@ -80,18 +80,18 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], orbitRho.TheObjects[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.AddOnTop(j);
+        tempEW.reflections.AddOnTop(j);
         this->AddOnTop(tempEW);
-        tempEW.RemoveLastObject();
+        tempEW.reflections.RemoveLastObject();
       }
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.AddOnTop(j+this->simpleGenerators.size);
+        tempEW.reflections.AddOnTop(j+this->simpleGenerators.size);
         this->AddOnTop(tempEW);
-        tempEW.RemoveLastObject();
+        tempEW.reflections.RemoveLastObject();
       }
     }
     if (UpperLimitNumElements>0)

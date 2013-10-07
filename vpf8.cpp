@@ -268,7 +268,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     this->theTranslationS[i]-=theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
     theProjectionBasisChanged.ActOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
-    if (theSubgroup[i].size%2==0)
+    if (theSubgroup[i].reflections.size%2==0)
       this->theCoeffs[i]=1;
     else
       this->theCoeffs[i]=-1;
@@ -5272,7 +5272,7 @@ void WeylGroup::GetExtremeElementInOrbit
    bool findLowest, bool RhoAction, bool UseMinusRho, int* sign,
    bool* stabilizerFound)
 { if (outputWeylElt!=0)
-    outputWeylElt->size=0;
+    outputWeylElt->reflections.size=0;
   if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -5301,7 +5301,7 @@ void WeylGroup::GetExtremeElementInOrbit
         else
           this->SimpleReflectionMinusRhoModified(i, inputOutput);
         if (outputWeylElt!=0)
-          outputWeylElt->AddOnTop(i);
+          outputWeylElt->reflections.AddOnTop(i);
         if (sign!=0)
           *sign*=-1;
 //        numTimesReflectionWasApplied++;
@@ -6183,22 +6183,21 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
   return *this->thePhysicalDrawOps.LastObject();
 }
 
-std::string ElementWeylGroup::ToString
-  (int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
-{ if (this->size==0)
+std::string ElementWeylGroup::ToString(int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
+{ if (this->reflections.size==0)
     return "id";
   std::string outerAutoLetter= "a";
   std::stringstream out;
-  for (int i=this->size-1; i>=0; i--)
-    if (NumSimpleGens<0 || (*this)[i]<NumSimpleGens)
+  for (int i=this->reflections.size-1; i>=0; i--)
+    if (NumSimpleGens<0 || this->reflections[i]<NumSimpleGens)
     { out << "s_{";
       if (DisplayIndicesOfSimpleRoots==0)
-        out << (*this)[i]+1;
+        out << this->reflections[i]+1;
       else
-        out << (*DisplayIndicesOfSimpleRoots)[(*this)[i]];
+        out << (*DisplayIndicesOfSimpleRoots)[this->reflections[i]];
       out << "}";
     } else
-      out << outerAutoLetter << "_{" << (*this)[i]-NumSimpleGens+1 << "}";
+      out << outerAutoLetter << "_{" << this->reflections[i]-NumSimpleGens+1 << "}";
   return out.str();
 }
 
@@ -6270,9 +6269,9 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->size; i++)
-  { if (this->TheObjects[i].size!=oldLayerElementLength)
+  { if (this->TheObjects[i].reflections.size!=oldLayerElementLength)
     { Layers.SetSize(Layers.size+1);
-      oldLayerElementLength=this->TheObjects[i].size;
+      oldLayerElementLength=this->TheObjects[i].reflections.size;
     }
     Layers.LastObject()->AddOnTop(i);
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
@@ -6291,7 +6290,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
       { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
         int index=orbit.GetIndex(tempRoot);
         assert(index!=-1);
-        if (this->TheObjects[index].size>this->TheObjects[Layers[i][j]].size)
+        if (this->TheObjects[index].reflections.size>this->TheObjects[Layers[i][j]].reflections.size)
           arrows[i][j].AddOnTop(index);
       }
   }

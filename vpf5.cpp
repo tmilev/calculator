@@ -1542,9 +1542,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.GetTypeHighestWeightParabolic
-    (theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer,
-     theCommands.innerRationalFunction))
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, theCommands.innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -1668,8 +1666,7 @@ bool CommandList::fPrintAllPartitions(CommandList& theCommands, const Expression
   theHWint.SetSize(theHW.size);
   for (int i=0; i<theHW.size; i++)
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i]<0)
-      return output.SetError
-      ("The input weight you gave is bad: it must consist of non-negative small integers", theCommands);
+      return output.SetError("The input weight you gave is bad: it must consist of non-negative small integers", theCommands);
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;

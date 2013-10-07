@@ -4946,12 +4946,14 @@ class WeylGroupRepresentation
   }
 };
 
-class ElementWeylGroup: public List<int>
+class ElementWeylGroup
 {
 public:
   WeylGroup* owner;
+  List<int> reflections;
   ElementWeylGroup():owner(0)
   {}
+
   bool CheckInitialization()
   { if (this->owner==0)
     { std::cout << "This is a programming error: non-initialized element Weyl group. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -4984,7 +4986,7 @@ public:
   bool operator==(const ElementWeylGroup& other)const
   { if (this->owner!=other.owner)
       return false;
-    return this->::List<int>::operator==(other);
+    return this->reflections==other.reflections;
   }
 };
 
@@ -5200,19 +5202,19 @@ public:
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt);
   bool IsEigenSpaceGeneratorCoxeterElement(Vector<Rational> & input);
   void GetCoxeterElement(ElementWeylGroup& outputWeylElt)
-  { outputWeylElt.SetSize(this->GetDim());
-    for (int i=0; i<outputWeylElt.size; i++)
-      outputWeylElt[i]=i;
+  { outputWeylElt.reflections.SetSize(this->GetDim());
+    for (int i=0; i<outputWeylElt.reflections.size; i++)
+      outputWeylElt.reflections[i]=i;
   }
   template <class Element>
   void ActOn(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
-  { for (int i=0; i<theGroupElement.size; i++)
-      this->SimpleReflection(theGroupElement[i], theVector);
+  { for (int i=0; i<theGroupElement.reflections.size; i++)
+      this->SimpleReflection(theGroupElement.reflections[i], theVector);
   }
   template <class Element>
   void ActOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
-  { for (int i=0; i<theGroupElement.size; i++)
-      this->SimpleReflectionRhoModified(theGroupElement[i], theVector);
+  { for (int i=0; i<theGroupElement.reflections.size; i++)
+      this->SimpleReflectionRhoModified(theGroupElement.reflections[i], theVector);
   }
   template <class Element>
   void ActOnRhoModified(int indexOfWeylElement, Vector<Element>& theVector)const
@@ -5307,10 +5309,11 @@ void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& the
 { Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat=(theVector[i]);
-    tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
-    alphaShift+=(tempRat);
+  { tempRat=theVector[i];
+    tempRat*=this->CartanSymmetric.elements[index][i];
+    alphaShift+=tempRat;
   }
+  alphaShift*=-2;
   alphaShift/=(this->CartanSymmetric.elements[index][index]);
   alphaShift+=(1);
   theVector[index]+=(alphaShift);
@@ -5318,15 +5321,21 @@ void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& the
 
 template <class Element>
 void WeylGroup::SimpleReflection(int index, Vector<Element>& theVector)const
-{ Element alphaShift, tempRat;
+{ if (index<0 || index>=this->CartanSymmetric.NumCols)
+  { std::cout << "This is a programming error: simple reflection with respect to index " << index+1 << " in a Weyl group of rank "
+    << this->GetDim() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat=(theVector[i]);
-    tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
-    alphaShift+=(tempRat);
+  { tempRat=theVector[i];
+    tempRat*=this->CartanSymmetric.elements[index][i];
+    alphaShift+=tempRat;
   }
-  alphaShift/=(this->CartanSymmetric.elements[index][index]);
-  theVector[index]+=(alphaShift);
+  alphaShift*=-2;
+  alphaShift/=this->CartanSymmetric.elements[index][index];
+  theVector[index]+=alphaShift;
 }
 
 class ReflectionSubgroupWeylGroup: public HashedList<ElementWeylGroup>
@@ -8486,24 +8495,24 @@ bool WeylGroup::GenerateOrbit
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots[i]);
   Vector<coefficient> currentRoot;
-  ElementWeylGroup tempEW;
-  tempEW.owner=this;
+  ElementWeylGroup currentElt;
+  currentElt.owner=this;
   if (expectedOrbitSize<=0)
-    expectedOrbitSize=(this->theDynkinType.GetSizeWeylGroupByFormula()).NumShort;
+    if (!this->theDynkinType.GetSizeWeylGroupByFormula().IsSmallInteger(&expectedOrbitSize))
+      expectedOrbitSize=-1;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;
+  //std::cout << "<hr>Setting expected orbit size: " << expectedOrbitSize;
   output.SetExpectedSize(expectedOrbitSize);
   if (outputSubset!=0)
-  { if (UpperLimitNumElements!=-1)
+  { if (UpperLimitNumElements>0)
       expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
-    tempEW.size=0;
+    currentElt.reflections.SetSize(0);
     outputSubset->SetExpectedSize(expectedOrbitSize);
     outputSubset->Clear();
-    outputSubset->AddOnTop(tempEW);
+    outputSubset->AddOnTop(currentElt);
   }
   for (int i=0; i<output.size; i++)
-  { if (outputSubset!=0)
-      tempEW=outputSubset->TheObjects[i];
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output[i];
       //if (this->flagAnErrorHasOcurredTimeToPanic)
@@ -8520,16 +8529,15 @@ bool WeylGroup::GenerateOrbit
       //}
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
-        { tempEW.AddOnTop(j);
-          tempEW.MakeCanonical();
-          outputSubset->AddOnTop(tempEW);
-          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
+        { currentElt=outputSubset->TheObjects[i];
+          currentElt.reflections.AddOnTop(j);
+          currentElt.MakeCanonical();
+          outputSubset->AddOnTop(currentElt);
         }
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)
           return false;
     }
-  }
   return true;
 }
 
@@ -8726,11 +8734,11 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<coefficient>& t
 template <class coefficient>
 void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElement, const Vector<coefficient>& input, Vector<coefficient>& output)const
 { assert(&input!=&output);
-  int NumElts=theElement.size;
+  int NumElts=theElement.reflections.size;
   Vector<coefficient> tempRoot, tempRoot2;
   output=(input);
   for (int i=0; i<NumElts; i++)
-  { int tempI=theElement[i];
+  { int tempI=theElement.reflections[i];
     if(tempI<this->simpleGenerators.size)
       this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
     else
@@ -8762,7 +8770,7 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
   coefficient theScalarProd;
   int theDim=this->GetDim();
   if (raisingElt!=0)
-    raisingElt->SetSize(0);
+    raisingElt->reflections.SetSize(0);
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<theDim; i++)
@@ -8775,7 +8783,7 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
         if (sign!=0)
           *sign*=-1;
         if (raisingElt!=0)
-          raisingElt->AddOnTop(i);
+          raisingElt->reflections.AddOnTop(i);
       }
       if (stabilizerFound!=0)
         if (theScalarProd.IsEqualToZero())

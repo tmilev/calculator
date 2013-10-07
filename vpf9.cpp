@@ -4300,11 +4300,11 @@ void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ration
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
-{ int tempI= this->theElements[index].size;
+{ int tempI= this->theElements[index].reflections.size;
   for (int i=0; i<tempI; i++)
-  { this->SimpleReflectionRoot(this->theElements[index][i], output.affinePoint, RhoAction, UseMinusRho);
+  { this->SimpleReflectionRoot(this->theElements[index].reflections[i], output.affinePoint, RhoAction, UseMinusRho);
 //    output.affinePoint.ComputeDebugString();
-    this->SimpleReflectionDualSpace(this->theElements[index][tempI-i-1], output.normal);
+    this->SimpleReflectionDualSpace(this->theElements[index].reflections[tempI-i-1], output.normal);
   }
 }
 
@@ -4328,7 +4328,7 @@ int WeylGroup::Invert(int g) const
 }
 
 void WeylGroup::GetGeneratorList(int g, List<int>& out) const
-{ out = this->theElements[g];
+{ out = this->theElements[g].reflections;
 }
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
@@ -4337,9 +4337,9 @@ void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
     << " belonging to different Weyl groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  List<int> oldMe=*this;
+  List<int> oldMe=this->reflections;
   *this=other;
-  this->AddListOnTop(oldMe);
+  this->reflections.AddListOnTop(oldMe);
   this->MakeCanonical();
 }
 
@@ -4352,7 +4352,7 @@ Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const
 
 ElementWeylGroup ElementWeylGroup::Inverse() const
 { ElementWeylGroup out = *this;
-  out.ReverseOrderElements();
+  out.reflections.ReverseOrderElements();
   out.MakeCanonical();
   return out;
 }
@@ -4364,8 +4364,8 @@ bool WeylGroup::operator==(const WeylGroup& other)const
 }
 
 void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
-{ for (int i=0; i<this->theElements[index].size; i++)
-    this->SimpleReflectionRoot(this->theElements[index][i], theRoot, RhoAction, UseMinusRho);
+{ for (int i=0; i<this->theElements[index].reflections.size; i++)
+    this->SimpleReflectionRoot(this->theElements[index].reflections[i], theRoot, RhoAction, UseMinusRho);
 }
 
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
@@ -4402,8 +4402,8 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ for (int i=0; i<this->theElements[index].size; i++)
-    this->SimpleReflectionRootAlg(this->theElements[index][i], theRoot, RhoAction);
+{ for (int i=0; i<this->theElements[index].reflections.size; i++)
+    this->SimpleReflectionRootAlg(this->theElements[index].reflections[i], theRoot, RhoAction);
 }
 
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
@@ -4411,7 +4411,7 @@ void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
   output.size=0;
   output.ReservE(this->RootSystem.size/2);
   for (int i=0; i<this->RootSystem.size; i++)
-    if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
+    if (this->RootSystem[i].IsPositiveOrZero())
       output.AddOnTop(this->RootSystem[i]);
 }
 
@@ -4642,10 +4642,10 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 }
 
 unsigned int ElementWeylGroup::HashFunction() const
-{ int top = MathRoutines::Minimum(this->size, ::SomeRandomPrimesSize);
+{ int top = MathRoutines::Minimum(this->reflections.size, ::SomeRandomPrimesSize);
   unsigned int result = this->owner==0 ? 0 : this->owner->HashFunction();
   for (int i=0; i<top; i++)
-    result+=this->TheObjects[i]*::SomeRandomPrimes[i];
+    result+=this->reflections[i]*::SomeRandomPrimes[i];
   return result;
 }
 
@@ -5003,8 +5003,8 @@ bool KLpolys::IndexGreaterThanIndex(int a, int b)
 
 int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
-  for (int i=0; i<this->TheWeylGroup->theElements[x].size; i++)
-    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theElements[x][i]];
+  for (int i=0; i<this->TheWeylGroup->theElements[x].reflections.size; i++)
+    start=this->SimpleReflectionsActionList[start][this->TheWeylGroup->theElements[x].reflections[i]];
   return start;
 }
 
@@ -5030,12 +5030,12 @@ void KLpolys::ComputeKLxy(int x, int y)
         tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
       }
       int tempI;
-      if ((this->TheWeylGroup->theElements[x].size+this->TheWeylGroup->theElements[i].size)%2==0)
+      if ((this->TheWeylGroup->theElements[x].reflections.size+this->TheWeylGroup->theElements[i].reflections.size)%2==0)
         tempI=1;
       else
         tempI=-1;
-      Rational powerQ= -this->TheWeylGroup->theElements[x].size+2*this->TheWeylGroup->theElements[i].size -
-      this->TheWeylGroup->theElements[y].size;
+      Rational powerQ= -this->TheWeylGroup->theElements[x].reflections.size+2*this->TheWeylGroup->theElements[i].reflections.size -
+      this->TheWeylGroup->theElements[y].reflections.size;
       powerQ/=2;
       tempP2.MakeMonomiaL(0, powerQ, tempI, 1);
       tempP1*=tempP2;
@@ -5049,7 +5049,7 @@ void KLpolys::ComputeKLxy(int x, int y)
       Accum+=tempP1;
     }
   this->theKLPolys[x][y].MakeZero();
-  Rational lengthDiff= this->TheWeylGroup->theElements[y].size-this->TheWeylGroup->theElements[x].size;
+  Rational lengthDiff= this->TheWeylGroup->theElements[y].reflections.size-this->TheWeylGroup->theElements[x].reflections.size;
   lengthDiff/=2;
 //  std::cout << "Accum: " << Accum.ToString();
   for (int i=0; i<Accum.size(); i++)
@@ -5142,8 +5142,7 @@ LargeInt PartFraction::EvaluateIntPolyAtOne(Polynomial<LargeInt>& input)
   return result;
 }
 
-void PartFraction::EvaluateIntPoly
-  (const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output)
+void PartFraction::EvaluateIntPoly(const Polynomial<LargeInt>& input, const Vector<Rational>& values, Rational& output)
 { std::string tempS1, tempS2;
   output.MakeZero();
   //if(this->flagAnErrorHasOccurredTimeToPanic)

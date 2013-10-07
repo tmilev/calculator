@@ -1518,6 +1518,8 @@ public:
   static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs(CommandList& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra& owner);
   static bool innerLoadElementSemisimpleLieAlgebraRationalCoeffs
   (CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output, SemisimpleLieAlgebra& owner);
+  static bool innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
+  (CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<AlgebraicNumber>& output, SemisimpleLieAlgebra& owner);
   static bool innerStoreUE(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerStorePoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerStoreSemisimpleLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output);
@@ -1532,6 +1534,8 @@ public:
   }
   static bool innerStoreElementSemisimpleLieAlgebraRationals
   (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
+  static bool innerStoreElementSemisimpleLieAlgebraAlgebraicNumbers
+  (CommandList& theCommands, const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input, Expression& output);
   static bool innerStoreObject(CommandList& theCommands, const Rational& input, Expression& output, Expression* theContext=0);
   static bool innerLoadFromObject(CommandList& theCommands, const Expression& input, slTwoSubalgebra& output);
   static bool innerLoadFromObject(CommandList& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output);

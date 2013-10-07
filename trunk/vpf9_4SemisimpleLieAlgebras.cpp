@@ -515,7 +515,7 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
   tempEW.owner=this;
   output.SetExpectedSize(UpperLimitNumElements);
   if (outputSubset!=0)
-  { tempEW.size=0;
+  { tempEW.reflections.size=0;
     outputSubset->SetExpectedSize(UpperLimitNumElements);
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
@@ -532,9 +532,9 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
         this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
-        { tempEW.AddOnTop(j);
+        { tempEW.reflections.AddOnTop(j);
           outputSubset->AddOnTop(tempEW);
-          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
+          tempEW.reflections.RemoveLastObject();
         }
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)

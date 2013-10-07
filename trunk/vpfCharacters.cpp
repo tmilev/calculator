@@ -22,9 +22,7 @@ std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
   out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size
   << ").\n";
   if (this->irreps.size>0)
-  { out << this->irreps.size << "out of "
-    << this->conjugacyClasses.size
-    << " irreducible finite dimensional representations "
+  { out << this->irreps.size << "out of " << this->conjugacyClasses.size << " irreducible finite dimensional representations "
     << " were computed. ";
     for (int i=0; i<this->irreps.size; i++)
     { out << "<br>Representation V_{" << i+1 << "}<br>";
@@ -126,15 +124,15 @@ void ElementWeylGroup::MakeCanonical()
   Vector<Rational> theVector=this->owner->rho;
   this->owner->ActOn(*this, theVector);
   int theRank=this->owner->GetDim();
-  this->SetSize(0);
+  this->reflections.SetSize(0);
   while (theVector!=this->owner->rho)
     for (int i=0; i<theRank; i++)
       if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
       { this->owner->SimpleReflection(i, theVector);
-        this->AddOnTop(i);
+        this->reflections.AddOnTop(i);
         break;
       }
-  this->ReverseOrderElements();
+  this->reflections.ReverseOrderElements();
 }
 
 List<int> CoxeterGroup::DecomposeTodorsVector(const Vector<Rational> &vv) const{
@@ -251,17 +249,23 @@ int CoxeterGroup::operator()(int i, int j) const
 }
 
 void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
-{ const int hardcodedUpperLimit=6000000;
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeConjugacyClasses");
+  this->CheckConsistency();
+  const int hardcodedUpperLimit=6000000;
   if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
-  { std::cout << "I am crashing for safety reasons (this is not a programming error). "
-    << " You requested to compute the conjugacy classes of a Weyl group of type "
-    << this->theDynkinType.ToString() << ", which, by formula, has "
-    << this->theDynkinType.GetSizeWeylGroupByFormula() << " elements, but I have a hard-coded "
-    << "safety limit of " << hardcodedUpperLimit << "."
+  { std::cout << "I am crashing for safety reasons (this is not a programming error). You requested to compute the conjugacy classes of a Weyl group of type "
+    << this->theDynkinType.ToString() << ", which, by formula, has " << this->theDynkinType.GetSizeWeylGroupByFormula()
+    << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  //  std::cout << "<hr>HEre be errors";
   this->ComputeAllElements(hardcodedUpperLimit+1);
+  //std::cout << "<hr>rho orbit: " <<  this->rhoOrbit.size << " total: " << this->rhoOrbit.ToString();
+  //std::cout << "<hr> the elements: " << this->theElements.size << " total: " << this->theElements.ToString();
+  //if (this->rhoOrbit.size!=this->theElements.size)
+  //{
+  //}
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
@@ -270,10 +274,14 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   theStack.SetExpectedSize(this->theElements.size);
   int theRank=this->GetDim();
   Vector<Rational> theRhoImage;
+  //this->rhoOrbit.GrandMasterConsistencyCheck();
+  //this->theElements.GrandMasterConsistencyCheck();
   for (int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
     { theStack.Clear();
       theStack.AddOnTop(i);
+      theStack.GrandMasterConsistencyCheck();
+      Accounted[i]=true;
       for (int j=0; j<theStack.size; j++)
         for (int k=0; k<theRank; k++)
         { theRhoImage=this->rho;
@@ -281,13 +289,32 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
           this->ActOn(theStack[j], theRhoImage);
           this->SimpleReflection(k, theRhoImage);
           int accountedIndex=this->rhoOrbit.GetIndex(theRhoImage);
-          theStack.AddOnTopNoRepetition(accountedIndex);
-          Accounted[accountedIndex]=true;
+          if(!Accounted[accountedIndex])
+          { theStack.AddOnTop(accountedIndex);
+            Accounted[accountedIndex]=true;
+          }
         }
       this->conjugacyClasses.AddOnTop(theStack);
       this->conjugacyClasses.LastObject()->QuickSortAscending();
     }
+  int checkNumElts=0;
+  for (int i=0; i<this->conjugacyClasses.size; i++)
+    checkNumElts+=this->conjugacyClasses[i].size;
+  if (this->theElements.size!=checkNumElts)
+  { std::cout << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes "
+    << " while the group has " << this->theElements.size << " elements" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   this->conjugacyClasses.QuickSortAscending();
+  checkNumElts=0;
+  for (int i=0; i<this->conjugacyClasses.size; i++)
+    checkNumElts+=this->conjugacyClasses[i].size;
+  if (this->theElements.size!=checkNumElts)
+  { std::cout << "This is a programming error: After soring there are total of " << checkNumElts << " elements in the various conjugacy classes "
+    << " while the group has " << this->theElements.size << " elements" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+//  std::cout << "<hr>I computed: " << this->conjugacyClasses.size << "conjugacy classes.";
 }
 
 void CoxeterGroup::ComputeConjugacyClasses(){
@@ -1133,7 +1160,7 @@ void WeylGroup::GetSignCharacter(Vector<Rational>& out)
     this->ComputeConjugacyClasses();
   out.SetSize(this->conjugacyClasses.size);
   for(int i=0; i<this->conjugacyClasses.size; i++)
-  { int yn = this->theElements[this->conjugacyClasses[i][0]].size % 2;
+  { int yn = this->theElements[this->conjugacyClasses[i][0]].reflections.size % 2;
     if(yn == 0)
       out[i] = 1;
     else

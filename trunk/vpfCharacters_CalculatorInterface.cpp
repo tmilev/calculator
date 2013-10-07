@@ -84,8 +84,7 @@ void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed()
 }
 
 template <typename coefficient>
-void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
-( GlobalVariables* theGlobalVariables)
+void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
   this->OwnerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup> ElementsExplored;
@@ -95,16 +94,16 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple
   int theRank=this->OwnerGroup->GetDim();
   tempElt.owner=this->OwnerGroup;
   ElementsExplored.AddOnTop(tempElt);
-  tempElt.SetSize(1);
+  tempElt.reflections.SetSize(1);
   for (int i=0; i<theRank; i++)
-  { tempElt[0]=i;
+  { tempElt.reflections[0]=i;
     ElementsExplored.AddOnTop(tempElt);
   }
   for (int i=0; i<ElementsExplored.size; i++)
   { int indexParentElement=this->OwnerGroup->theElements.GetIndex(ElementsExplored[i]);
     for (int j=0; j<theRank; j++)
     { tempElt=ElementsExplored[i];
-      tempElt.AddOnTop(j);
+      tempElt.reflections.AddOnTop(j);
       tempElt.MakeCanonical();
       if (!ElementsExplored.Contains(tempElt))
       { int indexCurrentElt=this->OwnerGroup->theElements.GetIndex(tempElt);
@@ -347,8 +346,8 @@ Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int e
   const ElementWeylGroup& theElt=this->OwnerGroup->theElements[elementIndex];
   this->theElementIsComputed[elementIndex]=true;
   theMat.MakeIdMatrix(this->GetDim());
-  for (int i=0; i<theElt.size; i++)
-    theMat.MultiplyOnTheLeft(this->theElementImages[theElt[i]+1]);
+  for (int i=0; i<theElt.reflections.size; i++)
+    theMat.MultiplyOnTheLeft(this->theElementImages[theElt.reflections[i]+1]);
   return theMat;
 }
 
@@ -642,7 +641,7 @@ bool WeylGroup::GenerateOuterOrbit
   tempEW.owner=this;
   output.SetExpectedSize(UpperLimitNumElements);
   if (outputSubset!=0)
-  { tempEW.size=0;
+  { tempEW.reflections.size=0;
     outputSubset->SetExpectedSize(UpperLimitNumElements);
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
@@ -659,9 +658,9 @@ bool WeylGroup::GenerateOuterOrbit
         this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
-        { tempEW.AddOnTop(j);
+        { tempEW.reflections.AddOnTop(j);
           outputSubset->AddOnTop(tempEW);
-          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
+          tempEW.reflections.RemoveLastObject();
         }
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)
@@ -815,8 +814,8 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit(CommandList& theCommands, cons
     { currentWeight=theHWsimpleCoords;
       standardElt.MakeOne(*theSSalgebra);
       bool isGood=true;
-      for (int j=0; j<orbitGeneratingSet.theElements[i].size; j++)
-      { int simpleIndex=orbitGeneratingSet.theElements[i][j];
+      for (int j=0; j<orbitGeneratingSet.theElements[i].reflections.size; j++)
+      { int simpleIndex=orbitGeneratingSet.theElements[i].reflections[j];
         theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
         theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
         theExp*=2;
@@ -1017,12 +1016,12 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement(CommandList& theCommands,
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], thePointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   ElementWeylGroup theElt;
-  theElt.ReservE(input.children.size-2);
+  theElt.reflections.ReservE(input.children.size-2);
   for(int i=2; i<input.children.size; i++){
     int tmp;
     if (!input[i].IsSmallInteger(& tmp))
       return false;
-    theElt.AddOnTop(tmp-1);
+    theElt.reflections.AddOnTop(tmp-1);
   }
   WeylGroup theGroup;
   theGroup=thePointer->theWeyl;
@@ -1033,8 +1032,8 @@ bool WeylGroupCalculatorFunctions::innerCoxeterElement(CommandList& theCommands,
   theElt.owner=&theCommands.theObjectContainer.theWeylGroups[indexOfOwnerGroupInObjectContainer];
   //std::cout << "<br>theElt.owner: " << theElt.owner;
 //  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
-  for(int i=0; i<theElt.size; i++){
-    if (theElt[i] >= thePointer->GetRank() || theElt[i] < 0)
+  for(int i=0; i<theElt.reflections.size; i++){
+    if (theElt.reflections[i] >= thePointer->GetRank() || theElt.reflections[i] < 0)
       return output.SetError("Bad reflection index", theCommands);
   }
 //  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
@@ -1048,8 +1047,7 @@ bool CommandList::innerMinPolyMatrix(CommandList& theCommands, const Expression&
   Matrix<Rational> theMat;
   if (!output.IsOfType<Matrix<Rational> >(&theMat))
   { theCommands.Comments << "<hr> Successfully called innerMatrixRational onto input " << input.ToString()
-    << " to get " << output.ToString()
-    << " but the return type was not a matrix of rationals. ";
+    << " to get " << output.ToString() << " but the return type was not a matrix of rationals. ";
     return true;
   }
   if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
@@ -1172,16 +1170,14 @@ std::string WeylGroupVirtualRepresentation::ToString(FormatExpressions* theForma
   return out.str();
 }
 
-void WeylGroupVirtualRepresentation::AssignWeylGroupRep
-(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables)
+void WeylGroupVirtualRepresentation::AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables)
 { WeylGroupRepresentation<Rational> otherCopy;
   this->ownerGroup=other.OwnerGroup;
   otherCopy=other;
   otherCopy.DecomposeMeIntoIrreps(this->coefficientsIrreps, theGlobalVariables);
 }
 
-bool WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool WeylGroupCalculatorFunctions::innerMakeVirtualWeylRep(CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.IsOfType<WeylGroupVirtualRepresentation>())
   { output=input;
     return true;

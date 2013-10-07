@@ -58,9 +58,9 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
-  { if (this->RepresentativesQuotientAmbientOrder[i].size!=oldLayerElementLength)
+  { if (this->RepresentativesQuotientAmbientOrder[i].reflections.size!=oldLayerElementLength)
     { Layers.SetSize(Layers.size+1);
-      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].size;
+      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].reflections.size;
     }
     Layers.LastObject()->AddOnTop(i);
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
@@ -80,8 +80,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
       for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
         if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
         ( this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
-          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].size
-              ==this->RepresentativesQuotientAmbientOrder[k].size-1)
+          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].reflections.size==this->RepresentativesQuotientAmbientOrder[k].reflections.size-1)
             arrows[i][j].AddOnTop(k);
   }
   return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
@@ -1099,8 +1098,8 @@ void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup(List<Ele
     indexShifts[i]=this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
   for (int i=0; i<this->size; i++)
   { tempElt=(*this)[i];
-    for (int j=0; j<tempElt.size; j++)
-      tempElt[j]= indexShifts[tempElt[j]];
+    for (int j=0; j<tempElt.reflections.size; j++)
+      tempElt.reflections[j]= indexShifts[tempElt.reflections[j]];
     output.AddOnTop(tempElt);
   }
 }

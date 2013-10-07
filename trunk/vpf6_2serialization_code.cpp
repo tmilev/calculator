@@ -416,9 +416,7 @@ bool Serialization::innerStoreElementSemisimpleLieAlgebraRationals(CommandList& 
   Expression tempContext;
   tempContext.MakeEmptyContext(theCommands);
   if (!input.IsEqualToZero())
-  { tempContext.ContextMakeContextSSLieAlgebrA
-    (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
-    (*input.GetOwner()), theCommands);
+  { tempContext.ContextMakeContextSSLieAlgebrA(theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(*input.GetOwner()), theCommands);
   }
   Serialization::innerStoreMonCollection(theCommands, input, output, &tempContext);
   return true;
@@ -482,25 +480,21 @@ bool Serialization::innerLoadFromObject(CommandList& theCommands, const Expressi
   const Expression& theE=input[2];
   ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
   if (!Serialization::DeSerializeMonCollection(theCommands, theF, eltF))
-  { theCommands.Comments
-    << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
+  { theCommands.Comments << "<hr>Failed to extract f element while loading sl(2) subalgebra<hr>";
     return false;
   }
   if (!Serialization::DeSerializeMonCollection(theCommands, theE, eltE))
-  { theCommands.Comments
-    << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
+  { theCommands.Comments << "<hr>Failed to extract e element while loading sl(2) subalgebra<hr>";
     return false;
   }
   if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
-  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. "
-    << "e and f are: " << eltE.ToString() << ", " << eltF.ToString() << ". ";
+  { theCommands.Comments << "<hr>Failed to load sl(2) subalgebra: either e or f is equal to zero. e and f are: " << eltE.ToString()
+    << ", " << eltF.ToString() << ". ";
     return false;
   }
   if (eltE.GetOwner()!=eltF.GetOwner())
-  { theCommands.Comments
-    << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners."
-    << " More precisely, the owner of e is " << eltE.GetOwner()->ToString() << " and the owner of f is "
-    << eltF.GetOwner()->ToString();
+  { theCommands.Comments << "<hr>Failed to load sl(2): E and F element of sl(2) have different owners. More precisely, the owner of e is "
+    << eltE.GetOwner()->ToString() << " and the owner of f is " << eltF.GetOwner()->ToString();
     return false;
   }
   output.theE=eltE;
@@ -722,7 +716,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   theSAs.initHookUpPointers(*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagComputePairingTable=true;
+  theSAs.flagComputePairingTable=false;
   theSAs.flagComputeNilradicals=false;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();

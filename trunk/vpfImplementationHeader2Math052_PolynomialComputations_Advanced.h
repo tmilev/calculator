@@ -785,7 +785,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   ProgressReport theReport2(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n" << inputSystem.ToString();
+    out << "<br>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n"
+    << this->GetCalculatorInputFromSystem(inputSystem);
     theReport1.Report(out.str());
   }
 //  std::cout << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
@@ -862,8 +863,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 
   int theVarIndex=this->GetPreferredSerreSystemSubIndex();
   if (theVarIndex==-1)
-  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system equals: "
-    << CGI::GetHtmlMathSpanPure(inputSystem.ToString()) << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: "
+    << this->GetCalculatorInputFromSystem(inputSystem) << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);

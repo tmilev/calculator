@@ -1509,7 +1509,7 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
         theWeyl.ActOnRhoModified(j, currentHW);
 //        currentHW-=theSub.GetRho();
         theMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
-        int sign= (currentElt.size- theWeyl.theElements[j].size)%2==0 ? 1 :-1;
+        int sign= (currentElt.reflections.size- theWeyl.theElements[j].reflections.size)%2==0 ? 1 :-1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
       }
     currentHW=theHWsimpCoords;
@@ -1518,7 +1518,7 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
     currentHW-=theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(currentChar.ToString(&formatChars)) << "</td>";
-    if (currentElt.size%2==1)
+    if (currentElt.reflections.size%2==1)
       currentChar*=-1;
     theChar+=currentChar;
     out << "</tr>";
@@ -2292,9 +2292,9 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     this->theGeneratingWordsIntGrouppedByWeight[i];
     for (int j=0; j<currentList.size; j++)
     { wordCounter++;
-      tempWelt.SetSize(currentListInt[j].generatorsIndices.size);
+      tempWelt.reflections.SetSize(currentListInt[j].generatorsIndices.size);
       for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
-        tempWelt[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+        tempWelt.reflections[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat)
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }

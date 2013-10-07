@@ -577,8 +577,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
       return;
     }
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
-      if (newCandidate.theWeylNonEmbeddeD.theDynkinType==
-          this->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
+      if (newCandidate.theWeylNonEmbeddeD.theDynkinType==this->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
       { if (newCandidate.IsDirectSummandOf(this->theSubalgebraCandidates[i], true))
         { //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
             //std::cout << "<hr>Candidate "
@@ -646,7 +645,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 //        std::cout << out.str();
     }
     if (indexCurrentWeight!=0)
-    { if (! this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 60000))
+    { if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 60000))
       { std::cout << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
         << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
         << "You might wanna work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. "
@@ -669,9 +668,15 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
       //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
         //std::cout << " done. The size of the orbit is " << theOrbit.size;
     }
+    if (theOrbit.size>=1000)
+    { std::stringstream out2;
+      out2 << "I am exploring the current Weyl group orbit containing " << theOrbit.size << " elements. As the orbit has more than 999 elements, "
+      << "I shall not be displaying progress report strings (the computation of those slows the computation way too much).";
+      theReport2.Report(out2.str());
+    }
     for (int j=0; j<theOrbit.size; j++)
     { std::stringstream out2;
-      if (theGlobalVariables!=0)
+      if (theGlobalVariables!=0 && theOrbit.size<1000)
       { out2 << "Exploring orbit element of index  " << j+1 << " out of " << theOrbit.size << ".";
         theReport2.Report(out2.str());
         //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
@@ -692,7 +697,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
         newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], i);
         this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
       } else
-        if (theGlobalVariables!=0)
+        if (theGlobalVariables!=0 && theOrbit.size<1000)
         { out2 << " the orbit candidate is no good. ";
           theReport2.Report(out2.str());
       //    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
@@ -705,13 +710,11 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 
 bool CandidateSSSubalgebra::CheckInitialization()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (this->owner==0)
-  { std::cout << "This is a programming error: use of non-initialized semisimple subalgebra candidate. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return true;
@@ -744,8 +747,7 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
 
 void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType)
 { if (theNewType.theRank<=0)
-  { std::cout << "This is a programming error: I am given a simple Dynkin type of non-positive rank. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: I am given a simple Dynkin type of non-positive rank. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   WeylGroup tempWeyl, tempWeylnonScaled;
@@ -832,8 +834,7 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
       << "*2/"
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[theIndex]);
     }*/
-    Rational actualScalar=
-    this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[k], AmbientRootTestedForWeightSpace);
+    Rational actualScalar= this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[k], AmbientRootTestedForWeightSpace);
     if (desiredScalarProd!=actualScalar)
     { //if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
       //{ std::cout << ", instead got " << actualScalar;

@@ -1602,8 +1602,8 @@ void WeylSubgroup::ComputeTauSignature()
     for(int i=0; i<this->conjugacyClasses.size; i++)
     { ElementWeylGroup g;
       g.owner = this->parent;
-      for(int j=0; j<this->theElements[this->conjugacyClasses[i][0]].size; j++)
-        g.AddListOnTop(this->parent->theElements[this->generatorPreimages[this->theElements[this->conjugacyClasses[i][0]][j]]]);
+      for(int j=0; j<this->theElements[this->conjugacyClasses[i][0]].reflections.size; j++)
+        g.reflections.AddListOnTop(this->parent->theElements[this->generatorPreimages[this->theElements[this->conjugacyClasses[i][0]].reflections[j]]].reflections);
       g.MakeCanonical();
       int gi = this->parent->theElements.GetIndex(g);
       for(int ci=0; ci<this->parent->conjugacyClasses.size; ci++)
@@ -2656,8 +2656,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
-  (localGlobalVariables, dt.theLetter, dt.theRank, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
   List<WeylGroupRepresentation<Rational> > reps;

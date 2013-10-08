@@ -317,11 +317,6 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->SimpleBasisK, this->SimpleBasisgEpsCoords);
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
-(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords)
-{ this->GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, sort, computeEpsCoords);
-}
-
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
 (rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
 { this->AddOnTop(bufferSAs[RecursionDepth-1]);

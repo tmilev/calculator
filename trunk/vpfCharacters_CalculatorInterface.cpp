@@ -3,8 +3,7 @@
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 
-static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP
-(__FILE__, "Weyl group calculator interface");
+static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface");
 
 bool WeylGroup::CheckConsistency()const
 { if (this->flagDeallocated)
@@ -126,8 +125,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(G
 }
 
 template <typename coefficient>
-void WeylGroupRepresentation<coefficient>::operator*=
-(const WeylGroupRepresentation<coefficient>& other)
+void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentation<coefficient>& other)
 { //lazy programmers handling://////
   if (&other==this )
   { WeylGroupRepresentation<coefficient> otherCopy;
@@ -1002,6 +1000,46 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep(CommandList& theComm
   theGroup.StandardRepresentation(tempRep);
   return output.AssignValue(tempRep, theCommands);
 }
+
+class MonomialMacdonald
+{
+public:
+  SemisimpleLieAlgebra* owner;
+  Selection posRootSel;
+  bool flagDeallocated;
+  MonomialMacdonald():owner(0), flagDeallocated(false)
+  {
+  }
+  bool CheckConsistency()
+  { if (this->flagDeallocated)
+    { std::cout << "This is a programming error: use after free of MonomialMacdonald. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
+  ~MonomialMacdonald()
+  { this->flagDeallocated=true;
+  }
+};
+
+bool WeylGroupCalculatorFunctions::innerMacdonaldPolys(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerMacdonaldPolys");
+  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
+  //input[1] and input[2];
+  SemisimpleLieAlgebra* thePointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, thePointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  rootSubalgebras theRootSAs;
+  theRootSAs.owneR=thePointer;
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(*theCommands.theGlobalVariableS, true, false);
+  for (int i=0; i<theRootSAs.size; i++)
+  { rootSubalgebra& currentRootSA=theRootSAs[i];
+
+  }
+  std::stringstream out;
+  out << "Type: " << theRootSAs.owneR->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.size;
+  return output.AssignValue(out.str(), theCommands);
+}
+
 
 bool WeylGroupCalculatorFunctions::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
 { //if (!input.IsSequenceNElementS(2))

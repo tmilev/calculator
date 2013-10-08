@@ -1274,7 +1274,7 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
-  theComputation.MaxNumComputations=1000;
+  theComputation.MaxNumComputations=5000;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
 //  std::cout << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);

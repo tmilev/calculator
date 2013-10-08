@@ -4,7 +4,7 @@
 #define vpfHeader1_3_h_already_included
 
 #include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, math routines. ");
+static ProjectInformationInstance ProjectInfoVpfHeader1_3(__FILE__, "Header, algebraic numbers. ");
 
 class AlgebraicClosureRationals;
 class AlgebraicNumber

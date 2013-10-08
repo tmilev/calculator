@@ -16,7 +16,10 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
  // std::string tempS;
 //  bool changed=true;
   this->flagBasisGuaranteedToGenerateIdeal=false;
+  int oldMaxNumComputations=this->MaxNumComputations;
+  this->MaxNumComputations=-1;
   this->AddPolyAndReduceBasis(theGlobalVariables);
+  this->MaxNumComputations=oldMaxNumComputations;
   this->flagBasisGuaranteedToGenerateIdeal=true;
   bool changed=true;
   while (changed)
@@ -102,7 +105,6 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
       }
     }
     this->flagBasisGuaranteedToGenerateIdeal=true;
-
     if (!addedNew)
       break;
     for (int i=0; i<this->theBasiS.size; i++)
@@ -189,7 +191,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
   //Ideals, Varieties, algorithms
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->theBasiS=inputOutpuT;
-  HashedListSpecialized<PairInts > indexPairs;
+  HashedListSpecialized<PairInts> indexPairs;
 //  Pair<int, int> currentPair;
   indexPairs.SetExpectedSize(this->theBasiS.size*this->theBasiS.size);
   this->leadingMons.SetExpectedSize(this->theBasiS.size*2);
@@ -716,11 +718,18 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
 }
 
 template <class coefficient>
-int GroebnerBasisComputation<coefficient>::GetPreferredSerreSystemSubIndex()
-{ const MonomialP& theMon=this->theBasiS[0].GetMaxMonomial(this->theMonOrdeR);
+int GroebnerBasisComputation<coefficient>::GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem)
+{ if (inputSystem[0].IsEqualToZero())
+  { std::cout << "Something is wrong: I have a zero polynomial in the reduced Groebner basis. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  const MonomialP& theMon=inputSystem[0].GetMaxMonomial(this->theMonOrdeR);
   for (int i=0; i<theMon.GetMinNumVars(); i++)
     if (theMon(i)>0)
       return i;
+  std::cout << "<hr>Warning: was not able to extract preferred index from polynomial: " << inputSystem[0].ToString()
+  << " with max monomial: " << theMon.ToString();
   return -1;
 }
 
@@ -861,10 +870,10 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   newComputation.flagSystemSolvedOverBaseField=false;
   newComputation.flagSystemProvenToHaveSolution=false;
 
-  int theVarIndex=this->GetPreferredSerreSystemSubIndex();
+  int theVarIndex=this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex==-1)
-  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: "
-    << this->GetCalculatorInputFromSystem(inputSystem) << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: <br>"
+    << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
@@ -938,7 +947,6 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   this->flagSystemSolvedOverBaseField=false;
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
-  this->MaxNumComputations=1000;
   int numVars=0;
 //  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<coefficient> > workingSystem=inputSystem;

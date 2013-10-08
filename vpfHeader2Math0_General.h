@@ -1483,7 +1483,7 @@ class GroebnerBasisComputation
   bool HasImpliedSubstitutions
   (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
   ;
-  int GetPreferredSerreSystemSubIndex();
+  int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
   void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, bool firstRun, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);

@@ -42,6 +42,9 @@ public:
   static bool innerCoxeterElement
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerMacdonaldPolys
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerWeylGroupIrrepsAndCharTable
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

@@ -27,6 +27,10 @@ void CommandList::initPredefinedInnerFunctions()
    "5!");
 
   this->AddOperationInnerHandler
+  ("printMacdonaldPolys", WeylGroupCalculatorFunctions::innerMacdonaldPolys, "",
+   "Prints macdonald polynomials from a semisimple type. ",
+   "printMacdonaldPolys{}(B_3)");
+  this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
@@ -314,19 +318,19 @@ void CommandList::initPredefinedInnerFunctions()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddOperationInnerHandler
-("Interpolate", &this->innerInterpolatePoly, "",
+  ("Interpolate", &this->innerInterpolatePoly, "",
    "Constructs the one-variable polynomial of minimal degree that passes through the points. Points are given in the form \
    ((x_1, y_1),(x_2, y_2), ...,(x_n, y_n))",
    "Interpolate{}(1,0) ; Interpolate{}((1,0),(2,3)); Interpolate{}((1,1), (2,2), (3, 4), (4, 8), (5, 16))", true, false)
    ;
   this->AddOperationInnerHandler
-("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
+  ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
    "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true, false)
    ;
   this->AddOperationInnerHandler
-("PolyDivStringGrLex", &this->innerPolynomialDivisionVerboseGrLex, "",
+  ("PolyDivStringGrLex", &this->innerPolynomialDivisionVerboseGrLex, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using gr lex order, for example, x^2 y^3 >x y^4, y^11>x^10. ",
    "PolyDivStringGrLex{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true, false)
@@ -358,7 +362,7 @@ void CommandList::initPredefinedInnerFunctions()
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
-this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta, "",
+  this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
@@ -383,23 +387,23 @@ this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta,
    "\nA:=3/2- ((-3/4+1/4 (x))^{2});\nB:= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)")
    ;
   this->AddOperationInnerHandler
-("IsInteger", this->innerIsInteger, "",
- " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
- "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
-   this->AddOperationInnerHandler
-("IsRational", this->innerIsRational, "",
- " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
- "IsRational{}a;IsRational{}-1;\nf{}{{a}}:=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
+  ("IsInteger", this->innerIsInteger, "",
+   " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
+   "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
-("Not", this->innerNot, "",
- " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
- If the argument is not a small integer, does nothing. ",
- "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
-  this->AddOperationInnerHandler
-("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
- " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
- debugging purposes. First argument =dimension, second argument=grading leve. ",
- "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
+  ("IsRational", this->innerIsRational, "",
+   " If the argument has no bound variables, returns 1 if the argument is an rational, 0 otherwise. ",
+   "IsRational{}a;IsRational{}-1;\nf{}{{a}}:=IsRational{}a;\nIsRational{}1;\nIsRational{}b");
+    this->AddOperationInnerHandler
+  ("Not", this->innerNot, "",
+   " If the argument is a small integer, returns 1 if the argument is 0 and 1 the argument is non-zero. \
+   If the argument is not a small integer, does nothing. ",
+   "Not{}1;Not{}a; Not{}0; Not{}(3==4)");
+    this->AddOperationInnerHandler
+  ("PrintNonNegativeVectorsLevel", this->innerPrintZnEnumeration, "",
+   " Prints all vectors of grade level d with n coordinates lying in Z_{>=0}. Function meant for \
+   debugging purposes. First argument =dimension, second argument=grading leve. ",
+   "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. The type of the semisimple Lie algebra is given in the format\

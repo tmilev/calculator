@@ -259,7 +259,7 @@ bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Exp
     theFileStream << cppFilesNoExtension[i] << ".o ";
   theFileStream << "-o ./Debug/calculator\n\n";
   for (int i=0; i<cppFilesNoExtension.size; i++)
-    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++11 -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
+    theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
   outHtml << "<a href=\" " << theCommands.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
   return output.AssignValue(outHtml.str(), theCommands);
 }

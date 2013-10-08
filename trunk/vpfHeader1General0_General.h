@@ -978,32 +978,44 @@ public:
   }
   int BSGetIndex(const Object& o) const
   { int n = this->BSExpectedIndex(o);
+    if(n == this->size)
+      return -1;
     return (this->TheObjects[n]==o) ? n : -1;
   }
+  // return the last index n of which we can say o <= l[n], or l.size
+  // i.e. not the first index at which o <= l[n], as if we were implementing l.GetIndex(o)
+  // the reason we want the last index is to support insertion sorting
   int BSExpectedIndex(const Object& o) const{
-    int i = 0, j = this->size;
+    if(this->size == 0)
+      return 0;
+    int i = 0, j = this->size-1;
     while(true){
-        int s=j-i;
-        int n = i+s/2;
-        if(s<0)
-            return n;
-        if(o==this->TheObjects[n])
-            return n;
-        if(o>this->TheObjects[n]){
-            if(i<n){
-                i=n;
-                continue;
-            }
-            i = n+1;
+        int s=(j-i)/2;
+        int n = j-s;
+        if(s == 0)
+        { if(this->TheObjects[n]<o)
+            return n+1;
+          return n;
         }
-        if(o<this->TheObjects[n]){
-            if(n<j){
-                j=n;
-                continue;
-            }
-            j = n-1;
+        if(o<this->TheObjects[n])
+        { j = n-1;
+          continue;
         }
+        i = n;
     }
+  }
+  // indexing is O(n log n) and insertion is O(n), whereas hash table insertion and indexing
+  // are both O(1)
+  bool BSInsertDontDup(const Object& o){
+    int n = BSExpectedIndex(o);
+    if(n==this->size)
+    { this->AddOnTop(o);
+      return false;
+    }
+    if(this->TheObjects[n] == o)
+      return true;
+    this->InsertAtIndexShiftElementsUp(o,n);
+    return false;
   }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
@@ -1066,6 +1078,7 @@ public:
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
   inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
   bool operator>(const List<Object>& other)const;
+  bool operator<(const List<Object>& other)const;
   void ShiftUpExpandOnTop(int StartingIndex);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
@@ -2913,6 +2926,21 @@ bool List<Object>::operator>(const List<Object>& other)const
       return true;
     if (other.TheObjects[i]>this->TheObjects[i])
       return false;
+  }
+  return false;
+}
+
+template <class Object>
+bool List<Object>::operator<(const List<Object>& other)const
+{ if (this->size>other.size)
+    return false;
+  if (other.size>this->size)
+    return true;
+  for (int i=0; i<this->size; i++)
+  { if (this->TheObjects[i]>other.TheObjects[i])
+      return false;
+    if (other.TheObjects[i]>this->TheObjects[i])
+      return true;
   }
   return false;
 }

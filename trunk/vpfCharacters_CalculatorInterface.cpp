@@ -563,6 +563,40 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   return false;
 }
 
+void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p)
+{ int i = this->irreps.BSExpectedIndex(p);
+  if(i==this->irreps.size){
+    this->irreps.AddOnTop(p);
+    this->characterTable.BSInsertDontDup(p.theCharacter);
+    return;
+  }
+  if(this->irreps[i].theCharacter != p.theCharacter)
+  { this->irreps.InsertAtIndexShiftElementsUp(p,i);
+    this->characterTable.BSInsertDontDup(p.theCharacter);
+    return;
+  }
+  for(int j=0; j<p.names.size; j++)
+  { bool alreadyhas = false;
+    for(int k=0; k<this->irreps[i].names.size; k++)
+      if(this->irreps[i].names[k] == p.names[j])
+        alreadyhas = true;
+    if(!alreadyhas)
+      this->irreps[i].names.AddOnTop(p.names[j]);
+  }
+}
+
+void WeylGroup::AddCharacter(const Vector<Rational>& X)
+{ int i = this->characterTable.BSExpectedIndex(X);
+  if(i==this->characterTable.size){
+    this->characterTable.AddOnTop(X);
+    return;
+  }
+  if(this->characterTable[i] != X)
+  { this->characterTable.InsertAtIndexShiftElementsUp(X,i);
+    return;
+  }
+}
+
 void WeylGroup::ComputeIrreducibleRepresentations
 (GlobalVariables* theGlobalVariables)
 { if(this->theElements.size == 0)

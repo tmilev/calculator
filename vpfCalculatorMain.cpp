@@ -507,10 +507,11 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  civilizedInput="FindOneSolutionSerreLikePolynomialSystem( -3(x-1.7)^2);";
+  //  civilizedInput="FindOneSolutionSerreLikePolynomialSystem( -3(x-1.7)^2);";
   //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
   //civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
-//  civilizedInput="plot2D(e^x,-0.9,0.9)";
+  //  civilizedInput="plot2D(e^x,-0.9,0.9)";
+//  civilizedInput="printMacdonaldPolys{}(B_3)";
   PredefinedStrings(civilizedInput);
 
   std::stringstream tempStreamXX;

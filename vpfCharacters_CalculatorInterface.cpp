@@ -1005,21 +1005,100 @@ class MonomialMacdonald
 {
 public:
   SemisimpleLieAlgebra* owner;
-  Selection posRootSel;
+  Selection rootSel;
   bool flagDeallocated;
   MonomialMacdonald():owner(0), flagDeallocated(false)
   {
   }
+  std::string ToString(FormatExpressions* theFormat=0)const;
   bool CheckConsistency()
   { if (this->flagDeallocated)
     { std::cout << "This is a programming error: use after free of MonomialMacdonald. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
+  static unsigned int HashFunction(const MonomialMacdonald& input)
+  { return input.rootSel.HashFunction();
+  }
+  bool operator==(const MonomialMacdonald& other)const;
+  void MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner);
+  void ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple);
+  void GenerateMyOrbit(HashedList<MonomialMacdonald>& output);
   ~MonomialMacdonald()
   { this->flagDeallocated=true;
   }
 };
+
+std::string MonomialMacdonald::ToString(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("MonomialMacdonald::ToString");
+  if (this->owner==0)
+    return "(non-initialized)";
+  if (this->rootSel.CardinalitySelection==0)
+    return "1";
+  std::stringstream out;
+  for (int i=0; i<this->rootSel.CardinalitySelection; i++)
+  { out << "a_" << this->rootSel.elements[i] << "";
+  }
+  return out.str();
+}
+
+bool MonomialMacdonald::operator==(const MonomialMacdonald& other)const
+{ return this->owner==other.owner && this->rootSel==other.rootSel;
+}
+
+void MonomialMacdonald::GenerateMyOrbit(HashedList<MonomialMacdonald>& output)
+{ MacroRegisterFunctionWithName("MonomialMacdonald::GenerateMyOrbit");
+  output.Clear();
+  output.AddOnTop(*this);
+  MonomialMacdonald currentMon;
+  Rational tempRat;
+  for (int i=0; i<output.size; i++)
+    for (int j=0; j<this->owner->GetRank(); j++)
+    { currentMon=output[i];
+      currentMon.ActOnMeSimpleReflection(j, tempRat);
+      output.AddOnTopNoRepetition(currentMon);
+    }
+}
+
+void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoots, SemisimpleLieAlgebra& inputOwner)
+{ MacroRegisterFunctionWithName("MonomialMacdonald::MakeFromRootSubsystem");
+  this->owner=&inputOwner;
+  this->rootSel.init(inputOwner.theWeyl.RootSystem.size);
+  Vector<Rational> currentV;
+  for (int i=0; i<inputRoots.size; i++)
+  { currentV=inputRoots[i];
+    if (currentV.IsNegative())
+      currentV*=-1;
+    int indexInRoots=inputOwner.theWeyl.RootSystem.GetIndex(currentV);
+    if (indexInRoots<0)
+    { std::cout << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString() << ": "
+      << " the vector " << currentV.ToString() << " is not a root. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->rootSel.AddSelectionAppendNewIndex(indexInRoots);
+  }
+  this->rootSel.ComputeIndicesFromSelection();
+}
+
+void MonomialMacdonald::ActOnMeSimpleReflection(int indexSimpleReflection, Rational& outputMultiple)
+{ Selection originalSel;
+ // std::cout << "this->rootSel:" << this->rootSel.ToString() << ", elements: " << this->rootSel.elements;
+
+  originalSel=this->rootSel;
+  this->rootSel.init(this->owner->theWeyl.RootSystem.size);
+  Vector<Rational> currentV;
+  outputMultiple=1;
+//  std::cout << originalSel.ToString() << ", elements: " << originalSel.elements;
+  for (int i=0; i<originalSel.CardinalitySelection; i++)
+  { currentV=this->owner->theWeyl.RootSystem[originalSel.elements[i]];
+    this->owner->theWeyl.SimpleReflection(indexSimpleReflection, currentV);
+    if (currentV.IsNegative())
+    { currentV*=-1;
+      outputMultiple*=-1;
+    }
+    this->rootSel.AddSelectionAppendNewIndex(this->owner->theWeyl.RootSystem.GetIndex(currentV));
+  }
+}
 
 bool WeylGroupCalculatorFunctions::innerMacdonaldPolys(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("WeylGroupCalculatorFunctions::innerMacdonaldPolys");
@@ -1031,11 +1110,18 @@ bool WeylGroupCalculatorFunctions::innerMacdonaldPolys(CommandList& theCommands,
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(*theCommands.theGlobalVariableS, true, false);
+  std::stringstream out;
+  MonomialMacdonald theGenerator;
+  HashedList<MonomialMacdonald> theOrbit;
   for (int i=0; i<theRootSAs.size; i++)
   { rootSubalgebra& currentRootSA=theRootSAs[i];
-
+    theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
+    theGenerator.GenerateMyOrbit(theOrbit);
+    out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(thePointer->theWeyl.theDynkinType[0]);
+    out << ". Orbit has " << theOrbit.size << " elements, here they are: ";
+    for (int j=0; j<theOrbit.size; j++)
+      out << "<br>" << theOrbit[j].ToString();
   }
-  std::stringstream out;
   out << "Type: " << theRootSAs.owneR->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.size;
   return output.AssignValue(out.str(), theCommands);
 }

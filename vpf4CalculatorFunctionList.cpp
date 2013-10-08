@@ -29,7 +29,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("printMacdonaldPolys", WeylGroupCalculatorFunctions::innerMacdonaldPolys, "",
    "Prints macdonald polynomials from a semisimple type. ",
-   "printMacdonaldPolys{}(B_3)");
+   "printMacdonaldPolys{}(B_3)", false);
   this->AddOperationInnerHandler
   ("Polynomial", Serialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",

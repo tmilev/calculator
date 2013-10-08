@@ -1158,19 +1158,30 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
   for(int i=0; i<G.conjugacyClasses.size; i++)
     for(int j=0; j<G.conjugacyClasses[i].size; j++)
       classmap[G.conjugacyClasses[i][j]] = i;
-  Matrix<Rational> form;
+  Matrix<Rational> form; // so inefficient
   form.MakeZeroMatrix(G.conjugacyClasses.size);
   for(int i=0; i<G.conjugacyClasses.size; i++)
     form.elements[i][i] = G.conjugacyClasses[i].size;
   List<VectorSpace<Rational> > spaces;
-  Vector<Rational> X1;
-  X1.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
-    X1[i] = 1;
-  VectorSpace<Rational> sp1;
-  sp1.AddVector(X1);
-  spaces.AddOnTop(sp1);
-  spaces.AddOnTop(sp1.OrthogonalComplement(0,&form));
+  if(G.characterTable.size > 0)
+  { VectorSpace<Rational> allchars;
+    for(int i=0; i<G.characterTable.size; i++)
+    { VectorSpace<Rational> xspi;
+      xspi.AddVector(G.characterTable[i]);
+      spaces.AddOnTop(xspi);
+      allchars.AddVector(G.characterTable[i]);
+    }
+    spaces.AddOnTop(allchars.OrthogonalComplement(0,&form));
+  } else {
+    Vector<Rational> X1;
+    X1.SetSize(G.conjugacyClasses.size);
+    for(int i=0; i<G.conjugacyClasses.size; i++)
+      X1[i] = 1;
+    VectorSpace<Rational> sp1;
+    sp1.AddVector(X1);
+    spaces.AddOnTop(sp1);
+    spaces.AddOnTop(sp1.OrthogonalComplement(0,&form));
+  }
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { Matrix<Rational> M;
     std::cout << "Getting class matrix " << i << std::endl;
@@ -1260,7 +1271,13 @@ got_chars:
     std::cout << x2 << std::endl;
   }
 
-  chars.QuickSortAscending(&CharacterComparator);
+  chars.QuickSortAscending(/*&CharacterComparator*/);
+  for(int i=0; i<chars.size; i++)
+    for(int j=i; j<chars.size; j++)
+      if(chars[i] > chars[j])
+        std::cout << "error: " << i << j << std::endl;
+  for(int i=0; i<chars.size; i++)
+    std::cout << chars[i] << std::endl;
   G.characterTable = chars;
   for(int i=0; i<G.characterTable.size; i++)
     std::cout << G.characterTable[i] << std::endl;
@@ -1296,7 +1313,30 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
   return out;
 }
 
-
+//template <typename somegroup>
+//template <typename grouprep>
+void ComputeIrreps(WeylGroup& G)
+{ List<int> charactersWithIrreps;
+  List<int> charactersWithoutIrreps;
+  for(int i=0; i<G.irreps.size; i++)
+  { charactersWithIrreps.AddOnTop(G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()));
+    std::cout << G.irreps[i].GetCharacter() << ": " << G.characterTable.BSExpectedIndex(G.irreps[i].GetCharacter()) << G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()) << std::endl;
+  }
+  std::cout << "characters with irreps " << charactersWithIrreps << std::endl;
+  for(int i=0; i<G.characterTable.size; i++)
+    if(!charactersWithIrreps.BSContains(i))
+      charactersWithoutIrreps.AddOnTop(i);
+  std::cout << "need reps for chars" << charactersWithoutIrreps << std::endl;
+  Matrix<Rational> M;
+  M.init(G.characterTable.size, G.characterTable.size);
+  for(int i=0; i<G.characterTable.size; i++)
+    for(int j=0; j<G.characterTable.size; j++)
+      M(j,i) = G.characterTable[j][i]*G.conjugacyClasses[i].size/G.size;
+  for(int i=0; i<G.characterTable.size; i++)
+    for(int j=i; j<G.characterTable.size; j++)
+    { std::cout << i << "⊗" << j << ": " << M*G.GetCharacterProduct(G.characterTable[i], G.characterTable[j]) << std::endl;
+    }
+}
 
 template <typename element>
 class FiniteGroup
@@ -2561,13 +2601,21 @@ List<Element> charpoly(const Matrix<Element>& M)
   return p;
 }
 
-/*Rational Matrix<Rational>::GetTrace(){
-    Rational acc = 0;
-    for(int i=0; i<this.NumCols; i++){
-        acc += this.elements[i][j];
-    }
-    return acc;
-}*/
+void BSTest()
+{ List<int> l;
+  l.BSInsertDontDup(1);
+  l.BSInsertDontDup(1);
+  l.BSInsertDontDup(5);
+  l.BSInsertDontDup(5);
+  l.BSInsertDontDup(1);
+  l.BSInsertDontDup(3);
+  l.BSInsertDontDup(5);
+  l.InsertAtIndexShiftElementsUp(1,1);
+  l.AddOnTop(5);
+  std::cout << "list contents " << l << std::endl;
+  for(int i=0; i<7; i++)
+    std::cout << i << ": " << l.BSExpectedIndex(i) << std::endl;
+}
 
 int chartable[10][10] =
 { {1,  1,  1,  1,  1,  1,  1,  1,  1,  1},
@@ -2649,7 +2697,6 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
 void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;
 
-
   GlobalVariables localGlobalVariables;
   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
 
@@ -2659,8 +2706,6 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
-  List<WeylGroupRepresentation<Rational> > reps;
-  reps.SetSize(theRootSAs.size);
   for (int k=0; k<theRootSAs.size; k++)
   { rootSubalgebra& currentRootSA=theRootSAs[k];
     roots=currentRootSA.PositiveRootsK;
@@ -2680,7 +2725,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
       mcs = module.size;
       for(int i=1; i<W.GetDim()+1; i++)
       { W.GetStandardRepresentationMatrix(i,m);
-        for(int j=mos; j<mcs; j++){
+        for(int j=0; j<mcs; j++){
           matrix_acts_on_polynomial(m,module[j],p);
           module.AddOnTop(p);
         }
@@ -2688,34 +2733,158 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
       Polynomial<Rational>::GaussianEliminationByRowsDeleteZeroRows(module);
     } while(module.size > mcs);
     std::cout << "...rank is " << module.size << std::endl;
-    reps[k].reset(&W);
-    reps[k].name = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+    WeylGroupRepresentation<Rational> rep;
+    rep.reset(&W);
+    rep.names.SetSize(1);
+    rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     for(int i=1; i<W.GetDim()+1; i++)
     { Matrix<Rational> rm;
       rm.init(module.size, module.size);
       W.GetStandardRepresentationMatrix(i,m);
-      for(int ji=0; ji<module.size; ji++)
-      { Vector<Rational> v;
-        matrix_acts_on_polynomial(m,module[ji],p);
-        GetCoordsInBasisInputIsGaussianEliminated(module,p,&v);
-        for(int jj=0; jj<module.size; jj++)
-          rm(jj,ji) = v[jj];
+      for(int ji=0; ji<module.size; ji++) // would be neat if we
+      { Vector<Rational> v;               // didnt need to go through
+        matrix_acts_on_polynomial(m,module[ji],p); // stuff we've
+        GetCoordsInBasisInputIsGaussianEliminated(module,p,&v); //
+        for(int jj=0; jj<module.size; jj++) // already looked at, but
+          rm(jj,ji) = v[jj]; // new dimensions can be inserted anywhere
       }
-      reps[k].SetElementImage(i,rm);
+      rep.SetElementImage(i,rm);
     }
     std::cout << "has character ";
-    std::cout << reps[k].GetCharacter() << std::endl;
+    std::cout << rep.GetCharacter() << std::endl;
+    W.AddIrreducibleRepresentation(rep);
   }
-  std::cout << "representations" << std::endl;
-  for(int i=0; i<reps.size; i++)
-    std::cout << reps[i].ToString() << std::endl;
-
-  reps.QuickSortAscending();
-  std::cout << "we have discovered " << reps.size << " representations"<< std::endl;
-  for(int i=0; i<reps.size; i++)
-    std::cout << reps[i].name << "\t\t" << reps[i].GetCharacter() << std::endl;
-
 }
+
+class lennum
+{ public:
+  int num;
+  Rational len;
+
+  bool operator<(const lennum& y) const
+  { return this->len < y.len;
+  }
+  bool operator>(const lennum& y) const
+  { return this->len > y.len;
+  }
+};
+
+WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, const List<Vector<Rational> >& roots)
+{ std::cout << "starting with roots " << roots << std::endl;
+  List<Vector<Rational> > monomial;
+  List<List<Vector<Rational> > > monomials;
+  Matrix<Rational> m;
+  for(int i=0; i<W.size; i++)
+  { W.GetStandardRepresentationMatrix(i,m);
+    monomial.SetSize(roots.size);
+    for(int j=0; j<roots.size; j++)
+    { monomial[j] = m*roots[j];
+      if(monomial[j].IsNegative())
+        monomial[j] = -monomial[j];
+    }
+    monomial.QuickSortAscending();
+    monomials.BSInsertDontDup(monomial);
+  }
+  std::cout << "have all " << monomials.size << " monomials";
+
+  List<lennum> lens;
+  List<Vector<Rational> > images;
+  images.SetSize(monomials.size);
+  lens.SetSize(monomials.size);
+  for(int i=0; i<monomials.size; i++)
+  { images[i].SetSize(W.RootSystem.size);
+    Rational l = 0;
+    for(int j=0; j<W.RootSystem.size; j++)
+    { Rational p=1;
+      for(int k1=0; k1<monomials[i].size; k1++)
+      { Rational s=0;
+        for(int k2=0; k2<monomials[i][k1].size; k2++)
+          s += monomials[i][k1][k2] * W.RootSystem[j][k2];
+        p *= s;
+      }
+      images[i][j] = p;
+      l += p*p;
+    }
+    lens[i].len = l;
+    lens[i].num = i;
+  }
+  lens.QuickSortAscending();
+  std::cout << " ... sorted" << std::endl;
+
+  List<int> monomials_used;
+  VectorSpace<Rational> vs;
+  for(int i=0; i<monomials.size; i++)
+  { if(vs.AddVector(images[lens[i].num]))
+      monomials_used.AddOnTop(lens[i].num);
+  }
+  Basis<Rational> B;
+  for(int i=0; i<monomials_used.size; i++)
+    B.AddVector(images[monomials_used[i]]);
+
+  std::cout << "module rank is " << monomials_used.size << std::endl;
+
+  WeylGroupRepresentation<Rational> rep;
+  rep.reset(&W);
+  for(int i=1; i<W.GetDim()+1; i++)
+  { Matrix<Rational> m;
+    W.GetStandardRepresentationMatrix(i,m);
+    Matrix<Rational> rm;
+    rm.init(monomials_used.size, monomials_used.size);
+    for(int j=0; j<monomials_used.size; j++)
+    { List<Vector<Rational> > monomial;
+      monomial.SetSize(roots.size);
+      for(int k=0; k<roots.size; k++)
+        monomial[k] = m*monomials[monomials_used[j]][k];
+      Vector<Rational> evaluated;
+      evaluated.SetSize(W.RootSystem.size);
+      for(int ei=0; ei<W.RootSystem.size; ei++)
+      { Rational p = 1;
+        for(int ej=0; ej<monomial.size; ej++)
+        { Rational s = 0;
+          for(int ek=0; ek<monomial[ej].size; ek++)
+          { s += monomial[ej][ek] * W.RootSystem[ei][ek];
+          }
+          p *= s;
+        }
+        evaluated[ei] = p;
+      }
+      Vector<Rational> be = B.PutInBasis(evaluated);
+      rm.AssignVectorToColumnKeepOtherColsIntactNoInit(j,be);
+    }
+    rep.SetElementImage(i,rm);
+    std::cout << rm.ToString(&testformat) << std::endl;
+  }
+  return rep;
+}
+
+
+void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
+{ WeylGroup& W = theSSlieAlg.theWeyl;
+
+  GlobalVariables localGlobalVariables;
+  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+
+  rootSubalgebras theRootSAs;
+  theRootSAs.owneR=&theSSlieAlg;
+  DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
+  List<Vector<Rational> > roots;
+
+  for (int k=0; k<theRootSAs.size; k++)
+  { rootSubalgebra& currentRootSA=theRootSAs[k];
+    roots=currentRootSA.PositiveRootsK;
+    std::cout << "I am processing root subalgebra of type "
+              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+    WeylGroupRepresentation<Rational> rep = get_macdonald_representation(W,roots);
+    rep.names.SetSize(1);
+    rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+    std::cout << "has character ";
+    std::cout << rep.GetCharacter() << std::endl;
+    W.AddIrreducibleRepresentation(rep);
+  }
+}
+
+
 
 template <class templateMonomial, class coefficient>
 bool GetCoordsInBasisInputIsGaussianEliminated
@@ -2744,7 +2913,8 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 
 
 int main(void)
-{ testformat.flagUseHTML = false;
+{ //BSTest();
+  testformat.flagUseHTML = false;
   testformat.flagUseLatex = false;
   /*
       Rational zero = Rational(0,1);
@@ -3426,8 +3596,8 @@ int main(void)
 
 
 
-  char letter = 'B';
-  int number = 3;
+  char letter = 'F';
+  int number = 4;
 
   GlobalVariables localGlobalVariables;
   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
@@ -3437,9 +3607,13 @@ int main(void)
   WeylGroup& W=theSSlieAlg.theWeyl;
   W.ComputeConjugacyClasses();
 
-  get_macdonald_representations_of_weyl_group(theSSlieAlg);
+  get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);
+  for(int i=0; i<W.irreps.size; i++)
+    std::cout << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << std::endl;
 
-  UDPolynomial<Rational> p;
+  ComputeCharacterTable(W);
+  //ComputeIrreps(W);
+/*UDPolynomial<Rational> p;
   Matrix<Rational> m;
   for(int i=0; i<W.conjugacyClasses.size; i++)
   { for(int j=0; j<W.conjugacyClasses[i].size; j++)
@@ -3447,8 +3621,7 @@ int main(void)
       p.AssignCharPoly(m);
       std::cout << i << ',' << j << ": " << p << std::endl;
     }
-  }
-
+  }*/
 
   /*
      JSData data;

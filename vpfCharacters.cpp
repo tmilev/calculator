@@ -267,6 +267,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   //{
   //}
   List<bool> Accounted;
+  std::cout << "Group has " << this->theElements.size << std::endl;
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);
@@ -278,24 +279,23 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   //this->theElements.GrandMasterConsistencyCheck();
   for (int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
-    { theStack.Clear();
-      theStack.AddOnTop(i);
-      theStack.GrandMasterConsistencyCheck();
-      Accounted[i]=true;
-      for (int j=0; j<theStack.size; j++)
+    { // provably unnecessary
+      Accounted[i] = true;
+      this->conjugacyClasses.SetSize(conjugacyClasses.size+1);
+      this->conjugacyClasses[this->conjugacyClasses.size-1].AddOnTop(i);
+      for (int j=0; j<this->conjugacyClasses[this->conjugacyClasses.size-1].size; j++)
         for (int k=0; k<theRank; k++)
         { theRhoImage=this->rho;
           this->SimpleReflection(k, theRhoImage);
-          this->ActOn(theStack[j], theRhoImage);
+          this->ActOn(this->conjugacyClasses[this->conjugacyClasses.size-1][j], theRhoImage);
           this->SimpleReflection(k, theRhoImage);
           int accountedIndex=this->rhoOrbit.GetIndex(theRhoImage);
           if(!Accounted[accountedIndex])
-          { theStack.AddOnTop(accountedIndex);
-            Accounted[accountedIndex]=true;
+          { this->conjugacyClasses[this->conjugacyClasses.size-1].AddOnTop(accountedIndex);
+            Accounted[accountedIndex] = true;
           }
         }
-      this->conjugacyClasses.AddOnTop(theStack);
-      this->conjugacyClasses.LastObject()->QuickSortAscending();
+      this->conjugacyClasses[conjugacyClasses.size-1].QuickSortAscending();
     }
   int checkNumElts=0;
   for (int i=0; i<this->conjugacyClasses.size; i++)
@@ -306,15 +306,9 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     assert(false);
   }
   this->conjugacyClasses.QuickSortAscending();
-  checkNumElts=0;
-  for (int i=0; i<this->conjugacyClasses.size; i++)
-    checkNumElts+=this->conjugacyClasses[i].size;
-  if (this->theElements.size!=checkNumElts)
-  { std::cout << "This is a programming error: After soring there are total of " << checkNumElts << " elements in the various conjugacy classes "
-    << " while the group has " << this->theElements.size << " elements" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-//  std::cout << "<hr>I computed: " << this->conjugacyClasses.size << "conjugacy classes.";
+  std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
+  for(int i=0; i<conjugacyClasses.size; i++)
+    std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
 }
 
 void CoxeterGroup::ComputeConjugacyClasses(){

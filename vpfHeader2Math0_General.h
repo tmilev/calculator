@@ -4905,7 +4905,7 @@ class WeylGroupRepresentation
   Matrix<coefficient> gramMatrixInverted;
   public:
   WeylGroup* OwnerGroup;
-  std::string name;
+  List<std::string> names;
   WeylGroupRepresentation():parent(0), OwnerGroup(0){}
   unsigned int HashFunction() const;
   bool CheckInitialization()const;
@@ -4935,6 +4935,7 @@ class WeylGroupRepresentation
   { return this->OwnerGroup==other.OwnerGroup && this->theCharacter==other.theCharacter;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
+  std::string GetName() const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   Matrix<coefficient>& GetElementImage(int elementIndex);
   void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
@@ -4943,6 +4944,9 @@ class WeylGroupRepresentation
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const
   { return this->theCharacter.isGreaterThanLexicographic(other.theCharacter);
+  }
+  bool operator<(const WeylGroupRepresentation<coefficient>& other)const
+  { return other.theCharacter.isGreaterThanLexicographic(this->theCharacter);
   }
 };
 
@@ -5038,6 +5042,8 @@ public:
   }
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables=0);
+  void AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p);
+  void AddCharacter(const Vector<Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType);
@@ -5046,6 +5052,8 @@ public:
   bool CheckInitializationFDrepComputation()const;
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
+  template <typename coefficient>
+  Vector<coefficient> GetCharacterProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
   template <typename coefficient>
   inline coefficient GetCharacterNorm
   (const Vector<coefficient>& theCharacter)const
@@ -8956,6 +8964,17 @@ unsigned int WeylGroupRepresentation<coefficient>::HashFunction()const
 }
 
 template <typename coefficient>
+std::string WeylGroupRepresentation<coefficient>::GetName() const
+{ std::string name;
+  for(int i=0; i<this->names.size; i++)
+  { name.append(this->names[i]);
+    if(i!=this->names.size-1)
+      name.append(" aka ");
+  }
+  return name;
+}
+
+template <typename coefficient>
 std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* theFormat)const
 { if (this->OwnerGroup==0)
     return "non-initialized representation";
@@ -8989,6 +9008,15 @@ coefficient WeylGroup::GetHermitianProduct(const Vector<coefficient>& leftCharac
   for(int i=0; i<this->conjugacyClasses.size; i++)
     result +=leftCharacter[i].GetComplexConjugate() * rightCharacter[i].GetComplexConjugate() * this->conjugacyClasses[i].size;
   result/=this->theElements.size;
+  return result;
+}
+
+template <typename coefficient>
+Vector<coefficient> WeylGroup::GetCharacterProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter) const
+{ Vector<coefficient> result;
+  result.SetSize(this->conjugacyClasses.size);
+  for(int i=0; i<this->conjugacyClasses.size; i++)
+    result[i] = leftCharacter[i]*rightCharacter[i];
   return result;
 }
 

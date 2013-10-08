@@ -704,10 +704,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
           //check our work:
           tempP.Substitution(outputSub);
           if (!tempP.IsEqualToZero())
-          { std::cout << "This is a programming error: I was solving the polynomial equation "
-            << inputSystem[i].ToString() << ", which resulted in the substitution " << outputSub.ToString()
-            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.ToString()
-            << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          { std::cout << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
+            << ", which resulted in the substitution " << outputSub.ToString()
+            << ". However, after carrying out the substitution in the polynomial, I got " << tempP.ToString() << ". "
+            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
           //
@@ -719,16 +719,19 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
 
 template <class coefficient>
 int GroebnerBasisComputation<coefficient>::GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem)
-{ if (inputSystem[0].IsEqualToZero())
-  { std::cout << "Something is wrong: I have a zero polynomial in the reduced Groebner basis. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  const MonomialP& theMon=inputSystem[0].GetMaxMonomial(this->theMonOrdeR);
+{ Polynomial<coefficient>* firstNonZero=0;
+  for (int i=0; i<inputSystem.size; i++)
+    if (!inputSystem[i].IsEqualToZero())
+    { firstNonZero=&inputSystem[i];
+      break;
+    }
+  if (firstNonZero==0)
+    return -1;
+  const MonomialP& theMon=firstNonZero->GetMaxMonomial(this->theMonOrdeR);
   for (int i=0; i<theMon.GetMinNumVars(); i++)
     if (theMon(i)>0)
       return i;
-  std::cout << "<hr>Warning: was not able to extract preferred index from polynomial: " << inputSystem[0].ToString()
+  std::cout << "<hr>Warning: was not able to extract preferred index from polynomial: " << firstNonZero->ToString()
   << " with max monomial: " << theMon.ToString();
   return -1;
 }

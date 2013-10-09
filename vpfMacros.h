@@ -77,10 +77,19 @@
 class ProjectInformationInstance
 {
   public:
-  ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
-  ;
+  ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
 };
 
 static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "External includes + macros. Macro/build configuration.");
 
+class Crasher
+{
+  public:
+  std::stringstream theCrashReport;
+  Crasher& operator<<(const std::string& input);
+  Crasher& operator<<(int x);
+  Crasher& operator<<(bool x);
+};
+
+extern Crasher crash;
 #endif

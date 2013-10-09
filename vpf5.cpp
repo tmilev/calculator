@@ -2437,55 +2437,6 @@ bool CommandList::ReadTestFromFile(std::fstream& theFile, List<std::string>& com
   return false;
 }
 
-void CommandList::AutomatedTestRun
-(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
-{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
-  CommandList theTester;
-  int numFunctionsToTest=0;
-  for (int i=0; i<this->FunctionHandlers.size; i++)
-    numFunctionsToTest+=this->FunctionHandlers[i].size;
-  numFunctionsToTest+=operationsCompositeHandlers.size;
-  inputStringsTest.SetExpectedSize(numFunctionsToTest);
-  inputStringsTest.SetSize(0);
-  for (int i=0; i<this->FunctionHandlers.size; i++)
-    for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      if (this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTest &&
-          this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTestSetKnownGoodCopy)
-        inputStringsTest.AddOnTop(this->FunctionHandlers[i][j].theExample);
-  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
-    inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i].theExample);
-  outputStringsTestWithInit.SetSize(inputStringsTest.size);
-  outputStringsTestNoInit.SetSize(inputStringsTest.size);
-  ProgressReport theReport(this->theGlobalVariableS);
-  for (int i=0; i<inputStringsTest.size; i++)
-  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
-    theTester.init(*this->theGlobalVariableS);
-    Expression dummyCommands, tempE;
-    tempE.AssignValue<std::string>("Input suppressed", theTester);
-    dummyCommands.reset(theTester);
-    dummyCommands.AddChildAtomOnTop(theTester.opEndStatement());
-    dummyCommands.AddChildOnTop(tempE);
-
-    std::cout << "<hr>Evaluating command of index " << i << ": " << inputStringsTest[i];
-    theTester.Evaluate(inputStringsTest[i]);
-    outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
-    std::cout << "<br>To get: " << theTester.theProgramExpression.ToString();
-    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
-    std::stringstream reportStream;
-    reportStream << "Testing expression " << i << " out of " << inputStringsTest.size << ". ";
-    theReport.Report(reportStream.str());
-  }
-/*  theTester.init(*this->theGlobalVariableS);
-  for (int i=0; i<inputStringsTest.size; i++)
-  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
-    std::cout << "<hr>Evaluating without initialization: " << inputStringsTest[i];
-    theTester.Evaluate(inputStringsTest[i]);
-    outputStringsTestNoInit[i]=theTester.theProgramExpression.ToString();
-    std::cout << "<br>To get: " << outputStringsTestNoInit[i];
-    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
-  }*/
-}
-
 bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAutomatedTestSetKnownGoodCopy");
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;

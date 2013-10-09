@@ -4,6 +4,44 @@
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Main implementation file, part 2. ");
 
+Crasher crash;
+
+Crasher& Crasher::operator <<(const std::string& input)
+{ this->theCrashReport << input;
+  return *this;
+}
+
+Crasher& Crasher::operator<< (int x)
+{ this->theCrashReport << x;
+  return *this;
+}
+
+Crasher& Crasher::operator<<(bool x)
+{ if (x==true)
+  { this->theCrashReport << " true ";
+    return *this;
+  }
+  this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  std::cout << this->theCrashReport.str();
+  std::fstream theFile;
+  std::string theFileName="../output/crashdump.txt";
+  bool succeededToDump=true;
+  if (!CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
+  { theFileName="../output/crashdump2.txt";
+    succeededToDump=CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  }
+  if (succeededToDump)
+    std::cout << " Crash dumped in file " << theFileName;
+  else
+    std::cout << "Failed to dump crash: check file permissions for file " << theFileName << ".";
+  std::cout.flush();
+  theFile << this->theCrashReport.str();
+  theFile.close();
+  assert(false);
+  return *this;
+}
+
+
 bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
 { Vectors<Rational>& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots.GetElement();
   Vectors<Rational>& Ksingular=theGlobalVariables.rootsConeConditionHolds2.GetElement();
@@ -2137,10 +2175,9 @@ void rootSubalgebras::ElementToHtml
   childrenPathServer.append("rootHtml_");
   CGI::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   if (!CGI::FileExists(MyPathPhysical))
-  { std::cout << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
+  { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
     << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    << false;
   }
   output << "<html><title> Root subsystems of " << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
   output << "<meta name=\"keywords\" content=\"" << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
@@ -2883,5 +2920,3 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   }
   return false;
 }
-
-

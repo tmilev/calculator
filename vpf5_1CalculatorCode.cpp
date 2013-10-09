@@ -464,11 +464,10 @@ bool CommandList::innerPrintSSsubalgebras
     std::fstream theFile;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     if(!CGI::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
-    { std::cout << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileName
+    { crash << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileName
       << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << false;
     }
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);

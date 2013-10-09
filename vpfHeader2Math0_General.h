@@ -1157,10 +1157,9 @@ public:
   bool operator<=(const coefficient& other)const
   { coefficient constME;
     if (!this->IsAConstant(&constME))
-    { std::cout << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
+    { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing that is a good decision. In any case, crashing to let you know. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << false;
       return false;
     }
     return constME<=other;
@@ -1168,10 +1167,9 @@ public:
   bool operator<(const coefficient& other)const
   { coefficient constME;
     if (!this->IsAConstant(&constME))
-    { std::cout << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
+    { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing  that is a good decision. In any case, crashing to let you know. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << false;
       return false;
     }
     return constME<other;
@@ -1986,10 +1984,9 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
   for (int i=0; i<r.size; i++)
   { tempM.MakeEi(i);
     if (!r[i].IsInteger())
-    { std::cout << "This may or may not be a programming error: requesting a monomial with non-integer exponent. "
+    { crash << "This may or may not be a programming error: requesting a monomial with non-integer exponent. "
       << "It appears this operation should be allowed, however this requires further consideration. I am crashing just in case. "
-      << " Please debug file " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << " Please debug file " << false;
     }
     this->AddMonomial(tempM, r[i].GetNumerator());
   }

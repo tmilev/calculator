@@ -333,13 +333,11 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
         if (!CGI::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, theFormat), false, true, false))
-        { std::cout << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
+        { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, theFormat)
           << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
           << "2. The calculator has no write permission to the folder in which the file is located. "
-          << "3. The folder does not exist for some reason lying outside of the calculator. "
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+          << "3. The folder does not exist for some reason lying outside of the calculator. " << false;
         }
         outputFileSubalgebra << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script> "
         << "<body>Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
@@ -347,13 +345,12 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
           if (!CGI::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, theFormat), false, true, false))
-          { std::cout << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
+          { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
             << this->GetPhysicalFileNameFKFTNilradicals(i, theFormat) << " for output. However, the file failed to create. "
             << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
+            << false;
           }
           outputFileFKFTnilradicals << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script><body>"
           << this->ToStringAlgebraLink(i, theFormat) << this->theSubalgebraCandidates[i].ToStringNilradicals(theFormat) << "\n</body></html>";

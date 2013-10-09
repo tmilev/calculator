@@ -158,9 +158,8 @@ class CoxeterElement{
   bool operator==(const CoxeterElement& other) const;
   bool operator>(const CoxeterElement& other) const
   { if(this->owner!=other.owner)
-    { std::cout << "This may or may not be a programming error: comparing elements of different coxeter groups. "
-      << "Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This may or may not be a programming error: comparing elements of different coxeter groups. "
+      << "Crashing to let you know. " << false;
     }
     return this->reflections>other.reflections;
   }

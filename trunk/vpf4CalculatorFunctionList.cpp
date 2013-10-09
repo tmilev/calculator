@@ -9,6 +9,10 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
+  ("crash", CommandListFunctions::innerCrash, "",
+   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.). ",
+   "crash(0)", false);
+  this->AddOperationInnerHandler
   ("MakeMakefile", CommandListFunctions::innerMakeMakeFile, "",
    "Makes a makefile. ",
    "MakeMakefile(0)", false);

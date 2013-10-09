@@ -24,6 +24,7 @@ public:
   static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCrash(CommandList& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

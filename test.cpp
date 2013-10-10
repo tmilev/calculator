@@ -2998,8 +2998,8 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 
 
 int main(void)
-{ //BSTest();
-  localObjectInitializer initializeGlobalObjects;
+{ InitializeGlobalObjects();
+  //BSTest();
 
   /*
       Rational zero = Rational(0,1);

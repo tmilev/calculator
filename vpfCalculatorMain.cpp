@@ -31,7 +31,7 @@ int main_command_input(int argc, char **argv)
 
 int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
-  localObjectInitializer initializeGlobalObjects;
+  InitializeGlobalObjects();
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=500;
 	std::cout << "Content-Type: text/html\n\n";
 

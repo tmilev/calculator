@@ -2684,12 +2684,9 @@ template <typename Element>
 inline void Matrix<Element>::SwitchTwoRows(int row1, int row2)
 { if (row1==row2)
     return;
-  Element tempElement;
-  for(int i = 0; i<this->NumCols; i++)
-  { tempElement=(this->elements[row1][i]);
-    this->elements[row1][i]=(this->elements[row2][i]);
-    this->elements[row2][i]=(tempElement);
-  }
+  Element* tmp = this->elements[row1];
+  this->elements[row1] = this->elements[row2];
+  this->elements[row2] = tmp;
 }
 
 template <typename Element>

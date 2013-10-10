@@ -2857,6 +2857,94 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   return rep;
 }
 
+WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
+{ std::cout << "starting with roots " << roots << std::endl;
+  List<Vector<Rational> > monomial;
+  List<List<Vector<Rational> > > monomials;
+  Matrix<Rational> m;
+  for(int i=0; i<W.size; i++)
+  { W.GetStandardRepresentationMatrix(i,m);
+    monomial.SetSize(roots.size);
+    for(int j=0; j<roots.size; j++)
+    { monomial[j] = m*roots[j];
+      if(monomial[j].IsNegative())
+        monomial[j] = -monomial[j];
+    }
+    monomial.QuickSortAscending();
+    monomials.BSInsertDontDup(monomial);
+  }
+  std::cout << "have all " << monomials.size << " monomials";
+
+  List<lennum> lens;
+  List<Vector<Rational> > images;
+  images.SetSize(monomials.size);
+  lens.SetSize(monomials.size);
+  for(int i=0; i<monomials.size; i++)
+  { images[i].SetSize(W.RootSystem.size);
+    Rational l = 0;
+    for(int j=0; j<W.RootSystem.size; j++)
+    { Rational p=1;
+      for(int k1=0; k1<monomials[i].size; k1++)
+      { Rational s=0;
+        for(int k2=0; k2<monomials[i][k1].size; k2++)
+          s += monomials[i][k1][k2] * W.RootSystem[j][k2];
+        p *= s;
+      }
+      images[i][j] = p;
+      l += p*p;
+    }
+    lens[i].len = l;
+    lens[i].num = i;
+  }
+  lens.QuickSortAscending();
+  std::cout << " ... sorted" << std::endl;
+
+  List<int> monomials_used;
+  VectorSpace<Rational> vs;
+  for(int i=0; i<monomials.size; i++)
+  { if(vs.AddVector(images[lens[i].num]))
+      monomials_used.AddOnTop(lens[i].num);
+  }
+  Basis<Rational> B;
+  for(int i=0; i<monomials_used.size; i++)
+    B.AddVector(images[monomials_used[i]]);
+
+  std::cout << "module rank is " << monomials_used.size << std::endl;
+
+  WeylGroupRepresentation<Rational> rep;
+  rep.reset(&W);
+  for(int i=1; i<W.GetDim()+1; i++)
+  { Matrix<Rational> m;
+    W.GetStandardRepresentationMatrix(i,m);
+    Matrix<Rational> rm;
+    rm.init(monomials_used.size, monomials_used.size);
+    for(int j=0; j<monomials_used.size; j++)
+    { List<Vector<Rational> > monomial;
+      monomial.SetSize(roots.size);
+      for(int k=0; k<roots.size; k++)
+        monomial[k] = m*monomials[monomials_used[j]][k];
+      Vector<Rational> evaluated;
+      evaluated.SetSize(W.RootSystem.size);
+      for(int ei=0; ei<W.RootSystem.size; ei++)
+      { Rational p = 1;
+        for(int ej=0; ej<monomial.size; ej++)
+        { Rational s = 0;
+          for(int ek=0; ek<monomial[ej].size; ek++)
+          { s += monomial[ej][ek] * W.RootSystem[ei][ek];
+          }
+          p *= s;
+        }
+        evaluated[ei] = p;
+      }
+      Vector<Rational> be = B.PutInBasis(evaluated);
+      for(int mnop=0; mnop<be.size; mnop++)
+        rm.elements[j][mnop] = be[mnop];
+    }
+    rep.SetElementImage(i,rm);
+    std::cout << rm.ToString(&testformat) << std::endl;
+  }
+  return rep;
+}
 
 void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;

@@ -82,11 +82,14 @@ class ProjectInformationInstance
 
 static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "External includes + macros. Macro/build configuration.");
 
+class GlobalVariables;
 class Crasher
 {
   public:
+  GlobalVariables* theGlobalVariables;
   std::string userInputStringIfAvailable;
   std::stringstream theCrashReport;
+  Crasher():theGlobalVariables(0){}
   Crasher& operator<<(const std::string& input);
   Crasher& operator<<(int x);
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);

@@ -1,14 +1,13 @@
+//The current file is licensed under the license terms found in the main header file "vpf.h".
+//For additional information refer to the file "vpf.h".
 #include "vpf.h"
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 // ^ that is first for precompilation
 
 //#include "testlib.h"
 #include <iostream>
 
 #include <sys/stat.h>
-
-// this is one reason test.cpp isn't even compiled into the actual calculator
-FormatExpressions testformat;
-
 
 // no need to lex first
 //enum Symbol{bracket,brace,quote};
@@ -1186,7 +1185,7 @@ List<Vector<Rational> > ComputeCharacterTable(somegroup &G)
   { Matrix<Rational> M;
     std::cout << "Getting class matrix " << i << std::endl;
     M = GetClassMatrix(G,i,&classmap);
-    //std::cout << M.ToString(&testformat) << std::endl;
+    //std::cout << M.ToString(&consoleFormat) << std::endl;
     List<VectorSpace<Rational> > es = GetEigenspaces(M);
     for(int esi=0; esi<es.size; esi++)
     { int spsize = spaces.size;
@@ -1219,7 +1218,7 @@ got_chars:
     for(int i=0; i<G.conjugacyClasses.size; i++)
     { Matrix<Rational> M;
       M = GetClassMatrix(G,i);
-      std::cout << M.ToString(&testformat) << std::endl;
+      std::cout << M.ToString(&consoleFormat) << std::endl;
       List<VectorSpace<Rational> > spsi = GetEigenspaces(M);
       for(int spi=0; spi<spsi.size; spi++)
         sps.AddOnTop(spsi[spi]);
@@ -1743,10 +1742,10 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
      sel.RemoveSelection(0);
      WeylSubgroup H;
      ParabolicSubgroup(&G,sel,H);
-     std::cout << G.CartanSymmetric.ToString(&testformat) << std::endl;
+     std::cout << G.CartanSymmetric.ToString(&consoleFormat) << std::endl;
      H.ComputeIrreducibleRepresentations();
      std::cout << "subgroup" << std::endl;
-     std::cout << H.ToString(&testformat) << std::endl;
+     std::cout << H.ToString(&consoleFormat) << std::endl;
      std::cout << "sigs" << std::endl;
      H.ComputeTauSignature();
      std::cout << H.tauSignature << std::endl;
@@ -2070,7 +2069,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     cf[cfi] = 1;
     std::cout << "getting matrix" << cf << std::endl;
     Matrix<coefficient> A = ClassFunctionMatrix(cf);
-    std::cout << A.ToString(&testformat) << std::endl;
+    std::cout << A.ToString(&consoleFormat) << std::endl;
     std::cout << "getting eigenspaces" << std::endl;
     List<List<Vector<coefficient> > > es = eigenspaces(A);
     for(int i=0; i<es.size; i++)
@@ -2697,13 +2696,11 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
 void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;
 
-  GlobalVariables localGlobalVariables;
-  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
 
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
   for (int k=0; k<theRootSAs.size; k++)
@@ -2852,7 +2849,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
       rm.AssignVectorToColumnKeepOtherColsIntactNoInit(j,be);
     }
     rep.SetElementImage(i,rm);
-    std::cout << rm.ToString(&testformat) << std::endl;
+    std::cout << rm.ToString(&consoleFormat) << std::endl;
   }
   return rep;
 }
@@ -2941,7 +2938,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
         rm.elements[j][mnop] = be[mnop];
     }
     rep.SetElementImage(i,rm);
-    std::cout << rm.ToString(&testformat) << std::endl;
+    std::cout << rm.ToString(&consoleFormat) << std::endl;
   }
   return rep;
 }
@@ -3002,8 +2999,8 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 
 int main(void)
 { //BSTest();
-  testformat.flagUseHTML = false;
-  testformat.flagUseLatex = false;
+  localObjectInitializer initializeGlobalObjects;
+
   /*
       Rational zero = Rational(0,1);
       Rational one = Rational(1,1);
@@ -3097,7 +3094,7 @@ int main(void)
     ClassFunction<Rational> cf;
     cf = G.irreps[0].GetCharacter();
     r.ClassFunctionMatrix(cf,cfm);
-    std::cout << cfm.ToString(&testformat) << std::endl;
+    std::cout << cfm.ToString(&consoleFormat) << std::endl;
   */
 
   /*
@@ -3316,7 +3313,7 @@ int main(void)
       }
     }
 
-    std::cout << BM.ToString(&testformat) << std::endl;
+    std::cout << BM.ToString(&consoleFormat) << std::endl;
     for(int i=0; i<BM.NumRows; i++)
     { std::cout << PutInBasis(B[i],B) << std::endl;
     }
@@ -3334,7 +3331,7 @@ int main(void)
       { M.elements[i][j] = v[j];
       }
     }
-    std::cout << M.ToString(&testformat) << std::endl;
+    std::cout << M.ToString(&consoleFormat) << std::endl;
 
 
 
@@ -3365,7 +3362,7 @@ int main(void)
     a(0,0) = -1; a(0,1) = -1; a(1,0) =  1; a(1,1) =  0;
     b(0,0) =  1; b(0,1) =  0; b(1,0) = -1; b(1,1) = -1;
     M.AssignTensorProduct(b,b);
-    std::cout << M.ToString(&testformat) << std::endl;
+    std::cout << M.ToString(&consoleFormat) << std::endl;
   */
   /*
       std::cout << "this orbit has " << G.rhoOrbit.size << std::endl;
@@ -3546,7 +3543,7 @@ int main(void)
       CoxeterRepresentation<Rational> V2x2 = V2*V2;
       std::cout << V2x2.GetCharacter() << std::endl;
       for(int i=0; i<G.rank; i++)
-      { std::cout << V2x2.gens[i].ToString(&testformat);
+      { std::cout << V2x2.gens[i].ToString(&consoleFormat);
         std::cout << V2x2.gens[i].GetDeterminant() << ' ' << V2x2.gens[i].GetTrace() << std::endl;
       }
       std::cout << "class function matrices" << std::endl;
@@ -3556,7 +3553,7 @@ int main(void)
         cf.MakeZero();
         cf[cfi] = 1;
         std::cout << cfi << std::endl;
-        std::cout << V2x2.ClassFunctionMatrix(cf).ToString(&testformat) << std::endl;
+        std::cout << V2x2.ClassFunctionMatrix(cf).ToString(&consoleFormat) << std::endl;
       }
       List<CoxeterRepresentation<Rational> > Vs;
       Vs = V2x2.Decomposition();
@@ -3600,7 +3597,7 @@ int main(void)
   for(int i=0; i<sr2d.size; i++)
   { std::cout << sr2d[i].GetCharacter() << std::endl;
     for(int j=0; j<sr2d[i].gens.size; j++)
-     std::cout << sr2d[i].gens[j].ToString(&testformat) << std::endl;
+     std::cout << sr2d[i].gens[j].ToString(&consoleFormat) << std::endl;
   }
   */
 
@@ -3644,7 +3641,7 @@ int main(void)
 
      std::cout << "trying to break up one isotypic component" << std::endl;
      int cmpx = 2;
-     std::cout << isocomps[cmpx].ToString(&testformat) << std::endl;
+     std::cout << isocomps[cmpx].ToString(&consoleFormat) << std::endl;
      int d = isocomps[cmpx].GetRank();
      std::cout << "the smoothed-out inner product" << std::endl;
      Matrix<Rational> B;
@@ -3657,7 +3654,7 @@ int main(void)
            isocomps[cmpx].GetElementImage(g).GetVectorFromColumn(j,w);
            B.elements[i][j] = v.ScalarEuclidean(w);
          }
-    std::cout << B.ToString(&testformat) << std::endl;
+    std::cout << B.ToString(&consoleFormat) << std::endl;
 
     Vector<Rational> v;
     v.MakeZero(B.NumRows);
@@ -3678,7 +3675,7 @@ int main(void)
     isocomps[cmpx].Restrict(W,derp,comp);
 
     std::cout << "This should be one component" << std::endl;
-    std::cout << comp.ToString(&testformat) << std::endl;
+    std::cout << comp.ToString(&consoleFormat) << std::endl;
   */
 
 

@@ -1,12 +1,12 @@
+//The current file is licensed under the license terms found in the main header file "vpf.h".
+//For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math3_Characters.h"
 #include "vpfHeader2Math4_Graph.h"
-
-#include "vpfHeader2Math0_General.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 
-extern FormatExpressions testformat;
+extern FormatExpressions consoleFormat;
 
 template<>
 typename List<CoxeterElement>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<CoxeterElement>()
@@ -610,7 +610,7 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
 { //std::cout << "AddVectorDestructively: v = " << v << " matrix is" << std::endl;
-  //std::cout << fastbasis.ToString(&testformat) << std::endl;
+  //std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
   if(fastbasis.NumRows == 0)
   { this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
@@ -628,7 +628,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     rank = 1;
     this->fastbasis.NumRows = 1;
 //    std::cout << "starting matrix" << std::endl;
-//    std::cout << fastbasis.ToString(&testformat) << std::endl;
+//    std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
     return true;
   }
   int jj=0;
@@ -653,7 +653,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       fastbasis.GaussianEliminationByRows();
       rank++;
 //      std::cout << "stuffed in the middle" << std::endl;
-//      std::cout << fastbasis.ToString(&testformat) << std::endl;
+//      std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
       return true;
     }
     if(jj>j)
@@ -673,7 +673,7 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
   rank++;
 //  std::cout << "tacked on the end" << std::endl;
-//  std::cout << fastbasis.ToString(&testformat) << std::endl;
+//  std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
   return true;
 }
 
@@ -735,7 +735,7 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
     }
   }
 //  std::cout << "MatrixInBasisFast" << std::endl;
-//  std::cout << in.ToString(&testformat) << '\n' << BM.ToString(&testformat) << '\n' << out.ToString(&testformat) << std::endl;
+//  std::cout << in.ToString(&consoleFormat) << '\n' << BM.ToString(&consoleFormat) << '\n' << out.ToString(&consoleFormat) << std::endl;
 }
 
 
@@ -763,7 +763,7 @@ Matrix<coefficient> CoxeterRepresentation<coefficient>::MatrixOfElement(int g)
 
 //template <typename coefficient>
 //void CoxeterRepresentation<coefficient>::PrintMatrixOfElement(int g)
-//{ std::cout << MatrixOfElement(g).ToString(&testformat) << std::endl;
+//{ std::cout << MatrixOfElement(g).ToString(&consoleFormat) << std::endl;
 //}
 
 
@@ -892,7 +892,7 @@ void CoxeterRepresentation<coefficient>::ClassFunctionMatrix
       for(int j=0; j<outputMat.NumCols; j++)
         outputMat.elements[i][j]+= classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
   }
-//  std::cout << outputMat.ToString(&testformat) << std::endl;
+//  std::cout << outputMat.ToString(&consoleFormat) << std::endl;
 
 }
 
@@ -1084,7 +1084,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     cf[cfi] = 1;
     std::cout << "getting matrix" << cf << std::endl;
     Matrix<coefficient> A = ClassFunctionMatrix(cf);
-    std::cout << A.ToString(&testformat) << std::endl;
+    std::cout << A.ToString(&consoleFormat) << std::endl;
     std::cout << "getting eigenspaces" << std::endl;
     List<List<Vector<coefficient> > > es = eigenspaces(A);
     for(int i=0; i<es.size; i++)

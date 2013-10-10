@@ -22,6 +22,12 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << "The program crash message follows. <br>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  if (this->theGlobalVariables!=0)
+    if (this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS.size>0)
+    { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>";
+      for (int i=this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS.size-1; i>=0; i--)
+        this->theCrashReport << this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS[i] << "<br>";
+    }
   std::cout << this->theCrashReport.str();
   std::fstream theFile;
   std::string theFileName="../output/crashdump.txt";
@@ -31,9 +37,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     succeededToDump=CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
   if (succeededToDump)
-    std::cout << " Crash dumped in file " << theFileName;
+    std::cout << "<hr>Crash dumped in file " << theFileName;
   else
-    std::cout << "Failed to dump crash: check file permissions for file " << theFileName << ".";
+    std::cout << "<hr>Failed to dump crash: check file permissions for file " << theFileName << ".";
   std::cout.flush();
   theFile << this->theCrashReport.str();
   theFile.close();

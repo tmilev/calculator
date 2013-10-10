@@ -1442,6 +1442,7 @@ class GroebnerBasisComputation
   List<Polynomial<coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
   List<coefficient> leadingCoeffs;
+  int TotalNumComputationsSerreLikeSystem;
   int NumberOfComputations;
   int MaxNumComputations;
   int RecursionCounterSerreLikeSystem;

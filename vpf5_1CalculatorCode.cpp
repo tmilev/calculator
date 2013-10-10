@@ -1280,7 +1280,7 @@ bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expr
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
   out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theFormat);
-  out << "<br>Total number of polynomial computations: " << theComputation.NumberOfComputations;
+  out << "<br>Total number of polynomial computations: " << theComputation.TotalNumComputationsSerreLikeSystem;
   if (theComputation.flagSystemProvenToHaveNoSolution)
     out << "<br>The system does not have a solution. ";
   else if(theComputation.flagSystemProvenToHaveSolution)

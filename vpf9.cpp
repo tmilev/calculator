@@ -76,6 +76,7 @@ GlobalVariables::GlobalVariables()
   this->callSystem=0;
   this->flagGaussianEliminationProgressReport=false;
   this->getElapsedTimePrivate=0;
+  std::cout << "Global variables created!";
 }
 
 void ProgressReport::Report(const std::string& theReport)

@@ -495,7 +495,6 @@ Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) con
   return out;
 }
 
-extern FormatExpressions testformat;
 template<typename coefficient>
 VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const
 { // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree

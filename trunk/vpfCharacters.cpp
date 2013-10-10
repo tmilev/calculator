@@ -609,7 +609,9 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
-{ if(fastbasis.NumRows == 0)
+{ //std::cout << "AddVectorDestructively: v = " << v << " matrix is" << std::endl;
+  //std::cout << fastbasis.ToString(&testformat) << std::endl;
+  if(fastbasis.NumRows == 0)
   { this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
     int nzi=0;
@@ -625,6 +627,8 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       fastbasis.elements[0][i] = v[i] / v[nzi];
     rank = 1;
     this->fastbasis.NumRows = 1;
+//    std::cout << "starting matrix" << std::endl;
+//    std::cout << fastbasis.ToString(&testformat) << std::endl;
     return true;
   }
   int jj=0;
@@ -636,15 +640,20 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
     int j = i;
     for(;(j<fastbasis.NumCols)&&(fastbasis.elements[i][j] == 0); j++);
     if(jj<j)
-    { // memmove()
-      for(int bi=degree-1; bi>i; bi--)
-        for(int bj=0; bj<fastbasis.NumCols; bj++)
-          fastbasis.elements[bi][bj] = fastbasis.elements[bi-1][bj];
+    { if(fastbasis.ActualNumRows >= fastbasis.NumRows+1)
+        fastbasis.NumRows++;
+      else
+        fastbasis.Resize(fastbasis.NumRows+1,fastbasis.NumCols,true);
+      coefficient* tmp = fastbasis.elements[fastbasis.NumRows-1];
+      for(int bi=fastbasis.NumRows-1; bi>i; bi--)
+        fastbasis.elements[bi] = fastbasis.elements[bi-1];
+      fastbasis.elements[i] = tmp;
       for(int bj=0; bj<fastbasis.NumCols; bj++)
         fastbasis.elements[i][bj] = v[bj];
       fastbasis.GaussianEliminationByRows();
       rank++;
-      fastbasis.NumRows = rank;
+//      std::cout << "stuffed in the middle" << std::endl;
+//      std::cout << fastbasis.ToString(&testformat) << std::endl;
       return true;
     }
     if(jj>j)
@@ -655,16 +664,16 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
   }
   if(v.IsEqualToZero())
     return false;
-  //realloc()
-  Matrix<coefficient> tmp = fastbasis;
-  fastbasis.init(fastbasis.NumRows+1,fastbasis.NumCols);
-  for(int i=0; i<tmp.NumRows; i++)
-    for(int j=0; j<tmp.NumCols; j++)
-      fastbasis.elements[i][j] = tmp.elements[i][j];
+  // this should take the same amount of time either way
+  if(fastbasis.ActualNumRows >= fastbasis.NumRows+1)
+    fastbasis.NumRows++;
+  else
+    fastbasis.Resize(fastbasis.NumRows+1,fastbasis.NumCols,true);
   for(int j=0; j<fastbasis.NumCols; j++)
     fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
   rank++;
-  fastbasis.NumRows = rank;
+//  std::cout << "tacked on the end" << std::endl;
+//  std::cout << fastbasis.ToString(&testformat) << std::endl;
   return true;
 }
 

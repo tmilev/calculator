@@ -3936,17 +3936,12 @@ template <typename Element>
 void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns, GlobalVariables* theGlobalVariables)
 { //Checking for bees
   if (this->NumRows==0)
-  { std::cout << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
-    << " zero rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
+    << " zero rows. " << crash;
   if (carbonCopyMat!=0)
     if (carbonCopyMat->NumRows!=this->NumRows)
-    { std::cout << "This is a programming error: requesting to do Gaussian elimination with carbon copy, however the matrix has "
-      << this->NumRows << " rows, while the carbon copy has " << carbonCopyMat->NumRows << " rows. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: requesting to do Gaussian elimination with carbon copy, however the matrix has "
+      << this->NumRows << " rows, while the carbon copy has " << carbonCopyMat->NumRows << " rows. " << crash;
   ///////////////////
   int tempI;
   int NumFoundPivots = 0;
@@ -4014,8 +4009,10 @@ class Lattice
 {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output);
 public:
-  inline static const std::string GetXMLClassName(){ return "Lattice";}
-  Matrix<Rational>  basisRationalForm;
+  inline static const std::string GetXMLClassName()
+  { return "Lattice";
+  }
+  Matrix<Rational> basisRationalForm;
   Matrix<LargeInt> basis;
   LargeIntUnsigned Den;
   int GetDim()const{return this->basis.NumCols;}
@@ -4197,8 +4194,7 @@ public:
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input)
-  { output << " Not implemented, please fix. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { output << " Not implemented, please fix. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     return output;
   }
   static const bool IsEqualToZero(){return false;}

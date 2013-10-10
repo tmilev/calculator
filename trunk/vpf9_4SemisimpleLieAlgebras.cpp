@@ -57,7 +57,7 @@ bool SemisimpleLieAlgebra::AttempTFindingHEF
     for (int i=0; i<theSystem.size; i++)
       *logStream << "<br>" << theSystem[i].ToString() << " = 0 ";
   }
-  theComputation.MaxNumComputations=5000;
+  theComputation.MaxNumComputations=1000;
   theComputation.SolveSerreLikeSystem(theSystem, 0, theGlobalVariables);
   if (!theComputation.flagSystemSolvedOverBaseField)
   { if (logStream!=0)
@@ -2260,7 +2260,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
-  theComputation.MaxNumComputations=5000;
+  theComputation.MaxNumComputations=1000;
   theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, theGlobalVariables);
 //  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;

@@ -9,7 +9,7 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialCo
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedGroebnerBasis");
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport(theGlobalVariables);
@@ -78,8 +78,16 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
 
 template<class coefficient>
 bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariables* theGlobalVariables)
-{ bool changed=false;
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyAndReduceBasis");
+  bool changed=false;
   ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport2(theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { std::stringstream out;
+    out << "Reducing basis. Current reduced basis: <br>" << this->theBasiS.ToString() << "<br> Polynomials to adjoin:<br> "
+    << this->basisCandidates.ToString();
+    theReport2.Report(out.str());
+  }
   while (this->basisCandidates.size>0)
   { bool addedNew=false;
     while (this->basisCandidates.size>0)
@@ -138,7 +146,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
 
 template<class coefficient>
 void GroebnerBasisComputation<coefficient>::MakeMinimalBasis()
-{ MacroRegisterFunctionWithName("RationalFunctionOld::GroebnerBasisMakeMinimal");
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::MakeMinimalBasis");
 /*  std::cout << "<br><br> and the leading monomials are: ";
   for (int i=0; i<LeadingCoeffs.size; i++)
     std::cout << LeadingCoeffs[i].ToString() << ", ";*/
@@ -553,6 +561,7 @@ GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
   this->flagSystemProvenToHaveNoSolution=false;
   this->flagSystemSolvedOverBaseField=false;
   this->MaxNumComputations=0;
+  this->TotalNumComputationsSerreLikeSystem=0;
 }
 
 template <class coefficient>
@@ -600,10 +609,10 @@ void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Poly
 
 template<class coefficient>
 void GroebnerBasisComputation<coefficient>::CheckConsistency()
-{ if (this->NumberOfComputations>this->MaxNumComputations+1000)
-    crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
-    << " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "
-    << crash;
+{ //if (this->NumberOfComputations>this->MaxNumComputations+1000)
+    //crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
+    //<< " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "
+    //<< crash;
 }
 
 template<class coefficient>
@@ -810,6 +819,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   { this->NumberOfComputations=0;
     //std::cout << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
     bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
+    this->TotalNumComputationsSerreLikeSystem+=this->NumberOfComputations;
     //if (!success)
     //  std::cout << "<br>Failed to reduce system!";
     if (success)
@@ -886,6 +896,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 //  std::cout << "<hr>Input system after sub first recursive call. " << inputSystem.ToString();
 
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
+  this->TotalNumComputationsSerreLikeSystem+=newComputation.TotalNumComputationsSerreLikeSystem;
   if (newComputation.flagSystemSolvedOverBaseField)
   { //std::cout << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
     *this=newComputation;
@@ -915,6 +926,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
+  this->TotalNumComputationsSerreLikeSystem+=newComputation.TotalNumComputationsSerreLikeSystem;
   if (newComputation.flagSystemSolvedOverBaseField)
   { //std::cout << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
     *this=newComputation;
@@ -925,7 +937,14 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     this->flagSystemProvenToHaveSolution=true;
   inputSystem=startingSystemNoModifications;
   if (firstRun && theAlgebraicClosure!=0)
+  { if (theGlobalVariables!=0)
+    { std::stringstream out;
+      out << "<hr>Failed to find rational solutions of <br>" << this->GetCalculatorInputFromSystem(inputSystem)
+      << "<br>Attempting to solve the system allowing algebraic extensions... ";
+      theReport2.Report(out.str());
+    }
     this->SolveSerreLikeSystemRecursively(inputSystem, false, theAlgebraicClosure, theGlobalVariables);
+  }
 }
 
 template <class coefficient>

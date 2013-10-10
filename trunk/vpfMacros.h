@@ -85,10 +85,11 @@ static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "External 
 class Crasher
 {
   public:
+  std::string userInputStringIfAvailable;
   std::stringstream theCrashReport;
   Crasher& operator<<(const std::string& input);
   Crasher& operator<<(int x);
-  Crasher& operator<<(bool x);
+  Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
 };
 
 extern Crasher crash;

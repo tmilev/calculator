@@ -514,6 +514,8 @@ int main(int argc, char **argv)
 //  civilizedInput="printMacdonaldPolys{}(B_3)";
   PredefinedStrings(civilizedInput);
 
+  crash.userInputStringIfAvailable=civilizedInput;
+
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

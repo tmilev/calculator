@@ -1068,10 +1068,8 @@ public:
   }
   inline Object& operator[](int i)const
   { if (i>=this->size || i<0)
-    { std::cout << "Programming error: attempting to access the entry of index " << i << " in an array of "
-      << this->size << " elements. " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "Programming error: attempting to access the entry of index " << i << " in an array of "
+      << this->size << " elements. " << crash;
     this->CheckConsistency();
     return this->TheObjects[i];
   }

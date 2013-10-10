@@ -27,10 +27,11 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
     return false;
   const Expression& functionNameNode =input[0];
   if (functionNameNode.IsListNElementsStartingWithAtom())
-  { const Function* theHandler=theCommands.GetOperationCompositeHandler(functionNameNode[0].theData);
-    if (theHandler!=0)
-      if (theHandler->theFunction(theCommands, input, output))
-        return true;
+  { const List<Function>* theHandlers=theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
+    if (theHandlers!=0)
+      for (int i=0; i<theHandlers->size; i++)
+        if ((*theHandlers)[i].theFunction(theCommands, input, output))
+          return true;
   }
   if (!functionNameNode.IsAtoM())
     return false;

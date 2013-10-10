@@ -824,7 +824,7 @@ bool Expression::CheckConsistency()const
         isGood=true;
       if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg()))
         isGood=true;
-      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opDifferentialOperatorVariables()))
+      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
         isGood=true;
       if (!isGood)
       { std::cout << "This is a programming error. The context " << mustBeTheContext.ToString()
@@ -1037,7 +1037,7 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   }
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->theBoss, 2);
-  diffVarsE.AddChildAtomOnTop(this->theBoss->opDifferentialOperatorVariables());
+  diffVarsE.AddChildAtomOnTop(this->theBoss->opWeylAlgebraVariables());
   diffVarsE.AddChildOnTop(theDiffOpVar);
   polyVarsE.reset(*this->theBoss, 2);
   polyVarsE.AddChildAtomOnTop(this->theBoss->opPolynomialVariables());
@@ -1045,7 +1045,7 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   bool foundDiffVarsE=false;
   bool foundPolyVarsE=false;
   for (int i=0; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opDifferentialOperatorVariables()))
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
     { this->SetChilD(i, diffVarsE);
       foundDiffVarsE=true;
     } else if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
@@ -1061,7 +1061,7 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
 
 Expression Expression::ContextGetDifferentialOperatorVariables()const
 { this->CheckInitialization();
-  return this->ContextGetContextType(this->theBoss->opDifferentialOperatorVariables());
+  return this->ContextGetContextType(this->theBoss->opWeylAlgebraVariables());
 }
 
 Expression Expression::ContextGetPolynomialVariables()const
@@ -1165,7 +1165,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
       }
     Expression diffVarsE;
     diffVarsE.reset(owner, polyVarUnion.size+1);
-    diffVarsE.AddChildAtomOnTop(owner.opDifferentialOperatorVariables());
+    diffVarsE.AddChildAtomOnTop(owner.opWeylAlgebraVariables());
     for (int i=0; i<EWAVars.size; i++)
       diffVarsE.AddChildOnTop(EWAVars[i]);
     outputContext.AddChildOnTop(diffVarsE);
@@ -4226,18 +4226,17 @@ void CommandList::AddOperationComposite
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
  const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
 { MacroRegisterFunctionWithName("CommandList::AddOperationComposite");
-  if (this->operationsComposite.Contains(theOpName))
-  { std::cout << "This is a programming error. At the moment, only one composite operation handler is allowed, but the programmer attempted to "
-    << " register function " << theOpName << " twice. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+  int theIndex=this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing!="")
-  { std::cout << "This section of code is not implemented yet. Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
+  if (theIndex==-1)
+  { theIndex=this->operationsComposite.size;
+    this->operationsComposite.AddOnTop(theOpName);
+    this->operationsCompositeHandlers.SetSize(this->operationsCompositeHandlers.size+1);
+    this->operationsCompositeHandlers.LastObject()->SetSize(0);
   }
   Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
-  this->operationsComposite.AddOnTop(theOpName);
-  this->operationsCompositeHandlers.AddOnTop(theFun);
+  this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
 }
 
 std::string CommandList::ElementToStringNonBoundVars()
@@ -4309,7 +4308,8 @@ std::string Function::GetString(CommandList& theBoss)
 }
 
 std::string CommandList::ToStringFunctionHandlers()
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("CommandList::ToStringFunctionHandlers");
+  std::stringstream out;
   int numOpsHandled=0;
   int numHandlers=0;
   int numInnerHandlers=0;
@@ -4327,26 +4327,34 @@ std::string CommandList::ToStringFunctionHandlers()
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
   for (int i=0; i<this->operations.size; i++)
-  { if (this->FunctionHandlers[i].size>0)
+  { int indexCompositeHander=this->operationsComposite.GetIndex(this->operations[i]);
+    int totalHandlers=this->FunctionHandlers[i].size;
+    if (indexCompositeHander!=-1)
+      if (indexCompositeHander!=-1)
+        totalHandlers+=this->operationsCompositeHandlers[indexCompositeHander].size;
+
+    if (this->FunctionHandlers[i].size>0)
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
         if (this->FunctionHandlers[i][j].flagIamVisible)
         { if (found)
             out << "<br>\n";
           found=true;
           out << openTag2 << this->operations[i] << closeTag2;
-          if (this->FunctionHandlers[i].size>1)
-            out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
+          if (totalHandlers>1)
+            out << " (" << j+1 << " out of " << totalHandlers << ")";
           out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
         }
-    int indexCompositeHander=this->operationsComposite.GetIndex(this->operations[i]);
     if (indexCompositeHander!=-1)
-      if (this->operationsCompositeHandlers[indexCompositeHander].flagIamVisible)
-      { if (found)
-          out << "<br>\n";
-        found=true;
-        out << openTag2 << this->operations[i] << closeTag2;
-        out << "\n" << this->operationsCompositeHandlers[indexCompositeHander].GetString(*this);
-      }
+      for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
+        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
+        { if (found)
+            out << "<br>\n";
+          found=true;
+          out << openTag2 << this->operations[i] << closeTag2;
+          if (totalHandlers>1)
+            out << " (" << j+1 << " out of " << totalHandlers << ")";
+          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
+        }
   }
   return out.str();
 }
@@ -4374,7 +4382,8 @@ std::string ObjectContainer::ToString()
 }
 
 std::string CommandList::ToString()
-{ std::stringstream out, out2;
+{ MacroRegisterFunctionWithName("CommandList::ToString");
+  std::stringstream out, out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";

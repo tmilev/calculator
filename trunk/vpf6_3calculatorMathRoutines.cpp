@@ -264,10 +264,31 @@ bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Exp
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
+bool CommandListFunctions::innerDifferentiateWrtAexpressionB(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
+  if (input.children.size!=3)
+    return false;
+  const Expression& theDO=input[1];
+  if (!theDO.IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  Expression theArgument=input[2];
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  output.reset(theCommands);
+  if (theArgument.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  { Expression changedMultiplicand, leftSummand, rightSummand;
+    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDO, theArgument[1]);
+    leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
+    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDO, theArgument[2]);
+    rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand );
+    return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+  }
+  return false;
+}
 
 bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
-  crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << false;
+  crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << crash;
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
 }
 
@@ -289,7 +310,8 @@ void CommandList::AutomatedTestRun
           )
         inputStringsTest.AddOnTop(this->FunctionHandlers[i][j].theExample);
   for (int i=0; i<this->operationsCompositeHandlers.size; i++)
-    inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i].theExample);
+    for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
+      inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
   outputStringsTestWithInit.SetSize(inputStringsTest.size);
   outputStringsTestNoInit.SetSize(inputStringsTest.size);
   ProgressReport theReport(this->theGlobalVariableS);

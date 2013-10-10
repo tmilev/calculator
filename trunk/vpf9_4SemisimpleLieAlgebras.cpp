@@ -337,7 +337,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, theFormat)
           << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
           << "2. The calculator has no write permission to the folder in which the file is located. "
-          << "3. The folder does not exist for some reason lying outside of the calculator. " << false;
+          << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
         outputFileSubalgebra << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script> "
         << "<body>Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
@@ -350,7 +350,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
             << this->GetPhysicalFileNameFKFTNilradicals(i, theFormat) << " for output. However, the file failed to create. "
             << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. "
-            << false;
+            << crash;
           }
           outputFileFKFTnilradicals << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script><body>"
           << this->ToStringAlgebraLink(i, theFormat) << this->theSubalgebraCandidates[i].ToStringNilradicals(theFormat) << "\n</body></html>";

@@ -563,7 +563,7 @@ class CommandList
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   List<List<Function> > FunctionHandlers;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
-  List<Function> operationsCompositeHandlers;
+  List<List<Function> > operationsCompositeHandlers;
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -712,7 +712,7 @@ public:
   inline const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes()
   { return this->builtInTypes;
   }
-  const Function* GetOperationCompositeHandler(int theOp)
+  const List<Function>* GetOperationCompositeHandlers(int theOp)
   { int theIndex=this->operationsComposite.GetIndex(this->GetOperations()[theOp]);
     if (theIndex==-1)
       return 0;
@@ -1035,6 +1035,9 @@ public:
   int opRationalFunction()
   { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
   }
+  int opDifferentiate()
+  { return this->operations.GetIndexIMustContainTheObject("Differentiate");
+  }
   int opMatRat()
   { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
   }
@@ -1104,7 +1107,7 @@ public:
   int opPolynomialVariables()
   { return this->operations.GetIndexIMustContainTheObject("PolyVars");
   }
-  int opDifferentialOperatorVariables()
+  int opWeylAlgebraVariables()
   { return this->operations.GetIndexIMustContainTheObject("DiffOpVars");
   }
   int opContexT()
@@ -1208,7 +1211,7 @@ public:
   static bool innerPolynomialWithEWA(CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerEWAorPoly(theCommands, input, output, true);
   }
-  static bool innerDifferentialOperator(CommandList& theCommands, const Expression& input, Expression& output)
+  static bool innerElementWeylAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerEWAorPoly(theCommands, input, output, false);
   }
   static bool innerEWAorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly);
@@ -1728,7 +1731,7 @@ bool Expression::AssignValue(const theType& inputValue, CommandList& owner)
       curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
-    << false;
+    << crash;
   }
   Expression emptyContext;
   emptyContext.MakeEmptyContext(owner);

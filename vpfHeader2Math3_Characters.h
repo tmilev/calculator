@@ -159,7 +159,7 @@ class CoxeterElement{
   bool operator>(const CoxeterElement& other) const
   { if(this->owner!=other.owner)
     { crash << "This may or may not be a programming error: comparing elements of different coxeter groups. "
-      << "Crashing to let you know. " << false;
+      << "Crashing to let you know. " << crash;
     }
     return this->reflections>other.reflections;
   }

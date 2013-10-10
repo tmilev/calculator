@@ -1159,7 +1159,7 @@ public:
     if (!this->IsAConstant(&constME))
     { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing that is a good decision. In any case, crashing to let you know. "
-      << false;
+      << crash;
       return false;
     }
     return constME<=other;
@@ -1169,7 +1169,7 @@ public:
     if (!this->IsAConstant(&constME))
     { crash << "This may or may not be a programming error: attempting to compare a non-constant polynomial to "
       << " a constant. I cannot judge at the moment whether allowing  that is a good decision. In any case, crashing to let you know. "
-      << false;
+      << crash;
       return false;
     }
     return constME<other;
@@ -1986,7 +1986,7 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
     if (!r[i].IsInteger())
     { crash << "This may or may not be a programming error: requesting a monomial with non-integer exponent. "
       << "It appears this operation should be allowed, however this requires further consideration. I am crashing just in case. "
-      << " Please debug file " << false;
+      << crash;
     }
     this->AddMonomial(tempM, r[i].GetNumerator());
   }
@@ -2107,11 +2107,8 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
     MonomialCollection<TemplateMonomial, coefficient>& currentPivot= theList[currentRowIndex];
     int colIndex=currentPivot.theMonomials.GetIndex(currentMon);
     if (colIndex==-1)
-    { std::cout << "This is a programming error. An internal check at the Gaussian elimination method for monomial collections fails. "
-      << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. " << theList.ToString() << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. An internal check at the Gaussian elimination method for monomial collections fails. "
+      << "Something is wrong. Here is the List you wanted to perform Gaussian elimination upon. " << theList.ToString() << ". " << crash;
     tempCF=currentPivot.theCoeffs[colIndex];
     tempCF.Invert();
     currentPivot*=tempCF;

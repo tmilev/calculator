@@ -16,11 +16,11 @@ Crasher& Crasher::operator<< (int x)
   return *this;
 }
 
-Crasher& Crasher::operator<<(bool x)
-{ if (x==true)
-  { this->theCrashReport << " true ";
-    return *this;
-  }
+Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
+{ this->theCrashReport << "<hr>This is a program crash. ";
+  if (this->userInputStringIfAvailable!="")
+    this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
+  this->theCrashReport << "The program crash message follows. <br>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   std::cout << this->theCrashReport.str();
   std::fstream theFile;
@@ -2177,7 +2177,7 @@ void rootSubalgebras::ElementToHtml
   if (!CGI::FileExists(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
     << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
-    << false;
+    << crash;
   }
   output << "<html><title> Root subsystems of " << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
   output << "<meta name=\"keywords\" content=\"" << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])

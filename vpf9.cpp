@@ -693,10 +693,8 @@ unsigned int Selection::HashFunction() const
 
 void Rational::operator=(const Polynomial<Rational>& other)
 { if (!other.IsAConstant(this))
-  { std::cout << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
+    << crash;
 }
 
 bool Rational::IsEqualTo(const Rational& b) const
@@ -1274,10 +1272,7 @@ LargeIntUnsigned LargeIntUnsigned::operator-(const LargeIntUnsigned& other) cons
 void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 { unsigned int CarryOver=0;
   if (!this->IsGEQ(x))
-  { std::cout << "This is a programming error: attempting to subtract a larger LargeIntUnsigned from a small one. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to subtract a larger LargeIntUnsigned from a smaller one. " << crash;
   for (int i=0; i<x.theDigits.size; i++)
     if (this->theDigits[i]<x.theDigits[i]+CarryOver)
     { this->theDigits[i]+=LargeIntUnsigned::CarryOverBound;
@@ -1500,10 +1495,8 @@ void LargeInt::MakeZero()
 
 void LargeInt::operator=(const Rational& other)
 { if (!other.IsInteger(this))
-  { std::cout << "This is a programming error: converting implicitly rational number " << other.ToString()
-    << " to integer is not possible as the Rational number is not integral. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: converting implicitly rational number " << other.ToString()
+    << " to integer is not possible as the Rational number is not integral. " << crash;
 //  assert(this->CheckForConsistensy());
 }
 
@@ -2359,9 +2352,7 @@ void PartFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
     }
     assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
-    { std::cout << "<b>This is a programmign error. The checksum of the partial fractions failed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "<b>This is a programmign error. The checksum of the partial fractions failed. " << crash;
     else
     { //std::cout<< "Checksum successful";
       //std::cout.flush();
@@ -2416,10 +2407,7 @@ bool PartFractions::splitPartial(GlobalVariables& theGlobalVariables, Vector<Rat
   { Rational tempRat;
     reducedForGood.ComputeOneCheckSum(tempRat, theGlobalVariables);
     if (tempRat!=this->CheckSum)
-    { std::cout << "This is a programming error. The checksums of the partial fraction decomposition do not match. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. The checksums of the partial fraction decomposition do not match. " << crash;
   }
   *this=reducedForGood;
   return true;
@@ -3102,10 +3090,8 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup
     theVPbasis.AddOnTop(tempRoot);
     for(int i=this->AmbientDimension-3; i>=0; i--)
     { tempRoot.TheObjects[i]=2;
-      std::cout << "This is a programming error: this line of code needs to be fixed but I don't have time right now."
-      << " This code shouldn't be used before the line is fixed! "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      crash << "This is a programming error: this line of code needs to be fixed but I don't have time right now."
+      << " This code shouldn't be used before the line is fixed! " << crash;
 //      theVPbasis.AddObjectOnBottom(tempRoot);
     }
     tempWeight.TheObjects[this->AmbientDimension-2]=7;
@@ -3521,10 +3507,10 @@ int SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
   for (int i=0; i<this->MaxMultiplicities.size; i++)
   { result*=(this->MaxMultiplicities[i]+1);
     if (result<0)
-    { std::cout << "This is a programming error: I was asked to enumerate all subsets of a multi-set, however the number of subsets is larger than  "
+    { crash << "This is a programming error: I was asked to enumerate all subsets of a multi-set, however the number of subsets is larger than  "
       << " the maximum value allowed for int on the system (on a 32 bit machine that is around  2 billion). This can be fixed, however I do not have time at the moment. If you "
       << " encounter this error, write me an email and I will take the time to fix this issue. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      << crash;
       assert(false);
     }
   }
@@ -3590,8 +3576,7 @@ void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output)const
   }
 }
 
-void DynkinType::GetOuterAutosGeneratorsOneType
-(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const
+void DynkinType::GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGeneratorsOneType");
   output.SetSize(0);
   Matrix<Rational> tempMat, finalMat;

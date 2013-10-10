@@ -601,10 +601,9 @@ void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Poly
 template<class coefficient>
 void GroebnerBasisComputation<coefficient>::CheckConsistency()
 { if (this->NumberOfComputations>this->MaxNumComputations+1000)
-  { crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
+    crash << "This may or may not be a programming error. While handling computation excess limit, I got that NumberOfComputations is much larger than MaxNumComputations. "
     << " I have no explanation for this issue right now, so I am crashing to let you know something is fishy. "
-    << false;
-  }
+    << crash;
 }
 
 template<class coefficient>

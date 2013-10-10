@@ -48,14 +48,20 @@ void CommandList::initPredefinedInnerFunctions()
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
 
   this->AddOperationInnerHandler
-  ("DifferentialOperator", CommandList::innerDifferentialOperator, "",
+  ("Differentiate", CommandListFunctions::innerDifferentiateWrtAexpressionB, "",
    "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
    second argument - the dual polynomial expression. ",
-   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
+   "Differentiate(x, x^2 )");
+
   this->AddOperationInnerHandler
-  ("PolynomialWithDO", CommandList::innerPolynomialWithEWA, "",
+  ("ElementWeylAlgebraDO", CommandList::innerElementWeylAlgebra, "",
+   "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
+   second argument - the dual polynomial expression. ",
+   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; \n\\partial_1 x_1; \nx_1\\partial_1");
+  this->AddOperationInnerHandler
+  ("ElementWeylAlgebraPoly", CommandList::innerPolynomialWithEWA, "",
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
-   "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \n\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n\\partial_1 x_1");
+   "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1");
   this->AddOperationInnerHandler
   ("RF", this->innerRationalFunction, "",
    "Creates a built-in rational function.",
@@ -79,7 +85,7 @@ void CommandList::initPredefinedInnerFunctions()
   ("FourierTransformDO", CommandListFunctions::innerFourierTransformEWA, "",
    "Fourier-transforms an element of a weyl algebra. Multiplies each monomial term of odd total degree by -1 \
    (total degree= sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
-   "x:=PolynomialWithDO{}(\\partial, x); \n\\partial:=DifferentialOperator{}(\\partial, x);\
+   "x:=ElementWeylAlgebraPoly{}(\\partial, x); \n\\partial:=ElementWeylAlgebraDO{}(\\partial, x);\
    \n  a:=x^3+x\\partial; b:=\\partial x+\\partial^3+\\partial;  \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
 
 
@@ -179,7 +185,7 @@ void CommandList::initPredefinedInnerFunctions()
    The first argument of the input is an upper bound for the dimension of the vector space. The remaining \
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
-   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i); \
+   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
 \ng_1:=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
 \n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
 \ng_-1:=x_5;\
@@ -1131,22 +1137,22 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+\\partial_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Adds a rational or polynomial to element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i+x_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrEWAToRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Adds a rational or polynomial to element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
@@ -1232,19 +1238,19 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opRational(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; 3\\partial_i", true);
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; 3\\partial_i", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opPoly(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opElementWeylAlgebra(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
-   " \\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\na:=x_1x_2;\nb:=\\partial_1\\partial_2; a b - b a -[a,b] ", true);
+   " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\na:=x_1x_2;\nb:=\\partial_1\\partial_2; a b - b a -[a,b] ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA, this->opElementWeylAlgebra(), this->opPoly(),
    "Multiplies rational or polynomial or element weyl algebra by rational or polynomial or element weyl algebra. ",
-   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
+   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
    "Multiplies polynomial by a rational (polynomial comes first). ",
@@ -1527,7 +1533,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerEWABySmallInteger, this->opElementWeylAlgebra(), this->opRational(),
    "Raises element of weyl algebra to integer power. ",
-   "\\partial:=DifferentialOperator{}(\\partial, x); \nx:=PolynomialWithDO{}(\\partial, x); \na:=x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
+   "\\partial:=ElementWeylAlgebraDO{}(\\partial, x); \nx:=ElementWeylAlgebraPoly{}(\\partial, x); \na:=x\\partial; \na^10; \\partial x^{3/2}; \\partial^{3/2} x",
    true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1587,7 +1593,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationInnerHandler
   ("[]", CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA, "",
    "Lie bracket of elements of weyl algebras=differential operators with polynomial coefficients. ",
-   "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
+   "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i; \n[\\partial_1, x_1]; ", true);
   this->AddOperationInnerHandler
   ("[]", CommandListInnerTypedFunctions::innerLieBracketRatOrUEWithRatOrUE, "",
    "Lie bracket of elements of semisimple Lie algebra. ",
@@ -1696,8 +1702,8 @@ void CommandList::initPredefinedOperationsComposite()
   ("Sequence", CommandListFunctions::innerCompositeSequenceDereference, "",
    "Dereferences a sequence. The syntax is as illustrated by the example. ",
    "X:=(a,b,c); X_1; X_2; X_3; X_4; X_j; j:=3; X_j", true);
- this->AddOperationComposite
+  this->AddOperationComposite
   ("ElementWeylAlgebra", CommandListFunctions::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
-   "x:=PolynomialWithDO{}(\\partial, x);\\partial:=DifferentialOperator{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)", true);
+   "x:=ElementWeylAlgebraPoly{}(\\partial, x);\\partial:=ElementWeylAlgebraDO{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)", true);
 }

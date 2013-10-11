@@ -253,12 +253,10 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   this->CheckConsistency();
   const int hardcodedUpperLimit=6000000;
   if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
-  { std::cout << "I am crashing for safety reasons (this is not a programming error). You requested to compute the conjugacy classes of a Weyl group of type "
-    << this->theDynkinType.ToString() << ", which, by formula, has " << this->theDynkinType.GetSizeWeylGroupByFormula()
+    crash << "I am crashing for safety reasons (this is not a programming error). You requested to compute the conjugacy classes of a Weyl group of type "
+    << this->theDynkinType.ToString() << ", which, by formula, has " << this->theDynkinType.GetSizeWeylGroupByFormula().ToString()
     << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << crash;
   //  std::cout << "<hr>HEre be errors";
   this->ComputeAllElements(hardcodedUpperLimit+1);
   //std::cout << "<hr>rho orbit: " <<  this->rhoOrbit.size << " total: " << this->rhoOrbit.ToString();
@@ -267,7 +265,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   //{
   //}
   List<bool> Accounted;
-  std::cout << "Group has " << this->theElements.size << std::endl;
+//  std::cout << "Group has " << this->theElements.size << std::endl;
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);
@@ -282,6 +280,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     { // provably unnecessary
       Accounted[i] = true;
       this->conjugacyClasses.SetSize(conjugacyClasses.size+1);
+      this->conjugacyClasses.LastObject()->SetSize(0);//<-needed in case the group is being recomputed
       this->conjugacyClasses[this->conjugacyClasses.size-1].AddOnTop(i);
       for (int j=0; j<this->conjugacyClasses[this->conjugacyClasses.size-1].size; j++)
         for (int k=0; k<theRank; k++)
@@ -301,14 +300,12 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   for (int i=0; i<this->conjugacyClasses.size; i++)
     checkNumElts+=this->conjugacyClasses[i].size;
   if (this->theElements.size!=checkNumElts)
-  { std::cout << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes "
-    << " while the group has " << this->theElements.size << " elements" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
+    << this->theElements.size << " elements" << crash;
   this->conjugacyClasses.QuickSortAscending();
-  std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
-  for(int i=0; i<conjugacyClasses.size; i++)
-    std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
+  //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
+  //for(int i=0; i<conjugacyClasses.size; i++)
+  //  std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
 }
 
 void CoxeterGroup::ComputeConjugacyClasses(){

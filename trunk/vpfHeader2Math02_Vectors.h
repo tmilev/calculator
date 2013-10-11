@@ -51,11 +51,9 @@ public:
   template <class otherType>
   static void ScalarProduct(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm, coefficient& result)
   { if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
-    { std::cout << "This is a programming error: attempting to take a bilinear form represented by matrix with " << TheBilinearForm.NumRows
+      crash << "This is a programming error: attempting to take a bilinear form represented by matrix with " << TheBilinearForm.NumRows
       << " rows and " << TheBilinearForm.NumCols << " columns " << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     coefficient tempRat, accumRow;
     result=0;
     for (int i=0; i<TheBilinearForm.NumRows; i++)
@@ -136,10 +134,8 @@ public:
   }
   void ScalarEuclidean(const Vector<coefficient>& other, coefficient& output)const
   { if (this->size!=other.size)
-    { std::cout << "This is a programming error: taking scalar product of elements of different dimensions: "
-      << this->ToString() << " and " << other.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: taking scalar product of elements of different dimensions: "
+      << this->ToString() << " and " << other.ToString() << ". " << crash;
     coefficient tempElt;
     output=0;
     for (int i=0; i<this->size; i++)
@@ -353,10 +349,8 @@ public:
   }
   Vector<coefficient> operator/(const coefficient& other)const
   { if (other.IsEqualToZero())
-    { std::cout << "This is a programming error: division by zero. Division by zero error are supposed to be handled at an earlier level. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: division by zero. Division by zero error are supposed to be handled at an earlier level. "
+      << crash;
     Vector<coefficient> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)
@@ -386,10 +380,8 @@ public:
   }
   inline bool operator>(const Vector<coefficient>& other)const
   { if (this->size!=other.size)
-    { std::cout << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
-      << this->ToString() << " and " << other.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: comparing Vectors with different number of coordinates, namely, "
+      << this->ToString() << " and " << other.ToString() << ". " << crash;
     coefficient c1=0, c2=0;
     for (int i=0; i<this->size; i++)
     { c1+=this->TheObjects[i];
@@ -410,9 +402,7 @@ public:
   template <class otherType>
   void operator-=(const Vector<otherType>& other)
   { if (this->size!=other.size)
-    { std::cout << "This is a programming error: subtracting vectors with different dimensions. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: subtracting vectors with different dimensions. " << crash;
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]-=other[i];
   }
@@ -942,16 +932,12 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
     return false;
   MacroRegisterFunctionWithName("Vector::GetCoordsInBasiS");
   if (this==0)
-  { std::cout << "This is a programming error: this pointer of a vector is zero when it shouldn't be. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: this pointer of a vector is zero when it shouldn't be. " << crash;
   Vectors<coefficient> bufferVectors;
   Matrix<coefficient> bufferMat;
   if (this->size!=inputBasis[0].size)
-  { std::cout << "This is a programming error: asking to get coordinates of vector of " << this->size << " coordinates using a basis whose first vector has "
-    << inputBasis[0].size << " coordinates." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  }
+    crash << "This is a programming error: asking to get coordinates of vector of " << this->size << " coordinates using a basis whose first vector has "
+    << inputBasis[0].size << " coordinates." << crash;
   bufferVectors.ReservE(inputBasis.size+1);
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
@@ -1043,10 +1029,8 @@ bool Vectors<coefficient>::GetCoordsInBasis
  const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("Vectors::GetCoordsInBasis");
   if (this==0 || &outputCoords==0 || this==&outputCoords)
-  { std::cout << "This is a programming error: input and output addresses are zero or coincide. this address: " << this << "; output address: " << &outputCoords
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: input and output addresses are zero or coincide. this address: "
+    << (unsigned long) this << "; output address: " << (unsigned long)(&outputCoords) << crash;
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
     if (!(this->operator[](i).GetCoordsInBasiS(inputBasis, outputCoords[i])))

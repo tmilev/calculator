@@ -4273,7 +4273,7 @@ std::string CommandList::ElementToStringNonBoundVars()
     if (this->FunctionHandlers[i].size>0)
     { out << " [handled by: ";
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      { out << this->FunctionHandlers[i][j].theFunction;
+      { out << std::hex << (unsigned long) this->FunctionHandlers[i][j].theFunction;
         if (this->FunctionHandlers[i][j].flagIsInner)
           out << "(inner)";
         else

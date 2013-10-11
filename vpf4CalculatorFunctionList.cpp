@@ -186,9 +186,9 @@ void CommandList::initPredefinedInnerFunctions()
    or returns error indicating the multiplicatively closed \
    set is larger than the upper bound.",
    "s_1:=MatrixRationals{}((-1 , 1 , 0),(0 , 1 , 0),(0 , 0 , 1));\
-\ns_2:=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
-\ns_3:=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
-\nGenerateMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
+    \ns_2:=MatrixRationals{}((1 , 0 , 0),(1 , -1 , 1),(0 , 0 , 1));\
+    \ns_3:=MatrixRationals{}((1 , 0 , 0),(0 , 1 , 0),(0 , 2 , -1));\
+    \nGenerateFiniteMultiplicativelyClosedSet{}(48, s_1, s_2, s_3);", true, false)
    ;
   this->AddOperationInnerHandler
   ("GenerateVectorSpaceClosedWRTLieBracket", CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket, "",

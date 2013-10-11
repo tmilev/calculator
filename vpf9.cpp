@@ -1092,7 +1092,7 @@ bool Rational::ShrinkExtendedPartIfPossible()
 
 Rational Rational::Factorial(int n, GlobalVariables* theGlobalVariables)
 { if (n<0)
-  { assert(false);
+  { crash << "This is a programming error: taking factorial of the negative number " << n << ". " << crash;
     return 0;
   }
   LargeIntUnsigned result;
@@ -3055,7 +3055,8 @@ bool PartFractions::IsHigherThanWRTWeight(const Vector<Rational>& left, const Ve
     accum+=(left[i]-r[i])*theWeights[i];
   return (accum>0);
 }
-//NOTE NOTE NOTE: To be fixed: you gotta use the precedign function to sort the theVPbasis!
+
+//NOTE NOTE NOTE: To be fixed: you gotta use the preceding function to sort the theVPbasis!
 void PartFractions::ComputeKostantFunctionFromWeylGroup
 (char WeylGroupLetter, int WeylGroupNumber, QuasiPolynomial& output, Vector<Rational>* ChamberIndicator,
  bool UseOldData, bool StoreToFile, GlobalVariables&  theGlobalVariables)
@@ -3096,7 +3097,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup
   }
   theVPbasis.QuickSortAscending();
   //fix this!
-  assert(false);
+  crash << crash;
 //  this->initFromRoots(theVPbasis, 0, theGlobalVariables);
   //this->flagSplitTestModeNoNumerators=true;
 //  this->split(theGlobalVariables, ChamberIndicator);
@@ -3109,7 +3110,7 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup
     tempRoot.MakeZero(this->AmbientDimension);
   if(!this->GetVectorPartitionFunction(output, tempRoot, theGlobalVariables))
   { this->ComputeDebugStringNoNumerator(theGlobalVariables);
-    assert(false);
+    crash << crash;
   }
   //output.ComputeDebugString();
 }
@@ -3504,12 +3505,10 @@ int SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
   for (int i=0; i<this->MaxMultiplicities.size; i++)
   { result*=(this->MaxMultiplicities[i]+1);
     if (result<0)
-    { crash << "This is a programming error: I was asked to enumerate all subsets of a multi-set, however the number of subsets is larger than  "
+      crash << "This is a programming error: I was asked to enumerate all subsets of a multi-set, however the number of subsets is larger than  "
       << " the maximum value allowed for int on the system (on a 32 bit machine that is around  2 billion). This can be fixed, however I do not have time at the moment. If you "
       << " encounter this error, write me an email and I will take the time to fix this issue. "
       << crash;
-      assert(false);
-    }
   }
   return result;
 }
@@ -3616,7 +3615,7 @@ void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)const
   int numRowsSoFar=0;
   for (int i=0; i<this->size(); i++)
   { if (!this->theCoeffs[i].IsSmallInteger(&currentMult))
-      assert(false);
+      crash << crash;
     this->GetOuterAutosGeneratorsOneType(intermediateGenerators,(*this)[i], currentMult);
     matrixToGo.MakeIdMatrix(this->GetRank()-numRowsSoFar-currentMult*(*this)[i].theRank);
     for (int j=0; j<intermediateGenerators.size; j++)
@@ -3672,10 +3671,8 @@ void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstC
   else
     theMon.lengthFirstCoRootSquared=*inputFirstCoRootSqLength;
   if (theMon.lengthFirstCoRootSquared<=0)
-  { std::cout << "This is a programming error: co-root length must be positive, instead I got " << theMon.lengthFirstCoRootSquared << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash  << "This is a programming error: co-root length must be positive, instead I got " << theMon.lengthFirstCoRootSquared.ToString()
+    << ". " << crash;
   this->MakeZero();
   this->AddMonomial(theMon, 1);
 }
@@ -3708,10 +3705,7 @@ int DynkinType::GetNumSimpleComponents()const
     result+=this->theCoeffs[i];
   int output;
   if (!result.IsSmallInteger(&output))
-  { std::cout << "This is a programming error: Dynkin type has a number of simple components which is "
-    << " not a small integer. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: Dynkin type has a number of simple components which is not a small integer. " << crash;
   return output;
 }
 
@@ -3726,10 +3720,8 @@ int DynkinType::GetRank()const
 { Rational tempRat = this->GetRankRational();
   int result;
   if (!tempRat.IsSmallInteger(&result))
-  { std::cout << "This is a programming error: attempting to get a small integer rank from a Dynkin type whose rank is not a small integer, but is instead " << tempRat
-    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to get a small integer rank from a Dynkin type whose rank is not a small integer, but is instead "
+    << tempRat.ToString() << ". " << crash;
   return result;
 }
 
@@ -3783,8 +3775,9 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w)
     else
       if(c2 == 4)
         return 6;
-  std::cout << "if you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near " << __FILE__ << ":" << __LINE__ << " with a real arccos function" << std::endl;
-  assert(false);
+  crash << "if you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near "
+  << __FILE__ << ":" << __LINE__ << " with an arccos function. " << crash;
+  return -1;
 }
 
 Rational DynkinType::GetSizeWeylGroupByFormula()const
@@ -3813,9 +3806,8 @@ Rational DynkinSimpleType::GetLongRootLengthSquared()const
     default:
       break;
   }
-  std::cout << "This is a programming error: calling DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+  crash << "This is a programming error: calling DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. "
+  << crash;
   return -1;
 }
 
@@ -3936,10 +3928,8 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
 
 Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
 { if (rootIndex>=this->theRank)
-  { std::cout << "This is a programming error: attempting to get the squared length of simple root number " << rootIndex+1
-    << ", however the root system if of rank " << this->theRank << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to get the squared length of simple root number " << rootIndex+1
+    << ", however the root system if of rank " << this->theRank << ". " << crash;
   switch (this->theLetter)
   { case 'A':
     case 'D':
@@ -3962,11 +3952,8 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
         return 6;
       return 2;
     default:
-      std::cout << "This is a programming error: "
-      << "calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized "
-      << " Dynkin type " << this->ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      crash << "This is a programming error: calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized "
+      << " Dynkin type " << this->ToString() << crash;
       return -1;
   }
 }
@@ -4091,10 +4078,8 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
 
 void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output)const
 { if (n<=0 || n>30000)
-  { std::cout << "This is a programming error: attempting to create type A_n with n=" << n << " is illegal. If this was a bad user input, it should "
-    << " be handled at an earlier stage. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to create type A_n with n=" << n << " is illegal. If this was a bad user input, it should "
+    << " be handled at an earlier stage. " << crash;
   output.init(n, n);
   output.NullifyAll();
   for (int i=0; i<n-1; i++)
@@ -4170,9 +4155,8 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
     case 'F': this->GetF4(output);                break;
     case 'G': this->GetG2(output);                break;
     default:
-      std::cout << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. "
+      << crash;
       break;
   }
   output*=this->lengthFirstCoRootSquared/2;
@@ -4235,9 +4219,7 @@ void DynkinSimpleType::operator++(int)
     this->theLetter='A';
     return;
   }
-  std::cout << "This is a programming error. This is a portion of code that should never be reached. Something has gone very wrong. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+  crash << "This is a programming error. This is a portion of code that should never be reached. Something has gone very wrong. " << crash;
 }
 
 bool DynkinSimpleType::operator<(int otherRank)const
@@ -4336,10 +4318,7 @@ void WeylGroup::GetGeneratorList(int g, List<int>& out) const
 
 void ElementWeylGroup::operator*=(const ElementWeylGroup& other)
 { if (this->owner!=other.owner)
-  { std::cout << "This is a programming error: attempting to multiply elements  "
-    << " belonging to different Weyl groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to multiply elements belonging to different Weyl groups. " << crash;
   List<int> oldMe=this->reflections;
   *this=other;
   this->reflections.AddListOnTop(oldMe);
@@ -4633,11 +4612,8 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
   tempRoots.QuickSortAscending();
   this->RootSubsystem=(tempRoots);
   if (this->RootSubsystem.size%2!=0)
-  { std::cout << "This is a programming error. I am getting that the number of weights of a root system is odd. The generating set of simple weights is "
-    << this->simpleGenerators.ToString() << ", and the generated weight subsystem is " << tempRoots.ToString()
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. I am getting that the number of weights of a root system is odd. The generating set of simple weights is "
+    << this->simpleGenerators.ToString() << ", and the generated weight subsystem is " << tempRoots.ToString() << crash;
   int numPosRoots=this->RootSubsystem.size/2;
   this->RootsOfBorel.SetSize(numPosRoots);
   for (int i=0; i<numPosRoots; i++)
@@ -4811,11 +4787,9 @@ void KLpolys::GeneratePartialBruhatOrder()
       this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, false, false);
       int x= this->GetIndex(tempRoot);
       if (x==-1)
-      { std::cout << "This is a programming error: something wrong has happened. A weight that is supposed to "
+        crash << "This is a programming error: something wrong has happened. A weight that is supposed to "
         << " be in a certain Weyl group orbit isn't there. There is an error in the code, crashing accordingly. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << crash;
       this->SimpleReflectionsActionList[i].AddOnTop(x);
       tempRoot2-=(tempRoot);
       if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero() )
@@ -4971,10 +4945,7 @@ void KLpolys::ComputeRPolys()
           break;
         }
       if (!tempBool)
-      { std::cout
-        << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: an algorithmic check failed while computing R-polynomials. " << crash;
       ExploredFromTop[a]=true;
       a= this->FindMaximalBruhatNonExplored(ExploredFromTop);
     }
@@ -5044,11 +5015,9 @@ void KLpolys::ComputeKLxy(int x, int y)
       tempP1*=tempP2;
       tempP1*=(this->theKLPolys[i][y]);
       if (!this->Explored[i])
-      { std::cout << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
+        crash << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial computation fails. More precisely, while computing "
         << "KL poly of indices " << x << ", " << y << " I am using KL poly with indices " << i << ", " << y << " which hasn't been computed yet. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << crash;
       Accum+=tempP1;
     }
   this->theKLPolys[x][y].MakeZero();
@@ -5083,10 +5052,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
   boolY=this->IndexGreaterThanIndex(y, sy);
   if (boolX && boolY)
   { if (!this->Explored[sy])
-    { std::cout << "This is a programming error: the computaion of R-polynomials is attempting to use a non-computed R-polynomial. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: the computaion of R-polynomials is attempting to use a non-computed R-polynomial. " << crash;
     this->theRPolys[x][y]=this->theRPolys[sx][sy];
     return true;
   }
@@ -5327,11 +5293,9 @@ void Vector<coefficient>::PerturbNoZeroScalarProductWithMe(const List<Vector<coe
     }
   for (int i=0; i<inputVectors.size; i++)
     if (this->ScalarEuclidean(inputVectors[i])==0)
-    { std::cout << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
+      crash << "This is a programming error: the vector produced by PerturbNoZeroScalarProductWithMe, namely, "
       << this->ToString() << " is orthogonal to input vector " << inputVectors[i].ToString() << ". The full list of vectors is "
-      << inputVectors.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << inputVectors.ToString() << crash;
 }
 
 void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)

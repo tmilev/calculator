@@ -62,9 +62,8 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
 
 int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& theSel)
 { if (theSel.MaxSize>30)
-  { std::cout << "This is a programming error: the algebraic extension is too large to be handled by the current data structures. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: the algebraic extension is too large to be handled by the current data structures. "
+    << crash;
   }
   int result=0;
   for (int i=theSel.MaxSize-1; i>=0; i--)
@@ -78,10 +77,9 @@ int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& the
 bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions");
   if (!this->flagIsQuadraticRadicalExtensionRationals )
-  { std::cout << "Thi is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
+  { crash << "This is a programming error: AlgebraicClosureRationals::MergeTwoQuadraticRadicalExtensions "
     << "with at least one of two arguments that is not a quadratic radical extension of the rationals. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    << crash;
   }
   //refine factors:
   HashedList<LargeInt> radicalsNew=this->theQuadraticRadicals;

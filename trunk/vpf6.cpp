@@ -3750,6 +3750,23 @@ std::string Expression::ToStringFull()const
   return out.str();
 }
 
+bool Expression::NeedsParenthesisForBaseOfExponent()const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()) ||
+      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()))
+    return true;
+  return false;
+}
+
+bool Expression::NeedsParenthesisForMultiplication()const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()))
+    return true;
+  return false;
+}
+
 std::string Expression::ToString(FormatExpressions* theFormat, Expression* startingExpression, Expression* Context)const
 { MacroRegisterFunctionWithName("Expression::ToString");
   if (this->theBoss!=0)
@@ -3821,9 +3838,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     else
     { std::string firstE= (*this)[1].ToString(theFormat);
       bool firstNeedsBrackets=(!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()))) && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
-      bool secondNeedsBrackets=true;
-      if ((*this)[2].IsOfType<Rational>())
-        secondNeedsBrackets=(*this)[2].GetValue<Rational>().IsNonPositive();
+      bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplication();
       if (firstE=="-1" )
       { firstE="-";
         firstNeedsBrackets=false;
@@ -3848,10 +3863,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=(*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
-    if ((*this)[1].IsOfType<Rational>())
-      out << firstE;
-    else
+    if ((*this)[1].NeedsParenthesisForBaseOfExponent())
       out << "(" << firstE << ")";
+    else
+      out << firstE;
     out << "^{" << secondE << "}";
   } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);

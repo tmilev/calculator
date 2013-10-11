@@ -195,6 +195,9 @@ class Expression
   bool IsError(std::string* outputErrorMessage=0)const;
   bool IsContext()const;
 
+  bool NeedsParenthesisForBaseOfExponent()const;
+  bool NeedsParenthesisForMultiplication()const;
+
   template <class theType>
   bool ConvertToType(Expression& output)const;
   template <class theType>
@@ -347,9 +350,7 @@ class Expression
   }
   bool CheckInitialization()const
   { if (this->theBoss==0)
-    { std::cout << "This is a programming error: " << "Expression has non-initialized owner. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: " << "Expression has non-initialized owner. " << crash;
       return false;
     }
     return true;

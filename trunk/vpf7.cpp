@@ -794,13 +794,6 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
   this->theFiles.AddOnTopNoRepetition(theInfo);
 }
 
-void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
-{ static int counter =-1;
-  counter++;
-  for (int i=0; i<input.ProgressReportStringS.size; i++)
-    std::cout << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
-}
-
 std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD/tree/trunk/" << CGI::RemovePathFromFileName(fileName) << "\">"

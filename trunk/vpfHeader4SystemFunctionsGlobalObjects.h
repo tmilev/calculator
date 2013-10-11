@@ -31,7 +31,6 @@ extern std::string IPAdressCaller;
 extern double GetElapsedTimeInSeconds();
 extern void CallSystemWrapper(const std::string& theCommand);
 extern bool ComputationComplete;
-extern void makeReport(IndicatorWindowVariables& input);
 extern std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<std::string>& optionsRank, std::string& selectedType, std::string& selectedRank, bool usePreamble);
 extern void PredefinedStrings(std::string& inputOutputCivilizedString);
 extern void getPath(char* path, std::string& output);

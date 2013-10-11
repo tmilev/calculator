@@ -1182,6 +1182,7 @@ public:
     return r*65536+g*256+b;
   }
   static void makeStdCoutReport(IndicatorWindowVariables& input);
+  static void makeReportIndicatorFile(IndicatorWindowVariables& input);
   static void FormatCPPSourceCode(const std::string& FileName);
   static void(*functionCGIServerIgnoreUserAbort)(void);
   static void SetCGIServerIgnoreUserAbort()

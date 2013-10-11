@@ -6,12 +6,12 @@ ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Main implementation f
 
 Crasher crash;
 
-Crasher& Crasher::operator <<(const std::string& input)
+Crasher& Crasher::operator<<(const std::string& input)
 { this->theCrashReport << input;
   return *this;
 }
 
-Crasher& Crasher::operator<< (int x)
+Crasher& Crasher::operator<<(int x)
 { this->theCrashReport << x;
   return *this;
 }
@@ -47,7 +47,6 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   return *this;
 }
 
-
 bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
 { Vectors<Rational>& NilradicalRoots= theGlobalVariables.rootsNilradicalRoots.GetElement();
   Vectors<Rational>& Ksingular=theGlobalVariables.rootsConeConditionHolds2.GetElement();
@@ -80,8 +79,8 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
     if (!this->NilradicalKmods.selected[i])
       for (int j=i+1; j<this->kModules.size; j++)
       { if (!this->NilradicalKmods.selected[j])
-        { tempRoot=(this->HighestWeightsGmodK.TheObjects[i]);
-          tempRoot+=(this->HighestWeightsGmodK.TheObjects[j]);
+        { tempRoot=(this->HighestWeightsGmodK[i]);
+          tempRoot+=(this->HighestWeightsGmodK[j]);
           if (!tempRoot.IsEqualToZero())
           { theRel.BetaCoeffs.SetSize(0);
             theRel.Betas.SetSize(0);
@@ -90,8 +89,8 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
             { tempBool=true;
               theRel.BetaCoeffs.SetSize(1);
               theRel.Betas.SetSize(1);
-              theRel.BetaCoeffs.TheObjects[0].MakeOne();
-              theRel.Betas.TheObjects[0]=(nilradicalRoots.TheObjects[tempI]);
+              theRel.BetaCoeffs[0].MakeOne();
+              theRel.Betas[0]=(nilradicalRoots[tempI]);
             } else
               tempBool=
               this->GetAmbientWeyl().HasStronglyPerpendicularDecompositionWRT
@@ -100,8 +99,8 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
             if (tempBool)
             { theRel.Alphas.size=0;
               theRel.AlphaCoeffs.size=0;
-              theRel.Alphas.AddOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-              theRel.Alphas.AddOnTop(this->HighestWeightsGmodK.TheObjects[j]);
+              theRel.Alphas.AddOnTop(this->HighestWeightsGmodK[i]);
+              theRel.Alphas.AddOnTop(this->HighestWeightsGmodK[j]);
               theRel.AlphaCoeffs.AddOnTop(1);
               theRel.AlphaCoeffs.AddOnTop(1);
 //              theRel.ComputeDebugString(*this, true);
@@ -176,7 +175,7 @@ void rootSubalgebra::ExtractRelations
           theRel.Betas.size=0;
           theRel.BetaCoeffs.size=0;
           for (int j=0; j<tempSel.CardinalitySelection; j++)
-            theRel.Alphas.TheObjects[j]=(Ksingular.TheObjects[tempSel.elements[j]]);
+            theRel.Alphas[j]=(Ksingular[tempSel.elements[j]]);
           if (theRel.IsStrictlyWeaklyProhibiting(*this, NilradicalRoots, theGlobalVariables, owner, indexInOwner))
             break;
         }
@@ -210,9 +209,9 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Ve
       Accum.MakeZero(this->GetAmbientWeyl().CartanSymmetric.NumRows);
       chosenAlphas.size=0;
       for (int k=0; k<tempSel.elements.size; k++)
-      { tempRoot=(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
+      { tempRoot=(highestWeightsAllowed[tempSel.elements[k]]);
         chosenAlphas.AddOnTop(tempRoot);
-        tempRoot*=(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+        tempRoot*=(tempSel.Multiplicities[tempSel.elements[k]]);
         Accum+=(tempRoot);
       }
       theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
@@ -239,8 +238,8 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Ve
           theRel.Alphas.SetSize(tempSel.CardinalitySelectionWithoutMultiplicities());
           theRel.AlphaCoeffs.SetSize(tempSel.elements.size);
           for (int k=0; k<tempSel.elements.size; k++)
-          { theRel.Alphas.TheObjects[k]=(highestWeightsAllowed.TheObjects[tempSel.elements.TheObjects[k]]);
-            theRel.AlphaCoeffs.TheObjects[k]=(tempSel.Multiplicities.TheObjects[tempSel.elements.TheObjects[k]]);
+          { theRel.Alphas[k]=(highestWeightsAllowed[tempSel.elements[k]]);
+            theRel.AlphaCoeffs[k]=(tempSel.Multiplicities[tempSel.elements[k]]);
           }
           //theRel.Alphas.ComputeDebugString();
           //theRel.Betas.ComputeDebugString();
@@ -259,23 +258,23 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<R
     for (int i=0; i<theRel.Alphas.size; i++)
       for(int j=i+1; j<theRel.Alphas.size; j++)
       { //theRel.ComputeDebugString(*this);
-        beta1=(theRel.Alphas.TheObjects[i]);
-        beta1+=(theRel.Alphas.TheObjects[j]);
+        beta1=(theRel.Alphas[i]);
+        beta1+=(theRel.Alphas[j]);
         if (this->IsARootOrZero(beta1))
         { this->ComputeHighestWeightInTheSameKMod(beta1, tempRoot);
           if (NilradicalRoots.Contains(beta1))
-          { alpha1=(theRel.Alphas.TheObjects[i]);
-            alpha2=(theRel.Alphas.TheObjects[j]);
+          { alpha1=(theRel.Alphas[i]);
+            alpha2=(theRel.Alphas[j]);
             theRel.Alphas.SetSize(2);
             theRel.AlphaCoeffs.SetSize(2);
-            theRel.Alphas.TheObjects[0]=(alpha1);
-            theRel.Alphas.TheObjects[1]=(alpha2);
-            theRel.AlphaCoeffs.TheObjects[0]=(1);
-            theRel.AlphaCoeffs.TheObjects[1]=(1);
+            theRel.Alphas[0]=(alpha1);
+            theRel.Alphas[1]=(alpha2);
+            theRel.AlphaCoeffs[0]=(1);
+            theRel.AlphaCoeffs[1]=(1);
             theRel.Betas.SetSize(1);
             theRel.BetaCoeffs.SetSize(1);
-            theRel.BetaCoeffs.TheObjects[0]=1;
-            theRel.Betas.TheObjects[0]=beta1;
+            theRel.BetaCoeffs[0]=1;
+            theRel.Betas[0]=beta1;
             madeChange=false;
             break;
           }
@@ -286,19 +285,19 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<R
             { changedIndex=j;
               otherIndex=i;
             }
-            alpha1coeff=(theRel.AlphaCoeffs.TheObjects[changedIndex]);
-            alpha2coeff=(theRel.AlphaCoeffs.TheObjects[otherIndex]);
-            alpha2=(theRel.Alphas.TheObjects[otherIndex]);
+            alpha1coeff=(theRel.AlphaCoeffs[changedIndex]);
+            alpha2coeff=(theRel.AlphaCoeffs[otherIndex]);
+            alpha2=(theRel.Alphas[otherIndex]);
             alpha2coeff.Subtract(alpha1coeff);
             madeChange=true;
-            theRel.Alphas.TheObjects[changedIndex]=(beta1);
-            theRel.AlphaCoeffs.TheObjects[changedIndex]=(alpha1coeff);
+            theRel.Alphas[changedIndex]=(beta1);
+            theRel.AlphaCoeffs[changedIndex]=(alpha1coeff);
             if (alpha2coeff.IsEqualToZero())
             { theRel.Alphas.RemoveIndexSwapWithLast(otherIndex);
               theRel.AlphaCoeffs.RemoveIndexSwapWithLast(otherIndex);
             } else
-            { theRel.Alphas.TheObjects[otherIndex]=(alpha2);
-              theRel.AlphaCoeffs.TheObjects[otherIndex]=(alpha2coeff);
+            { theRel.Alphas[otherIndex]=(alpha2);
+              theRel.AlphaCoeffs[otherIndex]=(alpha2coeff);
             }
           }
         }

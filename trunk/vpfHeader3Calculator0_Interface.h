@@ -185,6 +185,7 @@ class Expression
     return this->theData==desiredDataUseMinusOneForAny;
   }
   bool HasSameContextArgumentsNoLog()const;
+  bool IsConstant()const;
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;

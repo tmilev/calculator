@@ -338,10 +338,9 @@ public:
       }
     }
     if (!(p==1))
-    { std::cout << "This is a programming error: the invert X mod N algorithm requires that X and N be relatively prime, which appears to have not been the case. "
-      << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }//if d and p were relatively prime this should be so. Otherwise the function was not called properly.
+      crash << "This is a programming error: the invert X mod N algorithm requires that X and N be relatively prime, which appears to have not been the case. "
+      << crash;
+    //if d and p were relatively prime this should be so. Otherwise the function was not called properly.
     p=vP[1]%N;
     if (p<0)
       p+=N;
@@ -485,9 +484,6 @@ public:
   }
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
-  //this function just redirects to the class CGI function with the same name.
-  //Reason: cannot use an incomplete CGI type.
-  static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
 };
 
 class XMLRoutines
@@ -574,7 +570,7 @@ class MemorySaving
 private:
   Object* theValue;
   MemorySaving(const MemorySaving<Object>& other)
-  { assert(false);
+  { crash << crash;
   }
 public:
   void operator=(const MemorySaving<Object>& other)
@@ -836,8 +832,7 @@ public:
   }
   bool CheckConsistency()const
   { if (this->flagDeallocated)
-    { std::cout << "This is a programming error: use after free of List. " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: use after free of List. " << crash;
     }
     return true;
   }
@@ -1308,26 +1303,19 @@ public:
       for (int j=0; j<current.size; j++)
       { int theIndex=current[j];
         if (theIndex>=this->size)
-        { std::cout << "This is a programming error: "
-          << " hash lookup array of index " << i << ", entry of index " << j << " reports index " << theIndex << " but I have only "
-          << this->size << " entries. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
+          crash << "This is a programming error: hash lookup array of index " << i << ", entry of index " << j << " reports index "
+          << theIndex << " but I have only " << this->size << " entries. " << crash;
         if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
-        { std::cout << "<hr>This is a programming error: the hashed element in position " << theIndex
-          << " is recorded in hash array of index " << i << ", however its hash value is instead "
-          << this->GetHash(this->TheObjects[theIndex]) << ". ";
-          std::cout << " The hash size is " << this->TheHashedArrays.size;
-          std::cout << "<br>hashes of objects: ";
+        { crash << "<hr>This is a programming error: the hashed element in position " << theIndex << " is recorded in hash array of index "
+          << i << ", however its hash value is instead " << this->GetHash(this->TheObjects[theIndex]) << ". The hash size is "
+          << this->TheHashedArrays.size << "<br>hashes of objects: ";
           for (int l=0; l<this->size; l++)
-            std::cout << this->GetHash(this->TheObjects[l])
-            << "= " << this->GetHash(this->TheObjects[l])%this->TheHashedArrays.size << ", ";
-          std::cout << "<br>hashes recorded: ";
+            crash << this->GetHash(this->TheObjects[l]) << "= " << this->GetHash(this->TheObjects[l])%this->TheHashedArrays.size << ", ";
+          crash << "<br>hashes recorded: ";
           for (int l=0; l<this->TheHashedArrays.size; l++)
             for (int k=0; k<this->TheHashedArrays[l].size; k++)
-              std::cout << this->TheHashedArrays[l][k] << ", ";
-          std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+              crash << this->TheHashedArrays[l][k] << ", ";
+          crash << crash;
         }
       }
     }
@@ -1373,10 +1361,8 @@ public:
   }
   void SetObjectAtIndex(int index, const Object& theObject)
   { if (index<0 || index>=this->size)
-    { std::cout << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
-      << " of size " << this->size << ". "<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
+      << " of size " << this->size << ". " << crash;
     int hashIndexPop = this->GetHash(this->TheObjects[index]);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
     int hashIndexIncoming=this->GetHash(theObject);
@@ -1385,10 +1371,8 @@ public:
   }
   void RemoveIndexSwapWithLast(int index)
   { if (index<0 || index>=this->size)
-    { std::cout << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
-      << " of size " << this->size << ". "<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
+      << " of size " << this->size << ". " << crash;
     Object* oPop= &this->TheObjects[index];
     int hashIndexPop = this->GetHash(*oPop);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
@@ -1429,10 +1413,8 @@ public:
     for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
     { int j=this->TheHashedArrays[hashIndex].TheObjects[i];
       if (j>=this->size)
-      { std::cout << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex << " I get instructed to look up index " << j
-        << " but I have only " << this->size << "elements. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex << " I get instructed to look up index " << j
+        << " but I have only " << this->size << "elements. " << crash;
       if((*this)[j]==o)
         return j;
     }
@@ -1441,11 +1423,9 @@ public:
   inline int GetIndexIMustContainTheObject(const Object& o) const
   { int result=this->GetIndex(o);
     if (result==-1)
-    { std::cout << "This is a programming error: the programmer has requested the index of object " << o
+      crash << "This is a programming error: the programmer has requested the index of object " << o
       << " with a function that does not allow failure. However, the container array does not contain his object. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     return result;
   }
   inline bool IsSparseRelativeToExpectedSize(int expectedSize)const
@@ -1820,11 +1800,9 @@ public:
   }
   void ActOnVectorROWSOnTheLeft(List<Vector<coefficient> >& standOnTheRightAsVectorRow, List<Vector<coefficient> >& output)const
   { if (this->NumCols!=standOnTheRightAsVectorRow.size)
-    { std::cout << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
+      crash << "This is a programming error: attempting to multiply a matrix, standing on the left, with "
       << this->NumCols << " columns, by a matrix, standing on the right, with " << standOnTheRightAsVectorRow.size << " rows. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     output.SetSize(this->NumRows);
     for (int i=0; i<this->NumRows; i++)
     { output[i].MakeZero(standOnTheRightAsVectorRow[0].size);
@@ -1863,9 +1841,8 @@ public:
       return;
     }
     if (this->NumCols!=input.size)
-    { std::cout << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
-      << " dimension " << input.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
+      << " dimension " << input.size << ". " << crash;
     }
     output.MakeZero(this->NumRows);
     otherType tempElt;
@@ -1896,9 +1873,8 @@ public:
     if (input.size==0)
       return;
     if (this->NumCols!=input.GetDim())
-    { std::cout << "This is a programming error: attempting to act by " << this->ToString() << "(an " << this->NumRows << " x "
-      << this->NumCols << " matrix) on a column vector " << input.ToString() << "(dimension " << input.size << ").";
-      assert(false);
+    { crash << "This is a programming error: attempting to act by " << this->ToString() << "(an " << this->NumRows << " x "
+      << this->NumCols << " matrix) on a column vector " << input.ToString() << "(dimension " << input.size << ")." << crash;
     }
     output.SetSize(input.size);
     for (int i=0; i<input.size; i++)
@@ -1964,9 +1940,8 @@ public:
   }
   inline coefficient& operator()(int i, int j)const
   { if (i<0 || i>=this->NumRows || j<0 || j>=this->NumCols)
-    { std::cout << "This is a programming error: requesting row, column indexed by " << i+1 << " and " << j+1 << " but I am a matrix with "
-      << this->NumRows << " rows and " << this->NumCols << " colums. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: requesting row, column indexed by " << i+1 << " and " << j+1 << " but I am a matrix with "
+      << this->NumRows << " rows and " << this->NumCols << " colums. " << crash;
     }
     return this->elements[i][j];
   }
@@ -2129,11 +2104,8 @@ public:
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<coefficient>& inputRightHandSide, Matrix<coefficient>& outputSolution);
   void operator+=(const Matrix<coefficient>& right)
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
-    { std::cout << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and "
-      << this->NumCols << " columns " << " to a matrix with " << right.NumRows << " rows and " << right.NumCols
-      << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and " << this->NumCols
+      << " columns to a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j]+=(right.elements[i][j]);
@@ -2141,11 +2113,8 @@ public:
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
   void operator-=(const Matrix<coefficient>& right)
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
-    { std::cout << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and "
-      << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to subtract from matrix with " << this->NumRows << " rows and " << this->NumCols
+      << " columns a matrix with " << right.NumRows << " rows and " << right.NumCols << " columns. " << crash;
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         (*this)(i,j)-=right(i,j);
@@ -2501,7 +2470,7 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
   assert(NumReadWords==0);
   input >> tempS >> r >> tempS >> c;
   if (tempS!="c:")
-  { assert(false);
+  { crash << crash;
     return false;
   }
   this->init(r, c);
@@ -2516,10 +2485,8 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
 template <typename Element>
 bool Matrix<Element>::Invert(GlobalVariables* theGlobalVariables)
 { if (this->NumCols!=this->NumRows)
-  { std::cout << "This is a programming error: requesting to invert a non-square matrix of " << this->NumRows << " rows and "
-    << this->NumCols << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: requesting to invert a non-square matrix of " << this->NumRows << " rows and "
+    << this->NumCols << " columns. " << crash;
   MacroRegisterFunctionWithName("Matrix::Invert");
 //  if (this->flagComputingDebugInfo)
 //    this->ComputeDebugString();
@@ -2549,10 +2516,8 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, 
     return;
   }
   if (this->NumRows!=standsOnTheLeft.NumCols)
-  { std::cout << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
-    << " columns by a matrix with " << this->NumRows << "rows. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to multiply a matrix with " << standsOnTheLeft.NumCols
+    << " columns by a matrix with " << this->NumRows << "rows. " << crash;
   Element tempEl;
   output.init(standsOnTheLeft.NumRows, this->NumCols);
   for (int i=0; i< standsOnTheLeft.NumRows; i++)
@@ -2806,12 +2771,9 @@ void List<Object>::QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<O
     }
   if (theOrder(this->TheObjects[HighIndex], this->TheObjects[BottomIndex]))
   { if (HighIndex==BottomIndex)
-    { std::cout << "This is a programming error. The programmer has given me a bad strict order: "
-      << " the order claims that object of index " << HighIndex << " is strictly greater than itself "
-      << " which is not allowed for strict orders. Maybe the programmer has given a non-strict order instead of "
-      << " strict one by mistake? " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. The programmer has given me a bad strict order: the order claims that object of index "
+      << HighIndex << " is strictly greater than itself which is not allowed for strict orders. Maybe the programmer has given a "
+      << "non-strict order instead of strict one by mistake? " << crash;
     HighIndex--;
   }
   this->SwapTwoIndices(BottomIndex, HighIndex);
@@ -2858,11 +2820,8 @@ void List<Object>::AddListOnTop(const List<Object>& theList)
 template<class Object>
 void List<Object>::SwapTwoIndices(int index1, int index2)
 { if (index1<0 || index1>=this->size || index2<0 || index2>=this->size)
-  { std::cout << "This is a programming error: requested to the elements with indices "
-    << index1 << " and " << index2 << " in a list that has " << this->size << " elements. This "
-    << " is impossible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: requested to the elements with indices " << index1 << " and " << index2 << " in a list that has "
+    << this->size << " elements. This is impossible. " << crash;
   if (index1==index2)
     return;
   Object tempO;
@@ -2966,10 +2925,7 @@ template <class Object>
 inline Object* List<Object>::LastObject()const
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size<=0)
-  { std::cout << "This is a programming error: trying to fetch the last object of an array with "
-    << this->size << " elements. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: trying to fetch the last object of an array with " << this->size << " elements. " << crash;
   return &this->TheObjects[this->size-1];
 }
 
@@ -3049,19 +3005,15 @@ void List<Object>::RemoveIndexSwapWithLast(int index)
 template <class Object>
 void List<Object>::RemoveLastObject()
 { if (this->size==0)
-  { std::cout << "Programming error: attempting to pop empty list"
-    << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
-    assert(false);
+  { crash << "Programming error: attempting to pop empty list" << crash;
   }
   this->size--;
 }
 
 template <class Object>
 Object List<Object>::PopLastObject()
-{ if (this->size==0){
-    std::cout << "Programming error: attempting to pop empty list" << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
-    assert(false);
-  }
+{ if (this->size==0)
+    crash << "Programming error: attempting to pop empty list" << crash;
   this->size--;
   return this->TheObjects[size];
 }
@@ -3140,10 +3092,8 @@ template <class Object>
 void List<Object>::AddOnTop(const Object& o)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size>this->ActualSize)
-  { std::cout << "This is a programming error: the actual size of the list is " << this->ActualSize << " but this->size equals " << this->size
-    << ". " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the actual size of the list is " << this->ActualSize << " but this->size equals " << this->size
+    << ". " << crash;
   if (this->size==this->ActualSize)
     this->ExpandArrayOnTop(this->GetNewSizeRelativeToExpectedSize(this->ActualSize+1)- this->size);
   this->TheObjects[size]=o;

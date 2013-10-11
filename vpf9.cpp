@@ -142,10 +142,6 @@ std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
   return out.str();
 }
 
-std::string MathRoutines::GetStackTraceEtcErrorMessage(const std::string& file, int line)
-{ return CGI::GetStackTraceEtcErrorMessage(file, line);
-}
-
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
 { static const int NumColorsBase=3;
   int tempI=index%(NumColorsBase*NumColorsBase*NumColorsBase);

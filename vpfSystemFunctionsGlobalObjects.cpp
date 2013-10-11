@@ -22,7 +22,7 @@ void InitializeGlobalObjects()
   gettimeofday(&ComputationStartGlobal, NULL);
 #endif
   crash.theGlobalVariables=&theGlobalVariables;
-  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
+  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&CGI::makeReportIndicatorFile);
 
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   //std::cout << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
@@ -63,8 +63,29 @@ void getPath(char* path, std::string& output)
   }
 }
 
-#ifndef WIN32
+void CGI::makeReportIndicatorFile(IndicatorWindowVariables& input)
+{ static int counter =-1;
+  counter++;
+  //  if (counter%10!=0)
+  //    return;
+  std::fstream theFile;
+  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
+  std::stringstream outStream;
+  theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
+  for (int i=input.ProgressReportStringS.size-1; i>=0; i--)
+    theFile << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
+  theFile.flush();
+  theFile.close();
+}
 
+void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
+{ static int counter =-1;
+  counter++;
+  std::cout << "\nLast progress string: " << *input.ProgressReportStringS.LastObject() << "\n<br>\n";
+  CGI::makeReportIndicatorFile(input);
+}
+
+#ifndef WIN32
 void* RunTimer(void* ptr)
 { double elapsedtime=-1;
   for (; ;)
@@ -101,21 +122,6 @@ void static_html3(std::stringstream& output);
 bool ComputationComplete;
 
 std::string IPAdressCaller;
-
-void makeReport(IndicatorWindowVariables& input)
-{ static int counter =-1;
-  counter++;
-  //  if (counter%10!=0)
-  //    return;
-  std::fstream theFile;
-  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
-  std::stringstream outStream;
-  theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
-  for (int i=input.ProgressReportStringS.size-1; i>=0; i--)
-    theFile << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
-  theFile.flush();
-  theFile.close();
-}
 
 std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<std::string>& optionsRank, std::string& selectedType, std::string& selectedRank, bool usePreamble)
 { std::stringstream out;

@@ -2260,7 +2260,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
-  theComputation.MaxNumComputations=1000;
+  theComputation.MaxNumComputations=501;
   theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, theGlobalVariables);
 //  std::cout << " <br>And after: " << this->transformedSystem.ToString();
   this->flagSystemSolved=theComputation.flagSystemSolvedOverBaseField;

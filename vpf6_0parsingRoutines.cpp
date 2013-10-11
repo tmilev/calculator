@@ -737,45 +737,23 @@ bool CommandList::isSeparatorFromTheRightForDefinition(const std::string& input)
 }
 
 bool CommandList::AllowsTensorInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="*" || lookAhead=="/" ||
-    lookAhead=="Expression" || lookAhead==")" ||
-    lookAhead=="(" || lookAhead=="[" ||
-    lookAhead=="=" || lookAhead=="\\otimes" ||
-//    lookAhead=="{" ||
-    lookAhead=="Variable" || lookAhead=="," ||
-    lookAhead==";" || lookAhead=="]" ||
-    lookAhead=="}" || lookAhead==":" || lookAhead=="EndProgram"
-    ;
+{ return  lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" || lookAhead==")" || lookAhead=="(" || lookAhead=="[" ||
+  lookAhead=="=" || lookAhead=="\\otimes" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" || lookAhead=="]" ||
+  lookAhead=="}" || lookAhead==":" || lookAhead=="EndProgram"
+  ;
 }
 
 bool CommandList::AllowsTimesInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="*" || lookAhead=="/" ||
-    lookAhead=="Expression" || lookAhead==")" ||
-    lookAhead=="(" || lookAhead=="[" ||
-    lookAhead=="=" ||
-//    lookAhead=="{" ||
-    lookAhead=="Variable" || lookAhead=="," ||
-    lookAhead==";" || lookAhead=="]" ||
-    lookAhead=="}" || lookAhead==":" ||
-    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
-    lookAhead=="EndProgram"
-    ;
+{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead==")" ||
+  lookAhead=="(" || lookAhead=="[" || lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" || lookAhead=="]" ||
+  lookAhead=="}" || lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" || lookAhead=="EndProgram"
+  ;
 }
 
 bool CommandList::AllowsPlusInPreceding(const std::string& lookAhead)
-{ return
-    lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="," || lookAhead=="=" ||
-    lookAhead==")" || lookAhead==";" ||
-    lookAhead=="]" || lookAhead=="}" ||
-    lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" ||
-    lookAhead=="EndProgram" ||
-    lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
-    ;
+{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="," || lookAhead=="=" || lookAhead==")" || lookAhead==";" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead==":" || lookAhead=="," || lookAhead=="\\choose" || lookAhead=="EndProgram" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\";
+  ;
 }
 
 bool CommandList::LookAheadAllowsDivide(const std::string& lookAhead)

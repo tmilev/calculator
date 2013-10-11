@@ -22,12 +22,20 @@ public:
   static bool innerArctan(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDifferentiateWrtAexpressionB(CommandList& theCommands, const Expression& input, Expression& output);
+
+  static bool innerDifferentiateAtimesB(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateX(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output);
+
   static bool innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCrash(CommandList& theCommands, const Expression& input, Expression& output);
+
+  static bool outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output);
+
 };
 
 #endif

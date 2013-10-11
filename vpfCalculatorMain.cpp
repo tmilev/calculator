@@ -146,6 +146,7 @@ int main(int argc, char **argv)
   //civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, d_4)";
   //  civilizedInput="plot2D(e^x,-0.9,0.9)";
 //  civilizedInput="printMacdonaldPolys{}(B_3)";
+//  civilizedInput="Differentiate(x, f*g )";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

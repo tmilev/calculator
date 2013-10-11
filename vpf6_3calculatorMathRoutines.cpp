@@ -264,26 +264,115 @@ bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Exp
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
-bool CommandListFunctions::innerDifferentiateWrtAexpressionB(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
+bool CommandListFunctions::innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstant");
+  //////////////////////
   if (input.children.size!=3)
     return false;
-  const Expression& theDO=input[1];
-  if (!theDO.IsAtoM())
+  if (!input[1].IsAtoM())
     theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
-  Expression theArgument=input[2];
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  if (theArgument[1]!=theDOvar)
+    return false;
+  if (!theArgument[2].IsConstant())
+    return false;
+  Expression theMonomial, theExponent, minusOne;
+  minusOne.AssignValue<Rational>(-1, theCommands);
+  theExponent.MakeXOX(theCommands, theCommands.opPlus(), theArgument[2], minusOne);
+  theMonomial.MakeXOX(theCommands, theCommands.opThePower(), theDOvar, theExponent);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), theArgument[2], theMonomial);
+}
+
+bool CommandListFunctions::innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstant");
+  //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theArgument=input[2];
+  //////////////////////
+  if (!theArgument.IsConstant())
+    return false;
+  return output.AssignValue<Rational>(0, theCommands);
+}
+
+bool CommandListFunctions::innerDifferentiateX(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateX");
+  //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  if (theArgument!=theDOvar)
+    return false;
+  return output.AssignValue<Rational>(1, theCommands);
+}
+
+bool CommandListFunctions::innerDifferentiateAtimesB(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
+    //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
-  if (theArgument.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
-  { Expression changedMultiplicand, leftSummand, rightSummand;
-    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDO, theArgument[1]);
-    leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
-    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDO, theArgument[2]);
-    rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand );
-    return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
-  }
-  return false;
+  Expression changedMultiplicand, leftSummand, rightSummand;
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand );
+  return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+}
+
+bool CommandListFunctions::outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDdivDxToDifferentiation");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 2))
+    return false;
+  if (input[2].IsBuiltInOperation())
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  output=input[1];
+  return output.AddChildOnTop(input[2]);
+}
+
+bool CommandListFunctions::innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDdivDxToDifferentiation");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  std::string denominatorString,numeratorString;
+  if (!input[1].IsOperation(&numeratorString))
+    return false;
+  if (!input[2].IsOperation(&denominatorString))
+    return false;
+  if (numeratorString!="d")
+    return false;
+  if (denominatorString.size()<2)
+    return false;
+  if (denominatorString[0]!='d')
+    return false;
+  for (int i=0; i<((signed) denominatorString.size())-1; i++)
+    denominatorString[i]=denominatorString[i+1];
+  denominatorString.resize(denominatorString.size()-1);
+  output.reset(theCommands, 2);
+  output.AddChildAtomOnTop(theCommands.opDifferentiate());
+  return output.AddChildAtomOnTop(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(denominatorString));
 }
 
 bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression& input, Expression& output)

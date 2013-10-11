@@ -48,10 +48,21 @@ void CommandList::initPredefinedInnerFunctions()
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
 
   this->AddOperationInnerHandler
-  ("Differentiate", CommandListFunctions::innerDifferentiateWrtAexpressionB, "",
-   "Creates element of a weyl algebra = polynomial coefficient differential operator. First argument denotes differential operator letter, \
-   second argument - the dual polynomial expression. ",
-   "Differentiate(x, x^2 )");
+  ("Differentiate", CommandListFunctions::innerDifferentiateAtimesB, "",
+   "Differentiation - product rule.  ",
+   "Differentiate(x, f*g )");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateConstant, "",
+   "Differeniation - constant rule. ",
+   "Differentiate(x, 5 ); d/dx \\sqrt{5}");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateX, "",
+   "Differeniation - d/dx x= 1.",
+   "Differentiate(x, x ); d/dx x");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateConstPower, "",
+   "Differeniation - d/dx x^n= n x^{n-1}.",
+   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", CommandList::innerElementWeylAlgebra, "",
@@ -186,16 +197,16 @@ void CommandList::initPredefinedInnerFunctions()
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
    "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \
-\ng_1:=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
-\n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
-\ng_-1:=x_5;\
-\ng_2:=x_{5} \\partial_{4} -x_{2} \\partial_{1} ;\
-\ng_-2:=(x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
-\ng_3:=(2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
-\ng_-3:=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
-\nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_-1, g_2, g_-2, g_3, g_-3);\
-\nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
-\nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3);", true, false)
+    \ng_1:=(-x_{5} \\partial_{5}^{2}-x_{4} \\partial_{4} \\partial_{5}  -x_{3} \\partial_{3} \\partial_{5} \
+    \n-x_{2} \\partial_{2} \\partial_{5}  +x_{1} \\partial_{2} \\partial_{4} +x_{1} \\partial_{3}^{2});\
+    \ng_-1:=x_5;\
+    \ng_2:=x_{5} \\partial_{4} -x_{2} \\partial_{1} ;\
+    \ng_-2:=(x_{4} \\partial_{5} -x_{1} \\partial_{2} );\
+    \ng_3:=(2x_{4} \\partial_{3} -x_{3} \\partial_{2} );\
+    \ng_-3:=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
+    \nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_-1, g_2, g_-2, g_3, g_-3);\
+    \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
+    \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3);", true, false)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",
@@ -763,8 +774,8 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("Reverse", this->innerReverseOrder, "",
    "Reverses order of elements recursively. This operation will reverse products, orderes of lists, etc. \
-   More precisely, the command leaves the fist child in the internal representation of the object in place\
-   and flips the order of all other children.",
+    More precisely, the command leaves the fist child in the internal representation of the object in place\
+    and flips the order of all other children.",
    "Reverse{}(s_1 s_2 s_3s_4s_2s_3s_1s_2s_3s_4s_1s_2s_3s_2s_1)");
 
   this->AddOperationInnerHandler
@@ -786,26 +797,26 @@ void CommandList::initPredefinedInnerFunctions()
    <br>Outcome 4. The system has a solution over the rationals. A solution is given.\
    ",
    "FindOneSolutionSerreLikePolynomialSystem{}(\
-   x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \
-x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},\
-x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},\
-x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},\
-x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},\
-x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,\
-x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},\
-x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},\
-x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},\
-x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,\
-x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},\
-x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,\
-x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},\
-x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},\
-x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},\
-x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,\
-x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
-x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
-x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
+    x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, \
+    x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},\
+    x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},\
+    x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},\
+    x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},\
+    x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,\
+    x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},\
+    x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},\
+    x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},\
+    x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,\
+    x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},\
+    x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,\
+    x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},\
+    x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},\
+    x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},\
+    x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,\
+    x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
+    x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
+    x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
+    x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
 
   this->AddOperationInnerHandler
   ("GroebnerLexUpperLimit", this->innerGroebnerLex, "",
@@ -923,11 +934,11 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
    "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)_{3}, -3))\\\\\
-+Serialization{}(getChevalleyGenerator, (B)_{3}, -1)\\\\\
-+3 (Serialization{}(getChevalleyGenerator, (B)_{3}, -2)), \
-3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 3))\\\\\
-+6 (Serialization{}(getChevalleyGenerator, (B)_{3}, 1))\\\\\
-+10/3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 2)))", true, true)
+    +Serialization{}(getChevalleyGenerator, (B)_{3}, -1)\\\\\
+    +3 (Serialization{}(getChevalleyGenerator, (B)_{3}, -2)), \
+    3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 3))\\\\\
+    +6 (Serialization{}(getChevalleyGenerator, (B)_{3}, 1))\\\\\
+    +10/3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
   ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",
@@ -973,8 +984,8 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", true);
   ("Killing", this->innerKillingForm, "",
    "Computes the Killing form product of two elements of semisimple Lie algebra. ",
    "h_{{i}}:=getCartanGenerator{}(F_1, i);\
-KF{}({{i}},{{j}}):=Killing{}(h_i, h_j);\
-FunctionToMatrix(KF, 4, 4)", true, false)
+    KF{}({{i}},{{j}}):=Killing{}(h_i, h_j);\
+    FunctionToMatrix(KF, 4, 4)", true, false)
    ;
   this->AddOperationInnerHandler
   ("FreudenthalFull", this->innerFreudenthalFull, "",
@@ -1205,6 +1216,10 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerTimesToFunctionApplication, "",
    "On condition that F is a built-int function name, replaces F*x with F{}x.",
    "plot2D(\\sin{}x+cos{}x, 0, 5) ", true);
+  this->AddOperationOuterHandler
+  ("*", CommandListFunctions::outerDifferentiateWRTxTimesAny, "",
+   "Replaces Differentiate{}(x)*a by  Differentiate{}(x,a).",
+   "d/dx (1/x) ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyEltZmodPorRatByEltZmodPorRat, this->opRational(), this->opEltZmodP(),
    "Multiplies elements of Z_p. ",
@@ -1447,6 +1462,11 @@ void CommandList::initPredefinedStandardOperations()
     "Same as ModP but uses the mod notation.",
     " 7 mod 3", true);
 
+  this->AddOperationOuterHandler
+  ("/", CommandListFunctions::innerDdivDxToDifferentiation, "",
+   "Replaces d/dx by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
+   "d/dx x", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opAlgNumber(),
    "Divides algebraic numbers. ",
@@ -1459,7 +1479,6 @@ void CommandList::initPredefinedStandardOperations()
   ("/", CommandListInnerTypedFunctions::innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat,  this->opAlgNumber(), this->opRational(),
    "Divides algebraic numbers. ",
    "1/(\\sqrt{}2+\\sqrt{}3+\\sqrt{}5)", true);
-
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",
@@ -1706,4 +1725,8 @@ void CommandList::initPredefinedOperationsComposite()
   ("ElementWeylAlgebra", CommandListFunctions::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
    "x:=ElementWeylAlgebraPoly{}(\\partial, x);\\partial:=ElementWeylAlgebraDO{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)", true);
+  //this->AddOperationComposite
+  //("Differentiate", CommandListFunctions::innerDdivDxToDifferentiation, "",
+  // " ",
+//  .. "", true);
 }

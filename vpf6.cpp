@@ -3408,6 +3408,12 @@ bool Expression::IsDouble(double* whichDouble)const
   return false;
 }
 
+bool Expression::IsConstant()const
+{ if (this->theBoss==0)
+    return false;
+  return this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>();
+}
+
 bool Expression::IsInteger(LargeInt* whichInteger)const
 { Rational theRat;
   if (!this->IsOfType<Rational>(&theRat))

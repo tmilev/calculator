@@ -532,6 +532,7 @@ bool CommandListInnerTypedFunctions::innerPowerEWABySmallInteger(CommandList& th
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
+//  std::cout << "raising " << input[1].ToString() << " to power " << input[2].ToString();
   ElementWeylAlgebra<Rational> base;
   int thePower=0;
   if(!input[1].IsOfType(&base))
@@ -577,6 +578,7 @@ bool CommandListInnerTypedFunctions::innerPowerRatByRat(CommandList& theCommands
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
+//  std::cout << "raising " << input[1].ToString() << " to power " << input[2].ToString();
   Rational base, exp;
   if(!input[1].IsOfType(&base))
     return false;
@@ -585,8 +587,8 @@ bool CommandListInnerTypedFunctions::innerPowerRatByRat(CommandList& theCommands
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
     return false;
-  if (base==0 && thePower<0)
-    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  if (base==0 && thePower<=0)
+    return output.SetError("Division by zero: trying to raise 0 to negative or zero power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
 }

@@ -265,7 +265,7 @@ bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Exp
 }
 
 bool CommandListFunctions::innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstant");
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstPower");
   //////////////////////
   if (input.children.size!=3)
     return false;
@@ -286,6 +286,28 @@ bool CommandListFunctions::innerDifferentiateConstPower(CommandList& theCommands
   theMonomial.MakeXOX(theCommands, theCommands.opThePower(), theDOvar, theExponent);
   return output.MakeXOX(theCommands, theCommands.opTimes(), theArgument[2], theMonomial);
 }
+
+bool CommandListFunctions::innerDifferentiateSqrtA(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateSqrtA");
+  //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opSqrt(), 2))
+    return false;
+  Expression NoCoeffE, multiplicand, basePrime, mHalfE, halfE;
+  halfE.AssignValue(Rational(1,2), theCommands);
+  mHalfE.AssignValue(Rational(-1,2), theCommands);
+  basePrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  multiplicand.MakeXOX(theCommands, theCommands.opThePower(), theArgument[1], mHalfE);
+  NoCoeffE.MakeXOX(theCommands, theCommands.opTimes(), multiplicand, basePrime);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), halfE, NoCoeffE);
+}
+
 
 bool CommandListFunctions::innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstant");
@@ -317,8 +339,28 @@ bool CommandListFunctions::innerDifferentiateX(CommandList& theCommands, const E
   return output.AssignValue<Rational>(1, theCommands);
 }
 
+bool CommandListFunctions::innerDifferentiateAplusB(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAplusB");
+  /////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  output.reset(theCommands);
+  Expression leftSummand, rightSummand;
+  leftSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  rightSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+}
+
 bool CommandListFunctions::innerDifferentiateAtimesB(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAtimesB");
     //////////////////////
   if (input.children.size!=3)
     return false;
@@ -339,8 +381,48 @@ bool CommandListFunctions::innerDifferentiateAtimesB(CommandList& theCommands, c
   return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
 }
 
+bool CommandListFunctions::innerPowerAnyToZero(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerPowerAnyToZero");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  if (!input[2].IsEqualToZero())
+    return false;
+  std::cout << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
+  if (input[1].IsEqualToZero())
+    return output.SetError("Error: expression of the form 0^0 is illegal.", theCommands);
+  return output.AssignValue<Rational>(1, theCommands);
+}
+
+bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAdivideB");
+    //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtoM())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  //Quotient rule (non-commutative): (a/b)'=(ab^{-1})'=a' b - a b^{-1} b' b^{-1}
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  output.reset(theCommands);
+  Expression changedMultiplicand, leftSummand, rightSummand, bInverse, bPrime, eMOne;
+  eMOne.AssignValue<Rational>(-1, theCommands);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.MakeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
+
+  bPrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  bInverse.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], eMOne);
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand= b' b^{-1}
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand= b^-1 b' b^-1
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
+  return output.MakeXOX(theCommands, theCommands.opPlus(), leftSummand, rightSummand);
+}
+
 bool CommandListFunctions::outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerDdivDxToDifferentiation");
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerDifferentiateWRTxTimesAny");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 2))
@@ -383,7 +465,7 @@ bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression
 
 void CommandList::AutomatedTestRun
 (List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
-{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
+{ MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
   CommandList theTester;
   int numFunctionsToTest=0;
   for (int i=0; i<this->FunctionHandlers.size; i++)

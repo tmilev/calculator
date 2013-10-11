@@ -259,7 +259,8 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << output.ToString() << "  ->  " << tempE.ToString() << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
+        this->Comments << "<hr>Substitution:<br>" << CGI::GetHtmlMathSpanPure(output.ToString()) << "  ->  " << CGI::GetHtmlMathSpanPure(tempE.ToString())
+        << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
       output=tempE;
       continue;
     }
@@ -283,7 +284,8 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << beforePatternMatch.ToString() << "  ->  " << output.ToString() << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
+          this->Comments << "<hr>Substitution:<br>" << CGI::GetHtmlMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
+          << CGI::GetHtmlMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
         break;
       }
     }

@@ -23,11 +23,15 @@ public:
   static bool innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
 
+  static bool innerDifferentiateAplusB(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateSqrtA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAtimesB(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateAdivideB(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateX(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output);
 
+  static bool innerPowerAnyToZero(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output);

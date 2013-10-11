@@ -1,8 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 // ^ that is first for precompilation
+
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 //#include "testlib.h"
 #include <iostream>
@@ -2715,11 +2716,9 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     std::cout << "I am processing root subalgebra of type "
               << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     module.AddOnTop(macdonaldPoly);
-    int mos=0;
     int mcs=0;
     do
-    { mos = mcs;
-      mcs = module.size;
+    { mcs = module.size;
       for(int i=1; i<W.GetDim()+1; i++)
       { W.GetStandardRepresentationMatrix(i,m);
         for(int j=0; j<mcs; j++){
@@ -2750,6 +2749,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     std::cout << "has character ";
     std::cout << rep.GetCharacter() << std::endl;
     W.AddIrreducibleRepresentation(rep);
+    std::cout << "elapsed seconds: " << theGlobalVariables.GetElapsedSeconds() << std::endl;
   }
 }
 
@@ -2850,14 +2850,28 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
     }
     rep.SetElementImage(i,rm);
     std::cout << rm.ToString(&consoleFormat) << std::endl;
+    if(!(rm*rm).IsIdMatrix())
+      std::cout << "Error: this matrix is not an involution" << std::endl;
   }
   return rep;
 }
 
+// balanced ternary
+Vector<int> pointi(int d, int i)
+{ Vector<int> out;
+  out.SetSize(d);
+  for(int ii=0; ii<d; ii++)
+  { int m = i%3;
+    out[ii] = (m!=2)?m:-1;
+    i /= 3;
+  }
+  return out;
+}
+
 WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ std::cout << "starting with roots " << roots << std::endl;
+{ std::cout << "starting with roots " << roots << " at time " <<   theGlobalVariables.GetElapsedSeconds() << std::endl;
   List<Vector<Rational> > monomial;
-  List<List<Vector<Rational> > > monomials;
+  HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
   for(int i=0; i<W.size; i++)
   { W.GetStandardRepresentationMatrix(i,m);
@@ -2868,23 +2882,30 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
         monomial[j] = -monomial[j];
     }
     monomial.QuickSortAscending();
-    monomials.BSInsertDontDup(monomial);
+    monomials.AddNoRepetitionOrReturnIndexFirst(monomial);
   }
-  std::cout << "have all " << monomials.size << " monomials";
+  std::cout << "have all " << monomials.size << " monomials (" << theGlobalVariables.GetElapsedSeconds() << ")";
+
+  // Σ(n choose k)x<<k
+  int number_of_images = 1;
+  for(int i=0; i<W.GetDim(); i++)
+    number_of_images *= 3;
+
 
   List<lennum> lens;
   List<Vector<Rational> > images;
   images.SetSize(monomials.size);
   lens.SetSize(monomials.size);
   for(int i=0; i<monomials.size; i++)
-  { images[i].SetSize(W.RootSystem.size);
+  { images[i].SetSize(number_of_images);
     Rational l = 0;
-    for(int j=0; j<W.RootSystem.size; j++)
-    { Rational p=1;
+    for(int j=0; j<number_of_images; j++)
+    { Vector<int> point = pointi(W.GetDim(),j);
+      Rational p=1;
       for(int k1=0; k1<monomials[i].size; k1++)
       { Rational s=0;
         for(int k2=0; k2<monomials[i][k1].size; k2++)
-          s += monomials[i][k1][k2] * W.RootSystem[j][k2];
+          s += monomials[i][k1][k2] * point[k2];
         p *= s;
       }
       images[i][j] = p;
@@ -2894,7 +2915,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     lens[i].num = i;
   }
   lens.QuickSortAscending();
-  std::cout << " ... sorted" << std::endl;
+  std::cout << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
 
   List<int> monomials_used;
   VectorSpace<Rational> vs;
@@ -2906,7 +2927,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   for(int i=0; i<monomials_used.size; i++)
     B.AddVector(images[monomials_used[i]]);
 
-  std::cout << "module rank is " << monomials_used.size << std::endl;
+  std::cout << "module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
 
   WeylGroupRepresentation<Rational> rep;
   rep.reset(&W);
@@ -2921,13 +2942,13 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       for(int k=0; k<roots.size; k++)
         monomial[k] = m*monomials[monomials_used[j]][k];
       Vector<Rational> evaluated;
-      evaluated.SetSize(W.RootSystem.size);
-      for(int ei=0; ei<W.RootSystem.size; ei++)
+      evaluated.SetSize(number_of_images);
+      for(int ei=0; ei<number_of_images; ei++)
       { Rational p = 1;
         for(int ej=0; ej<monomial.size; ej++)
         { Rational s = 0;
           for(int ek=0; ek<monomial[ej].size; ek++)
-          { s += monomial[ej][ek] * W.RootSystem[ei][ek];
+          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
           }
           p *= s;
         }
@@ -2939,6 +2960,32 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     }
     rep.SetElementImage(i,rm);
     std::cout << rm.ToString(&consoleFormat) << std::endl;
+    if((rm*rm).IsIdMatrix())
+      std::cout << "passed idempotence test" << std::endl;
+    else
+      std::cout << "failed idempotence test" << std::endl;
+  }
+
+
+  Matrix<Rational> idr;
+  idr.MakeIdMatrix(rep.GetDim());
+
+  for(int i=0; i<W.GetDim(); i++)
+  { for(int j=0; j<W.GetDim(); j++)
+    { if(j == i)
+        continue;
+      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
+      if(w <= 2)
+        continue;
+      Matrix<Rational> M1 = rep.GetElementImage(i+1);
+      Matrix<Rational> M2 = rep.GetElementImage(j+1);
+      Matrix<Rational> M3 = M1*M2;
+      MathRoutines::RaiseToPower(M3,w,idr);
+      if(M3.IsIdMatrix())
+        std::cout << "passed Coxeter presentation test " << i << "," << j << std::endl;
+      else
+        std::cout << "failed Coxeter presentation test " << i << "," << j << std::endl;
+    }
   }
   return rep;
 }
@@ -2960,7 +3007,7 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
     roots=currentRootSA.PositiveRootsK;
     std::cout << "I am processing root subalgebra of type "
               << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    WeylGroupRepresentation<Rational> rep = get_macdonald_representation(W,roots);
+    WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     std::cout << "has character ";
@@ -3681,8 +3728,8 @@ int main(void)
 
 
 
-  char letter = 'F';
-  int number = 4;
+  char letter = 'E';
+  int number = 6;
 
   GlobalVariables localGlobalVariables;
   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);

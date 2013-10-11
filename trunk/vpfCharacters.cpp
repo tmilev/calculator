@@ -265,7 +265,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   //{
   //}
   List<bool> Accounted;
-//  std::cout << "Group has " << this->theElements.size << std::endl;
+  //std::cout << "ComputeConjugacyClasses: group has " << this->theElements.size << " elements." << std::endl;
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(50);

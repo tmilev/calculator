@@ -3766,6 +3766,27 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   }
 }
 
+int DynkinType::GetCoxeterEdgeWeight(int v, int w)
+{ if(v == w)
+    return 0;
+  Matrix<Rational> M;
+  this->GetCartanSymmetric(M);
+  if(M(v,w) == 0)
+    return 2;
+  Rational c2 = M(v,w)*M(v,w)/M(v,v)/M(w,w);
+  c2 = 3/c2;
+  if(c2 == 12)
+    return 3;
+  else
+    if(c2 == 6)
+      return 4;
+    else
+      if(c2 == 4)
+        return 6;
+  std::cout << "if you would like an edge weight of a non-crystallographic Coxeter graph, replace the code near " << __FILE__ << ":" << __LINE__ << " with a real arccos function" << std::endl;
+  assert(false);
+}
+
 Rational DynkinType::GetSizeWeylGroupByFormula()const
 { Rational result=1;
   Rational tempRat;

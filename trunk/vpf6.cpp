@@ -403,265 +403,169 @@ ElementWeylGroup
 template < >
 Rational& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Rational>())
-  { std::cout << "This is a programming error: expression not of required type Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theRationals.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementZmodP& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementZmodP>())
-  { std::cout << "This is a programming error: expression not of required type Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type ElementZmodP. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theEltsModP.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 AlgebraicNumber& Expression::GetValueNonConst()const
 { if (!this->IsOfType<AlgebraicNumber>())
-  { std::cout << "This is a programming error: expression not of required type Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type AlgebraicNumber. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theAlgebraicNumbers.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 double& Expression::GetValueNonConst()const
 { if (!this->IsOfType<double>())
-  { std::cout << "This is a programming error: expression not of required type Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type double. The expression equals " << this->ToString() << "." << crash;
+
   return this->theBoss->theObjectContainer.theDoubles.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 std::string& Expression::GetValueNonConst()const
 { if (!this->IsOfType<std::string>())
-  { std::cout << "This is a programming error: expression not of required type std::string. "
-    << " The expression equals " << this->ToString() << "."
-    <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type std::string. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theStrings.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 RationalFunctionOld& Expression::GetValueNonConst()const
 { if (!this->IsOfType<RationalFunctionOld>())
-  { std::cout << "This is a programming error: expression not of required type RationalFunctionOld."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theRFs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-  { std::cout << "This is a programming error: expression not of required"
-    << " type ElementUniversalEnveloping_RationalFunctionOld."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type ElementUniversalEnveloping_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theUEs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Polynomial<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Polynomial<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type Polynomial_Rational."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type Polynomial_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.thePolys.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Polynomial<AlgebraicNumber>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Polynomial<AlgebraicNumber> >())
-  { std::cout << "This is a programming error: expression not of required type Polynomial_Rational."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type Polynomial_AlgebraicNumber. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.thePolysOverANs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementWeylAlgebra<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementWeylAlgebra<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type ElementWeylAlgebra."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type ElementWeylAlgebra_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylAlgebraElements.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 LittelmannPath& Expression::GetValueNonConst()const
 { if (!this->IsOfType<LittelmannPath>())
-  { std::cout << "This is a programming error: expression not of required type LittelmannPath."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type LittelmannPath. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theLSpaths.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
-  { std::cout << "This is a programming error: expression not of required type MonomialTensor_int."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type MonomialTensor. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theLittelmannOperators.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { std::cout << "This is a programming error: expression not of required type ElementTensorsGeneralizedVermas_RationalFunction."
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type ElementTGVM_RationalFunctionOld. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theTensorElts.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 charSSAlgMod<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<charSSAlgMod<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type charSSAlgMod_Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type charSSAlgMod_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theCharsSSLieAlgFD.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
-  { std::cout << "This is a programming error: expression not of required type AlgebraicNumberOld. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theLieAlgebras[this->GetLastChild().theData];
 }
 
 template < >
 Matrix<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type Matrix_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatRats.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 MatrixTensor<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MatrixTensor<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type MatrixTensor_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatTensorRats.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 Matrix<RationalFunctionOld>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<Matrix<RationalFunctionOld> >())
-  { std::cout << "This is a programming error: expression not of required type Matrix_RF. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type Matrix_RF. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theMatRFs.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 SemisimpleSubalgebras& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleSubalgebras>())
-  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type SemisimpleSubalgebras. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theSSsubalgebras[this->GetLastChild().theData];
 }
 
 template < >
 CalculusFunctionPlot& Expression::GetValueNonConst()const
 { if (!this->IsOfType<CalculusFunctionPlot>())
-  { std::cout << "This is a programming error: expression not of required type CalculusPlot. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type CalculusFunctionPlot. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
 
 template < >
 WeylGroup& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroup>())
-  { std::cout << "This is a programming error: expression not of required type WeylGroup. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type WeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroups[this->GetLastChild().theData];
 }
 
 template < >
 WeylGroupRepresentation<Rational>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupRepresentation<Rational> >())
-  { std::cout << "This is a programming error: expression not of required type WeylGroupRepresentation. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type WeylGroupRepresentation_Rational. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroupReps.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 ElementWeylGroup& Expression::GetValueNonConst()const
 { if (!this->IsOfType<ElementWeylGroup>())
-  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
 
 template < >
 WeylGroupVirtualRepresentation& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroupVirtualRepresentation>())
-  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
-    << " The expression equals " << this->ToString() << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: expression not of required type WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
 
@@ -805,18 +709,13 @@ bool Expression::CheckConsistency()const
     return false;
   if (this->IsBuiltInType())
   { if (this->children.size!=3)
-    { std::cout << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
+      crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
       << "children: type, context, and index in CommandList. The expression is " << this->ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     const Expression& mustBeTheContext=(*this)[1];
     if (!mustBeTheContext.IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
-    { std::cout << "This is a programming error. At the moment of writing,  "
-      << "the second child of a built-in type must be a context. It is instead " << mustBeTheContext.ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. At the moment of writing, the second child of a built-in type must be a context. It is instead "
+      << mustBeTheContext.ToString() << crash;
     for (int i=1; i<mustBeTheContext.children.size; i++)
     { bool isGood=false;
       const Expression& currentE=mustBeTheContext[i];
@@ -827,11 +726,8 @@ bool Expression::CheckConsistency()const
       if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
         isGood=true;
       if (!isGood)
-      { std::cout << "This is a programming error. The context " << mustBeTheContext.ToString()
-        << " has an entry which I do not recognize, namely, " << currentE.ToString() << ". "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error. The context " << mustBeTheContext.ToString() << " has an entry which I do not recognize, namely, "
+        << currentE.ToString() << ". " << crash;
     }
   }
   return true;
@@ -841,17 +737,14 @@ const Expression& Expression::operator[](int n)const
 { this->CheckInitialization();
   int childIndex=this->children[n];
   if (childIndex<0)
-  { std::cout << "<hr>This is a programming error: the child of position " << n << " out of " << this->children.size-1
-    << " is not contained in the expression container. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "<hr>This is a programming error: the child of position " << n << " out of " << this->children.size-1
+    << " is not contained in the expression container. " << crash;
   return this->theBoss->theExpressionContainer[childIndex];
 }
 
 bool Expression::AddChildOnTop(const Expression& inputChild)
 { this->CheckInitialization();
-  this->children.AddOnTop
-  (this->theBoss->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild));
+  this->children.AddOnTop(this->theBoss->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild));
   return true;
 }
 
@@ -906,10 +799,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 { MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
   this->CheckInitialization();
   if (!this->IsBuiltInType())
-  { std::cout << "This is a programming error: calling Expression::SetContextAtLeastEqualTo on an expression that is not of built-in type. "
-    << "Contexts are reserved for built-in data types. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling Expression::SetContextAtLeastEqualTo on an expression that is not of built-in type. "
+    << "Contexts are reserved for built-in data types. " << crash;
   if (!inputOutputMinContext.IsContext())
   { this->theBoss->Comments << "<br>Warning: non-initialized input context in Expression::SetContextAtLeastEqualTo. Stack trace: "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -1013,10 +904,7 @@ Expression Expression::ContextGetContextVariable(int variableIndex)const
 
 bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
 { if (!this->IsContext())
-  { std::cout << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA on a non-context expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA on a non-context expression. " << crash;
   int index=this->ContextGetIndexAmbientSSalg();
   if (index!=-1 && index!=indexInOwners)
     return false;
@@ -1031,10 +919,7 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
 
 bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const Expression& theDiffOpVar)
 { if (!this->IsContext())
-  { std::cout << "This is a programming error: calling Expression::ContextSetDiffOperatorVar on a non-context expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling Expression::ContextSetDiffOperatorVar on a non-context expression. " << crash;
   Expression diffVarsE, polyVarsE;
   diffVarsE.reset(*this->theBoss, 2);
   diffVarsE.AddChildAtomOnTop(this->theBoss->opWeylAlgebraVariables());
@@ -1416,10 +1301,7 @@ bool CommandList::GetTypeHighestWeightParabolic
         outputInducingSel.AddSelectionAppendNewIndex(i);
   }
   if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
-  { std::cout << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
-    << " contained object container more than once. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName() << " contained object container more than once. " << crash;
   int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
 //  std::cout << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
@@ -1494,12 +1376,8 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
     out << "<tr><td>" << currentElt.ToString() << "</td>";
     int indexInWeyl=theKLpolys.TheWeylGroup->theElements.GetIndex(currentElt);
     if (indexInWeyl==-1)
-    { std::cout << "This is a programming error. Something is wrong: I am getting that an element "
-      << "of the Weyl group of the Levi part of the parabolic does not lie in the ambient Weyl group, which "
-      << " is impossible. There is a bug somewhere; crashing in accordance. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Something is wrong: I am getting that an element of the Weyl group of the Levi part of "
+      << "the parabolic does not lie in the ambient Weyl group, which is impossible. There is a bug somewhere; crashing in accordance. " << crash;
     currentChar.MakeZero();
     theMon.owner=theSSlieAlg;
     for (int j=0; j< theKLpolys.theKLcoeffs[indexInWeyl].size; j++)
@@ -1899,12 +1777,9 @@ std::string quasiDiffOp<coefficient>::ToString(FormatExpressions* theFormat)cons
   }
   std::string result=reordered.ToString(theFormat);
   if (result=="0" && this->size()!=0)
-  { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero quasidifferential operator "
+    crash << "This is likely a programming error (crashing at any rate): I have a non-zero quasidifferential operator "
     << " with non-properly formatted LaTeX string " << this->MonomialCollection<quasiDiffMon, coefficient>::ToString(theFormat)
-    << ", however its properly formatted string is 0. Probably there is something wrong with the initializations of the monomials "
-    << "of the qdo. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << ", however its properly formatted string is 0. Probably there is something wrong with the initializations of the monomials of the qdo. " << crash;
   return result;
 }
 
@@ -1920,10 +1795,8 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& t
 //  <<  " with min num vars equal to " << theCoeff.GetMinNumVars();
   for (int i=0; i<theCoeff.GetMinNumVars(); i++)
   { if (!theCoeff(i).IsSmallInteger(&powerMonCoeff))
-    { std::cout << "This is a programming error. Getting euler operator part of action on generalized Verma module: I have an "
-      << "exponent with non-small integer entry. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Getting euler operator part of action on generalized Verma module: I have an exponent with non-small integer entry. "
+      << crash;
     currentMonContribution.Makexidj(i, i, 0);
     currentMonContribution.RaiseToPower(powerMonCoeff);
     outputDO*=currentMonContribution;
@@ -2003,10 +1876,7 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
       exponentContribution*=oneIndexContribution;
       theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
       if (!tempP1.IsEqualToZero())
-      { std::cout << "This is a mathematical error! Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a mathematical error! Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. " << crash;
     }
 //    std::cout << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
 //    std::cout << "<br>Exponent contribution of " << currentMon.ToString() << ": "
@@ -2405,16 +2275,10 @@ bool CommandList::innerHWVCommon
       return output.SetError("Error while generating highest weight module. See comments for details. ", theCommands);
   }
   if (&theMod.GetOwner()!=owner)
-  { std::cout << "This is a programming error: module has owner that is not what it should be. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: module has owner that is not what it should be. " << crash;
   theElt.MakeHWV(theMod, RFOne);
   if (&theElt.GetOwnerSS()!=owner)
-  { std::cout << "This is a programming error: just created an ElementTensorsGeneralizedVermas whose owner is not "
-    << "what it should be. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: just created an ElementTensorsGeneralizedVermas whose owner is not what it should be. " << crash;
   return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theElt, hwContext, theCommands);
 }
 
@@ -2510,13 +2374,9 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
       theGenMod.GetOwner().GetRank()!=theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize ||
       theFDMod.GetOwner().GetRank()!=theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
       )
-  { std::cout << "This is a programming error: the two modules have owners, " << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
+    crash << "This is a programming error: the two modules have owners, " << theFDMod.GetOwner().theWeyl.theDynkinType.ToString()
     << " and " << theGenMod.GetOwner().theWeyl.theDynkinType.ToString() << ", and parabolic selections of max size "
-    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " and "
-    << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " and " << theFDMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << crash;
   //int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
@@ -2524,11 +2384,9 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   List<ElementUniversalEnveloping<RationalFunctionOld> > theLeviEigenVectors;
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
   if (theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize!=theGenMod.GetOwner().GetRank())
-  { std::cout << "This is a programming error: module has parabolic selection with max size "
+    crash << "This is a programming error: module has parabolic selection with max size "
     << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.MaxSize << " but the ambient semisimple Lie algebra is of rank "
-    << theGenMod.GetOwner().GetRank() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << theGenMod.GetOwner().GetRank() << ". " << crash;
   std::string report;
   theFDMod.SplitOverLevi
   (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
@@ -2736,10 +2594,8 @@ bool CommandList::innerGetCartanGen(CommandList& theCommands, const Expression& 
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
-  { std::cout << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a "
-    << "semisimple Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
+    << crash;
 //  std::cout << "<br>Here I am at next phase: " << input.ToString() << ", ss alg: " << theSSalg->ToString();
 //  std::cout.flush();
   int theIndex;
@@ -2886,13 +2742,10 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
       tempM2.Transpose();
       tempM2.MultiplyOnTheRight(tempM);
       if (!(tempM2==theWeyl.CartanSymmetric))
-      { std::cout << "This is a (non-critical) programming error: the epsilon coordinates of the vectors are incorrect. "
+        crash << "This is a (non-critical) programming error: the epsilon coordinates of the vectors are incorrect. "
         << "Please fix function DynkinType::GetEpsilonMatrix. The matrix of the epsilon coordinates is " << tempM.ToString()
         << ", the Symmetric Cartan matrix is " << theWeyl.CartanSymmetric.ToString() << ", and the  "
-        << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". " << crash;
     }
   if (Verbose)
   { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
@@ -2920,17 +2773,11 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
 
 bool Expression::HasBoundVariables()const
 { if (this->theBoss==0)
-  { std::cout << "This is a programming error: calling function HasBoundVariables on non-initialized expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling function HasBoundVariables on non-initialized expression. " << crash;
   RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
-  { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. " << crash;
   if (this->IsListOfTwoAtomsStartingWith(this->theBoss->opBind()))
     return true;
   for (int i=0; i<this->children.size; i++)
@@ -2988,8 +2835,7 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& in
 }
 
 Expression::FunctionAddress CommandList::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
-{ std::cout << "Function CommandList::GetfOp not implemented yet. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+{ crash << "Function CommandList::GetfOp not implemented yet. " << crash;
   return 0;
 }
 
@@ -3308,9 +3154,7 @@ bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, E
   }
   if (summandsWithCoeff.size>=2)
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
-    { std::cout << "This is a pgoramming error: bad comparison! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a pgoramming error: bad comparison! " << crash;
   summandsWithCoeff.QuickSortAscending();
   if (summandsWithCoeff.size==1)
   { output=summandsWithCoeff[0];
@@ -3529,11 +3373,9 @@ Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->IsBuiltInType())
     return (*this)[1];
-  std::cout << "This is a programming error: GetContext called on an Expression that is not a built-in data type.  "
+  crash << "This is a programming error: GetContext called on an Expression that is not a built-in data type.  "
   << " I can't display the expression as this may cause ``infinite'' recursion if the error is caused by the ToString method. Here is however the lisp form "
-  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+  << this->ToStringFull() << " of the expression. " << "Here's  a stack trace. " << crash;
   Expression output;
   output.MakeEmptyContext(*this->theBoss);
   return output;
@@ -3837,7 +3679,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\sqrt{" << secondE << "}";
     else
     { std::string firstE= (*this)[1].ToString(theFormat);
-      bool firstNeedsBrackets=(!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()))) && !(*this)[1].IsOfType<Rational>() && !(*this)[1].IsOfType<double>();
+      bool firstNeedsBrackets=(*this)[1].NeedsParenthesisForMultiplication();
       bool secondNeedsBrackets=(*this)[2].NeedsParenthesisForMultiplication();
       if (firstE=="-1" )
       { firstE="-";
@@ -3887,10 +3729,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
-    { std::cout << "This is a programming error: the minus function expects" << "1 or 2 arguments, instead there are " << this->children.size-1
-      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: the minus function expects" << "1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
     out << (*this)[1].ToString(theFormat) << "-" << (*this)[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
@@ -4094,10 +3933,7 @@ bool Expression::IsLisT()const
   if (this->children.size<=0)
     return false;
   if (this->theData!=this->theBoss->opLisT())
-  { std::cout << "This is a programming error. List expressions must have data valule equal to CommandList::opList(). "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. List expressions must have data valule equal to CommandList::opList(). " << crash;
   return true;
 }
 
@@ -4195,9 +4031,7 @@ void CommandList::AddOperationBuiltInType(const std::string& theOpName)
 
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->GetOperations().Contains(theOpName))
-  { std::cout << "This is a programming error: operation " << theOpName << " already created. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: operation " << theOpName << " already created. " << crash;
   this->operations.AddOnTop(theOpName);
   this->FunctionHandlers.SetSize(this->operations.size);
   this->FunctionHandlers.LastObject()->SetSize(0);
@@ -4232,9 +4066,7 @@ void CommandList::AddOperationHandler
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
-  { std::cout << "This section of code is not implemented yet. Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
     this->FunctionHandlers[indexOp].ReservE(55);
@@ -4537,10 +4369,8 @@ bool CommandList::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   if (!left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
-  { std::cout << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression "
-    << " is not EndStatement." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression "
+    << " is not EndStatement." << crash;
   left.theData.children.ReservE(left.theData.children.size+ right.theData.children.size-1);
   for (int i=1; i<right.theData.children.size; i++)
     left.theData.AddChildOnTop(right.theData[i]);
@@ -4710,11 +4540,8 @@ template <class coefficient>
 bool Expression::ContextGetPolySubFromSuperContextNoFailure(const Expression& largerContext, PolynomialSubstitution<coefficient>& output)const
 { bool mustBeTrue= this->ContextGetPolySubFromSuperContext(largerContext, output);
   if (!mustBeTrue)
-  { std::cout << "This is a programming error: I was not able to extract a polynomial substitution from smaller context "
-    << this->ToString() << " relative to larger context " << largerContext.ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I was not able to extract a polynomial substitution from smaller context "
+    << this->ToString() << " relative to larger context " << largerContext.ToString() << ". " << crash;
   return mustBeTrue;
 }
 
@@ -4737,11 +4564,8 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure
 (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const
 { bool mustBeTrue= this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue)
-  { std::cout << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from "
-    << " smaller context " << this->ToString() << " relative to larger context " << largerContext.ToString()
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from "
+    << " smaller context " << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
   return mustBeTrue;
 }
 

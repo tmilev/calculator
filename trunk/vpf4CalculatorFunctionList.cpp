@@ -52,6 +52,18 @@ void CommandList::initPredefinedInnerFunctions()
    "Differentiation - product rule.  ",
    "Differentiate(x, f*g )");
   this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateSqrtA, "",
+   "Differentiation - square roots.  ",
+   "Differentiate(x, \\sqrt{f} )");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateAdivideB, "",
+   "Differentiation - division rule.  ",
+   "Differentiate(x, f/g )");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateAplusB, "",
+   "Differentiation - sum rule.  ",
+   "Differentiate(x, f+g )");
+  this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateConstant, "",
    "Differeniation - constant rule. ",
    "Differentiate(x, 5 ); d/dx \\sqrt{5}");
@@ -1331,7 +1343,7 @@ void CommandList::initPredefinedStandardOperations()
    "W:= WeylGroupNaturalRep{}(B_3); V:=MakeVirtualWeylGroupRepresentation{}W; W\\otimes W; V*V", true);
   this->AddOperationInnerHandler
   ("*", this->innerCollectMultiplicands, "",
-   "Collects multiplicand exponents.",
+   "Collects multiplicand exponents. ",
    "x*(x*y)*x*(x*x^3*x); ", true);
   this->AddOperationInnerHandler
   ("*", this->innerMultiplyByOne, "",
@@ -1533,6 +1545,12 @@ void CommandList::initPredefinedStandardOperations()
    "Provided the exponent is t or T, calls the Transpose function on the base.",
    "X:=(1,2)^t; X-Transpose{}(1,2)  ",
    true);
+  this->AddOperationHandler
+  ("^", CommandListFunctions::innerPowerAnyToZero, "",
+   "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
+   "A:=x^0; x:=0; A; B:=x^0; 0^0; ",
+   true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
@@ -1595,9 +1613,7 @@ void CommandList::initPredefinedStandardOperations()
    "(a^m)^n", true);
   this->AddOperationOuterHandler
   ("^", this->outerPowerRaiseToFirst, "",
-   "Provided the base is not equal to one of the letters A, B, C, D, E, F, or G, realizes \
-   the tranformation {{anything}}^1:=a. We note that the notation A^1, B^1, C^1, D^1, E^1, F^1, G^1\
-   is reserved for denoting Dynkin types. ",
+   "Realizes the tranformation {{anything}}^1:=a. ",
   "x^1+x^2; A^1", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes

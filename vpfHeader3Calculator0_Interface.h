@@ -143,6 +143,7 @@ class Expression
     tempE.MakeAtom(theOp, *this->theBoss);
     return this->AddChildOnTop(tempE);
   }
+  bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
@@ -295,6 +296,7 @@ class Expression
   bool IsEqualToOne()const;
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss);
+  bool MakeSum(CommandList& theCommands, const MonomialCollection<Expression, Rational>& theSum);
   void MakeSerialization(const std::string& secondEntry, CommandList& theCommands, int numElementsToReserve=0);
   bool MakeAtom(int input, CommandList& newBoss)
   { this->reset(newBoss);
@@ -307,6 +309,7 @@ class Expression
   void MakeFunction(CommandList& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
   bool MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right);
+  bool MakeXOdotsOX(CommandList& owner, int theOp, const List<Expression>& input);
   bool MakeOX(CommandList& owner, int theOp, const Expression& opArgument);
   bool Sequencefy();
   void Substitute(const Expression& input, Expression& output);

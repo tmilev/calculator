@@ -560,8 +560,7 @@ void CommandList::AutomatedTestRun
   }*/
 }
 
-bool CommandListFunctions::outerAdivBpowerItimesBpowerJ
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandListFunctions::outerAdivBpowerItimesBpowerJ(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::outerAdivBpowerItimesBpowerJ");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
@@ -580,3 +579,58 @@ bool CommandListFunctions::outerAdivBpowerItimesBpowerJ
   return output.MakeXOX(theCommands, theCommands.opTimes(), input[1][1], rightMultiplicand);
 }
 
+bool Expression::SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const
+{ MacroRegisterFunctionWithName("Expression::SplitProduct");
+  if (numDesiredMultiplicandsLeft<=0)
+    return false;
+  this->CheckInitialization();
+  List<Expression> theMultiplicandsLeft, theMultiplicandsRight;
+  this->theBoss->AppendOpandsReturnTrueIfOrderNonCanonical(*this, theMultiplicandsLeft, this->theBoss->opTimes());
+  if (theMultiplicandsLeft.size<=numDesiredMultiplicandsLeft)
+    return false;
+  theMultiplicandsRight.SetExpectedSize(theMultiplicandsLeft.size-numDesiredMultiplicandsLeft);
+  for (int i=numDesiredMultiplicandsLeft; i<theMultiplicandsLeft.size; i++)
+    theMultiplicandsRight.AddOnTop(theMultiplicandsLeft[i]);
+  theMultiplicandsLeft.SetSize(numDesiredMultiplicandsLeft);
+  outputLeftMultiplicand.MakeXOdotsOX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsLeft);
+  return outputRightMultiplicand.MakeXOdotsOX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsRight);
+}
+
+bool CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::outerAtimesBpowerJplusEtcDivBpowerI");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+    return false;
+//  std::cout << "ere be i!";
+  Expression denominatorBase, denominatorExponent;
+  input[2].GetBaseExponentForm(denominatorBase, denominatorExponent);
+  MonomialCollection<Expression, Rational> numerators, numeratorsNew;
+  theCommands.CollectSummands(theCommands, input[1], numerators);
+  numeratorsNew.SetExpectedSize(numerators.size());
+  numeratorsNew.MakeZero();
+  Expression numeratorMultiplicandLeft, numeratorMultiplicandRight, numeratorBaseRight, numeratorExponentRight;
+  Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
+  mOneE.AssignValue(-1, theCommands);
+  for (int i=0; i<numerators.size(); i++)
+  { if (numerators[i].IsConstant())
+    { newNumExponent.MakeXOX(theCommands, theCommands.opTimes(), mOneE, denominatorExponent);
+      newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      continue;
+    }
+    bool isGood=false;
+    for (int j=1; numerators[i].SplitProduct(j, numeratorMultiplicandLeft, numeratorMultiplicandRight); j++)
+    { numeratorMultiplicandRight.GetBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
+      if (numeratorBaseRight!=denominatorBase)
+        continue;
+      newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
+      newNumSummandRightPart.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+      newNumSummand.MakeXOX(theCommands, theCommands.opTimes(), numeratorMultiplicandLeft, newNumSummandRightPart);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      isGood=true;
+      break;
+    }
+    if (!isGood)
+      return false;
+  }
+  return output.MakeSum(theCommands, numeratorsNew);
+}

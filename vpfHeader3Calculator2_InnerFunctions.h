@@ -37,6 +37,7 @@ public:
   static bool innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool outerAdivBpowerItimesBpowerJ(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetAlgebraicNumberFromMinPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(CommandList& theCommands, const Expression& input, Expression& output);

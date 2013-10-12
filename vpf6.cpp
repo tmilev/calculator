@@ -2825,9 +2825,7 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& in
     for (int i=1; i<input.children.size; i++)
     { if (this->AppendOpandsReturnTrueIfOrderNonCanonical(input[i], output, theOp))
         result=true;
-      if (i<input.children.size-1 &&
-          input[i].IsListStartingWithAtom(theOp) &&
-          input[i].children.size>2)
+      if (i<input.children.size-1 && input[i].IsListStartingWithAtom(theOp) && input[i].children.size>2)
         result=true;
     }
   return result;
@@ -3124,19 +3122,32 @@ bool CommandList::outerPowerRaiseToFirst(CommandList& theCommands, const Express
   return false;
 }
 
-bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerPlus");
-//  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
-    return false;
-  MonomialCollection<Expression, Rational> theSum;
-  theCommands.CollectSummands(theCommands, input, theSum);
-//  Rational constTerm=0;
-//  bool foundConstTerm=false;
+bool Expression::MakeXOdotsOX(CommandList& owner, int theOp, const List<Expression>& input)
+{ MacroRegisterFunctionWithName("Expression::MakeXOdotsOX");
+  if (input.size==0)
+    crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
+  if (input.size==1)
+  { *this=input[0];
+    return true;
+  }
+  this->MakeXOX(owner, theOp, *input.LastObject(), input[input.size-2]);
+  Expression result;
+  for (int i=input.size-3; i>=0; i--)
+  { result.reset(owner, 3);
+    result.AddChildAtomOnTop(theOp);
+    result.AddChildOnTop(*this);
+    result.AddChildOnTop(input[i]);
+    *this=result;
+  }
+  return true;
+}
+
+bool Expression::MakeSum(CommandList& theCommands, const MonomialCollection<Expression, Rational>& theSum)
+{ MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
   if (theSum.IsEqualToZero())
-    return output.AssignValue<Rational>(0, theCommands);
+    return this->AssignValue<Rational>(0, theCommands);
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.SetSize(theSum.size());
   for (int i=0; i<theSum.size(); i++)
@@ -3155,20 +3166,17 @@ bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, E
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
       crash << "This is a pgoramming error: bad comparison! " << crash;
   summandsWithCoeff.QuickSortAscending();
-  if (summandsWithCoeff.size==1)
-  { output=summandsWithCoeff[0];
-    return true;
-  }
-  output.MakeXOX(theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1], summandsWithCoeff[summandsWithCoeff.size-2]);
-  Expression result;
-  for (int i=summandsWithCoeff.size-3; i>=0; i--)
-  { result.reset(theCommands, 3);
-    result.AddChildAtomOnTop(theCommands.opPlus());
-    result.AddChildOnTop(output);
-    result.AddChildOnTop(summandsWithCoeff[i]);
-    output=result;
-  }
-  return true;
+  return this->MakeXOdotsOX(theCommands, theCommands.opPlus(), summandsWithCoeff);
+}
+
+bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::outerPlus");
+//  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
+    return false;
+  MonomialCollection<Expression, Rational> theSum;
+  theCommands.CollectSummands(theCommands, input, theSum);
+  return output.MakeSum(theCommands, theSum);
 }
 
 bool CommandList::EvaluateIf(CommandList& theCommands, const Expression& input, Expression& output)

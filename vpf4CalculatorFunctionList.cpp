@@ -1378,8 +1378,6 @@ void CommandList::initPredefinedStandardOperations()
   ("*", CommandListFunctions::outerAdivBpowerItimesBpowerJ, "",
    "Rule: (a/x^t)x^s:=a x^{s-t}.",
    " (a/x) x^{-1} ;(a/x^2) x^{3};(a/x) x^{3}; (a/x^2) x", true);
-
-
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
    "Multiplies rational number by an element universal enveloping algebra.",
@@ -1516,6 +1514,10 @@ void CommandList::initPredefinedStandardOperations()
    Note the order of multiplication in the rules: this operation is safe and correct for \
    non-commutative rings as well.",
    "(a/b)/c; a/(b/c);", true);
+  this->AddOperationOuterHandler
+  ("/", CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI, "",
+   "Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t:=a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} ",
+   " (a x^{1/2} + b x )/x; (a x^{1/2} + b x )/x^2;", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", CommandListInnerTypedFunctions::innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",

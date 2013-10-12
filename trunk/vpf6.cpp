@@ -3372,6 +3372,17 @@ int Expression::ContextGetIndexAmbientSSalg()const
   return -1;
 }
 
+void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const
+{ this->CheckInitialization();
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(), 3))
+  { outputBase=(*this)[1];
+    outputExponent=(*this)[2];
+    return;
+  }
+  outputBase=*this;
+  outputExponent.AssignValue(1, *this->theBoss);
+}
+
 Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->IsBuiltInType())
@@ -3560,7 +3571,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { out << this->GetValue<AlgebraicNumber>().ToString();
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
-  { out << this->GetValue<LittelmannPath>().ToString()  ;
+  { out << this->GetValue<LittelmannPath>().ToString();
     result=true;
   } else if (this->IsOfType<Matrix<RationalFunctionOld> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -3635,6 +3646,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //  }
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
+  if (this->theBoss->flagUseFracInRationalLaTeX)
+    allowNewLine=false;
   int lineBreak=50;
   int charCounter=0;
   std::string tempS;

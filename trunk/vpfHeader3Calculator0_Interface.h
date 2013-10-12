@@ -143,6 +143,7 @@ class Expression
     tempE.MakeAtom(theOp, *this->theBoss);
     return this->AddChildOnTop(tempE);
   }
+  void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool SetChilD(int childIndexInMe, int childIndexInBoss);

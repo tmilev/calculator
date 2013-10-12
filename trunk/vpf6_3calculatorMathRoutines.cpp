@@ -559,3 +559,24 @@ void CommandList::AutomatedTestRun
     std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
   }*/
 }
+
+bool CommandListFunctions::outerAdivBpowerItimesBpowerJ
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::outerAdivBpowerItimesBpowerJ");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+    return false;
+  Expression denominatorBase, denominatorExponent;
+  Expression numeratorBase, numeratorExponent;
+  input[1][2].GetBaseExponentForm(denominatorBase, denominatorExponent);
+  input[2].GetBaseExponentForm(numeratorBase, numeratorExponent);
+  if (denominatorBase!=numeratorBase)
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  Expression rightMultiplicand, rightMultiplicandExponent;
+  rightMultiplicandExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponent, denominatorExponent);
+  rightMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, rightMultiplicandExponent);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), input[1][1], rightMultiplicand);
+}
+

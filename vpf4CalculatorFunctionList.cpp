@@ -1374,6 +1374,12 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
    "(a+b)*c; \n a*(b+c)", true);
+  this->AddOperationOuterHandler
+  ("*", CommandListFunctions::outerAdivBpowerItimesBpowerJ, "",
+   "Rule: (a/x^t)x^s:=a x^{s-t}.",
+   " (a/x) x^{-1} ;(a/x^2) x^{3};(a/x) x^{3}; (a/x^2) x", true);
+
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyAnyByUE, this->opRational(), this->opElementUEoverRF(),
    "Multiplies rational number by an element universal enveloping algebra.",

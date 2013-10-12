@@ -1142,3 +1142,4 @@ bool CommandList::ApplyOneRule()
     return this->DecreaseStackSetCharacterRangeS(1);
   return false;
 }
+

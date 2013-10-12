@@ -44,6 +44,7 @@ void CommandList::reset()
   this->flagNewContextNeeded=true;
   this->flagProduceLatexLink=false;
   this->flagDisplayFullExpressionTree=false;
+  this->flagUseFracInRationalLaTeX=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
@@ -106,7 +107,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("mod");
   this->AddOperationNoRepetitionAllowed("\\otimes");
   this->AddOperationNoRepetitionAllowed("\\choose");
-  this->AddOperationNoRepetitionAllowed("\\ln");
+  this->AddOperationNoRepetitionAllowed("\\sqrt");
   this->AddOperationNoRepetitionAllowed("[]");
   this->AddOperationNoRepetitionAllowed(":=:");
   this->AddOperationNoRepetitionAllowed("^");
@@ -126,7 +127,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("EltZmodP");
   this->AddOperationBuiltInType("Double");
-  this->AddOperationBuiltInType("AlgebraicNumberOld");
+  this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("PolynomialOverANs");
   this->AddOperationBuiltInType("RationalFunction");
@@ -196,6 +197,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("\\");
   this->controlSequences.AddOnTop("&");
   this->controlSequences.AddOnTop("%");
+  this->controlSequences.AddOnTop("UseFrac");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LogFull");
@@ -204,6 +206,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("EndProgram");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
+
   this->AddOperationBuiltInType("PolynomialWithDO");
   this->AddOperationBuiltInType("DifferentialOperator");
 
@@ -212,9 +215,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Serialization");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
-
+  this->AddOperationNoRepetitionAllowed("\\ln");
 
   this->TotalNumPatternMatchedPerformed=0;
+  this->NumPredefinedOperations=this->operations.size; //<-operations added up to this point are called ``operations''
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initPredefinedOperationsComposite();
@@ -253,9 +257,52 @@ bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
   newExpr.AddChildOnTop(rightE.theData);
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(7);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
+  return this->DecreaseStackSetCharacterRangeS(7);
+}
+
+bool CommandList::ReplaceSqrtEXByEX(int formatOptions)
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& argument=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr, twoE;
+  twoE.AssignValue(2, *this);
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(argument.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLast(1);
+}
+
+bool CommandList::ReplaceOXEXEByE(int formatOptions)
+{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
+  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  Expression newExpr;
+  newExpr.reset(*this, 4);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.format=formatOptions;
+  newExpr.AddChildOnTop(leftE.theData);
+  newExpr.AddChildOnTop(rightE.theData);
+  opElt.theData=newExpr;
+  opElt.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(4);
+}
+
+bool CommandList::ReplaceOXEXEXByEX(int formatOptions)
+{ SyntacticElement& opElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
+  SyntacticElement& leftE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr;
+  newExpr.reset(*this, 4);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(opElt.controlIndex));
+  newExpr.format=formatOptions;
+  newExpr.AddChildOnTop(leftE.theData);
+  newExpr.AddChildOnTop(rightE.theData);
+  opElt.theData=newExpr;
+  opElt.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLast(4);
 }
 
 bool CommandList::ReplaceOXXEXEXEXByE(int formatOptions)
@@ -287,9 +334,22 @@ bool CommandList::ReplaceOXEByE(int formatOptions)
   newExpr.format= formatOptions;
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
-  this->DecreaseStackSetCharacterRangeS(2);
+  return this->DecreaseStackSetCharacterRangeS(2);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
-  return true;
+}
+
+bool CommandList::ReplaceOEByE(int formatOptions)
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr.AddChildAtomOnTop(this->GetOperationIndexFromControlIndex(left.controlIndex));
+  newExpr.AddChildOnTop(right.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(1);
+//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
 }
 
 bool CommandList::ReplaceOEXByEX(int formatOptions)
@@ -876,6 +936,11 @@ bool CommandList::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="UseFrac")
+  { this->flagUseFracInRationalLaTeX=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
 
 /*  if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
@@ -982,6 +1047,10 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else
   //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
+  if (thirdToLastS=="\\sqrt" && secondToLastS=="Expression")
+    return this->ReplaceSqrtEXByEX();
+  if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
+    return this->ReplaceOXEXEXByEX();
   //Some synonyms:
   if (lastS=="ln")
     return this->ReplaceXByEusingO(this->opLog());

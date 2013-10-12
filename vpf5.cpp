@@ -2305,10 +2305,25 @@ bool CommandList::innerDouble(CommandList& theCommands, const Expression& input,
 
 bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSqrt");
-  if (!input.IsOfType<Rational>())
+  if (input.children.size!=3)
+    return false;
+  int thePower;
+  if (!input[1].IsSmallInteger(&thePower))
+    return false;
+  if (!input[2].IsConstant())
+  { //std::cout << "input is: " << input[2].ToString();
+    theCommands.CheckInputNotSameAsOutput(input, output);
+    Expression theExponent;
+    Rational thePowerRat(1, thePower);
+    theExponent.AssignValue(thePowerRat, theCommands);
+    return output.MakeXOX(theCommands, theCommands.opThePower(), input[2], theExponent);
+  }
+  if (!input[2].IsOfType<Rational>())
+    return false;
+  if (thePower!=2)
     return false;
   AlgebraicNumber theNumber;
-  if (!theNumber.AssignRationalQuadraticRadical(input.GetValue<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
+  if (!theNumber.AssignRationalQuadraticRadical(input[2].GetValue<Rational>(), theCommands.theObjectContainer.theAlgebraicClosure))
     return false;
   return output.AssignValue(theNumber, theCommands);
 }

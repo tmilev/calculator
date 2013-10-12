@@ -483,10 +483,25 @@ bool CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger(CommandList& t
   int thePower=0;
   if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
     return false;
-  if (thePower<0)
-    return false;
   if (base.IsEqualToZero() && thePower<=0)
     return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  if (thePower<0)
+  { if (base.size()==1)
+    { Polynomial<Rational> outputPoly;
+      MonomialP theMon=base[0];
+      Rational theCF=base.theCoeffs[0];
+      theCF.RaiseToPower(thePower);
+      theMon.RaiseToPower(thePower);
+      outputPoly.MakeZero();
+      outputPoly.AddMonomial(theMon, theCF);
+      return output.AssignValueWithContext(outputPoly, input[1].GetContext(), theCommands);
+    }
+    base.RaiseToPower(-thePower);
+    RationalFunctionOld theRF;
+    theRF=base;
+    theRF.Invert();
+    return output.AssignValueWithContext(theRF, input[1].GetContext(), theCommands);
+  }
   base.RaiseToPower(thePower);
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }

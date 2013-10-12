@@ -10,8 +10,8 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
   ("crash", CommandListFunctions::innerCrash, "",
-   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.). ",
-   "crash(0)", false);
+   "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
+   "crash(0)");
   this->AddOperationInnerHandler
   ("MakeMakefile", CommandListFunctions::innerMakeMakeFile, "",
    "Makes a makefile. ",
@@ -23,7 +23,7 @@ void CommandList::initPredefinedInnerFunctions()
    "AutomatedTest{}(0)", false);
   this->AddOperationInnerHandler
   ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
-   "Runs a big bad automated test of all built in functions to create a file containing a set of known good results. ",
+   "Runs a big bad automated test of all built in functions to create a file containing a set of known good results.",
    "AutomatedTestSetGoodKnownCopy 0");
   this->AddOperationInnerHandler
   ("!", CommandListFunctions::innerFactorial, "",
@@ -48,13 +48,17 @@ void CommandList::initPredefinedInnerFunctions()
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
 
   this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateSinCos, "",
+   "Differentiation - product rule.  ",
+   "Differentiate(x,  (\\sin x) \\cos x )");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateChainRule, "",
+   "Differentiation - chain rule.  ",
+   "Differentiate(x,  \\sin x^2 \\cos (\\sin x))");
+  this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateAtimesB, "",
    "Differentiation - product rule.  ",
    "Differentiate(x, f*g )");
-  this->AddOperationInnerHandler
-  ("Differentiate", CommandListFunctions::innerDifferentiateSqrtA, "",
-   "Differentiation - square roots.  ",
-   "Differentiate(x, \\sqrt{f} )");
   this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateAdivideB, "",
    "Differentiation - division rule.  ",
@@ -1009,7 +1013,8 @@ void CommandList::initPredefinedInnerFunctions()
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
-  this->NumPredefinedVars=this->operations.size;
+  this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation =this->operations.size-this->NumPredefinedOperations;//<-operations that are added up to this point but were not accounted as ``operations'' are called ``built-in-functions''.
+
 }
 
 void CommandList::initPredefinedStandardOperations()
@@ -1226,7 +1231,7 @@ void CommandList::initPredefinedStandardOperations()
 
   this->AddOperationOuterHandler
   ("*", this->outerTimesToFunctionApplication, "",
-   "On condition that F is a built-int function name, replaces F*x with F{}x.",
+   "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
    "plot2D(\\sin{}x+cos{}x, 0, 5) ", true);
   this->AddOperationOuterHandler
   ("*", CommandListFunctions::outerDifferentiateWRTxTimesAny, "",
@@ -1382,7 +1387,7 @@ void CommandList::initPredefinedStandardOperations()
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
-   "Multiplies rational number by a rational function",
+   "Multiplies rational number by a rational function.",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
@@ -1741,6 +1746,10 @@ void CommandList::initPredefinedOperationsComposite()
   ("ElementWeylAlgebra", CommandListFunctions::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",
    "x:=ElementWeylAlgebraPoly{}(\\partial, x);\\partial:=ElementWeylAlgebraDO{}(\\partial, x);\n \\partial{}(x); \\partial^{2}{}(x^3+x^2); x{}(x^2)", true);
+  this->AddOperationComposite
+  ("*", CommandListFunctions::innerCompositeConstTimesAnyActOn, "",
+   "Rule (a*f){}x= a*(f{}x), provided a is a constant. ",
+   "(2\\sin){}x-2(\\sin x) ", true);
   //this->AddOperationComposite
   //("Differentiate", CommandListFunctions::innerDdivDxToDifferentiation, "",
   // " ",

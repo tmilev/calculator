@@ -188,6 +188,14 @@ class Expression
   bool IsConstant()const;
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInFunction(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInFunctionOrOperation(std::string* outputWhichOperation=0)const
+  { if(this->IsBuiltInOperation(outputWhichOperation))
+      return true;
+    if (this->IsBuiltInFunction(outputWhichOperation))
+      return true;
+    return false;
+  }
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
@@ -287,9 +295,10 @@ class Expression
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss);
   void MakeSerialization(const std::string& secondEntry, CommandList& theCommands, int numElementsToReserve=0);
-  void MakeAtom(int input, CommandList& newBoss)
+  bool MakeAtom(int input, CommandList& newBoss)
   { this->reset(newBoss);
     this->theData=input;
+    return true;
   }
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
@@ -642,9 +651,11 @@ public:
   bool flagProduceLatexLink;
   bool flagHideLHS;
   bool flagDisplayFullExpressionTree;
+  bool flagUseFracInRationalLaTeX;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
-  int NumPredefinedVars;
+  int NumPredefinedOperations;
+  int NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation;
   int numEmptyTokensStart;
   Expression theProgramExpression;
 //  std::vector<std::stringstream> theLogs;
@@ -790,8 +801,12 @@ public:
   }
   bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceEOByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEXEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceXEEXByEXusingO(int inputOperation, int formatOptions=Expression::formatDefault);
@@ -1023,7 +1038,7 @@ public:
   { return this->operations.GetIndexIMustContainTheObject("Double");
   }
   int opAlgNumber()
-  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumberOld");
+  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
   int opElementWeylAlgebra()
   { return this->operations.GetIndexIMustContainTheObject("ElementWeylAlgebra");

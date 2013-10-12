@@ -425,7 +425,6 @@ template < >
 double& Expression::GetValueNonConst()const
 { if (!this->IsOfType<double>())
     crash << "This is a programming error: expression not of required type double. The expression equals " << this->ToString() << "." << crash;
-
   return this->theBoss->theObjectContainer.theDoubles.GetElement(this->GetLastChild().theData);
 }
 
@@ -3038,7 +3037,7 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   if (input.children.size<2)
     return false;
   const Expression& firstElt=input[1];
-  if (!firstElt.IsBuiltInOperation())
+  if (!firstElt.IsBuiltInFunctionOrOperation())
     return false;
   output=input;
   output.children.RemoveIndexShiftDown(0);
@@ -3255,6 +3254,10 @@ bool Expression::IsDouble(double* whichDouble)const
 bool Expression::IsConstant()const
 { if (this->theBoss==0)
     return false;
+  if (this->IsAtoM(this->theBoss->opPi()))
+    return true;
+//  std::cout << "testing for constant: " << this->ToString();
+//  std::cout << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
   return this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>();
 }
 
@@ -3442,7 +3445,10 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   } else if (this->IsOfType<Rational>())
   { if (this->HasNonEmptyContext())
       out << "Rational{}(" << (*this)[1].ToString() << ", ";
-    out << this->GetValue<Rational>().ToString();
+    if (!this->theBoss->flagUseFracInRationalLaTeX)
+      out << this->GetValue<Rational>().ToString();
+    else
+      out << this->GetValue<Rational>().ToStringFrac();
     if (this->HasNonEmptyContext())
       out << ")";
     result=true;
@@ -3596,7 +3602,8 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
 { if (this->theBoss==0)
     return false;
   if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()) ||
-      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()))
+      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()) ||
+      this->IsListNElementsStartingWithAtom(this->theBoss->opThePower()))
     return true;
   return false;
 }
@@ -3652,7 +3659,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { std::string firstE= (*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
-    if(this->format!=this->formatUseFrac)
+    bool doUseFrac= this->formatUseFrac || this->theBoss->flagUseFracInRationalLaTeX;
+    if(!doUseFrac)
     { bool firstNeedsBrackets= !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
       bool secondNeedsBrackets=true;
       if ((*this)[2].IsOfType<Rational>())
@@ -3700,9 +3708,18 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << secondE;
     }
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opSqrt(), 3))
+  { int thePower=0;
+    bool hasPowerTwo=(*this)[1].IsSmallInteger(&thePower);
+    if (hasPowerTwo)
+      hasPowerTwo=(thePower==2);
+    if (hasPowerTwo)
+      out << "\\sqrt{" << (*this)[2].ToString() << "}";
+    else
+      out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
   } else if (this->IsListStartingWithAtom(this->theBoss->opFactorial()))
-  { out << (*this)[1].ToString(theFormat) << "!";
-  } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
+    out << (*this)[1].ToString(theFormat) << "!";
+  else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=(*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].NeedsParenthesisForBaseOfExponent())
@@ -3944,7 +3961,22 @@ bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
     return false;
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
-  if (this->theData>= this->theBoss->NumPredefinedVars)
+  if (this->theData>= this->theBoss->NumPredefinedOperations)
+    return false;
+  if (outputWhichOperation!=0)
+    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
+  return true;
+}
+
+bool Expression::IsBuiltInFunction(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  if (this->theData<this->theBoss->NumPredefinedOperations ||
+      this->theData>=this->theBoss->NumPredefinedOperations+this->theBoss->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
     return false;
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
@@ -4098,8 +4130,10 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= " << this->NumPredefinedVars
-  << " predefined + " << this->operations.size-this->NumPredefinedVars << " user-defined). <br>Predefined: \n<br>\n";
+  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= " << this->NumPredefinedOperations
+  << " predefined operations + " << this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined functions + "
+  << this->operations.size-this->NumPredefinedOperations -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation
+  << " user-or-run-time defined). <br>Predefined: \n<br>\n";
   for (int i=0; i<this->operations.size; i++)
   { out << openTag1 << this->operations[i] << closeTag1;
     if (this->FunctionHandlers[i].size>0)
@@ -4117,7 +4151,7 @@ std::string CommandList::ElementToStringNonBoundVars()
     }
     if (i!=this->operations.size-1)
     { out << ", ";
-      if (i==this->NumPredefinedVars-1 )
+      if (i==this->NumPredefinedOperations+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation-1 )
         out << "<br>user-defined:\n<br>\n";
     }
   }
@@ -4146,7 +4180,7 @@ std::string Function::GetString(CommandList& theBoss)
 //    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
-    out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
+    out << " Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - takes as argument the name of the operation as well. ";
     if (this->theExample!="")
@@ -4174,7 +4208,7 @@ std::string CommandList::ToStringFunctionHandlers()
       if (this->FunctionHandlers[i][j].flagIsInner)
         numInnerHandlers++;
   }
-  out << "\n <b> " << numOpsHandled << "  operations handled, by a total of " << numHandlers << " handler functions ("
+  out << "\n <b> " << numOpsHandled << "  operations+built in functions handled, by a total of " << numHandlers << " handler functions ("
   << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";
@@ -4205,7 +4239,7 @@ std::string CommandList::ToStringFunctionHandlers()
           found=true;
           out << openTag2 << this->operations[i] << closeTag2;
           if (totalHandlers>1)
-            out << " (" << j+1 << " out of " << totalHandlers << ")";
+            out << " (" << j+1+this->FunctionHandlers[i].size << " out of " << totalHandlers << ")";
           out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
         }
   }
@@ -4245,8 +4279,7 @@ std::string CommandList::ToString()
   std::string closeTag3="</span>";
   out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
   double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds();
-  out2 << "<br>Computation time: "
-  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
+  out2 << "<br>Computation time: " << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
   std::stringstream tempStreamTime;
   tempStreamTime << " Of them " << this->StartTimeEvaluationInSecondS << " seconds (" << this->StartTimeEvaluationInSecondS*1000
   << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " (" << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000
@@ -4289,8 +4322,9 @@ std::string CommandList::ToString()
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n Variables (" << this->operations.size << " = " << this->NumPredefinedVars << " predefined + "
-  << this->operations.size-this->NumPredefinedVars << " user-defined):<br>\n";
+  out << "<br>\n Operations+Functions+user defined variables = " << this->operations.size << " (= "
+  << this->NumPredefinedOperations+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined + "
+  << this->operations.size-this->NumPredefinedOperations -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " user-defined):<br>\n";
   for (int i=0; i<this->operations.size; i++)
   { out << "\n" << i << ": " << openTag1 << this->operations[i] << closeTag1;
     if(i!=this->operations.size-1)
@@ -4369,8 +4403,7 @@ bool CommandList::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   if (!left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
-    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression "
-    << " is not EndStatement." << crash;
+    crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << crash;
   left.theData.children.ReservE(left.theData.children.size+ right.theData.children.size-1);
   for (int i=1; i<right.theData.children.size; i++)
     left.theData.AddChildOnTop(right.theData[i]);
@@ -4564,8 +4597,8 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContextNoFailure
 (const Expression& largerContext, PolynomialSubstitution<Rational>& outputPolyPart, PolynomialSubstitution<Rational>& outputEWApart)const
 { bool mustBeTrue= this->ContextGetPolyAndEWASubFromSuperContext(largerContext, outputPolyPart, outputEWApart);
   if (!mustBeTrue)
-    crash << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from "
-    << " smaller context " << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
+    crash << "This is a programming error: I was not able to extract a polynomial/differential operator substitution from smaller context "
+    << this->ToString() << " relative to larger context " << largerContext.ToString() << crash;
   return mustBeTrue;
 }
 

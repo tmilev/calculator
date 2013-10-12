@@ -729,6 +729,31 @@ std::string Rational::ToString(FormatExpressions* notUsed)const
   return out.str();
 }
 
+std::string Rational::ToStringFrac(FormatExpressions* notUsed)const
+{ std::stringstream out;
+  if (this->Extended==0)
+  { if (this->NumShort<0)
+      out << "-";
+    int numShortAbsoluteValue=this->NumShort<0 ?- this->NumShort: this->NumShort;
+    if (this->DenShort==1)
+      out << numShortAbsoluteValue;
+    else
+      out << "\\frac{" << numShortAbsoluteValue << "}{" << this->DenShort << "}";
+    return out.str();
+  }
+  std::string tempS;
+  LargeInt numAbsVal=this->Extended->num;
+  if (numAbsVal<0)
+  { out << "-";
+    numAbsVal.sign=1;
+  }
+  if (this->Extended->den.IsEqualToOne())
+    out << numAbsVal.ToString();
+  else
+    out << "\\frac{" << numAbsVal.ToString() << "}{" << this->Extended->den.ToString() << "}";
+  return out.str();
+}
+
 //Format expression monomial orders (for the ToString() function follow.
 template<>
 typename List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>()

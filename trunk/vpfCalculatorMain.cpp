@@ -147,6 +147,7 @@ int main(int argc, char **argv)
   //  civilizedInput="plot2D(e^x,-0.9,0.9)";
 //  civilizedInput="printMacdonaldPolys{}(B_3)";
 //  civilizedInput="Differentiate(x, f*g )";
+//  civilizedInput="\\sqrt 2";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

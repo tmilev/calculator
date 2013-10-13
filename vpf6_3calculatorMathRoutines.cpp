@@ -453,11 +453,24 @@ bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, 
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
-  Expression changedMultiplicand, leftSummand, rightSummand, bInverse, bPrime, eMOne;
+  Expression changedMultiplicand, leftSummand, rightSummand;
+  HashedListSpecialized<Expression> theUserExpressions;
+  theArgument.GetUserDefinedSymbols(theUserExpressions);
+  if (theUserExpressions.size==1)
+  { changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+    leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
+    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+    rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
+    Expression numerator, twoE;
+    numerator.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
+    twoE.AssignValue(2, theCommands);
+    changedMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], twoE);
+    return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, changedMultiplicand);
+  }
+  Expression bInverse, bPrime, eMOne;
   eMOne.AssignValue<Rational>(-1, theCommands);
   changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
   leftSummand.MakeXOX(theCommands, theCommands.opDivide(), changedMultiplicand, theArgument[2]);
-
   bPrime.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
   bInverse.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], eMOne);
   rightSummand.MakeXOX(theCommands, theCommands.opTimes(), bPrime, bInverse); //rightSummand= b' b^{-1}
@@ -503,8 +516,8 @@ bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& th
   if (leftE>rightE || leftE==rightE)
     return false;
   Expression leftMultiplicand;
-  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), leftE, input[2][2]);
-  return output.MakeXOX(theCommands, theCommands.opTimes(), rightE, leftMultiplicand);
+  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), leftMultiplicand, input[2][2]);
 }
 
 bool CommandListFunctions::outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output)

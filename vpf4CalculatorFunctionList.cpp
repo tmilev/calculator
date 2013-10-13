@@ -519,6 +519,15 @@ void CommandList::initPredefinedInnerFunctions()
    to be used with multivariate polynomials with large number of variables. ",
    "DeterminantPolynomial{}\\left(\\begin{array}{ccc}x_{11}& x_{12} \
    & x_{13}\\\\ x_{21} & x_{22} & x_{23} \\\\ x_{31} & x_{32} & x_{33} \\end{array} \\right) ");
+  this->AddOperationInnerHandler
+  ("Sort", CommandListFunctions::innerSort, "",
+   "Sorts a sequence. The purpose of this function is to test the exrpession comparison function of the calculator. ",
+   "Sort(x^2, x^3, x^1, x^{-1}) ");
+  this->AddOperationInnerHandler
+  ("UserDefined", CommandListFunctions::innerGetUserDefinedSubExpressions, "",
+   "Get user defined subexpressions. ",
+   "UserDefined(\\sin x + x^2+ 3x y +18x ^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})");
+
 /*  this->AddOperationInnerHandler
   ("Union", this->innerUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
@@ -1358,6 +1367,14 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
    "(a*b)*(c*(d*e)*f) - a*b*c*d*e*f;(a*b)*(c*(e*d)*f) - a*b*c*d*e*f", true);
+  this->AddOperationOuterHandler
+  ("*", CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate, "",
+   "Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exactly one user-defined variable, 2) a is not a constant and 3) a>b as an expression. ",
+   "x(x+1)^{-1}x; x(y+1)^{-1}x; (\\sin x ) x (\\cos x)", true);
+  this->AddOperationOuterHandler
+  ("*", CommandListFunctions::outerCommuteAtimesBifUnivariate, "",
+   "Commutative law: replaces a*b by b*a provided that 1) a and and b depend on exactly one user-defined variable, 2) a is not a constant and 3) a>b as an expression. ",
+   "x(x+1)^{-1}x; x(y+1)^{-1}x", true);
   this->AddOperationOuterHandler
   ("*", this->outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",

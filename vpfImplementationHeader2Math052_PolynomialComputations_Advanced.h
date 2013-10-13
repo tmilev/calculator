@@ -212,9 +212,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
     this->leadingCoeffs.AddOnTop(this->theBasiS[i].theCoeffs[theIndex]);
   }
   if (this->theBasiS.size<=0)
-  { std::cout << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: transforming to Groebner basis not allowed for empty basis. " << crash;
   MonomialP leftShift, rightShift, monLCM;
   Polynomial<Rational> leftBuf, rightBuf, buffer1;
   Polynomial<Rational>& outputRemainder=rightBuf; //to save some RAM
@@ -372,11 +370,8 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
 { //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
   MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
   if (&inputOutput==outputRemainder || &inputOutput==&this->bufPoly || outputRemainder==&this->bufPoly)
-  { std::cout
-    << "This is a programming error: the input, the output and the buffer member object must be pairwise distinct when carrying out "
-    << " multi-polynomial division. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the input, the output and the buffer member object must be pairwise distinct when carrying out "
+    << " multi-polynomial division. " << crash;
   MemorySaving<Polynomial<coefficient> > tempPoly;
   if (outputRemainder==0)
     outputRemainder=&tempPoly.GetElement();
@@ -414,10 +409,8 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
       { numIntermediateRemainders++;
         highestMonCurrentDivHighestMonOther/=highestMonBasis;
         if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents())
-        { std::cout << "This is a programming error: the pivot monomial in the polynomial division algorithm has negative exponent(s). "
-          << "This is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
+          crash << "This is a programming error: the pivot monomial in the polynomial division algorithm has negative exponent(s). "
+          << "This is not allowed. " << crash;
         if (this->flagDoLogDivision)
         { this->intermediateHighestMonDivHighestMon.GetElement().
           AddOnTop(highestMonCurrentDivHighestMonOther);
@@ -465,14 +458,11 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i+1;
           if(this->NumberOfComputations>this->MaxNumComputations+1010)
-          { std::cout
+            crash
             << "<br>This may or may not be a programming error. While handling computation excess limit, "
             << " I got that NumberOfComputations is much larger than MaxNumComputations. "
             << " I have no explanation for this issue right now, so I am crashing to let you know "
-            << " something is fishy. ";
-            std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            << " something is fishy. "<< crash;
         }*/
         this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
@@ -486,16 +476,12 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
       this->NumberOfComputations++;
       /*if (this->NumberOfComputations>this->MaxNumComputations+1000)
-      { std::cout
+        crash
         << "This may or may not be a programming error. While handling computation excess limit, "
         << " I got that NumberOfComputations is much larger than MaxNumComputations. "
         << " I have no explanation for this issue right now, so I am crashing to let you know "
-        << " something is fishy. ";
-        std::cout << "<br>Current remainder:<br> " << currentRemainder.ToString();
-
-        std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }*/
+        << " something is fishy. " << "<br>Current remainder:<br> " << currentRemainder.ToString() << crash;
+        */
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
         out << "Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder is no longer reducible. "
@@ -513,9 +499,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis(GlobalVariables* theGlobalVariables)
 { if (this->leadingMons.size!=this->theBasiS.size)
-  { std::cout << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the number of leading monomials does not equal the number of polynomials. " << crash;
   MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
   if (this->remainderDivision.IsEqualToZero())
     return false;
@@ -568,10 +552,7 @@ template <class coefficient>
 void GroebnerBasisComputation <coefficient>::initForDivisionAlone(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
   if (inputOutpuT.size<=0)
-  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << crash;
   this->theBasiS=inputOutpuT;
   this->leadingMons.SetSize(inputOutpuT.size);
   this->leadingCoeffs.SetSize(inputOutpuT.size);
@@ -579,11 +560,9 @@ void GroebnerBasisComputation <coefficient>::initForDivisionAlone(List<Polynomia
   { Polynomial<Rational>& curPoly=theBasiS[i];
     int theIndex=curPoly.GetIndexMaxMonomial(this->theMonOrdeR);
     if (theIndex==-1)
-    { std::cout << "This is a programming error: initialization for polynomial division with respect to at least one zero polynomial. "
+      crash << "This is a programming error: initialization for polynomial division with respect to at least one zero polynomial. "
       << "If this is a bad user input, it should be handled at an earlier level. Here is the current basis by which we need to divide. "
-      << this->theBasiS.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << this->theBasiS.ToString() << crash;
     this->leadingMons[i]=curPoly[theIndex];
     this->leadingCoeffs[i]=curPoly.theCoeffs[theIndex];
   }
@@ -594,9 +573,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::initForGroebnerComputation(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
   if (inputOutpuT.size<=0)
-  { std::cout << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I cannot transform an empty list to a Groebner basis. " << crash;
   this->basisCandidates.SetSize(0);
   this->theBasiS.SetSize(0);
   this->theBasiS.ReservE(inputOutpuT.size);
@@ -710,12 +687,10 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
           //check our work:
           tempP.Substitution(outputSub);
           if (!tempP.IsEqualToZero())
-          { std::cout << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
+            crash << "This is a programming error: I was solving the polynomial equation " << inputSystem[i].ToString()
             << ", which resulted in the substitution " << outputSub.ToString()
             << ". However, after carrying out the substitution in the polynomial, I got " << tempP.ToString() << ". "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            << crash;
           //
           return true;
         }
@@ -758,10 +733,8 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
           this->SetSerreLikeSolutionIndex(j, 0);
         else
           if (this->systemSolution.GetElement()[j]!=0)
-          { std::cout << "This is a programming error: variable index " << j+1 << " is supposed to be a free parameter, i.e., be set to zero, but "
-            << "instead it has a non-zero value. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            crash << "This is a programming error: variable index " << j+1 << " is supposed to be a free parameter, i.e., be set to zero, but "
+            << "instead it has a non-zero value. " << crash;
         theFinalSub[j]=0;
         changed=true;
       }
@@ -769,10 +742,8 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
     thePoly.Substitution(theFinalSub);
   coefficient tempCF;
   if (!thePoly.IsAConstant(&tempCF))
-  { std::cout << "\n<br>\nThis is a programming error: after carrying all implied substitutions the polynomial is not a constant, rather equals "
-    << thePoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "\n<br>\nThis is a programming error: after carrying all implied substitutions the polynomial is not a constant, rather equals "
+    << thePoly.ToString() << ". " << crash;
   theFinalSub[theIndex]=tempCF;
   this->SetSerreLikeSolutionIndex(theIndex, tempCF);
 }
@@ -882,10 +853,8 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 
   int theVarIndex=this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex==-1)
-  { std::cout << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: <br>"
-    << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: <br>"
+    << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=0;
   //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
@@ -985,13 +954,11 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
     for (int i=0; i<workingSystem.size; i++)
     { workingSystem[i].Substitution(theSub);
       if (!workingSystem[i].IsEqualToZero())
-      { std::cout << "<br>This is a programming error. Function SolveSerreLikeSystem reports to have found a solution over the base field, "
+        crash << "<br>This is a programming error. Function SolveSerreLikeSystem reports to have found a solution over the base field, "
         << "but substituting the solution back to the original system does not yield a zero system of equations. More precisely, "
         << "the reported solution was " << this->ToStringSerreLikeSolution() << " but substitution in equation " << inputSystem[i].ToString()
-        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>";
-        std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << " yields " << workingSystem[i].ToString() << ". Calculator input: <br>" << this->GetCalculatorInputFromSystem(inputSystem) << " <br>"
+        << crash;
     }
   }
 }
@@ -1012,10 +979,8 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   if (this->solutionsFound.GetElement().selected[theIndex])
-  { std::cout << "This a programming error: attempting to set value to a variable whose value has already been computed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This a programming error: attempting to set value to a variable whose value has already been computed. "
+    << crash;
   this->solutionsFound.GetElement().AddSelectionAppendNewIndex(theIndex);
 }
 #endif

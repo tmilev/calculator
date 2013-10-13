@@ -432,7 +432,7 @@ bool CommandListFunctions::innerPowerAnyToZero(CommandList& theCommands, const E
     return false;
   if (!input[2].IsEqualToZero())
     return false;
-  std::cout << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
+//  std::cout << "input[1]: "<< input[1].ToString() << ", input[2]: " << input[2].ToString();
   if (input[1].IsEqualToZero())
     return output.SetError("Error: expression of the form 0^0 is illegal.", theCommands);
   return output.AssignValue<Rational>(1, theCommands);
@@ -464,6 +464,47 @@ bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, 
   changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), bInverse, rightSummand); //changedMultiplicand= b^-1 b' b^-1
   rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
   return output.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
+}
+
+bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (input[1].IsConstant())
+    return false;
+  HashedListSpecialized<Expression> theList;
+  input.GetUserDefinedSymbols(theList);
+  if (theList.size!=1)
+    return false;
+  if (input[2]>input[1] || input[1]==input[2])
+    return false;
+  output=input;
+  output.children.SwapTwoIndices(1,2);
+  return true;
+}
+
+bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+    return false;
+//  std::cout << "ere be i!";
+  const Expression& leftE=input[1];
+  if (leftE.IsConstant())
+    return false;
+  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+    return false;
+  const Expression& rightE=input[2][1];
+  HashedListSpecialized<Expression> theList;
+
+  leftE.GetUserDefinedSymbols(theList);
+  rightE.GetUserDefinedSymbols(theList);
+  if (theList.size!=1)
+    return false;
+  if (leftE>rightE || leftE==rightE)
+    return false;
+  Expression leftMultiplicand;
+  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), leftE, input[2][2]);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), rightE, leftMultiplicand);
 }
 
 bool CommandListFunctions::outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output)
@@ -603,6 +644,8 @@ bool CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theC
 //  std::cout << "ere be i!";
   Expression denominatorBase, denominatorExponent;
   input[2].GetBaseExponentForm(denominatorBase, denominatorExponent);
+  if (!denominatorBase.IsAtoM())
+    return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());
@@ -613,6 +656,13 @@ bool CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theC
   for (int i=0; i<numerators.size(); i++)
   { if (numerators[i].IsConstant())
     { newNumExponent.MakeXOX(theCommands, theCommands.opTimes(), mOneE, denominatorExponent);
+      newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
+      numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
+      continue;
+    }
+    numerators[i].GetBaseExponentForm(numeratorBaseRight, numeratorExponentRight);
+    if (numeratorBaseRight==denominatorBase)
+    { newNumExponent.MakeXOX(theCommands, theCommands.opMinus(), numeratorExponentRight, denominatorExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
       numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
       continue;
@@ -629,8 +679,51 @@ bool CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theC
       isGood=true;
       break;
     }
+//    if (!isGood)
+//      std:: cout << "- oh no: " << numerators[i] << " is no good! ";
     if (!isGood)
       return false;
   }
   return output.MakeSum(theCommands, numeratorsNew);
+}
+
+bool CommandListFunctions::innerSort(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerSort");
+  if (!input.IsSequenceNElementS())
+    return false;
+  List<Expression> sortedExpressions;
+  sortedExpressions.ReservE(input.children.size-1);
+  for (int i=1; i<input.children.size; i++)
+    sortedExpressions.AddOnTop(input[i]);
+  sortedExpressions.QuickSortAscending();
+  output.reset(theCommands, sortedExpressions.size+1);
+  output.AddChildAtomOnTop(theCommands.opSequence());
+  for (int i=0; i<sortedExpressions.size; i++)
+    output.AddChildOnTop(sortedExpressions[i]);
+  return true;
+}
+
+void Expression::GetUserDefinedSymbols(HashedListSpecialized<Expression>& inputOutputList)const
+{ MacroRegisterFunctionWithName("Expression::GetUserDefinedSymbols");
+  if (this->IsBuiltInFunctionOrOperation() || this->IsBuiltInType())
+    return;
+  if (this->IsAtoM())
+    inputOutputList.AddOnTopNoRepetition(*this);
+  for (int i=0; i<this->children.size; i++)
+    (*this)[i].GetUserDefinedSymbols(inputOutputList);
+}
+
+bool Expression::MakeSequence(CommandList& owner, List<Expression>& inputSequence)
+{ this->reset(owner, inputSequence.size+1);
+  this->AddChildAtomOnTop(owner.opSequence());
+  for (int i=0; i<inputSequence.size; i++)
+    this->AddChildOnTop(inputSequence[i]);
+  return true;
+}
+
+bool CommandListFunctions::innerGetUserDefinedSubExpressions(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerGetUserDefinedSubExpressions");
+  HashedListSpecialized<Expression> theList;
+  input.GetUserDefinedSymbols(theList);
+  return output.MakeSequence(theCommands, theList);
 }

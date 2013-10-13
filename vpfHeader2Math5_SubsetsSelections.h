@@ -89,12 +89,8 @@ public:
   }
   void SetNumItemsAndDesiredSubsetSize(int inputDesiredSubsetSize, int inputNumItems)
   { if(inputDesiredSubsetSize<0 || inputNumItems<0)
-    { std::cout << "This is a programming error: requesting to initialize"
-      << " a selection of size " << inputDesiredSubsetSize << " out of "
-      << inputNumItems << " elements, which does not make sense. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: requesting to initialize a selection of size " << inputDesiredSubsetSize << " out of "
+      << inputNumItems << " elements, which does not make sense. " << crash;
     this->theSelection.init(inputNumItems);
     this->DesiredSubsetSize=inputDesiredSubsetSize;
     if (this->DesiredSubsetSize>0)

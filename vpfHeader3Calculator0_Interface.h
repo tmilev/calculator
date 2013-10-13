@@ -143,8 +143,10 @@ class Expression
     tempE.MakeAtom(theOp, *this->theBoss);
     return this->AddChildOnTop(tempE);
   }
+  void GetUserDefinedSymbols(HashedListSpecialized<Expression>& inputOutputList)const;
   bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
+  void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool SetChilD(int childIndexInMe, int childIndexInBoss);
@@ -204,7 +206,6 @@ class Expression
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
   bool IsContext()const;
-
   bool NeedsParenthesisForBaseOfExponent()const;
   bool NeedsParenthesisForMultiplication()const;
 
@@ -308,6 +309,7 @@ class Expression
   void MakeProducT(CommandList& owner, const Expression& left, const Expression& right);
   void MakeFunction(CommandList& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
+  bool MakeSequence(CommandList& owner, List<Expression>& inputSequence);
   bool MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeXOdotsOX(CommandList& owner, int theOp, const List<Expression>& input);
   bool MakeOX(CommandList& owner, int theOp, const Expression& opArgument);
@@ -385,6 +387,7 @@ class Expression
   }
 //  void operator=(const Expression& other);
   bool operator>(const Expression& other)const;
+  bool GreaterThanNoCoeff(const Expression& other)const;
 };
 
 class Function
@@ -1186,10 +1189,8 @@ public:
   (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog=0, bool logAttempts=false);
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
   { if (&input==&output)
-    { std::cout << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: the input expression, equal to " << input.ToString() << " has the same address as the output expression. "
+      << crash;
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   template <class theType>
@@ -1798,9 +1799,7 @@ bool Serialization::innerPolynomial(CommandList& theCommands, const Expression& 
   }
   if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
   { if (!input.ConvertToType<Polynomial<coefficient> >(output))
-    { std::cout << "This is a programming error: failed to convert coefficient to polynomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: failed to convert coefficient to polynomial. " << crash;
     return true;
   }
   Expression theConverted, theComputed;

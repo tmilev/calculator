@@ -115,11 +115,7 @@ public:
   bool computeSimpleGens=true);
   SemisimpleLieAlgebra& GetOwner()const
   { if (this->owneR==0)
-    { std::cout << "This is a programming error: calling GetOwner() on a non-initialized "
-      << " generalized Verma module. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: calling GetOwner() on a non-initialized generalized Verma module. " << crash;
     return *this->owneR;
   }
   void GetAdActionHomogenousElT
@@ -198,18 +194,12 @@ public:
   }
   SemisimpleLieAlgebra& GetOwnerSS()const
   { if (this->size() <=0)
-    { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
-      << " This is not allowed as the index of the owner modules are stored in the monomials. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
+      << " This is not allowed as the index of the owner modules are stored in the monomials. " << crash;
     const MonomialTensorGeneralizedVermas<coefficient>& theMon=(*this)[0];
     if (theMon.theMons.size<=0)
-    { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
-      << " This is not allowed: constant monomials do not have owners. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
+      << " This is not allowed: constant monomials do not have owners. " << crash;
     MonomialGeneralizedVerma<coefficient>& theGmon=theMon.theMons[0];
     return theGmon.owneR->GetOwner();
   }

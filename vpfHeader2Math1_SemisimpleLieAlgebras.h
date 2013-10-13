@@ -43,19 +43,13 @@ public:
 
   SltwoSubalgebras& GetContainerSl2s()
   { if (this->container==0)
-    { std::cout << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to access the container list of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->container;
   }
   WeylGroup& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
   { if (this->owneR==0)
-    { std::cout << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to access the ambient Lie algebra of a non-initialized sl(2)-subalgebra. " << crash;
     return *this->owneR;
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
@@ -122,10 +116,7 @@ public:
   bool CheckConsistency()const;
   void CheckForCorrectInitializationCrashIfNot()const
   { if (this->owner==0)
-    { std::cout << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "<br>This is a programming error. Object SltwoSubalgebras is not initialized, although it is supposed to be. " << crash;
   }
   WeylGroup& GetOwnerWeyl()const
   { return this->GetOwner().theWeyl;
@@ -137,9 +128,8 @@ public:
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void reset(SemisimpleLieAlgebra& inputOwners);
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
-  { std::cout << "This is a programming error. This function used to work in an older version of the program, but, as the requirements have changed, now needs a rewrite. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error. This function used to work in an older version of the program, but, as the requirements have changed, now needs a rewrite. "
+    << crash;
     /*for(int i=0; i<this->size; i++)
       (*this)[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
       */
@@ -457,19 +447,13 @@ public:
   { if (this->owneR==other.owneR)
       return true;
     if (this->owneR==0 || other.owneR==0)
-    { std::cout << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
     return *this->owneR==*other.owneR;
   }
 
   SemisimpleLieAlgebra& GetSSowner()const
   { if (this->owneR==0)
-    { std::cout << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     return *this->owneR;
   }
   void initHookUpPointers(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField);

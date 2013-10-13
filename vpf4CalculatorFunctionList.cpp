@@ -300,6 +300,26 @@ void CommandList::initPredefinedInnerFunctions()
    "Cosine function. Evaluates to a decimal approximation if the input is a double number. ",
    "\\cos{}(3.1415)", true, false)
    ;
+  this->AddOperationInnerHandler
+  ("\\tan", CommandListFunctions::innerTan, "",
+   "Tangent function. Substitutes \\tan{}{{x}}:=\\sin{}x/\\cos x. ",
+   "\\tan{}(3.1415); \\tan 1.570796327", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\cot", CommandListFunctions::innerCot, "",
+   "Tangent function. Substitutes \\tan{}{{x}}:=\\cos{}x/\\sin x. ",
+   "\\cot{}(3.1415); \\cot 1.570796327", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\csc", CommandListFunctions::innerCsc, "",
+   "Cosecant function. Substitutes \\csc{}{{x}}:=1/\\sin x. ",
+   "\\csc{}(3.1415); \\csc 1.570796327", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\sec", CommandListFunctions::innerSec, "",
+   "Secant function. Substitutes \\sec{}{{x}}:=1/\\sec x. ",
+   "\\sec{}(3.1415); \\sec 1.570796327", true, false)
+   ;
 
   this->AddOperationInnerHandler
   ("DoubleValue", this->innerDouble, "",

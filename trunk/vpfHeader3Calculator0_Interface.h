@@ -1116,6 +1116,15 @@ public:
   int opTan()
   { return this->operations.GetIndexIMustContainTheObject("\\tan");
   }
+  int opCot()
+  { return this->operations.GetIndexIMustContainTheObject("\\cot");
+  }
+  int opSec()
+  { return this->operations.GetIndexIMustContainTheObject("\\sec");
+  }
+  int opCsc()
+  { return this->operations.GetIndexIMustContainTheObject("\\csc");
+  }
   int opLittelmannPath()
   { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
   }

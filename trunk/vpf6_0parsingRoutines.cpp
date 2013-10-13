@@ -175,6 +175,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("sin");
   this->controlSequences.AddOnTop("cos");
   this->controlSequences.AddOnTop("tan");
+  this->controlSequences.AddOnTop("cot");
+  this->controlSequences.AddOnTop("csc");
+  this->controlSequences.AddOnTop("sec");
   this->controlSequences.AddOnTop("sqrt");
   this->controlSequences.AddOnTop("arctan");
   this->controlSequences.AddOnTop("arcsin");
@@ -1062,6 +1065,12 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXByEusingO(this->opCos());
   if (lastS=="tan")
     return this->ReplaceXByEusingO(this->opTan());
+  if (lastS=="cot")
+    return this->ReplaceXByEusingO(this->opCot());
+  if (lastS=="csc")
+    return this->ReplaceXByEusingO(this->opCsc());
+  if (lastS=="sec")
+    return this->ReplaceXByEusingO(this->opSec());
   if (lastS=="sqrt")
     return this->ReplaceXByEusingO(this->opSqrt());
   //end of some synonyms

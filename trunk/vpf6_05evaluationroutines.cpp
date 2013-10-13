@@ -18,11 +18,7 @@ StackMaintainerRules::~StackMaintainerRules()
 bool CommandList::outerStandardFunction(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (&input==&output)
-  { std::cout << "This is a programming error: the input and output object of outerStandardFunction must be different."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+  theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsLisT())
     return false;
   const Expression& functionNameNode =input[0];
@@ -31,7 +27,11 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
     if (theHandlers!=0)
       for (int i=0; i<theHandlers->size; i++)
         if ((*theHandlers)[i].theFunction(theCommands, input, output))
+        { if (theCommands.flagLogEvaluatioN)
+            theCommands.Comments << "<hr>Substitution, composite rule " << theCommands.GetOperations()[functionNameNode[0].theData]
+            << ", " << i+1 << " out of " << theHandlers->size << "<br>";
           return true;
+        }
   }
   if (!functionNameNode.IsAtoM())
     return false;
@@ -43,6 +43,9 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
         { output.CheckConsistency();
+          if (theCommands.flagLogEvaluatioN)
+            theCommands.Comments << "<hr>Substitution, outer rule " << theCommands.GetOperations()[functionNameNode.theData]
+            << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
           return true;
         }
     } else
@@ -56,12 +59,18 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
         if (innerFun.inputFitsMyInnerType(input))
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
+            if (theCommands.flagLogEvaluatioN)
+              theCommands.Comments << "<hr>Substitution, inner rule " << theCommands.GetOperations()[functionNameNode.theData]
+              << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
             return true;
           }
       } else
         if (innerFun.inputFitsMyInnerType(input[1]))
           if (innerFun.theFunction(theCommands, input[1], output))
           { output.CheckConsistency();
+            if (theCommands.flagLogEvaluatioN)
+              theCommands.Comments << "<hr>Substitution, inner rule " << theCommands.GetOperations()[functionNameNode.theData]
+              << ", handler " << i+1 << " out of " << theCommands.FunctionHandlers[functionNameNode.theData].size << "<br>";
             return true;
           }
     }
@@ -202,10 +211,8 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
       { if (!this->flagTimeLimitErrorDetected)
-          std::cout << "<br><b>Max allowed computational time is "
-          << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
-          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS
-          << " have elapsed -> aborting computation ungracefully.</b>";
+          std::cout << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
+          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
         this->flagAbortComputationASAP=true;
         break;
@@ -259,7 +266,7 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << "<hr>Substitution:<br>" << CGI::GetHtmlMathSpanPure(output.ToString()) << "  ->  " << CGI::GetHtmlMathSpanPure(tempE.ToString())
+        this->Comments << CGI::GetHtmlMathSpanPure(output.ToString()) << "  ->  " << CGI::GetHtmlMathSpanPure(tempE.ToString())
         << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
       output=tempE;
       continue;
@@ -284,7 +291,7 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << "<hr>Substitution:<br>" << CGI::GetHtmlMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
+          this->Comments << CGI::GetHtmlMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
           << CGI::GetHtmlMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
         break;
       }

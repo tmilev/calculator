@@ -152,6 +152,38 @@ bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& 
   return output.AssignValue(cos(theArgument), theCommands );
 }
 
+bool CommandListFunctions::innerTan(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerTan");
+  Expression num, den;
+  num.MakeOX(theCommands, theCommands.opSin(), input);
+  den.MakeOX(theCommands, theCommands.opCos(), input);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+}
+
+bool CommandListFunctions::innerCot(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerTan");
+  Expression num, den;
+  num.MakeOX(theCommands, theCommands.opCos(), input);
+  den.MakeOX(theCommands, theCommands.opSin(), input);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+}
+
+bool CommandListFunctions::innerSec(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerSec");
+  Expression num, den;
+  num.AssignValue(1, theCommands);
+  den.MakeOX(theCommands, theCommands.opCos(), input);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+}
+
+bool CommandListFunctions::innerCsc(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCsc");
+  Expression num, den;
+  num.AssignValue(1, theCommands);
+  den.MakeOX(theCommands, theCommands.opSin(), input);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
+}
+
 bool CommandListFunctions::innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeSequenceDereference");
   if (input.children.size!=2)
@@ -489,8 +521,9 @@ bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theComma
   input.GetUserDefinedSymbols(theList);
   if (theList.size!=1)
     return false;
-  if (input[2]>input[1] || input[1]==input[2])
+  if (input[2]>input[1] || input[2]==input[1])
     return false;
+//  std::cout << "ere be i, number 1!";
   output=input;
   output.children.SwapTwoIndices(1,2);
   return true;
@@ -500,7 +533,6 @@ bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& th
 { MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
     return false;
-//  std::cout << "ere be i!";
   const Expression& leftE=input[1];
   if (leftE.IsConstant())
     return false;
@@ -513,10 +545,12 @@ bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& th
   rightE.GetUserDefinedSymbols(theList);
   if (theList.size!=1)
     return false;
-  if (leftE>rightE || leftE==rightE)
+  if (rightE>leftE || leftE==rightE)
     return false;
+//  std::cout << "ere be i, number 2!";
   Expression leftMultiplicand;
-  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+  leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), rightE, leftE);
+//  std::cout << "Left multiplicand: " << leftE.ToString() << ", right: " << rightE.ToString() << " ";
   return output.MakeXOX(theCommands, theCommands.opTimes(), leftMultiplicand, input[2][2]);
 }
 

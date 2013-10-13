@@ -3651,10 +3651,12 @@ std::string Expression::ToStringFull()const
 bool Expression::NeedsParenthesisForBaseOfExponent()const
 { if (this->theBoss==0)
     return false;
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()) ||
-      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()) ||
-      this->IsListNElementsStartingWithAtom(this->theBoss->opThePower()))
+  if (this->IsListNElementsStartingWithAtom())
     return true;
+//  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()) ||
+//      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()) ||
+//      this->IsListNElementsStartingWithAtom(this->theBoss->opThePower()))
+//    return true;
   return false;
 }
 

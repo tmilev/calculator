@@ -16,7 +16,11 @@ public:
   static bool innerFactorial(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerSin(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCos(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerSec(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCsc(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerTan(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCot(CommandList& theCommands, const Expression& input, Expression& output);
+
   static bool innerArcsin(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(CommandList& theCommands, const Expression& input, Expression& output);

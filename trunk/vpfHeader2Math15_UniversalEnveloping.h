@@ -261,10 +261,7 @@ public:
   }
   void MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
   { if (generatorIndex<0 || generatorIndex>inputOwner.GetNumGenerators())
-    { std::cout << "This is a programming error: attempting to assign impossible index to monomial UE. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to assign impossible index to monomial UE. " << crash;
     this->owneR=&inputOwner;
     this->generatorsIndices.SetSize(1);
     this->generatorsIndices[0]=generatorIndex;

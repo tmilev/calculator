@@ -183,9 +183,7 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
   }
   this->ComputedGeneratorActions.AddSelectionAppendNewIndex(generatorIndex);
   if (this->HasFreeAction(generatorIndex))
-  { std::cout << "This is a programming error, due to a change in implementation of "
-    << " the generalized Verma module class. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error, due to a change in implementation of the generalized Verma module class. " << crash;
     this->actionsGeneratorsMaT[generatorIndex].MakeZero();
     //std::cout << "<br>generator index " << generatorIndex << " has free action. ";
     return this->actionsGeneratorsMaT[generatorIndex];
@@ -283,10 +281,8 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
     return;
   }
   if (this->GetOwner().GetRank()!=splittingParSel.MaxSize)
-  { std::cout << "This is a programming error: semisimple rank is " << this->GetOwner().GetRank() << " but splitting parabolic selects "
-    << " out of " << splittingParSel.MaxSize << " simple roots. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: semisimple rank is " << this->GetOwner().GetRank() << " but splitting parabolic selects "
+    << " out of " << splittingParSel.MaxSize << " simple roots. " << crash;
   ReflectionSubgroupWeylGroup subWeyl;
   MemorySaving<charSSAlgMod<coefficient> > buffer;
   charSSAlgMod<coefficient>& charWRTsubalgebra= (outputChar==0) ? buffer.GetElement() : *outputChar;
@@ -441,13 +437,9 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
 
   int theRank=theAlgebrA.GetRank();
   if (HWFundCoords.size!=theRank || selNonSelectedAreElementsLevi.MaxSize!=theRank)
-  { std::cout << "This is a programming error. I am asked to create a generalized Verma module "
-    << " with a semisimple Lie algebra of rank " << theRank << " but the input highest weight, "
-    << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
-    << " the parabolic section indicates rank of " << selNonSelectedAreElementsLevi.MaxSize
-    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. I am asked to create a generalized Verma module with a semisimple Lie algebra of rank "
+    << theRank << " but the input highest weight, " << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
+    << " the parabolic section indicates rank of " << selNonSelectedAreElementsLevi.MaxSize << ". " << crash;
   WeylGroup& theWeyl=theAlgebrA.theWeyl;
   this->cachedPairs.Clear();
   this->cachedTraces.SetSize(0);
@@ -747,13 +739,10 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
       diffMat=otherOutput;
       diffMat-=output;
       if(!diffMat.IsEqualToZero())
-      { std::cout << "<br>[" << left.ToString() << ", " << right.ToString() << "] = " << output.ToString();
-        std::cout << "<br> [" << leftGen.ToString() << ", " << rightGen.ToString() << "] = " << outputGen.ToString();
-        std::cout << "<br> " << outputGen.ToString() << "->" << otherOutput.ToString();
-        std::cout << "<br>This is a programming error: something is wrong with the algorithm, a check fails! "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      } else
+        crash << "<br>[" << left.ToString() << ", " << right.ToString() << "] = " << output.ToString() << "<br> [" << leftGen.ToString()
+        << ", " << rightGen.ToString() << "] = " << outputGen.ToString() << "<br> " << outputGen.ToString() << "->" << otherOutput.ToString()
+        << "<br>This is a programming error: something is wrong with the algorithm, a check fails! " << crash;
+      else
       { std::stringstream tempStream;
         tempStream << "tested index" << i+1 << " out of " << this->GetOwner().GetNumGenerators() << ", " << j+1 << " out of "
         << this->GetOwner().GetNumGenerators();

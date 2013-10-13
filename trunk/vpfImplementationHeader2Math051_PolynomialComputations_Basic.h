@@ -17,12 +17,9 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
-      { std::cout << "This is a programming error. Attempting to carry out a substitution in the monomial" << this->ToString()
-        << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has "
-        << TheSubstitution.size << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error. Attempting to carry out a substitution in the monomial" << this->ToString()
+        << " which does have non-zero exponent of variable x_" << i+1 << "; however, the input substitution has " << TheSubstitution.size
+        << " variable images (more precisely, the input substitution is:  " << TheSubstitution.ToString() << ". " << crash;
       int theExponent=0;
       if (!this->monBody[i].IsSmallInteger(&theExponent) || this->monBody[i]<0)
       { if (TheSubstitution[i].IsMonomialCoeffOne())
@@ -66,7 +63,7 @@ bool Polynomial<coefficient>::IsOneVariablePoly(int* whichVariable)const
 template <class coefficient>
 void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polynomial<coefficient> >& theMat)
 { if(theMat.NumCols!=theMat.NumRows)
-    assert(false);
+    crash << crash;
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
   int numCycles=thePerm.GetNumPermutations();
@@ -136,10 +133,7 @@ template <class coefficient>
 int Polynomial<coefficient>::TotalDegreeInt()const
 { int result=-1;
   if (!this->TotalDegree().IsSmallInteger(&result))
-  { std::cout << "This is a programming error: requested total degree of a polynomial in int formal, but the degree of the polynomial is not a "
-    << "small integer. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: requested total degree of a polynomial in int formal, but the degree of the polynomial is not a small integer. " << crash;
   return result;
 }
 
@@ -147,11 +141,10 @@ template <class coefficient>
 bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >& TheSubstitution, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("Polynomial::Substitution");
   /*if (TheSubstitution.size<this->GetMinNumVars())
-  { std::cout << "This is a programming error: attempting to carry out a substitution in a polynomial of " << this->GetMinNumVars()
+    crash << "This is a programming error: attempting to carry out a substitution in a polynomial of " << this->GetMinNumVars()
     << " variables while specifying the images of only " << TheSubstitution.size << " of the variables. The current polynomial is "
-    << this->ToString() << " and the substitution is " << TheSubstitution.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }*/
+    << this->ToString() << " and the substitution is " << TheSubstitution.ToString() << ". " << crash;
+  */
   Polynomial<coefficient> Accum, TempPoly;
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
@@ -201,10 +194,7 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const co
 template <class coefficient>
 void Polynomial<coefficient>::MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff, int ExpectedNumVars)
 { if (LetterIndex<0)
-  { std::cout << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. " << crash;
   int numVars=MathRoutines::Maximum(LetterIndex+1, ExpectedNumVars);
   this->MakeZero();
   MonomialP tempM;
@@ -224,12 +214,9 @@ coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
     for (int j=0; j<currentMon.GetMinNumVars(); j++)
     { int numCycles;
       if (!(*this)[i](j).IsSmallInteger(&numCycles) )
-      { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
+        crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
         << (*this)[i](j).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
-        << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)." << crash;
       bool isPositive=numCycles>0;
       if (numCycles<0)
         numCycles=-numCycles;
@@ -250,10 +237,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   if (newNumVars>=this->GetMinNumVars())
     return;
   if (newNumVars<0)
-  { std::cout << "This is a programming error. Requesting negative number of variables (more precisely, " << newNumVars << ") is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. Requesting negative number of variables (more precisely, " << newNumVars << ") is not allowed. " << crash;
   Polynomial<coefficient> Accum;
   Accum.MakeZero();
   Accum.SetExpectedSize(this->size());
@@ -270,10 +254,7 @@ void Polynomial<coefficient>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 template <class coefficient>
 void Polynomial<coefficient>::ShiftVariableIndicesToTheRight(int VarIndexShift)
 { if (VarIndexShift<0)
-  { std::cout << "This is a programming error. Requesting negative variable shift (more precisely, " << VarIndexShift << ") not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. Requesting negative variable shift (more precisely, " << VarIndexShift << ") not allowed. " << crash;
   if (VarIndexShift==0)
     return;
   int oldNumVars=this->GetMinNumVars();
@@ -301,12 +282,10 @@ Matrix<coefficient> Polynomial<coefficient>::EvaluateUnivariatePoly(const Matrix
   { const MonomialP& currentMon=(*this)[i];
     int numCycles=0;
     if (!currentMon(0).IsSmallInteger(&numCycles) )
-    { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
+      crash << "This is a programming error. Attempting to evaluate a polynomial whose" <<  i+1 << "^{th} variable is raised to the power "
       << currentMon(0).ToString() << ". Raising variables to power is allowed only if the power is a small integer. "
       << "If the user has requested such an operation, it *must* be intercepted at an earlier level (and the user must be informed)."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     bool isPositive=numCycles>0;
     if (numCycles<0)
       numCycles=-numCycles;
@@ -391,11 +370,8 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   //}
   assert(remainderMaxMonomial<outputRemainder.size());
   if (inputMaxMonomial>=tempInput.size() || inputMaxMonomial<0)
-  { std::cout << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial << " while the polynomial has "
-    << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString() << " by " << inputDivisor.ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial << " while the polynomial has "
+    << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString() << " by " << inputDivisor.ToString() << ". " << crash;
 //  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
@@ -446,9 +422,7 @@ void Polynomial<coefficient>::TimesInteger(int a)
 template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
 { if (input.NumCols!=input.NumRows)
-  { std::cout << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
   int theDim = input.NumCols;
   this->MakeOne(1);
   Vectors<coefficient> theBasis;
@@ -487,10 +461,8 @@ int Polynomial<coefficient>::GetMaxPowerOfVariableIndex(int VariableIndex)
   for (int i=0; i<this->size(); i++)
   { result= MathRoutines::Maximum(result, (*this)[i](VariableIndex).NumShort);
     if (!(*this)[i](VariableIndex).IsSmallInteger())
-    { std::cout << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
-      << " have degrees that are not small integers. This needs to be fixed! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
+      << " have degrees that are not small integers. This needs to be fixed! " << crash;
   }
   return result;
 }

@@ -178,20 +178,14 @@ public:
   }
   Rational& operator[](int i)
   { if (i<0)
-    { std::cout << "This is a programming error: requested exponent of monomial variable with index " << i << " which is negative. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: requested exponent of monomial variable with index " << i << " which is negative. " << crash;
     if (i>=this->monBody.size)
       this->SetNumVariablesSubDeletedVarsByOne(i+1);
     return this->monBody[i];
   }
   Rational operator()(int i)const
   { if (i<0)
-    { std::cout << "This is a programming error: requested exponent of monomial variable " << " with index " << i << " which is negative. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: requested exponent of monomial variable " << " with index " << i << " which is negative. " << crash;
     if (i>=this->monBody.size)
       return 0;
     return this->monBody[i];
@@ -231,10 +225,7 @@ public:
   int TotalDegreeInt()const
   { int result=-1;
     if (!this->TotalDegree().IsSmallInteger(&result))
-    { std::cout << "This is a programming error: total degree of monomial must be a small integer to call this function. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: total degree of monomial must be a small integer to call this function. " << crash;
     return result;
   }
   Rational TotalDegree()const
@@ -520,6 +511,11 @@ public:
       result+= input.theCoeffs[i].HashFunction()*input[i].HashFunction();
     return result;
   }
+  void QuickSortAscending(typename List<TemplateMonomial>::OrderLeftGreaterThanRight theOrder=0)
+  { List<TemplateMonomial> theSortedMons=this->theMonomials;
+    theSortedMons.QuickSortAscending(theOrder, &this->theCoeffs);
+    this->theMonomials=theSortedMons;
+  }
   void PopMonomial(int index)
   { this->theMonomials.RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);
@@ -707,10 +703,8 @@ public:
   static std::string GetBlendCoeffAndMon(const TemplateMonomial& inputMon, coefficient& inputCoeff, bool addPlusToFront, FormatExpressions* theFormat=0);
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->theMonomials.size)
-    { std::cout << "This is a programming error: a monomial collection has " << this->theMonomials.size << " monomials but "
-      << this->theCoeffs.size << " coefficients. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: a monomial collection has " << this->theMonomials.size << " monomials but "
+      << this->theCoeffs.size << " coefficients. " << crash;
   }
   bool IsEqualToZero()const;
   int FindMaxPowerOfVariableIndex(int VariableIndex);
@@ -805,9 +799,8 @@ public:
   template <class otherType>
   inline void operator/=(const otherType& other)
   { if (other==0)
-    { std::cout << "This is a programming error. A MonomialCollection division by zero has been requested: division by zero error should"
-      << " be handled before calling operator/=. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
-      assert(false);
+    { crash << "This is a programming error. A MonomialCollection division by zero has been requested: division by zero error should"
+      << " be handled before calling operator/=. " << crash;
       return;
     }
     for (int i=0; i<this->theCoeffs.size; i++)
@@ -1119,10 +1112,8 @@ public:
   { if (d==1)
       return;
     if (d<0)
-    { std::cout << "This is a programming error: attempting to raise the polynomial " << this->ToString() << " to the negative power "
-      << d << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to raise the polynomial " << this->ToString() << " to the negative power "
+      << d << ". " << crash;
     Polynomial<coefficient> theOne;
     theOne.MakeOne(this->GetMinNumVars());
     MathRoutines::RaiseToPower(*this, d, theOne);
@@ -1669,10 +1660,7 @@ public:
   { switch(this->expressionType)
     { case RationalFunctionOld::typeRationalFunction:
       if (this->Denominator.IsZeroPointer())
-      { std::cout << "This is a programming error: the rational function is supposed to be honest, "
-        << " but the denominator pointer is zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: the rational function is supposed to be honest, but the denominator pointer is zero. " << crash;
       output=this->Denominator.GetElementConst();
       return;
       default: output.MakeConst((Rational) 1); return;
@@ -1791,7 +1779,7 @@ public:
       case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst());
       case RationalFunctionOld::typeRational: return this->ratValue==other.ratValue;
     }
-    assert(false);
+    crash << crash;
     return false;
   }
   static void GetRelations(List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables);
@@ -1886,7 +1874,7 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std:
   bool result=true;
   input >> ReaderString >> targetSize;
   if (ReaderString!="numMons:" )
-  { assert(false);
+  { crash << crash;
     return false;
   }
   this->MakeZero();
@@ -2054,16 +2042,13 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
 { MacroRegisterFunctionWithName("MonomialCollection::GaussianEliminationByRows");
   if (carbonCopyMatrix!=0)
     if (carbonCopyMatrix->NumRows!=theList.size)
-    { std::cout << "This is a programming error: carbon copy matrix has " << carbonCopyMatrix->NumRows << " rows, while the gaussian-eliminated list has " << theList.size
-      << " elements; the two numbers must be the same!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: carbon copy matrix has " << carbonCopyMatrix->NumRows << " rows, while the gaussian-eliminated list has " << theList.size
+      << " elements; the two numbers must be the same!" << crash;
     }
   if (carbonCopyList!=0)
     if (carbonCopyList->size!=theList.size)
-    { std::cout << "This is a programming error: carbon copy list has " << carbonCopyList->size << " elements, while the gaussian-eliminated list has "
-      << theList.size << " elements; the two numbers must be the same!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: carbon copy list has " << carbonCopyList->size << " elements, while the gaussian-eliminated list has "
+      << theList.size << " elements; the two numbers must be the same!" << crash;
   MemorySaving<HashedList<TemplateMonomial> > bufferMons;
   HashedList<TemplateMonomial>& allMons = seedMonomials==0 ? bufferMons.GetElement() : *seedMonomials;
   if (seedMonomials==0)
@@ -2154,9 +2139,9 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j>=this->size())
-  { std::cout << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
-    << " returns index " << j << " but I have only " << this->size() << " elements " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash.theCrashReport << "This is a programming error: function GetIndex evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
+    << " returns index " << j << " but I have only " << this->size() << " elements ";
+    crash << crash;
   }
   if (j==-1)
   { this->theMonomials.AddOnTop(inputMon);
@@ -2166,10 +2151,8 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
   { ///
 //    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
     if (j>=this->theCoeffs.size)
-    { std::cout << "This is a programming error. Looking for coefficient index " << j << " when number of coefficients is "
-      << this->theCoeffs.size <<  ". " <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Looking for coefficient index " << j << " when number of coefficients is "
+      << this->theCoeffs.size <<  ". " << crash;
     ///
     this->theCoeffs[j]+=inputCoeff;
   }
@@ -2969,10 +2952,8 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
 { MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
   ProgressReport theReport(theGlobalVariables);
   if (otherMatrix==this)
-  { std::cout << "This is a programming error: the Carbon copy in the Gaussian elimination coincides with the matrix which we are row-reducing "
-    << "(most probably this is a wrong pointer typo). " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the Carbon copy in the Gaussian elimination coincides with the matrix which we are row-reducing "
+    << "(most probably this is a wrong pointer typo). " << crash;
   int col=0;
   Element tempElt;
   int row=0;
@@ -2986,19 +2967,17 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       }
     if (foundPivotRow!=-1)
     { /*if (this->elements[foundPivotRow][col].IsEqualToZero())
-      { std::cout << "This is a programming error. "
+      { crash << "This is a programming error. "
         << "Something is very wrong: I am getting 0 for a pivot element in "
         << "Gaussian elimination over Euclidean domains. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
+        << crash;
       }*/
       this->SwitchTwoRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
       /*if (this->elements[row][col].IsEqualToZero())
-      { std::cout << "This is a programming error. "
+      { crash << "This is a programming error. "
         << "Something is very wrong: I am getting 0 for a pivot element in "
         << "Gaussian elimination over Euclidean domains. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
+        << crash;
       }*/
       if (this->elements[row][col].IsNegative())
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
@@ -3013,11 +2992,10 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
         Element& PivotElt=this->elements[row][col];
         Element& otherElt=this->elements[ExploringRow][col];
         /*if (PivotElt.IsEqualToZero())
-        { std::cout << "This is a programming error. "
+        { crash << "This is a programming error. "
           << "Something is very wrong: I am getting 0 for a pivot element in "
           << "Gaussian elimination over Euclidean domains. "
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+          << crash;
         }*/
         if (otherElt.IsNegative())
           this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
@@ -3229,10 +3207,7 @@ public:
     SemisimpleLieAlgebra* owner= (*this)[0].owneR;
     for (int i=1; i<this->size(); i++)
       if (owner!=(*this)[i].owneR)
-      { std::cout << "This is a programming error: ElementSemisimpleLieAlgebra contains Chevalley generators with different owners. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: ElementSemisimpleLieAlgebra contains Chevalley generators with different owners. " << crash;
     return true;
   }
   bool NeedsBrackets()const;
@@ -3294,9 +3269,7 @@ public:
 template <class Object>
 const Object& MemorySaving<Object>::GetElementConst()const
 { if (this->theValue==0)
-  { std::cout << "Programming error: attempting to access zero pointer. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
-    assert(false);
-  }
+    crash << "Programming error: attempting to access zero pointer. " << crash;
   return *this->theValue;
 }
 
@@ -3388,11 +3361,9 @@ Element Matrix<Element> ::GetDeterminant()
 template <class Element>
 Element Matrix<Element>::GetTrace()const
 { if (this->NumCols!=this->NumRows)
-  { std::cout << "This is either programming error, a mathematical error, or requires a more general definition of trace. Requesting the trace of "
+    crash << "This is either programming error, a mathematical error, or requires a more general definition of trace. Requesting the trace of "
     << " a non-square matrix of " << this->NumRows << " rows and " << this->NumCols << " columns is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << crash;
   Element acc = 0;
   for(int i=0; i<this->NumCols; i++)
     acc += this->elements[i][i];
@@ -3410,10 +3381,7 @@ Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
 template <class Element>
 Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
 { if(v.size != NumCols)
-  { std::cout << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
-    assert(false);
-  }
+    crash  << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size << crash;
   Vector<Element> out;
   out.MakeZero(NumRows);
   for(int i=0;i<NumRows;i++)
@@ -4683,8 +4651,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void ResetRelevanceIsComputed()
-  { std::cout << "This is not implemented yet. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is not implemented yet. " << crash;
   }
   PartFractions();
   int SizeWithoutDebugString();
@@ -4720,12 +4687,8 @@ class DynkinSimpleType
   void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared=0)
   { if ((inputLetter!= 'A' && inputLetter!='B' && inputLetter!= 'C' && inputLetter!='D' &&
          inputLetter!= 'E' && inputLetter!='F' && inputLetter!= 'G') || inputRank<=0 )
-    { std::cout << "This is a programming error. Requested to create a simple Dynkin type "
-      << "of type " << inputLetter << " and rank " << inputRank << ". This is not allowed: "
-      << " I only accept types A, B, C, D, E, F and G and non-negative ranks. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Requested to create a simple Dynkin type of type " << inputLetter << " and rank "
+      << inputRank << ". This is not allowed: I only accept types A, B, C, D, E, F and G and non-negative ranks. " << crash;
     if (inputLetter=='G')
       inputRank=2;
     if (inputLetter=='F')
@@ -4830,10 +4793,7 @@ public:
   int GetMult(int SimpleTypeIdentifier)const
   { int result;
     if(!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result))
-    { std::cout << "This is a programming error: Dynkin type has multiplicity that is not a small integer "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << crash;
     return result;
   }
   bool IsPossibleCoRootLength(const Rational& input)const
@@ -4851,10 +4811,7 @@ public:
       result+=this->theCoeffs[i]*(*this)[i].GetRootSystemSize();
     int intResult;
     if (!result.IsSmallInteger(&intResult))
-    { std::cout << "This is a programming error: multiplicity of simple type is not a small integer. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
   }
   int GetRootSystemPlusRank()const
@@ -4863,10 +4820,7 @@ public:
       result+=this->theCoeffs[i]*(*this)[i].GetRootSystemPlusRank();
     int intResult;
     if (!result.IsSmallInteger(&intResult))
-    { std::cout << "This is a programming error: multiplicity of simple type is not a small integer. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
   }
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
@@ -4952,8 +4906,7 @@ public:
 
   bool CheckInitialization()
   { if (this->owner==0)
-    { std::cout << "This is a programming error: non-initialized element Weyl group. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: non-initialized element Weyl group. " << crash;
       return false;
     }
     return true;
@@ -5096,10 +5049,8 @@ public:
   Vector<coefficient> GetDualCoordinatesFromFundamental(const Vector<coefficient>& inputInFundamentalCoords)
   { Vector<coefficient> result=inputInFundamentalCoords;
     if (result.size!=this->GetDim())
-    { std::cout << "This is a programming error. The input fundamental weight has " << result.size << " coordinates, while the rank of the Weyl group is "
-      << this->GetDim() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. The input fundamental weight has " << result.size << " coordinates, while the rank of the Weyl group is "
+      << this->GetDim() << ". " << crash;
     for (int i=0; i<result.size; i++)
       result[i]*=this->CartanSymmetric.elements[i][i]/2;
     return result;
@@ -5107,10 +5058,8 @@ public:
   template <class coefficient>
   coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot)
   { if (indexSimpleRoot<0 || indexSimpleRoot>=this->GetDim())
-    { std::cout << "This is a programming error. Attempting to take scalar product with simple root of index " << indexSimpleRoot
-      << " which is impossible, as the rank of the Weyl group is " << this->GetDim() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Attempting to take scalar product with simple root of index " << indexSimpleRoot
+      << " which is impossible, as the rank of the Weyl group is " << this->GetDim() << ". " << crash;
     coefficient result, buffer;
     result=input[0].GetZero();//<-the value of zero is not known at compile time (example: multivariate polynomials have unknown #variables)
     Rational* currentRow=this->CartanSymmetric.elements[indexSimpleRoot];
@@ -5257,12 +5206,10 @@ public:
   void RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const;
   double RootScalarCartanRoot(const Vector<double>& r1, const Vector<double>& r2)const
   { if (r1.size!=r2.size || r1.size!=this->GetDim())
-    { std::cout << "This is a programming error: attempting to take the root system scalar product of "
-      << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. "
-      << "The two input vectors were " << r1 << " and " << r2
-      << " and the rank of the Weyl group is " << this->GetDim() << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash.theCrashReport << "This is a programming error: attempting to take the root system scalar product of "
+      << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. The two input vectors were "
+      << r1 << " and " << r2 << " and the rank of the Weyl group is " << this->GetDim() << ". ";
+      crash << crash;
     }
     double result=0;
     for (int i=0; i<this->GetDim(); i++)
@@ -5322,10 +5269,8 @@ void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& the
 template <class Element>
 void WeylGroup::SimpleReflection(int index, Vector<Element>& theVector)const
 { if (index<0 || index>=this->CartanSymmetric.NumCols)
-  { std::cout << "This is a programming error: simple reflection with respect to index " << index+1 << " in a Weyl group of rank "
-    << this->GetDim() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: simple reflection with respect to index " << index+1 << " in a Weyl group of rank "
+    << this->GetDim() << crash;
   Element alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
@@ -6062,16 +6007,12 @@ public:
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain()
   { if (domainAlg==0)
-    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
     return *domainAlg;
   }
   SemisimpleLieAlgebra& theRange()
   { if (rangeAlg==0)
-    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
     return *rangeAlg;
   }
   HomomorphismSemisimpleLieAlgebra(): domainAlg(0), rangeAlg(0){}
@@ -6344,9 +6285,7 @@ public:
   void CheckNonZeroOwner()const
   { if (this->owner!=0)
       return;
-    std::cout << "This is a programming error: Monomial char has zero owner, which is not allowed by the current function call. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    crash << "This is a programming error: Monomial char has zero owner, which is not allowed by the current function call. " << crash;
   }
   void AccountSingleWeight
   (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
@@ -6377,18 +6316,12 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
     const SemisimpleLieAlgebra* owner=(*this)[0].owner;
     for (int i=1; i<this->size(); i++)
       if ((*this)[i].owner!=owner)
-      { std::cout << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras"
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras. " << crash;
   }
   void CheckNonZeroOwner()const
   { this->CheckConsistency();
     if (this->GetOwner()==0)
-    { std::cout << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, which is not allowed at "
-      << "by the calling function. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, which is not allowed at by the calling function. " << crash;
   }
   bool IsEqualToZero()
   { return this->size()==0;
@@ -6417,10 +6350,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   void DrawMeAssumeCharIsOverCartan(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
   SemisimpleLieAlgebra* GetOwner()const
   { if (this->size()==0)
-    { std::cout << "This is a programming error: requesting owner semisimple Lie algebra of zero character. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << crash;
     return (*this)[0].owner;
   }
   bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
@@ -6816,10 +6746,8 @@ void MatrixTensor<coefficient>::Invert()
 //  std::cout << "<hr>Inverting: " << this->ToStringMatForm();
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this!=theId)
-  { std::cout << "This is a programming error: attempting to invert a non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
-    << this->ToStringMatForm() << " but should instead be equal to " << theId.ToStringMatForm() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to invert a non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
+    << this->ToStringMatForm() << " but should instead be equal to " << theId.ToStringMatForm() << crash;
   *this=result;
 }
 
@@ -7344,10 +7272,7 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString
 template <class coefficient>
 std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* theFormat, bool includeV)const
 { if (this->owneR==0)
-  { std::cout << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)." << crash;
   ModuleSSalgebra<coefficient>& theMod=*this->owneR;
   std::string tempS;
   if (tempS=="1")
@@ -7688,11 +7613,8 @@ coefficient WeylGroup::WeylDimFormulaFundamentalCoords(Vector<coefficient>& weig
 template<class leftType, class rightType>
 void WeylGroup::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const
 { if (r1.size!=r2.size || r1.size!=this->GetDim())
-  { std::cout << "This is a programming error: attempting to get the scalar products of two weights "
-    << " that are not of the same dimension as the rank of the Weyl group. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to get the scalar products of two weights that are not of the same dimension as the rank of the Weyl group. "
+    << crash;
   output=r1[0].GetZero();
   leftType buffer;
   for (int i=0; i<this->CartanSymmetric.NumRows; i++)
@@ -7712,10 +7634,8 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
   //std::cout << "<br>input second space: " << secondSpace.ToString();
   Vectors<coefficient> firstReduced, secondReduced;
   Selection tempSel;
-  Vectors<coefficient>::SelectABasisInSubspace
-  (firstSpace, firstReduced, tempSel, theGlobalVariables);
-  Vectors<coefficient>::SelectABasisInSubspace
-  (secondSpace, secondReduced, tempSel, theGlobalVariables);
+  Vectors<coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel, theGlobalVariables);
+  Vectors<coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel, theGlobalVariables);
 //  std::cout << "<br>first selected basis: " << firstReduced.ToString();
 //  std::cout << "<br>second selected basis: " << secondReduced.ToString();
   if (firstReduced.size==0 || secondReduced.size==0)
@@ -8130,11 +8050,8 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   std::string tempS;
 //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
   if (this->GetOwner()->GetRank()!=splittingParSel.MaxSize)
-  { std::cout << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
-    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-
+    crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
+    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
   outputWeylSub.ComputeRootSubsystem();
   ReflectionSubgroupWeylGroup complementGroup;
@@ -8284,11 +8201,7 @@ std::string charSSAlgMod<coefficient>::operator*=(const charSSAlgMod& other)
 template <class coefficient>
 std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables)
 { if (this->GetOwner()!=other.GetOwner() || this->GetOwner()==0)
-  { std::cout
-    << "This is a programming error: attempting to multiply characters of different or non-initialized semisimple Lie algebras."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to multiply characters of different or non-initialized semisimple Lie algebras." << crash;
   this->SetExpectedSize(other.size()+this->size());
   charSSAlgMod result, summand;
   result.MakeZero();
@@ -8610,10 +8523,8 @@ bool WeylGroup::FreudenthalEval
     BufferCoeff=hwPlusRhoSquared;
     BufferCoeff-=this->RootScalarCartanRoot(convertor, convertor);
     if (BufferCoeff==0)
-    { std::cout << "This is a programming or a mathematical error. I get that the denominator in the Freundenthal formula is zero. "
-      << " The highest weight is " << inputHWfundamentalCoords.ToString() << ". The Weyl group details follow. " << this->ToString();
-      assert(false);
-    }
+      crash << "This is a programming or a mathematical error. I get that the denominator in the Freundenthal formula is zero. "
+      << " The highest weight is " << inputHWfundamentalCoords.ToString() << ". The Weyl group details follow. " << this->ToString() << crash;
     currentAccum/=BufferCoeff;
 
 //    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
@@ -8796,10 +8707,7 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
 template<class Element>
 bool Matrix<Element>::IsPositiveDefinite()
 { if (this->NumRows!=this->NumCols)
-  { std::cout << "This is a programming error: attempting to evaluate whether a matrix is positive definite, but"
-    << " the matrix is not square. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to evaluate whether a matrix is positive definite, but the matrix is not square. " << crash;
   Element det;
   Matrix<Element> tempMat;
   for (int i=0; i< this->NumRows; i++)
@@ -8836,9 +8744,7 @@ template <class coefficient>
 void ElementSemisimpleLieAlgebra<coefficient>::MakeGenerator(int generatorIndex, SemisimpleLieAlgebra& inputOwner)
 { //Changing RootSystem order invalidates this function!
   if (&inputOwner==0)
-  { std::cout << " This is a programming error: 0 pointer to Semisimple Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: 0 pointer to Semisimple Lie algebra. " << crash;
   this->MakeZero();
   ChevalleyGenerator tempGenerator;
   tempGenerator.MakeGenerator(inputOwner, generatorIndex);
@@ -8897,10 +8803,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
   result.MakeZero(theRank);
 //  std::cout << "<br>Zero vector in GetCartanPart is: " << result.ToString();
   if (theRank<=0 || owner==0)
-  { std::cout << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. " << crash;
   for (int i=0; i<theRank; i++)
   { tempGen.MakeGenerator(*owner, i+numPosRoots);
     int currentIndex=this->theMonomials.GetIndex(tempGen);
@@ -8925,11 +8828,9 @@ template <class coefficient>
 void charSSAlgMod<coefficient>::MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner)
 { this->MakeZero();
   if (inputWeightSimpleCoords.size!=inputOwner->GetRank())
-  { std::cout << "This is a programming error: attempting to create a character from highest weight in simple coords "
+    crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << (inputOwner->GetRank()) << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;
   MonomialChar<coefficient> theMon;
   theMon.owner=inputOwner;
   theMon.weightFundamentalCoordS=

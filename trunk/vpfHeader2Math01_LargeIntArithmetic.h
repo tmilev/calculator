@@ -124,10 +124,7 @@ public:
   bool operator!=(const LargeIntUnsigned& other)const;
   inline void operator--(int)
   { if (this->IsEqualToZero())
-    { std::cout << "This is a programming error: attempting to subtract 1 from a large unsigned integer with value 0. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to subtract 1 from a large unsigned integer with value 0. " << crash;
     this->SubtractSmallerPositive(1);
   }
   inline void operator%=(const LargeIntUnsigned& other)
@@ -394,7 +391,7 @@ class Rational
   }
   friend std::istream& operator >> (std::istream& input, const Rational& output)
   { std::string tempS;
-    assert(false);
+    crash << crash;
 //    input >> tempS;
     //output.
     return input;
@@ -402,10 +399,8 @@ class Rational
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
     if (this->DenShort<=0 || OtherDen<=0)
-    { std::cout << "This is a programming error: corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
-      << ". The cause of the error should be in some of " << " the calling functions. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: corrupt rational number(s) with denominators " << this->DenShort << " and " << OtherDen
+      << ". The cause of the error should be in some of the calling functions. " << crash;
     if (OtherNum<0)
       OtherNumAbs=-OtherNum;
     else
@@ -442,8 +437,7 @@ class Rational
         std::cout << "This is a programming error: division by zero. ";
       else
         std::cout << "This is a programming error: corrupt rational number denominator. ";
-      std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      crash << crash;
     }
     if (OtherNum<0)
       OtherNumAbs=-OtherNum;
@@ -741,7 +735,7 @@ ParallelComputing::GlobalPointerCounter++;
       } else
         return this->NumShort/this->DenShort;
     }
-    assert(false);
+    crash << crash;
     return -1;
   }
   void MakeZero()

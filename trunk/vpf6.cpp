@@ -3077,7 +3077,8 @@ bool CommandList::outerRightDistributeBracketIsOnTheRight(CommandList& theComman
 }
 
 bool CommandList::CollectSummands(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
-{ List<Expression> summands;
+{ MacroRegisterFunctionWithName("CommandList::CollectSummands");
+  List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
@@ -3093,6 +3094,9 @@ bool CommandList::CollectSummands(CommandList& theCommands, const Expression& in
       currentSummandNoCoeff=&oneE;
     outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
+//  std::cout << " before mon sort, mon order: " << outputSum.theMonomials.ToString();
+  outputSum.QuickSortAscending();
+//  std::cout << " after mon sort: " << outputSum.theMonomials.ToString();
   return true;
 }
 
@@ -3130,13 +3134,13 @@ bool Expression::MakeXOdotsOX(CommandList& owner, int theOp, const List<Expressi
   { *this=input[0];
     return true;
   }
-  this->MakeXOX(owner, theOp, *input.LastObject(), input[input.size-2]);
+  this->MakeXOX(owner, theOp, input[input.size-2], *input.LastObject());
   Expression result;
   for (int i=input.size-3; i>=0; i--)
   { result.reset(owner, 3);
     result.AddChildAtomOnTop(theOp);
-    result.AddChildOnTop(*this);
     result.AddChildOnTop(input[i]);
+    result.AddChildOnTop(*this);
     *this=result;
   }
   return true;
@@ -3165,7 +3169,6 @@ bool Expression::MakeSum(CommandList& theCommands, const MonomialCollection<Expr
   if (summandsWithCoeff.size>=2)
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
       crash << "This is a pgoramming error: bad comparison! " << crash;
-  summandsWithCoeff.QuickSortAscending();
   return this->MakeXOdotsOX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
@@ -3418,9 +3421,37 @@ int Expression::GetNumCols()const
   return theMax;
 }
 
+void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const
+{ this->CheckInitialization();
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+    if ((*this)[1].IsOfType(&outputCoeff))
+    { outputNoCoeff=(*this)[2];
+      return;
+    }
+  outputCoeff=1;
+  outputNoCoeff=*this;
+  return;
+}
+
 bool Expression::operator>(const Expression& other)const
-{ if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
+{ Rational leftCoeff, rightCoeff;
+  Expression leftMon, rightMon;
+  this->GetCoefficientMultiplicandForm(leftCoeff, leftMon);
+  other.GetCoefficientMultiplicandForm(rightCoeff, rightMon);
+  if (leftMon==rightMon)
+    return leftCoeff>rightCoeff;
+  return leftMon.GreaterThanNoCoeff(rightMon);
+}
+
+bool Expression::GreaterThanNoCoeff(const Expression& other)const
+{ MacroRegisterFunctionWithName("Expression::GreaterThanNoCoeff");
+  if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
     return this->GetValue<Rational>()>other.GetValue<Rational>();
+  if (this->IsBuiltInType() && !other.IsBuiltInType())
+    return false;
+  if (!this->IsBuiltInType() && other.IsBuiltInType())
+    return true;
+
   if (this->children.size>other.children.size)
     return true;
   if (other.children.size>this->children.size)
@@ -4122,7 +4153,7 @@ void CommandList::AddOperationHandler
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
   Function theFun(handler, 0, opDescription, opExample, isInner, visible, isExperimental);
   if (theOpName=="*" || theOpName=="+" || theOpName=="/" || theOpName=="\\otimes" || theOpName=="^")
-    this->FunctionHandlers[indexOp].ReservE(55);
+    this->FunctionHandlers[indexOp].ReservE(100);
   else
     this->FunctionHandlers[indexOp].ReservE(10);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);

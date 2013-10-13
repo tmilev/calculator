@@ -20,7 +20,6 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { this->theCrashReport << "<hr>This is a program crash. ";
   if (this->userInputStringIfAvailable!="")
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
-  this->theCrashReport << "The program crash message follows. <br>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   if (this->theGlobalVariables!=0)
     if (this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS.size>0)

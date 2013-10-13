@@ -803,10 +803,12 @@ private:
   friend class PartFractions;
   friend class PartFraction;
   void ExpandArrayOnTop(int increase);
-  void QuickSortAscendingNoOrder(int BottomIndex, int TopIndex);
+  template <class otherType>
+  void QuickSortAscendingNoOrder(int BottomIndex, int TopIndex, List<otherType>* carbonCopy=0);
   //submitting zero comparison function is not allowed!
   //that is why the function is private.
-  void QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder);
+  template <class otherType>
+  void QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder, List<otherType>* carbonCopy=0);
   template <class compareClass, class carbonCopyType>
   bool QuickSortAscendingCustomRecursive(int BottomIndex, int TopIndex, compareClass& theCompareror, List<carbonCopyType>* carbonCopy);
   void QuickSortDescending(int BottomIndex, int TopIndex);
@@ -938,16 +940,17 @@ public:
   void SubSelection(Selection& theSelection, List<Object>& output);
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
-  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  template <class otherType=Object>
+  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
   { if (this->size==0)
       return;
     if (theOrder==0)
-      this->QuickSortAscendingNoOrder(0, this->size-1);
+      this->QuickSortAscendingNoOrder(0, this->size-1, carbonCopy);
     else
-      this->QuickSortAscendingOrder(0, this->size-1, theOrder);
+      this->QuickSortAscendingOrder(0, this->size-1, theOrder, carbonCopy);
   }
   void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
-  { this->QuickSortAscending(theOrder);
+  { this->QuickSortAscending<Object>(theOrder);
     this->ReverseOrderElements();
   }
   bool HasACommonElementWith(List<Object>& right);
@@ -1424,9 +1427,10 @@ public:
   inline int GetIndexIMustContainTheObject(const Object& o) const
   { int result=this->GetIndex(o);
     if (result==-1)
-      crash << "This is a programming error: the programmer has requested the index of object " << o
-      << " with a function that does not allow failure. However, the container array does not contain his object. "
-      << crash;
+    { crash.theCrashReport << "This is a programming error: the programmer has requested the index of object " << o
+      << " with a function that does not allow failure. However, the container array does not contain his object. ";
+      crash << crash;
+    }
     return result;
   }
   inline bool IsSparseRelativeToExpectedSize(int expectedSize)const
@@ -2742,31 +2746,39 @@ std::ostream& operator<<(std::ostream& out, const Vector<coefficient>& theVector
 }
 
 template <class Object>
-void List<Object>::QuickSortAscendingNoOrder(int BottomIndex, int TopIndex)
+template <class otherType>
+void List<Object>::QuickSortAscendingNoOrder(int BottomIndex, int TopIndex, List<otherType>* carbonCopy)
 { if (TopIndex<=BottomIndex)
     return;
   int HighIndex = TopIndex;
   for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
     if (this->TheObjects[LowIndex]>(this->TheObjects[BottomIndex]))
     { this->SwapTwoIndices(LowIndex, HighIndex);
+      if (carbonCopy!=0)
+        carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
       LowIndex--;
       HighIndex--;
     }
   if (this->TheObjects[HighIndex]>this->TheObjects[BottomIndex])
     HighIndex--;
   this->SwapTwoIndices(BottomIndex, HighIndex);
-  this->QuickSortAscendingNoOrder(BottomIndex, HighIndex-1);
-  this->QuickSortAscendingNoOrder(HighIndex+1, TopIndex);
+  if (carbonCopy!=0)
+    carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+  this->QuickSortAscendingNoOrder(BottomIndex, HighIndex-1, carbonCopy);
+  this->QuickSortAscendingNoOrder(HighIndex+1, TopIndex, carbonCopy);
 }
 
 template <class Object>
-void List<Object>::QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder)
+template <class otherType>
+void List<Object>::QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder, List<otherType>* carbonCopy)
 { if (TopIndex<=BottomIndex)
     return;
   int HighIndex = TopIndex;
   for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
     if (theOrder(this->TheObjects[LowIndex],(this->TheObjects[BottomIndex])))
     { this->SwapTwoIndices(LowIndex, HighIndex);
+      if (carbonCopy!=0)
+        carbonCopy->SwapTwoIndices(LowIndex, HighIndex);
       LowIndex--;
       HighIndex--;
     }
@@ -2778,8 +2790,10 @@ void List<Object>::QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<O
     HighIndex--;
   }
   this->SwapTwoIndices(BottomIndex, HighIndex);
-  this->QuickSortAscendingOrder(BottomIndex, HighIndex-1, theOrder);
-  this->QuickSortAscendingOrder(HighIndex+1, TopIndex, theOrder);
+  if (carbonCopy!=0)
+    carbonCopy->SwapTwoIndices(BottomIndex, HighIndex);
+  this->QuickSortAscendingOrder(BottomIndex, HighIndex-1, theOrder, carbonCopy);
+  this->QuickSortAscendingOrder(HighIndex+1, TopIndex, theOrder, carbonCopy);
 }
 
 template <class Object>

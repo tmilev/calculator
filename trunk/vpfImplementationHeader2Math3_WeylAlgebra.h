@@ -38,11 +38,8 @@ void ElementWeylAlgebra<coefficient>::MultiplyTwoMonomials(const MonomialWeylAlg
   for (int i=0; i<theDimensioN; i++)
   { int powerDiffOp=0;
     if (!left.differentialPart(i).IsSmallInteger(&powerDiffOp))
-    { std::cout << "This is a programming error. Requested operations with elements of Weyl algebra that have monomials of exponent "
-      << left.differentialPart(i) << " which I cannot handle. If this is bad user input, it should have been caught at an earlier level. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error. Requested operations with elements of Weyl algebra that have monomials of exponent "
+      << left.differentialPart(i).ToString() << " which I cannot handle. If this is bad user input, it should have been caught at an earlier level. " << crash;
     tempSel.MaxMultiplicities[i]=powerDiffOp;
     theExpectedSize*=powerDiffOp;
   }
@@ -261,10 +258,7 @@ void ElementWeylAlgebra<coefficient>::GetStandardOrderDiffOperatorCorrespondingT
   outputDO.MakeZero();
   int inputPower=0;
   if (!inputRationalPower.IsSmallInteger(&inputPower))
-  { std::cout << "This is a programming error: " << " I can give you a differential operator only from integer exponent. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: " << " I can give you a differential operator only from integer exponent. " << crash;
   if (inputPower>=0)
     tempMon.polynomialPart.MakeEi(indexVar, inputPower);
   else
@@ -328,10 +322,7 @@ void ElementWeylAlgebra<coefficient>::FourierTransform(ElementWeylAlgebra<coeffi
   for (int i=0; i<this->size(); i++)
   { const MonomialWeylAlgebra& currentMon=(*this)[i];
     if (!(currentMon.polynomialPart.TotalDegree()+currentMon.differentialPart.TotalDegree()).IsInteger(&totalDeg))
-    { std::cout << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: calling Fourier transoform on differential operator with non-integral exponents. " << crash;
 //    std::cout << "<br>totalDeg: " << totalDeg.ToString() << ", is even=" << totalDeg.IsEven();
     theMon.differentialPart=currentMon.polynomialPart;
     theMon.polynomialPart=currentMon.differentialPart;

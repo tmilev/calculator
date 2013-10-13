@@ -168,10 +168,7 @@ public:
   ElementZmodP(const ElementZmodP& other){this->operator=(other);}
   void CheckIamInitialized()
   { if (this->theModulo.IsEqualToZero())
-    { std::cout << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: computing with non-initialized element the ring Z mod p (the number p has not been initialized!)." << crash;
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool IsEqualToZero()const
@@ -193,10 +190,8 @@ public:
   }
   void CheckEqualModuli(const ElementZmodP& other)
   { if (this->theModulo!=other.theModulo)
-    { std::cout << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
-      << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to make an operation with two elemetns of Z mod P with different moduli, "
+      << this->theModulo.ToString() << " and " << other.theModulo.ToString() << ". " << crash;
   }
   bool operator==(int other)const
   { ElementZmodP tempElt;
@@ -248,10 +243,8 @@ public:
   void operator=(const Rational& other)
   { bool tempB=this->AssignRational(other);
     if (!tempB)
-    { std::cout << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
-      << " Operator= does not allow failure. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: using ElementZmodP::operator= to assign a Rational number failed. "
+      << " Operator= does not allow failure. " << crash;
   }
   void operator/=(const ElementZmodP& den);
   void ScaleToIntegralMinHeightAndGetPoly(const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output, const LargeIntUnsigned& newModulo)

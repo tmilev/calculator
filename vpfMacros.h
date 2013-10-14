@@ -80,7 +80,7 @@ class ProjectInformationInstance
   ProjectInformationInstance(const char* fileName, const std::string& fileDescription);
 };
 
-static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "External includes + macros. Macro/build configuration.");
+static ProjectInformationInstance vpfMacrosHprojectInstance(__FILE__, "Header, External includes + macros. Macro/build configuration.");
 
 class GlobalVariables;
 class Crasher

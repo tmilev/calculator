@@ -4,7 +4,7 @@
 #define vpfHeaderMathVectors_h_already_included
 
 #include "vpfHeader2Math01_LargeIntArithmetic.h"
-static ProjectInformationInstance vpfHeader2Math_02Vectors(__FILE__, "Main header. Vectors and related machinery. ");
+static ProjectInformationInstance vpfHeader2Math_02Vectors(__FILE__, "Header, vectors and related machinery. ");
 
 template <class coefficient>
 class Vector: public List<coefficient>

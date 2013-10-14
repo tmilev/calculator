@@ -3,29 +3,24 @@
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 
-static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface");
+static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
 bool WeylGroup::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of WeylGroup. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of WeylGroup. " << crash;
   this->RootsOfBorel.CheckConsistency();
   return true;
 }
 
 bool WeylGroup::CheckInitializationFDrepComputation()const
 { if (this->conjugacyClasses.size==0 || this->theElements.size==0)
-  { std::cout << "This is a programming error: requesting to compute character hermitian product "
-    << " in a group whose conjugacy classes and/or elements have not been computed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: requesting to compute character hermitian product in a group whose conjugacy classes and/or elements have not been computed. "
+    << crash;
     return false;
   }
   for (int i=0; i<this->irreps.size; i++)
     if (this->irreps[i].theCharacter.IsEqualToZero())
-    { std::cout << "This is a programming error: irrep number " << i+1 << " has zero character!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: irrep number " << i+1 << " has zero character!" << crash;
       return false;
     }
   return true;
@@ -39,9 +34,8 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
     if (this->theElementImages[i+1].NumRows==0)
       isOK=false;
     if (!isOK)
-    { std::cout << "This is a programming error: working with a representation in which the action of the simple generators is not computed. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. "
+      << crash;
       return false;
     }
   }
@@ -52,9 +46,7 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
 template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
 { if (this->OwnerGroup==0)
-  { std::cout << "This is a programming error: working with a representation with non-initialized owner Weyl group. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: working with a representation with non-initialized owner Weyl group. " << crash;
     return false;
   }
   return true;
@@ -75,10 +67,8 @@ void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed()
       tempElt.MakeCanonical();
       int targetIndex=this->OwnerGroup->theElements.GetIndex(tempElt);
       if (!(tempMat==this->theElementImages[targetIndex]))
-      { std::cout << "this is a programming error: element " << i+1 << " times element "<< j+1 << " is outside of the set, i.e.,  "
-        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "this is a programming error: element " << i+1 << " times element "<< j+1 << " is outside of the set, i.e.,  "
+        << tempList[i].ToString() << " * " << tempList[j].ToString() << " is bad. " << crash;
     }
 }
 
@@ -135,10 +125,7 @@ void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentat
   }
   //////////////////////////////////
   if (this->OwnerGroup!=other.OwnerGroup)
-  { std::cout << "This is a programming error: attempting to multiply representations with different owner groups. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
   WeylGroupRepresentation<coefficient> output;
   output.reset(this->OwnerGroup);
   output.theCharacter=this->theCharacter;
@@ -160,10 +147,8 @@ void WeylGroupRepresentation<coefficient>::Restrict
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size==0)
-  { std::cout << "This is a programming error: restriction of representation to a zero subspace is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: restriction of representation to a zero subspace is not allowed. "
+    << crash;
   output.reset(this->OwnerGroup);
   output.vectorSpaceBasis = VectorSpaceBasisSubrep;
   output.vectorSpaceBasis.GetGramMatrix(output.gramMatrixInverted, 0);
@@ -318,13 +303,8 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
       output.SetSize(output.size+1);
       tempMat.GetEigenspaceModifyMe(theEigenValueCandidate[0], *output.LastObject());
       if (output.LastObject()->size==0)
-      { std::cout << "This is a programmig error: " << theEigenValueCandidate[0]
-        << " is a zero of the minimal polynomial " << theMinPoly.ToString() << " of the operator "
-        << this->ToString() << " but the corresponding eigenspace is empty. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-
-      }
+        crash << "This is a programmig error: " << theEigenValueCandidate[0].ToString() << " is a zero of the minimal polynomial "
+        << theMinPoly.ToString() << " of the operator " << this->ToString() << " but the corresponding eigenspace is empty. " << crash;
 //      std::cout << " <br> And the resulting eigenspace is: " << *output.LastObject();
       found += output.LastObject()->size;
       if(found == this->NumCols)
@@ -387,10 +367,8 @@ void WeylGroupRepresentation<coefficient>::GetLargestDenominatorSimpleGens
   outputDen=1;
   for(int gi=1; gi<this->OwnerGroup->GetDim()+1; gi++)
     if (!this->theElementIsComputed[gi])
-    { std::cout << "This is a programming error: the simple generator has not been computed, but "
-      << " is being used. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    } else
+      crash << "This is a programming error: the simple generator has not been computed, but is being used. " << crash;
+    else
       for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
         for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
         { if(this->theElementImages[gi](mi,mj).GetDenominator() > outputDen)
@@ -409,12 +387,8 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   this->OwnerGroup->CheckInitializationFDrepComputation();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared==0)
-  { std::cout << "This is a programming error: a module has character "
-    << this->theCharacter.ToString() << " of zero length, which is impossible. "
-    << "Here is a printout of the module. " << this->ToString()
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: a module has character " << this->theCharacter.ToString() << " of zero length, which is impossible. "
+    << "Here is a printout of the module. " << this->ToString() << crash;
   if(SumOfNumComponentsSquared== 1)
   { int indexMe=this->OwnerGroup->irreps.GetIndex(*this);
     if(indexMe== -1)
@@ -477,18 +451,16 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
       }
       remainingVectorSpace=tempSpace;
       if(remainingCharacter[0]!=remainingVectorSpace.size)
-      { std::cout << "<br>This is a programming error: remaining char "
-        << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0]
-        << " but remaining vector space has dim "
-        << remainingVectorSpace.size;
-        //assert(false);
+      { std::cout << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0]
+        << " but remaining vector space has dim " << remainingVectorSpace.size;
+        //crash<<crash;
       }
       if (remainingCharacter.IsEqualToZero())
         if (!remainingVectorSpace.size==0)
         { std::cout << "This is a programming error: remaining char is zero but remaining space is "
           << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacter.ToString()
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          //assert(false);
+          //crash<<crash;
         }
     }
   }
@@ -514,14 +486,9 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
 //    tempFormat.flagUseLatex=true;
 //    std::cout << "... and the result is:<br>" << splittingOperatorMatrix.ToString(&tempFormat);
     bool tempB=
-    splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim
-    (theSubRepsBasis);
+    splittingOperatorMatrix.GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerThanDim(theSubRepsBasis);
     if (!tempB)
-    { std::cout << "<br>This is a mathematical or programming mistake: "
-      << "splittingOperatorMatrix should have small integral values, which it doesn't!"
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "<br>This is a mathematical or programming mistake: splittingOperatorMatrix should have small integral values, which it doesn't!" << crash;
     //std::cout << "<br>the eigenspaces were of dimensions: ";
 //    for(int i=0; i<theSubRepsBasis.size; i++)
 //      std::cout << theSubRepsBasis[i].size << " ";
@@ -543,9 +510,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
   average.MakeZero(this->GetDim());
   for (int i=0; i<this->theElementImages.size; i++)
   { if (!this->theElementIsComputed[i])
-    { std::cout << "<hr>Oh shit! ";
-      assert(false);
-    }
+      crash << "<hr>This is a programming error: an internal check failed. " << crash;
     this->theElementImages[i].ActOnVectorColumn(startingVector, tempV);
     average+=tempV;
   }
@@ -554,9 +519,8 @@ bool WeylGroupRepresentation<coefficient>::DecomposeMeIntoIrrepsRecursive
 /*  Vectors<coefficient> theSpread;
   this->SpreadVector(average, theSpread);
   if (theSpread.size==this->GetDim())
-  { std::cout << "<hr><b>I was horribly wrong!</b>";
-    assert(false);
-  } else
+    crash << "<hr><b>I was horribly wrong!</b>" << crash;
+  else
   { std::cout << "<hr>The image of the spread is " << theSpread.size << " dimensional. ";
   }
 */
@@ -621,10 +585,7 @@ void WeylGroup::ComputeIrreducibleRepresentations
     bool tempB=
     newRep.DecomposeMeIntoIrreps(decompositionNewRep, theGlobalVariables);
     if (!tempB)
-    { std::cout << "This is a mathematical error: failed to decompose " << newRep.theCharacter.ToString() << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a mathematical error: failed to decompose " << newRep.theCharacter.ToString() << ". " << crash;
   }
   this->irreps.QuickSortAscending();
   if (theGlobalVariables!=0)
@@ -1047,9 +1008,10 @@ public:
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool CheckConsistency()
   { if (this->flagDeallocated)
-    { std::cout << "This is a programming error: use after free of MonomialMacdonald. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: use after free of MonomialMacdonald. " << crash;
+      return false;
     }
+    return true;
   }
   static unsigned int HashFunction(const MonomialMacdonald& input)
   { return input.rootSel.HashFunction();
@@ -1105,10 +1067,8 @@ void MonomialMacdonald::MakeFromRootSubsystem(const Vectors<Rational>& inputRoot
       currentV*=-1;
     int indexInRoots=inputOwner.theWeyl.RootSystem.GetIndex(currentV);
     if (indexInRoots<0)
-    { std::cout << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString() << ": "
-      << " the vector " << currentV.ToString() << " is not a root. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to make a Macdonald polynomial from " << inputRoots.ToString() << ": the vector " << currentV.ToString()
+      << " is not a root. " << crash;
     this->rootSel.AddSelectionAppendNewIndex(indexInRoots);
   }
   this->rootSel.ComputeIndicesFromSelection();
@@ -1275,19 +1235,13 @@ bool CommandList::innerGenerateMultiplicativelyClosedSet(CommandList& theCommand
 
 void WeylGroupVirtualRepresentation::operator+=(const WeylGroupVirtualRepresentation& other)
 { if (this->ownerGroup!=other.ownerGroup)
-  { std::cout << "This is a programming error: adding virtual representations of different groups. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: adding virtual representations of different groups. " << crash;
   this->coefficientsIrreps+=other.coefficientsIrreps;
 }
 
 void WeylGroupVirtualRepresentation::operator*=(const WeylGroupVirtualRepresentation& other)
 { if (this->ownerGroup!=other.ownerGroup)
-  { std::cout << "This is a programming error: adding virtual representations of different groups. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: adding virtual representations of different groups. " << crash;
   WeylGroupVirtualRepresentation output;
   output.ownerGroup=this->ownerGroup;
   output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);

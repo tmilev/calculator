@@ -5,7 +5,7 @@
 
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Header, implementation polynomial computations, more advanced. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialComputations(__FILE__, "Implementation header, polynomial computations, more advanced. ");
 
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)

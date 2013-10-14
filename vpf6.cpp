@@ -6,7 +6,7 @@
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 
 
-ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
+ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 //If you get a specialization after instantiation error:
 //the following template specialization funcitons must appear

@@ -4,7 +4,7 @@
 #define vpfHeader2Math_01LargeIntegersInstance_already_included
 
 #include "vpfHeader1General0_General.h"
-static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(__FILE__, "Main header. Large integer/rational number arithmetic. ");
+static ProjectInformationInstance vpfHeader2Math_01LargeIntegersInstance(__FILE__, "Header, large integer/rational number arithmetic. ");
 class LargeIntUnsigned
 { void AddNoFitSize(const LargeIntUnsigned& x);
 public:

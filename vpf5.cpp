@@ -7,7 +7,7 @@
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 
-ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for the calculator parser part 2: meant for built-in functions. ");
+ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in functions. ");
 
 //If you get a the C++ multiple definition error:
 //- Try moving template *EXPLICIT* specializations (i.e. template <>)

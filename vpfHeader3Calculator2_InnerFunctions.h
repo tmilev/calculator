@@ -4,8 +4,7 @@
 #define vpfHeader6_2InnerFns
 #include "vpfHeader3Calculator0_Interface.h"
 
-static ProjectInformationInstance ProjectInfoVpf6_2Header
-(__FILE__, "Math calculator routines . ");
+static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Heder, calculator built-in functions. ");
 
 class CommandListFunctions
 {

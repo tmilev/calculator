@@ -4,7 +4,7 @@
 #include "vpfHeader2Math0_General.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersHEader
-(__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
+(__FILE__, "Header file, finite group characters sandbox. Work in progress by Thomas.");
 
 class WeylGroupVirtualRepresentation
 {

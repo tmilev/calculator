@@ -4,7 +4,7 @@
 #define vpfHeader1_2SubsetsSelections_already_included
 
 #include "vpfHeader1General0_General.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header: basic data structures: selections, subsets, etc. ");
+static ProjectInformationInstance ProjectInfoVpfHeader1_5(__FILE__, "Header, selections, subsets, etc. ");
 
 class SelectionOneItem
 {

@@ -3,7 +3,7 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
-ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Main implementation file, part 1. ");
+ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.

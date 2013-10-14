@@ -13,7 +13,7 @@
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 
-static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
+static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file, calculator declaration. ");
 
 class Expression
 { void reset()

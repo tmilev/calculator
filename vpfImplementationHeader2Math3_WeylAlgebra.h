@@ -5,7 +5,7 @@
 
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(__FILE__, "Header, implementation of Weyl algebra routines. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderWeylAlgebras(__FILE__, "Implementation header, Weyl algebra routines. ");
 
 template <class coefficient>
 bool ElementWeylAlgebra<coefficient>::IsPolynomial(Polynomial<coefficient>* whichPoly)const

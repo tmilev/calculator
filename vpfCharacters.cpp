@@ -3,7 +3,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math3_Characters.h"
 #include "vpfHeader2Math4_Graph.h"
-static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
+static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
 
 extern FormatExpressions consoleFormat;

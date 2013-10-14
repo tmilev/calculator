@@ -4,7 +4,7 @@
 #define vpfHeader_ImplementationHeaderModulesSSLielgebras
 #include "vpfHeader2Math6_ModulesSSLieAlgebras.h"
 
-static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(__FILE__, "Header, generalized Verma modules implementation. ");
+static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLielgebras(__FILE__, "Implementation header, generalized Verma modules. ");
 
 template<class coefficient>
 Rational ModuleSSalgebra<coefficient>::hwTrace

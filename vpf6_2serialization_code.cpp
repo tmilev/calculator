@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".#include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader3Calculator0_Interface.h"
-static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object to calculator expression serialization/deserialization.");
+static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression serialization/deserialization.");
 
 bool Serialization::innerStoreChevalleyGenerator(CommandList& theCommands, const ChevalleyGenerator& input, Expression& output)
 { MacroRegisterFunctionWithName("innerStoreChevalleyGenerator");

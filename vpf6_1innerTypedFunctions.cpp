@@ -5,8 +5,7 @@
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 
-ProjectInformationInstance ProjectInfoVpf6_1cpp
-(__FILE__, "Implementation file for the calculator parser: implementation of inner binary typed functions. ");
+ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
 
 bool CommandList::innerOperationBinary(CommandList& theCommands, const Expression& input, Expression& output, int theOp)
 { for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)

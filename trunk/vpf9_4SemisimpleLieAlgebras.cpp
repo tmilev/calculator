@@ -533,7 +533,7 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
 
 void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentRecursive");
-  baseCandidate.CheckInitialization();
+  baseCandidate.CheckMaximalDominance();
   RecursionDepthCounter theCounter(&this->theRecursionCounter);
   int numVectorsFound=baseCandidate.CartanSAsByComponent.LastObject()->size;
   CandidateSSSubalgebra newCandidate;
@@ -667,7 +667,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     { Hrescaled=theOrbit[j];
       Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
       Hrescaled/=2;
-      if (baseCandidate.isGoodForTheTop(this->GetSSowner().theWeyl, Hrescaled))
+      if (baseCandidate.isGoodForTheTop(Hrescaled))
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
           out2 << " Orbit candidate " << j+1 << " out of " << theOrbit.size << " is good, adding to list of good candidates. ";
@@ -695,7 +695,8 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
         theReport2.Report(out2.str());
       }
       newCandidate=baseCandidate;
-      newCandidate.AddHincomplete(Hrescaled, theHCandidatesRescaledGenerators[j], i);
+      newCandidate.AddHincomplete(theHCandidatesRescaled[j], theHCandidatesRescaledGenerators[j], i);
+      newCandidate.CheckMaximalDominance();
       this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
     }
   }
@@ -752,7 +753,7 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
 //  this->theHWeylGroupElts.LastObject()->size=0;
 }
 
-bool CandidateSSSubalgebra::isGoodForTheTop(WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
+bool CandidateSSSubalgebra::isGoodForTheTop(const Vector<Rational>& HneW)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodForTheTop");
   //Check if input weight is maximally dominant:
   Rational theScalarProd;
@@ -768,13 +769,11 @@ bool CandidateSSSubalgebra::isGoodForTheTop(WeylGroup& ownerWeyl, const Vector<R
           crash << "This is a programming error. The candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
           << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
           << this->CartanSAsByComponent[k][l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
-          << " preceding roots. " << crash;
+          << " preceding roots. Hnew equals: " << HneW.ToString() << " Here are all preceding roots: " << this->CartanSAsByComponent.ToString() << crash;
       }
     if (canBeRaisingReflection)
-    { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HneW);
-      if (theScalarProd<0)
+      if (this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HneW)<0)
         return false;
-    }
   }
   int counter=-1;
   int indexHnewInSmallType=this->CartanSAsByComponent.LastObject()->size;
@@ -783,18 +782,17 @@ bool CandidateSSSubalgebra::isGoodForTheTop(WeylGroup& ownerWeyl, const Vector<R
   for (int k=0; k<this->CartanSAsByComponent.size; k++)
     for (int l=0; l<this->CartanSAsByComponent[k].size; l++)
     { counter++;
-      theScalarProd= ownerWeyl.RootScalarCartanRoot(HneW, this->CartanSAsByComponent[k][l]);
+      theScalarProd= this->GetAmbientWeyl().RootScalarCartanRoot(HneW, this->CartanSAsByComponent[k][l]);
       if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHnew, counter))
         return false;
     }
   for (int i=0; i<this->PosRootsPerpendicularPrecedingWeights.size; i++)
-    if (ownerWeyl.RootScalarCartanRoot(HneW, this->PosRootsPerpendicularPrecedingWeights[i])<0)
+    if (this->GetAmbientWeyl().RootScalarCartanRoot(HneW, this->PosRootsPerpendicularPrecedingWeights[i])<0)
       return false;
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     if (this->CartanSAsByComponent[i].Contains(HneW))
       crash << "This is a programming error: I am told that " << HneW.ToString() << " is an OK weight to extend the weight subsystem, "
-      << " but the weight subsystem contains that weight already: " << this->CartanSAsByComponent[i].ToString() << ". "
-      << crash;
+      << " but the weight subsystem contains that weight already: " << this->CartanSAsByComponent[i].ToString() << ". " << crash;
   Vectors<Rational> tempVectors;
   tempVectors.AssignListList(this->CartanSAsByComponent);
   tempVectors.AddOnTop(HneW);
@@ -993,8 +991,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
         posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
         int q;
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
-          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through "
-          << (-posRoot2).ToString() << " does not contain any root, which is impossible. " << crash;
+          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through " << (-posRoot2).ToString()
+          << " does not contain any root, which is impossible. " << crash;
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
         for (int k=0; k<q+1; k++)
           this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
@@ -1140,8 +1138,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
       this->fullBasisOwnerModules.AddOnTop(i);
     }
   if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
-    crash << "This is a programming error: the full basis by modules does not have same number of elements "
-    << " as the number of generators of the ambient Lie algebra. " << crash;
+    crash << "This is a programming error: the full basis by modules does not have same number of elements as the number of generators of the ambient Lie algebra. " << crash;
   this->WeightsModulesNONprimal.SetSize(this->Modules.size);
   this->WeightsModulesPrimal.SetSize(this->Modules.size);
   Vector<Rational> theProjection, thePrimalProjection;
@@ -2939,6 +2936,31 @@ bool CandidateSSSubalgebra::CheckConsistency()const
     crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
   return true;
 }
+
+bool CandidateSSSubalgebra::CheckMaximalDominance()const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::CheckMaximalDominance");
+  this->CheckInitialization();
+  Rational theScalarProd;
+  for (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
+  { Vector<Rational>& currentPosRoot=this->GetAmbientWeyl().RootsOfBorel[i];
+    bool canBeRaisingReflection=true;
+    for (int k=0; k<this->CartanSAsByComponent.size && canBeRaisingReflection; k++)
+      for (int l=0; l<this->CartanSAsByComponent[k].size && canBeRaisingReflection; l++)
+      { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, this->CartanSAsByComponent[k][l]);
+        if (theScalarProd>0)
+          canBeRaisingReflection=false;
+        if (theScalarProd<0)
+        { crash << "This is a programming error. The candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
+          << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
+          << this->CartanSAsByComponent[k][l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
+          << " preceding roots. Here are all preceding roots: " << this->CartanSAsByComponent.ToString() << crash;
+          return false;
+        }
+      }
+  }
+  return true;
+}
+
 bool SltwoSubalgebras::CheckConsistency()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;

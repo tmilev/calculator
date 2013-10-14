@@ -148,6 +148,7 @@ int main(int argc, char **argv)
 //  civilizedInput="printMacdonaldPolys{}(B_3)";
 //  civilizedInput="Differentiate(x, f*g )";
 //  civilizedInput="\\sqrt 2";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras(A_5)";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

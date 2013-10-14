@@ -301,6 +301,7 @@ public:
   { this->flagDeallocated=true;
   }
   bool CheckConsistency()const;
+  bool CheckMaximalDominance()const;
   int GetPrimalRank()const;
 
   void GetHsByType
@@ -390,7 +391,7 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   bool isGoodForTheTop
-  (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
+  (const Vector<Rational>& HneW)const
   ;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;

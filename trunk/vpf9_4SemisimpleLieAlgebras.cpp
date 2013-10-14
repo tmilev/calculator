@@ -3,7 +3,7 @@
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
-ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Implementation of semisimple subalgebra routines. ");
+ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
 typename List<DynkinSimpleType>::OrderLeftGreaterThanRight
@@ -26,9 +26,7 @@ void SemisimpleLieAlgebra::GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebr
 
 bool SemisimpleLieAlgebra::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
   this->theWeyl.CheckConsistency();
   return true;
 }
@@ -449,10 +447,7 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
       { //permutation (12)(23)(12)=(13), AutoIndex=5
         output(0,3)=1; output(2,2)=1; output(3,0)=1;
       } else
-      { std::cout << "This is a programming error: requesting triality automorphism with index not in the range 0-5. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: requesting triality automorphism with index not in the range 0-5. " << crash;
     } else
     { output.MakeIdMatrix(this->theRank);
       output(this->theRank-1, this->theRank-1)=0;
@@ -472,17 +467,13 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
   }
   Rational tempRat=output.GetDeterminant();
   if (tempRat!=1 && tempRat!=-1)
-  { std::cout << "This is a programming error: the determinant of the automorphism matrix of the Dynkin graph must be +/-1, it is instead "
-    << tempRat << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the determinant of the automorphism matrix of the Dynkin graph must be +/-1, it is instead "
+    << tempRat.ToString() << ". " << crash;
 }
 
 DynkinSimpleType DynkinType::GetSmallestSimpleType()const
 { if (this->size()==0)
-  { std::cout << "This is a programming error: asking for the smallest simple type of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: asking for the smallest simple type of a 0 dynkin type. " << crash;
   DynkinSimpleType result=(*this)[0];
   for (int i=1; i<this->size(); i++)
     if ((*this)[i]<result)
@@ -492,9 +483,7 @@ DynkinSimpleType DynkinType::GetSmallestSimpleType()const
 
 DynkinSimpleType DynkinType::GetGreatestSimpleType()const
 { if (this->size()==0)
-  { std::cout << "This is a programming error: asking for the greatest simple type of a 0 dynkin type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: asking for the greatest simple type of a 0 dynkin type. " << crash;
   DynkinSimpleType result=(*this)[0];
   for (int i=1; i<this->size(); i++)
     if ((*this)[i]>result)
@@ -592,9 +581,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     newCandidate.indexInOwner=this->theSubalgebraCandidates.size;
     this->theSubalgebraCandidates.AddOnTop(newCandidate);
     if (!this->theSubalgebraCandidates.LastObject()->indexInOwner==this->theSubalgebraCandidates.size-1)
-    { std::cout << "<hr>wtf? ";
-      assert(false);
-    }
+      crash << "<hr>Something is very wrong: internal check failed! " << crash;
     if (propagateRecursion)
     { //std::cout << "<hr>Extending recursively: " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
     }
@@ -644,12 +631,10 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     }
     if (indexCurrentWeight!=0)
     { if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 60000))
-      { std::cout << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
+        crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
         << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
-        << "You might wanna work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. "
+        << crash;
     } else
     { theOrbit=startingVector;
       ElementWeylGroup theId;
@@ -708,13 +693,9 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 
 bool CandidateSSSubalgebra::CheckInitialization()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
   if (this->owner==0)
-  { std::cout << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use of non-initialized semisimple subalgebra candidate. " << crash;
   return true;
 }
 
@@ -745,9 +726,7 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
 
 void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType)
 { if (theNewType.theRank<=0)
-  { std::cout << "This is a programming error: I am given a simple Dynkin type of non-positive rank. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I am given a simple Dynkin type of non-positive rank. " << crash;
   WeylGroup tempWeyl, tempWeylnonScaled;
   Rational two=2;
   tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
@@ -765,7 +744,28 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
 
 bool CandidateSSSubalgebra::isGoodForTheTop(WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodForTheTop");
+  //Check if input weight is maximally dominant:
   Rational theScalarProd;
+  for  (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
+  { Vector<Rational>& currentPosRoot=this->GetAmbientWeyl().RootsOfBorel[i];
+    bool canBeRaisingReflection=true;
+    for (int k=0; k<this->CartanSAsByComponent.size && canBeRaisingReflection; k++)
+      for (int l=0; l<this->CartanSAsByComponent[k].size && canBeRaisingReflection; l++)
+      { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, this->CartanSAsByComponent[k][l]);
+        if (theScalarProd>0)
+          canBeRaisingReflection=false;
+        if (theScalarProd<0)
+          crash << "This is a programming error. The candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
+          << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
+          << this->CartanSAsByComponent[k][l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
+          << " preceding roots. " << crash;
+      }
+    if (canBeRaisingReflection)
+    { theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HneW);
+      if (theScalarProd<0)
+        return false;
+    }
+  }
   int counter=-1;
   int indexHnewInSmallType=this->CartanSAsByComponent.LastObject()->size;
   DynkinSimpleType currentType=this->theWeylNonEmbeddeD.theDynkinType.GetGreatestSimpleType();
@@ -782,18 +782,14 @@ bool CandidateSSSubalgebra::isGoodForTheTop(WeylGroup& ownerWeyl, const Vector<R
       return false;
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     if (this->CartanSAsByComponent[i].Contains(HneW))
-    { std::cout << "This is a programming error: I am told that " << HneW.ToString() << " is an OK weight to extend the weight subsystem, "
+      crash << "This is a programming error: I am told that " << HneW.ToString() << " is an OK weight to extend the weight subsystem, "
       << " but the weight subsystem contains that weight already: " << this->CartanSAsByComponent[i].ToString() << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
   Vectors<Rational> tempVectors;
   tempVectors.AssignListList(this->CartanSAsByComponent);
   tempVectors.AddOnTop(HneW);
   if (tempVectors.GetRankOfSpanOfElements()<tempVectors.size)
     return false;
-  if (indexHnew==0)
-    return ownerWeyl.IsDominantWeight(HneW);
   return true;
 }
 
@@ -913,21 +909,14 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   const SemisimpleLieAlgebra& nonEmbeddedMe=this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknownsNoCentralizer=0;
   if (this->theHs.size==0)
-  { std::cout << "This is a programming error: the number of involved H's cannot be zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the number of involved H's cannot be zero. " << crash;
   if (this->theInvolvedNegGenerators.size!=this->theHs.size)
-  { std::cout << "This is a programming error: the number of involved negative generators, which is " << this->theInvolvedNegGenerators.size
-    << " is not equal to the subalgebra rank, which is " << this->theHs.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the number of involved negative generators, which is " << this->theInvolvedNegGenerators.size
+    << " is not equal to the subalgebra rank, which is " << this->theHs.size << ". " << crash;
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
     this->totalNumUnknownsNoCentralizer+=this->theInvolvedNegGenerators[i].size;
   if (this->theWeylNonEmbeddeD.RootSystem.size==0)
-  { std::cout << "This is a programming error: the root system of the candidate subalgebra has not been computed "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the root system of the candidate subalgebra has not been computed " << crash;
   this->totalNumUnknownsNoCentralizer*=2;
   this->totalNumUnknownsWithCentralizer=this->totalNumUnknownsNoCentralizer;
   this->theUnknownNegGens.SetSize(this->theInvolvedNegGenerators.size);
@@ -938,10 +927,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
   { int rankCentralizer=-1;
     bool tempB= this->centralizerRank.IsSmallInteger(&rankCentralizer);
     if (!tempB || rankCentralizer<0 || rankCentralizer>this->GetAmbientWeyl().GetDim())
-    { std::cout << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
-      << " Currently rankCentalizer is supposed to be " << rankCentralizer << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
+      << " Currently rankCentalizer is supposed to be " << rankCentralizer << crash;
     this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()+1;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
   }
@@ -996,10 +983,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
         posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
         int q;
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
-        { std::cout << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through "
-          << (-posRoot2).ToString() << " does not contain any root, which is impossible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
+          crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through "
+          << (-posRoot2).ToString() << " does not contain any root, which is impossible. " << crash;
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
         for (int k=0; k<q+1; k++)
           this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
@@ -1101,11 +1086,9 @@ bool CandidateSSSubalgebra::CheckModuleDimensions()const
   if (totalDim!=this->GetAmbientSS().GetNumGenerators())
   { FormatExpressions theFormat;
     theFormat.flagCandidateSubalgebraShortReportOnly=false;
-    std::cout << "<br><b>Something went very wrong with candidate " << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) << ": dimensions DONT FIT!!! More precisely, "
+    crash << "<br><b>Something went very wrong with candidate " << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) << ": dimensions DONT FIT!!! More precisely, "
     << "I am getting total module dimension sum  " << totalDim << " instead of " << this->GetAmbientSS().GetNumGenerators()
-    << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat)
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    << ".</b> Here is a detailed subalgebra printout. " << this->ToString(&theFormat) << crash;
   }
   return true;
 }
@@ -1129,11 +1112,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
     if (this->ModulesIsotypicallyMerged[i][0].IsElementCartan())
     { for (int j=0; j<this->ModulesIsotypicallyMerged[i].size; j++)
         if (!this->ModulesIsotypicallyMerged[i][j].IsElementCartan())
-        { std::cout << "<br>This is a programming or mathematical error. Module " << this->ModulesIsotypicallyMerged[i].ToString()
+          crash << "<br>This is a programming or mathematical error. Module " << this->ModulesIsotypicallyMerged[i].ToString()
           << " has elements of the ambient Cartan and elements outside of the ambient Cartan, which is not allowed. "
-          << "<br>Here is a detailed subalgebra printout. " << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
+          << "<br>Here is a detailed subalgebra printout. " << crash;
       this->primalSubalgebraModules.AddOnTop(i);
 
     }// else
@@ -1149,10 +1130,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
       this->fullBasisOwnerModules.AddOnTop(i);
     }
   if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
-  { std::cout << "This is a programming error: the full basis by modules does not have same number of elements "
-    << " as the number of generators of the ambient Lie algebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the full basis by modules does not have same number of elements "
+    << " as the number of generators of the ambient Lie algebra. " << crash;
   this->WeightsModulesNONprimal.SetSize(this->Modules.size);
   this->WeightsModulesPrimal.SetSize(this->Modules.size);
   Vector<Rational> theProjection, thePrimalProjection;
@@ -1172,11 +1151,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
           this->WeightsModulesPrimal[i][j]=thePrimalProjection;
         } else
           if (this->WeightsModulesNONprimal[i][j]!=theProjection || this->WeightsModulesPrimal[i][j]!=thePrimalProjection)
-          { std::cout << "This is a programming or mathematical error. Given two isomorphic modules over "
+            crash << "This is a programming or mathematical error. Given two isomorphic modules over "
             << "the semisimple subalgebra (i.e., same highest weights), and the same order of generation of weights, I got different order "
-            << " of the lower weights of the modules. Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            << " of the lower weights of the modules. Something is very wrong. " << crash;
       }
     }
   this->centralizerSubalgebraModules.SetSize(0);
@@ -1219,9 +1196,7 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(const ElementSemi
   Vector<AlgebraicNumber> coordsInFullBasis;
   output.SetSize(0);
   if (this->fullBasisByModules.size!=this->GetAmbientSS().GetNumGenerators())
-  { std::cout << "This is a programming error: fullBasisByModules not computed when it should be. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: fullBasisByModules not computed when it should be. " << crash;
   for (int j=0; j<rightModule.size; j++)
   { this->GetAmbientSS().LieBracket(leftKweightElt, rightModule[j], theLieBracket);
     if (theGlobalVariables!=0)
@@ -1231,10 +1206,8 @@ void CandidateSSSubalgebra::ComputePairKweightElementAndModule(const ElementSemi
     }
     bool tempbool=theLieBracket.GetCoordsInBasis(this->fullBasisByModules, coordsInFullBasis, *theGlobalVariables);
     if (!tempbool)
-    { std::cout  << "This is a programming error: something has gone very wrong: my k-weight basis " << this->fullBasisByModules.ToString()
-      << " does not contain " << theLieBracket.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: something has gone very wrong: my k-weight basis " << this->fullBasisByModules.ToString()
+      << " does not contain " << theLieBracket.ToString() << crash;
     for (int i=0; i<coordsInFullBasis.size; i++)
       if (!coordsInFullBasis[i].IsEqualToZero())
         output.AddOnTopNoRepetition(this->fullBasisOwnerModules[i]);
@@ -1354,10 +1327,7 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsAll(const Vector<Ra
         for (int k=0; k<this->Modules[i].size; k++)
         { outputElts.AddOnTop(this->Modules[i][k][j]);
           if (!(theElementWeight+this->GetPrimalWeightFirstGen(this->Modules[i][k][j])).IsEqualToZero())
-          { std::cout << "This is a programming error: element this->Modules[i][k][j] does not have the primal weight it is supposed to have. "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            crash << "This is a programming error: element this->Modules[i][k][j] does not have the primal weight it is supposed to have. " << crash;
         }
 }
 
@@ -1414,9 +1384,7 @@ int CandidateSSSubalgebra::GetPrimalRank()const
 
 void NilradicalCandidate::CheckInitialization()const
 { if (this->owner==0)
-  { std::cout << "This is a programming error: NilradicalCandidate with non-initialized owner" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: NilradicalCandidate with non-initialized owner" << crash;
 }
 
 Vector<Rational> NilradicalCandidate::GetConeStrongIntersectionWeight()const
@@ -1451,7 +1419,7 @@ bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inpu
   for (int i=0; i<inputNilradSel.CardinalitySelection; i++)
     for (int j=i+1; j<inputNilradSel.CardinalitySelection; j++)
       if (this->owner->GetScalarSA(this->theNilradicalWeights[inputNilradSel.elements[i]], this->theNilradicalWeights[inputNilradSel.elements[j]])<0)
-      { /*std::cout << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
+      { /*crash << "<br>This is either a programming error, or I am missing some mathematical phenomenon: k-sl(2)-triples are "
         << "strongly orthogonal, but their k-weights aren't. Crashing to tactfully let you know. "
         << "The bad elements are: "
         << this->theNilradical[inputNilradSel.elements[i]].ToString() << " of weight "
@@ -1461,9 +1429,8 @@ bool NilradicalCandidate::IsCommutingSelectionNilradicalElements(Selection& inpu
         << this->theNilradicalWeights[inputNilradSel.elements[j]].ToString() << ". "
         //<< "The bilinear form is: " << this->owner->BilinearFormFundPrimal.ToString() << ". "
         //<< " and the subalgebra in play is: " << this->owner->ToString() << ". "
-        //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__)
-        ;
-        //assert(false);*/
+        //<< crash;
+        */
         return false;
       }
   return true;
@@ -1550,11 +1517,9 @@ void NilradicalCandidate::ComputeParabolicACextendsToParabolicAC(GlobalVariables
   if (smallLeviHasBDGE)
   { this->flagParabolicACextendsToParabolicAC=true;
     if (!ambientLeviHasBDGE)
-    { std::cout << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
+    { crash << "This is a mathematical error. Something is very wrong. The ambient parabolic subalgebra has components "
       << " of type A and C, but intesects the centralizer in components of type B and D. This must be impossible according to "
-      << "the PSZ paper and the restriction of Fernando's theorem to the centralizer. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << "the PSZ paper and the restriction of Fernando's theorem to the centralizer. " << crash;
     }
   }
 }
@@ -1715,10 +1680,7 @@ void NilradicalCandidate::ComputeTheTwoCones(GlobalVariables* theGlobalVariables
         }
     }
   if (this->ownerModulesNilradicalElements.size!=this->theNilradical.size || this->theNonFKhws.size!=this->ownerModulestheNonFKhwVectors.size)
-  { std::cout << "This is a programming error: sizes of indexing arrasy in Fernando Kac nilradical candidate don't match. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: sizes of indexing arrasy in Fernando Kac nilradical candidate don't match. " << crash;
 //  out << "<br>";
 //  this->FKnilradicalLogs[inputFKIndex]=out.str();
 }
@@ -1741,19 +1703,14 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
     theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
   if (theSel.size!=this->NilradicalPairingTable.size || theSel.size!=this->ModulesIsotypicallyMerged.size)
-  { std::cout << "This is a programming error: selection has " << theSel.size << ", nilraidcal pairing table has "
+    crash << "This is a programming error: selection has " << theSel.size << ", nilraidcal pairing table has "
     << this->NilradicalPairingTable.size << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size
-    << " elements." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << " elements." << crash;
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
   if (this->FKNilradicalCandidates.size<1)
-  { std::cout << "This is a programming error:" << " while enumerating nilradicals of "
+    crash << "This is a programming error:" << " while enumerating nilradicals of "
     << this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0])
-    << " got 0 nilradical candidates which is impossible (the zero "
-    << " nilradical is always possible). " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << " got 0 nilradical candidates which is impossible (the zero nilradical is always possible). " << crash;
   for (int i=0; i<this->FKNilradicalCandidates.size; i++)
   { std::stringstream reportStream2;
     reportStream2 << "Processing nilradical: " << i+1 << " out of " << this->FKNilradicalCandidates.size;
@@ -1792,10 +1749,8 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(const 
 { MacroRegisterFunctionWithName("Vectors::PerturbSplittingNormal");
   for (int i=0; i<NonStrictConeNonPositiveScalar.size; i++)
     if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])<0)
-    { std::cout << "This is a programming error: the splitting normal " << this->ToString() << " is supposed to have non-negative scalar product with the vector "
-      << NonStrictConeNonPositiveScalar[i].ToString() << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: the splitting normal " << this->ToString() << " is supposed to have non-negative scalar product with the vector "
+      << NonStrictConeNonPositiveScalar[i].ToString() << ", but it doesn't." << crash;
   Vector<Rational> oldThis=*this;
   Cone theCone, orthognalCone;
   theCone.CreateFromVertices(NonStrictConeNonPositiveScalar);
@@ -1831,17 +1786,13 @@ void Vector<coefficient>::PerturbNormalRelativeToVectorsInGeneralPosition(const 
 //    std::cout << "<br> *this=" << this->ToString();
     for (int i=0; i<NonStrictConeNonPositiveScalar.size; i++)
       if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])<0)
-      { std::cout << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+        crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
         << " is supposed to have non-negative scalar product with the vector " << NonStrictConeNonPositiveScalar[i].ToString()
-        << ", but it doesn't." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      } else
+        << ", but it doesn't." << crash;
+      else
       if (this->ScalarEuclidean(NonStrictConeNonPositiveScalar[i])==0 && oldThis.ScalarEuclidean(NonStrictConeNonPositiveScalar[i])>0)
-      { std::cout << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
-        << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString()
-        << "." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "<br>This is a programming error: during perturbation, the splitting normal " << this->ToString()
+        << " lost  positive scalar product with " << NonStrictConeNonPositiveScalar[i].ToString() << "." << crash;
     }
 //  return true;
 }
@@ -1954,10 +1905,8 @@ void CandidateSSSubalgebra::EnumerateNilradicalsRecursively(List<int>& theSelect
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateNilradicalsRecursively");
   RecursionDepthCounter theCounter(&this->RecursionDepthCounterForNilradicalGeneration);
   if (this->RecursionDepthCounterForNilradicalGeneration>this->NilradicalPairingTable.size+1)
-  { std::cout << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot exceed the number of nilradicals! "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "<br>oh no... something went very wrong! the nilradical generation recursion depth cannot exceed the number of nilradicals! "
+    << crash;
   ProgressReport theReport(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream out;
@@ -2105,10 +2054,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis))
     { MonomialCollection<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(tempModules[i], this->theBasis, *this->HighestVectors.LastObject());
       if (this->HighestVectors.LastObject()->size!=1)
-      { std::cout << "This is a programming error: simple component has more than one highest weight vector"
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: simple component has more than one highest weight vector" << crash;
       this->primalSubalgebraModules.AddOnTop(this->Modules.size-1);
       this->Modules.LastObject()->SetSize(1);
       *this->Modules.LastObject()->LastObject()=*this->HighestVectors.LastObject();
@@ -2126,10 +2072,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         }
         this->HighestVectors.LastObject()->RemoveIndexSwapWithLast(0);
         if (this->HighestVectors.LastObject()->size!=tempModules[i].size-1)
-        { std::cout << "This is a programming error: wrong number of hwv's: got  " << this->HighestVectors.LastObject()->size
-          << ", must have " << tempModules[i].size-1 << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
+          crash << "This is a programming error: wrong number of hwv's: got  " << this->HighestVectors.LastObject()->size << ", must have "
+          << tempModules[i].size-1 << crash;
         for (int j=0; j<this->HighestVectors.LastObject()->size; j++)
         { (*this->Modules.LastObject())[j].SetSize(1);
           (*this->Modules.LastObject())[j][0]=(*this->HighestVectors.LastObject())[j];
@@ -2166,15 +2110,11 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
   for (int i=0; i<this->Modules.size; i++)
     for (int j=0; j<this->Modules[i].size; j++)
       if (this->Modules[i][j].size!=1)
-      { std::cout << "This is a programming error: empty module! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: empty module! " << crash;
   if (this->thePrimalChaR.GetCoefficientsSum()!=numMods)
-  { std::cout << "This is a programming error: the sum of the coeffs of the primal char is "
+    crash << "This is a programming error: the sum of the coeffs of the primal char is "
     << this->thePrimalChaR.GetCoefficientsSum().ToString() << " but there are  " << numMods << " modules. Tempmodules variable: "
-    << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << crash;
 }
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
@@ -2222,9 +2162,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVaria
 
 bool SemisimpleSubalgebras::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of semisimple subalgebras. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of semisimple subalgebras. " << crash;
   return true;
 }
 
@@ -2285,12 +2223,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSytem(GlobalVariables* theGlobalVariab
       this->thePosGens[i]=currentPosElt;
     }
     if (!this->CheckGensBracketToHs())
-    { std::cout << "This is a programming error: I just solved the Serre-Like system governing the "
-      << " subalgebra embedding, but the Lie brackets of the resulting positive and negative generators "
-      << " are not what they should be. Something has gone very wrong. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: I just solved the Serre-Like system governing the subalgebra embedding, but the Lie brackets of the "
+      << "resulting positive and negative generators are not what they should be. Something has gone very wrong. " << crash;
   } else
   { //if (this->flagSystemProvedToHaveNoSolution)
     //  std::cout << "System " << this->transformedSystem.ToString() << " <b> proven contradictory, good. </b>";
@@ -2351,10 +2285,7 @@ void CandidateSSSubalgebra::GetGenericLinearCombination(int numVars, int varOffs
 
 bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables* theGlobalVariables)
 { if (this->indexInOwnersOfNonEmbeddedMe==-1)
-  { std::cout << "This is a programming error: attempting to compute char of candidate subalgebra that has not been initialized properly. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to compute char of candidate subalgebra that has not been initialized properly. " << crash;
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
   this->CheckInitialization();
   this->theWeylNonEmbeddeD.ComputeRho(true);
@@ -2385,11 +2316,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables*
 //        /theTypes[i].GetDefaultRootLengthSquared(j))*2;
         if(!tempMon.weightFundamentalCoordS[counter].IsInteger())
         { if (!allowBadCharacter)
-          { std::cout << "This is a programming error: function ComputeChar called with Cartan that suggests non-integral characters. At "
-            << "the same time, an option banning this possibility has been explicitly selected. "
-            << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            crash << "This is a programming error: function ComputeChar called with Cartan that suggests non-integral characters. At "
+            << "the same time, an option banning this possibility has been explicitly selected. " << crash;
           return false;
         }
       }
@@ -2405,11 +2333,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables*
   while (accumChar.size()>0)
   { int currentIndex=accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
-    { std::cout << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
-      << "that there is no extreme weight. This is impossible: something has gone very wrong. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: while decomposing ambient Lie algebra over the candidate subalgebra, I got "
+      << "that there is no extreme weight. This is impossible: something has gone very wrong. " << crash;
 //    std::cout << "<br>Extreme weight: " << //this->theWeylNonEmbeddeD.GetSimpleCoordinatesFromFundamental
 //    (accumChar[currentIndex].weightFundamentalCoords).ToString();
 
@@ -2430,10 +2355,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables*
     std::string tempS;
     bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, theGlobalVariables);
     if (!tempBool && !allowBadCharacter)
-    { std::cout << "This is a programming error: failed to evaluate full character via the Freudenthal formula on "
-      << " a relatively small example, namely " << freudenthalChar.ToString() << ". The failure message was: " << tempS
-      << ". This shouldn't happen. " <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: failed to evaluate full character via the Freudenthal formula on a relatively small example, namely "
+      << freudenthalChar.ToString() << ". The failure message was: " << tempS << ". This shouldn't happen. " << crash;
       return false;
     }
     accumChar-=outputChar;
@@ -2636,10 +2559,7 @@ WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
 bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
 {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
   if (this->owneR!=right.owneR)
-  { std::cout << "This is a programming error: comparing sl(2) subalgebras that have different ambient Lie algebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: comparing sl(2) subalgebras that have different ambient Lie algebras. " << crash;
   return this->hCharacteristic==(right.hCharacteristic);
 }
 
@@ -2740,9 +2660,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
 
 bool slTwoSubalgebra::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of slTwoSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of slTwoSubalgebra. " << crash;
   if (this->owneR!=0)
     this->owneR->CheckConsistency();
   return true;
@@ -2869,10 +2787,7 @@ WeylGroup& rootSubalgebras::GetOwnerWeyl()
 
 SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()
 { if (this->owneR==0)
-  { std::cout << "This is a programming error. Attempting to access the ambient Lie algebra of a non-initialized collection of root subalgebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. Attempting to access the ambient Lie algebra of a non-initialized collection of root subalgebras. " << crash;
   return *this->owneR;
 }
 
@@ -3011,16 +2926,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 
 bool CandidateSSSubalgebra::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of CandidateSSSubalgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of CandidateSSSubalgebra. " << crash;
   return true;
 }
 bool SltwoSubalgebras::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of SemisimpleLieAlgebra. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of SemisimpleLieAlgebra. " << crash;
   if (this->owner!=0)
     this->owner->CheckConsistency();
   for(int i=0; i<this->size; i++)
@@ -3133,10 +3044,7 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
   this->CheckConsistency();
   positiveRootsContainingRegularSA.CheckConsistency();
   if (positiveRootsContainingRegularSA.size<=0)
-  { std::cout << "This is a programming error: positiveRootsContainingRegularSA has less than one element. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: positiveRootsContainingRegularSA has less than one element. " << crash;
   int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
   outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
   outputWeightSpaceDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
@@ -3149,10 +3057,9 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
   { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
     assert(tempRat.DenShort==1);
     if (tempRat>positiveRootsContainingRegularSA.size*2)
-    { std::cout << "This is a programming error. The scalar product of the h-Characteristic " << this->hCharacteristic.ToString()
+    { crash << "This is a programming error. The scalar product of the h-Characteristic " << this->hCharacteristic.ToString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString() << " is larger than " << positiveRootsContainingRegularSA.size*2
-      << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+      << ". The affected sl(2) subalgebra is " << this->ToString() << ". " << crash;
       break;
     }
     outputWeightSpaceDimensions[IndexZeroWeight+tempRat.NumShort]++;
@@ -3168,10 +3075,8 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights[j];
     if (topMult<0)
-    { std::cout << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
-      << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->ToString() << "." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: the sl(2)-module decomposition shows an sl(2)-module with highest weight "
+      << topMult << " which is impossible. Here is the sl(2) subalgebra. " << this->ToString() << "." << crash;
     if (topMult>0)
     { outputHighestWeights.AddOnTop(j-IndexZeroWeight);
       outputMultiplicitiesHighestWeights.AddOnTop(topMult);
@@ -3182,13 +3087,12 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
         if (k!=IndexZeroWeight)
           BufferHighestWeights[IndexZeroWeight*2-k]-=topMult;
         if(BufferHighestWeights[k]<0 || !(BufferHighestWeights[k]==BufferHighestWeights[IndexZeroWeight*2-k]))
-        { std::cout << " This is a programming error: an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
+        { crash.theCrashReport << " This is a programming error: an error check has failed. While trying to decompose with respect to  h-characteristic <br> "
           << this->hCharacteristic.ToString() << ". The positive root system of the containing root subalgebra is <br>" << positiveRootsContainingRegularSA.ToString()
           << ". <br>The preferred simple basis is <br>" << this->preferredAmbientSimpleBasis.ToString() << ". The coordinates relative to the preferred simple basis are<br>"
           << coordsInPreferredSimpleBasis.ToString() << " The starting weights list is <br>" << outputWeightSpaceDimensions << ". "
-          << " I got that the root space of index  " <<  k+1 << " has negative dimension. Something is wrong. "
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+          << " I got that the root space of index  " <<  k+1 << " has negative dimension. Something is wrong. ";
+          crash << crash;
         }
       }
     }
@@ -4560,12 +4464,9 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
-      { std::cout << "This is a programming error: two different methods for computing the centralizer type yield different results: "
+        crash << "This is a programming error: two different methods for computing the centralizer type yield different results: "
         << "by sub-diagram I computed the type as  " << this->theCentralizerType.ToString() << " but looking at subalgerba containing the "
-        << " current one I got centralizer type " << centralizerType.ToString()
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << " current one I got centralizer type " << centralizerType.ToString() << crash;
   }
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size );
 }
@@ -4841,9 +4742,7 @@ void CandidateSSSubalgebra::GetHsByType(List<List<Vectors<Rational> > >& outputH
   outputHsByType.SetSize(0);
   outputTypeList.SetSize(0);
   if (allTypes.size!=this->CartanSAsByComponent.size)
-  { std::cout << "This is a programming error: allTypes.size must equal this->CartanSAsByComponent.size. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: allTypes.size must equal this->CartanSAsByComponent.size. " << crash;
   for (int i=0; i<allTypes.size; i++)
   { bool shouldOpenNewType=true;
     if (i!=0)
@@ -4960,11 +4859,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   Rational numCyclesFromOuterIsos=selectedOuterAutos.GetNumTotalCombinations();
   int intNumCyclesFromTypes, intNumCyclesFromOuterIsos;
   if (!numCyclesFromTypes.IsSmallInteger(&intNumCyclesFromTypes) || !numCyclesFromOuterIsos.IsSmallInteger(&intNumCyclesFromOuterIsos))
-  { std::cout
-    << "Computation is too large: I am crashing to let you know that the program cannot handle such a large number of outer automorphisms"
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "Computation is too large: I am crashing to let you know that the program cannot handle such a large number of outer automorphisms" << crash;
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   Matrix<Rational> currentOuterAuto;
@@ -4978,7 +4873,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   //  << selectedTypes.GetNumTotalCombinations().ToString();
   //  std::cout << "; the combination: " << selectedTypes.ToString();
   //  if (counter>1000)
-  //    assert(false);
+  //    crash << crash;
   //} while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
 
 //  counter=0;
@@ -4986,7 +4881,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     do
     { counter++;
       //if (counter>1000)
-      //assert(false);
+      // crash << crash;
       //std::cout << "<br>Checking combination " << counter << " out of "
       //<< (selectedTypes.GetNumTotalCombinations()*selectedOuterAutos.GetNumTotalCombinations()).ToString();
       conjugationCandidates.SetSize(0);
@@ -5106,9 +5001,8 @@ bool DynkinType::operator>(const DynkinType& other)const
 
 bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other)const
 { //if (this->owner!=other.owner)
-  //{ std::cout << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
-  //  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  //  assert(false);
+  //{ crash << "This is a programming error: comparing CandidateSSSubalgebra with different owners. "
+  //  << crash;
   //}
   return this->theWeylNonEmbeddeD.theDynkinType>other.theWeylNonEmbeddeD.theDynkinType;
 }
@@ -5133,8 +5027,7 @@ bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
   }
   if (this->theLetter=='A' || this->theLetter=='D' || this->theLetter=='E')
     return input==this->lengthFirstCoRootSquared;
-  std::cout << "This is a programmig error: non-initialized or otherwise faulty Dynkin simple type. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+  crash << "This is a programmig error: non-initialized or otherwise faulty Dynkin simple type. " << crash;
   return false;
 }
 

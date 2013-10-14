@@ -5,7 +5,7 @@
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 
-ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Second main implementation file. ");
+ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Math routines implementation. ");
 
 
 void LargeIntUnsigned::AssignString(const std::string& input)

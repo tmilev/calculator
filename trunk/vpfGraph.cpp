@@ -1,6 +1,6 @@
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader2Math0_General.h"
-static ProjectInformationInstance ProjectInfoVpfGraphs(__FILE__, "A graph class written by Thomas.");
+static ProjectInformationInstance ProjectInfoVpfGraphs(__FILE__, "A graph class by Thomas.");
 
 Graph::Graph(int max_vertices, int max_edges){
     this->vertices = max_vertices;

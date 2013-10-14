@@ -3,8 +3,7 @@
 #ifndef vpfHeader6_1InnerTypedFns_h_already_included
 #define vpfHeader6_1InnerTypedFns_h_already_included
 
-static ProjectInformationInstance ProjectInfoVpf6_1Header
-(__FILE__, "Declaration of inner typed and other calculator functions. ");
+static ProjectInformationInstance ProjectInfoVpf6_1Header(__FILE__, "Header, calculator inner binary typed functions. ");
 
 class CommandListInnerTypedFunctions
 {

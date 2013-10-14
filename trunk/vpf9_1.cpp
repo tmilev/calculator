@@ -2,7 +2,7 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
 
-ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Main implementation file, part 2. ");
+ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher crash;
 

@@ -6,7 +6,7 @@
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 
-ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Main implementation file, part 3. ");
+ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 
 std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
 { if (this->IsAConstant())

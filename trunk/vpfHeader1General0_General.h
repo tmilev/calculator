@@ -4,7 +4,7 @@
 #define vpfHeader1_h_already_included
 
 #include "vpfMacros.h"
-static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header. Math and general routines. ");
+static ProjectInformationInstance vpfHeader1instance(__FILE__, "Header, general routines. ");
 
 //IMPORTANT.
 //Convention on Hash functions.

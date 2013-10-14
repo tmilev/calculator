@@ -4,7 +4,7 @@
 #include "vpfHeader2Math0_General.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 
-ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Implementation file intended for small fast changes. ");
+ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Math routines implementation. ");
 
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
 (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator)

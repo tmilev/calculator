@@ -598,6 +598,8 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
   HashedList<Vector<Rational> > theOrbit;
   HashedList<ElementWeylGroup> theOrbitGenerators;
   Vector<Rational> Hrescaled;
+  Vectors<Rational> theHCandidatesRescaled;
+  List<ElementWeylGroup> theHCandidatesRescaledGenerators;
   startingVector.SetSize(1);
   std::stringstream out0;
   if (theGlobalVariables!=0)
@@ -657,36 +659,44 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
       << "I shall not be displaying progress report strings (the computation of those slows the computation way too much).";
       theReport2.Report(out2.str());
     }
+    theHCandidatesRescaled.SetSize(0);
+    theHCandidatesRescaledGenerators.SetSize(0);
+    theHCandidatesRescaled.ReservE(theOrbit.size);
+    theHCandidatesRescaledGenerators.ReservE(theOrbit.size);
     for (int j=0; j<theOrbit.size; j++)
-    { std::stringstream out2;
-      if (theGlobalVariables!=0 && theOrbit.size<1000)
-      { out2 << "Exploring orbit element of index  " << j+1 << " out of " << theOrbit.size << ".";
-        theReport2.Report(out2.str());
-        //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-          //std::cout << "<br>" << out2.str();
-      }
-      Hrescaled=theOrbit[j];
+    { Hrescaled=theOrbit[j];
       Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
       Hrescaled/=2;
       if (baseCandidate.isGoodForTheTop(this->GetSSowner().theWeyl, Hrescaled))
       { if (theGlobalVariables!=0)
-        { out2 << " the candidate is good. Attempting to complete the component by recursion. ";
+        { std::stringstream out2;
+          out2 << " Orbit candidate " << j+1 << " out of " << theOrbit.size << " is good, adding to list of good candidates. ";
           theReport2.Report(out2.str());
         }
 //        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
   //        std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
     //      << Hrescaled.ToString() << ", is GOOD. ";
-        newCandidate=baseCandidate;
-        newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], i);
-        this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
+        theHCandidatesRescaled.AddOnTop(Hrescaled);
+        theHCandidatesRescaledGenerators.AddOnTop(theOrbitGenerators[j]);
       } else
         if (theGlobalVariables!=0 && theOrbit.size<1000)
-        { out2 << " the orbit candidate is no good. ";
+        { std::stringstream out2;
+          out2 << " Orbit candidate " << j+1 << " out of " << theOrbit.size << " is not a valid candidate. " ;
           theReport2.Report(out2.str());
       //    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
         //    std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
           //  << Hrescaled.ToString() << ", is no good. ";
         }
+    }
+    for (int j=0; j<theHCandidatesRescaled.size; j++)
+    { if (theGlobalVariables!=0)
+      { std::stringstream out2;
+        out2 << "Attempting to extend type by h element number " << j+1 << " out of " << theHCandidatesRescaled.size << ".";
+        theReport2.Report(out2.str());
+      }
+      newCandidate=baseCandidate;
+      newCandidate.AddHincomplete(Hrescaled, theHCandidatesRescaledGenerators[j], i);
+      this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
     }
   }
 }

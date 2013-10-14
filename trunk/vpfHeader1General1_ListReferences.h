@@ -83,6 +83,7 @@ public:
     }
     return indexOfObject;
   }
+//  void operator=(const ListReferences<Object>& other);
   Object& LastObject()const
   { return (*this)[this->size-1];
   }

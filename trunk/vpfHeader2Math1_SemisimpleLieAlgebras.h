@@ -474,6 +474,8 @@ public:
   std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
 
+  const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
+
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;

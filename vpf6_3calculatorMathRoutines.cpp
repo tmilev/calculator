@@ -596,8 +596,7 @@ bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
 }
 
-void CommandList::AutomatedTestRun
-(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
+void CommandList::AutomatedTestRun(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
 { MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
   CommandList theTester;
   int numFunctionsToTest=0;

@@ -10,6 +10,7 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialCo
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedGroebnerBasis");
+  //std::cout << "<hr>Processing" << inputOutpuT.ToString() << ".<br>";
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport(theGlobalVariables);
@@ -21,6 +22,11 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
   this->AddPolyAndReduceBasis(theGlobalVariables);
   this->MaxNumComputations=oldMaxNumComputations;
   this->flagBasisGuaranteedToGenerateIdeal=true;
+
+  if (this->theBasiS.size==1)
+  { inputOutpuT=this->theBasiS;
+    return true;
+  }
   bool changed=true;
   while (changed)
   { changed=false;
@@ -828,18 +834,6 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     }
   }
   //std::cout << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
-  if (theGlobalVariables!=0)
-  { //std::cout << "<hr>The system solution candidate at recursion depth "
-    //<< this->RecursionCounterSerreLikeSystem << ": "
-    //<< this->ToStringSerreLikeSolution(&theGlobalVariables->theDefaultFormat);
-    //std::cout << "<br>The system so far: (";
-    //for (int i=0; i<inputSystem.size; i++)
-    //{ std::cout << inputSystem[i].ToString(&theGlobalVariables->theDefaultFormat);
-    //  if (i!=inputSystem.size-1)
-    //    std::cout << ", ";
-    //}
-    //std::cout << ")";
-  }
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
   GroebnerBasisComputation newComputation;
   newComputation.RecursionCounterSerreLikeSystem=this->RecursionCounterSerreLikeSystem;

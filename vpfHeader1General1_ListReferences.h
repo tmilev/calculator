@@ -35,6 +35,7 @@ static ProjectInformationInstance ProjectInfoVpfHeader3(__FILE__, "Header, ListR
 template <class Object>
 class ListReferences
 {
+  void operator=(const ListReferences<Object>& other);//ListReferences can't be copied: it is not clear who owns the pointers.
 public:
   List<Object*> theReferences;
   int size;

@@ -1309,12 +1309,12 @@ public:
         if (theIndex>=this->size)
           crash << "This is a programming error: hash lookup array of index " << i << ", entry of index " << j << " reports index "
           << theIndex << " but I have only " << this->size << " entries. " << crash;
-        if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
+        if (this->GetHash((*this)[theIndex])!=(unsigned) i)
         { crash << "<hr>This is a programming error: the hashed element in position " << theIndex << " is recorded in hash array of index "
-          << i << ", however its hash value is instead " << this->GetHash(this->TheObjects[theIndex]) << ". The hash size is "
+          << i << ", however its hash value is instead " << this->GetHash((*this)[theIndex]) << ". The hash size is "
           << this->TheHashedArrays.size << "<br>hashes of objects: ";
           for (int l=0; l<this->size; l++)
-            crash << this->GetHash(this->TheObjects[l]) << "= " << this->GetHash(this->TheObjects[l])%this->TheHashedArrays.size << ", ";
+            crash << this->GetHash((*this)[l]) << "= " << this->GetHash((*this)[l])%this->TheHashedArrays.size << ", ";
           crash << "<br>hashes recorded: ";
           for (int l=0; l<this->TheHashedArrays.size; l++)
             for (int k=0; k<this->TheHashedArrays[l].size; k++)

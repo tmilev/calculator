@@ -515,7 +515,8 @@ public:
   HashedListReferences<WeylGroupVirtualRepresentation> theWeylGroupVirtualReps;
   ListReferences<WeylGroup> theWeylGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
-  ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
+  HashedListReferences<SemisimpleLieAlgebra> theLieAlgebras;
+  ListReferences<SltwoSubalgebras> theSltwoSAs;
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
@@ -725,6 +726,7 @@ public:
   void GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat);
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
+  bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
   inline const HashedList<std::string, MathRoutines::hashString>& GetOperations()
   { return this->operations;
@@ -812,6 +814,7 @@ public:
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceSqrtEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceSqrtXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
@@ -1513,27 +1516,9 @@ public:
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);
   void EvaluateCommands();
   bool EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree);
-  void Evaluate(const std::string& theInput)
-  { MacroRegisterFunctionWithName("CommandList::Evaluate");
-    if (this->theGlobalVariableS==0)
-    { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
-      return;
-    }
-    this->StartTimeEvaluationInSecondS=this->theGlobalVariableS->GetElapsedSeconds();
-    this->inputString=theInput;
-    this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
-    this->EvaluateCommands();
-  }
+  void Evaluate(const std::string& theInput);
   bool ParseAndExtractExpressions
-  (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
-  { this->CurrentSyntacticStacK=&outputSynStack;
-    this->CurrrentSyntacticSouP=&outputSynSoup;
-    this->ParseFillDictionary(theInputString);
-    bool result=this->ExtractExpressions(outputExp, outputSynErrors);
-    this->CurrentSyntacticStacK=&this->syntacticStacK;
-    this->CurrrentSyntacticSouP=&this->syntacticSouP;
-    return result;
-  }
+  (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors);
   bool isLeftSeparator(char c);
   bool isRightSeparator(char c);
   void ParseFillDictionary(const std::string& input);

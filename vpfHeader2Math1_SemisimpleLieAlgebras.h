@@ -419,9 +419,8 @@ public:
   SemisimpleLieAlgebra* owneR;
   AlgebraicClosureRationals* ownerField;
   SltwoSubalgebras theSl2s;
-  ListReferences<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
-  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
-  ListReferences<SltwoSubalgebras> theSl2sOfSubalgebras;
+  HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
+  ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
 
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
   int theRecursionCounter;
@@ -457,7 +456,10 @@ public:
       crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
     return *this->owneR;
   }
-  void initHookUpPointers(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField);
+  void initHookUpPointers
+  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
+;
   void reset();
   ~SemisimpleSubalgebras()
   { this->flagDeallocated=true;
@@ -465,9 +467,11 @@ public:
   SemisimpleSubalgebras(): flagDeallocated(false)
   { this->reset();
   }
-  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField): flagDeallocated(false)
+  SemisimpleSubalgebras
+  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras): flagDeallocated(false)
   { this->reset();
-    this->initHookUpPointers(inputOwner, theField);
+    this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras);
   }
   bool CheckConsistency()const;
   std::string ToString(FormatExpressions* theFormat=0);

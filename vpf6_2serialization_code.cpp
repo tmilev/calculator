@@ -35,12 +35,9 @@ bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>(CommandList& th
   tempAlgebra.theWeyl.MakeFromDynkinType(theType);
   bool feelsLikeTheVeryFirstTime=
   theCommands.theObjectContainer.theLieAlgebras.Contains(tempAlgebra);
-  int algebraIdentifier=
-  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlgebra);
+  int algebraIdentifier=theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlgebra);
   if (feelsLikeTheVeryFirstTime)
-  { theCommands.theObjectContainer.theLieAlgebras[algebraIdentifier].ComputeChevalleyConstantS
-    (theCommands.theGlobalVariableS);
-  }
+    theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIdentifier).ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
   outputContext.ContextMakeContextSSLieAlgebrA(algebraIdentifier, theCommands);
   return true;
 }
@@ -76,7 +73,7 @@ bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& i
   { theCommands.Comments << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is " << input[1].ToString();
     return false;
   }
-  outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras[AlgIndex];
+  outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras.GetElement(AlgIndex);
 //  std::cout << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
 //  << outputMon.owneR->GetNumGenerators();
   if (theOperation=="getCartanGenerator")
@@ -374,8 +371,8 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
     theCommands.theObjectContainer.theLieAlgebras.AddOnTop(tempSSalgebra);
   }
   if (outputPointer!=0)
-    *outputPointer=&theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
-  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
+    *outputPointer=&theCommands.theObjectContainer.theLieAlgebras.GetElement(indexInOwner);
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras.GetElement(indexInOwner);
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
   { //std::cout << theSSalgebra.theWeyl.theDynkinType.ToString();
@@ -666,8 +663,8 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   }
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
-  outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
-  owner.theSubalgebrasNonEmbedded.GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
+  outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
+  owner.theSubalgebrasNonEmbedded->GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS, false);
   if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
@@ -705,6 +702,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
+  theSAs.initHookUpPointers(*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
   //FormatExpressions tempFormat;
 //  std::cout << ownerSS->ToString();
   Expression theCandidatesE=input[2];
@@ -712,8 +710,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   theSAs.theSubalgebraCandidates.ReservE(theCandidatesE.children.size-1);
   Expression tempE;
   theSAs.theSubalgebraCandidates.SetSize(0);
-  theSAs.theSubalgebrasNonEmbedded.SetExpectedSize(theCandidatesE.children.size-1);
-  theSAs.initHookUpPointers(*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
+  theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theCandidatesE.children.size-1);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
   theSAs.flagComputePairingTable=false;

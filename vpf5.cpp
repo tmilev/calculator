@@ -716,8 +716,8 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 { SemisimpleLieAlgebra tempb3alg, tempg2alg;
   tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
   tempg2alg.theWeyl.MakeArbitrarySimple('G',2);
-  output.domainAlg=&this->theObjectContainer.theLieAlgebras[this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg)];
-  output.rangeAlg =&this->theObjectContainer.theLieAlgebras[this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg)];
+  output.domainAlg=&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg));
+  output.rangeAlg =&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg));
 
   output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
   output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
@@ -1775,7 +1775,6 @@ bool CommandList::fTestMonomialBaseConjecture(CommandList& theCommands, const Ex
   theHighestWeights.SetSize(theRanks.size);
   ModuleSSalgebra<Rational> theMod;
   bool foundBad=false;
-  theCommands.theObjectContainer.theLieAlgebras.SetSize(theRanks.size);
   Selection tempSel;
   std::stringstream latexReport;
   latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
@@ -1787,10 +1786,12 @@ bool CommandList::fTestMonomialBaseConjecture(CommandList& theCommands, const Ex
   List<LittelmannPath> tempList;
   List<List<int> > theStrings;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
+  SemisimpleLieAlgebra tempAlg;
   for (int i=0; i<theRanks.size; i++)
-  { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
-    currentAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
-    currentAlg.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+  { tempAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
+    tempAlg.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras.GetElement
+    (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlg));
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{" << "$" << currentAlg.GetLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";

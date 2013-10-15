@@ -596,6 +596,18 @@ bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
 }
 
+bool CommandList::CheckConsistencyAfterInitializationExpressionStackEmpty()
+{ this->theExpressionContainer.GrandMasterConsistencyCheck();
+  this->ExpressionStack.GrandMasterConsistencyCheck();
+  this->cachedExpressions.GrandMasterConsistencyCheck();
+  if (this->cachedExpressions.size!=0 || this->imagesCachedExpressions.size!=0 || this->ExpressionStack.size!=0 ||
+      this->theExpressionContainer.size!=0)
+    crash << "This is a programming error: cached expressions, images cached expressions, expression stack and expression container are supposed to be empty, but "
+    << " instead they contain respectively " << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
+    << this->ExpressionStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
+  return true;
+}
+
 void CommandList::AutomatedTestRun(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
 { MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
   CommandList theTester;
@@ -618,8 +630,10 @@ void CommandList::AutomatedTestRun(List<std::string>& inputStringsTest, List<std
   outputStringsTestWithInit.SetSize(inputStringsTest.size);
   outputStringsTestNoInit.SetSize(inputStringsTest.size);
   ProgressReport theReport(this->theGlobalVariableS);
-  for (int i=0; i<inputStringsTest.size; i++)
+  for (int i=242; i<inputStringsTest.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    theTester.reset();
+    theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
     theTester.init(*this->theGlobalVariableS);
     Expression dummyCommands, tempE;
     tempE.AssignValue<std::string>("Input suppressed", theTester);

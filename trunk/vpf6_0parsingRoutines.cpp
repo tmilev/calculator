@@ -70,6 +70,8 @@ void CommandList::reset()
   this->CurrentSyntacticStacK=&this->syntacticStacK;
   this->CurrrentSyntacticSouP=&this->syntacticSouP;
   this->cachedExpressions.Clear();
+  this->imagesCachedExpressions.SetSize(0);
+  this->theProgramExpression.reset(*this);
   //The expression container must be cleared last!
   this->theExpressionContainer.Clear();
 }
@@ -276,6 +278,21 @@ bool CommandList::ReplaceSqrtEXByEX(int formatOptions)
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
   return this->DecreaseStackExceptLast(1);
+}
+
+bool CommandList::ReplaceSqrtXEXByEX(int formatOptions)
+{ SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& argument=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  Expression newExpr, twoE;
+  twoE.AssignValue(2, *this);
+  newExpr.reset(*this, 3);
+  newExpr.AddChildAtomOnTop(this->opSqrt());
+  newExpr.AddChildOnTop(twoE);
+  newExpr.AddChildOnTop(argument.theData);
+  newExpr.format= formatOptions;
+  left.theData=newExpr;
+  left.controlIndex=this->conExpression();
+  return this->DecreaseStackExceptLast(2);
 }
 
 bool CommandList::ReplaceOXEXEByE(int formatOptions)
@@ -1052,6 +1069,9 @@ bool CommandList::ApplyOneRule()
   //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (thirdToLastS=="\\sqrt" && secondToLastS=="Expression")
     return this->ReplaceSqrtEXByEX();
+  if (fourthToLastS=="\\sqrt"  && thirdToLastS == "{}" && secondToLastS=="Expression")
+    return this->ReplaceSqrtXEXByEX();
+
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
   //Some synonyms:

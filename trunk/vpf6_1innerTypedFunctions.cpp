@@ -1014,7 +1014,7 @@ bool CommandList::innerHWTAABF(CommandList& theCommands, const Expression& input
   int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
   if (algebraIndex==-1)
     return output.SetError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
-  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras[algebraIndex];
+  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIndex);
   const Expression& weightExpression=input[3];
   Vector<RationalFunctionOld> weight;
   if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerRationalFunction))

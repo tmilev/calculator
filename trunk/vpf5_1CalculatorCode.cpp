@@ -452,7 +452,8 @@ bool CommandList::innerPrintSSsubalgebras
 //  << "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
-  { SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
+  { SemisimpleSubalgebras tempSSsas
+    (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ? input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
@@ -503,7 +504,7 @@ bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression&
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
+  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
@@ -534,7 +535,7 @@ bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Express
   }
   else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure);
+  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   DynkinSimpleType theType;

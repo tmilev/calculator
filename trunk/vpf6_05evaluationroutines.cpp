@@ -82,12 +82,10 @@ bool CommandList::ExpressionMatchesPattern(const Expression& thePattern, const E
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.theBoss==this && input.theBoss==this))
-  { std::cout << "This is a programming error. Either a pattern or an input has a wrongly  initialized owner: the pattern is "
+    crash << "This is a programming error. Either a pattern or an input has a wrongly  initialized owner: the pattern is "
     << thePattern.ToString() << " and the input is " << input.ToString() << ". The error is certainly in the preceding code; here "
     << "is a stack trace, however beware that the error might be in code preceding the stack loading. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << crash;
 //  static int ExpressionMatchesPatternDebugCounter=-1;
   static const bool printLocalDebugInfo=false;
 //  if (input.ToString()=="f{}((a)):=a+5")
@@ -159,6 +157,12 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
   { this->flagAbortComputationASAP=true;
     return true;
   }
+  //////////////////////////////
+  //  std::cout << "temporary check comment me out";
+  //  this->ExpressionStack.GrandMasterConsistencyCheck();
+  //  input.CheckConsistency();
+  //  input.HashFunction();
+  //////////////////////////////
   if (this->ExpressionStack.Contains(input))
   { std::stringstream errorStream;
     errorStream << "I think I have detected an infinite cycle: I am asked to reduce " << input.ToString()
@@ -403,6 +407,29 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   return true;
 }
 
+bool CommandList::ParseAndExtractExpressions
+(const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
+{ this->CurrentSyntacticStacK=&outputSynStack;
+  this->CurrrentSyntacticSouP=&outputSynSoup;
+  this->ParseFillDictionary(theInputString);
+  bool result=this->ExtractExpressions(outputExp, outputSynErrors);
+  this->CurrentSyntacticStacK=&this->syntacticStacK;
+  this->CurrrentSyntacticSouP=&this->syntacticSouP;
+  return result;
+}
+
+void CommandList::Evaluate(const std::string& theInput)
+{ MacroRegisterFunctionWithName("CommandList::Evaluate");
+  if (this->theGlobalVariableS==0)
+  { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
+    return;
+  }
+  this->StartTimeEvaluationInSecondS=this->theGlobalVariableS->GetElapsedSeconds();
+  this->inputString=theInput;
+  this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
+  this->EvaluateCommands();
+}
+
 void CommandList::EvaluateCommands()
 { MacroRegisterFunctionWithName("CommandList::EvaluateCommands");
   std::stringstream out;
@@ -420,17 +447,15 @@ void CommandList::EvaluateCommands()
 //  << "Starting expression: " << this->theProgramExpression.ToString()
 //  << "<hr>";
   Expression StartingExpression=this->theProgramExpression;
+//  std::cout << "comment me out when done with debugging";
+//  StartingExpression.HashFunction();
   this->flagAbortComputationASAP=false;
   bool tempBool;
   this->Comments.clear();
   this->EvaluateExpression(this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
   if (this->RecursionDeptH!=0)
-  { std::cout << "This is a programming error: the starting recursion depth "
-    << "before evaluation was 0, but after evaluation it is "
-    << this->RecursionDeptH << "."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
+    << this->RecursionDeptH << "." << crash;
   this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;
   this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;

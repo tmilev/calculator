@@ -502,7 +502,7 @@ template < >
 SemisimpleLieAlgebra& Expression::GetValueNonConst()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
     crash << "This is a programming error: expression not of required type SemisimpleLieAlgebra. The expression equals " << this->ToString() << "." << crash;
-  return this->theBoss->theObjectContainer.theLieAlgebras[this->GetLastChild().theData];
+  return this->theBoss->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData);
 }
 
 template < >
@@ -3369,7 +3369,7 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
   int indexSSalg=myContext.ContextGetIndexAmbientSSalg();
   if (indexSSalg==-1)
     return 0;
-  return &this->theBoss->theObjectContainer.theLieAlgebras[indexSSalg];
+  return &this->theBoss->theObjectContainer.theLieAlgebras.GetElement(indexSSalg);
 }
 
 int Expression::ContextGetIndexAmbientSSalg()const
@@ -4598,7 +4598,7 @@ void ObjectContainer::reset()
   this->theWeylGroupVirtualReps.Clear();
   this->theWeylGroups.SetSize(0);
   this->theCategoryOmodules.SetSize(0);
-  this->theLieAlgebras.SetSize(0);
+  this->theLieAlgebras.Clear();
   this->theSSsubalgebras.SetSize(0);
   this->theTensorElts.Clear();
   this->thePolys.Clear();
@@ -4621,6 +4621,7 @@ void ObjectContainer::reset()
   theAlgebraicClosure.reset();
   this->theAlgebraicNumbers.Clear();
   this->theLittelmannOperators.Clear();
+  this->theSltwoSAs.SetSize(0);
 }
 
 template <class coefficient>

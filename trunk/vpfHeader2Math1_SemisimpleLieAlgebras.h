@@ -416,11 +416,16 @@ public:
 class SemisimpleSubalgebras
 {
 public:
+  GlobalVariables* theGlobalVariables;
   SemisimpleLieAlgebra* owneR;
   AlgebraicClosureRationals* ownerField;
   SltwoSubalgebras theSl2s;
   HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
   ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
+
+  List<HashedList<Vector<Rational> > > theOrbits;
+  List<HashedList<ElementWeylGroup> > theOrbitGeneratingElts;
+  List<bool> theOrbitsAreComputed;
 
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
   int theRecursionCounter;
@@ -458,7 +463,7 @@ public:
   }
   void initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables)
 ;
   void reset();
   ~SemisimpleSubalgebras()
@@ -469,9 +474,9 @@ public:
   }
   SemisimpleSubalgebras
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras): flagDeallocated(false)
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables): flagDeallocated(false)
   { this->reset();
-    this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras);
+    this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
   }
   bool CheckConsistency()const;
   std::string ToString(FormatExpressions* theFormat=0);
@@ -479,32 +484,33 @@ public:
   std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
 
   const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
+  const HashedList<ElementWeylGroup>& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
 
   void RegisterPossibleCandidate
-  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  (CandidateSSSubalgebra& theCandidate)
   ;
   void HookUpCentralizers
-  ( GlobalVariables* theGlobalVariables=0)
+  ()
   ;
+  void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings
-  (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
+  (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner)
   ;
   void FindTheSSSubalgebras
-  (SemisimpleLieAlgebra& newOwner, GlobalVariables* theGlobalVariables)
+  (SemisimpleLieAlgebra& newOwner)
   ;
 
   void FindTheSSSubalgebrasPart2
-  (GlobalVariables* theGlobalVariables)
+  ()
   ;
   void ExtendCandidatesRecursive
-  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
-   GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
   ;
   void ExtendOneComponentOneTypeAllLengthsRecursive
-  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion)
 ;
   void ExtendOneComponentRecursive
-  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
   ;
 };
 

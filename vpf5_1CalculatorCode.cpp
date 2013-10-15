@@ -200,11 +200,9 @@ bool Vectors<coefficient>::ConesIntersect
   { if (outputSplittingNormal!=0)
     { bool tempBool=Vectors<coefficient>::GetNormalSeparatingCones(StrictCone, NonStrictCone, *outputSplittingNormal, theGlobalVariables);
       if (!tempBool)
-      { std::cout << "This is an algorithmic/mathematical (hence also programming) error: I get that two cones do not intersect, yet there exists no plane separating them. "
+        crash << "This is an algorithmic/mathematical (hence also programming) error: I get that two cones do not intersect, yet there exists no plane separating them. "
         << "Something is wrong with the implementation of the simplex algorithm. The input which manifested the problem was: <br>StrictCone: <br>"
-        << StrictCone.ToString() << "<br>Non-strict cone: <br>" << NonStrictCone.ToString() << "<br>" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << StrictCone.ToString() << "<br>Non-strict cone: <br>" << NonStrictCone.ToString() << "<br>" << crash;
     }
     return false;
   }
@@ -416,6 +414,26 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, con
   return output.AssignValue(out2.str(), theCommands);
 }
 
+bool CommandList::innerPrintSSsubalgebrasForceRecomputeWithNilradicals(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true);
+}
+
+bool CommandList::innerPrintSSsubalgebrasForceRecomputeNoPairingTable(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false);
+}
+
+bool CommandList::innerPrintSSsubalgebrasForceRecomputeWithPairingTable(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, false);
+}
+
+bool CommandList::innerPrintSSsubalgebrasNoSolutions(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, true, true, true);
+}
+
+bool CommandList::innerPrintSSsubalgebrasRegular(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false);
+}
+
 bool CommandList::innerPrintSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals)
@@ -435,7 +453,7 @@ bool CommandList::innerPrintSSsubalgebras
   } else
     ownerSSPointer=input.GetValue<SemisimpleSubalgebras>().owneR;
   if (ownerSSPointer==0)
-    assert(false);
+    crash << crash;
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
@@ -453,7 +471,8 @@ bool CommandList::innerPrintSSsubalgebras
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas
-    (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
+    (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+     &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
     SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ? input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
@@ -471,7 +490,7 @@ bool CommandList::innerPrintSSsubalgebras
       << crash;
     }
     if (!isAlreadySubalgebrasObject)
-      theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
+      theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
     theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
@@ -504,10 +523,12 @@ bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression&
     return output.AssignValue(out.str(), theCommands);
   } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
+  SemisimpleSubalgebras tempSSsas
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
-  theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
+  theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
@@ -535,14 +556,16 @@ bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Express
   }
   else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas(ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
+  SemisimpleSubalgebras tempSSsas
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
   DynkinSimpleType theType;
   if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
     return output.SetError("I've been instructed to act on simple types only. ", theCommands);
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
-  theSSsubalgebras.FindAllEmbeddings(theType, ownerSS, theCommands.theGlobalVariableS);
+  theSSsubalgebras.FindAllEmbeddings(theType, ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
@@ -668,9 +691,7 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
     { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
       theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
     } else
-    { std::cout << "This is not programmed yet! Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is not programmed yet! Crashing to let you know. " << crash;
   } else if (!useRevLex)
   { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
     theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
@@ -1211,11 +1232,9 @@ bool CommandList::innerConesIntersect(CommandList& theCommands, const Expression
     for (int i=0; i<coneNonStrictGens.size; i++)
       checkVector+=coneNonStrictGens[i]*outputIntersection[coneStrictGens.size+i];
     if (!checkVector.IsEqualToZero())
-    { std::cout << "<br>This is a programming error: the output linear combination" << outputIntersection.ToString()
+      crash << "<br>This is a programming error: the output linear combination" << outputIntersection.ToString()
       << " corresponds to the cone intersection " << checkVector.ToString() << " and is not equal to zero! Here is the cone output so far: "
-      << out.str() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << out.str() << crash;
     out << "<br>Cones intersect, here is one intersection: 0= " << outputIntersection.ToStringLetterFormat("v");
   } else
   { out << "<br>Cones have empty intersection.";

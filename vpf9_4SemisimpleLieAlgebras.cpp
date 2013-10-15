@@ -357,37 +357,62 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       }
   }
   if (this->theSl2s.size!=0)
+  { int numComputedOrbits=0;
+    for (int i=0; i<this->theOrbitsAreComputed.size; i++)
+      if (this->theOrbitsAreComputed[i])
+        numComputedOrbits++;
+    out << "<hr>Of the " << this->theOrbits.size << " h element conjugacy classes " << numComputedOrbits << " had their "
+    << "Weyl group orbits computed. The h elements and their computed orbit sizes follow. ";
+    out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
+    for (int i=0; i<this->theOrbitGeneratingElts.size; i++)
+    { out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
+      if (this->theOrbitsAreComputed[i])
+        out << "<td>" << this->theOrbits[i].size << "</td>";
+      else
+        out << "<td>not computed</td>";
+      out << "</tr>";
+    }
+    out << "</table>";
     out << this->theSl2s.ToString(theFormat);
+  }
   return out.str();
 }
 
-void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand");
+  this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, *theGlobalVariables);
+  this->theOrbits.SetSize(this->theSl2s.size);
+  this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
+  this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
+}
+
+void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindAllEmbeddings");
   this->owneR=&theOwner;
-  this->GetSSowner().FindSl2Subalgebras(theOwner, this->theSl2s, *theGlobalVariables);
+  this->ComputeSl2sInitOrbitsForComputationOnDemand();
   CandidateSSSubalgebra theCandidate;
   theCandidate.owner=this;
 //  bool aaarg;
-  this->ExtendOneComponentOneTypeAllLengthsRecursive(theCandidate, theType, false, theGlobalVariables);
+  this->ExtendOneComponentOneTypeAllLengthsRecursive(theCandidate, theType, false);
 //  this->HookUpCentralizers(theGlobalVariables);
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
   this->owneR=&newOwner;
-  this->GetSSowner().FindSl2Subalgebras(newOwner, this->theSl2s, *theGlobalVariables);
-  this->FindTheSSSubalgebrasPart2(theGlobalVariables);
+  this->ComputeSl2sInitOrbitsForComputationOnDemand();
+  this->FindTheSSSubalgebrasPart2();
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2(GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2()
 { this->CheckConsistency();
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
-  this->ExtendCandidatesRecursive(emptyCandidate, true, theGlobalVariables);
-  this->HookUpCentralizers(theGlobalVariables);
+  this->ExtendCandidatesRecursive(emptyCandidate, true);
+  this->HookUpCentralizers();
 }
 
-void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input, GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
@@ -531,7 +556,43 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
   return true;
 }
 
-void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+const HashedList<ElementWeylGroup>& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt");
+  if (this->theOrbitsAreComputed[indexSl2])
+    return this->theOrbitGeneratingElts[indexSl2];
+  this->GetOrbitSl2Helement(indexSl2);
+  return this->theOrbitGeneratingElts[indexSl2];
+}
+
+const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(int indexSl2)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2Helement");
+  if (this->theOrbitsAreComputed[indexSl2])
+    return this->theOrbits[indexSl2];
+  Vectors<Rational> startingVector;
+  startingVector.AddOnTop(this->theSl2s[indexSl2].theH.GetCartanPart());
+  std::stringstream out;
+  ProgressReport theReport(this->theGlobalVariables);
+  if (this->theGlobalVariables!=0)
+  { out << "Generating orbit of " << startingVector[0].ToString() << "...";
+    theReport.Report(out.str());
+//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+//        std::cout << out.str();
+  }
+  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], 60000))
+    crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
+    << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
+    << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. " << crash;
+  if (this->theGlobalVariables!=0)
+  { out << " done. The size of the orbit is " << this->theOrbits[indexSl2].size;
+    theReport.Report(out.str());
+    //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
+      //std::cout << " done. The size of the orbit is " << theOrbit.size;
+  }
+  this->theOrbitsAreComputed[indexSl2]=true;
+  return this->theOrbits[indexSl2];
+}
+
+void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentRecursive");
   baseCandidate.CheckMaximalDominance();
   RecursionDepthCounter theCounter(&this->theRecursionCounter);
@@ -545,7 +606,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
   //std::cout << "<hr> Trying to realize " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
   if (numVectorsFound==theNewTypE.theRank)
   { newCandidate=baseCandidate;
-    this->RegisterPossibleCandidate(newCandidate, theGlobalVariables);
+    this->RegisterPossibleCandidate(newCandidate);
     if (!newCandidate.ComputeChar(false, theGlobalVariables))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " doesn't have fitting chars.");
       //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
@@ -586,7 +647,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     { //std::cout << "<hr>Extending recursively: " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
     }
     if (propagateRecursion)
-      this->ExtendCandidatesRecursive(newCandidate, propagateRecursion, theGlobalVariables);
+      this->ExtendCandidatesRecursive(newCandidate, propagateRecursion);
     return;
   }
   int indexFirstWeight=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows - theNewTypE.theRank;
@@ -595,8 +656,6 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
   desiredLengthSquared*=theNewTypE.GetDefaultRootLengthSquared(0);
   desiredLengthSquared/=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
   Vectors<Rational> startingVector;
-  HashedList<Vector<Rational> > theOrbit;
-  HashedList<ElementWeylGroup> theOrbitGenerators;
   Vector<Rational> Hrescaled;
   Vectors<Rational> theHCandidatesRescaled;
   List<ElementWeylGroup> theHCandidatesRescaledGenerators;
@@ -623,70 +682,44 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
-    startingVector[0]=this->theSl2s[i].theH.GetCartanPart();
-    std::stringstream out;
-    if (theGlobalVariables!=0)
-    { out << "Generating orbit of " << startingVector[0].ToString() << "...";
-      theReport.Report(out.str());
-//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-//        std::cout << out.str();
-    }
-    if (indexCurrentWeight!=0)
-    { if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, theOrbit, &theOrbitGenerators, 60000))
-        crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 10000 elements. "
-        << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
-        << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. "
-        << crash;
-    } else
-    { theOrbit=startingVector;
-      ElementWeylGroup theId;
-      theOrbitGenerators.Clear();
-      theOrbitGenerators.AddOnTop(theId);
-    }
-    if (theGlobalVariables!=0)
-    { out << " done. ";
-      if (indexCurrentWeight!=0)
-        out << "The size of the orbit is " << theOrbit.size;
-      else
-        out << " Orbit was in fact not generated as we are selecting the first element of the Cartan of the semisimple subalgebra. ";
-      theReport.Report(out.str());
-      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-        //std::cout << " done. The size of the orbit is " << theOrbit.size;
-    }
-    if (theOrbit.size>=1000)
-    { std::stringstream out2;
-      out2 << "I am exploring the current Weyl group orbit containing " << theOrbit.size << " elements. As the orbit has more than 999 elements, "
-      << "I shall not be displaying progress report strings (the computation of those slows the computation way too much).";
-      theReport2.Report(out2.str());
-    }
     theHCandidatesRescaled.SetSize(0);
     theHCandidatesRescaledGenerators.SetSize(0);
-    theHCandidatesRescaled.ReservE(theOrbit.size);
-    theHCandidatesRescaledGenerators.ReservE(theOrbit.size);
-    for (int j=0; j<theOrbit.size; j++)
-    { Hrescaled=theOrbit[j];
+    if (indexCurrentWeight!=0)
+    { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(i);
+      const HashedList<ElementWeylGroup>& currentOrbitGeneratingElts=this->GetOrbitSl2HelementWeylGroupElt(i);
+      theHCandidatesRescaled.ReservE(currentOrbit.size);
+      theHCandidatesRescaledGenerators.ReservE(currentOrbit.size);
+      for (int j=0; j<currentOrbit.size; j++)
+      { Hrescaled=currentOrbit[j];
+        Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
+        Hrescaled/=2;
+        if (baseCandidate.isGoodForTheTop(Hrescaled))
+        { if (theGlobalVariables!=0)
+          { std::stringstream out2;
+            out2 << " Orbit candidate " << j+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
+            theReport2.Report(out2.str());
+          }
+          theHCandidatesRescaled.AddOnTop(Hrescaled);
+          theHCandidatesRescaledGenerators.AddOnTop(currentOrbitGeneratingElts[j]);
+        } else
+          if (theGlobalVariables!=0)
+          { std::stringstream out2;
+            out2 << " Orbit candidate " << j+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). " ;
+            theReport2.Report(out2.str());
+          }
+      }
+    }
+    else
+    { Hrescaled=this->theSl2s[i].theH.GetCartanPart();
       Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
       Hrescaled/=2;
-      if (baseCandidate.isGoodForTheTop(Hrescaled))
-      { if (theGlobalVariables!=0)
-        { std::stringstream out2;
-          out2 << " Orbit candidate " << j+1 << " out of " << theOrbit.size << " is good, adding to list of good candidates. ";
-          theReport2.Report(out2.str());
-        }
-//        if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-  //        std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
-    //      << Hrescaled.ToString() << ", is GOOD. ";
-        theHCandidatesRescaled.AddOnTop(Hrescaled);
-        theHCandidatesRescaledGenerators.AddOnTop(theOrbitGenerators[j]);
-      } else
-        if (theGlobalVariables!=0 && theOrbit.size<1000)
-        { std::stringstream out2;
-          out2 << " Orbit candidate " << j+1 << " out of " << theOrbit.size << " is not a valid candidate. " ;
-          theReport2.Report(out2.str());
-      //    if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-        //    std::cout << " the orbit candidate " << theOrbit[j].ToString() << ", rescaled to "
-          //  << Hrescaled.ToString() << ", is no good. ";
-        }
+      theHCandidatesRescaled.AddOnTop(Hrescaled);
+      ElementWeylGroup theId;
+      theHCandidatesRescaledGenerators.AddOnTop(theId);
+      if (theGlobalVariables!=0)
+      { std::stringstream out;
+        out << "Orbit of " << Hrescaled.ToString() << " not generated because that is the very first H element selected.";
+      }
     }
     for (int j=0; j<theHCandidatesRescaled.size; j++)
     { if (theGlobalVariables!=0)
@@ -697,7 +730,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
       newCandidate=baseCandidate;
       newCandidate.AddHincomplete(theHCandidatesRescaled[j], theHCandidatesRescaledGenerators[j], i);
       newCandidate.CheckMaximalDominance();
-      this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
+      this->ExtendOneComponentRecursive(newCandidate, propagateRecursion);
     }
   }
 }
@@ -2175,16 +2208,18 @@ bool SemisimpleSubalgebras::CheckConsistency()const
 
 void SemisimpleSubalgebras:: initHookUpPointers
   (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras)
+   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables)
 { this->owneR=&inputOwner;
   this->theSl2s.owner=&inputOwner;
   this->ownerField=theField;
   this->theSubalgebrasNonEmbedded=inputSubalgebrasNonEmbedded;
   this->theSl2sOfSubalgebras=inputSl2sOfSubalgebras;
+  this->theGlobalVariables=inputGlobalVariables;
 }
 
 void SemisimpleSubalgebras::reset()
-{ this->owneR=0;
+{ this->theGlobalVariables=0;
+  this->owneR=0;
   this->ownerField=0;
   this->theRecursionCounter=0;
   this->theSl2s.owner=0;
@@ -2379,7 +2414,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables*
 }
 
 void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
-(const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+(const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive");
   baseCandidate.CheckInitialization();
   CandidateSSSubalgebra theCandidate;
@@ -2467,7 +2502,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
       if (!isGood)
         break;
     }
-    if (theGlobalVariables!=0)
+    if (this->theGlobalVariables!=0)
     { std::stringstream out;
       out << " \n" << theType.ToString();
       if (isGood)
@@ -2481,12 +2516,12 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     }
     if (isGood)
     { theCandidate.AddTypeIncomplete(theType);
-      this->ExtendOneComponentRecursive(theCandidate, propagateRecursion, theGlobalVariables);
+      this->ExtendOneComponentRecursive(theCandidate, propagateRecursion);
     }
   }
 }
 
-void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
   MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
   baseCandidate.CheckInitialization();
@@ -2496,7 +2531,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   myType.theLetter='G';
   myType.theRank=this->GetSSowner().GetRank();
   myType.lengthFirstCoRootSquared=this->theSl2s[0].LengthHsquared;
-  if(theGlobalVariables!=0)
+  if(this->theGlobalVariables!=0)
   { std::stringstream out;
     out << "\nExploring extensions of " << baseCandidate.ToString();
     theProgressReport1.Report(out.str());
@@ -2511,7 +2546,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   else
     theType=*theTypes.LastObject();
   for (; theType<myType; theType++, theType.lengthFirstCoRootSquared=-1)
-    this->ExtendOneComponentOneTypeAllLengthsRecursive(baseCandidate, theType, propagateRecursion, theGlobalVariables);
+    this->ExtendOneComponentOneTypeAllLengthsRecursive(baseCandidate, theType, propagateRecursion);
 }
 
 void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const
@@ -4970,9 +5005,9 @@ int CandidateSSSubalgebra::GetNumModules()const
   return result;
 }
 
-void SemisimpleSubalgebras::HookUpCentralizers(GlobalVariables* theGlobalVariables)
+void SemisimpleSubalgebras::HookUpCentralizers()
 { this->theSubalgebraCandidates.QuickSortAscending();
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   std::stringstream reportStream;
   theReport1.Report("<hr>\nHooking up centralizers ");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)

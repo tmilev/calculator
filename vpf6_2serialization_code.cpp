@@ -144,10 +144,7 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const MonomialUni
 bool Serialization::innerStoreObject(CommandList& theCommands, const MonomialP& input, Expression& output, Expression* theContext, bool* inputOutputNonConst)
 { MacroRegisterFunctionWithName("Serialization::SerializeMon_MonomialP");
   if (theContext==0)
-  { std::cout << "This is a programming error: it is forbiddeen to call MonomialP storing without providing a context. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: it is forbiddeen to call MonomialP storing without providing a context. " << crash;
   Expression exponentE, monE, tempE, letterE;
   bool tempB;
   bool& isNonConst= inputOutputNonConst==0 ? tempB : *inputOutputNonConst;
@@ -375,8 +372,7 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras.GetElement(indexInOwner);
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
-  { //std::cout << theSSalgebra.theWeyl.theDynkinType.ToString();
-    //assert(false);
+  { //crash << theSSalgebra.theWeyl.theDynkinType.ToString() << crash;
     theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
@@ -702,7 +698,9 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   SemisimpleSubalgebras tempSAs;
   tempSAs.owneR=ownerSS;
   SemisimpleSubalgebras& theSAs=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSAs)];
-  theSAs.initHookUpPointers(*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs);
+  theSAs.initHookUpPointers
+  (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   //FormatExpressions tempFormat;
 //  std::cout << ownerSS->ToString();
   Expression theCandidatesE=input[2];
@@ -730,7 +728,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
 //    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
-  theSAs.HookUpCentralizers(0);//theCommands.theGlobalVariableS);
+  theSAs.HookUpCentralizers();//theCommands.theGlobalVariableS);
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
 //  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
 //  std::cout << theCommands.theObjectContainer.ToString();
@@ -999,11 +997,9 @@ bool CommandList::innerRationalFunction(CommandList& theCommands, const Expressi
   if (!result)
     return false;
   if (!theConverted.IsOfType<Polynomial<Rational> >())
-  { std::cout << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
+    crash << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
     << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << crash;
   return theConverted.ConvertToType<RationalFunctionOld>(output);
 }
 
@@ -1023,11 +1019,9 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const RationalFun
   if (input.expressionType==input.typePoly)
     return Serialization::innerStoreMonCollection(theCommands, theNumerator, output, theContext);
   if (input.expressionType!=input.typeRationalFunction)
-  { std::cout << "This is a programming error: I am processing a rational function which is not "
+    crash << "This is a programming error: I am processing a rational function which is not "
     << " of type rational polynomial or honest rataional function. Something has gone very wrong. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << crash;
   Polynomial<Rational> theDenominator;
   input.GetDenominator(theDenominator);
   Expression denE, numE;

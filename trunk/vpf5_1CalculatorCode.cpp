@@ -328,7 +328,7 @@ bool DynkinSimpleType::HasEasySubalgebras()const
     return true;
   if (this->theLetter=='G')
     return true;
-  if (this->theLetter=='A' && (this->theRank==2 || this->theRank==3 || this->theRank==4))
+  if (this->theLetter=='A' && (this->theRank<=6))
     return true;
   if (this->theLetter=='B' && (this->theRank==2 || this->theRank==3 || this->theRank==4))
     return true;
@@ -465,9 +465,9 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-//  << "<meta http-equiv=\"refresh\" content=\"5; url="
-//  << displayFolder << theTitlePageFileNameNoPath
-//  << "\">"
+  << "<meta http-equiv=\"refresh\" content=\"5; url="
+  << displayFolder << theTitlePageFileNameNoPath
+  << "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas

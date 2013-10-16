@@ -763,6 +763,37 @@ bool CommandListFunctions::innerSort(CommandList& theCommands, const Expression&
   return true;
 }
 
+bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerGrowDynkinType");
+  if (input.children.size!=3)
+    return false;
+  const Expression& theSmallerTypeE=input[1];
+  DynkinType theSmallDynkinType;
+  if (!Serialization::innerLoadDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
+    return false;
+  SemisimpleLieAlgebra* theSSalg=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[2], theSSalg))
+    return output.SetError("Error extracting ambient Lie algebra.", theCommands);
+  SemisimpleSubalgebras tempSas;
+  tempSas.owneR=theSSalg;
+  tempSas.ownerField=&theCommands.theObjectContainer.theAlgebraicClosure;
+  tempSas.theGlobalVariables=theCommands.theGlobalVariableS;
+  tempSas.ComputeSl2sInitOrbitsForComputationOnDemand();
+  if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
+    return output.SetError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
+  List<DynkinType> largerTypes;
+  if (!tempSas.Grow(theSmallDynkinType, largerTypes))
+    return output.SetError("Error: growing type "+theSmallDynkinType.ToString()+" inside "+theSSalg->theWeyl.theDynkinType.ToString() + " failed. ", theCommands);
+  std::stringstream out;
+  out << "Inside " << theSSalg->theWeyl.theDynkinType.ToString() << ", input type " << theSmallDynkinType.ToString();
+  if (largerTypes.size==0)
+    out << " cannot grow any further. ";
+  else
+  { out << " can grow to the following types. " << largerTypes.ToString();
+  }
+  return output.AssignValue(out.str(), theCommands);
+}
+
 void Expression::GetUserDefinedSymbols(HashedListSpecialized<Expression>& inputOutputList)const
 { MacroRegisterFunctionWithName("Expression::GetUserDefinedSymbols");
   if (this->IsBuiltInFunctionOrOperation() || this->IsBuiltInType())

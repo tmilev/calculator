@@ -17,6 +17,7 @@ void CommandList::initPredefinedInnerFunctions()
    "Makes a makefile. ",
    "MakeMakefile(0)", false);
 
+
   this->AddOperationInnerHandler
   ("AutomatedTest", this->innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
@@ -46,6 +47,13 @@ void CommandList::initPredefinedInnerFunctions()
   ("AlgebraicNumberFromPoly", CommandListFunctions::innerGetAlgebraicNumberFromMinPoly, "",
    "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
+
+   this->AddOperationInnerHandler
+  ("GrowDynkinType", CommandListFunctions::innerGrowDynkinType, "",
+   "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
+   "GrowDynkinType(A^20_1+d_4, e_6); ", false);
+
+
 
   this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateSinCos, "",

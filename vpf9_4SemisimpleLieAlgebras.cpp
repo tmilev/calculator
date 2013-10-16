@@ -387,10 +387,14 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 
 void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand");
-  this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, *theGlobalVariables);
+  this->GetSSowner().FindSl2Subalgebras(this->GetSSowner(), this->theSl2s, *this->theGlobalVariables);
   this->theOrbits.SetSize(this->theSl2s.size);
   this->theOrbitGeneratingElts.SetSize(this->theSl2s.size);
   this->theOrbitsAreComputed.initFillInObject(this->theSl2s.size, false);
+  this->theOrbitHelementLengths.Clear();
+  this->theOrbitHelementLengths.SetExpectedSize(this->theSl2s.size);
+  for (int i=0; i<this->theSl2s.size; i++)
+    this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
 }
 
 void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner)
@@ -413,6 +417,28 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
   emptyCandidate.owner=this;
   this->ExtendCandidatesRecursive(emptyCandidate);
   this->HookUpCentralizers();
+}
+
+bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
+{ if (input.GetRank()>this->owneR->GetRank())
+    return false;
+  for (int i=0; i<input.size(); i++)
+    if (!this->theOrbitHelementLengths.Contains(input[i].lengthFirstCoRootSquared))
+      return false;
+  return true;
+}
+
+bool SemisimpleSubalgebras::Grow(const DynkinType& input, List<DynkinType>& output)const
+{ List<DynkinSimpleType> theSimpleTypes;
+  output.SetSize(0);
+//  Rational minCoRootLengthSquared=-1;
+  int indexMinLengthSimpleType=input.IsEqualToZero() ? -1 :0;
+  for (int i=1; i<input.size(); i++)
+    if (input[indexMinLengthSimpleType].lengthFirstCoRootSquared>input[i].lengthFirstCoRootSquared)
+      indexMinLengthSimpleType=i;
+
+
+
 }
 
 void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
@@ -3220,23 +3246,15 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
 std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SltwoSubalgebras::ElementToStringNoGenerators");
   std::string tempS; std::stringstream out;
-  std::string tooltipHchar=
-  "Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple root\
-   w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
-  std::string tooltipVDecomposition=
-  "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
+  std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple root w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
+  std::string tooltipVDecomposition="The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular=
-  "A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer \
-  in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be \
-  minimal containing. This happens when another minimal containing regular semisimple \
-  subalgebra of equal rank nests as a root subalgebra in the containing SA. \
-  See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, \
-  remark before Theorem 10.4.";
+  "A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be \
+  minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a root subalgebra in the containing SA. \
+  See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue=
-  "The actual realization of h. The coordinates of h are given with respect to the fixed \
-  original simple basis. Note that the characteristic of h is given \
-  *with respect to another basis* (namely, with respect to an h-positive simple basis). \
-  I will fix this in the future (email me if you want that done sooner).";
+  "The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given \
+  *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
   //if (this->owner==0)
 
   bool usePNG=theFormat==0? false : theFormat->flagUsePNG;
@@ -3250,13 +3268,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     usePNG = false;
   std::stringstream out2;
   out2 << "<br>Length longest root ambient algebra squared/4= " << this->GetOwnerWeyl().GetLongestRootLengthSquared()/4 << "<br>";
-  out2
-  << "<br> Given a root subsystem P, and a root subsubsystem P_0, in (10.2) "
-  << " of Semisimple subalgebras of semisimple Lie algebras, E. Dynkin defines "
-  << " a numerical constant e(P, P_0) (which we call Dynkin epsilon). "
-  << " <br>In Theorem 10.3, Dynkin proves that if an sl(2) is an S-subalgebra in "
-  << " the root subalgebra generated by P, such that it has characteristic 2 "
-  << " for all simple roots of P lying in P_0, then e(P, P_0)=0. ";
+  out2 << "<br> Given a root subsystem P, and a root subsubsystem P_0, in (10.2) of Semisimple subalgebras of semisimple Lie algebras, E. Dynkin defines "
+  << " a numerical constant e(P, P_0) (which we call Dynkin epsilon). <br>In Theorem 10.3, Dynkin proves that if an sl(2) is an S-subalgebra in "
+  << " the root subalgebra generated by P, such that it has characteristic 2 for all simple roots of P lying in P_0, then e(P, P_0)=0. ";
 
   if (this->BadHCharacteristics.size>0)
   { bool allbadAreGoodInTheirBadness=true;
@@ -3272,8 +3286,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
         out << "<b>Bad characteristic: " << this->BadHCharacteristics[i] << "</b>";
       }
       else
-      { out2
-        << "<br><b>It turns out that in the current case of Cartan element h = " << this->BadHCharacteristics[i] << " we have that, for a certain P, "
+      { out2 << "<br><b>It turns out that in the current case of Cartan element h = " << this->BadHCharacteristics[i] << " we have that, for a certain P, "
         << " e(P, P_0) equals 0, but I failed to realize the corresponding sl(2) as a subalgebra of that P. However, it turns out that h "
         << " is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
       }
@@ -3320,8 +3333,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
-      out << "<a href=\"" << displayPath << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
-      << ".html\">" << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
+      out << "<a href=\"" << displayPath << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j] << ".html\">"
+      << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";

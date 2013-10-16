@@ -424,6 +424,7 @@ public:
   ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
 
   List<HashedList<Vector<Rational> > > theOrbits;
+  HashedList<Rational> theOrbitHelementLengths;
   List<HashedList<ElementWeylGroup> > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
 
@@ -486,6 +487,8 @@ public:
 
   const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
   const HashedList<ElementWeylGroup>& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
+  bool RanksAndIndicesFit(const DynkinType& input)const;
+  bool Grow(const DynkinType& input, List<DynkinType>& output)const;
 
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate)

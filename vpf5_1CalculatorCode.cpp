@@ -500,7 +500,7 @@ bool CommandList::innerPrintSSsubalgebras
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
     theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
-    << "</title><script src=\"" << theCommands.DisplayPathServerBase << "jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
+    << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);

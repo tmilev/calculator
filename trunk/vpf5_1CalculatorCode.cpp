@@ -490,7 +490,7 @@ bool CommandList::innerPrintSSsubalgebras
       << crash;
     }
     if (!isAlreadySubalgebrasObject)
-      theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
+      theSSsubalgebras.FindTheSSSubalgebrasOLD(ownerSS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
     theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
@@ -528,7 +528,7 @@ bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression&
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   SemisimpleSubalgebras& theSSsubalgebras=
   theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
-  theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
+  theSSsubalgebras.FindTheSSSubalgebrasOLD(ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 

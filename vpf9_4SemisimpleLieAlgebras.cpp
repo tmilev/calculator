@@ -139,9 +139,16 @@ std::string SemisimpleSubalgebras::GetPhysicalFileNameFKFTNilradicals(int Actual
   return out.str();
 }
 
-std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
+  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  return out.str();
+}
+
+std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "./";
   out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
@@ -361,8 +368,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->theOrbitsAreComputed.size; i++)
       if (this->theOrbitsAreComputed[i])
         numComputedOrbits++;
-    out << "<hr>Of the " << this->theOrbits.size << " h element conjugacy classes " << numComputedOrbits << " had their "
-    << "Weyl group orbits computed. The h elements and their computed orbit sizes follow. ";
+    out << "<hr>Of the " << this->theOrbits.size << " h element conjugacy classes " << numComputedOrbits
+    << " had their Weyl group orbits computed. The h elements and their computed orbit sizes follow. ";
     out << "<table><tr><td>h element</td><td>orbit size</td></tr>";
     for (int i=0; i<this->theOrbitGeneratingElts.size; i++)
     { out << "<tr><td>" << this->theSl2s[i].theH.GetCartanPart().ToString() << "</td>";
@@ -1743,9 +1750,8 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
     theSel[this->primalSubalgebraModules[i]]=1;
   std::stringstream out;
   if (theSel.size!=this->NilradicalPairingTable.size || theSel.size!=this->ModulesIsotypicallyMerged.size)
-    crash << "This is a programming error: selection has " << theSel.size << ", nilraidcal pairing table has "
-    << this->NilradicalPairingTable.size << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size
-    << " elements." << crash;
+    crash << "This is a programming error: selection has " << theSel.size << ", nilraidcal pairing table has " << this->NilradicalPairingTable.size
+    << " elements and modules isotypically merged has " << this->ModulesIsotypicallyMerged.size << " elements." << crash;
   this->EnumerateNilradicalsRecursively(theSel, theGlobalVariables, &out);
   if (this->FKNilradicalCandidates.size<1)
     crash << "This is a programming error:" << " while enumerating nilradicals of "
@@ -1905,9 +1911,8 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(Li
     if (theSelection[i]==0 && selectedIndices.Contains(i))
     { if (logStream!=0)
       { *logStream << " <br>The selection " << this->ToStringNilradicalSelection(theSelection)
-        << " is contradictory, as the only way to extend it to a subalgebra (i.e., closed under Lie bracket)"
-        << " is by requesting that module V_{" << i+1 << "} be included, but at the same time "
-        << " we have already decided to exclude that module in one of our preceding choices. ";
+        << " is contradictory, as the only way to extend it to a subalgebra (i.e., closed under Lie bracket) is by requesting that module V_{"
+        << i+1 << "} be included, but at the same time we have already decided to exclude that module in one of our preceding choices. ";
       }
       return false;
     }
@@ -1923,8 +1928,7 @@ bool CandidateSSSubalgebra::IsPossibleNilradicalCarryOutSelectionImplications(Li
     for (int j=0; j<this->OppositeModulesByStructure[selectedIndices[i]].size; j++)
     { if (theSelection[this->OppositeModulesByStructure[selectedIndices[i]][j]]==1)
       { if (logStream!=0)
-        { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection)
-          << " contains opposite modules and is therefore not allowed. ";
+        { *logStream << "<br>The subalgebra selection " << this->ToStringNilradicalSelection(theSelection) << " contains opposite modules and is therefore not allowed. ";
         }
         return false;
       }
@@ -2152,9 +2156,8 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
       if (this->Modules[i][j].size!=1)
         crash << "This is a programming error: empty module! " << crash;
   if (this->thePrimalChaR.GetCoefficientsSum()!=numMods)
-    crash << "This is a programming error: the sum of the coeffs of the primal char is "
-    << this->thePrimalChaR.GetCoefficientsSum().ToString() << " but there are  " << numMods << " modules. Tempmodules variable: "
-    << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << crash;
+    crash << "This is a programming error: the sum of the coeffs of the primal char is " << this->thePrimalChaR.GetCoefficientsSum().ToString()
+    << " but there are  " << numMods << " modules. Tempmodules variable: " << tempModules.ToString() << "<br>Candidate details: " << this->ToString() << crash;
 }
 
 void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws)
@@ -4474,7 +4477,7 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   //DynkinType typeScaled=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
   //this->ScaleDynkinType(typeScaled);
   if (makeLink)
-    out << "<a href=\"" << this->GetDisplayFileNameSubalgebra(ActualIndexSubalgebra, theFormat) << "\">"
+    out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\">"
     << CGI::GetHtmlMathSpanPure(this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]))
     << "</a> ";
   else

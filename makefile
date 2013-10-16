@@ -3,8 +3,8 @@ all: directories calculator
 directories: Debug
 Debug:
 	mkdir ./Debug
-calculator: vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf7.o vpf8.o vpf9.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o 
-	g++ -std=c++11 -pthread vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf7.o vpf8.o vpf9.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o -o ./Debug/calculator
+calculator: vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf7.o vpf8.o vpf9.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o vpfSystemFunctionsGlobalObjects.o 
+	g++ -std=c++11 -pthread vpf4CalculatorFunctionList.o vpf5.o vpf5_1CalculatorCode.o vpf5_2javascript_graphics.o vpf6.o vpf6_05evaluationroutines.o vpf6_0parsingRoutines.o vpf6_1innerTypedFunctions.o vpf6_2serialization_code.o vpf6_3calculatorMathRoutines.o vpf7.o vpf8.o vpf9.o vpf9_1.o vpf9_2.o vpf9_3RationalRadicals.o vpf9_4SemisimpleLieAlgebras.o vpfCalculatorMain.o vpfCharacters.o vpfCharacters_CalculatorInterface.o vpfGraph.o vpfSystemFunctionsGlobalObjects.o -o ./Debug/calculator
 
 vpf4CalculatorFunctionList.o: vpf4CalculatorFunctionList.cpp
 	g++ -std=c++0x -pthread -c vpf4CalculatorFunctionList.cpp
@@ -68,4 +68,7 @@ vpfCharacters_CalculatorInterface.o: vpfCharacters_CalculatorInterface.cpp
 
 vpfGraph.o: vpfGraph.cpp
 	g++ -std=c++0x -pthread -c vpfGraph.cpp
+
+vpfSystemFunctionsGlobalObjects.o: vpfSystemFunctionsGlobalObjects.cpp
+	g++ -std=c++0x -pthread -c vpfSystemFunctionsGlobalObjects.cpp
 

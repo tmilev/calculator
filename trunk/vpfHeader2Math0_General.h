@@ -4709,6 +4709,7 @@ class DynkinSimpleType
   void GetEn(int n, Matrix<Rational>& output)const;
   void GetF4(Matrix<Rational>& output)const;
   void GetG2(Matrix<Rational>& output)const;
+  void Grow(List<DynkinSimpleType>& output);
   bool IsPossibleCoRootLength(const Rational& input)const;
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;

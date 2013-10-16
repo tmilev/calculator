@@ -497,15 +497,20 @@ public:
   void FindAllEmbeddings
   (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner)
   ;
-  void FindTheSSSubalgebras
+  void FindTheSSSubalgebrasOLD
   (SemisimpleLieAlgebra& newOwner)
   ;
-
-  void FindTheSSSubalgebrasPart2
+  void FindTheSSSubalgebras
+  (SemisimpleLieAlgebra& newOwner)
+;
+  void FindTheSSSubalgebrasOLDPart2
   ()
   ;
-  void ExtendCandidatesRecursive
+  void ExtendCandidatesRecursiveOLD
   (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
+  ;
+  void ExtendCandidatesRecursive
+  (const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0)
   ;
   void ExtendOneComponentOneTypeAllLengthsRecursive
   (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion)

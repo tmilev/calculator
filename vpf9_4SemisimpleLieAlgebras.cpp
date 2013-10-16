@@ -405,17 +405,33 @@ void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, Semisim
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasOLD");
   this->owneR=&newOwner;
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
-  this->FindTheSSSubalgebrasPart2();
+  this->CheckConsistency();
+  CandidateSSSubalgebra emptyCandidate;
+  emptyCandidate.owner=this;
+  this->ExtendCandidatesRecursive(emptyCandidate);
+  this->HookUpCentralizers();
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2()
+void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
+
+}
+
+void SemisimpleSubalgebras::FindTheSSSubalgebrasOLD(SemisimpleLieAlgebra& newOwner)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasOLD");
+  this->owneR=&newOwner;
+  this->ComputeSl2sInitOrbitsForComputationOnDemand();
+  this->FindTheSSSubalgebrasOLDPart2();
+}
+
+void SemisimpleSubalgebras::FindTheSSSubalgebrasOLDPart2()
 { this->CheckConsistency();
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
-  this->ExtendCandidatesRecursive(emptyCandidate, true);
+  this->ExtendCandidatesRecursiveOLD(emptyCandidate, true);
   this->HookUpCentralizers();
 }
 
@@ -654,7 +670,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
     { //std::cout << "<hr>Extending recursively: " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
     }
     if (propagateRecursion)
-      this->ExtendCandidatesRecursive(newCandidate, propagateRecursion);
+      this->ExtendCandidatesRecursiveOLD(newCandidate, propagateRecursion);
     return;
   }
   int indexFirstWeight=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows - theNewTypE.theRank;
@@ -2528,9 +2544,9 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   }
 }
 
-void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
+void SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD");
   baseCandidate.CheckInitialization();
   DynkinSimpleType theType;
   ProgressReport theProgressReport1(theGlobalVariables);

@@ -24,7 +24,7 @@ void CommandList::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("AutomatedTestSetGoodKnownCopy", this->innerAutomatedTestSetKnownGoodCopy, "",
    "Runs a big bad automated test of all built in functions to create a file containing a set of known good results.",
-   "AutomatedTestSetGoodKnownCopy 0");
+   "AutomatedTestSetGoodKnownCopy 0", false);
   this->AddOperationInnerHandler
   ("!", CommandListFunctions::innerFactorial, "",
    "Factorial function. ",

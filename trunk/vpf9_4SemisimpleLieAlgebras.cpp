@@ -344,7 +344,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
-        outputFileSubalgebra << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script> "
+        outputFileSubalgebra << "<html>" << "<script src=\"../../jsmath/easy/load.js\"></script> "
         << "<body>Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
         outputFileSubalgebra << this->theSubalgebraCandidates[i].ToString(theFormat);
         if (this->flagComputeNilradicals)
@@ -3384,7 +3384,7 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
     tempS= out.str();
     theFile << "<HMTL><title>sl(2)-subalgebras of "
     << this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</title>";
-    theFile << "<script src=\"" << PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script> ";
+    theFile << "<script src=\"../../../jsmath/easy/load.js\"></script> ";
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0])
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras, nilpotent orbits of "

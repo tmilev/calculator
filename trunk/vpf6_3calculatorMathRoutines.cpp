@@ -373,8 +373,7 @@ bool CommandListFunctions::innerDifferentiateSinCos(CommandList& theCommands, co
   if (input.children.size!=3)
     return false;
   if (!input[1].IsAtoM())
-    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
-    << " - possible user typo?";
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
   const Expression& theArgument=input[2];
   //////////////////////
   if (theArgument.IsAtoM(theCommands.opSin()))
@@ -600,8 +599,7 @@ bool CommandList::CheckConsistencyAfterInitializationExpressionStackEmpty()
 { this->theExpressionContainer.GrandMasterConsistencyCheck();
   this->ExpressionStack.GrandMasterConsistencyCheck();
   this->cachedExpressions.GrandMasterConsistencyCheck();
-  if (this->cachedExpressions.size!=0 || this->imagesCachedExpressions.size!=0 || this->ExpressionStack.size!=0 ||
-      this->theExpressionContainer.size!=0)
+  if (this->cachedExpressions.size!=0 || this->imagesCachedExpressions.size!=0 || this->ExpressionStack.size!=0 || this->theExpressionContainer.size!=0)
     crash << "This is a programming error: cached expressions, images cached expressions, expression stack and expression container are supposed to be empty, but "
     << " instead they contain respectively " << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
     << this->ExpressionStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
@@ -790,8 +788,9 @@ bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const E
   if (largerTypes.size==0)
     out << " cannot grow any further. ";
   else
-  { out << " can grow to the following types. <br>";
-    out << "<table border=\"1\"><td>Larger type</td><td>Root injection</td></tr>";
+  { CandidateSSSubalgebra tempCandidate;
+    out << " can grow to the following types. <br>";
+    out << "<table border=\"1\"><td>Larger type</td><td>Root injection</td><td>Highest weight module containing new simple generator</td></tr>";
     for(int i=0; i<largerTypes.size; i++)
     { out << "<tr><td>" << largerTypes[i].ToString() << "</td>";
       out << "<td>";
@@ -800,6 +799,9 @@ bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const E
         if (j!=theRootInjections[i].size)
           out << ", ";
       }
+      out << "</td><td>";
+      out << CGI::GetHtmlMathSpanPure
+      (tempSas.GetHighestWeightFundNewComponentFromRootInjection(largerTypes[i], theRootInjections[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
     }
     out << "</table>";

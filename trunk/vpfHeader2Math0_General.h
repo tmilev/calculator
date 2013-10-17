@@ -4813,6 +4813,7 @@ public:
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
   }
+  static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
@@ -4977,6 +4978,7 @@ public:
   }
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables=0);
+  void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
   void AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p);
   void AddCharacter(const Vector<Rational>& X);
   void ComputeRho(bool Recompute);

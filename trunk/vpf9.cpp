@@ -3601,8 +3601,7 @@ void DynkinType::GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output,
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGeneratorsOneType");
   output.SetSize(0);
   Matrix<Rational> tempMat, finalMat;
-  if (theType.theLetter=='D' || (theType.theLetter=='A'&& theType.theRank>1) ||
-      (theType.theLetter=='E' && theType.theRank==6))
+  if (theType.theLetter=='D' || (theType.theLetter=='A'&& theType.theRank>1) || (theType.theLetter=='E' && theType.theRank==6))
   { tempMat.MakeIdMatrix(theType.theRank*(multiplicity-1));
     int numGens=1;
     if (theType.theLetter=='D' && theType.theRank==4)
@@ -3781,7 +3780,8 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
 }
 
 void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
-{ output.init(0,0);
+{ MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
+  output.init(0,0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
   sortedMons=this->theMonomials;
@@ -3791,6 +3791,26 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
     int mult=this->GetMult(theIndex);
     for (int k=0; k<mult; k++)
     { (*this)[theIndex].GetCartanSymmetric(curCartan);
+      output.DirectSumWith(curCartan);
+    }
+  }
+}
+
+void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output)const
+{ MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder");
+  output.init(0,0);
+  Matrix<Rational> curCartan;
+  List<DynkinSimpleType> sortedMons;
+  sortedMons=this->theMonomials;
+  sortedMons.QuickSortDescending();
+  DynkinSimpleType currentType;
+  for (int j=0; j<sortedMons.size; j++)
+  { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
+    int mult=this->GetMult(theIndex);
+    currentType.MakeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank);
+    currentType.lengthFirstCoRootSquared=currentType.GetDefaultCoRootLengthSquared(0);
+    for (int k=0; k<mult; k++)
+    { currentType.GetCartanSymmetric(curCartan);
       output.DirectSumWith(curCartan);
     }
   }
@@ -4295,8 +4315,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
     case 'F': this->GetF4(output);                break;
     case 'G': this->GetG2(output);                break;
     default:
-      crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. "
-      << crash;
+      crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
       break;
   }
   output*=this->lengthFirstCoRootSquared/2;
@@ -4631,6 +4650,12 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
 }
 
+void WeylGroup::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType)
+{ this->init();
+  this->theDynkinType=inputType;
+  this->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(this->CartanSymmetric);
+}
+
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
 { Matrix<Rational> basisChange;
   Matrix<Rational> tempMat;
@@ -4650,8 +4675,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, Lis
   }
   basisChange.Resize(0, 0, true);
   for (int i=0; i<tempDyn.SimpleComponentTypes.size; i++)
-  { DynkinSimpleType::GetEpsilonMatrix
-    (tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat);
+  { DynkinSimpleType::GetEpsilonMatrix(tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat);
     basisChange.DirectSumWith(tempMat, (Rational) 0);
     //basisChange.ComputeDebugString();
   }
@@ -4717,7 +4741,7 @@ void WeylGroup::ComputeRho(bool Recompute)
   //this->ComputeDebugString();
   this->rho.MakeZero(this->CartanSymmetric.NumRows);
   for (int i=0; i<this->RootSystem.size; i++)
-    if (this->RootSystem[i].IsPositiveOrZero() )
+    if (this->RootSystem[i].IsPositiveOrZero())
       this->rho+=(RootSystem[i]);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
     this->rho[i].DivideByInteger(2);
@@ -4887,8 +4911,7 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
     out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
     << " in " <<  CGI::GetHtmlMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
-    << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: "
-    << "<br><table border=\"1\"><tr><td>Weyl elt.</td>";
+    << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: <br><table border=\"1\"><tr><td>Weyl elt.</td>";
     for (int i=0; i<this->TheWeylGroup->theElements.size; i++)
       out << "<td>" << this->TheWeylGroup->theElements[i].ToString() << "</td>";
     out << "</tr>";

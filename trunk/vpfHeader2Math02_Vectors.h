@@ -349,12 +349,11 @@ public:
   }
   Vector<coefficient> operator/(const coefficient& other)const
   { if (other.IsEqualToZero())
-      crash << "This is a programming error: division by zero. Division by zero error are supposed to be handled at an earlier level. "
-      << crash;
+      crash << "This is a programming error: division by zero. Division by zero error are supposed to be handled at an earlier level. " << crash;
     Vector<coefficient> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)
-    { result[i]=this->TheObjects[i];
+    { result[i]=(*this)[i];
       result[i]/=other;
     }
     return result;

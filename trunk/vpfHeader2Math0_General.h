@@ -4817,6 +4817,7 @@ public:
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
+  void GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output)const;
   int GetCoxeterEdgeWeight(int v, int w);
   std::string GetLieAlgebraName(FormatExpressions* theFormat=0)const;
   std::string GetWeylGroupName(FormatExpressions* theFormat=0)const;
@@ -4984,6 +4985,7 @@ public:
   void ComputeRho(bool Recompute);
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeFromDynkinType(const DynkinType& inputType);
+  void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeExternalAutos();
   bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;

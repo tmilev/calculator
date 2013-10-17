@@ -3760,8 +3760,7 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
     int theMult=this->GetMult(theIndex);
     for (int k=0; k<theMult; k++)
-    { DynkinSimpleType::GetEpsilonMatrix
-      ((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
+    { DynkinSimpleType::GetEpsilonMatrix((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
       output.DirectSumWith(curCartan);
     }
   }
@@ -3772,7 +3771,7 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
   sortedMons=this->theMonomials;
-  sortedMons.QuickSortAscending();
+  sortedMons.QuickSortDescending();
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
     int mult=this->GetMult(theIndex);
@@ -4119,6 +4118,108 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 { this->GetAn(n, output);
   output(n-1,n-1)=1;
 }
+
+void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputImagesSimpleRoots)const
+{ MacroRegisterFunctionWithName("DynkinSimpleType::Grow");
+  output.SetSize(0);
+  List<int> currentImagesSimpleRootsCurrent;
+  if (outputImagesSimpleRoots!=0)
+    outputImagesSimpleRoots->SetSize(0);
+  currentImagesSimpleRootsCurrent.SetSize(this->theRank);
+  DynkinSimpleType newType;
+  if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='D')
+  { newType.MakeArbitrary(this->theLetter, this->theRank+1, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+    { if (this->theLetter=='A')
+      { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
+          currentImagesSimpleRootsCurrent[i]=i;
+        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      }
+      if (this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='D')
+      { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
+          currentImagesSimpleRootsCurrent[i]=i+1;
+        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+      }
+    }
+  }
+  if (this->theLetter=='A')
+  { newType.MakeArbitrary('B', this->theRank+1, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    if (this->theRank>1)
+    { newType.MakeArbitrary('C', this->theRank+1, this->lengthFirstCoRootSquared);
+      output.AddOnTop(newType);
+      if (outputImagesSimpleRoots!=0)
+        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+    if (this->theRank>2)
+    { newType.MakeArbitrary('D', this->theRank+1, this->lengthFirstCoRootSquared);
+      output.AddOnTop(newType);
+      if (outputImagesSimpleRoots!=0)
+        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+    if (this->theRank==1)
+    { newType.MakeArbitrary('G', 2, this->lengthFirstCoRootSquared);
+      output.AddOnTop(newType);
+      if (outputImagesSimpleRoots!=0)
+        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+  }
+  if (this->theLetter=='C' && this->theRank==3)
+  { newType.MakeArbitrary('F', 4, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+    { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
+        currentImagesSimpleRootsCurrent[i]=i;
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+  }
+  if (this->theLetter=='D' && this->theRank==5)
+  { newType.MakeArbitrary('E', 6, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+    { currentImagesSimpleRootsCurrent[0]=0;
+      currentImagesSimpleRootsCurrent[1]=2;
+      currentImagesSimpleRootsCurrent[2]=3;
+      currentImagesSimpleRootsCurrent[3]=4;
+      currentImagesSimpleRootsCurrent[5]=1;
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+  }
+  if (this->theLetter=='E' && this->theRank<8)
+  { newType.MakeArbitrary('E', this->theRank+1, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+    { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
+        currentImagesSimpleRootsCurrent[i]=i;
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+    }
+  }
+}
+
+bool DynkinSimpleType::operator>(const DynkinSimpleType& other)const
+{ if (this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared)
+    return true;
+  if (this->lengthFirstCoRootSquared<other.lengthFirstCoRootSquared)
+    return false;
+  if (this->theRank>other.theRank)
+    return true;
+  if (this->theRank<other.theRank)
+    return false;
+  if ((this->theLetter=='B' ||this->theLetter=='C') && other.theLetter=='D')
+    return true;
+  if (this->theLetter=='D' && (other.theLetter=='B' ||other.theLetter=='C'))
+    return false;
+  return this->theLetter>other.theLetter;
+//  if (this->theLetter>other.theLetter)
+//    return true;
+//  if (this->theLetter<other.theLetter)
+//    return false;
+//  return this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared;
+}
+
 
 void DynkinSimpleType::GetCn(int n, Matrix<Rational>& output)const
 { this->GetAn(n, output);

@@ -716,12 +716,9 @@ void rootSubalgebra::ElementToHtml
   MyPath=out.str();
   CGI::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
   this->ToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
-  output << "<html><title>"
-  << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
-  << " root subalgebra of type "
+  output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
-  output << "<meta name=\"keywords\" content=\""
-  << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
+  output << "<meta name=\"keywords\" content=\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
@@ -759,8 +756,7 @@ void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std:
   }
 }
 
-std::string rootSubalgebra::ToString
-(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   std::string latexFooter, latexHeader;
@@ -830,8 +826,7 @@ std::string rootSubalgebra::ToString
       //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
     //  tempStream2
      // << this->kModulesgEpsCoords[i][0].ToStringLetterFormat("\\epsilon");
-      tempStream3
-      << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
+      tempStream3 << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
       //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
       tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
       tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";
@@ -940,7 +935,7 @@ bool rootSubalgebra::IsGeneratingSingularVectors(int indexKmod, Vectors<Rational
   Vector<Rational> tempRoot;
   for (int i=0; i<NilradicalRoots.size; i++)
   { tempRoot=(currentRoot);
-    tempRoot+=(NilradicalRoots.TheObjects[i]);
+    tempRoot+=(NilradicalRoots[i]);
     if (this->IsARootOrZero(tempRoot))
       if (!NilradicalRoots.Contains(tempRoot))
         return false;
@@ -956,29 +951,29 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, Ve
   { isMaximal=true;
     for (int i=0; i<theRelation.AlphaCoeffs.size; i++)
     { for (int j=0; j<nilradicalRoots.size; j++)
-      { tempRoot=(theRelation.Alphas.TheObjects[i]);
-        //theRelation.Alphas.TheObjects[i].ComputeDebugString();
-        //nilradicalRoots.TheObjects[j].ComputeDebugString();
-        tempRoot+=(nilradicalRoots.TheObjects[j]);
+      { tempRoot=(theRelation.Alphas[i]);
+        //theRelation.Alphas[i].ComputeDebugString();
+        //nilradicalRoots[j].ComputeDebugString();
+        tempRoot+=(nilradicalRoots[j]);
         //tempRoot.ComputeDebugString();
         //theRelation.ComputeDebugString(*this);
         if ((this->IsARoot(tempRoot) || tempRoot.IsEqualToZero()) &&(!nilradicalRoots.Contains(tempRoot)))
         { this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
           //tempRoot.ComputeDebugString();
-          tempRoot-=(theRelation.Alphas.TheObjects[i]);
+          tempRoot-=(theRelation.Alphas[i]);
           //tempRoot.ComputeDebugString();
-          theRelation.Alphas.TheObjects[i]+=(tempRoot);
+          theRelation.Alphas[i]+=(tempRoot);
           int tempI=theRelation.Betas.GetIndex(tempRoot);
           if (tempI==-1)
           { theRelation.Betas.AddOnTop(tempRoot);
-            theRelation.BetaCoeffs.AddOnTop(theRelation.AlphaCoeffs.TheObjects[i]);
+            theRelation.BetaCoeffs.AddOnTop(theRelation.AlphaCoeffs[i]);
           }
           else
-            theRelation.BetaCoeffs.TheObjects[tempI]+=(theRelation.AlphaCoeffs.TheObjects[i]);
+            theRelation.BetaCoeffs[tempI]+=(theRelation.AlphaCoeffs[i]);
           isMaximal=false;
           break;
         }
-        if (theRelation.Alphas.TheObjects[i].IsEqualToZero())
+        if (theRelation.Alphas[i].IsEqualToZero())
         { theRelation.Alphas.RemoveIndexSwapWithLast(i);
           theRelation.AlphaCoeffs.RemoveIndexSwapWithLast(i);
           i--;

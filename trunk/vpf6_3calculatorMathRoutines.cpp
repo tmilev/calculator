@@ -782,14 +782,27 @@ bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const E
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
     return output.SetError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
   List<DynkinType> largerTypes;
-  if (!tempSas.Grow(theSmallDynkinType, largerTypes))
+  List<List<int> > theRootInjections;
+  if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &theRootInjections))
     return output.SetError("Error: growing type "+theSmallDynkinType.ToString()+" inside "+theSSalg->theWeyl.theDynkinType.ToString() + " failed. ", theCommands);
   std::stringstream out;
   out << "Inside " << theSSalg->theWeyl.theDynkinType.ToString() << ", input type " << theSmallDynkinType.ToString();
   if (largerTypes.size==0)
     out << " cannot grow any further. ";
   else
-  { out << " can grow to the following types. " << largerTypes.ToString();
+  { out << " can grow to the following types. <br>";
+    out << "<table border=\"1\"><td>Larger type</td><td>Root injection</td></tr>";
+    for(int i=0; i<largerTypes.size; i++)
+    { out << "<tr><td>" << largerTypes[i].ToString() << "</td>";
+      out << "<td>";
+      for (int j=0; j<theRootInjections[i].size; j++)
+      { out << "r_" << j+1 << " -> " << "r_" << theRootInjections[i][j]+1;
+        if (j!=theRootInjections[i].size)
+          out << ", ";
+      }
+      out << "</td></tr>";
+    }
+    out << "</table>";
   }
   return output.AssignValue(out.str(), theCommands);
 }

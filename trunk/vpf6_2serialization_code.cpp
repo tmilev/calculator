@@ -318,8 +318,8 @@ bool Serialization::innerLoadDynkinType(CommandList& theCommands, const Expressi
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
-    { theCommands.Comments << "I failed to convert the coefficient " << theType.theCoeffs[i] << " of " << currentMon.ToString(&theFormat)
-      << " to a small integer";
+    { theCommands.Comments << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << currentMon.ToString(&theFormat)
+      << " to a small positive integer. ";
       return false;
     }
     output.AddMonomial(simpleComponent, theMultiplicity);
@@ -351,8 +351,7 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
     << " If you would like to relax this limitation edit file " << __FILE__ << " line "
     << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
     << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
-    << " You have been warned. "
-    << " Alternatively, you may want to implement a sparse structure constant table "
+    << " You have been warned. Alternatively, you may want to implement a sparse structure constant table "
     << "(write me an email if you want to do that, I will help you). ";
     return output.SetError(out.str(), theCommands);
   }

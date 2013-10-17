@@ -428,17 +428,68 @@ bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
   return true;
 }
 
-bool SemisimpleSubalgebras::Grow(const DynkinType& input, List<DynkinType>& output)const
-{ List<DynkinSimpleType> theSimpleTypes;
-  output.SetSize(0);
-//  Rational minCoRootLengthSquared=-1;
-  int indexMinLengthSimpleType=input.IsEqualToZero() ? -1 :0;
+bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const
+{ output.SetSize(0);
+  if (input.GetRank()>=this->owneR->GetRank())
+    return true;
+  if (outputImagesSimpleRoots!=0)
+    outputImagesSimpleRoots->SetSize(0);
+  if (input.IsEqualToZero())
+  { output.SetSize(this->theSl2s.size);
+    if (outputImagesSimpleRoots!=0)
+      outputImagesSimpleRoots->SetSize(this->theSl2s.size);
+    for (int i=0; i<this->theSl2s.size; i++)
+    { output[i].MakeSimpleType('A', 1, &this->theOrbitHelementLengths[i]);
+      if (outputImagesSimpleRoots!=0)
+        (*outputImagesSimpleRoots)[i].SetSize(0);
+    }
+    return true;
+  }
+  //  Rational minCoRootLengthSquared=-1;
+  //growth is allowed from the minimal component only
+  int indexMinComponentByLengthAndSimpleType=0;
   for (int i=1; i<input.size(); i++)
-    if (input[indexMinLengthSimpleType].lengthFirstCoRootSquared>input[i].lengthFirstCoRootSquared)
-      indexMinLengthSimpleType=i;
-
-
-
+  { if (input[indexMinComponentByLengthAndSimpleType]>input[i])
+      indexMinComponentByLengthAndSimpleType=i;
+  }
+  DynkinType typeMinusMin=input;
+  typeMinusMin.SubtractMonomial(input[indexMinComponentByLengthAndSimpleType], 1);
+  List<DynkinSimpleType> theSimpleTypes;
+  List<List<int> > lastComponentRootInjections;
+  input[indexMinComponentByLengthAndSimpleType].Grow(theSimpleTypes, &lastComponentRootInjections);
+  List<int> currentRootInjection;
+  currentRootInjection.SetSize(typeMinusMin.GetRank());
+  for (int i=0; i<currentRootInjection.size; i++)
+    currentRootInjection[i]=i;
+  for (int i=0; i<theSimpleTypes.size; i++)
+  { bool isGood=true;
+    for (int j=0; j<typeMinusMin.size(); j++)
+      if (theSimpleTypes[i]>typeMinusMin[j])
+      { isGood=false;
+        break;
+      }
+    if (!isGood)
+      continue;
+    output.AddOnTop(typeMinusMin);
+    output.LastObject()->AddMonomial(theSimpleTypes[i],1);
+    if (outputImagesSimpleRoots!=0)
+    { currentRootInjection.SetSize(typeMinusMin.GetRank());
+      for (int j=0; j<lastComponentRootInjections[i].size; j++)
+        currentRootInjection.AddOnTop(lastComponentRootInjections[i][j]+typeMinusMin.GetRank());
+      outputImagesSimpleRoots->AddOnTop(currentRootInjection);
+    }
+  }
+  for (int i=0; i<this->theOrbitHelementLengths.size; i++)
+    if (this->theOrbitHelementLengths[i]<=input[indexMinComponentByLengthAndSimpleType].lengthFirstCoRootSquared)
+    { output.SetSize(output.size+1);
+      output.LastObject()->MakeSimpleType('A', 1, &this->theOrbitHelementLengths[i]);
+      *output.LastObject()+=input;
+      if (outputImagesSimpleRoots!=0)
+      { currentRootInjection.SetSize(typeMinusMin.GetRank());
+        outputImagesSimpleRoots->AddOnTop(currentRootInjection);
+      }
+    }
+  return true;
 }
 
 void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
@@ -1269,7 +1320,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
 }
 
 CandidateSSSubalgebra::CandidateSSSubalgebra():
-owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1),
+owner(0), indexInOwner(-1), indexInOwnersOfNonEmbeddedMe(-1), indexHcandidateBeingGrown(-1),
 indexMaxSSContainer(-1), flagSystemSolved(false), flagSystemProvedToHaveNoSolution(false),
 flagSystemGroebnerBasisFound(false), flagCentralizerIsWellChosen(false),
 totalNumUnknownsNoCentralizer(0), totalNumUnknownsWithCentralizer(0), NumConeIntersections(-1), NumCasesNoLinfiniteRelationFound(-1),

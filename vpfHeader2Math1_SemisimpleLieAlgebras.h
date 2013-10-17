@@ -248,6 +248,7 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwner;
   int indexInOwnersOfNonEmbeddedMe;
+  int indexHcandidateBeingGrown;
   int indexMaxSSContainer;
   List<int> indicesDirectSummandSuperAlgebra;
   MemorySaving<FormatExpressions> charFormaT;
@@ -488,7 +489,7 @@ public:
   const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
   const HashedList<ElementWeylGroup>& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input)const;
-  bool Grow(const DynkinType& input, List<DynkinType>& output)const;
+  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
 
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate)

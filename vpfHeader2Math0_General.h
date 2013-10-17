@@ -4709,7 +4709,7 @@ class DynkinSimpleType
   void GetEn(int n, Matrix<Rational>& output)const;
   void GetF4(Matrix<Rational>& output)const;
   void GetG2(Matrix<Rational>& output)const;
-  void Grow(List<DynkinSimpleType>& output);
+  void Grow(List<DynkinSimpleType>& output, List<List<int> >* outputImagesSimpleRoots)const;
   bool IsPossibleCoRootLength(const Rational& input)const;
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
@@ -4731,8 +4731,7 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
-  void GetAutomorphismActingOnVectorROWSwhichStandOnTheRight
-  (Matrix<Rational>& output, int AutoIndex)const;
+  void GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetLongRootLengthSquared()const;
@@ -4745,23 +4744,13 @@ class DynkinSimpleType
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   void operator++(int);
-  bool operator>(const DynkinSimpleType& other)const
-  { if (this->theRank>other.theRank)
-      return true;
-    if (this->theRank<other.theRank)
-      return false;
-    if ((this->theLetter=='B' ||this->theLetter=='C') && other.theLetter=='D')
-      return true;
-    if (this->theLetter=='D' && (other.theLetter=='B' ||other.theLetter=='C'))
-      return false;
-    if (this->theLetter>other.theLetter)
-      return true;
-    if (this->theLetter<other.theLetter)
-      return false;
-    return this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared;
-  }
+  //DynksinSimpleTypes are compared as follows.
+  //First, we compare the length of the first co-root. Larger co-root length= larger simple type.
+  //Second, we comare ranks. Larger rank = larger simple type. Note that an sl(2) with large co-root length will be considered
+  //larger than an sl(100) with small root length.
+  //Finally, we compare types. The convention here is: larger root system=larger type. In other words, A<D<B<C<E<F<G
+  bool operator>(const DynkinSimpleType& other)const;
   static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
-
   inline bool operator<(const DynkinSimpleType& other)const
   { return other>*this;
   }

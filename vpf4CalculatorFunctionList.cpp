@@ -51,7 +51,7 @@ void CommandList::initPredefinedInnerFunctions()
    this->AddOperationInnerHandler
   ("GrowDynkinType", CommandListFunctions::innerGrowDynkinType, "",
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
-   "GrowDynkinType(A^20_1+d_4, e_6); ", false);
+   "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
 
 
 

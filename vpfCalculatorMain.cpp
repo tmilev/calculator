@@ -143,6 +143,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("8");
   //  civilizedInput="FindOneSolutionSerreLikePolynomialSystem( -3(x-1.7)^2);";
 //  civilizedInput="AutomatedTestSetGoodKnownCopy 0";
+//civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

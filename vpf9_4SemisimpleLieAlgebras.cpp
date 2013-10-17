@@ -485,17 +485,66 @@ bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinT
       output.LastObject()->MakeSimpleType('A', 1, &this->theOrbitHelementLengths[i]);
       *output.LastObject()+=input;
       if (outputImagesSimpleRoots!=0)
-      { currentRootInjection.SetSize(typeMinusMin.GetRank());
+      { currentRootInjection.SetSize(input.GetRank());
+        for (int i=0; i<currentRootInjection.size; i++)
+          currentRootInjection[i]=i;
         outputImagesSimpleRoots->AddOnTop(currentRootInjection);
       }
     }
   return true;
 }
 
+Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRootInjection
+(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRootInjection");
+  Vector<Rational> result;
+  if (input.IsEqualToZero())
+  { result.MakeZero(0);
+    return result;
+  }
+  Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
+  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.MakeFromDynkinType(input);
+  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeRho(true);
+  int newIndex=DynkinType::GetNewIndexFromRootInjection(theRootInjection);
+  int newRank=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.GetDim();
+  newSimpleRoot.MakeEi(newRank, newIndex);
+  Vectors<Rational> simpleBasisOld;
+  simpleBasisOld.SetSize(newRank-1);
+  if (theRootInjection.size!=newRank-1)
+    crash << "This is a programming error: the root injection must have " << newRank-1 << " elements but it has " << theRootInjection.size << " elements instead. "
+    << "The type is " << input.ToString() << ". " << crash;
+  for (int i=0; i<theRootInjection.size; i++)
+    simpleBasisOld[i].MakeEi(newRank, theRootInjection[i]);
+//  std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
+  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
+  result.SetSize(newRank-1);
+  for (int i=0; i<simpleBasisOld.size; i++)
+    result[i]=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.RootScalarCartanRoot
+    (highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i])*2/
+    theSSSubalgebraToBeModified.theWeylNonEmbeddeD.RootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
+  return result;
+}
+
 void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
+  List<DynkinType> theLargerTypes;
+  List<List<int> > theRootInjections;
+  this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
+  CandidateSSSubalgebra newCandidate;
+  newCandidate.owner=this;
+  Vector<Rational> weightHElementWeAreLookingFor;
+  for (int i=0; i<theLargerTypes.size; i++)
+  { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
+    for (int j=0; j<this->theSl2s.size; j++)
+    {
+      DynkinSimpleType currentSimpleType= theLargerTypes[i].GetSmallestSimpleType();
+      if(this->theOrbitHelementLengths[j]!=currentSimpleType.lengthFirstCoRootSquared)
+        continue;
 
+    }
+  }
 }
+
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasOLD(SemisimpleLieAlgebra& newOwner)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasOLD");
@@ -540,8 +589,7 @@ void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
 
 void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight");
-  if (AutoIndex==0 || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='G' ||
-      this->theLetter=='F' || this->theRank==1 || (this->theLetter=='E' && this->theRank!=6))
+  if (AutoIndex==0 || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='G' || this->theLetter=='F' || this->theRank==1 || (this->theLetter=='E' && this->theRank!=6))
   { output.MakeIdMatrix(this->theRank);
     return;
   }

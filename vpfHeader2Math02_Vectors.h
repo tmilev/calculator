@@ -370,7 +370,7 @@ public:
   template <class otherType>
   void operator+=(const Vector<otherType>& other)
   { for (int i=0; i<this->size; i++)
-      this->TheObjects[i]+=other.TheObjects[i];
+      (*this)[i]+=other[i];
   }
   inline bool operator<(const Vector<coefficient>& other)const
   { return other>*this;

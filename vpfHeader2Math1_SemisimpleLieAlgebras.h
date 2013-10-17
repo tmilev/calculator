@@ -491,6 +491,10 @@ public:
   bool RanksAndIndicesFit(const DynkinType& input)const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
 
+  Vector<Rational> GetHighestWeightFundNewComponentFromRootInjection
+(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified)
+  ;
+
   void RegisterPossibleCandidate
   (CandidateSSSubalgebra& theCandidate)
   ;

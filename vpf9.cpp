@@ -3687,6 +3687,20 @@ std::string DynkinType::GetWeylGroupName(FormatExpressions* theFormat)const
 { return this->ToString(theFormat);
 }
 
+int DynkinType::GetNewIndexFromRootInjection(const List<int>& inputRootInjection)
+{ MacroRegisterFunctionWithName("DynkinType::GetNewIndexFromRootInjection");
+  Selection selectedIndices;
+  selectedIndices.init(inputRootInjection.size+1);
+  for (int i=0; i<inputRootInjection.size; i++)
+    selectedIndices.AddSelectionAppendNewIndex(inputRootInjection[i]);
+  selectedIndices.InvertSelection();
+  if (selectedIndices.CardinalitySelection!=1)
+  { crash.theCrashReport << "This is a programming error: faulty root injection. inputRootInjection is " << inputRootInjection << ". ";
+    crash << crash;
+  }
+  return selectedIndices.elements[0];
+}
+
 void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength)
 { DynkinSimpleType theMon;
   theMon.theRank=rank;
@@ -5493,27 +5507,32 @@ void WeylGroup::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens,
   }
 }
 
-void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
-{ outputW=(input);
+void WeylGroup::ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeExtremeRootInTheSameKMod");
+  output=inputRoot;
+  Vector<Rational> tempRoot;
   for(bool FoundHigher=true; FoundHigher; )
   { FoundHigher=false;
-    for (int i=0; i<this->SimpleBasisK.size; i++)
-    { Vector<Rational> tempRoot;
-      tempRoot=(outputW);
+    for (int i=0; i<inputSimpleBasisK.size; i++)
+    { tempRoot=output;
       if (lookingForHighest)
-        tempRoot+=(this->SimpleBasisK[i]);
+        tempRoot+=(inputSimpleBasisK[i]);
       else
-        tempRoot-=(this->SimpleBasisK[i]);
-      if (this->GetAmbientWeyl().RootSystem.GetIndex(tempRoot)!=-1)
-      { outputW=(tempRoot);
+        tempRoot-=(inputSimpleBasisK[i]);
+      if (this->RootSystem.GetIndex(tempRoot)!=-1)
+      { output=tempRoot;
         FoundHigher=true;
       }
       if (tempRoot.IsEqualToZero())
-      { outputW.MakeZero(this->GetOwnerSSalg().GetRank());
+      { output.MakeZero(this->GetDim());
         return;
       }
     }
   }
+}
+
+void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
+{ this->GetAmbientWeyl().ComputeExtremeRootInTheSameKMod(this->SimpleBasisK, input, outputW, lookingForHighest);
 }
 
 void rootSubalgebra::ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW)

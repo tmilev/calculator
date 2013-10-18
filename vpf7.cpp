@@ -35,10 +35,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
         { int currentIndex=this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex=this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex])
-          { std::cout << "This is a programming error. For some reason I am not computed. Here is me: "
-            << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-            assert(false);
-          }
+            crash << "This is a programming error. For some reason I am not computed. Here is me: " << this->ToString() << crash;
           outputMultiplyLieBracketsToGetGenerator/=this->ChevalleyConstants.elements[theIndex][currentIndex];
         }
         break;
@@ -149,10 +146,7 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   if (displayIndex>0)
     this->ActByEalpha(displayIndex-1);
   else
@@ -161,15 +155,9 @@ void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 
 void LittelmannPath::ActByEalpha(int indexAlpha)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
-  { std::cout << " This is a programming error: index of Littelmann root operator out of range. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
  if (this->Waypoints.size==0)
     return;
   Rational theMin=0;
@@ -246,15 +234,9 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
 { if (this->Waypoints.size==0)
     return;
   if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: LS path without initialized owner is begin acted upon. " << crash;
   if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
-  { std::cout << " This is a programming error: index of Littelmann root operator out of range. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << " This is a programming error: index of Littelmann root operator out of range. " << crash;
   Rational theMin=0;
   int minIndex=-1;
   WeylGroup& theWeyl=*this->owner;
@@ -1003,11 +985,9 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       }
     }
     if (!isGood)
-    { std::cout << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      crash << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
       << " is wrong. The question is, which is the more desirable case... The bad apple is element " << this->nilradicalSmall[i].ToString() << " of weight "
-      << this->weightsNilradicalSmall[i].ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << this->weightsNilradicalSmall[i].ToString() << ". " << crash;
   }
 /*  std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
   std::cout  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
@@ -1019,12 +999,9 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
 { List<Vectors<Rational> > emptyList;
-  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
-  (&this->generatorsSmallSub, &emptyList, &theGlobalVariables, 1000, true);
-  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
-  (this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
-  this->WeylFD.MakeParabolicFromSelectionSimpleRoots
-  (this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
+  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections(&this->generatorsSmallSub, &emptyList, &theGlobalVariables, 1000, true);
+  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots(this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
+  this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
 
   //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
   //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
@@ -1078,10 +1055,8 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
 
 void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output)
 { if (this->ExternalAutomorphisms.size>0)
-  { std::cout << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
+    << crash;
   output.ReservE(this->size);
   output.SetSize(0);
   ElementWeylGroup tempElt;

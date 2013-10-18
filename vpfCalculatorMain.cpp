@@ -87,17 +87,13 @@ int main(int argc, char **argv)
 	}
   //	inputString="textInput=+asf&buttonGo=Go";
   //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
-  std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
-  << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  "
-  << __DATE__ << ", " << __TIME__ << "</title>";
+  std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
   //  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
   //  << "></script>";
   //  << " djConfig = \"parseOnLoad: true\"></script>";
-
-  std::cout << "<script src=\"../jsmath/easy/load.js\"></script> ";
-  std::cout << "\n" << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
+  std::cout << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
   //std::cout << IPAdressCaller;
   //  std::stringstream tempStreamX;
   //  static_html3(tempStreamX);
@@ -157,16 +153,13 @@ int main(int argc, char **argv)
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
-    std::cout
-    << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
+    std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
     << " modified due to a javascript hijack issue. <br>";
-  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\""
-  << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
   << " this.form.submit(); return false;}\" >";
   std::cout << civilizedInputSafish;
   std::cout << "</textarea>\n<br>\n";
-  std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
-  << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
+  std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
     std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   std::cout << "\n</FORM>";
@@ -176,8 +169,8 @@ int main(int argc, char **argv)
   if (civilizedInput!="")
   { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;
-      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString << "_" << inputRankString
-      << ", i); h_{{i}}:=getCartanGenerator{}( " << inputWeylString << "_" << inputRankString << ", i) ;";
+      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString << "_" << inputRankString << ", i); h_{{i}}:=getCartanGenerator{}( "
+      << inputWeylString << "_" << inputRankString << ", i) ;";
       civilizedInput=tempStream.str()+civilizedInput;
     }
     theParser.Evaluate(civilizedInput);

@@ -3896,9 +3896,8 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 
       //Rational theRatio;
       //if (!theRatioSquared.GetSquareRootIfRational(theRatio))
-      //{ std::cout << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
-      //  << theRatio.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      //  assert(false);
+      //{ crash << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
+      //  << theRatio.ToString() << crash;
       //}
       out << theLetter;
       if (theDynkinIndex!=1)

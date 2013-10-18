@@ -21,17 +21,14 @@ bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(co
   tempVect=this->simpleGenerators[generatorIndex].GetVectorRational();
   tempRF=this->AmbientWeyl.RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType!=tempRF.typeRational)
-  { std::cout << "This might or might not be a programming mistake: I am being asked whether a weight"
+  { crash << "This might or might not be a programming mistake: I am being asked whether a weight"
     << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
     << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
     << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
     << " equals " << tempRF.ToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
-    << " whether a non-constant function is positive or not. "
-    << " If this is not a programming mistake, you might want to consider introducing a substitution "
+    << " whether a non-constant function is positive or not. If this is not a programming mistake, you might want to consider introducing a substitution "
     << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
-    << " Whether or not this is a mistake, I am crashing. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    << " Whether or not this is a mistake, I am crashing. " << crash;
     return false;
   }
   return !tempRF.ratValue.IsNegative();
@@ -49,7 +46,7 @@ bool WeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<Rationa
   tempVect.MakeEi(this->GetDim(), generatorIndex);
   tempRF=this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType!=tempRF.typeRational)
-  { std::cout << "This might or might not be a programming mistake: I am being asked whether a weight"
+  { crash << "This might or might not be a programming mistake: I am being asked whether a weight"
     << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
     << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
     << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
@@ -58,8 +55,7 @@ bool WeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<Rationa
     << " If this is not a programming mistake, you might want to consider introducing a substitution "
     << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
     << " Whether or not this is a mistake, I am crashing.  "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    << crash;
     return false;
   }
   return !tempRF.ratValue.IsNegative();
@@ -2012,10 +2008,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
 { if (this->theDigits.size>1)
     return false;
   if (this->IsEqualToZero())
-  { std::cout << "This is a programming error: it was requested that I factor 0, which is forbidden."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
   unsigned int n=this->theDigits[0];
   outputPrimeFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
@@ -2221,10 +2214,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
     this->DivideBy(output, interPoly, checkRemainder);
     if (!checkRemainder.IsEqualToZero())
-    { std::cout << "This is a programming error: polynomial " << output.ToString() << " was computed to be a divisor of " << this->ToString()
-      << " but it is not. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: polynomial " << output.ToString() << " was computed to be a divisor of " << this->ToString()
+      << " but it is not. " << crash;
     *this=interPoly;
     return true;
   } while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
@@ -2475,21 +2466,12 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
   List<std::string> goodInputStrings, goodOutputStrings;
   if (CGI::FileExists(theTestFileName))
   { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, false, false))
-    { std::cout << "This is a programming error or worse: failed to open an existing file: " << theTestFileName << ". "
-      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error or worse: failed to open an existing file: " << theTestFileName << ". Something is very wrong. " << crash;
     if (!theCommands.ReadTestFromFile(theTestFile, goodInputStrings, goodOutputStrings))
-    { std::cout << "Failed to get input/output strings from file: " << theTestFileName << ". "
-      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "Failed to get input/output strings from file: " << theTestFileName << ". Something is very wrong. " << crash;
   } else
   { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, true, false))
-    { std::cout << "This is a programming error or worse: file " << theTestFileName << " does not exist but cannot be created. "
-      << " Something is very wrong. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error or worse: file " << theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
   out << "Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;

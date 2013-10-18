@@ -38,7 +38,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   if (succeededToDump)
     std::cout << "<hr>Crash dumped in file " << theFileName;
   else
-    std::cout << "<hr>Failed to dump crash: check file permissions for file " << theFileName << ".";
+    std::cout << "<hr>Failed to dump crash: check if folder exists and the executable has file permissions for file " << theFileName << ".";
   std::cout.flush();
   theFile << this->theCrashReport.str();
   theFile.close();
@@ -1208,11 +1208,8 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
       if (currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsNegative())
         counter++;
     if (counter>3)
-    { std::cout << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: "
-      << "the Dynkin diagram should have nodes with valency at most 3, but this diagram has node with valency " << counter << ". "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash  << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: the Dynkin diagram should have nodes with"
+      << " valency at most 3, but this diagram has node with valency " << counter << ". " << crash;
     if (counter==3)
     { result++;
       this->indicesThreeNodes[indexComponent]=i;
@@ -1836,7 +1833,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   if (this->theDiagram.ToStringRelativeToAmbientType(owner.owneR->theWeyl.theDynkinType[0])=="F^{1}_4")
     return false;
   if (this->theDiagram.SimpleComponentTypes[0].theLetter=='A' && this->theDiagram.SimpleComponentTypes[0].theRank==1)
-  {//  assert(false);
+  {//  crash << crash;
   }
   ReflectionSubgroupWeylGroup tempSubgroup;
   tempSubgroup.AmbientWeyl=(owner.GetAmbientWeyl());
@@ -1879,7 +1876,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, Vectors<Rational>& N
   this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.GetAmbientWeyl());
   if (this->theDiagram.SimpleComponentTypes[0].theLetter=='A' && this->theDiagram.SimpleComponentTypes[0].theRank==1)
   { this->ComputeDiagramRelAndK(owner);
-    assert(false);
+    crash << crash;
   }
   this->SortRelation(owner);
   this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
@@ -2517,10 +2514,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
     theReport.Report(out.str());
   }
   if (this->GetNumPosRoots()<=0)
-  { std::cout << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
+    crash << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. " << crash;
 //  this->TestForConsistency(theGlobalVariables);
 }
 
@@ -2649,10 +2643,7 @@ bool SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
 { output=-1;
   Vector<Rational> tempRoot=beta;
   if (alpha.IsEqualToZero())
-  { std::cout << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot with zero value for alpha is not allowed. " << crash;
   bool foundRoot=false;
   while (this->theWeyl.IsARoot(tempRoot))
   { output++;
@@ -2709,13 +2700,12 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
         temp+=g231;
         temp+=g312;
         if (!temp.IsEqualToZero())
-        { std::cout << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
+        { crash << "This is a programming error. The computed structure constants are wrong: the Jacobi identity fails. More precisely, I get that "
           << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "]=" << g12.ToString(&theFormat)
           << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "]=" << g23.ToString(&theFormat)
           << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "]=" << g31.ToString(&theFormat)
           << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231=" << g231.ToString(&theFormat) << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
+          << crash;
           return false;
         }
         this->MakeChevalleyTestReport(i, j, k, this->GetNumGenerators(), theGlobalVariables);

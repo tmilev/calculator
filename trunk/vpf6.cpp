@@ -957,10 +957,9 @@ Expression Expression::ContextGetContextType(int theType)const
 { MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
   this->CheckInitialization();
   if (!this->IsContext())
-  { //std::cout << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
+  { //crash << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
     //<< " on a non-context expression. "
-    //<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    //assert(false);
+    //<< crash;
   }
   for (int i=1; i<this->children.size; i++)
     if ((*this)[i].IsListNElementsStartingWithAtom(theType))
@@ -2082,12 +2081,12 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
       reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
-      reportFourierTransformedCalculatorCommands << "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n";
+      reportFourierTransformedCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
       reportCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
       << ", differential operators - formatted for calculator input. <br><br>";
-      reportCalculatorCommands << "x_{{i}}:=PolynomialWithDO{}(\\partial_i, x_i);\n<br>"
-      << "\\partial_{{i}}:=DifferentialOperator{}(\\partial_i, x_i);\n";
+      reportCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
+      << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
 
       for (int j=0; j<theGeneratorsItry.size; j++)
       { theQDOs[j].GetEWAsetMatrixPartsToId(diffOpPart);

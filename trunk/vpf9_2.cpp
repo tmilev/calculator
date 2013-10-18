@@ -624,10 +624,7 @@ WeylGroup& rootSubalgebra::GetAmbientWeyl()
 
 SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg()
 { if (this->owneR==0)
-  { std::cout << "This is a programming error. Attempting to access ambient Lie algebra of non-initialized root subalgebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error. Attempting to access ambient Lie algebra of non-initialized root subalgebras. " << crash;
   return (*this->owneR);
 }
 
@@ -739,7 +736,7 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
 void WeylGroup::WriteToFile(std::fstream& output)
 { output << "Weyl_group: ";
   std::cout << "This code is not implemented yet (due to a regression).";
-  assert(false);
+  crash << crash;
 //  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
 //  this->lengthLongestRootSquared.WriteToFile(output);
@@ -752,7 +749,7 @@ void WeylGroup::ReadFromFile(std::fstream& input)
 //  int tempI;
   input >> tempS;
   std::cout << "This code is not implemented yet (due to a regression).";
-  assert(false);
+  crash << crash;
   //input >> this->WeylLetter >> tempI >> tempS;
   assert(tempS=="Long_root_length:");
 //  this->lengthLongestRootSquared.ReadFromFile(input);
@@ -768,11 +765,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   char simpleType;
   int theRank;
   if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank))
-  { std::cout << "This is a programming error: ElementToStringConeConditionNotSatisfying"
-    << " called on a non-simple Lie algebra. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: ElementToStringConeConditionNotSatisfying called on a non-simple Lie algebra. " << crash;
   if (simpleType=='B')
     out << "$\\mathrm{so}(2n+1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C=-C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D=-D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
   if (simpleType=='C')
@@ -848,10 +841,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   char simpleType;
   int theDimension;
   if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension))
-  { std::cout << "This is a programming error: ElementToStringConeConditionNotSatisfying called on a non-simple Lie algebra. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: ElementToStringConeConditionNotSatisfying called on a non-simple Lie algebra. " << crash;
   if (simpleType=='B')
   { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2+1, 1, 0);
@@ -1187,7 +1177,7 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
     if (!weightSupport.Contains(tempRoot))
       return i;
   }
-//  assert(false);
+//  crash << crash;
 //  return -1;
 }
 
@@ -1432,18 +1422,12 @@ bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables
 
 void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other)const
 { if (this->owneR!=other.owneR)
-  { std::cout
-    << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << ".";
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. " << crash;
 }
 
 bool ChevalleyGenerator::CheckInitialization()const
 { if (this->owneR==0)
-  { std::cout << "This is a programming error: attempting to use a non-initialized Chevalley generator. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: attempting to use a non-initialized Chevalley generator. " << crash;
     return false;
   }
   return true;
@@ -1648,10 +1632,8 @@ void RationalFunctionOld::Invert()
   assert(this->checkConsistency());
   if (this->expressionType==this->typeRational)
   { if (this->ratValue.IsEqualToZero())
-    { std::cout << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
-      << "handled gracefully. Crashing ungracefully. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
+      << "handled gracefully. Crashing ungracefully. " << crash;
     this->ratValue.Invert();
     return;
   }
@@ -1669,15 +1651,11 @@ void RationalFunctionOld::Invert()
 bool RationalFunctionOld::checkConsistency()const
 { if (this->expressionType==this->typePoly)
   { if (this->Numerator.IsZeroPointer())
-    { std::cout << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. " << crash;
       return false;
     }
     if (this->Numerator.GetElementConst().IsAConstant())
-    { std::cout << "This is a programming error: a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. " << crash;
       return false;
     }
 //      int commentMeOutWhenDoneDebugging=-1;
@@ -1685,22 +1663,18 @@ bool RationalFunctionOld::checkConsistency()const
   }
   if (this->expressionType==this->typeRationalFunction)
   { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
-    { std::cout << "This is a programming error: a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
+      << crash;
       return false;
     }
     if (this->Denominator.GetElementConst().IsAConstant())
-    { std::cout << "This is a programming error: a rational function is flagged as having non-constant denominator, but the denominator is constant. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    { crash << "This is a programming error: a rational function is flagged as having non-constant denominator, but the denominator is constant. " << crash;
       return false;
     }
   }
   if (this->expressionType!=this->typeRational && this->expressionType!=this->typePoly && this->expressionType!=this->typeRationalFunction)
-  { std::cout << "This is a programming error: a rational function is not initialized properly: its type is " << this->expressionType
-    << " which is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: a rational function is not initialized properly: its type is " << this->expressionType
+    << " which is not allowed. " << crash;
     return false;
   }
   return true;
@@ -1747,29 +1721,20 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
 //  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
   prodBuf.DivideBy(lcmBuf, output, remBuf);
   if (!remBuf.IsEqualToZero() || output.IsEqualToZero() )
-  { std::cout << "This is a programming error. <br>While computing the gcd of left=" << left.ToString() << " <br>and right="
+    crash << "This is a programming error. <br>While computing the gcd of left=" << left.ToString() << " <br>and right="
     << right.ToString() << " <br>I got that left*right= " << prodBuf.ToString() << "<br>, and that lcm(left,right)="
     << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>" << output.ToString()
-    << "<br> with remainder " << remBuf.ToString() << ", which is imposible. <br>The Groebner basis follows. <br>";
-    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << "<br> with remainder " << remBuf.ToString() << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 //  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
-void RationalFunctionOld::MakeOneLetterMoN
-  (int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables,
-   int ExpectedNumVars)
+void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables, int ExpectedNumVars)
 { if ( theIndex<0)
-  { std::cout << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << theIndex << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << theIndex << ". " << crash;
   this->expressionType=this->typePoly;
   ExpectedNumVars=MathRoutines::Maximum(theIndex+1, ExpectedNumVars);
-  this->Numerator.GetElement().MakeDegreeOne
-  (ExpectedNumVars, theIndex, theCoeff);
+  this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
   this->context=&theGlobalVariables;
 }
 
@@ -1872,12 +1837,10 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
     }
   }
   if (maxMonNoTIndex==-1)
-  { std::cout << "This is a programming error: failed to obtain lcm of two rational functions. "
-    << "The list of polynomials is: ";
+  { crash << "This is a programming error: failed to obtain lcm of two rational functions. The list of polynomials is: ";
     for (int i=0; i<theBasis.size; i++)
-      std::cout << theBasis[i].ToString() << ", ";
-    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+      crash << theBasis[i].ToString() << ", ";
+    crash << crash;
   }
   output=theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
@@ -2083,17 +2046,14 @@ void RationalFunctionOld::Simplify()
 //      << this->Denominator.GetElement().ToString() << "<br>";
       this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD, this->context);
       if (theGCD.IsEqualToZero())
-      { std::cout << "This is a programing error: " << " while fetching the gcd of " << this->Numerator.GetElement().ToString() << " and "
-        << this->Denominator.GetElement().ToString() << " I got 0, which is impossible. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programing error: " << " while fetching the gcd of " << this->Numerator.GetElement().ToString() << " and " << this->Denominator.GetElement().ToString()
+        << " I got 0, which is impossible. " << crash;
 //      std::cout << "to get " << theGCD.ToString();
 //      std::cout << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement()=(tempP);
 //      std::cout << "<br>the critical divide: " << this->Denominator.GetElement().ToString() << " by " << theGCD.ToString() << ".";
-      //assert(false);
+      //crash << crash ;
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Denominator.GetElement()=(tempP);
     }
@@ -2245,7 +2205,8 @@ void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
     ElementSemisimpleLieAlgebra<Rational>& currentLieElt=inputElts[i];
     for (int j=0; j<this->theDomain().GetRank(); j++)
     { this->theRange().LieBracket(this->imagesAllChevalleyGenerators[j+this->theDomain().GetNumPosRoots()], currentLieElt, tempLieElement);
-      if(!currentLieElt.IsProportionalTo(tempLieElement, tempRat)){ assert(false);}
+      if(!currentLieElt.IsProportionalTo(tempLieElement, tempRat))
+        crash << crash;
       currentWeight[j]=tempRat;
     }
   }
@@ -2312,10 +2273,7 @@ void RationalFunctionOld::RaiseToPower(int thePower)
   }
   if (thePower==0)
   { if (this->IsEqualToZero())
-    { std::cout << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. " << crash;
     this->MakeOne(this->context);
     return;
   }
@@ -2985,10 +2943,7 @@ bool MonomialP::IsGEQTotalDegThenLexicographicLastVariableStrongest(const Monomi
 
 bool MonomialP::IsGEQpartialOrder(MonomialP& m)
 { if (this->monBody.size!=m.monBody.size)
-  { std::cout << "This is a programming error: comparing two monomials with different number of variables. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: comparing two monomials with different number of variables. " << crash;
   for (int i=0; i<m.monBody.size; i++)
     if ((*this)[i]<m[i])
       return false;

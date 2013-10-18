@@ -105,7 +105,8 @@ void* RunTimer(void* ptr)
     << " the variable theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit located in file "
     << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
     std::cout.flush();
-    assert(false);
+    crash << crash;
+    return 0;
   } else
     pthread_exit(NULL);
 }

@@ -19,12 +19,10 @@ void LargeIntUnsigned::AssignString(const std::string& input)
   { this->operator*=(10);
     int whichDigit=input[i]-'0';
     if (whichDigit>9 || whichDigit<0)
-    { std::cout << "This is a programming error: LargeIntUnsigned::AssignString" << " called on the string " << input
+      crash << "This is a programming error: LargeIntUnsigned::AssignString" << " called on the string " << input
       << " which does not consist entirely of digits. Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
       << " internal use only. If you want to parse arbitrary unsafe expressions coming from the user, please use the big gun (a.k.a. CommandList). "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      << crash;
     this->operator+=((unsigned) whichDigit);
   }
 }
@@ -186,11 +184,11 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
   Matrix<Rational>  theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
   FormatExpressions theFormat;
-  assert(false);
+  crash << crash;
 //  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  assert(false);
+  crash << crash;
 //  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS, theGlobalVariables);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ToString();
@@ -420,10 +418,8 @@ bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
   selectedRoots.ReservE(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
   if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
-  { std::cout << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
-    << " elements while the weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
+    << " elements while the weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << crash;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
     { selectedRoots.SetSize(selectedRoots.size+1);
@@ -518,14 +514,14 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
   out << "=" << this->thePfs.DebugString;
 //  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
-  assert(false);
+  crash << crash;
 //  this->thePfs.theChambersOld.init();
 //  this->thePfs.theChambersOld.theDirections=this->GmodKNegWeightsBasisChanged;
 //  this->thePfs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
 //  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
 //  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
-  assert(false);
+  crash << crash;
 /*
   for (int i=0; i<this->thePfs.theChambersOld.size; i++)
     if (this->thePfs.theChambersOld.TheObjects[i]!=0)
@@ -558,7 +554,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
     for (int k=0; k<this->theLinearOperators.size; k++)
     { this->GetProjection(k, this->projectivizedChambeR.TheObjects[i].GetInternalPoint(), tempRoot);
       tempRoot-=this->NonIntegralOriginModificationBasisChanged;
-      assert(false);
+      crash << crash ;
       int theIndex;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex!=-1)
       { tempQP=this->theQPsSubstituted[theIndex][k];
@@ -771,7 +767,7 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   theFracs.split(theGlobalVariables, 0);
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ToString(theGlobalVariables, theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
-  assert(false);
+  crash << crash ;
 //  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
 //  theFracs.theChambersOld.theDirections=theRoots;
 //  theFracs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
@@ -1256,10 +1252,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
-  { std::cout << "This is a programming error: currentComponent is empty "
-    << " which is impossible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: currentComponent is empty "
+    << " which is impossible. " << crash;
 //  std::cout << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
 //  << theBilinearForm.ToString();
   if (this->numberOfThreeValencyNodes(indexComponent, theBilinearForm)==1)
@@ -1486,7 +1480,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
 
 void Cone::TransformToWeylProjective
   (ConeComplex& owner, GlobalVariables& theGlobalVariables)
-{ assert(false);
+{ crash << crash;
 /*
   for (int i=0; i<this->Externalwalls.size; i++)
     this->Externalwalls.TheObjects[i].TransformToWeylProjective(theGlobalVariables);
@@ -2292,7 +2286,7 @@ bool Cone::EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, 
     this->Normals.SetSize(currentUniqueElementIndex+1);
   for (int i=0; i<this->Vertices.size; i++)
     if (this->Normals.HasAnElementWithNegativeScalarProduct(this->Vertices[i]))
-      assert(false);
+      crash << crash;
   for (int i=0; i<this->Normals.size; i++)
     if (!this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals.TheObjects[i]))
       return false;
@@ -2527,7 +2521,7 @@ int RationalFunctionOld::GetMinNumVars()const
       return this->Numerator.GetElementConst().GetMinNumVars();
     case RationalFunctionOld::typeRationalFunction:
       return MathRoutines::Maximum(this->Numerator.GetElementConst().GetMinNumVars(), this->Denominator.GetElementConst().GetMinNumVars());
-    default: //this should never happen! maybe assert(false) here...
+    default: //this should never happen! maybe crash << crash here...
       return -1;
   }
 }
@@ -3164,8 +3158,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)const
   basisRoots.AssignMatrixRows(this->basisRationalForm);
   //std::cout <<  "the basis: " << basisRoots.ToString();
   if (!theVector.GetCoordsInBasiS(basisRoots, output))
-  { std::cout << "oops bad!";
-    assert(false);
+  { crash << "oops bad!" << crash;
     return false;
   }
   for (int i=0; i<output.size; i++)
@@ -3337,7 +3330,7 @@ bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<R
           oldCheckSum.ToString(tempS3);
           tempLRat2.ToString(tempS4);
           PartFraction::flagAnErrorHasOccurredTimeToPanic=true;
-  //        assert(false);
+  //        crash << crash;
         }
         oldCheckSum.Assign(PartFractions::CheckSum);
         oldOutput.Assign(output);
@@ -3388,7 +3381,7 @@ void LargeInt::AssignString(const std::string& input)
 std::string PartFractions::DoTheFullComputationReturnLatexFileString
 (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml)
 { std::string whatWentWrong;
-  assert(false);
+  crash << crash;
 //  this->theChambersOld.theDirections=toBePartitioned;
   this->AmbientDimension=toBePartitioned.GetDim();
 //  this->theChambersOld.AmbientDimension=toBePartitioned.GetDim();
@@ -3396,7 +3389,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
   //this->theChambers.ReadFromDefaultFile(theGlobalVariables);
   std::stringstream out;
   std::stringstream outHtml;
-  assert(false);
+  crash << crash ;
 //  this->theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
 //  this->theChambersOld.QuickSortAscending();
 //  this->theChambersOld.LabelChamberIndicesProperly();
@@ -3407,17 +3400,17 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
   outHtml << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
   Vector<Rational> tempRoot; tempRoot.MakeZero(this->AmbientDimension);
   tempRoot.MakeZero(this->AmbientDimension);
-  assert(false);
+  crash << crash;
 //  this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
   << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
-  assert(false);
+  crash << crash;
 //  out << this->theChambersOld.theDirections.ElementToStringGeneric();
   out << "\n\n The corresponding generating function is: " << this->ToString(theGlobalVariables, theFormat) << "= (after splitting acording to algorithm)";
   this->split(theGlobalVariables, 0);
   out << this->ToString(theGlobalVariables, theFormat);
-  assert(false);
+  crash << crash;
 //  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
 //        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
 //  outHtml << "There are " << this->theChambersOld.size << " systems of linear inequalities "
@@ -3426,7 +3419,7 @@ std::string PartFractions::DoTheFullComputationReturnLatexFileString
   QuasiPolynomial tempQP;
   std::string tempS;
   Vector<Rational> tempIndicator;
-  assert(false);
+  crash << crash;
   /*for (int i=0; i<this->theChambersOld.size; i++)
     if (this->theChambersOld.TheObjects[i]!=0)
     { Cone& currentChamber=this->theChambers[i];
@@ -3509,11 +3502,8 @@ void QuasiPolynomial::Substitution
   { tempP=this->valueOnEachLatticeShift[i];
     bool tempB=tempP.Substitution(theSub);
     if (!tempB)
-    { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
-      << tempP.ToString() << " failed but the current function does not handle this properly. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+      << " failed but the current function does not handle this properly. " << crash;
     for (int j=0; j<allRepresentatives.size; j++)
       if (imagesAllRepresentatives[j]==this->LatticeShifts[i])
         output.AddLatticeShift(tempP, allRepresentatives[j]);
@@ -3537,11 +3527,8 @@ void QuasiPolynomial::Substitution
   { tempP=this->valueOnEachLatticeShift[i];
     bool tempB=tempP.Substitution(theSub);
     if (!tempB)
-    { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
-      << tempP.ToString() << " failed but the current function does not handle this properly. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+      << " failed but the current function does not handle this properly. " << crash;
     output.AddLatticeShift(tempP, this->LatticeShifts.TheObjects[i]+inputTranslationSubtractedFromArgument);
   }
 }
@@ -3580,11 +3567,8 @@ bool QuasiPolynomial::SubstitutionLessVariables(const PolynomialSubstitution<Rat
       tempP=this->valueOnEachLatticeShift[i];
       bool tempB=tempP.Substitution(theSub);
       if (!tempB)
-      { std::cout << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial "
-        << tempP.ToString() << " failed but the current function does not handle this properly. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << tempP.ToString()
+        << " failed but the current function does not handle this properly. " << crash;
       output.AddLatticeShift(tempP, tempRoot);
     }
   }
@@ -4070,7 +4054,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   input >> tempS;
   int numReadWords;
   if (tempS!="NormalConstAdjustment:")
-  { assert(false);
+  { crash << crash;
     return false;
   }
   this->NonIntegralOriginModificationBasisChanged.ReadFromFile(input);
@@ -4133,17 +4117,17 @@ void ConeComplex::WriteToFile
 bool ConeComplex::ReadFromFile
   (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
 { if(!this->List<Cone>::ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes))
-  { assert(false);
+  { crash << crash ;
     return false;
   }
   std::string tempS;
   input >> tempS >> this->indexLowestNonRefinedChamber;
   if (tempS!="IndexLowestNonRefined:")
-  { assert(false);
+  { crash << crash;
     return false;
   }
   if (!this->splittingNormals.ReadFromFile(input))
-  { assert(false);
+  { crash << crash;
     return false;
   }
   this->slicingDirections.ReadFromFile(input, theGlobalVariables);
@@ -4555,10 +4539,7 @@ LargeIntUnsigned::  LargeIntUnsigned(const LargeIntUnsigned& x)
 void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
 { LargeIntUnsigned tempUI, tempUI2;
   if (a.IsEqualToZero() || b.IsEqualToZero())
-  { std::cout << "This is a programming error: calling lcm on zero elements is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: calling lcm on zero elements is not allowed. " << crash;
   LargeIntUnsigned::gcd(a, b, tempUI);
   a.MultiplyBy(b, tempUI2);
   output=(tempUI2);
@@ -6162,7 +6143,7 @@ void DrawOperations::operator+=(const DrawOperations& other)
         this->IndexNthDrawOperation.AddOnTop(other.IndexNthDrawOperation[i]+shiftDrawTextAtVector);
         break;
       default:
-        assert(false);
+        crash << crash;
         break;
     }
   this->theDrawTextOperations.AddListOnTop(other.theDrawTextOperations);
@@ -6372,13 +6353,8 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       if (!this->Numerator.GetElement().Substitution(theSub, 1))
-      { std::cout << "This is a programming error: "
-        << " substitution   " << theSub.ToString() << " into polynomial "
-        << this->Numerator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << this->Numerator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. " << crash;
 //      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
@@ -6386,26 +6362,16 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
       return;
     case RationalFunctionOld::typeRationalFunction:
       if (!this->Numerator.GetElement().Substitution(theSub, 1))
-      { std::cout << "This is a programming error: "
-        << " substitution   " << theSub.ToString() << " into polynomial "
-        << this->Numerator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: substitution " << theSub.ToString() << " into polynomial " << this->Numerator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. " << crash;
       if (!this->Denominator.GetElement().Substitution(theSub, 1))
-      { std::cout << "This is a programming error: "
-        << " substitution   " << theSub.ToString() << " into polynomial "
-        << this->Denominator.GetElement().ToString()
-        << " failed but the current function does not handle this properly. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << this->Denominator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. " << crash;
       this->Simplify();
 //      assert(this->checkConsistency());
       return;
     default:
-      assert(false);
+      crash << crash;
       break;
   }
 }

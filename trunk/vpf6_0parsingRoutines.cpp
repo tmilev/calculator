@@ -212,8 +212,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("EndProgram");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-  this->AddOperationBuiltInType("PolynomialWithDO");
-  this->AddOperationBuiltInType("DifferentialOperator");
+//  this->AddOperationBuiltInType("ElementWeylAlgebraDO");
+//  this->AddOperationBuiltInType("ElementWeylAlgebraPoly");
 
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
@@ -862,12 +862,10 @@ bool CommandList::ExtractExpressions(Expression& outputExpression, std::string* 
     while(this->ApplyOneRule())
     { numberOfTimesApplyOneRuleCalled++;
       if (numberOfTimesApplyOneRuleCalled>maxNumTimesOneRuleCanBeCalled)
-      { std::cout << "This may be a programming error: CommandList::ApplyOneRule called more than " << maxNumTimesOneRuleCanBeCalled
+        crash << "This may be a programming error: CommandList::ApplyOneRule called more than " << maxNumTimesOneRuleCanBeCalled
         << " times without advancing to the next syntactic element in the syntactic soup. If this is indeed an expression which requires that"
         << " many application of a single parsing rule, then you should modify function CommandList::ExtractExpressions"
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        << crash;
     }
   }
   bool success=false;
@@ -963,11 +961,10 @@ bool CommandList::ApplyOneRule()
   }
 
 /*  if (lastE.theData.IndexBoundVars==-1)
-  { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
+  { crash << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
     << this->ElementToStringSyntacticStack()
     << " does not have properly initialized context. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
-    assert(false);
+    << crash;
   }*/
   if (secondToLastS==":" && lastS=="=")
     return this->ReplaceXXByCon(this->conDefine());

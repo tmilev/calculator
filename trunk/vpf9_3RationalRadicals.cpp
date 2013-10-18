@@ -188,7 +188,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
     do
     { //counter ++;
       //if (counter>1000)
-      //  assert(false);
+      //  crash << crash;
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
       //std::cout << "<br>The basis: " << this->theGeneratingElementPowersBasis.ToString()
@@ -222,9 +222,7 @@ bool AlgebraicClosureRationals::ReduceMe()
 //  std::cout << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
   bool mustBeTrue=theMinPoly.FactorMeOutputIsSmallestDivisor(smallestFactor, 0);
   if (!mustBeTrue)
-  { std::cout << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
 //  std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt()==theDim)
     return true;
@@ -241,10 +239,7 @@ bool AlgebraicClosureRationals::ReduceMe()
   MatrixTensor<Rational> theProjection;
   int smallestFactorDegree=-1;
   if (!smallestFactor.TotalDegree().IsSmallInteger(&smallestFactorDegree))
-  { std::cout << "This is a programming error: " << smallestFactor.ToString() << " has non-integral exponent, which "
-    << " should be impossible in the current context. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: " << smallestFactor.ToString() << " has non-integral exponent, which should be impossible in the current context. " << crash;
   //theProjection.init(smallestFactorDegree, this->DimOverRationals);
   theProjection.MakeZero();
   for (int i=0; i<smallestFactorDegree; i++)
@@ -309,10 +304,8 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   for (int i=0; i<input.theElT.size(); i++)
   { int currentIndex=input.theElT[i].theIndex;
     if (currentIndex<0 || currentIndex>=this->theBasesAdditive[input.basisIndex].size)
-    { std::cout << "This is a programming error: I am getting basis index " << input.basisIndex << " with current index " << currentIndex
-      << ". A printout of the algebraic closure follows. " << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: I am getting basis index " << input.basisIndex << " with current index " << currentIndex
+      << ". A printout of the algebraic closure follows. " << this->ToString() << crash;
     output.AddOtherTimesConst(this->theBasesAdditive[input.basisIndex][currentIndex], input.theElT.theCoeffs[i]);
   }
 }
@@ -326,10 +319,8 @@ void AlgebraicClosureRationals::GetMultiplicationBy
   MatrixTensor<Rational> currentMat;
   for (int i=0; i<inputAdditiveForm.size(); i++)
   { if (inputAdditiveForm[i].theIndex<0 || inputAdditiveForm[i].theIndex>=this->theBasisMultiplicative.size)
-    { std::cout << "This is a programming error: element " << input.ToString() << " has bad index, namely, "
-      << inputAdditiveForm[i].theIndex << ". The algebraic closure is: " << this->ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: element " << input.ToString() << " has bad index, namely, " << inputAdditiveForm[i].theIndex
+      << ". The algebraic closure is: " << this->ToString() << ". " << crash;
     currentMat= this->theBasisMultiplicative[inputAdditiveForm[i].theIndex];
     currentMat*=inputAdditiveForm.theCoeffs[i];
     output+=currentMat;
@@ -370,7 +361,7 @@ Rational AlgebraicNumber::GetNumeratorRationalPart()const
 }
 
 unsigned int AlgebraicNumber::HashFunction()const
-{ //assert(false);
+{ //crash << crash;
   //WARNING. Algebraic numbers, as they are recorded in memory at the moment,
   //do not have unique presentations, so we return 0 as their hash function.
   //Computing a hash function can be done, for example, by picking the hash function of the minimal polynomial
@@ -399,10 +390,7 @@ bool AlgebraicNumber::NeedsBrackets()const
 
 bool AlgebraicNumber::CheckNonZeroOwner()const
 { if (this->owner==0)
-  { std::cout << "This is a programming error: algebraic number with non-initialized owner not permitted in the current context."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: algebraic number with non-initialized owner not permitted in the current context." << crash;
   return true;
 }
 
@@ -462,11 +450,9 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   checkSub[0].MakeConst(outputRoot);
   algNumPoly.Substitution(checkSub);
   if (!algNumPoly.IsEqualToZero())
-  { std::cout << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    crash << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
     << " was given by requesting that it has minimial polynomial " << algNumPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << "does not yield zero, rather yields " << algNumPoly.ToString() << ". " << crash;
   //check end
   return true;
 
@@ -477,10 +463,8 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
 { MacroRegisterFunctionWithName("AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOnFirstVariableNoFail");
   int indexVar=-1;
   if (!input.IsOneVariableNonConstPoly(&indexVar))
-  { std::cout << "This is a programming error: I am being asked convert to a one-variable polynomial a polynomial "
-    << "depending on more than one variables. The input poly is: " << input.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: I am being asked convert to a one-variable polynomial a polynomial "
+    << "depending on more than one variables. The input poly is: " << input.ToString() << crash;
   PolynomialSubstitution<AlgebraicNumber> theSub;
   theSub.MakeIdSubstitution(indexVar+1);
   theSub[indexVar].MakeMonomiaL(0, 1, 1);
@@ -533,9 +517,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
     { int relRowIndex=currentCoeffMatForm[j].vIndex;
       int relColIndex=currentCoeffMatForm[j].dualIndex;
       if (relRowIndex==-1 || relColIndex==-1)
-      { std::cout << "This is a programming error: non initialized monomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
+        crash << "This is a programming error: non initialized monomial. " << crash;
       theGenMat.AddMonomial(MonomialMatrix(currentMon.TotalDegreeInt()*startingDim+relRowIndex, startingDim*(degreeMinPoly-1)+relColIndex), currentCoeffMatForm.theCoeffs[j]);
     }
   }
@@ -574,11 +556,9 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   theSub[0].MakeConst(outputRoot);
   minPoly.Substitution(theSub);
   if (!minPoly.IsEqualToZero())
-  { std::cout << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
+    crash << "This is a programming error. The number z:=" << outputRoot.ToString() << " was just adjoined to the base field; z"
     << " was given by requesting that it has minimial polynomial " << minPoly.ToString() << ", however, substituting z back in to the minimal polynomial "
-    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    << "does not yield zero, rather yields " << minPoly.ToString() << ". " << crash;
   //
   return true;
 }
@@ -587,17 +567,13 @@ void AlgebraicNumber::Invert()
 { MacroRegisterFunctionWithName("AlgebraicNumber::Invert");
   if (this->owner==0)
   { if (this->theElT.IsEqualToZero())
-    { std::cout << "This is a programming error: division by zero. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: division by zero. " << crash;
     bool isGood=(this->theElT.size()==1);
     if (isGood)
       isGood=(this->theElT[0].theIndex==0);
     if (!isGood)
-    { std::cout << "This is a programming error: Algebraic number has no owner, so it must be rational, but it appears to be not. "
-      << " as its theElt vector is: " << this->theElT.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+      crash << "This is a programming error: Algebraic number has no owner, so it must be rational, but it appears to be not. "
+      << " as its theElt vector is: " << this->theElT.ToString() << crash;
     this->theElT.theCoeffs[0].Invert();
     return;
   }
@@ -628,9 +604,7 @@ bool AlgebraicNumber::CheckCommonOwner(const AlgebraicNumber& other)const
 { if (this->owner==0 || other.owner==0)
     return true;
   if (this->owner!=other.owner)
-  { std::cout << "This is a programming error. Two algebraic numbers have different algebraic closures when they shouldn't. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error. Two algebraic numbers have different algebraic closures when they shouldn't. " << crash;
     return false;
   }
   return true;
@@ -647,10 +621,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
   if (theOwner==0)
     theOwner=other.owner;
   if (theOwner==0)
-  { std::cout << "This is a programming error: algebraic numbers with zero owners but different basis indices. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
@@ -671,10 +642,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   if (theOwner==0)
     theOwner=other.owner;
   if (theOwner==0)
-  { std::cout << "This is a programming error: algebraic numbers with zero owners but different basis indices. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: algebraic numbers with zero owners but different basis indices. " << crash;
   VectorSparse<Rational> AdditiveFormOther;
   theOwner->GetAdditionTo(*this, this->theElT);
   theOwner->GetAdditionTo(other, AdditiveFormOther);
@@ -686,9 +654,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
 
 bool AlgebraicNumber::CheckConsistency()const
 { if (this->flagDeallocated)
-  { std::cout << "This is a programming error: use after free of AlgebraicNumber. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: use after free of AlgebraicNumber. " << crash;
   return true;
 }
 
@@ -808,8 +774,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
 }
 
 void AlgebraicNumber::RadicalMeDefault(int theRad)
-{ std::cout << "Not implemented yet!" << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
+{ crash << "Not implemented yet!" << crash;
 /*  MatrixTensor<Rational> theRadicalOp;
   theRadicalOp.MakeZero();
   MonomialTensor tempM;
@@ -900,10 +865,9 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
   if (other.IsRational(&ratValue))
     return *this==ratValue;
   if (this->owner!=other.owner)
-  { std::cout << "This might or might not be a programming error: comparing two algebraic number that do not have the same owner. "
-    << "The numbers have owners of respective addresses " << this->owner << " and " << other.owner << ". "
-    << "Crashing to let you know. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash.theCrashReport << "This might or might not be a programming error: comparing two algebraic number that do not have the same owner. "
+    << "The numbers have owners of respective addresses " << this->owner << " and " << other.owner << ". Crashing to let you know. ";
+    crash << crash;
   }
   this->CheckNonZeroOwner();
   if (this->basisIndex==other.basisIndex)
@@ -916,10 +880,7 @@ bool AlgebraicNumber::operator==(const AlgebraicNumber& other)const
 
 void AlgebraicNumber::operator=(const Polynomial<AlgebraicNumber>& other)
 { if (!other.IsAConstant(this))
-  { std::cout << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to assign non-constant polynomial to a Rational number is not allowed. " << crash;
 }
 
 void AlgebraicNumber::operator=(const Rational& other)
@@ -931,10 +892,7 @@ void AlgebraicNumber::operator=(const Rational& other)
 void Rational::operator=(const AlgebraicNumber& other)
 { bool isGood=other.IsRational(this);
   if (!isGood)
-  { std::cout << "This is a programming error: attempting to assign the non-rational algebraic number " << other.ToString() << "to a rational number. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to assign the non-rational algebraic number " << other.ToString() << "to a rational number. " << crash;
 }
 
 std::string ElementZmodP::ToString(FormatExpressions* theFormat)const

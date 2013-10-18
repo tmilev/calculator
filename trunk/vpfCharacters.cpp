@@ -480,12 +480,8 @@ Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v
 CoxeterElement CoxeterGroup::GetCoxeterElement(int i)const
 { MacroRegisterFunctionWithName("CoxeterGroup::GetCoxeterElement");
   if (this->rhoOrbit.size<=i || i<0)
-  { std::cout << "This is a programming error: group element indexed by " << i
-    << " but the rho-orbit of the group has only " << this->rhoOrbit.size
-    << " elements. The programmer either gave a bad index, or did not compute the rho orbit. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: group element indexed by " << i << " but the rho-orbit of the group has only " << this->rhoOrbit.size
+    << " elements. The programmer either gave a bad index, or did not compute the rho orbit. " << crash;
   return CoxeterElement(this, this->DecomposeTodorsVector(rhoOrbit[i]));
 }
 

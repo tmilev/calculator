@@ -3261,7 +3261,7 @@ bool Expression::IsDouble(double* whichDouble)const
   return false;
 }
 
-bool Expression::IsConstant()const
+bool Expression::IsConstantNumber()const
 { if (this->theBoss==0)
     return false;
   if (this->IsAtoM(this->theBoss->opPi()))
@@ -3624,7 +3624,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << "ElementWeylAlgebra{}(";
     out << this->GetValue<ElementWeylAlgebra<Rational> >().ToString(&contextFormat.GetElement());
     out << ")";
-//    out << "[" << this->GetContext().ToString() << "]";
+    out << "[" << this->GetContext().ToString() << "]";
     result=true;
   }
   output=out.str();
@@ -4007,6 +4007,25 @@ bool Expression::IsLisT()const
   return true;
 }
 
+bool Expression::IsFrozen()const
+{ std::string atomName;
+  if (!this->IsListNElementsStartingWithAtom())
+    return false;
+  return (*this)[0].IsAtomThatFreezesArguments();
+}
+
+bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  if (outputWhichAtom!=0)
+    *outputWhichAtom=this->theBoss->GetOperations()[this->theData];
+  return this->theBoss->atomsThatFreezeArguments.Contains(this->theBoss->GetOperations()[this->theData]);
+}
+
 bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
 { if (this->theBoss==0)
     return false;
@@ -4014,7 +4033,7 @@ bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
     return false;
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
-  if (this->theData>= this->theBoss->NumPredefinedOperations)
+  if (this->theData>= this->theBoss->NumPredefinedAtoms)
     return false;
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
@@ -4028,8 +4047,8 @@ bool Expression::IsBuiltInFunction(std::string* outputWhichOperation)const
     return false;
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
-  if (this->theData<this->theBoss->NumPredefinedOperations ||
-      this->theData>=this->theBoss->NumPredefinedOperations+this->theBoss->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
+  if (this->theData<this->theBoss->NumPredefinedAtoms ||
+      this->theData>=this->theBoss->NumPredefinedAtoms+this->theBoss->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
     return false;
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
@@ -4099,12 +4118,12 @@ bool Expression::IsBuiltInType(int* outputWhichType)const
 }
 
 int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
-{ int result=this->operations.GetIndex(theOpName);
+{ int result=this->theAtoms.GetIndex(theOpName);
   if (result==-1)
-  { this->operations.AddOnTop(theOpName);
-    this->FunctionHandlers.SetSize(this->operations.size);
+  { this->theAtoms.AddOnTop(theOpName);
+    this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
-    result=this->operations.size-1;
+    result=this->theAtoms.size-1;
   }
   return result;
 }
@@ -4117,19 +4136,19 @@ void CommandList::AddOperationBuiltInType(const std::string& theOpName)
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->GetOperations().Contains(theOpName))
     crash << "This is a programming error: operation " << theOpName << " already created. " << crash;
-  this->operations.AddOnTop(theOpName);
-  this->FunctionHandlers.SetSize(this->operations.size);
+  this->theAtoms.AddOnTop(theOpName);
+  this->FunctionHandlers.SetSize(this->theAtoms.size);
   this->FunctionHandlers.LastObject()->SetSize(0);
 }
 
 void CommandList::AddOperationBinaryInnerHandlerWithTypes
 (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
  const std::string& opExample, bool visible, bool experimental)
-{ int indexOp=this->operations.GetIndex(theOpName);
+{ int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
-  { this->operations.AddOnTop(theOpName);
-    indexOp=this->operations.size-1;
-    this->FunctionHandlers.SetSize(this->operations.size);
+  { this->theAtoms.AddOnTop(theOpName);
+    indexOp=this->theAtoms.size-1;
+    this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   Function innerFunction(innerHandler, 0, opDescription, opExample, true, visible, experimental, true);
@@ -4143,11 +4162,11 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
 void CommandList::AddOperationHandler
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
  const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
-{ int indexOp=this->operations.GetIndex(theOpName);
+{ int indexOp=this->theAtoms.GetIndex(theOpName);
   if (indexOp==-1)
-  { this->operations.AddOnTop(theOpName);
-    indexOp=this->operations.size-1;
-    this->FunctionHandlers.SetSize(this->operations.size);
+  { this->theAtoms.AddOnTop(theOpName);
+    indexOp=this->theAtoms.size-1;
+    this->FunctionHandlers.SetSize(this->theAtoms.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
@@ -4183,12 +4202,12 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= " << this->NumPredefinedOperations
+  out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms
   << " predefined operations + " << this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined functions + "
-  << this->operations.size-this->NumPredefinedOperations -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation
+  << this->theAtoms.size-this->NumPredefinedAtoms -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation
   << " user-or-run-time defined). <br>Predefined: \n<br>\n";
-  for (int i=0; i<this->operations.size; i++)
-  { out << openTag1 << this->operations[i] << closeTag1;
+  for (int i=0; i<this->theAtoms.size; i++)
+  { out << openTag1 << this->theAtoms[i] << closeTag1;
     if (this->FunctionHandlers[i].size>0)
     { out << " [handled by: ";
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
@@ -4202,9 +4221,9 @@ std::string CommandList::ElementToStringNonBoundVars()
       }
       out << "]";
     }
-    if (i!=this->operations.size-1)
+    if (i!=this->theAtoms.size-1)
     { out << ", ";
-      if (i==this->NumPredefinedOperations+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation-1 )
+      if (i==this->NumPredefinedAtoms+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation-1 )
         out << "<br>user-defined:\n<br>\n";
     }
   }
@@ -4253,7 +4272,7 @@ std::string CommandList::ToStringFunctionHandlers()
   int numOpsHandled=0;
   int numHandlers=0;
   int numInnerHandlers=0;
-  for (int i=0; i<this->operations.size; i++)
+  for (int i=0; i<this->theAtoms.size; i++)
   { if (this->FunctionHandlers[i].size!=0)
       numOpsHandled++;
     numHandlers+=this->FunctionHandlers[i].size;
@@ -4266,8 +4285,8 @@ std::string CommandList::ToStringFunctionHandlers()
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  for (int i=0; i<this->operations.size; i++)
-  { int indexCompositeHander=this->operationsComposite.GetIndex(this->operations[i]);
+  for (int i=0; i<this->theAtoms.size; i++)
+  { int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[i]);
     int totalHandlers=this->FunctionHandlers[i].size;
     if (indexCompositeHander!=-1)
       if (indexCompositeHander!=-1)
@@ -4279,7 +4298,7 @@ std::string CommandList::ToStringFunctionHandlers()
         { if (found)
             out << "<br>\n";
           found=true;
-          out << openTag2 << this->operations[i] << closeTag2;
+          out << openTag2 << this->theAtoms[i] << closeTag2;
           if (totalHandlers>1)
             out << " (" << j+1 << " out of " << totalHandlers << ")";
           out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
@@ -4290,7 +4309,7 @@ std::string CommandList::ToStringFunctionHandlers()
         { if (found)
             out << "<br>\n";
           found=true;
-          out << openTag2 << this->operations[i] << closeTag2;
+          out << openTag2 << this->theAtoms[i] << closeTag2;
           if (totalHandlers>1)
             out << " (" << j+1+this->FunctionHandlers[i].size << " out of " << totalHandlers << ")";
           out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
@@ -4375,12 +4394,12 @@ std::string CommandList::ToString()
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n Operations+Functions+user defined variables = " << this->operations.size << " (= "
-  << this->NumPredefinedOperations+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined + "
-  << this->operations.size-this->NumPredefinedOperations -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " user-defined):<br>\n";
-  for (int i=0; i<this->operations.size; i++)
-  { out << "\n" << i << ": " << openTag1 << this->operations[i] << closeTag1;
-    if(i!=this->operations.size-1)
+  out << "<br>\n Operations+Functions+user defined variables = " << this->theAtoms.size << " (= "
+  << this->NumPredefinedAtoms+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined + "
+  << this->theAtoms.size-this->NumPredefinedAtoms -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " user-defined):<br>\n";
+  for (int i=0; i<this->theAtoms.size; i++)
+  { out << "\n" << i << ": " << openTag1 << this->theAtoms[i] << closeTag1;
+    if(i!=this->theAtoms.size-1)
       out << ", ";
   }
   out << this->ElementToStringNonBoundVars();
@@ -4693,7 +4712,7 @@ bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 //  std::cout << "<br>Registering bound variable index: " << theBoundVar;
   if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << this->operations[theBoundVar] << " is first used to denote a non-bound variable"
+    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar] << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString=out.str();
     theElt.controlIndex=this->conError();

@@ -1345,6 +1345,15 @@ public:
     this->AddOnTop(o);
     return true;
   }
+  bool AddOnTopNoRepetitionMustBeNewCrashIfNot(const Object& o)
+  { if (this->GetIndex(o)!=-1)
+    { crash.theCrashReport << "This is a programming error: the programmer requested to add the object " << o << " without repetition "
+      << " to the hashed list with a function that does not allow repetition, but the hashed list already contains the object. ";
+      crash << crash;
+    }
+    this->AddOnTop(o);
+    return true;
+  }
   Object PopLastObject()
   { Object result=*this->LastObject();
     this->RemoveIndexSwapWithLast(this->size-1);

@@ -2302,7 +2302,7 @@ bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, E
   int thePower;
   if (!input[1].IsSmallInteger(&thePower))
     return false;
-  if (!input[2].IsConstant())
+  if (!input[2].IsConstantNumber())
   { //std::cout << "input is: " << input[2].ToString();
     theCommands.CheckInputNotSameAsOutput(input, output);
     Expression theExponent;

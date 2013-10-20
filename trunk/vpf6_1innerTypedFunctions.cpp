@@ -323,7 +323,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
     return false;
   Expression inputContextsMerged;
 //  std::cout << "<hr>Merging contexts: " << input.ToString();
-  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational>>(inputContextsMerged))
+  if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(inputContextsMerged))
     return false;
 //  std::cout << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
@@ -332,6 +332,8 @@ bool CommandListInnerTypedFunctions::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA
     << " one of the two differential operators has differential operator exponent that is not a small integer. ";
     return false;
   }
+//  std::cout << "<hr>Multiplying " << inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().ToString()
+//  << " by " << inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().ToString();
   ElementWeylAlgebra<Rational> result=inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
   result*=inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);

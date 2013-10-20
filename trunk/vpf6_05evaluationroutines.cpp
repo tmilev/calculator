@@ -235,7 +235,7 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
 //////------End of handling naughty expressions------
 /////-------Evaluating children if the expression is not of built-in type-------
     //bool foundError=false;
-    if (!output.IsBuiltInType())
+    if (!output.IsFrozen())
       for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
       { bool tempBool=true;
   //      bool debugBool=false;

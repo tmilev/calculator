@@ -50,11 +50,15 @@ void CommandList::reset()
   this->MaxNumCachedExpressionPerContext=100000;
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
-  this->operations.Clear();
+
+  this->theAtoms.Clear();
   this->operationsComposite.Clear();
   this->operationsCompositeHandlers.SetSize(0);
   this->builtInTypes.Clear();
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
+  this->atomsThatFreezeArguments.Clear();
   this->FunctionHandlers.SetSize(0);
+
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
   this->flagTimeLimitErrorDetected=false;
@@ -80,7 +84,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 { MacroRegisterFunctionWithName("CommandList::init");
   this->reset();
 
-  this->operations.SetExpectedSize(300);
+  this->theAtoms.SetExpectedSize(300);
   this->FunctionHandlers.SetExpectedSize(300);
   this->builtInTypes.SetExpectedSize(50);
   this->operationsComposite.SetExpectedSize(50);
@@ -155,7 +159,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");
-  this->controlSequences.AddOnTop(this->operations);//all operations defined up to this point are also control sequences
+  this->controlSequences.AddOnTop(this->theAtoms);//all operations defined up to this point are also control sequences
   this->controlSequences.AddOnTop("Expression");
   this->controlSequences.AddOnTop("Integer");
   this->controlSequences.AddOnTop(",");
@@ -212,8 +216,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("EndProgram");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-//  this->AddOperationBuiltInType("ElementWeylAlgebraDO");
-//  this->AddOperationBuiltInType("ElementWeylAlgebraPoly");
 
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
   this->AddOperationNoRepetitionAllowed("MonomialPoly");
@@ -223,16 +225,19 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\ln");
 
   this->TotalNumPatternMatchedPerformed=0;
-  this->NumPredefinedOperations=this->operations.size; //<-operations added up to this point are called ``operations''
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
   this->initPredefinedOperationsComposite();
+  this->initAtomsThatAllowCommutingOfArguments();
+  this->initAtomsThatFreezeArguments();
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
 
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;
+  this->NumPredefinedAtoms=this->theAtoms.size; //<-operations added up to this point are called ``operations''
+
 /*  this->Evaluate
   ("(InternalVariable1{}{{InternalVariableA}})_{{InternalVariableB}}\
    :=getSemisimpleLieAlgGenerator{}\
@@ -524,7 +529,7 @@ void CommandList::ParseFillDictionary(const std::string& input)
 }
 
 int CommandList::GetOperationIndexFromControlIndex(int controlIndex)
-{ return this->operations.GetIndex(this->controlSequences[controlIndex]);
+{ return this->theAtoms.GetIndex(this->controlSequences[controlIndex]);
 }
 
 int CommandList::GetExpressionIndex()

@@ -888,21 +888,17 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     //////////////////
     out << projBasisCircles << "[" << i << "]= new Array(2);\n";
   }
-  out << "var " << Points1ArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << Points2ArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << circArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << circRadiiArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << txtArrayName << "=new Array(" << this->theFrames.size << ");\n"
-  << "var " << Points1ArrayNameColors << "=new Array(" << this->theFrames.size << ");\n"
+  out << "var " << Points1ArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points2ArrayName << "=new Array(" << this->theFrames.size << ");\n"
+  << "var " << circArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << circRadiiArrayName << "=new Array(" << this->theFrames.size << ");\n"
+  << "var " << txtArrayName << "=new Array(" << this->theFrames.size << ");\n" << "var " << Points1ArrayNameColors << "=new Array(" << this->theFrames.size << ");\n"
   ;
   for (int k=0; k<this->theFrames.size; k++)
   { DrawOperations& currentOps= this->theFrames[k].theBuffer;
-    out << Points1ArrayName << "[" << k << "]" << "=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-    << Points2ArrayName << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-    << circArrayName         << "[" << k << "]=new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
-    << circRadiiArrayName << "[" << k << "]=new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
-    << txtArrayName << "[" << k << "]=new Array(" << currentOps.theDrawTextAtVectorOperations.size << ");\n"
-    << Points1ArrayNameColors << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n"
+    out << Points1ArrayName << "[" << k << "]" << "=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << Points2ArrayName << "["
+    << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n" << circArrayName << "[" << k << "]=new Array("
+    << currentOps.theDrawCircleAtVectorOperations.size << ");\n" << circRadiiArrayName << "[" << k << "]=new Array(" << currentOps.theDrawCircleAtVectorOperations.size << ");\n"
+    << txtArrayName << "[" << k << "]=new Array(" << currentOps.theDrawTextAtVectorOperations.size << ");\n" << Points1ArrayNameColors
+    << "[" << k << "]=new Array(" << currentOps.theDrawLineBetweenTwoRootsOperations.size << ");\n"
     ;
     for (int i=0; i<currentOps.theDrawLineBetweenTwoRootsOperations.size; i++)
     { Vector<double>& current1=currentOps.theDrawLineBetweenTwoRootsOperations[i].v1;

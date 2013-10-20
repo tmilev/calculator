@@ -143,7 +143,7 @@ class Expression
     tempE.MakeAtom(theOp, *this->theBoss);
     return this->AddChildOnTop(tempE);
   }
-  void GetUserDefinedSymbols(HashedListSpecialized<Expression>& inputOutputList)const;
+  void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const;
   bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
@@ -189,7 +189,9 @@ class Expression
     return this->theData==desiredDataUseMinusOneForAny;
   }
   bool HasSameContextArgumentsNoLog()const;
-  bool IsConstant()const;
+  bool IsConstantNumber()const;
+  bool IsFrozen()const;
+  bool IsAtomThatFreezesArguments(std::string* outputWhichAtom=0)const;
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInFunction(std::string* outputWhichOperation=0)const;
@@ -576,14 +578,18 @@ struct ExpressionTripleCrunchers
 
 class CommandList
 {
+
+public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
-  HashedList<std::string, MathRoutines::hashString> operations;
+  HashedList<std::string, MathRoutines::hashString> theAtoms;
+  HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
-  List<List<Function> > FunctionHandlers;
+  HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
+  List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
-public:
+
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
 //return bool. It is forbidden to pass the same object as input and output.
@@ -662,7 +668,7 @@ public:
   bool flagUseFracInRationalLaTeX;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
-  int NumPredefinedOperations;
+  int NumPredefinedAtoms;
   int NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation;
   int numEmptyTokensStart;
   Expression theProgramExpression;
@@ -729,7 +735,7 @@ public:
   bool CheckConsistencyAfterInitializationExpressionStackEmpty();
   //to make operations read only, we make operations private and return const pointer to it.
   inline const HashedList<std::string, MathRoutines::hashString>& GetOperations()
-  { return this->operations;
+  { return this->theAtoms;
   }
   inline const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes()
   { return this->builtInTypes;
@@ -985,205 +991,205 @@ public:
   { return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
   }
   int opEltZmodP()
-  { return this->operations.GetIndexIMustContainTheObject("EltZmodP");
+  { return this->theAtoms.GetIndexIMustContainTheObject("EltZmodP");
   }
   int opApplyFunction()
-  { return this->operations.GetIndexIMustContainTheObject("{}");
+  { return this->theAtoms.GetIndexIMustContainTheObject("{}");
   }
   int opIsDenotedBy()
-  { return this->operations.GetIndexIMustContainTheObject(":=:");
+  { return this->theAtoms.GetIndexIMustContainTheObject(":=:");
   }
   int opDefine()
-  { return this->operations.GetIndexIMustContainTheObject(":=");
+  { return this->theAtoms.GetIndexIMustContainTheObject(":=");
   }
   int opSqrt()
-  { return this->operations.GetIndexIMustContainTheObject("\\sqrt");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\sqrt");
   }
   int opDefineConditional()
-  { return this->operations.GetIndexIMustContainTheObject("if:=");
+  { return this->theAtoms.GetIndexIMustContainTheObject("if:=");
   }
   int opThePower()
-  { return this->operations.GetIndexIMustContainTheObject("^");
+  { return this->theAtoms.GetIndexIMustContainTheObject("^");
   }
   int opEqualEqual()
-  { return this->operations.GetIndexIMustContainTheObject("==");
+  { return this->theAtoms.GetIndexIMustContainTheObject("==");
   }
   int opGreaterThan()
-  { return this->operations.GetIndexIMustContainTheObject(">");
+  { return this->theAtoms.GetIndexIMustContainTheObject(">");
   }
   int opLessThan()
-  { return this->operations.GetIndexIMustContainTheObject("<");
+  { return this->theAtoms.GetIndexIMustContainTheObject("<");
   }
   int opError()
-  { return this->operations.GetIndexIMustContainTheObject("Error");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Error");
   }
   int opLisT()
-  { return this->operations.GetIndexIMustContainTheObject("");
+  { return this->theAtoms.GetIndexIMustContainTheObject("");
   }
   int opMonomialCollection()
-  { return this->operations.GetIndexIMustContainTheObject("MonomialCollection");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MonomialCollection");
   }
   int opMonomialPoly()
-  { return this->operations.GetIndexIMustContainTheObject("MonomialPoly");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MonomialPoly");
   }
   int opSerialization()
-  { return this->operations.GetIndexIMustContainTheObject("Serialization");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Serialization");
   }
   int opCalculusPlot()
-  { return this->operations.GetIndexIMustContainTheObject("CalculusPlot");
+  { return this->theAtoms.GetIndexIMustContainTheObject("CalculusPlot");
   }
   int opSequence()
-  { return this->operations.GetIndexIMustContainTheObject("Sequence");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Sequence");
   }
   int opQuote()
-  { return this->operations.GetIndexIMustContainTheObject("\"");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\"");
   }
   int opMelt()
-  { return this->operations.GetIndexIMustContainTheObject("Melt");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Melt");
   }
   int opRational()
-  { return this->operations.GetIndexIMustContainTheObject("Rational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Rational");
   }
   int opDouble()
-  { return this->operations.GetIndexIMustContainTheObject("Double");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Double");
   }
   int opAlgNumber()
-  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
+  { return this->theAtoms.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
   int opElementWeylAlgebra()
-  { return this->operations.GetIndexIMustContainTheObject("ElementWeylAlgebra");
+  { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylAlgebra");
   }
   int opPoly()
-  { return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialRational");
   }
   int opPolyOverANs()
-  { return this->operations.GetIndexIMustContainTheObject("PolynomialOverANs");
+  { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
   int opRationalFunction()
-  { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
+  { return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
   }
   int opDifferentiate()
-  { return this->operations.GetIndexIMustContainTheObject("Differentiate");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
   }
   int opMatRat()
-  { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");
   }
   int opMatTensorRat()
-  { return this->operations.GetIndexIMustContainTheObject("MatrixTensor_Rational");
+  { return this->theAtoms.GetIndexIMustContainTheObject("MatrixTensor_Rational");
   }
   int opWeylGroupRep()
-  { return this->operations.GetIndexIMustContainTheObject("WeylGroupRep");
+  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupRep");
   }
   int opMatRF()
-  { return this->operations.GetIndexIMustContainTheObject("Matrix_RF");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_RF");
   }
   int opString()
-  { return this->operations.GetIndexIMustContainTheObject("string");
+  { return this->theAtoms.GetIndexIMustContainTheObject("string");
   }
   int opElementUEoverRF()
-  { return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
+  { return this->theAtoms.GetIndexIMustContainTheObject("ElementUEoverRF");
   }
   int opWeylGroupVirtualRep()
-  { return this->operations.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
+  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroupVirtualRep");
   }
   int opElementTensorGVM()
-  { return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
+  { return this->theAtoms.GetIndexIMustContainTheObject("ElementTensorGVM");
   }
   int opCharSSAlgMod()
-  { return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
+  { return this->theAtoms.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
   int opSSLieAlg()
-  { return this->operations.GetIndexIMustContainTheObject("SemisimpleLieAlg");
+  { return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras()
-  { return this->operations.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
+  { return this->theAtoms.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
   }
   int opCandidateSSsubalgebra()
-  { return this->operations.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
+  { return this->theAtoms.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
   int opPi()
-  { return this->operations.GetIndexIMustContainTheObject("\\pi");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }
   int opLog()
-  { return this->operations.GetIndexIMustContainTheObject("\\ln");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\ln");
   }
   int opSin()
-  { return this->operations.GetIndexIMustContainTheObject("\\sin");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\sin");
   }
   int opFactorial()
-  { return this->operations.GetIndexIMustContainTheObject("!");
+  { return this->theAtoms.GetIndexIMustContainTheObject("!");
   }
   int opCos()
-  { return this->operations.GetIndexIMustContainTheObject("\\cos");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\cos");
   }
   int opTan()
-  { return this->operations.GetIndexIMustContainTheObject("\\tan");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\tan");
   }
   int opCot()
-  { return this->operations.GetIndexIMustContainTheObject("\\cot");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\cot");
   }
   int opSec()
-  { return this->operations.GetIndexIMustContainTheObject("\\sec");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\sec");
   }
   int opCsc()
-  { return this->operations.GetIndexIMustContainTheObject("\\csc");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\csc");
   }
   int opLittelmannPath()
-  { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
+  { return this->theAtoms.GetIndexIMustContainTheObject("LittelmannPath");
   }
   int opLRO()
-  { return this->operations.GetIndexIMustContainTheObject("LRO");
+  { return this->theAtoms.GetIndexIMustContainTheObject("LRO");
   }
   int opWeylGroup()
-  { return this->operations.GetIndexIMustContainTheObject("WeylGroup");
+  { return this->theAtoms.GetIndexIMustContainTheObject("WeylGroup");
   }
   int opUnion()
-  { return this->operations.GetIndexIMustContainTheObject("\\cup");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\cup");
   }
   int opPolynomialVariables()
-  { return this->operations.GetIndexIMustContainTheObject("PolyVars");
+  { return this->theAtoms.GetIndexIMustContainTheObject("PolyVars");
   }
   int opWeylAlgebraVariables()
-  { return this->operations.GetIndexIMustContainTheObject("DiffOpVars");
+  { return this->theAtoms.GetIndexIMustContainTheObject("DiffOpVars");
   }
   int opContexT()
-  { return this->operations.GetIndexIMustContainTheObject("Context");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Context");
   }
   int opWeylGroupElement()
-  { return this->operations.GetIndexIMustContainTheObject("ElementWeylGroup");
+  { return this->theAtoms.GetIndexIMustContainTheObject("ElementWeylGroup");
   }
   int opEndStatement()
-  { return this->operations.GetIndexIMustContainTheObject(";");
+  { return this->theAtoms.GetIndexIMustContainTheObject(";");
   }
   int opUnionNoRepetition()
-  { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\sqcup");
   }
   int opBind()
-  { return this->operations.GetIndexIMustContainTheObject("Bind");
+  { return this->theAtoms.GetIndexIMustContainTheObject("Bind");
   }
   int opPlus()
-  { return this->operations.GetIndexIMustContainTheObject("+");
+  { return this->theAtoms.GetIndexIMustContainTheObject("+");
   }
   int opMod()
-  { return this->operations.GetIndexIMustContainTheObject("mod");
+  { return this->theAtoms.GetIndexIMustContainTheObject("mod");
   }
   int opMinus()
-  { return this->operations.GetIndexIMustContainTheObject("-");
+  { return this->theAtoms.GetIndexIMustContainTheObject("-");
   }
   int opTimes()
-  { return this->operations.GetIndexIMustContainTheObject("*");
+  { return this->theAtoms.GetIndexIMustContainTheObject("*");
   }
   int opTensor()
-  { return this->operations.GetIndexIMustContainTheObject("\\otimes");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\otimes");
   }
   int opChoose()
-  { return this->operations.GetIndexIMustContainTheObject("\\choose");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\choose");
   }
   int opLieBracket()
-  { return this->operations.GetIndexIMustContainTheObject("[]");
+  { return this->theAtoms.GetIndexIMustContainTheObject("[]");
   }
   int opDivide()
-  { return this->operations.GetIndexIMustContainTheObject("/");
+  { return this->theAtoms.GetIndexIMustContainTheObject("/");
   }
   bool ReadTestFromFile(std::fstream& theFile, List<std::string>& commandStrings, List<std::string>& commandResultStrings);
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
@@ -1500,6 +1506,8 @@ public:
   }
   void init(GlobalVariables& inputGlobalVariables);
   void reset();
+  void initAtomsThatFreezeArguments();
+  void initAtomsThatAllowCommutingOfArguments();
   void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions();
   void initPredefinedOperationsComposite();
@@ -1747,7 +1755,7 @@ bool Expression::AssignValue(const theType& inputValue, CommandList& owner)
 template <class theType>
 bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
-  //std::cout << "<hr>Merging context arguments of " << this->ToString();
+//  std::cout << "<hr>Merging context arguments of " << this->ToString();
   this->CheckInitialization();
   Expression mergedContexts;
   if (!this->MergeContextsMyAruments(mergedContexts))

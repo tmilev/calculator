@@ -552,9 +552,9 @@ void CommandList::initPredefinedInnerFunctions()
    "Sorts a sequence. The purpose of this function is to test the exrpession comparison function of the calculator. ",
    "Sort(x^2, x^3, x^1, x^{-1}) ");
   this->AddOperationInnerHandler
-  ("UserDefined", CommandListFunctions::innerGetUserDefinedSubExpressions, "",
-   "Get user defined subexpressions. ",
-   "UserDefined(\\sin x + x^2+ 3x y +18x ^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})");
+  ("BlocksOfCommutativity", CommandListFunctions::innerGetUserDefinedSubExpressions, "",
+   "Returns subexpression blocks of commutativity. ",
+   "BlocksOfCommutativity(\\sin x + x^2+ 3x y +18x ^{3/4 y}+\\sqrt{2}^{\\sqrt{2}c})");
 
 /*  this->AddOperationInnerHandler
   ("Union", this->innerUnion, "",
@@ -1050,7 +1050,7 @@ void CommandList::initPredefinedInnerFunctions()
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
-  this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation =this->operations.size-this->NumPredefinedOperations;//<-operations that are added up to this point but were not accounted as ``operations'' are called ``built-in-functions''.
+  this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation =this->theAtoms.size-this->NumPredefinedAtoms;//<-operations that are added up to this point but were not accounted as ``operations'' are called ``built-in-functions''.
 
 }
 
@@ -1807,4 +1807,23 @@ void CommandList::initPredefinedOperationsComposite()
   //("Differentiate", CommandListFunctions::innerDdivDxToDifferentiation, "",
   // " ",
 //  .. "", true);
+}
+
+void CommandList::initAtomsThatAllowCommutingOfArguments()
+{ MacroRegisterFunctionWithName("CommandList::initAtomsThatAllowCommutingOfArguments");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.SetExpectedSize(30);
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+}
+
+void CommandList::initAtomsThatFreezeArguments()
+{ MacroRegisterFunctionWithName("CommandList::initAtomsThatFreezeArguments");
+  this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size+50);
+  this->atomsThatFreezeArguments.AddOnTop(this->builtInTypes);
+
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
+  this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
+
 }

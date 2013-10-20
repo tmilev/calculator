@@ -228,7 +228,7 @@ bool CommandListFunctions::innerCompositeConstTimesAnyActOn(CommandList& theComm
     return false;
   if (!input[0].IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
-  if (!input[0][1].IsConstant())
+  if (!input[0][1].IsConstantNumber())
     return false;
   Expression functionActsOnE;
   functionActsOnE.reset(theCommands);
@@ -325,7 +325,7 @@ bool CommandListFunctions::innerDifferentiateConstPower(CommandList& theCommands
   //////////////////////
   if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     return false;
-  if (!theArgument[2].IsConstant())
+  if (!theArgument[2].IsConstantNumber())
     return false;
   Expression theMonomial, theTerm, theExponent, basePrime, minusOne;
   minusOne.AssignValue<Rational>(-1, theCommands);
@@ -346,7 +346,7 @@ bool CommandListFunctions::innerDifferentiateConstant(CommandList& theCommands, 
     << " - possible user typo?";
   const Expression& theArgument=input[2];
   //////////////////////
-  if (!theArgument.IsConstant())
+  if (!theArgument.IsConstantNumber())
     return false;
   return output.AssignValue<Rational>(0, theCommands);
 }
@@ -486,7 +486,7 @@ bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, 
   output.reset(theCommands);
   Expression changedMultiplicand, leftSummand, rightSummand;
   HashedListSpecialized<Expression> theUserExpressions;
-  theArgument.GetUserDefinedSymbols(theUserExpressions);
+  theArgument.GetBlocksOfCommutativity(theUserExpressions);
   if (theUserExpressions.size==1)
   { changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
     leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
@@ -514,10 +514,10 @@ bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theComma
 { MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
-  if (input[1].IsConstant())
+  if (input[1].IsConstantNumber())
     return false;
   HashedListSpecialized<Expression> theList;
-  input.GetUserDefinedSymbols(theList);
+  input.GetBlocksOfCommutativity(theList);
   if (theList.size!=1)
     return false;
   if (input[2]>input[1] || input[2]==input[1])
@@ -533,15 +533,15 @@ bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& th
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
     return false;
   const Expression& leftE=input[1];
-  if (leftE.IsConstant())
+  if (leftE.IsConstantNumber())
     return false;
   if (!input[2].IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
     return false;
   const Expression& rightE=input[2][1];
   HashedListSpecialized<Expression> theList;
 
-  leftE.GetUserDefinedSymbols(theList);
-  rightE.GetUserDefinedSymbols(theList);
+  leftE.GetBlocksOfCommutativity(theList);
+  rightE.GetBlocksOfCommutativity(theList);
   if (theList.size!=1)
     return false;
   if (rightE>leftE || leftE==rightE)
@@ -712,7 +712,7 @@ bool CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theC
   Expression newNumSummand, newNumSummandRightPart, newNumExponent, mOneE;
   mOneE.AssignValue(-1, theCommands);
   for (int i=0; i<numerators.size(); i++)
-  { if (numerators[i].IsConstant())
+  { if (numerators[i].IsConstantNumber())
     { newNumExponent.MakeXOX(theCommands, theCommands.opTimes(), mOneE, denominatorExponent);
       newNumSummand.MakeXOX(theCommands, theCommands.opThePower(), denominatorBase, newNumExponent);
       numeratorsNew.AddMonomial(newNumSummand, numerators.theCoeffs[i]);
@@ -809,14 +809,24 @@ bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const E
   return output.AssignValue(out.str(), theCommands);
 }
 
-void Expression::GetUserDefinedSymbols(HashedListSpecialized<Expression>& inputOutputList)const
-{ MacroRegisterFunctionWithName("Expression::GetUserDefinedSymbols");
-  if (this->IsBuiltInFunctionOrOperation() || this->IsBuiltInType())
-    return;
+void Expression::GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const
+{ MacroRegisterFunctionWithName("Expression::GetBlocksOfCommutativity");
+  this->CheckInitialization();
   if (this->IsAtoM())
-    inputOutputList.AddOnTopNoRepetition(*this);
-  for (int i=0; i<this->children.size; i++)
-    (*this)[i].GetUserDefinedSymbols(inputOutputList);
+  { inputOutputList.AddOnTopNoRepetition(*this);
+    return;
+  }
+  if (this->IsConstantNumber())
+    return;
+  std::string whichOperation;
+  if ((*this)[0].IsOperation(&whichOperation))
+    if (this->theBoss->atomsThatAllowCommutingOfCompositesStartingWithThem.Contains(whichOperation))
+    { for (int i=1; i<this->children.size; i++)
+        (*this)[i].GetBlocksOfCommutativity(inputOutputList);
+      return;
+    }
+//  std::cout << "<hr>which operation=" << whichOperation;
+  inputOutputList.AddOnTopNoRepetition(*this);
 }
 
 bool Expression::MakeSequence(CommandList& owner, List<Expression>& inputSequence)
@@ -830,6 +840,6 @@ bool Expression::MakeSequence(CommandList& owner, List<Expression>& inputSequenc
 bool CommandListFunctions::innerGetUserDefinedSubExpressions(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerGetUserDefinedSubExpressions");
   HashedListSpecialized<Expression> theList;
-  input.GetUserDefinedSymbols(theList);
+  input.GetBlocksOfCommutativity(theList);
   return output.MakeSequence(theCommands, theList);
 }

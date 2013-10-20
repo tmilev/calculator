@@ -1110,7 +1110,7 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
   if (input.IsOperation(&currentString))
   { if (input.ToString()=="e")
       return output.AssignValue<std::string>("2.718281828 ", theCommands);
-    if (input.theData>=theCommands.NumPredefinedOperations+theCommands.NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
+    if (input.theData>=theCommands.NumPredefinedAtoms+theCommands.NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
       return output.AssignValue(currentString, theCommands);
     if (currentString=="+")
       return output.AssignValue<std::string>("add ", theCommands);

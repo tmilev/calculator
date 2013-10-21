@@ -272,6 +272,7 @@ public:
 
   List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > HighestVectors;
   HashedList<Vector<Rational> > HighestWeightsPrimal;
+  List<Vector<Rational> > HighestWeightsNONPrimal;
 
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > Modules;
   List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > ModulesSl2opposite;
@@ -330,6 +331,11 @@ public:
   void AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish)
   ;
+  bool CreateAndAddByExtendingBaseSubalgebra
+  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType,
+   const List<int>& theRootInjection)
+   ;
+
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
@@ -339,6 +345,7 @@ public:
   (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
   void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
+  Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
   void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
   void ComputeKsl2triplesGetOppositeEltsInOppositeModule
   (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule,
@@ -377,7 +384,7 @@ public:
   ;
   bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords
-  (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+  (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
   ;
   bool ComputeSystem
   (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)

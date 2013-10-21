@@ -525,6 +525,56 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRoot
   return result;
 }
 
+bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
+(const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType, const List<int>& theRootInjection)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra");
+  this->theWeylNonEmbeddeD.MakeFromDynkinType(theNewType);
+  DynkinSimpleType newComponent=theNewType.GetSmallestSimpleType();
+  this->CartanSAsByComponent=baseSubalgebra.CartanSAsByComponent;
+  this->owner=baseSubalgebra.owner;
+  int newIndex=DynkinType::GetNewIndexFromRootInjection(theRootInjection);
+  int newIndexInNewComponent=0;
+  if (newComponent.theRank==1)
+  { this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
+    this->CartanSAsByComponent.LastObject()->SetSize(1);
+    (*this->CartanSAsByComponent.LastObject())[0]=newH;
+  } else
+  { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponent.LastObject();
+    Vectors<Rational>& currentHs=*this->CartanSAsByComponent.LastObject();
+    currentHs.SetSize(currentHs.size+1);
+    int indexOffset=theNewType.GetRank()-newComponent.theRank;
+    newIndexInNewComponent=newIndex-indexOffset;
+    for (int i=0; i<newComponent.theRank-1; i++)
+      currentHs[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
+    currentHs[newIndexInNewComponent]=newH;
+  }
+  this->theHorbitIndices.SetSize(baseSubalgebra.theHorbitIndices.size+1);
+  for (int i=0; i<baseSubalgebra.theHorbitIndices.size; i++)
+    this->theHorbitIndices[theRootInjection[i]]=baseSubalgebra.theHorbitIndices[i];
+  this->theHorbitIndices[newIndex]=newHorbitIndex;
+  this->owner->RegisterPossibleCandidate(*this);
+  ProgressReport theReport(this->owner->theGlobalVariables);
+  if (!this->ComputeChar(false, this->owner->theGlobalVariables))
+  { if (this->owner->theGlobalVariables!=0)
+      theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
+    return false;
+  }
+  if (!this->ComputeSystem(this->owner->theGlobalVariables, false))
+  { if (this->owner->theGlobalVariables!=0)
+      theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
+    return false;
+  }
+  for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)
+    if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
+      if (this->IsDirectSummandOf(this->owner->theSubalgebraCandidates[i], true))
+        return false;
+  this->indexInOwner=this->owner->theSubalgebraCandidates.size;
+  this->owner->theSubalgebraCandidates.AddOnTop(*this);
+  if (!this->owner->theSubalgebraCandidates.LastObject()->indexInOwner==this->owner->theSubalgebraCandidates.size-1)
+    crash << "<hr>Something is very wrong: internal check failed! " << crash;
+  return true;
+}
+
 void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
   List<DynkinType> theLargerTypes;
@@ -533,21 +583,103 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
-  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "Inducing from type " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". There are  "
     << theLargerTypes.size << " possible extensions total. ";
     theReport1.Report(reportStream.str());
   }
+  List<int> indicesModulesNewComponentExtensionMod;
+  indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
+
+  Vectors<Rational> startingVector;
+  Vector<Rational> Hrescaled;
+  Vectors<Rational> theHCandidatesRescaled;
+  DynkinSimpleType theSmallType;
+  Selection oldRoots;
   for (int i=0; i<theLargerTypes.size; i++)
-  { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
+  { if (theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". The type we are trying to extend is "
+      << theLargerTypes[i].ToString();
+      theReport2.Report(reportStream.str());
+    }
+    weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
+    indicesModulesNewComponentExtensionMod.SetSize(0);
+    for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
+      if (baseCandidate.HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
+        indicesModulesNewComponentExtensionMod.AddOnTop(j);
+    if (indicesModulesNewComponentExtensionMod.size==0)
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
+        << " cannot be realized: no appropriate module.";
+        theReport2.Report(reportStream.str());
+      }
+      continue;
+    }
+    theSmallType=theLargerTypes[i].GetSmallestSimpleType();
+    int indexNewRoot=DynkinType::GetNewIndexFromRootInjection(theRootInjections[i]);
+    indexNewRoot=theSmallType.theRank-theLargerTypes[i].GetRank();
+    Rational desiredLengthSquared=theSmallType.lengthFirstCoRootSquared;
+    desiredLengthSquared*=theSmallType.GetDefaultRootLengthSquared(0);
+    desiredLengthSquared/=theSmallType.GetDefaultRootLengthSquared(indexNewRoot);
     for (int j=0; j<this->theSl2s.size; j++)
-    { DynkinSimpleType currentSimpleType= theLargerTypes[i].GetSmallestSimpleType();
-      if(this->theOrbitHelementLengths[j]!=currentSimpleType.lengthFirstCoRootSquared)
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStreamX;
+        reportStreamX << "Trying to realize the root of index " << indexNewRoot << " in simple component of type " << theSmallType.ToString();
+        if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
+          reportStreamX << " which is no good.<br> ";
+        else
+          reportStreamX << " which is all nice and dandy.<br>";
+        theReport3.Report(reportStreamX.str());
+      }
+      if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
         continue;
-
-
+      theHCandidatesRescaled.SetSize(0);
+      if (theLargerTypes[i].GetRank()!=0)
+      { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(i);
+        theHCandidatesRescaled.ReservE(currentOrbit.size);
+        for (int k=0; k<currentOrbit.size; k++)
+        { Hrescaled=currentOrbit[k];
+          Hrescaled*=theSmallType.GetDefaultRootLengthSquared(indexNewRoot);
+          Hrescaled/=2;
+          if (baseCandidate.isGoodForTheTop(Hrescaled))
+          { if (theGlobalVariables!=0)
+            { std::stringstream out2;
+              out2 << " Orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
+              theReport2.Report(out2.str());
+            }
+            theHCandidatesRescaled.AddOnTop(Hrescaled);
+          } else
+            if (theGlobalVariables!=0)
+            { std::stringstream out2;
+              out2 << " Orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). " ;
+              theReport2.Report(out2.str());
+            }
+        }
+      } else
+      { Hrescaled=this->theSl2s[i].theH.GetCartanPart();
+        Hrescaled*=theSmallType.GetDefaultRootLengthSquared(indexNewRoot);
+        Hrescaled/=2;
+        theHCandidatesRescaled.AddOnTop(Hrescaled);
+        if (theGlobalVariables!=0)
+        { std::stringstream out;
+          out << "Orbit of " << Hrescaled.ToString() << " not generated because that is the very first H element selected.";
+        }
+      }
+      for (int k=0; k<theHCandidatesRescaled.size; k++)
+      { if (theGlobalVariables!=0)
+        { std::stringstream out2;
+          out2 << "Attempting to extend type by h element number " << k+1 << " out of " << theHCandidatesRescaled.size << ".";
+          theReport2.Report(out2.str());
+        }
+        if(newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], j, theLargerTypes[i], theRootInjections[i]))
+        { this->theSubalgebraCandidates.AddOnTop(newCandidate);
+          this->ExtendCandidatesRecursive(newCandidate, targetType);
+        }
+      }
     }
   }
 }
@@ -883,8 +1015,8 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
       }
       newCandidate=baseCandidate;
       newCandidate.AddHincomplete(theHCandidatesRescaled[j], theHCandidatesRescaledGenerators[j], i);
-      newCandidate.CheckMaximalDominance();
-      this->ExtendOneComponentRecursive(newCandidate, propagateRecursion);
+      if (newCandidate.CheckMaximalDominance())
+        this->ExtendOneComponentRecursive(newCandidate, propagateRecursion);
     }
   }
 }
@@ -1367,7 +1499,6 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   this->theCentralizerType.MakeZero();
   for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
     this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
-
   this->ComputeCharsPrimalModules();
 }
 
@@ -1504,8 +1635,15 @@ void CandidateSSSubalgebra::ComputeKsl2triplesGetOppositeEltsInOppositeModule
 
 Vector<Rational> CandidateSSSubalgebra::GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const
 { Vector<Rational> output;
-  Vector<Rational> tempV=this->GetAmbientSS().GetWeightOfGenerator(input[0].theGeneratorIndex);
-  this->GetPrimalWeightProjectionFundCoords(tempV, output);
+  Vector<Rational> theRoot=this->GetAmbientSS().GetWeightOfGenerator(input[0].theGeneratorIndex);
+  this->GetPrimalWeightProjectionFundCoords(theRoot, output);
+  return output;
+}
+
+Vector<Rational> CandidateSSSubalgebra::GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const
+{ Vector<Rational> output;
+  Vector<Rational> theRoot=this->GetAmbientSS().GetWeightOfGenerator(input[0].theGeneratorIndex);
+  this->GetWeightProjectionFundCoords(theRoot, output);
   return output;
 }
 
@@ -2169,7 +2307,7 @@ bool CandidateSSSubalgebra::CompareLeftGreaterThanRight(const Vector<Rational>& 
   return leftCpart>rightCpart;
 }
 
-void CandidateSSSubalgebra::GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)
+void CandidateSSSubalgebra::GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::GetWeightProjectionFundCoords");
   output.SetSize(this->theHs.size);
   for (int j=0; j<this->theHs.size; j++)
@@ -2243,7 +2381,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
     if (MonomialCollection<ChevalleyGenerator, Rational>::VectorSpacesIntersectionIsNonTrivial(tempModules[i], this->theBasis))
     { MonomialCollection<ChevalleyGenerator, AlgebraicNumber>::IntersectVectorSpaces(tempModules[i], this->theBasis, *this->HighestVectors.LastObject());
       if (this->HighestVectors.LastObject()->size!=1)
-        crash << "This is a programming error: simple component has more than one highest weight vector" << crash;
+        crash << "This is a programming error: simple component computed to have more than one highest weight vector. " << crash;
       this->primalSubalgebraModules.AddOnTop(this->Modules.size-1);
       this->Modules.LastObject()->SetSize(1);
       *this->Modules.LastObject()->LastObject()=*this->HighestVectors.LastObject();
@@ -2262,7 +2400,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
         this->HighestVectors.LastObject()->RemoveIndexSwapWithLast(0);
         if (this->HighestVectors.LastObject()->size!=tempModules[i].size-1)
           crash << "This is a programming error: wrong number of hwv's: got  " << this->HighestVectors.LastObject()->size << ", must have "
-          << tempModules[i].size-1 << crash;
+          << tempModules[i].size-1 << ". " << crash;
         for (int j=0; j<this->HighestVectors.LastObject()->size; j++)
         { (*this->Modules.LastObject())[j].SetSize(1);
           (*this->Modules.LastObject())[j][0]=(*this->HighestVectors.LastObject())[j];
@@ -2277,6 +2415,9 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
       }
     }
   }
+  this->HighestWeightsNONPrimal.SetSize(this->Modules.size);
+  for (int i=0; i<this->Modules.size; i++)
+    this->HighestWeightsNONPrimal[i]=this->GetNonPrimalWeightFirstGen(this->Modules[i][0][0]);
   this->subalgebraModules=this->primalSubalgebraModules;
 //  std::cout << "<br>Subalgebra modules: " << this->subalgebraModules;
   this->charFormaT.GetElement().CustomPlusSign="\\oplus ";
@@ -2355,8 +2496,8 @@ bool SemisimpleSubalgebras::CheckConsistency()const
 }
 
 void SemisimpleSubalgebras:: initHookUpPointers
-  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables)
+(SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
+ ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables)
 { this->owneR=&inputOwner;
   this->theSl2s.owner=&inputOwner;
   this->ownerField=theField;

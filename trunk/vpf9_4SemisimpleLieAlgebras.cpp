@@ -533,13 +533,20 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
+  ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { std::stringstream reportStream;
+    reportStream << "Inducing from type " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". There are  "
+    << theLargerTypes.size << " possible extensions total. ";
+    theReport1.Report(reportStream.str());
+  }
   for (int i=0; i<theLargerTypes.size; i++)
   { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
     for (int j=0; j<this->theSl2s.size; j++)
-    {
-      DynkinSimpleType currentSimpleType= theLargerTypes[i].GetSmallestSimpleType();
+    { DynkinSimpleType currentSimpleType= theLargerTypes[i].GetSmallestSimpleType();
       if(this->theOrbitHelementLengths[j]!=currentSimpleType.lengthFirstCoRootSquared)
         continue;
+
 
     }
   }

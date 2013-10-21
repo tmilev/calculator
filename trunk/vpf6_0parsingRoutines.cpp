@@ -559,7 +559,7 @@ bool CommandList::ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(in
   newExpr.reset(*this);
   newExpr.children.ReservE(theSequenceElt.theData.children.size);
   newExpr.AddChildOnTop(theFunctionElt.theData);
-  if (theSequenceElt.theData.IsAtoM())
+  if (theSequenceElt.theData.IsAtom())
     newExpr.AddChildOnTop(theSequenceElt.theData);
   else
     for (int i=1; i<theSequenceElt.theData.children.size; i++)

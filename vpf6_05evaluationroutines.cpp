@@ -15,6 +15,54 @@ StackMaintainerRules::~StackMaintainerRules()
   this->theBoss=0;
 }
 
+std::string CommandList::ToStringFunctionHandlers()
+{ MacroRegisterFunctionWithName("CommandList::ToStringFunctionHandlers");
+  std::stringstream out;
+  int numOpsHandled=0;
+  int numHandlers=0;
+  int numInnerHandlers=0;
+  for (int i=0; i<this->theAtoms.size; i++)
+  { if (this->FunctionHandlers[i].size!=0)
+      numOpsHandled++;
+    numHandlers+=this->FunctionHandlers[i].size;
+    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      if (this->FunctionHandlers[i][j].flagIsInner)
+        numInnerHandlers++;
+  }
+  out << "\n <b> " << numOpsHandled << "  operations+built in functions handled, by a total of " << numHandlers << " handler functions ("
+  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
+  bool found=false;
+  std::string openTag2="<span style=\"color:#FF0000\">";
+  std::string closeTag2="</span>";
+  for (int i=0; i<this->theAtoms.size; i++)
+  { int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[i]);
+    int totalDirectHandlers=this->FunctionHandlers[i].size;
+
+    if (this->FunctionHandlers[i].size>0)
+      for (int j=0; j<this->FunctionHandlers[i].size; j++)
+        if (this->FunctionHandlers[i][j].flagIamVisible)
+        { if (found)
+            out << "<br>\n";
+          found=true;
+          out << openTag2 << this->theAtoms[i] << closeTag2;
+          if (totalDirectHandlers>1)
+            out << " (" << j+1 << " out of " << totalDirectHandlers << ")";
+          out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
+        }
+    if (indexCompositeHander!=-1)
+      for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
+        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
+        { if (found)
+            out << "<br>\n";
+          found=true;
+          out << openTag2 << this->theAtoms[i] << closeTag2;
+          out << " (" << j+1 << " out of " << this->operationsCompositeHandlers[indexCompositeHander].size << " composite handlers)";
+          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
+        }
+  }
+  return out.str();
+}
+
 bool CommandList::outerStandardFunction(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
@@ -33,7 +81,7 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
           return true;
         }
   }
-  if (!functionNameNode.IsAtoM())
+  if (!functionNameNode.IsAtom())
     return false;
 //  std::cout << "<br>Evaluating: " << input.ToString();
 //  std::cout.flush();
@@ -202,7 +250,7 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
     counterNumTransformations++;
-//    std::cout << " transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
+//    std::cout << "<hr>transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
 //    std::cout.flush();
 
     //if (this->flagLogEvaluation && counterNumTransformations>1 )
@@ -317,12 +365,11 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
 
 Expression* CommandList::PatternMatch
 (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, const Expression* condition, std::stringstream* theLog, bool logAttempts)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::PatternMatch");
+{ MacroRegisterFunctionWithName("CommandList::PatternMatch");
+  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Error: while trying to evaluate expression, the maximum recursion depth of "
-    << this->MaxRecursionDeptH << " was exceeded";
+    out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH << " was exceeded";
     theExpression.SetError(out.str(), *this);
     return 0;
   }
@@ -334,8 +381,7 @@ Expression* CommandList::PatternMatch
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
     return 0;
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
-    << thePattern.ToString() << " with " << bufferPairs.ToString();
+    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> " << thePattern.ToString() << " with " << bufferPairs.ToString();
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
@@ -358,7 +404,8 @@ Expression* CommandList::PatternMatch
 }
 
 void CommandList::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
+{ MacroRegisterFunctionWithName("CommandList::SpecializeBoundVars");
+  RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
   { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn);
     if (indexMatching!=-1)
@@ -409,7 +456,8 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
 
 bool CommandList::ParseAndExtractExpressions
 (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
-{ this->CurrentSyntacticStacK=&outputSynStack;
+{ MacroRegisterFunctionWithName("CommandList::ParseAndExtractExpressions");
+  this->CurrentSyntacticStacK=&outputSynStack;
   this->CurrrentSyntacticSouP=&outputSynSoup;
   this->ParseFillDictionary(theInputString);
   bool result=this->ExtractExpressions(outputExp, outputSynErrors);

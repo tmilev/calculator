@@ -1107,10 +1107,10 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
     return output.AssignValue((std::string) "...", theCommands);
   std::string currentString;
-  if (input.IsOperation(&currentString))
+  if (input.IsAtom(&currentString))
   { if (input.ToString()=="e")
       return output.AssignValue<std::string>("2.718281828 ", theCommands);
-    if (input.theData>=theCommands.NumPredefinedAtoms+theCommands.NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
+    if (input.theData>=theCommands.NumPredefinedAtoms)
       return output.AssignValue(currentString, theCommands);
     if (currentString=="+")
       return output.AssignValue<std::string>("add ", theCommands);
@@ -1146,7 +1146,7 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;
-  bool useUsualOrder=!input[0].IsAtoM(theCommands.opDivide()) && !input[0].IsAtoM(theCommands.opThePower());
+  bool useUsualOrder=!input[0].IsAtomGivenData(theCommands.opDivide()) && !input[0].IsAtomGivenData(theCommands.opThePower());
 //  if (input[0].IsAtoM(theCommands.opDivide()))
 //    std::cout << input.Lispify();
   if (useUsualOrder)
@@ -1249,14 +1249,14 @@ bool CommandList::innerConesIntersect(CommandList& theCommands, const Expression
 
 bool Expression::operator==(const std::string& other)const
 { std::string tempS;
-  if (!this->IsOperation(&tempS))
+  if (!this->IsAtom(&tempS))
     return false;
   return tempS==other;
 }
 
 bool CommandList::innerReverseOrder(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerReverse");
-  if (input.IsBuiltInType()||input.IsAtoM())
+  if (input.IsBuiltInType()||input.IsAtom())
   { output=input;
     return true;
   }

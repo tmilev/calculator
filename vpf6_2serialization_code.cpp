@@ -69,7 +69,7 @@ bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& i
   if (!generatorIndexE.IsSmallInteger(&generatorIndex))
     return false;
   std::string theOperation;
-  if (!input[1].IsOperation(&theOperation))
+  if (!input[1].IsAtom(&theOperation))
   { theCommands.Comments << "<hr>Can't load Chevalley generator: second argument is not an operation, instead it is " << input[1].ToString();
     return false;
   }
@@ -207,14 +207,13 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, c
   //std::cout << "here i am again1.5. ";
   //std::cout.flush();
   std::string theTypeName;
-  if (!typeLetter.IsOperation(&theTypeName))
+  if (!typeLetter.IsAtom(&theTypeName))
   { theCommands.Comments << "I couldn't extract a type letter from " << input.ToString();
     return false;
   }
   if (theTypeName.size()!=1)
   { theCommands.Comments << "<hr>Error while extracting Dynkin simple type: The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
-    << "Instead, it is " << theTypeName + ". Error encountered while processing "
-    << input.ToString();
+    << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.ToString();
     return false;
   }
   //std::cout << "here i am again 2. ";
@@ -848,7 +847,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraAlgebraicNumbers
       return false;
     }
     std::string theLetter;
-    if (!singleChevGenE[0].IsOperation(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+    if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
     { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
       << owner.GetLieAlgebraName();
       return false;
@@ -918,7 +917,7 @@ bool Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(CommandLi
         return false;
       }
       std::string theLetter;
-      if (!singleChevGenE[0].IsOperation(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
+      if (!singleChevGenE[0].IsAtom(&theLetter) || !singleChevGenE[1].IsSmallInteger(&theChevGen.theGeneratorIndex))
       { theCommands.Comments << "<hr>Failed to convert summand " << singleChevGenE.ToString() << " to Chevalley generator of "
         << owner.GetLieAlgebraName();
         return false;

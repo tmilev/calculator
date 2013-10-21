@@ -776,7 +776,7 @@ bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
   } else
     if (this->children.size==0)
       return false;
-  if (!(*this)[0].IsAtoM())
+  if (!(*this)[0].IsAtom())
     return false;
   if (theOp==-1)
     return true;
@@ -3034,8 +3034,10 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   if (input.children.size<2)
     return false;
   const Expression& firstElt=input[1];
-  if (!firstElt.IsBuiltInFunctionOrOperation())
+//  std::cout << " <hr>outer times to function ";
+  if (!firstElt.IsBuiltInAtom())
     return false;
+//  std::cout << firstElt << " is a built in fucker!";
   output=input;
   output.children.RemoveIndexShiftDown(0);
   return true;
@@ -3093,8 +3095,13 @@ bool CommandList::CollectSummands(CommandList& theCommands, const Expression& in
       currentSummandNoCoeff=&oneE;
     outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
-//  std::cout << " before mon sort, mon order: " << outputSum.theMonomials.ToString();
+//  std::cout << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
+//  if (outputSum.theMonomials[0]>outputSum.theMonomials[1])
+//    std::cout << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
+//  else
+//    std::cout << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
   outputSum.QuickSortAscending();
+
 //  std::cout << " after mon sort: " << outputSum.theMonomials.ToString();
   return true;
 }
@@ -3264,7 +3271,7 @@ bool Expression::IsDouble(double* whichDouble)const
 bool Expression::IsConstantNumber()const
 { if (this->theBoss==0)
     return false;
-  if (this->IsAtoM(this->theBoss->opPi()))
+  if (this->IsAtomGivenData(this->theBoss->opPi()))
     return true;
 //  std::cout << "testing for constant: " << this->ToString();
 //  std::cout << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
@@ -3457,8 +3464,8 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
     return false;
   if (this->children.size==0)
   { std::string leftS, rightS;
-    if (this->IsOperation(&leftS))
-      if (other.IsOperation(&rightS))
+    if (this->IsAtom(&leftS))
+      if (other.IsAtom(&rightS))
         return leftS>rightS;
     return this->theData>other.theData;
   }
@@ -3477,7 +3484,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   MemorySaving<FormatExpressions> contextFormat;
-  if (this->IsAtoM())
+  if (this->IsAtom())
   { if (this->theData< this->theBoss->GetOperations().size && this->theData>=0)
       out << this->theBoss->GetOperations()[this->theData];
     else
@@ -3633,7 +3640,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
 
 std::string Expression::ToStringFull()const
 { std::stringstream out;
-  if (this->IsAtoM())
+  if (this->IsAtom())
     out << this->theData << " ";
   if (this->children.size>0)
   { out << "(";
@@ -3736,7 +3743,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
   { std::string secondE=(*this)[2].ToString(theFormat);
-    if ((*this)[1].IsAtoM(this->theBoss->opSqrt()))
+    if ((*this)[1].IsAtomGivenData(this->theBoss->opSqrt()))
       out << "\\sqrt{" << secondE << "}";
     else
     { std::string firstE= (*this)[1].ToString(theFormat);
@@ -4026,7 +4033,32 @@ bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom)const
   return this->theBoss->atomsThatFreezeArguments.Contains(this->theBoss->GetOperations()[this->theData]);
 }
 
-bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
+bool Expression::IsAtom(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (outputWhichOperation!=0)
+  { if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    { std::stringstream out;
+      out << "(data-atom:~" << this->theData << ")";
+      *outputWhichOperation= out.str();
+    }
+    else
+      *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
+  }
+  return true;
+}
+
+bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny)const
+{ if (this->IsLisT())
+    return false;
+  if (desiredDataUseMinusOneForAny==-1)
+    return true;
+  return this->theData==desiredDataUseMinusOneForAny;
+}
+
+bool Expression::IsBuiltInAtom(std::string* outputWhichOperation)const
 { if (this->theBoss==0)
     return false;
   if (this->IsLisT())
@@ -4034,33 +4066,6 @@ bool Expression::IsBuiltInOperation(std::string* outputWhichOperation)const
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
   if (this->theData>= this->theBoss->NumPredefinedAtoms)
-    return false;
-  if (outputWhichOperation!=0)
-    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
-  return true;
-}
-
-bool Expression::IsBuiltInFunction(std::string* outputWhichOperation)const
-{ if (this->theBoss==0)
-    return false;
-  if (this->IsLisT())
-    return false;
-  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
-    return false;
-  if (this->theData<this->theBoss->NumPredefinedAtoms ||
-      this->theData>=this->theBoss->NumPredefinedAtoms+this->theBoss->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation)
-    return false;
-  if (outputWhichOperation!=0)
-    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
-  return true;
-}
-
-bool Expression::IsOperation(std::string* outputWhichOperation)const
-{ if (this->theBoss==0)
-    return false;
-  if (this->IsLisT())
-    return false;
-  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
@@ -4098,7 +4103,7 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
     return false;
 //  if (this->children.size<2 || !(*this)[this->children.size-1].IsAtoM())
 //    return false;
-  if (!(*this)[0].IsOperation(&tempS))
+  if (!(*this)[0].IsAtom(&tempS))
     return false;
   if (this->theBoss->GetBuiltInTypes().Contains(tempS))
   { if (outputWhichOperation!=0)
@@ -4202,10 +4207,8 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms
-  << " predefined operations + " << this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined functions + "
-  << this->theAtoms.size-this->NumPredefinedAtoms -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation
-  << " user-or-run-time defined). <br>Predefined: \n<br>\n";
+  out << "<br>\n" << this->theAtoms.size << " atoms " << " (= " << this->NumPredefinedAtoms << " predefined atoms+ "
+  << this->theAtoms.size-this->NumPredefinedAtoms << " user-or-run-time defined). <br>Predefined: \n<br>\n";
   for (int i=0; i<this->theAtoms.size; i++)
   { out << openTag1 << this->theAtoms[i] << closeTag1;
     if (this->FunctionHandlers[i].size>0)
@@ -4223,8 +4226,8 @@ std::string CommandList::ElementToStringNonBoundVars()
     }
     if (i!=this->theAtoms.size-1)
     { out << ", ";
-      if (i==this->NumPredefinedAtoms+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation-1 )
-        out << "<br>user-defined:\n<br>\n";
+      if (i==this->NumPredefinedAtoms-1 )
+        out << "<br>user or run-time defined:\n<br>\n";
     }
   }
   return out.str();
@@ -4254,7 +4257,7 @@ std::string Function::GetString(CommandList& theBoss)
     // uintptr_t is only available in c++0x
     out << " Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
-      out << "This is a <b>``law''</b> - takes as argument the name of the operation as well. ";
+      out << "This is a <b>``law''</b> - substitution takes place only if output expression is different from input. ";
     if (this->theExample!="")
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
@@ -4264,58 +4267,6 @@ std::string Function::GetString(CommandList& theBoss)
   } else
     out2 << "<b>Experimental, please don't use.</b>";
   return out2.str();
-}
-
-std::string CommandList::ToStringFunctionHandlers()
-{ MacroRegisterFunctionWithName("CommandList::ToStringFunctionHandlers");
-  std::stringstream out;
-  int numOpsHandled=0;
-  int numHandlers=0;
-  int numInnerHandlers=0;
-  for (int i=0; i<this->theAtoms.size; i++)
-  { if (this->FunctionHandlers[i].size!=0)
-      numOpsHandled++;
-    numHandlers+=this->FunctionHandlers[i].size;
-    for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      if (this->FunctionHandlers[i][j].flagIsInner)
-        numInnerHandlers++;
-  }
-  out << "\n <b> " << numOpsHandled << "  operations+built in functions handled, by a total of " << numHandlers << " handler functions ("
-  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
-  bool found=false;
-  std::string openTag2="<span style=\"color:#FF0000\">";
-  std::string closeTag2="</span>";
-  for (int i=0; i<this->theAtoms.size; i++)
-  { int indexCompositeHander=this->operationsComposite.GetIndex(this->theAtoms[i]);
-    int totalHandlers=this->FunctionHandlers[i].size;
-    if (indexCompositeHander!=-1)
-      if (indexCompositeHander!=-1)
-        totalHandlers+=this->operationsCompositeHandlers[indexCompositeHander].size;
-
-    if (this->FunctionHandlers[i].size>0)
-      for (int j=0; j<this->FunctionHandlers[i].size; j++)
-        if (this->FunctionHandlers[i][j].flagIamVisible)
-        { if (found)
-            out << "<br>\n";
-          found=true;
-          out << openTag2 << this->theAtoms[i] << closeTag2;
-          if (totalHandlers>1)
-            out << " (" << j+1 << " out of " << totalHandlers << ")";
-          out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
-        }
-    if (indexCompositeHander!=-1)
-      for (int j=0; j<this->operationsCompositeHandlers[indexCompositeHander].size; j++)
-        if (this->operationsCompositeHandlers[indexCompositeHander][j].flagIamVisible)
-        { if (found)
-            out << "<br>\n";
-          found=true;
-          out << openTag2 << this->theAtoms[i] << closeTag2;
-          if (totalHandlers>1)
-            out << " (" << j+1+this->FunctionHandlers[i].size << " out of " << totalHandlers << ")";
-          out << "\n" << this->operationsCompositeHandlers[indexCompositeHander][j].GetString(*this);
-        }
-  }
-  return out.str();
 }
 
 std::string ObjectContainer::ToString()
@@ -4394,9 +4345,8 @@ std::string CommandList::ToString()
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n Operations+Functions+user defined variables = " << this->theAtoms.size << " (= "
-  << this->NumPredefinedAtoms+this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " predefined + "
-  << this->theAtoms.size-this->NumPredefinedAtoms -this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation << " user-defined):<br>\n";
+  out << "<br>\n User or run-time defined atoms = " << this->theAtoms.size << " (= " << this->NumPredefinedAtoms << " predefined + "
+  << this->theAtoms.size-this->NumPredefinedAtoms << " user-defined):<br>\n";
   for (int i=0; i<this->theAtoms.size; i++)
   { out << "\n" << i << ": " << openTag1 << this->theAtoms[i] << closeTag1;
     if(i!=this->theAtoms.size-1)

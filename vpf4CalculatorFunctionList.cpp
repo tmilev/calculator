@@ -17,7 +17,6 @@ void CommandList::initPredefinedInnerFunctions()
    "Makes a makefile. ",
    "MakeMakefile(0)", false);
 
-
   this->AddOperationInnerHandler
   ("AutomatedTest", this->innerAutomatedTest, "",
    "Runs a big bad automated test of all built in functions against a set of known good results. ",
@@ -1050,7 +1049,6 @@ void CommandList::initPredefinedInnerFunctions()
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
-  this->NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation =this->theAtoms.size-this->NumPredefinedAtoms;//<-operations that are added up to this point but were not accounted as ``operations'' are called ``built-in-functions''.
 
 }
 

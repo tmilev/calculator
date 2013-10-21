@@ -168,7 +168,7 @@ class Expression
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;
-    if (!(*this)[0].IsAtoM())
+    if (!(*this)[0].IsAtom())
       return false;
     if (theOp==-1)
       return true;
@@ -179,29 +179,15 @@ class Expression
       return false;
     if (this->children.size!=2)
       return false;
-    return (*this)[1].IsAtoM();
-  }
-  bool IsAtoM(int desiredDataUseMinusOneForAny=-1)const
-  { if (this->IsLisT())
-      return false;
-    if (desiredDataUseMinusOneForAny==-1)
-      return true;
-    return this->theData==desiredDataUseMinusOneForAny;
+    return (*this)[1].IsAtom();
   }
   bool HasSameContextArgumentsNoLog()const;
   bool IsConstantNumber()const;
   bool IsFrozen()const;
   bool IsAtomThatFreezesArguments(std::string* outputWhichAtom=0)const;
-  bool IsOperation(std::string* outputWhichOperation=0)const;
-  bool IsBuiltInOperation(std::string* outputWhichOperation=0)const;
-  bool IsBuiltInFunction(std::string* outputWhichOperation=0)const;
-  bool IsBuiltInFunctionOrOperation(std::string* outputWhichOperation=0)const
-  { if(this->IsBuiltInOperation(outputWhichOperation))
-      return true;
-    if (this->IsBuiltInFunction(outputWhichOperation))
-      return true;
-    return false;
-  }
+  bool IsAtom(std::string* outputWhichOperation=0)const;
+  bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
+  bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
@@ -220,7 +206,7 @@ class Expression
       return false;
     if (!this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()))
       return false;
-    if(this->children.size<2 || !this->GetLastChild().IsAtoM())
+    if(this->children.size<2 || !this->GetLastChild().IsAtom())
       return false;
     if (whichElement==0)
       return true;
@@ -669,7 +655,6 @@ public:
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedAtoms;
-  int NumPredefinedFunctionsCountsStartsAfterLastPredefinedOperation;
   int numEmptyTokensStart;
   Expression theProgramExpression;
 //  std::vector<std::stringstream> theLogs;

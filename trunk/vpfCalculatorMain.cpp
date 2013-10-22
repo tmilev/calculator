@@ -101,9 +101,6 @@ int main(int argc, char **argv)
   //  std::cout << tempStreamX.str() << std::endl;
   //  std::cout << inputString;
 
-#ifndef WIN32
-  pthread_create(&TimerThread, NULL,*RunTimer, 0);
-#endif
   //  std::cout << "Raw input: " << inputString << "<hr>";
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;

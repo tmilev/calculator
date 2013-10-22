@@ -37,7 +37,7 @@ bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>(CommandList& th
   theCommands.theObjectContainer.theLieAlgebras.Contains(tempAlgebra);
   int algebraIdentifier=theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlgebra);
   if (feelsLikeTheVeryFirstTime)
-    theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIdentifier).ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIdentifier).ComputeChevalleyConstants(theCommands.theGlobalVariableS);
   outputContext.ContextMakeContextSSLieAlgebrA(algebraIdentifier, theCommands);
   return true;
 }
@@ -371,7 +371,7 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
   { //crash << theSSalgebra.theWeyl.theDynkinType.ToString() << crash;
-    theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    theSSalgebra.ComputeChevalleyConstants(theCommands.theGlobalVariableS);
     Expression tempE;
     theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
     theCommands.Comments << tempE.GetValue<std::string>();

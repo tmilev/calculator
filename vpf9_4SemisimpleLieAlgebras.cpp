@@ -733,7 +733,7 @@ void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& inp
   bool needToComputeConstants=this->theSubalgebrasNonEmbedded->Contains(tempSA);
   int theIndex=this->theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
   if (needToComputeConstants)
-    this->theSubalgebrasNonEmbedded->GetElement(theIndex).ComputeChevalleyConstantS(theGlobalVariables);
+    this->theSubalgebrasNonEmbedded->GetElement(theIndex).ComputeChevalleyConstants(theGlobalVariables);
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
@@ -2860,7 +2860,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
       tempStream << "\nGenerating simple Lie algebra " << theType.ToString() << " (total " << this->theSubalgebrasNonEmbedded->size << ")...";
       theProgressReport2.Report(tempStream.str());
       theSmallAlgebra.CheckConsistency();
-      theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
+      theSmallAlgebra.ComputeChevalleyConstants(theGlobalVariables);
     }
     if (theSmallSl2s.owner!=&theSmallAlgebra)
     { std::stringstream tempStream;
@@ -3173,7 +3173,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   inputOwner.CheckConsistency();
   output.reset(inputOwner);
   output.CheckConsistency();
-  output.GetOwner().ComputeChevalleyConstantS(&theGlobalVariables);
+  output.GetOwner().ComputeChevalleyConstants(&theGlobalVariables);
   output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.size);
@@ -5124,33 +5124,29 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
 
 bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::HasConjugateHsTo");
-  bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_1";
+  bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1";
   if (doDebug)
     std::cout << "<br>Checking whether " << this->theHs.ToString() << " are conjugated to " << input.ToString();
   if (input.size!=this->theHs.size)
     return false;
   List<Vector<Rational> > raisedInput=input;
   List<Vector<Rational> > myVectors=this->theHs;
-  if (doDebug)
-    std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
+  //if (doDebug)
+  //  std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
   ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
-  if (doDebug)
-    std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
+  //if (doDebug)
+  //  std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
   return myVectors==raisedInput;
 }
 
 bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
 { if (other.flagSystemProvedToHaveNoSolution)
     return false;
-  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "A^{1}_1" &&
-      other.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{1}_1");
+  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "A^{2}_1" && other.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{1}_1");
   if (doDebug)
-    std::cout << " <hr><hr>Testing whether "
-    << this->ToString() << " is a direct summand of "
-    << other.ToString() << "...<br>";
-
+    std::cout << " <hr><hr>Testing whether " << this->ToString() << " is a direct summand of " << other.ToString() << "...<br>";
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
@@ -5193,12 +5189,12 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   Matrix<Rational> currentOuterAuto;
-  if (doDebug)
-    std::cout << "<br>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
-    << " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
-    << " outer autos.";
+  // if (doDebug)
+  //   std::cout << "<br>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
+  //    << " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
+  //    << " outer autos.";
   int counter=0;
-  if (doDebug)
+  /*if (doDebug)
     do
     { counter++;
       std::cout << "<br>Testing combination " << counter << " out of "
@@ -5207,8 +5203,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       if (counter>1000)
         crash << crash;
     } while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
+  counter=0;*/
 
-  counter=0;
   do
     do
     { counter++;

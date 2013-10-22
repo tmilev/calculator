@@ -5923,7 +5923,7 @@ public:
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
-  void ComputeChevalleyConstantS(GlobalVariables* theGlobalVariables);
+  void ComputeChevalleyConstants(GlobalVariables* theGlobalVariables);
   template<class coefficient>
   coefficient GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right);
   template <class coefficient>

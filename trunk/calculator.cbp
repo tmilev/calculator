@@ -56,6 +56,8 @@
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
+		<Unit filename="vpf9_8GlobalObjects.cpp" />
+		<Unit filename="vpf9_9SystemFunctions.cpp" />
 		<Unit filename="vpfCalculatorMain.cpp">
 			<Option target="Debug" />
 		</Unit>
@@ -85,7 +87,6 @@
 		<Unit filename="vpfImplementationHeader2Math3_WeylAlgebra.h" />
 		<Unit filename="vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h" />
 		<Unit filename="vpfMacros.h" />
-		<Unit filename="vpfSystemFunctionsGlobalObjects.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

@@ -9,7 +9,8 @@ extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
 
 int main_command_input(int argc, char **argv)
-{ std::stringstream theInputStream;
+{ MacroRegisterFunctionWithName("main_command_input");
+  std::stringstream theInputStream;
   theParser.theGlobalVariableS->SetFeedDataToIndicatorWindowDefault(&CGI::makeStdCoutReport);
   for (int i=1; i<argc; i++)
   { theInputStream << argv[i];
@@ -85,30 +86,12 @@ int main(int argc, char **argv)
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-  //	inputString="textInput=+asf&buttonGo=Go";
-  //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
   std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
-  //below follows a script for collapsing and expanding menus
-  //  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
-  //  << "></script>";
-  //  << " djConfig = \"parseOnLoad: true\"></script>";
   std::cout << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
-  //std::cout << IPAdressCaller;
-  //  std::stringstream tempStreamX;
-  //  static_html3(tempStreamX);
-  //  static_html5(tempStreamX);
-  //  std::cout << tempStreamX.str() << std::endl;
-  //  std::cout << inputString;
-
-  //  std::cout << "Raw input: " << inputString << "<hr>";
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  //std::cout << "Chopped strings: ";
-  //for (int i=0; i<inputStrings.size; i++)
-  //  std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
-  //std::cout << "<hr>";
   std::string civilizedInput, inputRankString, inputWeylString;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
@@ -137,6 +120,7 @@ int main(int argc, char **argv)
   //  civilizedInput="FindOneSolutionSerreLikePolynomialSystem( -3(x-1.7)^2);";
 //  civilizedInput="AutomatedTestSetGoodKnownCopy 0";
 //civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
+//civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;
@@ -174,12 +158,10 @@ int main(int argc, char **argv)
     ComputationComplete=true;
     if (theParser.flagProduceLatexLink)
       std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> " << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, civilizedInput);
-  //    std::cout << "<hr>";
     std::cout << theParser.outputString;
     if (theParser.parsingLog!="")
       std::cout << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
   }
-  //  theComputation.flagLogSyntaxRules=inputRankString=="2";
   std::cout << "\n\n</td>\n\n";
   if (theParser.outputCommentsString!="")
   { std::cout << "<td valign=\"top\">";
@@ -198,26 +180,8 @@ int main(int argc, char **argv)
 
   std::cout << "</td></tr></table>";
   std::stringstream tempStream3;
-  //  static_html5(tempStream3);
-  //  static_html6(tempStream3);
-  //  std::cout << tempStream3.str();
-  //  std::cout << "</div>";
   std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
- /* bool isFirst=true;
-  for (int i=0; i<theParser.theObjectContainer.theVariablesNonBound.size; i++)
-  { VariableNonBound& currentVar=theParser.theObjectContainer.theVariablesNonBound[i];
-    if (true)
-    { if (!isFirst)
-        std::cout << ",";
-      isFirst=false;
-      std::cout << "\"" << currentVar.theName << "\"";
-    }
-  }*/
   std::cout << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
-  //  for(int i=0; i<theParser.SystemCommands.size; i++)
-  //  { std::cout << "<br>About to execute: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
-  //   system(theParser.SystemCommands[i].c_str());
-  // }
   std::cout << "</body></html>";
   std::cout << "<!--";
   std::cout.flush();

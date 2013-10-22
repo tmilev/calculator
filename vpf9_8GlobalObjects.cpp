@@ -1,26 +1,17 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader4SystemFunctionsGlobalObjects.h"
-ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystem(__FILE__, "Global objects and system calls.");
 
-timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
-pthread_t TimerThread;
+#include "vpfHeader4SystemFunctionsGlobalObjects.h"
+ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
+
 
 GlobalVariables theGlobalVariables;
 CommandList theParser;
 FormatExpressions consoleFormat;
 
-double GetElapsedTimeInSeconds()
-{ gettimeofday(&LastMeasureOfCurrentTime, NULL);
-  int miliSeconds =(LastMeasureOfCurrentTime.tv_sec- ComputationStartGlobal.tv_sec)*1000+(LastMeasureOfCurrentTime.tv_usec- ComputationStartGlobal.tv_usec)/1000;
-  return ((double) miliSeconds)/1000;
-}
-
 void InitializeGlobalObjects()
 { //std::cout << "Content-Type: text/html\n\n";
-#ifndef WIN32
-  gettimeofday(&ComputationStartGlobal, NULL);
-#endif
+  InitializeTimer();
   crash.theGlobalVariables=&theGlobalVariables;
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&CGI::makeReportIndicatorFile);
 
@@ -31,36 +22,6 @@ void InitializeGlobalObjects()
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   consoleFormat.flagUseHTML = false;
   consoleFormat.flagUseLatex = false;
-}
-
-void ignoreUserAbortSignal()
-{
-#ifndef WIN32
-  signal(SIGABRT,SIG_IGN);
-  signal(SIGTERM,SIG_IGN);
-#endif
-}
-
-void getPath(char* path, std::string& output)
-{ if (path==0) return;
-  int length=0;
-  output= path;
-  while (output[length]!=0 && length<150)
-    length++;
-  for (int i=length-1; i>=0; i--)
-  {
-#ifdef WIN32
-	if (output[i]=='\\' )
-    { output.resize(i+1);
-      return;
-    }
-#else
-    if (output[i]=='/')
-    { output.resize(i+1);
-      return;
-    }
-#endif
-  }
 }
 
 void CGI::makeReportIndicatorFile(IndicatorWindowVariables& input)
@@ -83,38 +44,6 @@ void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
   counter++;
   std::cout << "\nLast progress string: " << *input.ProgressReportStringS.LastObject() << "\n<br>\n";
   CGI::makeReportIndicatorFile(input);
-}
-
-#ifndef WIN32
-void* RunTimer(void* ptr)
-{ double elapsedtime=-1;
-  for (; ;)
-  { usleep(100);
-    elapsedtime=GetElapsedTimeInSeconds();
-    if (ComputationComplete)
-      break;
-    if (elapsedtime >=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit && !
-        (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0))
-      break;
-  }
-  if (!ComputationComplete)
-  { std::cout << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
-    std::cout << "<br>The maximum allowed run time for " << " the entire system is  " << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
-    << " seconds (twice the amount of time allowed for calculator interpretation). <br>This safety limit is hard coded in this particular server. "
-    << "<br>However, if you install the calculator on your own machine you may <br>allow arbitrarily large execution time by modifying "
-    << " the variable theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit located in file "
-    << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
-    std::cout.flush();
-    crash << crash;
-    return 0;
-  } else
-    pthread_exit(NULL);
-}
-#endif
-
-
-void CallSystemWrapper(const std::string& theCommand)
-{ system(theCommand.c_str());
 }
 
 void static_html4(std::stringstream& output);

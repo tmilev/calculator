@@ -465,15 +465,15 @@ bool CommandList::innerPrintSSsubalgebras
   << "= --reservedCountDownToRefresh;}, 1000); </script>";
   out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
   << "seconds...  </b>"
-  << "<meta http-equiv=\"refresh\" content=\"5; url="
-  << displayFolder << theTitlePageFileNameNoPath
-  << "\">"
+  //<< "<meta http-equiv=\"refresh\" content=\"5; url="
+  //<< displayFolder << theTitlePageFileNameNoPath
+  //<< "\">"
   ;
   if (!CGI::FileExists(theTitlePageFileName)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas
     (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
      &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject  ? input.GetValueNonConst<SemisimpleSubalgebras>() :
+    SemisimpleSubalgebras& theSSsubalgebras= isAlreadySubalgebrasObject ? input.GetValueNonConst<SemisimpleSubalgebras>() :
     theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -490,7 +490,7 @@ bool CommandList::innerPrintSSsubalgebras
       << crash;
     }
     if (!isAlreadySubalgebrasObject)
-      theSSsubalgebras.FindTheSSSubalgebrasOLD(ownerSS);
+      theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
     theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+

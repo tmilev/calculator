@@ -4154,52 +4154,14 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 
 void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputImagesSimpleRoots)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::Grow");
+  //almost all simple types are grown from type A. Exceptions only for types F4 (grown from C_3),
+  //E6 (grown from D_5), E7 (grown from E6) and E8 (grown from E7).
   output.SetSize(0);
   List<int> currentImagesSimpleRootsCurrent;
   if (outputImagesSimpleRoots!=0)
     outputImagesSimpleRoots->SetSize(0);
   currentImagesSimpleRootsCurrent.SetSize(this->theRank);
   DynkinSimpleType newType;
-  if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='D')
-  { newType.MakeArbitrary(this->theLetter, this->theRank+1, this->lengthFirstCoRootSquared);
-    output.AddOnTop(newType);
-    if (outputImagesSimpleRoots!=0)
-    { if (this->theLetter=='A')
-      { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
-          currentImagesSimpleRootsCurrent[i]=i;
-        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-      }
-      if (this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='D')
-      { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
-          currentImagesSimpleRootsCurrent[i]=i+1;
-        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-      }
-    }
-  }
-  if (this->theLetter=='A')
-  { newType.MakeArbitrary('B', this->theRank+1, this->lengthFirstCoRootSquared);
-    output.AddOnTop(newType);
-    if (outputImagesSimpleRoots!=0)
-      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-    if (this->theRank>1)
-    { newType.MakeArbitrary('C', this->theRank+1, this->lengthFirstCoRootSquared);
-      output.AddOnTop(newType);
-      if (outputImagesSimpleRoots!=0)
-        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-    }
-    if (this->theRank>2)
-    { newType.MakeArbitrary('D', this->theRank+1, this->lengthFirstCoRootSquared);
-      output.AddOnTop(newType);
-      if (outputImagesSimpleRoots!=0)
-        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-    }
-    if (this->theRank==1)
-    { newType.MakeArbitrary('G', 2, this->lengthFirstCoRootSquared);
-      output.AddOnTop(newType);
-      if (outputImagesSimpleRoots!=0)
-        outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
-    }
-  }
   if (this->theLetter=='C' && this->theRank==3)
   { newType.MakeArbitrary('F', 4, this->lengthFirstCoRootSquared);
     output.AddOnTop(newType);
@@ -4229,6 +4191,37 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
         currentImagesSimpleRootsCurrent[i]=i;
       outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
     }
+  }
+  if (this->theLetter!='A')
+    return;
+  newType.MakeArbitrary(this->theLetter, this->theRank+1, this->lengthFirstCoRootSquared);
+  output.AddOnTop(newType);
+  if (outputImagesSimpleRoots!=0)
+  { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
+      currentImagesSimpleRootsCurrent[i]=i;
+    outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+  }
+  newType.MakeArbitrary('B', this->theRank+1, this->lengthFirstCoRootSquared);
+  output.AddOnTop(newType);
+  if (outputImagesSimpleRoots!=0)
+    outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+  if (this->theRank>1)
+  { newType.MakeArbitrary('C', this->theRank+1, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+  }
+  if (this->theRank>2)
+  { newType.MakeArbitrary('D', this->theRank+1, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
+  }
+  if (this->theRank==1)
+  { newType.MakeArbitrary('G', 2, this->lengthFirstCoRootSquared);
+    output.AddOnTop(newType);
+    if (outputImagesSimpleRoots!=0)
+      outputImagesSimpleRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
 }
 

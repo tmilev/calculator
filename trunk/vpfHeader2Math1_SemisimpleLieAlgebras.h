@@ -222,6 +222,7 @@ public:
   List<Vectors<Rational> > CartanSAsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
+  Vectors<Rational> theHsInOrderOfCreation;
   Matrix<Rational> BilinearFormSimplePrimal;
   Matrix<Rational> BilinearFormFundPrimal;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
@@ -233,8 +234,6 @@ public:
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownNegGens;
   List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
 
-  List<List<int> > theHorbitIndices;
-//  List<List<ElementWeylGroup> > theHWeylGroupElts;
 //  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
@@ -302,6 +301,7 @@ public:
   ~CandidateSSSubalgebra()
   { this->flagDeallocated=true;
   }
+  void reset(SemisimpleSubalgebras* inputOwner=0);
   bool CheckConsistency()const;
   bool CheckMaximalDominance()const;
   int GetPrimalRank()const;
@@ -335,14 +335,17 @@ public:
   (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType,
    const List<int>& theRootInjection)
    ;
+  void SetUpInjectionHs
+  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
+   Vector<Rational>* newH=0, int newHorbitIndex=-1)
+   ;
 
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
   void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
   (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables, std::stringstream* logStream);
-  bool IsPossibleNilradicalCarryOutSelectionImplications
-  (List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
+  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
   void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables);
   Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
   Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
@@ -400,6 +403,9 @@ public:
   ;
   bool isGoodForTheTop
   (const Vector<Rational>& HneW)const
+  ;
+  bool isGoodHnew
+  (const Vector<Rational>& HneW, int indexHneW)const
   ;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;

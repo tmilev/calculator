@@ -715,8 +715,8 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.domainAlg=&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg));
   output.rangeAlg =&this->theObjectContainer.theLieAlgebras.GetElement(this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg));
 
-  output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
-  output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
+  output.theRange().ComputeChevalleyConstants(this->theGlobalVariableS);
+  output.theDomain().ComputeChevalleyConstants(this->theGlobalVariableS);
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator         (13, output.theRange());
   g_m2.MakeGenerator        (7,  output.theRange());
@@ -1785,7 +1785,7 @@ bool CommandList::fTestMonomialBaseConjecture(CommandList& theCommands, const Ex
   SemisimpleLieAlgebra tempAlg;
   for (int i=0; i<theRanks.size; i++)
   { tempAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
-    tempAlg.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    tempAlg.ComputeChevalleyConstants(theCommands.theGlobalVariableS);
     SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras.GetElement
     (theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempAlg));
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);

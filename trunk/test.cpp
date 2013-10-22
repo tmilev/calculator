@@ -3735,7 +3735,7 @@ int main(void)
   localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
-  theSSlieAlg.ComputeChevalleyConstantS(&localGlobalVariables);
+  theSSlieAlg.ComputeChevalleyConstants(&localGlobalVariables);
   WeylGroup& W=theSSlieAlg.theWeyl;
   W.ComputeConjugacyClasses();
 

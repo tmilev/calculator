@@ -3588,8 +3588,8 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output)const
 { output.SetSize(0);
   output.ReservE(this->GetNumSimpleComponents());
-  List<DynkinSimpleType> componentsSorted=this->theMonomials;
-  componentsSorted.QuickSortAscending();
+  List<DynkinSimpleType> componentsSorted;
+  this->GetSortedDynkinTypes(componentsSorted);
   for (int i=0; i<componentsSorted.size; i++)
   { int theIndex= this->theMonomials.GetIndex(componentsSorted[i]);
     for (int j=0; j<this->GetMult(theIndex); j++)

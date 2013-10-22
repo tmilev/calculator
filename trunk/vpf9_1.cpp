@@ -2408,9 +2408,9 @@ void coneRelations::ToString
   output=out.str();
 }
 
-void SemisimpleLieAlgebra::ComputeChevalleyConstantS
+void SemisimpleLieAlgebra::ComputeChevalleyConstants
 (GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstantS");
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstants");
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);

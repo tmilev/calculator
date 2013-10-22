@@ -737,7 +737,7 @@ void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& inp
   input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
-void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)
+void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)const
 { if (&output==this)
   { DynkinType thisCopy=*this;
     thisCopy.GetDynkinTypeWithDefaultLengths(output);
@@ -4796,9 +4796,11 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
   { this->flagCentralizerIsWellChosen=true;
     return;
   }
+  std::cout << "<hr>computing centralizer rank of " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
   if (this->indexMaxSSContainer!=-1)
   { DynkinType centralizerType =this->owner->theSubalgebraCandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+    std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
@@ -4806,6 +4808,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
         << "by sub-diagram I computed the type as  " << this->theCentralizerType.ToString() << " but looking at subalgerba containing the "
         << " current one I got centralizer type " << centralizerType.ToString() << crash;
   }
+  std::cout << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size );
 }
 
@@ -5120,30 +5123,34 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
 }
 
 bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const
-{ //std::cout << "<br>Checking whether " << this->theHs.ToString()
-  //<< " are conjugated to " << input.ToString();
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::HasConjugateHsTo");
+  bool doDebug=this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_1";
+  if (doDebug)
+    std::cout << "<br>Checking whether " << this->theHs.ToString() << " are conjugated to " << input.ToString();
   if (input.size!=this->theHs.size)
     return false;
   List<Vector<Rational> > raisedInput=input;
   List<Vector<Rational> > myVectors=this->theHs;
-  //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-  //std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with "
-  //<< myVectors.ToString();
+  if (doDebug)
+    std::cout << "<br>Comparing simultaneously: " << raisedInput.ToString() << " with " << myVectors.ToString();
   WeylGroup& ambientWeyl=this->GetAmbientWeyl();
   ambientWeyl.RaiseToMaximallyDominant(raisedInput, true);
   ambientWeyl.RaiseToMaximallyDominant(myVectors, true);
-  //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-  //std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: "
-  //<< myVectors.ToString();
+  if (doDebug)
+    std::cout << "<br>raised input is: " << raisedInput.ToString() << ", my raised h's are: " << myVectors.ToString();
   return myVectors==raisedInput;
 }
 
 bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
 { if (other.flagSystemProvedToHaveNoSolution)
     return false;
- // std::cout << " <br>Testing whether "
-  //<< this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is a direct summand of "
-  //<< other.theWeylNonEmbeddeD.theDynkinType.ToString() << "...";
+  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "A^{1}_1" &&
+      other.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{1}_1");
+  if (doDebug)
+    std::cout << " <hr><hr>Testing whether "
+    << this->ToString() << " is a direct summand of "
+    << other.ToString() << "...<br>";
+
   DynkinType theDifference;
   theDifference= other.theWeylNonEmbeddeD.theDynkinType;
   theDifference-=this->theWeylNonEmbeddeD.theDynkinType;
@@ -5186,20 +5193,22 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
   Matrix<Rational> currentOuterAuto;
-  //std::cout << "<hr>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
-  //<< " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
-  //<< " outer autos.";
+  if (doDebug)
+    std::cout << "<br>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
+    << " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
+    << " outer autos.";
   int counter=0;
-  //do
-  //{ counter++;
-  //  std::cout << "<br>Testing combination " << counter << " out of "
-  //  << selectedTypes.GetNumTotalCombinations().ToString();
-  //  std::cout << "; the combination: " << selectedTypes.ToString();
-  //  if (counter>1000)
-  //    crash << crash;
-  //} while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
+  if (doDebug)
+    do
+    { counter++;
+      std::cout << "<br>Testing combination " << counter << " out of "
+      << selectedTypes.GetNumTotalCombinations().ToString();
+      std::cout << "; the combination: " << selectedTypes.ToString();
+      if (counter>1000)
+        crash << crash;
+    } while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
 
-//  counter=0;
+  counter=0;
   do
     do
     { counter++;
@@ -5227,7 +5236,8 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
 }
 
 void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
-{ if (this->flagSystemProvedToHaveNoSolution)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::AdjustCentralizerAndRecompute");
+  if (this->flagSystemProvedToHaveNoSolution)
     return;
   this->ComputeCentralizerIsWellChosen();
   if (!this->flagCentralizerIsWellChosen)
@@ -5247,7 +5257,8 @@ int CandidateSSSubalgebra::GetNumModules()const
 }
 
 void SemisimpleSubalgebras::HookUpCentralizers()
-{ this->theSubalgebraCandidates.QuickSortAscending();
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::HookUpCentralizers");
+  this->theSubalgebraCandidates.QuickSortAscending();
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   std::stringstream reportStream;
   theReport1.Report("<hr>\nHooking up centralizers ");
@@ -5260,6 +5271,7 @@ void SemisimpleSubalgebras::HookUpCentralizers()
     currentSA.indexInOwner=i;
     currentSA.indicesDirectSummandSuperAlgebra.SetSize(0);
     currentSA.indexMaxSSContainer=-1;
+    std::cout << "<hr>Exploring centralizers of " << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString();
     for (int j=0; j<this->theSubalgebraCandidates.size; j++)
     { if (i==j)
         continue;
@@ -5271,18 +5283,18 @@ void SemisimpleSubalgebras::HookUpCentralizers()
         if (this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
             <otherSA.theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
           currentSA.indexMaxSSContainer=j;
-        //std::cout << currentSA.theWeylNonEmbeddeD.theDynkinType.ToString()
-        //<< " is a direct summand of " << otherSA.ToString();
-      }
+        std::cout << " direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
+      } else
+        std::cout << " NOT direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
     }
   }
-  theReport1.Report("<hr>\nCentralizers computed, ajusing centralizers with respect to the Cartan subalgebra.");
+  theReport1.Report("<hr>\nCentralizers computed, adjusing centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { std::stringstream reportStream2;
     reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of "
     << this->theSubalgebraCandidates.size << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
     theReport2.Report(reportStream2.str());
-    this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(theGlobalVariables);
+    this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(this->theGlobalVariables);
   }
   theReport1.Report("<hr>\nComputing pairing tables.");
   if (this->flagComputeModuleDecomposition)
@@ -5292,13 +5304,13 @@ void SemisimpleSubalgebras::HookUpCentralizers()
         reportStream2 << "Computing pairing table of subalgebra number " << i+1 << " out of " << this->theSubalgebraCandidates.size
         << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
         theReport2.Report(reportStream2.str());
-        this->theSubalgebraCandidates[i].ComputePrimalModuleDecomposition(theGlobalVariables);
+        this->theSubalgebraCandidates[i].ComputePrimalModuleDecomposition(this->theGlobalVariables);
         if (!this->flagComputePairingTable)
           continue;
-        this->theSubalgebraCandidates[i].ComputePairingTable(theGlobalVariables);
+        this->theSubalgebraCandidates[i].ComputePairingTable(this->theGlobalVariables);
         //int fixMe;
         if (this->flagComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<50)
-          this->theSubalgebraCandidates[i].EnumerateAllNilradicals(theGlobalVariables);
+          this->theSubalgebraCandidates[i].EnumerateAllNilradicals(this->theGlobalVariables);
       }
 }
 

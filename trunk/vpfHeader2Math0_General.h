@@ -4757,6 +4757,9 @@ class DynkinSimpleType
   bool operator<(int otherRank)const;
 };
 
+//this class needs a fix: it should not inherit monomial collection, rather have a monomial collection as a private member.
+//Most important operations with Dynkin types require fixed order of monomils, which makes using monomial collections
+// a bad design decision.
 class DynkinType: public MonomialCollection<DynkinSimpleType, Rational>
 {
 public:
@@ -4771,9 +4774,11 @@ public:
     return currentType==inputType && currentRank==inputRank;
   }
   void GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const;
-  void GetOuterAutosGenerators(List<Matrix<Rational> >& output)const;
+  void GetOuterAutosGenerators(List<Matrix<Rational> >& output);
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
-  void GetDynkinTypeWithDefaultLengths(DynkinType& output);
+  void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
+  void SortTheDynkinTypes();
+  void GetDynkinTypeWithDefaultLengths(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;
   DynkinSimpleType GetSmallestSimpleType()const;
   Rational GetSizeWeylGroupByFormula()const;

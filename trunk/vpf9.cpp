@@ -3568,19 +3568,19 @@ int ::SelectionWithDifferentMaxMultiplicities::MaxTotalMultiplicity()
 
 void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
 { for (int i=0; i<this->Multiplicities.size; i++)
-    this->Multiplicities.TheObjects[i]=0;
+    this->Multiplicities[i]=0;
 }
 
 void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
 {  for (int i=this->Multiplicities.size-1; i>=0; i--)
-    if (this->Multiplicities.TheObjects[i]<this->MaxMultiplicities.TheObjects[i])
-    { if (this->Multiplicities.TheObjects[i]==0)
+    if (this->Multiplicities[i]<this->MaxMultiplicities[i])
+    { if (this->Multiplicities[i]==0)
         this->elements.AddOnTop(i);
-      this->Multiplicities.TheObjects[i]++;
+      this->Multiplicities[i]++;
       return;
     }
     else
-    { this->Multiplicities.TheObjects[i]=0;
+    { this->Multiplicities[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
 }
@@ -3630,8 +3630,10 @@ void DynkinType::GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output,
   }
 }
 
-void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)const
+void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
+  this->SortTheDynkinTypes();
+
   List<Matrix<Rational> > intermediateGenerators;
   Matrix<Rational> matrixFinal, matrixToGo;
   int currentMult;
@@ -3663,8 +3665,8 @@ void DynkinType::GetLettersTypesMults
     outputMults->SetSize(0);
   if (outputFirstCoRootLengthsSquared!=0)
     outputFirstCoRootLengthsSquared->SetSize(0);
-  List<DynkinSimpleType> componentsSorted=this->theMonomials;
-  componentsSorted.QuickSortAscending();
+  List<DynkinSimpleType> componentsSorted;
+  this->GetSortedDynkinTypes(componentsSorted);
   for (int i=0; i<componentsSorted.size; i++)
   { int theIndex= this->theMonomials.GetIndex(componentsSorted[i]);
     if (outputLetters!=0)
@@ -3767,8 +3769,7 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
 { output.init(0,0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
-  sortedMons=this->theMonomials;
-  sortedMons.QuickSortAscending();
+  this->GetSortedDynkinTypes(sortedMons);
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
     int theMult=this->GetMult(theIndex);
@@ -3779,13 +3780,27 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
   }
 }
 
+void DynkinType::SortTheDynkinTypes()
+{ List<DynkinSimpleType> sortedTypes;
+  this->GetSortedDynkinTypes(sortedTypes);
+  DynkinType finalMe;
+  finalMe.MakeZero();
+  for (int i=0; i<sortedTypes.size; i++)
+    finalMe.AddMonomial(sortedTypes[i], this->GetMonomialCoefficient(sortedTypes[i]));
+  *this=finalMe;
+}
+
+void DynkinType::GetSortedDynkinTypes(List<DynkinSimpleType>& output)const
+{ output=this->theMonomials;
+  output.QuickSortDescending();
+}
+
 void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
 { MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
   output.init(0,0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
-  sortedMons=this->theMonomials;
-  sortedMons.QuickSortDescending();
+  this->GetSortedDynkinTypes(sortedMons);
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
     int mult=this->GetMult(theIndex);
@@ -3801,8 +3816,7 @@ void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
   output.init(0,0);
   Matrix<Rational> curCartan;
   List<DynkinSimpleType> sortedMons;
-  sortedMons=this->theMonomials;
-  sortedMons.QuickSortDescending();
+  this->GetSortedDynkinTypes(sortedMons);
   DynkinSimpleType currentType;
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);

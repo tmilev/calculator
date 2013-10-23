@@ -67,9 +67,10 @@ void CommandList::initPredefinedInnerFunctions()
    "Differentiation - product rule.  ",
    "Differentiate(x, f*g )");
   this->AddOperationInnerHandler
-  ("Differentiate", CommandListFunctions::innerDifferentiateAdivideB, "",
-   "Differentiation - division rule.  ",
-   "Differentiate(x, f/g )");
+  ("Differentiate", CommandListFunctions::innerDifferentiateAdivideBCommutative, "",
+   "Differentiation - division rule, commutative. For the time being differentiation is assumed to be over commutative rings. \
+   This might change in the future. The commutative division rule is d/dx (f/g^n)= ((d/dx f) g- n f (d/dx g))/g^{n+1}.  ",
+   "Differentiate(x, f/g ); Differentiate(x, f/g^5 ); Differentiate(x, f/g^n )");
   this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateAplusB, "",
    "Differentiation - sum rule.  ",

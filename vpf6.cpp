@@ -2957,22 +2957,6 @@ bool CommandList::innerCancelMultiplicativeInverse(CommandList& theCommands, con
   return false;
 }
 
-bool CommandList::innerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
-    return false;
-  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
-  { Expression newRightE;
-    newRightE.MakeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
-    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
-  }
-  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
-  { Expression newLeftE;
-    newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
-    return output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
-  }
-  return false;
-}
-
 bool CommandList::outerAssociateTimesDivision(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
@@ -4070,6 +4054,19 @@ bool Expression::IsBuiltInAtom(std::string* outputWhichOperation)const
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
   return true;
+}
+
+bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  std::cout << "ere be i - checking whether operation " << this->theBoss->GetOperations()[this->theData] << " is good for chain rule. ";
+  if (outputWhichOperation!=0)
+    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
+  return !this->theBoss->atomsNotAllowingChainRule.Contains(this->theBoss->GetOperations()[this->theData]);
 }
 
 bool Expression::RemoveContext()

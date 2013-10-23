@@ -230,6 +230,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->initPredefinedOperationsComposite();
   this->initAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();
+  this->initAtomsNotGoodForChainRule();
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
 

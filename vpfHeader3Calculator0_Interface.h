@@ -188,6 +188,8 @@ class Expression
   bool IsAtom(std::string* outputWhichOperation=0)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
+  bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
+
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
@@ -570,6 +572,7 @@ public:
   //Operations are the labels of the atom nodes of the expression tree.
   HashedList<std::string, MathRoutines::hashString> theAtoms;
   HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
+  HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
@@ -1277,7 +1280,6 @@ public:
   static bool outerAssociate(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerSubZeroDivAnythingWithZero(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCancelMultiplicativeInverse(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(CommandList& theCommands, const Expression& input, Expression& output);
@@ -1493,6 +1495,7 @@ public:
   void reset();
   void initAtomsThatFreezeArguments();
   void initAtomsThatAllowCommutingOfArguments();
+  void initAtomsNotGoodForChainRule();
   void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions();
   void initPredefinedOperationsComposite();

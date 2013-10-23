@@ -387,11 +387,47 @@ bool CommandListFunctions::innerDifferentiateSinCos(CommandList& theCommands, co
   return false;
 }
 
+bool CommandListFunctions::outerAssociateAdivBdivCpowerD(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerAssociateAdivBdivCpowerD");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  if (!input[2][1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  Expression numeratorE, numeratorLeftE, denominatorE;
+  output.reset(theCommands, 3);
+  numeratorLeftE.MakeXOX(theCommands, theCommands.opThePower(), input[2][1][2], input[2][2]);
+  numeratorE.MakeXOX(theCommands, theCommands.opTimes(), input[1], numeratorLeftE);
+  denominatorE.MakeXOX(theCommands, theCommands.opThePower(), input[2][1][1], input[2][2]);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
+}
+
+bool CommandListFunctions::outerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerAssociateDivisionDivision");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { Expression newRightE;
+    newRightE.MakeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
+    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
+  }
+  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  { Expression newLeftE;
+    newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
+    return output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
+  }
+  return false;
+}
+
 bool CommandListFunctions::innerDifferentiateChainRule(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateChainRule");
   /////////////////////
+//  std::cout << "here be i!";
   if (input.children.size!=3)
     return false;
+//  std::cout << "here be i number 2!";
   if (!input[1].IsAtom())
     theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
     << " - possible user typo?";
@@ -400,8 +436,10 @@ bool CommandListFunctions::innerDifferentiateChainRule(CommandList& theCommands,
 //  std::cout << "ere be chain rule! Argument be: " << theArgument.ToString() << " Argument[0] be: " << theArgument[0].ToString();
   if (!theArgument.IsListNElementsStartingWithAtom(-1, 2))
     return false;
-//  std::cout << " continues to rule!";
-  if (theArgument.IsBuiltInAtom() || theArgument[0].IsBuiltInAtom())
+//  std::cout << " continues to rule! The argument be: " << theArgument.ToString() << " theArgument.IsGoodForChainRuleFunction()= "
+//  << theArgument.IsGoodForChainRuleFunction() << " theArgument[0].IsGoodForChainRuleFunction()="
+//  << theArgument[0].IsGoodForChainRuleFunction() << "; ";
+  if (!theArgument.IsGoodForChainRuleFunction() && !theArgument[0].IsGoodForChainRuleFunction())
     return false;
 //  std::cout << " here be ruler #1!";
   theCommands.CheckInputNotSameAsOutput(input, output);

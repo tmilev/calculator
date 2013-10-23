@@ -1552,11 +1552,17 @@ void CommandList::initPredefinedStandardOperations()
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",
    "0/b; ", true);
   this->AddOperationOuterHandler
-  ("/", this->innerAssociateDivisionDivision, "",
+  ("/", CommandListFunctions::outerAssociateDivisionDivision, "",
    "Substitutes (a/b)/c :=a/(c*b); a/(b/c):=a*c/b; .\
    Note the order of multiplication in the rules: this operation is safe and correct for \
    non-commutative rings as well.",
    "(a/b)/c; a/(b/c);", true);
+  this->AddOperationOuterHandler
+  ("/", CommandListFunctions::outerAssociateAdivBdivCpowerD, "",
+   "Substitutes a/(b/c)^d:=a c^d/b^d;.\
+   Note the order of multiplication in the rules: this operation is safe and correct for \
+   non-commutative rings as well.",
+   "a/(b/c)^d;", true);
   this->AddOperationOuterHandler
   ("/", CommandListFunctions::outerAtimesBpowerJplusEtcDivBpowerI, "",
    "Rule: (a_0 + a_1 x^{c_1}+ ... + a_n x^{c_n}) /x^t:=a_0 x^{-t}+ a_1 x^{c_1-t}+...+a_n x^{c_n-t} ",
@@ -1805,6 +1811,11 @@ void CommandList::initPredefinedOperationsComposite()
   //("Differentiate", CommandListFunctions::innerDdivDxToDifferentiation, "",
   // " ",
 //  .. "", true);
+}
+
+void CommandList::initAtomsNotGoodForChainRule()
+{ MacroRegisterFunctionWithName("CommandList::initFunctionsCalculus");
+// this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
 }
 
 void CommandList::initAtomsThatAllowCommutingOfArguments()

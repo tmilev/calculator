@@ -573,18 +573,21 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   if (!this->ComputeChar(false, this->owner->theGlobalVariables))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
+    std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - bad character.";
     return false;
   }
   if (!this->ComputeSystem(this->owner->theGlobalVariables, false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
+    std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - couldnt solve system.";
     return false;
   }
   for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebraCandidates[i], true))
+      { std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is equal to " << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
         return false;
-      else
+      } else
         std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is not a direct summand of "
         << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
     } else
@@ -632,7 +635,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
       << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      std::cout << "<hr>" << reportStream.str();
+      //std::cout << "<hr>" << reportStream.str();
       theReport2.Report(reportStream.str());
     }
     if (baseRank!=0)
@@ -646,7 +649,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         { std::stringstream reportStream;
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
           << " cannot be realized: no appropriate module.";
-          std::cout << "<hr>" << reportStream.str();
+        //  std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
         continue;
@@ -665,10 +668,10 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         reportStreamX << "Trying to realize the root of index " << indexNewRootInSmallType << " in simple component of type " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
         { reportStreamX << " which is no good.<br> ";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
+          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
         } else
         { reportStreamX << " which is all nice and dandy.<br>";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
+          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
         }
         //std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
@@ -725,14 +728,14 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesRescaled.size << "). ";
-            std::cout << reportStream.str();
+            //std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
         } else
         { std::stringstream out2;
           out2 << "sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ": did not succeed extending. ";
-          std::cout << out2.str();
+          //std::cout << out2.str();
           theReport2.Report(out2.str());
         }
       }
@@ -1305,7 +1308,9 @@ bool CandidateSSSubalgebra::ComputeSystem(GlobalVariables* theGlobalVariables, b
         //std::cout << "<br>Generator " << currentGen.ToString() << " ain't no good";
     }
     if (currentInvolvedNegGens.size==0)
+    { std::cout << "Current involved neg gens size is 0. ";
       return false;
+    }
   }
   return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, true);
 }
@@ -1369,9 +1374,15 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     if (useInducedSubalgebraRealization)
     { CandidateSSSubalgebra& theInducer=this->owner->theSubalgebraCandidates[this->indexIamInducedFrom];
       if (theInducer.flagSystemSolved && i!=indexNewRoot)
-      { int preimageIndex=DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
+      { std::cout << " <hr>... and the inducer is: " << theInducer.theWeylNonEmbeddeD.theDynkinType.ToString();
+        if (theInducer.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_1")
+          std::cout << "<br>Detailed inducer printout<br>" << theInducer.ToString();
+        int preimageIndex=DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
         this->theUnknownNegGens[i]=theInducer.theNegGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         this->theUnknownPosGens[i]=theInducer.thePosGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
+        std::cout << "<br>induced neg generator: " << theInducer.theNegGens[preimageIndex];
+        std::cout << "<br>induced pos generator: " << theInducer.thePosGens[preimageIndex];
+        std::cout << "<br>total num neg generators: " << this->theInvolvedNegGenerators.size;
         seedsHaveBeenSown=true;
       }
     }
@@ -1381,6 +1392,9 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
     //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
+  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+    std::cout << "<br>Finally, the neg gens be: " << this->theUnknownNegGens.ToString()
+    << "<br>'n the pos gens be: " << this->theUnknownPosGens.ToString();
 
   if (this->theUnknownCartanCentralizerBasis.size>0)
   { Matrix<Polynomial<AlgebraicNumber> > theCentralizerCartanVars;
@@ -1429,10 +1443,15 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
           crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through " << (-posRoot2).ToString()
           << " does not contain any root, which is impossible. " << crash;
+        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+        { std::cout << " <br>the q in the q-string is: " << q;
+        }
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
         for (int k=0; k<q+1; k++)
-          this->GetAmbientSS().LieBracket(this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
-        //std::cout << "<hr>adjoint element, with power " << q+1 << ": " << lieBracketMinusGoalValue;
+          this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
+        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+          std::cout << "<hr>ad of " << this->theUnknownPosGens[i] << " applied to " << this->theUnknownPosGens[j]
+          << q+1 << " times = " << lieBracketMinusGoalValue;
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
@@ -1449,22 +1468,29 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     this->flagSystemProvedToHaveNoSolution=false;
   }
   if (!this->flagSystemSolved && useInducedSubalgebraRealization)
-  { bool seedHadNoSolution=this->flagSystemProvedToHaveNoSolution;
+  { //bool seedHadNoSolution=this->flagSystemProvedToHaveNoSolution;
     bool result=this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, false);
-    if (seedHadNoSolution && this->flagSystemSolved)
-      std::cout << "<hr>I did not expect that: seed system coming from inducer had NO solution, but system DID HAVE overall a solution. "
-      << "This may be a programming mistake. If not, then this needs to be investigated. Here is the subalgebra: " << this->ToString();
+//    if (seedHadNoSolution && this->flagSystemSolved)
+//      std::cout << "<hr>I did not expect that: seed system coming from inducer had NO solution, but system DID HAVE overall a solution. "
+//      << "This may be a programming mistake. If not, then this needs to be investigated. Here is the subalgebra: " << this->ToString();
     return result;
   }
   if (this->flagSystemProvedToHaveNoSolution)
+  { std::cout << "System proven to have no solution, type is " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
     return false;
+  }
   if (this->flagSystemSolved)
   { this->theBasis=this->theNegGens;
     this->theBasis.AddListOnTop(this->thePosGens);
     if (this->theBasis.size>0)
     { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
       if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
+      { std::cout << "Lie subalgebra dimension doesn't fit: dimension is " << this->theBasis.size << ", must be "
+        << this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank() << ". The subalgebra is " << this->ToString();
+        std::cout << "<br>Involved generators: " << this->theInvolvedNegGenerators.ToString()
+        << "<br>and<br>" << this->theInvolvedPosGenerators.ToString();
         return false;
+      }
     }
     this->owner->owneR->GetCommonCentralizer(this->thePosGens, this->HighestVectorsNonSorted);
     this->ComputeCartanOfCentralizer(theGlobalVariables);

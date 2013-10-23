@@ -507,13 +507,47 @@ bool CommandListFunctions::innerPowerAnyToZero(CommandList& theCommands, const E
   return output.AssignValue<Rational>(1, theCommands);
 }
 
-bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAdivideB");
+bool CommandListFunctions::innerDifferentiateAdivideBCommutative(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAdivideBCommutative");
     //////////////////////
   if (input.children.size!=3)
     return false;
   if (!input[1].IsAtom())
-    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1], theArgument=input[2];
+  //////////////////////
+  //Quotient rule (commutative): (a/b^n)':=(a'b-n a b')/b^{n+1}
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  output.reset(theCommands);
+  Expression theDenominatorBase;
+  Expression theDenominatorExponentPlusOne;
+  Expression theDenominatorExponent;
+  if (theArgument[2].IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  { theDenominatorBase=theArgument[2][1];
+    theDenominatorExponent=theArgument[2][2];
+
+  }
+/*  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
+  Expression numerator, twoE;
+  numerator.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
+  twoE.AssignValue(2, theCommands);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], twoE);*/
+//  return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, changedMultiplicand);
+}
+
+bool CommandListFunctions::innerDifferentiateAdivideBNONCommutative(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAdivideBNONCommutative");
+    //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtom())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression " << input[1].ToString()
     << " - possible user typo?";
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
@@ -523,19 +557,6 @@ bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, 
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
   Expression changedMultiplicand, leftSummand, rightSummand;
-  HashedListSpecialized<Expression> theUserExpressions;
-  theArgument.GetBlocksOfCommutativity(theUserExpressions);
-  if (theUserExpressions.size==1)
-  { changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-    leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
-    changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
-    rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
-    Expression numerator, twoE;
-    numerator.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
-    twoE.AssignValue(2, theCommands);
-    changedMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], twoE);
-    return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, changedMultiplicand);
-  }
   Expression bInverse, bPrime, eMOne;
   eMOne.AssignValue<Rational>(-1, theCommands);
   changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
@@ -547,6 +568,7 @@ bool CommandListFunctions::innerDifferentiateAdivideB(CommandList& theCommands, 
   rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
   return output.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
 }
+
 
 bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");

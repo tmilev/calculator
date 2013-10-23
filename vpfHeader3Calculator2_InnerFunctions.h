@@ -31,7 +31,8 @@ public:
   static bool innerDifferentiateChainRule(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAplusB(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAtimesB(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDifferentiateAdivideB(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateAdivideBCommutative(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateAdivideBNONCommutative(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateX(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output);

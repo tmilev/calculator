@@ -573,23 +573,23 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   if (!this->ComputeChar(false, this->owner->theGlobalVariables))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
-    std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - bad character.";
+    //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - bad character.";
     return false;
   }
-  if (!this->ComputeSystem(this->owner->theGlobalVariables, false))
+  if (!this->ComputeSystem(this->owner->theGlobalVariables, false,false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
-    std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - couldnt solve system.";
+    //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - couldnt solve system.";
     return false;
   }
   for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)
     if (this->theWeylNonEmbeddeD.theDynkinType==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
     { if (this->IsDirectSummandOf(this->owner->theSubalgebraCandidates[i], true))
-      { std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is equal to " << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
+      { //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is equal to " << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
         return false;
-      } else
-        std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is not a direct summand of "
-        << this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
+      } //else
+        //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " is not a direct summand of "
+        //<< this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString();
     } else
       if (this->theWeylNonEmbeddeD.theDynkinType.ToString()==this->owner->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType.ToString())
         crash << crash;
@@ -961,7 +961,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 
       return;
     }
-    if (!newCandidate.ComputeSystem(theGlobalVariables, false))
+    if (!newCandidate.ComputeSystem(theGlobalVariables, false, false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " -> no system solution.");
       //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
       //std::cout << "Candidate "
@@ -1270,7 +1270,8 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
   return true;
 }
 
-bool CandidateSSSubalgebra::ComputeSystem(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
+bool CandidateSSSubalgebra::ComputeSystem
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool allowLieBracketFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
@@ -1312,7 +1313,7 @@ bool CandidateSSSubalgebra::ComputeSystem(GlobalVariables* theGlobalVariables, b
       return false;
     }
   }
-  return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, true);
+  return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, true, allowLieBracketFailure);
 }
 
 bool CandidateSSSubalgebra::CheckGensBracketToHs()
@@ -1330,7 +1331,9 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   return true;
 }
 
-bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization)
+bool CandidateSSSubalgebra::ComputeSystemPart2
+(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization,
+ bool allowLieBracketFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
@@ -1374,15 +1377,15 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     if (useInducedSubalgebraRealization)
     { CandidateSSSubalgebra& theInducer=this->owner->theSubalgebraCandidates[this->indexIamInducedFrom];
       if (theInducer.flagSystemSolved && i!=indexNewRoot)
-      { std::cout << " <hr>... and the inducer is: " << theInducer.theWeylNonEmbeddeD.theDynkinType.ToString();
-        if (theInducer.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_1")
-          std::cout << "<br>Detailed inducer printout<br>" << theInducer.ToString();
+      { //std::cout << " <hr>... and the inducer is: " << theInducer.theWeylNonEmbeddeD.theDynkinType.ToString();
+        //if (theInducer.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_1")
+        //  std::cout << "<br>Detailed inducer printout<br>" << theInducer.ToString();
         int preimageIndex=DynkinType::GetIndexPreimageFromRootInjection(i, this->RootInjectionsFromInducer);
         this->theUnknownNegGens[i]=theInducer.theNegGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
         this->theUnknownPosGens[i]=theInducer.thePosGens[preimageIndex];//<-implicit type conversion from base field to polynomial here
-        std::cout << "<br>induced neg generator: " << theInducer.theNegGens[preimageIndex];
-        std::cout << "<br>induced pos generator: " << theInducer.thePosGens[preimageIndex];
-        std::cout << "<br>total num neg generators: " << this->theInvolvedNegGenerators.size;
+        //std::cout << "<br>induced neg generator: " << theInducer.theNegGens[preimageIndex];
+        //std::cout << "<br>induced pos generator: " << theInducer.thePosGens[preimageIndex];
+        //std::cout << "<br>total num neg generators: " << this->theInvolvedNegGenerators.size;
         seedsHaveBeenSown=true;
       }
     }
@@ -1392,9 +1395,9 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
     //std::cout << "<hr>Unknown generator index " << i << ": " << this->theUnknownNegGens[i].ToString();
   }
-  if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-    std::cout << "<br>Finally, the neg gens be: " << this->theUnknownNegGens.ToString()
-    << "<br>'n the pos gens be: " << this->theUnknownPosGens.ToString();
+  //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+  //  std::cout << "<br>Finally, the neg gens be: " << this->theUnknownNegGens.ToString()
+  //  << "<br>'n the pos gens be: " << this->theUnknownPosGens.ToString();
 
   if (this->theUnknownCartanCentralizerBasis.size>0)
   { Matrix<Polynomial<AlgebraicNumber> > theCentralizerCartanVars;
@@ -1443,15 +1446,15 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
         if (!nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot(posRoot1, -posRoot2, q))
           crash << "This is a programming error: the alpha-string along " << posRoot1.ToString() << " through " << (-posRoot2).ToString()
           << " does not contain any root, which is impossible. " << crash;
-        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-        { std::cout << " <br>the q in the q-string is: " << q;
-        }
+        //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+        //{ std::cout << " <br>the q in the q-string is: " << q;
+        //}
         lieBracketMinusGoalValue=this->theUnknownPosGens[j];
         for (int k=0; k<q+1; k++)
           this->GetAmbientSS().LieBracket(this->theUnknownPosGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
-        if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
-          std::cout << "<hr>ad of " << this->theUnknownPosGens[i] << " applied to " << this->theUnknownPosGens[j]
-          << q+1 << " times = " << lieBracketMinusGoalValue;
+        //if (this->theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{1}_2")
+        //  std::cout << "<hr>ad of " << this->theUnknownPosGens[i] << " applied to " << this->theUnknownPosGens[j]
+        //  << q+1 << " times = " << lieBracketMinusGoalValue;
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
@@ -1476,7 +1479,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     return result;
   }
   if (this->flagSystemProvedToHaveNoSolution)
-  { std::cout << "System proven to have no solution, type is " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
+  { //std::cout << "System proven to have no solution, type is " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
     return false;
   }
   if (this->flagSystemSolved)
@@ -1485,10 +1488,11 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(GlobalVariables* theGlobalVariabl
     if (this->theBasis.size>0)
     { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
       if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
-      { std::cout << "Lie subalgebra dimension doesn't fit: dimension is " << this->theBasis.size << ", must be "
-        << this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank() << ". The subalgebra is " << this->ToString();
-        std::cout << "<br>Involved generators: " << this->theInvolvedNegGenerators.ToString()
-        << "<br>and<br>" << this->theInvolvedPosGenerators.ToString();
+      { if (!allowLieBracketFailure)
+          crash << "This is a programming error. Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
+          << this->theBasis.size << ", must be " << this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
+          << ". The subalgebra is " << this->ToString() << "<br>Involved generators: " << this->theInvolvedNegGenerators.ToString()
+          << "<br>and<br>" << this->theInvolvedPosGenerators.ToString() << crash;
         return false;
       }
     }
@@ -5325,7 +5329,7 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
   if (!this->flagCentralizerIsWellChosen)
   { //std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
     //std::cout << "<br>Starting generators: " << this->ToStringGenerators();
-    this->ComputeSystem(theGlobalVariables, true);
+    this->ComputeSystem(theGlobalVariables, true, false);
     //std::cout << "<br>... and final generators: " << this->ToStringGenerators();
     this->ComputeCentralizerIsWellChosen();
   }

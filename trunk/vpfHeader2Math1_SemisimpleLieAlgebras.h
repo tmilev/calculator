@@ -392,10 +392,10 @@ public:
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
   ;
   bool ComputeSystem
-  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
+  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool allowLieBracketFailure)
   ;
   bool ComputeSystemPart2
-  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization=true)
+  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization=true, bool allowLieBracketFailure=false)
   ;
   bool ComputeChar
   (bool allowBadCharacter, GlobalVariables* theGlobalVariables)

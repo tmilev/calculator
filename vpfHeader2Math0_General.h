@@ -4819,6 +4819,7 @@ public:
     return intResult;
   }
   static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
+  static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;

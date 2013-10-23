@@ -3702,6 +3702,18 @@ int DynkinType::GetNewIndexFromRootInjection(const List<int>& inputRootInjection
   return selectedIndices.elements[0];
 }
 
+int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection)
+{ MacroRegisterFunctionWithName("DynkinType::GetIndexPreimageFromRootInjection");
+  for (int i=0; i<inputRootInjection.size; i++)
+    if (inputRootInjection[i]==inputIndex)
+      return i;
+  crash.theCrashReport << "This is a programming error: asking to find the preimage of root index " << inputIndex << " w.r.t. root injection "
+  << inputRootInjection << " - the root index has no preimage. This function is not allowed to fail. ";
+  crash << crash;
+  return -1;
+}
+
+
 void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength)
 { DynkinSimpleType theMon;
   theMon.theRank=rank;
@@ -3878,8 +3890,7 @@ Rational DynkinSimpleType::GetLongRootLengthSquared()const
     default:
       break;
   }
-  crash << "This is a programming error: calling DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. "
-  << crash;
+  crash << "This is a programming error: calling DynkinSimpleType::GetLongRootLengthSquared on a non-initialized simple type. " << crash;
   return -1;
 }
 
@@ -4023,8 +4034,8 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
         return 6;
       return 2;
     default:
-      crash << "This is a programming error: calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized "
-      << " Dynkin type " << this->ToString() << crash;
+      crash << "This is a programming error: calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized Dynkin type "
+      << this->ToString() << crash;
       return -1;
   }
 }
@@ -4505,9 +4516,7 @@ ElementWeylGroup ElementWeylGroup::Inverse() const
 }
 
 bool WeylGroup::operator==(const WeylGroup& other)const
-{ return
-  this->CartanSymmetric==other.CartanSymmetric &&
-  this->theDynkinType==other.theDynkinType;
+{ return this->CartanSymmetric==other.CartanSymmetric && this->theDynkinType==other.theDynkinType;
 }
 
 void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
@@ -4957,8 +4966,7 @@ void KLpolys::GeneratePartialBruhatOrder()
       int x= this->GetIndex(tempRoot);
       if (x==-1)
         crash << "This is a programming error: something wrong has happened. A weight that is supposed to "
-        << " be in a certain Weyl group orbit isn't there. There is an error in the code, crashing accordingly. "
-        << crash;
+        << " be in a certain Weyl group orbit isn't there. There is an error in the code, crashing accordingly. " << crash;
       this->SimpleReflectionsActionList[i].AddOnTop(x);
       tempRoot2-=(tempRoot);
       if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero() )

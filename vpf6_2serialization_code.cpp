@@ -52,8 +52,8 @@ bool Serialization::DeSerializeMonGetContext<DynkinSimpleType>
 template <>
 bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& input, const Expression& inputContext, ChevalleyGenerator& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon");
-  std::cout << "here i am again -!. ";
-  std::cout.flush();
+//  std::cout << "here i am again -!. ";
+//  std::cout.flush();
   int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
   { theCommands.Comments << "<hr>Can't load Chevalley generator: failed extract ambient algebra index from context " << inputContext.ToString();
@@ -81,8 +81,8 @@ bool Serialization::DeSerializeMon(CommandList& theCommands, const Expression& i
   else if (theOperation=="getChevalleyGenerator")
     generatorIndex=outputMon.owneR->GetGeneratorFromDisplayIndex(generatorIndex);
   else
-  { theCommands.Comments << "<hr>Failed to load Chevalley generator: the generator name was  "
-    << theOperation << "; it must either be getCartanGenerator or getChevalleyGenerator.";
+  { theCommands.Comments << "<hr>Failed to load Chevalley generator: the generator name was  " << theOperation
+    << "; it must either be getCartanGenerator or getChevalleyGenerator.";
     return false;
   }
   if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
@@ -346,12 +346,9 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
 //  std::cout.flush();
   if (theDynkinType.GetRank()>20)
   { std::stringstream out;
-    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
-    << " If you would like to relax this limitation edit file " << __FILE__ << " line "
-    << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
-    << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
-    << " You have been warned. Alternatively, you may want to implement a sparse structure constant table "
-    << "(write me an email if you want to do that, I will help you). ";
+    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
+    << " line " << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g) table of RAM memory, which means the RAM memory rises with the 4^th power of rank(g). "
+    << " You have been warned. Alternatively, you may want to implement a sparse structure constant table (write me an email if you want to do that, I will help you). ";
     return output.SetError(out.str(), theCommands);
   }
   SemisimpleLieAlgebra tempSSalgebra;
@@ -382,8 +379,7 @@ bool Serialization::innerLoadSSLieAlgebra(CommandList& theCommands, const Expres
 
 bool Serialization::innerStoreSemisimpleLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsOfType<SemisimpleLieAlgebra>())
-    return output.SetError
-    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
+    return output.SetError("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ", theCommands);
   SemisimpleLieAlgebra& owner=input.GetValueNonConst<SemisimpleLieAlgebra>();
   return Serialization::innerStoreObject(theCommands, owner, output);
 }
@@ -463,8 +459,7 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const slTwoSubalg
 bool Serialization::innerLoadFromObject(CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
 { MacroRegisterFunctionWithName("Serialization::innerLoadFromObject slTwoSubalgebra");
   if (!input.IsListNElements(3))
-  { theCommands.Comments << "<hr>input of innerLoadFromObject has "
-    << input.children.size << " children, 3 expected. ";
+  { theCommands.Comments << "<hr>input of innerLoadFromObject has " << input.children.size << " children, 3 expected. ";
     return false;
   }
   const Expression& theF=input[1];
@@ -662,8 +657,7 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
   outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS, false);
   if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
-  { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra "
-    << " does not decompose properly over the candidate subalgebra. ";
+  { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
     return false;
 //    outputSubalgebra.theCharNonPrimalFundCoords.MakeZero(owner.owneR);
 //    outputSubalgebra.theCharFundamentalCoordsRelativeToCartan.MakeZero(owner.owneR);
@@ -996,8 +990,7 @@ bool CommandList::innerRationalFunction(CommandList& theCommands, const Expressi
     return false;
   if (!theConverted.IsOfType<Polynomial<Rational> >())
     crash << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
-    << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". "
-    << crash;
+    << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". " << crash;
   return theConverted.ConvertToType<RationalFunctionOld>(output);
 }
 
@@ -1017,9 +1010,8 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const RationalFun
   if (input.expressionType==input.typePoly)
     return Serialization::innerStoreMonCollection(theCommands, theNumerator, output, theContext);
   if (input.expressionType!=input.typeRationalFunction)
-    crash << "This is a programming error: I am processing a rational function which is not "
-    << " of type rational polynomial or honest rataional function. Something has gone very wrong. "
-    << crash;
+    crash << "This is a programming error: I am processing a rational function which is not of type rational polynomial or honest rataional "
+    << "function. Something has gone very wrong. " << crash;
   Polynomial<Rational> theDenominator;
   input.GetDenominator(theDenominator);
   Expression denE, numE;

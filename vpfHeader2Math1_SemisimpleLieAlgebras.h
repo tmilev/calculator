@@ -246,6 +246,8 @@ public:
   List<Polynomial<AlgebraicNumber> > transformedSystem;
   SemisimpleSubalgebras* owner;
   int indexInOwner;
+  int indexIamInducedFrom;
+  List<int> RootInjectionsFromInducer;
   int indexInOwnersOfNonEmbeddedMe;
   int indexHcandidateBeingGrown;
   int indexMaxSSContainer;
@@ -393,12 +395,12 @@ public:
   (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
   ;
   bool ComputeSystemPart2
-  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer)
+  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization=true)
   ;
   bool ComputeChar
   (bool allowBadCharacter, GlobalVariables* theGlobalVariables)
   ;
-  bool AttemptToSolveSytem
+  bool AttemptToSolveSystem
   (GlobalVariables* theGlobalVariables)
   ;
   bool isGoodForTheTop

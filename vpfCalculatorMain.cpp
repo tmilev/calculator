@@ -118,9 +118,10 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
   //  civilizedInput="FindOneSolutionSerreLikePolynomialSystem( -3(x-1.7)^2);";
-//  civilizedInput="AutomatedTestSetGoodKnownCopy 0";
-//civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
-//civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
+  //  civilizedInput="AutomatedTestSetGoodKnownCopy 0";
+  //civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
+  //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
+  //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute a_2";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

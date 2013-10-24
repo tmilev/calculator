@@ -118,6 +118,7 @@ class Expression
   //The status of the following data has not been decided:
   int format;
 //////
+  bool flagDeallocated;
   typedef bool (*FunctionAddress) (CommandList& theCommands, const Expression& input, Expression& output);
 //////
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
@@ -346,18 +347,21 @@ class Expression
         return i;
     return -1;
   }
-  Expression()
+  Expression() :flagDeallocated(false)
   { this->reset();
   }
   const Expression& GetLastChild()const
   { return (*this)[this->children.size-1];
   }
   bool SetError (const std::string& theError, CommandList& owner);
-  Expression(const Expression& other)
+  Expression(const Expression& other):flagDeallocated(false)
   { this->operator=(other);
   }
-  Expression(CommandList& inputBoss)
+  Expression(CommandList& inputBoss):flagDeallocated(false)
   { this->reset(inputBoss);
+  }
+  ~Expression()
+  { this->flagDeallocated=true;
   }
   bool CheckInitialization()const
   { if (this->theBoss==0)

@@ -703,6 +703,8 @@ bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionO
 
 bool Expression::CheckConsistency()const
 { MacroRegisterFunctionWithName("Expression::CheckConsistency");
+  if (this->flagDeallocated)
+    crash << "Use after free of Expression. " << crash;
   this->CheckInitialization();
   if (this->children.size==0)
     return false;
@@ -2882,12 +2884,15 @@ bool CommandList::outerTensor(CommandList& theCommands, const Expression& input,
 bool CommandList::innerCollectMultiplicands(CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
+//  std::cout << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
   const Expression* left= &input[1];
   const Expression* right=&input[2];
   if (*left==*right)
   { constPower.AssignValue(2, theCommands);
-    return output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
+    output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
+    //std::cout << "<br>output be at first place: " << output.ToString();
+    return true;
   }
   for (int i=0; i<2; i++, MathRoutines::swap(left, right))
     if (left->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
@@ -2899,7 +2904,9 @@ bool CommandList::innerCollectMultiplicands(CommandList& theCommands, const Expr
       if (right->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
         { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
-          return output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+          output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
+          //std::cout << "<br>output be at second place: " << output.ToString();
+          return true;
         }
     }
   return false;
@@ -3685,7 +3692,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else
     return "(Error:NoOwner)";
   RecursionDepthCounter theRecursionCounter(&this->theBoss->RecursionDeptH);
-
+  this->CheckConsistency();
   int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
     return theBoss->theObjectContainer.ExpressionNotation[notationIndex];
@@ -3793,6 +3800,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         newE.reset(*this->theBoss, 2);
         newE.AddChildOnTop(newFunE);
         newE.AddChildOnTop(firstE[1]);
+        this->CheckConsistency();
+        newE.CheckConsistency();
+        newFunE.CheckConsistency();
+        //std::cout << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
         out << newE.ToString(theFormat);
       }
     if (!involvesExponentsInterprettedAsFunctions)
@@ -3816,6 +3827,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << firstEstr;
       out << "^{" << secondEstr << "}";
     }
+//    std::cout << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
   } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { if (this->children.size<2)
       crash << crash;
@@ -3995,6 +4007,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "}";
     else if (needParenthesis)
       out << ")";
+//    std::cout << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
+
   } else //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)" ;
   if (startingExpression!=0)

@@ -87,6 +87,10 @@ void CommandList::initPredefinedInnerFunctions()
   ("Differentiate", CommandListFunctions::innerDifferentiateConstPower, "",
    "Differeniation - d/dx x^n= n x^{n-1}.",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
+  this->AddOperationInnerHandler
+  ("Differentiate", CommandListFunctions::innerDifferentiateConstPower, "",
+   "Differeniation - d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\ln a) .",
+   "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
 
   this->AddOperationInnerHandler
   ("ElementWeylAlgebraDO", CommandList::innerElementWeylAlgebra, "",
@@ -1830,7 +1834,7 @@ void CommandList::initPredefinedOperationsComposite()
 
 void CommandList::initAtomsNotGoodForChainRule()
 { MacroRegisterFunctionWithName("CommandList::initFunctionsCalculus");
-// this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("+");
+ this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
 }
 
 void CommandList::initAtomsThatAllowCommutingOfArguments()

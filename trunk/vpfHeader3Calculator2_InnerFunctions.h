@@ -38,6 +38,7 @@ public:
   static bool innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateX(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateConstPower(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateAPowerB(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerAnyToZero(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output);

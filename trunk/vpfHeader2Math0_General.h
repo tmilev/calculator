@@ -516,6 +516,11 @@ public:
     theSortedMons.QuickSortAscending(theOrder, &this->theCoeffs);
     this->theMonomials=theSortedMons;
   }
+  void QuickSortDescending(typename List<TemplateMonomial>::OrderLeftGreaterThanRight theOrder=0)
+  { List<TemplateMonomial> theSortedMons=this->theMonomials;
+    theSortedMons.QuickSortDescending(theOrder, &this->theCoeffs);
+    this->theMonomials=theSortedMons;
+  }
   void PopMonomial(int index)
   { this->theMonomials.RemoveIndexSwapWithLast(index);
     this->theCoeffs.RemoveIndexSwapWithLast(index);

@@ -45,6 +45,7 @@ void CommandList::reset()
   this->flagProduceLatexLink=false;
   this->flagDisplayFullExpressionTree=false;
   this->flagUseFracInRationalLaTeX=false;
+  this->flagDontDistribute=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
@@ -57,6 +58,7 @@ void CommandList::reset()
   this->builtInTypes.Clear();
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
   this->atomsThatFreezeArguments.Clear();
+  this->atomsNotInterprettedAsFunctions.Clear();
   this->FunctionHandlers.SetSize(0);
 
   this->syntacticSouP.SetSize(0);
@@ -213,6 +215,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("FullTree");
   this->controlSequences.AddOnTop("HideLHS");
+  this->controlSequences.AddOnTop("DontDistribute");
   this->controlSequences.AddOnTop("EndProgram");
   //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
@@ -223,6 +226,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
   this->AddOperationNoRepetitionAllowed("\\ln");
+  //additional operations with the same status as user-input expressions.
+  this->AddOperationNoRepetitionAllowed("\\pi");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
@@ -231,8 +236,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->initAtomsThatAllowCommutingOfArguments();
   this->initAtomsThatFreezeArguments();
   this->initAtomsNotGoodForChainRule();
-  //additional operations with the same status as user-input expressions.
-  this->AddOperationNoRepetitionAllowed("\\pi");
+  this->initBuiltInAtomsNotInterprettedAsFunctions();
+  this->initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
 
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
@@ -942,6 +947,11 @@ bool CommandList::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="DontDistribute")
+  { this->flagDontDistribute=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

@@ -222,6 +222,33 @@ bool CommandListFunctions::innerGetAlgebraicNumberFromMinPoly(CommandList& theCo
   return output.AssignValue(theAN, theCommands);
 }
 
+bool CommandListFunctions::innerCompositeApowerBevaluatedAtC(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeApowerBevaluatedAtC");
+  //std::cout << "<hr>input be: " << input.ToString();
+  if (!input.IsListNElements())
+    return false;
+  const Expression& firstE=input[0];
+  if (!firstE.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  Expression finalBase;
+  finalBase.reset(theCommands, input.children.size);
+  finalBase.AddChildOnTop(input[0][1]);
+  for (int i=1; i<input.children.size; i++)
+    finalBase.AddChildOnTop(input[i]);
+  return output.MakeXOX(theCommands, theCommands.opThePower(), finalBase, input[0][2]);
+}
+
+bool CommandListFunctions::innerConstantFunction(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerConstantFunction");
+  if (!input.IsListNElements())
+    return false;
+  if (!input[0].IsConstantNumber())
+    return false;
+  output=input[0];
+  return true;
+}
+
 bool CommandListFunctions::innerCompositeConstTimesAnyActOn(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeConstTimesAnyActOn");
   if (!input.IsListNElements())
@@ -522,23 +549,30 @@ bool CommandListFunctions::innerDifferentiateAdivideBCommutative(CommandList& th
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
-  Expression theDenominatorBase;
-  Expression theDenominatorExponentPlusOne;
-  Expression theDenominatorExponent;
+  Expression theDenominatorBase, eOne, theDenominatorExponentPlusOne, theDenominatorExponent, changedMultiplicand,
+  leftSummand, rightSummand, theDenominatorFinal, numerator;
+  eOne.AssignValue(1, theCommands);
+  bool denBaseFound=false;
   if (theArgument[2].IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
-  { theDenominatorBase=theArgument[2][1];
-    theDenominatorExponent=theArgument[2][2];
-
+    if (theArgument[2][2].IsConstantNumber())
+    { denBaseFound=true;
+      theDenominatorBase=theArgument[2][1];
+      theDenominatorExponent=theArgument[2][2];
+      theDenominatorExponentPlusOne.MakeXOX(theCommands, theCommands.opPlus(), theDenominatorExponent, eOne);
+    }
+  if (!denBaseFound)
+  { theDenominatorBase=theArgument[2];
+    theDenominatorExponentPlusOne.AssignValue(2, theCommands);
+    theDenominatorExponent.AssignValue(1, theCommands);
   }
-/*  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
-  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theArgument[2]);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[2]);
-  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
-  Expression numerator, twoE;
+  theDenominatorFinal.MakeXOX(theCommands, theCommands.opThePower(), theDenominatorBase, theDenominatorExponentPlusOne);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theArgument[1]);
+  leftSummand.MakeXOX(theCommands, theCommands.opTimes(), changedMultiplicand, theDenominatorBase);
+  rightSummand.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, theDenominatorBase);
+  changedMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], rightSummand);
+  rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theDenominatorExponent, changedMultiplicand);
   numerator.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
-  twoE.AssignValue(2, theCommands);
-  changedMultiplicand.MakeXOX(theCommands, theCommands.opThePower(), theArgument[2], twoE);*/
-//  return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, changedMultiplicand);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numerator, theDenominatorFinal);
 }
 
 bool CommandListFunctions::innerDifferentiateAdivideBNONCommutative(CommandList& theCommands, const Expression& input, Expression& output)
@@ -582,6 +616,7 @@ bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theComma
     return false;
   if (input[2]>input[1] || input[2]==input[1])
     return false;
+//  std::cout << "<hr>" << input[2].ToString() << " less than " << input[1].ToString();
 //  std::cout << "ere be i, number 1!";
   output=input;
   output.children.SwapTwoIndices(1,2);
@@ -589,7 +624,7 @@ bool CommandListFunctions::outerCommuteAtimesBifUnivariate(CommandList& theComma
 }
 
 bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBifUnivariate");
+{ MacroRegisterFunctionWithName("CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
     return false;
   const Expression& leftE=input[1];
@@ -606,7 +641,7 @@ bool CommandListFunctions::outerCommuteAtimesBtimesCifUnivariate(CommandList& th
     return false;
   if (rightE>leftE || leftE==rightE)
     return false;
-//  std::cout << "ere be i, number 2!";
+//  std::cout << "<hr>" << rightE.ToString() << " less than " << leftE.ToString();
   Expression leftMultiplicand;
   leftMultiplicand.MakeXOX(theCommands, theCommands.opTimes(), rightE, leftE);
 //  std::cout << "Left multiplicand: " << leftE.ToString() << ", right: " << rightE.ToString() << " ";

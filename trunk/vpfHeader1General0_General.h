@@ -949,9 +949,12 @@ public:
     else
       this->QuickSortAscendingOrder(0, this->size-1, theOrder, carbonCopy);
   }
-  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
-  { this->QuickSortAscending<Object>(theOrder);
+  template <class otherType=Object>
+  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
+  { this->QuickSortAscending(theOrder, carbonCopy);
     this->ReverseOrderElements();
+    if (carbonCopy!=0)
+      carbonCopy->ReverseOrderElements();
   }
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);

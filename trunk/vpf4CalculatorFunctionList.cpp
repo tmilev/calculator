@@ -1613,7 +1613,6 @@ void CommandList::initPredefinedStandardOperations()
    "Replaces p^0 by 1 if p is non-zero, and by an error message if p is zero.",
    "A:=x^0; x:=0; A; B:=x^0; 0^0; ",
    true);
-
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CommandListInnerTypedFunctions::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
@@ -1796,7 +1795,16 @@ void CommandList::initPredefinedStandardOperations()
 }
 
 void CommandList::initPredefinedOperationsComposite()
-{ this->AddOperationComposite
+{ MacroRegisterFunctionWithName("CommandList::initPredefinedOperationsComposite");
+  this->AddOperationComposite
+  ("Rational", CommandListFunctions::innerConstantFunction, "",
+   "If x is a constant, replaces x{}({{anything}}):=x; ",
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true);
+  this->AddOperationComposite
+  ("AlgebraicNumber", CommandListFunctions::innerConstantFunction, "",
+   "If x is a constant, replaces x{}({{anything}}):=x; ",
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true);
+  this->AddOperationComposite
   ("Sequence", CommandListFunctions::innerCompositeSequenceDereference, "",
    "Dereferences a sequence. The syntax is as illustrated by the example. ",
    "X:=(a,b,c); X_1; X_2; X_3; X_4; X_j; j:=3; X_j", true);
@@ -1808,6 +1816,12 @@ void CommandList::initPredefinedOperationsComposite()
   ("*", CommandListFunctions::innerCompositeConstTimesAnyActOn, "",
    "Rule (a*f){}x= a*(f{}x), provided a is a constant. ",
    "(2\\sin){}x-2(\\sin x) ", true);
+  this->AddOperationComposite
+  ("^", CommandListFunctions::innerCompositeApowerBevaluatedAtC, "",
+   "Provided that n is not equal to -1, use the rule ({{f}}^{{n}}){}{{x}}:=(f{}x)^n.",
+   "\\tan^2 x; (f^-2) {}x ; (f^-1){}x ",
+   true);
+
   //this->AddOperationComposite
   //("Differentiate", CommandListFunctions::innerDdivDxToDifferentiation, "",
   // " ",
@@ -1826,6 +1840,27 @@ void CommandList::initAtomsThatAllowCommutingOfArguments()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("*");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("/");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");
+}
+
+void CommandList::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()
+{ MacroRegisterFunctionWithName("CommandList::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\tan");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cot");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sec");
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
+}
+
+void CommandList::initBuiltInAtomsNotInterprettedAsFunctions()
+{ MacroRegisterFunctionWithName("CommandList::initBuiltInAtomsNotInterprettedAsFunctions");
+  this->atomsNotInterprettedAsFunctions.SetExpectedSize(30);
+  this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\pi");
+  this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("e");
+
 }
 
 void CommandList::initAtomsThatFreezeArguments()

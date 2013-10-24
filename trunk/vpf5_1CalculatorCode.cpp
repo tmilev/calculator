@@ -75,13 +75,15 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     { int LeavingVariableRow;  Rational MaxMovement;
       Matrix<Rational>::GetMaxMovementAndLeavingVariableRow(MaxMovement, LeavingVariableRow, EnteringVariable, NumTrueVariables, tempMatA, matX, BaseVariables);
       Rational tempRat, tempTotalChange;
-      assert(!tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero());
+      if (tempMatA.elements[LeavingVariableRow][EnteringVariable].IsEqualToZero())
+        crash << crash;
       tempRat.Assign(tempMatA.elements[LeavingVariableRow][EnteringVariable]);
       tempRat.Invert();
   //    if (BaseVariables.elements[LeavingVariableRow]==34)
   //      tempMatA.ComputeDebugString();
       for (int i=0; i<tempMatA.NumRows; i++)
-        assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1));
+        if (!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
+          crash << crash;
       tempMatA.RowTimesScalar(LeavingVariableRow, tempRat);
       //if (BaseVariables.elements[LeavingVariableRow]==34)
       //  tempMatA.ComputeDebugString();
@@ -115,7 +117,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
         //tempMatA.ComputeDebugString();
         //matX.ComputeDebugString();
       }
-      assert(matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero());
+      if(!matX[BaseVariables.elements[LeavingVariableRow]].IsEqualToZero())
+        crash << crash;
       BaseVariables.selected[BaseVariables.elements[LeavingVariableRow]]=false;
       BaseVariables.elements[LeavingVariableRow]= EnteringVariable;
       BaseVariables.selected[EnteringVariable]= true;

@@ -185,6 +185,10 @@ class Expression
   bool IsConstantNumber()const;
   bool IsFrozen()const;
   bool IsAtomThatFreezesArguments(std::string* outputWhichAtom=0)const;
+  bool IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outputWhichAtom=0)const;
+  bool IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction()const;
+  bool IsAtomNotInterprettedAsFunction(std::string* outputWhichAtom=0)const;
+
   bool IsAtom(std::string* outputWhichOperation=0)const;
   bool IsAtomGivenData(int desiredDataUseMinusOneForAny=-1)const;
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
@@ -198,6 +202,8 @@ class Expression
   bool IsContext()const;
   bool NeedsParenthesisForBaseOfExponent()const;
   bool NeedsParenthesisForMultiplication()const;
+
+  int GetExpressionTreeSize()const;
 
   template <class theType>
   bool ConvertToType(Expression& output)const;
@@ -575,6 +581,8 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
+  HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterprettedAsFunctions;
+  HashedList<std::string, MathRoutines::hashString> atomsNotInterprettedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> operationsComposite;
   List<List<Function> > FunctionHandlers;
   List<List<Function> > operationsCompositeHandlers;
@@ -655,6 +663,8 @@ public:
   bool flagHideLHS;
   bool flagDisplayFullExpressionTree;
   bool flagUseFracInRationalLaTeX;
+
+  bool flagDontDistribute;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedAtoms;
@@ -1495,6 +1505,8 @@ public:
   void reset();
   void initAtomsThatFreezeArguments();
   void initAtomsThatAllowCommutingOfArguments();
+  void initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
+  void initBuiltInAtomsNotInterprettedAsFunctions();
   void initAtomsNotGoodForChainRule();
   void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions();

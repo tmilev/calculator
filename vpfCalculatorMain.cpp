@@ -122,6 +122,7 @@ int main(int argc, char **argv)
   //civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
   //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
   //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute a_2";
+ // civilizedInput="\\sin ^2 x";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

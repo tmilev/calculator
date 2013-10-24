@@ -17,7 +17,8 @@ Crasher& Crasher::operator<<(int x)
 }
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
-{ this->theCrashReport << "<hr>This is a program crash. ";
+{ MacroRegisterFunctionWithName("Standard crashing method.");
+  this->theCrashReport << "<hr>This is a program crash. ";
   if (this->userInputStringIfAvailable!="")
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

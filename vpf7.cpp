@@ -137,7 +137,8 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 { Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(inputLine);
   this->IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  assert(this->basisRationalForm.NumRows<=1);
+  if (this->basisRationalForm.NumRows>1)
+    crash << crash;
   if (this->basisRationalForm.NumRows==0)
     outputGenerator.MakeZero(inputLine.size);
   else

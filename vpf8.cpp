@@ -138,7 +138,8 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2(GlobalVari
 }
 
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
-{ assert(&output!=&input);
+{ if(&output==&input)
+    crash << crash;
   output.MakeZero();
   for (int i=0; i<input.size(); i++)
   { int currentIndex=input[i].theGeneratorIndex;
@@ -597,9 +598,9 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGl
   this->WriteToFile(output, theGlobalVariables);
 }
 
-std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport
-(GlobalVariables& theGlobalVariables)
-{ assert(this->theMultiplicities.size== this->projectivizedChambeR.size);
+std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport(GlobalVariables& theGlobalVariables)
+{ if (this->theMultiplicities.size!= this->projectivizedChambeR.size)
+    crash << crash;
   std::stringstream out;
   FormatExpressions theFormat;
   theFormat.polyAlphabeT.SetSize(5);

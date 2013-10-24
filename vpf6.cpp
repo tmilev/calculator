@@ -3020,6 +3020,12 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   const Expression& firstElt=input[1];
 //  std::cout << " <hr>outer times to function ";
   if (!firstElt.IsBuiltInAtom())
+  { if (!firstElt.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+      return false;
+    if (!firstElt[1].IsAtomWhoseExponentsAreInterprettedAsFunction())
+      return false;
+  }
+  if (firstElt.IsAtomNotInterprettedAsFunction())
     return false;
 //  std::cout << firstElt << " is a built in fucker!";
   output=input;
@@ -3028,7 +3034,9 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
 }
 
 bool CommandList::outerDistribute(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
+{ if (theCommands.flagDontDistribute)
+    return false;
+  if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
     return true;
   return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
 }
@@ -3084,7 +3092,7 @@ bool CommandList::CollectSummands(CommandList& theCommands, const Expression& in
 //    std::cout << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
 //  else
 //    std::cout << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
-  outputSum.QuickSortAscending();
+  outputSum.QuickSortDescending();
 
 //  std::cout << " after mon sort: " << outputSum.theMonomials.ToString();
   return true;
@@ -3423,6 +3431,22 @@ void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expressio
   return;
 }
 
+int Expression::GetExpressionTreeSize()const
+{ this->CheckInitialization();
+  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
+  if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
+    crash << "This is a run-time error, which may or may not be caused by a programming error. "
+    << "While computing expression tree size, I exceeded the "
+    << " recrsion depth limit. To increase the recursion depth limit, modify CommandList::MaxRecursionDeptH. "
+    << "The current max recursion depth limit is: " << this->theBoss->MaxRecursionDeptH << crash;
+  if (this->IsAtom())
+    return 1;
+  int result=0;
+  for (int i=0; i<this->children.size; i++)
+    result+=(*this)[i].GetExpressionTreeSize();
+  return result;
+}
+
 bool Expression::operator>(const Expression& other)const
 { Rational leftCoeff, rightCoeff;
   Expression leftMon, rightMon;
@@ -3441,10 +3465,11 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
     return false;
   if (!this->IsBuiltInType() && other.IsBuiltInType())
     return true;
-
-  if (this->children.size>other.children.size)
+  int thisExpressionTreeSize=this->GetExpressionTreeSize();
+  int otherExpressionTreeSize=other.GetExpressionTreeSize();
+  if (thisExpressionTreeSize>otherExpressionTreeSize)
     return true;
-  if (other.children.size>this->children.size)
+  if (otherExpressionTreeSize>thisExpressionTreeSize)
     return false;
   if (this->children.size==0)
   { std::string leftS, rightS;
@@ -3453,13 +3478,7 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
         return leftS>rightS;
     return this->theData>other.theData;
   }
-  for (int i=0; i<this->children.size; i++)
-  { if ((*this)[i]>other[i])
-      return true;
-    if (other[i]>(*this)[i])
-      return false;
-  }
-  return false;
+  return this->children>other.children;
 }
 
 bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)const
@@ -3763,16 +3782,43 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
   } else if (this->IsListStartingWithAtom(this->theBoss->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
-  else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
-  { std::string firstE=(*this)[1].ToString(theFormat);
-    std::string secondE=(*this)[2].ToString(theFormat);
-    if ((*this)[1].NeedsParenthesisForBaseOfExponent())
-      out << "(" << firstE << ")";
-    else
-      out << firstE;
-    out << "^{" << secondE << "}";
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(),3))
+  { bool involvesExponentsInterprettedAsFunctions;
+    const Expression& firstE=(*this)[1];
+    if (firstE.IsListNElementsStartingWithAtom(-1, 2))
+      if (firstE[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
+      { involvesExponentsInterprettedAsFunctions=true;
+        Expression newE, newFunE;
+        newFunE.MakeXOX(*this->theBoss, this->theBoss->opThePower(), firstE[0], (*this)[2]);
+        newE.reset(*this->theBoss, 2);
+        newE.AddChildOnTop(newFunE);
+        newE.AddChildOnTop(firstE[1]);
+        out << newE.ToString(theFormat);
+      }
+    if (!involvesExponentsInterprettedAsFunctions)
+    { std::string secondEstr=(*this)[2].ToString(theFormat);
+      std::string firstEstr=(*this)[1].ToString(theFormat);
+      if ((*this)[1].NeedsParenthesisForBaseOfExponent())
+      { bool useBigParenthesis=false;
+        if ((*this)[1].IsListNElementsStartingWithAtom(this->theBoss->opDivide()))
+          useBigParenthesis=true;
+        if (useBigParenthesis)
+          out << "\\left(";
+        else
+          out << "(";
+        out << firstEstr;
+        if (useBigParenthesis)
+          out << "\\right)";
+        else
+          out << ")";
+      }
+      else
+        out << firstEstr;
+      out << "^{" << secondEstr << "}";
+    }
   } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
-  { assert(this->children.size>=2);
+  { if (this->children.size<2)
+      crash << crash;
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
@@ -3795,7 +3841,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
-  { assert(this->children.size>=2);
+  { if (this->children.size<2)
+      crash << crash;
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
@@ -3880,8 +3927,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     { out << "<tr><td valign=\"top\">";
       bool createTable=(startingExpression!=0);
       if (createTable)
-        createTable=
-        (startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()));
+        createTable=(startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()));
       if (createTable)
       { out << "<hr> ";
         if (!this->theBoss->flagHideLHS)
@@ -3923,6 +3969,13 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << (*this)[0].ToString(theFormat);
   else if (this->children.size>=2)
   { out << (*this)[0].ToString(theFormat);
+    bool needParenthesis=true;
+    if (this->children.size==2)
+    { if ((*this)[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
+        needParenthesis=!(*this)[1].IsAtom();
+      if ((*this)[0].IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction())
+        needParenthesis=!(*this)[1].IsAtom();
+    }
     if (this->format==this->formatFunctionUseUnderscore)
       out << "_";
     else if (this->format==this->formatFunctionUseCdot)
@@ -3931,7 +3984,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "{}";
     if(this->format== this->formatFunctionUseUnderscore)
       out << "{";
-    else
+    else if (needParenthesis)
       out << "(";
     for (int i=1; i<this->children.size; i++)
     { out << (*this)[i].ToString(theFormat);
@@ -3940,7 +3993,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
     if(this->format== this->formatFunctionUseUnderscore)
       out << "}";
-    else
+    else if (needParenthesis)
       out << ")";
   } else //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)" ;
@@ -4017,6 +4070,38 @@ bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom)const
   return this->theBoss->atomsThatFreezeArguments.Contains(this->theBoss->GetOperations()[this->theData]);
 }
 
+bool Expression::IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction()const
+{ if (this->theBoss==0)
+    return false;
+  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(), 3))
+    return false;
+  return (*this)[1].IsAtomWhoseExponentsAreInterprettedAsFunction();
+}
+
+bool Expression::IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outputWhichAtom)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  if (outputWhichAtom!=0)
+    *outputWhichAtom=this->theBoss->GetOperations()[this->theData];
+  return this->theBoss->atomsWhoseExponentsAreInterprettedAsFunctions.Contains(this->theBoss->GetOperations()[this->theData]);
+}
+
+bool Expression::IsAtomNotInterprettedAsFunction(std::string* outputWhichAtom)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
+    return false;
+  if (outputWhichAtom!=0)
+    *outputWhichAtom=this->theBoss->GetOperations()[this->theData];
+  return this->theBoss->atomsNotInterprettedAsFunctions.Contains(this->theBoss->GetOperations()[this->theData]);
+}
+
 bool Expression::IsAtom(std::string* outputWhichOperation)const
 { if (this->theBoss==0)
     return false;
@@ -4063,7 +4148,7 @@ bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation)co
     return false;
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
-  std::cout << "ere be i - checking whether operation " << this->theBoss->GetOperations()[this->theData] << " is good for chain rule. ";
+//  std::cout << "ere be i - checking whether operation " << this->theBoss->GetOperations()[this->theData] << " is good for chain rule. ";
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
   return !this->theBoss->atomsNotAllowingChainRule.Contains(this->theBoss->GetOperations()[this->theData]);

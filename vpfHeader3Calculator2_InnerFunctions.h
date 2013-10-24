@@ -26,6 +26,8 @@ public:
   static bool innerCompositeSequenceDereference(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerCompositeApowerBevaluatedAtC(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerConstantFunction(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerDifferentiateSinCos(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateChainRule(CommandList& theCommands, const Expression& input, Expression& output);

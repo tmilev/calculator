@@ -363,6 +363,29 @@ bool CommandListFunctions::innerDifferentiateConstPower(CommandList& theCommands
   return output.MakeXOX(theCommands, theCommands.opTimes(), theTerm, basePrime);
 }
 
+bool CommandListFunctions::innerDifferentiateAPowerB(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateAPowerB");
+  //////////////////////
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtom())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
+    << " - possible user typo?";
+  const Expression& theDOvar=input[1];
+  const Expression& theArgument=input[2];
+  //////////////////////
+  //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\ln a)
+  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    return false;
+  Expression logBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
+  logBase.reset(theCommands, 2);
+  logBase.AddChildAtomOnTop(theCommands.opLog());
+  logBase.AddChildOnTop(theArgument[1]);
+  exponentTimesLogBase.MakeXOX(theCommands, theCommands.opTimes(), theArgument[2], logBase);
+  derivativeExponentTimesLogBase.MakeXOX(theCommands, theCommands.opDifferentiate(), theDOvar, exponentTimesLogBase);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), theArgument, derivativeExponentTimesLogBase);
+}
+
 bool CommandListFunctions::innerDifferentiateConstant(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerDifferentiateConstant");
   //////////////////////
@@ -412,6 +435,23 @@ bool CommandListFunctions::innerDifferentiateSinCos(CommandList& theCommands, co
     return output.MakeXOX(theCommands, theCommands.opTimes(), mOneE, sinE);
   }
   return false;
+}
+
+bool CommandListFunctions::innerCompositeDifferentiateLog(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeDifferentiateLog");
+  /////////////////////
+  std::cout << "<hr>input composite: " << input.ToString();
+  if (input.children.size!=2)
+    return false;
+  if (!input[0].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 3))
+    return false;
+  if (!input[0][2].IsAtomGivenData(theCommands.opLog()))
+    return false;
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  Expression OneE;
+  OneE.AssignValue(1, theCommands);
+  output.reset(theCommands, 2);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), OneE, input[1]);
 }
 
 bool CommandListFunctions::outerAssociateAdivBdivCpowerD(CommandList& theCommands, const Expression& input, Expression& output)

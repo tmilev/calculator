@@ -3803,7 +3803,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   } else if (this->IsListStartingWithAtom(this->theBoss->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(),3))
-  { bool involvesExponentsInterprettedAsFunctions;
+  { bool involvesExponentsInterprettedAsFunctions=false;
     const Expression& firstE=(*this)[1];
     if (firstE.IsListNElementsStartingWithAtom(-1, 2))
       if (firstE[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
@@ -3861,7 +3861,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
-      crash << "This is a programming error: the minus function expects" << "1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
+      crash << "This is a programming error: the minus function expects 1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
     out << (*this)[1].ToString(theFormat) << "-" << (*this)[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";

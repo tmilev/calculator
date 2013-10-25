@@ -1843,8 +1843,8 @@ void CommandList::initPredefinedOperationsComposite()
 }
 
 void CommandList::initAtomsNotGoodForChainRule()
-{ MacroRegisterFunctionWithName("CommandList::initFunctionsCalculus");
- this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
+{ MacroRegisterFunctionWithName("CommandList::initAtomsNotGoodForChainRule");
+  this->atomsNotAllowingChainRule.AddOnTopNoRepetitionMustBeNewCrashIfNot("Bind");
 }
 
 void CommandList::initAtomsThatAllowCommutingOfArguments()

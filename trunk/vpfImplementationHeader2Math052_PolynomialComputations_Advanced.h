@@ -859,6 +859,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 //  std::cout << "<hr>Input system after sub first recursive call. " << inputSystem.ToString();
 
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
+  int oldNumComputations=newComputation.TotalNumComputationsSerreLikeSystem;
   this->TotalNumComputationsSerreLikeSystem+=newComputation.TotalNumComputationsSerreLikeSystem;
   if (newComputation.flagSystemSolvedOverBaseField)
   { //std::cout << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
@@ -889,7 +890,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     inputSystem[i].Substitution(theSub);
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   newComputation.SolveSerreLikeSystemRecursively(inputSystem, true, theAlgebraicClosure, theGlobalVariables);
-  this->TotalNumComputationsSerreLikeSystem+=newComputation.TotalNumComputationsSerreLikeSystem;
+  this->TotalNumComputationsSerreLikeSystem+=newComputation.TotalNumComputationsSerreLikeSystem-oldNumComputations;
   if (newComputation.flagSystemSolvedOverBaseField)
   { //std::cout << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetHtmlMathSpanPure(inputSystem.ToString());
     *this=newComputation;

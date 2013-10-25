@@ -1107,6 +1107,10 @@ void CommandList::initPredefinedStandardOperations()
    "Adds elements of Z_p. ",
    " (2 mod  7)+3", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opRational(),
+   "Adds elements of Z_p. ",
+   " (2 mod  7)+3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat, this->opEltZmodP(), this->opEltZmodP(),
    "Adds elements of Z_p. ",
    " (2 mod  7)+3", true);

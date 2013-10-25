@@ -61,6 +61,7 @@ bool CommandList::outerExtractBaseMultiplication(CommandList& theCommands, const
 
 bool CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddEltZmodPorRatToEltZmodPorRat");
+  //std::cout << "<hr>here i am ";
   if (!input.IsListNElements(3))
     return false;
   const Expression* leftE;

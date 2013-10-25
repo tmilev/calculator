@@ -1112,6 +1112,9 @@ public:
   int opPi()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }
+  int opEulerConstant()
+  { return this->theAtoms.GetIndexIMustContainTheObject("e");
+  }
   int opLog()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\ln");
   }

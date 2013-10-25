@@ -88,7 +88,7 @@ void CommandList::initPredefinedInnerFunctions()
    "Differeniation - d/dx x^n= n x^{n-1}.",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
   this->AddOperationInnerHandler
-  ("Differentiate", CommandListFunctions::innerDifferentiateConstPower, "",
+  ("Differentiate", CommandListFunctions::innerDifferentiateAPowerB, "",
    "Differeniation - d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\ln a) .",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
 
@@ -1824,6 +1824,11 @@ void CommandList::initPredefinedOperationsComposite()
   ("^", CommandListFunctions::innerCompositeApowerBevaluatedAtC, "",
    "Provided that n is not equal to -1, use the rule ({{f}}^{{n}}){}{{x}}:=(f{}x)^n.",
    "\\tan^2 x; (f^-2) {}x ; (f^-1){}x ",
+   true);
+  this->AddOperationComposite
+  ("Differentiate", CommandListFunctions::innerCompositeDifferentiateLog, "",
+   "Differentiates ln.",
+   "d/dx (\\ln x)",
    true);
 
   //this->AddOperationComposite

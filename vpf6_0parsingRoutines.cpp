@@ -228,6 +228,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\ln");
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
+  this->AddOperationNoRepetitionAllowed("e");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();

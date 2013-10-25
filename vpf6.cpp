@@ -3272,6 +3272,8 @@ bool Expression::IsConstantNumber()const
     return false;
   if (this->IsAtomGivenData(this->theBoss->opPi()))
     return true;
+  if (this->IsAtomGivenData(this->theBoss->opEulerConstant()))
+    return true;
 //  std::cout << "testing for constant: " << this->ToString();
 //  std::cout << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
   return this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>();

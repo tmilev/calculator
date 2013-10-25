@@ -43,14 +43,6 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
   return true;
 }
 
-template <typename coefficient>
-bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
-{ if (this->OwnerGroup==0)
-  { crash << "This is a programming error: working with a representation with non-initialized owner Weyl group. " << crash;
-    return false;
-  }
-  return true;
-}
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::CheckRepIsMultiplicativelyClosed()
@@ -314,20 +306,7 @@ bool Matrix<Element>::GetEigenspacesProvidedAllAreIntegralWithEigenValueSmallerT
   return false;
 }
 
-template <typename coefficient>
-Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int elementIndex)
-{ this->CheckInitialization();
-  this->OwnerGroup->CheckInitializationFDrepComputation();
-  Matrix<coefficient>& theMat=this->theElementImages[elementIndex];
-  if (this->theElementIsComputed[elementIndex])
-    return theMat;
-  const ElementWeylGroup& theElt=this->OwnerGroup->theElements[elementIndex];
-  this->theElementIsComputed[elementIndex]=true;
-  theMat.MakeIdMatrix(this->GetDim());
-  for (int i=0; i<theElt.reflections.size; i++)
-    theMat.MultiplyOnTheLeft(this->theElementImages[theElt.reflections[i]+1]);
-  return theMat;
-}
+
 
 template <typename coefficient>
 Vector<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()

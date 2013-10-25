@@ -4899,6 +4899,31 @@ class WeylGroupRepresentation
   }
 };
 
+template <typename coefficient>
+bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
+{ if (this->OwnerGroup==0)
+  { std::cout << "This is a programming error: working with a representation with non-initialized owner Weyl group. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    return false;
+  }
+  return true;
+}
+
+template <typename coefficient>
+void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
+{ this->OwnerGroup=inputOwner;
+  this->CheckInitialization();
+  this->OwnerGroup->CheckInitializationFDrepComputation();
+  this->theCharacter.SetSize(0);
+  this->theElementImages.SetSize(this->OwnerGroup->theElements.size);
+  this->theElementIsComputed.initFillInObject(this->OwnerGroup->theElements.size, false);
+  this->classFunctionMatrices.SetSize(this->OwnerGroup->conjugacyClasses.size);
+  this->classFunctionMatricesComputed.initFillInObject(this->OwnerGroup->conjugacyClasses.size, false);
+}
+
+
+
 class ElementWeylGroup
 {
 public:
@@ -4941,6 +4966,22 @@ public:
     return this->reflections==other.reflections;
   }
 };
+
+
+template <typename coefficient>
+Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int elementIndex)
+{ this->CheckInitialization();
+  this->OwnerGroup->CheckInitializationFDrepComputation();
+  Matrix<coefficient>& theMat=this->theElementImages[elementIndex];
+  if (this->theElementIsComputed[elementIndex])
+    return theMat;
+  const ElementWeylGroup& theElt=this->OwnerGroup->theElements[elementIndex];
+  this->theElementIsComputed[elementIndex]=true;
+  theMat.MakeIdMatrix(this->GetDim());
+  for (int i=0; i<theElt.reflections.size; i++)
+    theMat.MultiplyOnTheLeft(this->theElementImages[theElt.reflections[i]+1]);
+  return theMat;
+}
 
 class WeylGroup
 {

@@ -428,6 +428,44 @@ bool ClassFunction<coefficient>::operator>(const ClassFunction<coefficient>& rig
   return false;
 }
 
+
+class f65521
+{ public:
+  unsigned int n;
+
+  f65521(){};
+
+  f65521(const int right)
+  { *this = right;
+  }
+
+  f65521(const Rational right)
+  { *this = right;
+  }
+
+  f65521 operator+(const f65521 right) const;
+  void operator+=(const f65521 right);
+  void Minus();
+  f65521 operator-() const;
+  f65521 operator-(const f65521 right) const;
+  void operator-=(const f65521 right);
+  f65521 operator*(const f65521 right) const;
+  void operator*=(const f65521 right);
+  void Invert();
+  f65521 operator/(const f65521 right) const;
+  void operator/=(const f65521 right);
+  void operator=(const int rhs);
+  void operator=(const Rational rhs);
+
+  bool operator==(const f65521 rhs) const;
+  bool operator!=(const f65521 rhs) const;
+  bool IsEqualToZero() const;
+  bool IsEqualToOne() const;
+
+  std::string ToString(FormatExpressions* f = 0) const;
+};
+std::ostream& operator<<(std::ostream& out, const f65521& data);
+
 template <typename coefficient>
 class Basis
 {
@@ -458,7 +496,7 @@ public:
    bool AddVector(const Vector<coefficient> &v);
    bool AddVectorDestructively(Vector<coefficient> &v);
    bool AddVectorToBasis(const Vector<coefficient> &v);
-   bool Contains(const Vector<coefficient>& v) const;
+   bool GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const;
    VectorSpace<coefficient> Intersection(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> Union(const VectorSpace<coefficient>& other) const;
    VectorSpace<coefficient> OrthogonalComplement(VectorSpace<coefficient>* ambient = 0, Matrix<coefficient>* form = 0) const;
@@ -493,6 +531,176 @@ Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) con
   Vector<coefficient> out;
   fastbasis.GetVectorFromRow(i,out);
   return out;
+}
+
+
+
+template <typename coefficient>
+void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
+{ if(basis.NumCols == 0)
+  { basis.init(v.size,v.size);
+    basis.NumRows = 0;
+  }
+  if(basis.NumRows == basis.NumCols)
+  { std::cout << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols << std::endl;
+    assert(false);
+  }
+  haveGramMatrix = false;
+  for(int i = 0; i<v.size; i++)
+      basis.elements[basis.NumRows][i] = v[i];
+  basis.NumRows++;
+}
+
+template <typename coefficient>
+void Basis<coefficient>::ComputeGramMatrix()
+{ int r = basis.NumRows;
+  int d = basis.NumCols;
+  gramMatrix.MakeZeroMatrix(r);
+  for(int i=0; i<r; i++)
+    for(int j=0; j<r; j++)
+      for(int k=0; k<d; k++)
+        gramMatrix.elements[i][j] += basis.elements[i][k] * basis.elements[j][k];
+   gramMatrix.Invert();
+   haveGramMatrix = true;
+}
+
+template <typename coefficient>
+Vector<coefficient> Basis<coefficient>::PutInBasis(const Vector<coefficient>& input)
+{ if (false)
+  { Vectors<coefficient> theBasisVectorForm;
+    this->basis.GetVectorsFromRows(theBasisVectorForm);
+    Vector<coefficient> output;
+    input.GetCoordsInBasiS(theBasisVectorForm, output);
+    return output;
+  } else
+  { if(!haveGramMatrix)
+      ComputeGramMatrix();
+    return gramMatrix*(basis*input);
+  }
+}
+
+template <typename coefficient>
+Matrix<coefficient> Basis<coefficient>::PutInBasis(const Matrix<coefficient>& in)
+{ if(!haveGramMatrix)
+    ComputeGramMatrix();
+  return gramMatrix*(basis*in);
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
+{ Vector<coefficient> tmp = v;
+  return AddVectorDestructively(tmp);
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
+{ //std::cout << "AddVectorDestructively: v = " << v << " matrix is" << std::endl;
+  //std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+  if(fastbasis.NumRows == 0)
+  { this->fastbasis.MakeZeroMatrix(v.size);
+    this->degree = v.size;
+    int nzi=0;
+    for(; nzi<degree; nzi++)
+      if(v[nzi] != 0)
+        break;
+    if(nzi==degree)
+    { rank = 0;
+      fastbasis.NumRows = 0;
+      return false;
+    }
+    for(int i=0; i<v.size; i++)
+      fastbasis.elements[0][i] = v[i] / v[nzi];
+    rank = 1;
+    this->fastbasis.NumRows = 1;
+//    std::cout << "starting matrix" << std::endl;
+//    std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+    return true;
+  }
+  int jj=0;
+  for(int i=0; i<fastbasis.NumRows; i++)
+  { while((jj<v.size)&&(v[jj] == 0))
+      jj++;
+    if(jj==v.size)
+      return false;
+    int j = i;
+    for(;(j<fastbasis.NumCols)&&(fastbasis.elements[i][j] == 0); j++);
+    if(jj<j)
+    { if(fastbasis.ActualNumRows >= fastbasis.NumRows+1)
+        fastbasis.NumRows++;
+      else
+        fastbasis.Resize(fastbasis.NumRows+1,fastbasis.NumCols,true);
+      coefficient* tmp = fastbasis.elements[fastbasis.NumRows-1];
+      for(int bi=fastbasis.NumRows-1; bi>i; bi--)
+        fastbasis.elements[bi] = fastbasis.elements[bi-1];
+      fastbasis.elements[i] = tmp;
+      for(int bj=0; bj<fastbasis.NumCols; bj++)
+        fastbasis.elements[i][bj] = v[bj];
+      fastbasis.GaussianEliminationByRows();
+      rank++;
+//      std::cout << "stuffed in the middle" << std::endl;
+//      std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+      return true;
+    }
+    if(jj>j)
+      continue;
+    coefficient x = -v[jj]/fastbasis.elements[i][j];
+    for(int jjj=jj; jjj<v.size; jjj++)
+      v[jjj] += x*fastbasis.elements[i][jjj];
+  }
+  if(v.IsEqualToZero())
+    return false;
+  // this should take the same amount of time either way
+  if(fastbasis.ActualNumRows >= fastbasis.NumRows+1)
+    fastbasis.NumRows++;
+  else
+    fastbasis.Resize(fastbasis.NumRows+1,fastbasis.NumCols,true);
+  for(int j=0; j<fastbasis.NumCols; j++)
+    fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
+  rank++;
+//  std::cout << "tacked on the end" << std::endl;
+//  std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+  return true;
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::AddVectorToBasis(const Vector<coefficient>& v)
+{ if(AddVector(v))
+  { basis.AddVector(v);
+    return true;
+  }
+  return false;
+}
+
+template <typename coefficient>
+bool VectorSpace<coefficient>::GetCoordinatesDestructively(Vector<coefficient>& v, Vector<coefficient>& out) const
+{ out.MakeZero(this->rank);
+  if(v.IsEqualToZero())
+  { if(this->rank == 0)
+      return false;
+    return true;
+  }
+  int i=0;
+  while(true)
+  { int vi = v.GetIndexFirstNonZeroCoordinate();
+    while(true)
+    { if(i==this->rank)
+        return false;
+      int mi = 0;
+      while(this->fastbasis(i,mi) == 0)
+        mi++;
+      if(mi > vi)
+        return false;
+      if(mi == vi)
+        break;
+      i++;
+    }
+    coefficient c = v[vi] / this->fastbasis(i,vi);
+    out[i] = c;
+    for(int k=0; k<this->degree; k++)
+      v[k] -= this->fastbasis(i,k) * c;
+    if(v.IsEqualToZero())
+      return true;
+  }
 }
 
 template<typename coefficient>
@@ -611,6 +819,7 @@ template <typename coefficient>
 bool VectorSpace<coefficient>::operator==(const VectorSpace<coefficient>& other) const
 { return fastbasis == other.fastbasis;
 }
+
 
 template <typename coefficient>
 class TrixTree

@@ -7,393 +7,10 @@
 
 //#include "testlib.h"
 #include <iostream>
+#include <algorithm>
 
-#include <sys/stat.h>
+#include "vpfJson.h"
 
-// no need to lex first
-//enum Symbol{bracket,brace,quote};
-//class SymbolTree
-//{ public:
-//  Symbol symbol;
-//  int start, end;
-//  List<SymbolTree> children;
-//};
-/*int SymbolTree::ParseSymbol(std::string data, int begin)
-{ bool havesymbol = false;
-  for(int i = begin; i<data.size && !havesymbol; i++)
-  { switch(data[i])
-    { case '{':
-        this->symbol = brace;
-        havesymbol=true;
-        break;
-      case '[':
-        this->symbol = bracket;
-        havesymbol=true;
-        break;
-      case '"':
-        this->symbol = quote;
-        havesymbol=true;
-        break;
-    }
-  }
-  if(!havesymbol)
-    return i;
-  for(int i=this->begin, i<data.size; i++)
-  {
-
-  }
-
-}*/
-
-//enum JSType{null, boolean, number, string, list, hash};
-// error: 'JSData::number' cannot appear in a constant-expression
-// or
-// error: 'JSType' is not a cass or namespace
-#define JSNULL 0
-#define JSBOOL 1
-#define JSNUM 2
-#define JSSTR 3
-#define JSLIST 4
-#define JSOBJ 5
-
-
-//struct JSHashData;
-class JSData
-{
-public:
-  char type;
-  bool boolean;
-  double number;
-  std::string string;
-  List<JSData> list;
-  List<struct JSHashData> obj;
-
-  void operator=(const bool other);
-  void operator=(const double other);
-  void operator=(const std::string& other);
-  JSData& operator[](int i);
-  JSData& operator[](const std::string& s);
-
-  // parsing
-  void ExtractScalar(const std::string& json, int begin, int end);
-  std::string GetString(const std::string& json, int begin, int end, int* actualend = NULL) const;
-  int AcceptString(const std::string& json, int begin);
-  int AcceptList(const std::string& json, int begin);
-  int AcceptObject(const std::string& json, int begin);
-
-  JSData()
-  { type=JSNULL;
-  }
-  std::string ToString() const;
-  template <typename somestream>
-  somestream& IntoStream(somestream& out) const;
-  void readfile(const char* filename);
-  void writefile(const char* filename) const;
-};
-
-struct JSHashData
-{ std::string key;
-  struct JSData value;
-};
-
-void JSData::operator=(const bool other)
-{ this->type = JSBOOL;
-  this->boolean = other;
-}
-
-void JSData::operator=(const double other)
-{ this->type = JSNUM;
-  this->number = other;
-}
-
-void JSData::operator=(const std::string& other)
-{ this->type = JSSTR;
-  this->string = other;
-}
-
-JSData& JSData::operator[](int i)
-{ this->type = JSLIST;
-  if(this->list.size < i+1)
-    this->list.SetSize(i+1);
-  return this->list[i];
-}
-
-JSData& JSData::operator[](const std::string& key)
-{ this->type = JSOBJ;
-  for(int i=0; i<this->obj.size; i++)
-    if(this->obj[i].key == key)
-      return this->obj[i].value;
-  int i = this->obj.size;
-  this->obj.SetSize(i+1);
-  this->obj[i].key = key;
-  return this->obj[i].value;
-}
-
-std::string JSData::GetString(const std::string& json, int begin, int end, int* actualend) const
-{ // i don't expect this to be bigger then 2147482647 but smaller then 4294967296
-  // the compiler whines about comparison between int i and json.size()
-  unsigned int i;
-  unsigned int minend;
-  bool endlt;
-  if(end>0 and ((unsigned int) end)<json.size())
-  { endlt = true;
-    minend = end;
-  }
-  else
-  { endlt = false;
-    minend = json.size();
-  }
-  for(i=begin; i<minend; i++)
-    if(json[i] == '"')
-    { i += 1;
-      break;
-    }
-  if(i>=minend)
-  { std::cout << "GetString: there does not appear to be a string between " << begin << " and " << minend << std::endl;
-    if(actualend)
-      *actualend = minend;
-    return json.substr(i,0);
-  }
-  for(; i<minend; i++)
-  { if(json[i] == '"')
-    { if(actualend)
-        *actualend = i;
-      return json.substr(begin+1,i-begin-1);
-    }
-  }
-  if(endlt)
-  { std::cout << "string being extracted failed to terminate in a timely manner, ending it at position" << i << std::endl;
-    if(actualend)
-      *actualend = i;
-    return json.substr(begin+1,i-begin);
-  }
-  std::cout << "json ended before string being extracted" << std::endl;
-  if(actualend)
-    *actualend = i;
-  return json.substr(begin+1,i-begin);
-}
-
-int JSData::AcceptString(const std::string& json, int begin)
-{ this->type = JSSTR;
-  // i don't expect this to be bigger then 2147482647 but smaller then 4294967296
-  // the compiler whines about comparison between int i and json.size()
-  unsigned int i = begin+1;
-  for(; i<json.size(); i++)
-  { if(json[i] == '"')
-    { this->string = json.substr(begin+1,i-begin-1);
-      return i;
-    }
-  }
-  std::cout << "parse error: input string ended but current data string is incomplete" << std::endl;
-  this->string = json.substr(begin+1,json.size()-begin-1);
-  return json.size();
-}
-
-void JSData::ExtractScalar(const std::string& json, int begin, int end)
-{ if(begin==end)
-    return;
-  std::string sbs = json.substr(begin,end-begin);
-  this->type = JSNUM;
-  this->number = atof(sbs.c_str());
-}
-
-int JSData::AcceptList(const std::string& json, int begin)
-{ this->type = JSLIST;
-  unsigned int i=begin+1;
-  unsigned int curobjbgn = i;
-  bool havecurobj = false;
-  for(; i<json.size(); i++)
-  { if(json[i] == ']')
-    { if(!havecurobj)
-      { // hack: should instead test in extractScalar for any type of reasonable
-        // scalar.  don't.  no need to figure that out yet.
-        if(i>curobjbgn)
-        { this->list.SetSize(this->list.size+1);
-          this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
-        }
-      }
-      return i;
-    }
-    if(json[i] == '[')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptList(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == '"')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptString(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == '{')
-    { this->list.SetSize(this->list.size+1);
-      i = this->list[this->list.size-1].AcceptObject(json,i);
-      havecurobj = true;
-      continue;
-    }
-    if(json[i] == ',')
-    { if(!havecurobj)
-      { this->list.SetSize(this->list.size+1);
-        this->list[this->list.size-1].ExtractScalar(json, curobjbgn, i);
-      }
-      havecurobj = false;
-      curobjbgn = i+1;
-      continue;
-    }
-  }
-  std::cout << "parse error: string ended but list is incomplete" << std::endl;
-  return i;
-}
-
-int JSData::AcceptObject(const std::string& json, int begin)
-{ this->type = JSOBJ;
-  unsigned int i=begin+1;
-  unsigned int curobjbgn = i;
-  bool isvaluetime = false;
-  bool havecurobj = false;
-  for(; i<json.size(); i++)
-  { if(json[i] == '}')
-    { if(!isvaluetime)
-      { std::cout << "parse error: } in key, character " << i << " key will be ignored" << std::endl;
-        return i;
-      }
-      if(!havecurobj)
-        this->obj[this->obj.size-1].value.ExtractScalar(json,curobjbgn,i-1);
-      return i;
-    }
-    if(json[i] == ':')
-    { if(isvaluetime)
-      { std::cout << "parse error: : in value, second key ignored" << std::endl;
-        curobjbgn = i+1;
-        continue;
-      }
-      isvaluetime = true;
-      this->obj.SetSize(this->obj.size+1);
-      this->obj[this->obj.size-1].key = this->GetString(json,curobjbgn,i);
-      curobjbgn = i+1;
-      havecurobj = false;
-    }
-    if(json[i] == ',')
-    { if(!isvaluetime)
-      { std::cout << "parse error: , in key, key ignored";
-        curobjbgn = i+1;
-        continue;
-      }
-      if(!havecurobj)
-        this->obj[this->obj.size-1].value.ExtractScalar(json, curobjbgn, i-1);
-      isvaluetime = false;
-      curobjbgn = i+1;
-    }
-    if(isvaluetime)
-    { if(json[i] == '[')
-      { i = this->obj[this->obj.size-1].value.AcceptList(json,i);
-        havecurobj = true;
-        continue;
-      }
-      if(json[i] == '"')
-      { i = this->obj[this->obj.size-1].value.AcceptString(json,i);
-        havecurobj = true;
-        continue;
-      }
-      if(json[i] == '{')
-      { i = this->obj[this->obj.size-1].value.AcceptObject(json,i);
-        havecurobj = true;
-        continue;
-      }
-    }
-  }
-  std::cout << "parse error: string ended but object is incomplete" << std::endl;
-  return i;
-}
-
-void JSData::readfile(const char* filename)
-{ std::ifstream ifp(filename);
-  if(!ifp.is_open())
-    return;
-  struct stat f;
-  stat(filename,&f);
-  std::string json;
-  json.resize(f.st_size);
-  ifp.read(&json[0], json.size());
-
-  unsigned int i=0;
-  for(; i<json.size(); i++)
-  { if(json[i] == '"')
-    { this->AcceptString(json,0);
-      return;
-    }
-    if(json[i] == '[')
-    { this->AcceptList(json,0);
-      return;
-    }
-    if(json[i] == '{')
-    { this->AcceptObject(json,0);
-      return;
-    }
-  }
-  this->ExtractScalar(json,0,json.size());
-}
-
-template <typename somestream>
-somestream& JSData::IntoStream(somestream& out) const
-{ switch(this->type)
-  { case JSNULL:
-      out << "null";
-      return out;
-    case JSNUM:
-      out << this->number;
-      return out;
-    case JSBOOL:
-      if(this->boolean == true)
-        out << "true";
-      else
-        out << "false";
-      return out;
-    case JSSTR:
-      out << '"' << this->string << '"';
-      return out;
-    case JSLIST:
-      out << '[';
-      for(int i=0; i<this->list.size; i++)
-      { this->list[i].IntoStream(out);
-        if(i!=this->list.size-1)
-          out << ',';
-      }
-      out << ']';
-      return out;
-    case JSOBJ:
-      out << '{';
-      for(int i=0; i<this->obj.size; i++)
-      { out << '"' << this->obj[i].key << '"';
-        out << ':';
-        this->obj[i].value.IntoStream(out);
-        if(i!=this->obj.size-1)
-          out << ',';
-      }
-      out << '}';
-      return out;
-  }
-  //unreachable
-  assert(false);
-  return out;
-}
-
-void JSData::writefile(const char* filename) const
-{ std::ofstream out;
-  out.open(filename);
-  this->IntoStream(out);
-}
-
-std::string JSData::ToString() const
-{ std::stringstream out;
-  this->IntoStream(out);
-  return out.str();
-}
-
-std::ostream& operator<<(std::ostream& out, const JSData& data)
-{ return data.IntoStream(out);
-}
 
 
 
@@ -532,6 +149,121 @@ std::ostream& operator<<(std::ostream& out, const PermutationR2& p)
     }
     out << ')';
   }
+  return out;
+}
+
+
+f65521 f65521::operator+(const f65521 right) const
+{ f65521 out;
+  out.n = (n+right.n)%65521;
+  return out;
+}
+
+void f65521::operator+=(const f65521 right)
+{ n += right.n;
+  n %= 65521;
+}
+
+void f65521::Minus()
+{ n = 65521-n;
+}
+
+f65521 f65521::operator-() const
+{ f65521 out;
+  out.n = 65521-n;
+  return out;
+}
+
+f65521 f65521::operator-(const f65521 right) const
+{ return *this+(-right);
+}
+
+void f65521::operator-=(const f65521 right)
+{ n += (-right).n;
+  n %= 65521;
+}
+
+f65521 f65521::operator*(const f65521 right) const
+{ f65521 out;
+  out.n = (n*right.n)%65521;
+  return out;
+}
+
+void f65521::operator*=(const f65521 right)
+{ n *= right.n;
+  n %= 65521;
+}
+
+void f65521::Invert()
+{ int x = 0;
+  int y = 1;
+  int a = 65521;
+  int b = n;
+  int l = 1;
+  int m = 0;
+  while(b != 0)
+  { int q = a / b;
+    int r = a % b;
+    a = b;
+    b = r;
+    int s = l - q*x;
+    int t = m - q*y;
+    l = x;
+    m = y;
+    x = s;
+    y = t;
+  }
+
+  if(m>=0)
+    n = m;
+  else
+    n = m+65521;
+}
+
+f65521 f65521::operator/(const f65521 right) const
+{ f65521 tmp = right;
+  tmp.Invert();
+  return *this * tmp;
+}
+
+void f65521::operator/=(const f65521 right)
+{ f65521 tmp = right;
+  tmp.Invert();
+  *this *= tmp;
+}
+
+bool f65521::IsEqualToZero() const
+{ return n==0;
+}
+
+bool f65521::IsEqualToOne() const
+{ return n==1;
+}
+
+bool f65521::operator==(const f65521 rhs) const
+{ return n == rhs.n;
+}
+
+bool f65521::operator!=(const f65521 rhs) const
+{ return n != rhs.n;
+}
+
+void f65521::operator=(const int rhs)
+{ n = rhs%65521;
+}
+
+void f65521::operator=(const Rational rhs)
+{ n = rhs.GetNumerator()%65521;
+  f65521 den = rhs.GetDenominator()%65521;
+  *this /= den;
+}
+
+std::string f65521::ToString(FormatExpressions* f) const
+{ return std::to_string(n);
+}
+
+std::ostream& operator<<(std::ostream& out, const f65521& data)
+{ out << data.ToString();
   return out;
 }
 
@@ -1889,94 +1621,6 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 */
 
 
-/* dunno why i thought it was fun to spend so much time on this
-class f127
-{ public:
-  int n;
-
-  f127 operator+(const f127 right) const;
-  void operator+=(const f127 right);
-  void operator-();
-  f127 operator-(const f127 right) const;
-  void operator-=(const f127 right);
-  f127 operator*(const f127 right) const;
-  void operator*=(const f127 right);
-  void Invert();
-  f127 operator/(const f127 right) const;
-  void operator/=(const f127 right);
-  void operator=(const int rhs);
-}
-
-f127 f127::operator+(const f127 right) const
-{ return (n+right.n)%127;
-}
-
-void f127::operator+=(const f127 right)
-{ n += right.n;
-  n %= 127;
-}
-
-f127 f127::operator-(const f127 right) const
-{ int x = (n-right.n)%127;
-  f127 out;
-  out.n = x>=0?x:-x;
-  return out;
-}
-
-void f127::operator-=(const f127 right)
-{ n -= right.n;
-  n %= 127;
-  if(n<0)
-    n = -n;
-}
-
-f127 f127::operator*(const f127 right) const
-{ return (n*right.n)%127;
-}
-
-void f127::operator*=(const f127 right)
-{ n *= right.n;
-  n %= 127;
-}
-
-void f127::Invert()
-{ int x = 0;
-  int y = 1;
-  int a = 127;
-  int b = n;
-  int m = 1
-  n = 0;
-  while(b != 0)
-  { int q = a / b;
-    int r = a % b;
-    a = b;
-    b = r;
-    int s = m - q*x;
-    int t = n - q*y;
-    m = x;
-    n = y;
-    x = s;
-    y = t;
-  }
-}
-
-f127 operator/(const f127 right) const;
-{ tmp = right;
-  tmp.Invert();
-  return *this *tmp;
-}
-
-void operator/=(const f127 right)
-{ tmp = right;
-  tmp.Invert();
-  *this *= tmp;
-}
-*/
-
-
-
-
-
 /*
 template <typename coefficient>
 List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
@@ -2630,30 +2274,7 @@ int chartable[10][10] =
   {3,  1, -1,  1, -1,  0,  0, -1, -1,  3}
 };
 
-template <typename coefficient>
-bool GetCoordsInBasisInputIsGaussianEliminated
-(const List<Polynomial<coefficient> > &inputReducedBasis,
- const Polynomial<coefficient> & input,
- Vector<coefficient>* outputCoordinatesInBasis=0)
-{ MacroRegisterFunctionWithName("GetCoordsInBasiSPolynomial");
-  Polynomial<coefficient> summand;
-  Polynomial<coefficient> v = input;
-  coefficient currentCoeff;
-  if (outputCoordinatesInBasis!=0)
-    outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
-  for(int i=0; i<inputReducedBasis.size; i++)
-  { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
-    if (!currentCoeff.IsEqualToZero())
-    { summand=inputReducedBasis[i];
-      if (outputCoordinatesInBasis!=0)
-        (*outputCoordinatesInBasis)[i]=currentCoeff;
-      currentCoeff*=-1;
-      summand*=currentCoeff;
-      v-=summand;
-    }
-  }
-  return v.IsEqualToZero();
-}
+
 
 void make_macdonald_polynomial(const WeylGroup& G, const List<Vector<Rational> > roots, Polynomial<Rational>& macdonaldPoly)
 { List<MonomialP> vars;
@@ -2692,6 +2313,54 @@ void matrix_acts_on_polynomial(const Matrix<Rational>& m,const Polynomial<Ration
     qi *= p.theCoeffs[i];
     q += qi;
   }
+}
+
+template <class templateMonomial, class coefficient>
+bool GetCoordsInBasisInputIsGaussianEliminated
+(const List<MonomialCollection<templateMonomial, coefficient> > &inputReducedBasis,
+ const MonomialCollection<templateMonomial, coefficient> & input,
+ Vector<coefficient>* outputCoordinatesInBasis=0)
+{ MacroRegisterFunctionWithName("GetCoordsInBasiS");
+  MonomialCollection<templateMonomial, coefficient>  summand, v=input;
+  coefficient currentCoeff;
+  if (outputCoordinatesInBasis!=0)
+    outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
+  for(int i=0; i<inputReducedBasis.size; i++)
+  { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
+    if (!currentCoeff.IsEqualToZero())
+    { summand=inputReducedBasis[i];
+      if (outputCoordinatesInBasis!=0)
+        (*outputCoordinatesInBasis)[i]=currentCoeff;
+      currentCoeff*=-1;
+      summand*=currentCoeff;
+      v-=summand;
+    }
+  }
+  return v.IsEqualToZero();
+}
+
+template <class coefficient>
+bool GetCoordsInBasisInputIsGaussianEliminated
+(const List<Polynomial<coefficient> > &inputReducedBasis,
+ const Polynomial<coefficient> & input,
+ Vector<coefficient>* outputCoordinatesInBasis=0)
+{ MacroRegisterFunctionWithName("GetCoordsInBasiS");
+  Polynomial<coefficient>  summand, v=input;
+  coefficient currentCoeff;
+  if (outputCoordinatesInBasis!=0)
+    outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
+  for(int i=0; i<inputReducedBasis.size; i++)
+  { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
+    if (!currentCoeff.IsEqualToZero())
+    { summand=inputReducedBasis[i];
+      if (outputCoordinatesInBasis!=0)
+        (*outputCoordinatesInBasis)[i]=currentCoeff;
+      currentCoeff*=-1;
+      summand*=currentCoeff;
+      v-=summand;
+    }
+  }
+  return v.IsEqualToZero();
 }
 
 void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieAlg)
@@ -2857,16 +2526,304 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
 }
 
 // balanced ternary
-Vector<int> pointi(int d, int i)
+Vector<int> pointi_old(int d, int i)
 { Vector<int> out;
   out.SetSize(d);
+  int acc = 1;
+  for(int i=0; i<d; i++)
+    acc *= 3;
+  if(i<acc)
+  { for(int ii=0; ii<d; ii++)
+    { int m = i%3;
+      out[ii] = (m!=2)?m:-1;
+      i /= 3;
+    }
+    return out;
+  }
   for(int ii=0; ii<d; ii++)
-  { int m = i%3;
-    out[ii] = (m!=2)?m:-1;
-    i /= 3;
+  { int m=i%5;
+    out[ii] = m-2;
+    i/=5;
   }
   return out;
 }
+
+bool pointgt(const Vector<int>& pointi, const Vector<int>& pointj)
+{ int is = 0;
+  int im = 0;
+  for(int i=0; i<pointi.size; i++)
+  { is += pointi[i];
+    if(im < abs(pointi[i]))
+      im = abs(pointi[i]);
+  }
+  int js = 0;
+  int jm = 0;
+  for(int j=0; j<pointj.size; j++)
+  { js += pointj[j];
+    if(jm < abs(pointj[j]))
+      jm = abs(pointj[j]);
+  }
+  if(abs(is) > abs(js))
+    return true;
+  if(abs(js) < abs(is))
+    return false;
+  if(im > jm)
+    return true;
+  if(im < jm)
+    return false;
+  return im > jm;
+}
+
+bool pointlt(const Vector<int>& pointi, const Vector<int>& pointj)
+{ int is = 0;
+  int im = 0;
+  for(int i=0; i<pointi.size; i++)
+  { is += pointi[i];
+    if(im < abs(pointi[i]))
+      im = abs(pointi[i]);
+  }
+  int js = 0;
+  int jm = 0;
+  for(int j=0; j<pointj.size; j++)
+  { js += pointj[j];
+    if(jm < abs(pointj[j]))
+      jm = abs(pointj[j]);
+  }
+  if(abs(is) > abs(js))
+    return false;
+  if(abs(js) < abs(is))
+    return true;
+  if(im > jm)
+    return false;
+  if(im < jm)
+    return true;
+  return im < jm;
+}
+
+template<>
+  std::string Vector<int>::ToString(FormatExpressions* theFormat)const
+  { std::stringstream out;
+    out.precision(5);
+    out << "(";
+    for(int i=0; i<this->size; i++)
+    { out << this->TheObjects[i];
+      if (i!=this->size-1)
+        out << ", ";
+    }
+    out << ")";
+    return out.str();
+  }
+
+
+int maxpoints;
+
+Vector<int> pointi(int d, int i)
+{ static List<Vector<int> > points;
+  static int old_d;
+  if((points.size == 0) || (old_d != d))
+  { std::cout << "generating points...";
+    old_d = d;
+    int n = 10-d; // values of each coordinate range from -n to n
+    Vector<int> point;
+    point.SetSize(d);
+    for(int j=0; j<d; j++)
+      point[j] = -n;
+    while(true)
+    { for(int j=0; j<d; j++)
+      { if(point[j] < n)
+        { point[j]++;
+          points.AddOnTop(point);
+          break;
+        } else
+        { if(j<d-1)
+          { point[j] = -n;
+            continue;
+          } else
+          { goto done_generating_points;
+          }
+        }
+      }
+    }
+    done_generating_points:
+    //points.QuickSortAscending(&pointgt);
+    std::sort(points.TheObjects, points.TheObjects+points.size, pointlt);
+    for(int k=0; k<points.size; k++)
+      std::cout << points[k] << std::endl;
+    std::cout << " " << points.size << " generated." << std::endl;
+    maxpoints = points.size;
+  }
+  if(i>=points.size)
+    std::cout << "only " << points.size << " points in dimension " << d << " available so far (requested point " << i << ")" << std::endl;
+  return points[i];
+}
+/*Vector<int> pointi(int d, int i)
+{ Vector<int> bars;
+  bars.SetSize(d);
+  int lastone = n+1;
+  for(int j=0; j<d-1; i++)
+  { bars[j] = i%lastone;
+    i = i/lastone;
+    lastone = bars[j] + 1;
+  }
+  Vector<int> out;
+  out.SetSize(d);
+  out[0] = bars[0];
+  int sum = out[0];
+  for(int j=1; j<d; j++)
+  { out[j] = bars[j] - bars[j]-1
+    sum += out[j];
+  }
+  out[d-1] = n-sum;
+}*/
+
+/*
+int pointis(int d, int n)
+{ int acc = 0;
+  for(int r=1; r<d; r++)
+  { MathRoutines::NChooseK(n-1,r) * MathRoutines
+  }
+
+}*/
+
+/*Vector<int> pointi_v2(int d, int i)
+{ static Vector<int> out;
+  out.MakeZero(d);
+
+  // sometimes you have to think aloud lol
+  if(i<d)
+  { out[i] = 1;
+    return out;
+  }
+  i -= d;
+  if(i<d)
+  { out[i] = -1;
+    return out;
+  }
+  i -= d;
+  if(i<d*(d-1))
+  { int j=i/d;
+    int k=1%d;
+    if(j<k)
+    {out[j] += 1;
+     out[k] += 1;
+     return out;
+    }
+    out[j] -= 1;
+    out[k] -= 1;
+    return out;
+  }
+  i -= d*(d-1);
+  if(i<d*(d-1))
+  { int j = i/d;
+    int k = i%d;
+    out[k] += 1;
+    if(j<k)
+      out[j] -= 1;
+    else
+      out[j+1] -= 1;
+  }
+  i -= d*(d-1);
+  if(i<d*d*d)
+  { int j = i%d;
+    i = i/d;
+    int k = i%d;
+    i = i/d;
+    out[k] += 1;
+    out[j] += 1;
+    out[i] += 1;
+    return out;
+  }
+  i -= d*d*d;
+  if(i<d*d*d)
+  { int j = i%d;
+    i = i/d;
+    int k = i%d;
+    i = i/d;
+    out[k] -= 1;
+    out[j] -= 1;
+    out[i] -= 1;
+    return out;
+  }
+  i -= d*d*d;
+
+  // static because wasting a few bytes vs allocating datastructures every time
+  // idk if its a good idea or not i just like peppering code with keywords
+  static List<int> pvec;
+  static List<int> npvec;
+  for(int n=0; ; n++)
+  { //def vectors(n):
+    //  cnt = 0
+    //  for r in range(d):
+    //    for partition in partitions(n,r):                   # (n+r-1 choose r)
+    //      pw = ways_of_placing(partition,d)                 # (d choose r)
+    //      cnt += sum([2**nonzero_entries(wp) for wp in pw]) # 2**r
+
+
+    //def vectors(n):
+    //  cnt = 0
+    //  for m in range(0,n+1):
+    //    for partition in partitions(m):
+    //      for negpart in partitions(n-m):
+    //        pw = ways_of_placing(partition,d) # (d choose partition.rows)
+    //        for wp in pw:
+    //          cnt += len(ways_of_placing(negpart, d-nonzero_entries(wp))) # (d choose negpart.rows)
+    for(int m=0; m<n+1; m++)
+    {
+      // vectors(n = abs sum,m = number of positives)
+
+
+      pvec.SetSize(m);
+      int lastp = d;
+      int spacesleft = d;
+      for(int j=0; j<m; j++)
+      { int pplace;
+        if(lastp > 0)
+        { pplace = i%lastp;
+          i /= lastp;
+        } else
+        { pplace = 0;
+        }
+        if(out[pplace] == 0){
+          pvec.AddOnTop(pplace);
+        }
+        out[pplace] += 1;
+        lastp = pplace;
+      }
+      // should think about this more
+      npvec.SetSize(0);
+      for(int ii = 0; ii<d; ii++)
+      { if(pvec.Contains(ii))
+          continue;
+        npvec.AddOnTop(pvec);
+      }
+
+      int lastn = npvec.size;
+      int spacesleft = npvec.size;
+      for(int j=0; j < n-m; j++)
+      { int nplace;
+        if(lastn > 0)
+        { nplace = i%lastn;
+          i /= lastn;
+        } else
+        { nplace = 0;
+        }
+        out[nplace] -= 1;
+        lastn = nplace;
+      }
+    }
+  }
+
+  if(i<d(d-1)(d-2)...)
+  { k[n] = i%d;
+    i = i/d;
+    k[n-1] = i%(d-1);
+    i
+  }
+
+
+}
+*/
+
 
 WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
 { std::cout << "starting with roots " << roots << " at time " <<   theGlobalVariables.GetElapsedSeconds() << std::endl;
@@ -2890,6 +2847,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   int number_of_images = 1;
   for(int i=0; i<W.GetDim(); i++)
     number_of_images *= 3;
+  number_of_images /= 3;
 
 
   List<lennum> lens;
@@ -2897,8 +2855,10 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   images.SetSize(monomials.size);
   lens.SetSize(monomials.size);
   for(int i=0; i<monomials.size; i++)
+    lens[i].len = 0;
+
+  for(int i=0; i<monomials.size; i++)
   { images[i].SetSize(number_of_images);
-    Rational l = 0;
     for(int j=0; j<number_of_images; j++)
     { Vector<int> point = pointi(W.GetDim(),j);
       Rational p=1;
@@ -2909,25 +2869,176 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
         p *= s;
       }
       images[i][j] = p;
-      l += p*p;
+      lens[i].len += p*p;
     }
-    lens[i].len = l;
     lens[i].num = i;
   }
   lens.QuickSortAscending();
   std::cout << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
 
-  List<int> monomials_used;
-  VectorSpace<Rational> vs;
+  List<Vector<f65521> > images65521;
+  images65521.SetSize(monomials.size);
+  getting_images_time:
+  std::cout << "using " << number_of_images << " points";
+  if(maxpoints > 0 && number_of_images >= maxpoints)
+  { number_of_images = maxpoints;
+    std::cout << "... max points reached, actually using " << number_of_images;
+  }
+  std::cout << std::endl;
+
   for(int i=0; i<monomials.size; i++)
-  { if(vs.AddVector(images[lens[i].num]))
+  { int images_old_size = images65521[i].size;
+    images65521[i].SetSize(number_of_images);
+    for(int j=images_old_size; j<number_of_images; j++)
+    { Vector<int> point = pointi(W.GetDim(),j);
+      f65521 p=1;
+      for(int k1=0; k1<monomials[i].size; k1++)
+      { f65521 s=0;
+        for(int k2=0; k2<monomials[i][k1].size; k2++)
+          s += monomials[i][k1][k2] * point[k2];
+        p *= s;
+      }
+      images65521[i][j] = p;
+    }
+  }
+
+  /*
+  List<int> monomials_used_rational;
+  VectorSpace<Rational> vsr;
+  for(int i=0; i<monomials.size; i++)
+  { if(vsr.AddVectorToBasis(images[lens[i].num]))
+      monomials_used_rational.AddOnTop(lens[i].num);
+  }
+  std::cout << "rational module rank is " << monomials_used_rational.size << std::endl;
+  //std::cout << vsr.fastbasis.ToString(&consoleFormat) << std::endl;
+  std::cout << "monomials used: ";
+  for(int i=0; i<monomials_used_rational.size; i++)
+    std::cout << monomials_used_rational[i] << " ";
+  std::cout << std::endl;
+  */
+
+  List<int> monomials_used;
+  VectorSpace<f65521> vs;
+  for(int i=0; i<monomials.size; i++)
+  { if(vs.AddVectorToBasis(images65521[lens[i].num]))
       monomials_used.AddOnTop(lens[i].num);
   }
+
+  std::cout << "finite module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
+  //std::cout << vs.fastbasis.ToString(&consoleFormat) << std::endl;
+  std::cout << "monomials used: ";
+  for(int i=0; i<monomials_used.size; i++)
+    std::cout << monomials_used[i] << " ";
+  std::cout << std::endl;
+
+  /*
+  if(monomials_used_rational.size != monomials_used.size)
+  { std::cout << "linear combinations over Z and Zp are different" << std::endl;
+    for(int i=0; i<monomials_used_rational.size; i++)
+      std::cout << monomials_used_rational[i] << " " << images[monomials_used_rational[i]] << std::endl;
+    for(int i=0; i<monomials_used.size; i++)
+      std::cout << monomials_used[i] << " " << images65521[monomials_used[i]] << std::endl;
+    assert(false);
+  }*/
+
+  Basis<f65521> B65521;
+  for(int i=0; i<monomials_used.size; i++)
+    B65521.AddVector(images65521[monomials_used[i]]);
+
+  WeylGroupRepresentation<f65521> rep65521;
+  rep65521.reset(&W);
+  for(int i=1; i<W.GetDim()+1; i++)
+  { Matrix<Rational> m;
+    W.GetStandardRepresentationMatrix(i,m);
+    Matrix<f65521> rm;
+    rm.init(monomials_used.size, monomials_used.size);
+    for(int j=0; j<monomials_used.size; j++)
+    { List<Vector<Rational> > monomial;
+      monomial.SetSize(roots.size);
+      for(int k=0; k<roots.size; k++)
+        monomial[k] = m*monomials[monomials_used[j]][k];
+      Vector<f65521> evaluated;
+      evaluated.SetSize(number_of_images);
+      for(int ei=0; ei<number_of_images; ei++)
+      { f65521 p = 1;
+        for(int ej=0; ej<monomial.size; ej++)
+        { f65521 s = 0;
+          for(int ek=0; ek<monomial[ej].size; ek++)
+          { s += monomial[ej][ek] * pointi(W.GetDim(),ei)[ek];
+          }
+          p *= s;
+        }
+        evaluated[ei] = p;
+      }
+      Vector<f65521> be;
+      /*Vector<f65521> evbackup = evaluated;
+      if(!vs.GetCoordinatesDestructively(evaluated, be))
+      { std::cout << "error: vector " << evbackup << " not in vector space " << vs.fastbasis.ToString(&consoleFormat) << " made with vectors " << std::endl;
+        for(int i=0; i<monomials_used.size; i++)
+          std::cout << images65521[monomials_used[i]] << std::endl;
+        assert(false);
+      }*/
+      be = B65521.PutInBasis(evaluated);
+      for(int mnop=0; mnop<be.size; mnop++)
+        rm.elements[j][mnop] = be[mnop];
+    }
+    rep65521.SetElementImage(i,rm);
+    std::cout << rm.ToString(&consoleFormat) << std::endl;
+    if((rm*rm).IsIdMatrix())
+      std::cout << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
+    else
+    { std::cout << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << std::endl;
+      //std::cout << "failed finite reflection test; trying rational anyway" << std::endl;
+      //goto make_rational_matrices;
+      number_of_images *= 2;
+      goto getting_images_time;
+    }
+  }
+
+
+  Matrix<f65521> idr65521;
+  idr65521.MakeIdMatrix(rep65521.GetDim());
+
+  for(int i=0; i<W.GetDim(); i++)
+  { for(int j=0; j<W.GetDim(); j++)
+    { if(j == i)
+        continue;
+      int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
+      if(w <= 2)
+        continue;
+      Matrix<f65521> M1 = rep65521.GetElementImage(i+1);
+      Matrix<f65521> M2 = rep65521.GetElementImage(j+1);
+      Matrix<f65521> M3 = M1*M2;
+      MathRoutines::RaiseToPower(M3,w,idr65521);
+      if(M3.IsIdMatrix())
+        std::cout << "passed Coxeter presentation test " << i << "," << j << std::endl;
+      else
+      { std::cout << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << std::endl;
+        number_of_images *= 2;
+        goto getting_images_time;
+      }
+    }
+  }
+
+  for(int i=0; i<monomials.size; i++)
+  { int images_old_size = images[i].size;
+    images[i].SetSize(number_of_images);
+    for(int j=images_old_size; j<number_of_images; j++)
+    { Vector<int> point = pointi(W.GetDim(),j);
+      Rational p=1;
+      for(int k1=0; k1<monomials[i].size; k1++)
+      { Rational s=0;
+        for(int k2=0; k2<monomials[i][k1].size; k2++)
+          s += monomials[i][k1][k2] * point[k2];
+        p *= s;
+      }
+      images[i][j] = p;
+    }
+  }
+
   Basis<Rational> B;
   for(int i=0; i<monomials_used.size; i++)
     B.AddVector(images[monomials_used[i]]);
-
-  std::cout << "module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
 
   WeylGroupRepresentation<Rational> rep;
   rep.reset(&W);
@@ -2961,9 +3072,12 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     rep.SetElementImage(i,rm);
     std::cout << rm.ToString(&consoleFormat) << std::endl;
     if((rm*rm).IsIdMatrix())
-      std::cout << "passed idempotence test" << std::endl;
+      std::cout << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
     else
-      std::cout << "failed idempotence test" << std::endl;
+    { std::cout << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << std::endl;
+      number_of_images *= 2;
+      goto getting_images_time;
+    }
   }
 
 
@@ -2984,7 +3098,10 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       if(M3.IsIdMatrix())
         std::cout << "passed Coxeter presentation test " << i << "," << j << std::endl;
       else
-        std::cout << "failed Coxeter presentation test " << i << "," << j << std::endl;
+      { std::cout << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << std::endl;
+        number_of_images *= 2;
+        goto getting_images_time;
+      }
     }
   }
   return rep;
@@ -3018,34 +3135,13 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
 
 
 
-template <class templateMonomial, class coefficient>
-bool GetCoordsInBasisInputIsGaussianEliminated
-(const List<MonomialCollection<templateMonomial, coefficient> > &inputReducedBasis,
- const MonomialCollection<templateMonomial, coefficient> & input,
- Vector<coefficient>* outputCoordinatesInBasis=0)
-{ MacroRegisterFunctionWithName("GetCoordsInBasiS");
-  MonomialCollection<templateMonomial, coefficient>  summand, v=input;
-  coefficient currentCoeff;
-  if (outputCoordinatesInBasis!=0)
-    outputCoordinatesInBasis->MakeZero(inputReducedBasis.size);
-  for(int i=0; i<inputReducedBasis.size; i++)
-  { currentCoeff=v.GetMonomialCoefficient(inputReducedBasis[i].GetMaxMonomial());
-    if (!currentCoeff.IsEqualToZero())
-    { summand=inputReducedBasis[i];
-      if (outputCoordinatesInBasis!=0)
-        (*outputCoordinatesInBasis)[i]=currentCoeff;
-      currentCoeff*=-1;
-      summand*=currentCoeff;
-      v-=summand;
-    }
-  }
-  return v.IsEqualToZero();
-}
+
 
 
 
 int main(void)
 { InitializeGlobalObjects();
+
   //BSTest();
 
   /*
@@ -3128,7 +3224,7 @@ int main(void)
      D.GetCartanSymmetric(M);
      std::cout << M << std::endl;
 
-  //  Matrix<f127> M2;
+  //  Matrix<f65521> M2;
   //  M2.init(M.NumRows, M.NumCols);
   //  for(int i=0; i<M.NumRows; i++)
   //    for(int j=0; j<M.NumCols; j++)
@@ -3725,9 +3821,15 @@ int main(void)
     std::cout << comp.ToString(&consoleFormat) << std::endl;
   */
 
-
-
-
+  /*f65521 three = 3;
+  f65521 one = 1;
+  f65521 third = 3;
+  third.Invert();
+  std::cout << "f65521 test " << third << " " << one/three << " " << (one/three)*three << std::endl;
+  f65521 n2 = -2;
+  f65521 two = 2;
+  std::cout << n2 << " " << n2 + two << " " << n2 + three << " " << " " << one / three << " " << n2 / three << " " << (n2/three)*three << std::endl;
+*/
   char letter = 'E';
   int number = 6;
 
@@ -3744,6 +3846,7 @@ int main(void)
     std::cout << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << std::endl;
 
   ComputeCharacterTable(W);
+
   //ComputeIrreps(W);
 /*UDPolynomial<Rational> p;
   Matrix<Rational> m;
@@ -3790,9 +3893,9 @@ int main(void)
   std::cout << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << std::endl;
 
 
-  /*  f127 a;
+  /*  f65521 a;
     a.n = 2;
-    f127 b;
+    f65521 b;
     b.n = 5;
     std::cout << (a*b).n << std::endl;
     std::cout << (a/b).n << std::endl;

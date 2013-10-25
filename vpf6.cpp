@@ -3031,7 +3031,8 @@ bool CommandList::innerMultiplyByOne(CommandList& theCommands, const Expression&
 }
 
 bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
+{ MacroRegisterFunctionWithName("CommandList::outerTimesToFunctionApplication");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
     return false;
   if (input.children.size<2)
     return false;
@@ -3045,7 +3046,11 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   }
   if (firstElt.IsAtomNotInterprettedAsFunction())
     return false;
-//  std::cout << firstElt << " is a built in fucker!";
+  const Expression& secondElt=input[2];
+  if (secondElt.IsSequenceNElementS())
+  { output=secondElt;
+    return output.SetChilD(0, firstElt);
+  }
   output=input;
   output.children.RemoveIndexShiftDown(0);
   return true;
@@ -3716,6 +3721,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
 //  }
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
+  bool oldAllowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
+
   if (this->theBoss->flagUseFracInRationalLaTeX)
     allowNewLine=false;
   int lineBreak=50;
@@ -3740,11 +3747,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
-  { std::string firstE= (*this)[1].ToString(theFormat);
-    std::string secondE=(*this)[2].ToString(theFormat);
-    bool doUseFrac= this->formatUseFrac || this->theBoss->flagUseFracInRationalLaTeX;
+  { bool doUseFrac= this->formatUseFrac || this->theBoss->flagUseFracInRationalLaTeX;
     if(!doUseFrac)
-    { bool firstNeedsBrackets= !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
+    { std::string firstE= (*this)[1].ToString(theFormat);
+      std::string secondE=(*this)[2].ToString(theFormat);
+      bool firstNeedsBrackets= !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())|| (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
       bool secondNeedsBrackets=true;
       if ((*this)[2].IsOfType<Rational>())
         if ((*this)[2].GetValue<Rational>().IsInteger())
@@ -3759,7 +3766,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << secondE;
     } else
+    { if (theFormat!=0)
+        theFormat->flagExpressionNewLineAllowed=false;
+      std::string firstE= (*this)[1].ToString(theFormat);
+      std::string secondE=(*this)[2].ToString(theFormat);
       out << "\\frac{" << firstE << "}{" << secondE << "}";
+      if (theFormat!=0)
+        theFormat->flagExpressionNewLineAllowed=oldAllowNewLine;
+    }
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opChoose(),3) )

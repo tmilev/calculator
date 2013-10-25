@@ -29,7 +29,7 @@ std::string CommandList::ToStringFunctionHandlers()
       if (this->FunctionHandlers[i][j].flagIsInner)
         numInnerHandlers++;
   }
-  out << "\n <b> " << numOpsHandled << "  operations+built in functions handled, by a total of " << numHandlers << " handler functions ("
+  out << "\n <b> " << numOpsHandled << "  built-in atoms are handled by a total of " << numHandlers << " handler functions ("
   << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer).</b><br>\n";
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";

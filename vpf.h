@@ -66,5 +66,5 @@
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math3_Characters.h"
 #include "vpfHeader3Calculator0_Interface.h"
-//static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
+static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

@@ -180,6 +180,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("\"");
   this->controlSequences.AddOnTop("pi");
   this->controlSequences.AddOnTop("ln");
+  this->controlSequences.AddOnTop("\\ln");
+  this->controlSequences.AddOnTop("log");
   this->controlSequences.AddOnTop("sin");
   this->controlSequences.AddOnTop("cos");
   this->controlSequences.AddOnTop("tan");
@@ -225,7 +227,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Serialization");
   this->AddOperationNoRepetitionAllowed("Melt");
   this->AddOperationNoRepetitionAllowed("Bind");
-  this->AddOperationNoRepetitionAllowed("\\ln");
+  this->AddOperationNoRepetitionAllowed("\\log");
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
   this->AddOperationNoRepetitionAllowed("e");
@@ -1089,7 +1091,7 @@ bool CommandList::ApplyOneRule()
   if (sixthToLastS=="\\sqrt" && fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="]" && secondToLastS=="Expression")
     return this->ReplaceOXEXEXByEX();
   //Some synonyms:
-  if (lastS=="ln")
+  if (lastS=="ln" || lastS=="log" || lastS=="\\ln")
     return this->ReplaceXByEusingO(this->opLog());
   if (lastS=="pi")
     return this->ReplaceXByEusingO(this->opPi());

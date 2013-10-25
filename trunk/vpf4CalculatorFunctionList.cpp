@@ -89,7 +89,7 @@ void CommandList::initPredefinedInnerFunctions()
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
   this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateAPowerB, "",
-   "Differeniation - d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\ln a) .",
+   "Differeniation - d/dx a^b= d/dx(e^{b\\log a}) = a^b d/dx(b\\log a) .",
    "Differentiate(x, x^2 ); d/dx x^-1; d/dt t^{\\sqrt{2}}; d/dc c^{DoubleValue 3.14}");
 
   this->AddOperationInnerHandler
@@ -301,6 +301,11 @@ void CommandList::initPredefinedInnerFunctions()
    \nW:=Store{}Z;\
    Load{}W\
    ", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\log", CommandListFunctions::innerLog, "",
+   "Logarithm function. Gives a decimal approximation of the natural logarithm provided the input is a double number. ",
+   "\\log{}(e); \\log 10", true, false)
    ;
   this->AddOperationInnerHandler
   ("\\sin", CommandListFunctions::innerSin, "",
@@ -1827,8 +1832,8 @@ void CommandList::initPredefinedOperationsComposite()
    true);
   this->AddOperationComposite
   ("Differentiate", CommandListFunctions::innerCompositeDifferentiateLog, "",
-   "Differentiates ln.",
-   "d/dx (\\ln x)",
+   "Differentiates log.",
+   "d/dx (\\log x)",
    true);
 
   //this->AddOperationComposite
@@ -1851,7 +1856,7 @@ void CommandList::initAtomsThatAllowCommutingOfArguments()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("^");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
-  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\ln");
+  this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
 }
 
 void CommandList::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()

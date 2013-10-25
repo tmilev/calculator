@@ -115,6 +115,27 @@ bool CommandListFunctions::innerCasimirWRTlevi(CommandList& theCommands, const E
   return output.AssignValueWithContext(theCasimir, contextE, theCommands);
 }
 
+bool CommandListFunctions::innerLog(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerLog");
+  double theArgument;
+  if (input.IsEqualToZero())
+    return output.SetError("Logarithm of zero is undefined.", theCommands);
+  if (!input.IsDouble(&theArgument))
+  { if (input.IsAtomGivenData(theCommands.opEulerConstant()))
+      return output.AssignValue(1, theCommands);
+    return false;
+  }
+  if (theArgument>0)
+    return output.AssignValue(log(theArgument), theCommands);
+  theArgument*=-1;
+  Expression iE, ipiE, piE, lnPart;
+  iE.MakeSqrt(theCommands, -1);
+  piE.MakeAtom(theCommands.opPi(), theCommands);
+  ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
+  lnPart.AssignValue(log(theArgument), theCommands);
+  return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
+}
+
 bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerSin");
   double theArgument;
@@ -374,7 +395,7 @@ bool CommandListFunctions::innerDifferentiateAPowerB(CommandList& theCommands, c
   const Expression& theDOvar=input[1];
   const Expression& theArgument=input[2];
   //////////////////////
-  //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\ln a)
+  //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
   if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     return false;
   Expression logBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
@@ -440,7 +461,7 @@ bool CommandListFunctions::innerDifferentiateSinCos(CommandList& theCommands, co
 bool CommandListFunctions::innerCompositeDifferentiateLog(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCompositeDifferentiateLog");
   /////////////////////
-  std::cout << "<hr>input composite: " << input.ToString();
+//  std::cout << "<hr>input composite: " << input.ToString();
   if (input.children.size!=2)
     return false;
   if (!input[0].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 3))

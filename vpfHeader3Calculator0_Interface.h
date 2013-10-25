@@ -308,6 +308,8 @@ class Expression
   int GetNumCols()const;
   bool MakeSequence(CommandList& owner, List<Expression>& inputSequence);
   bool MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right);
+  bool MakeSqrt(CommandList& owner, const Rational& argument, const Rational& radicalSuperIndex=2);
+
   bool MakeXOdotsOX(CommandList& owner, int theOp, const List<Expression>& input);
   bool MakeOX(CommandList& owner, int theOp, const Expression& opArgument);
   bool Sequencefy();
@@ -1116,7 +1118,7 @@ public:
   { return this->theAtoms.GetIndexIMustContainTheObject("e");
   }
   int opLog()
-  { return this->theAtoms.GetIndexIMustContainTheObject("\\ln");
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\log");
   }
   int opSin()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\sin");

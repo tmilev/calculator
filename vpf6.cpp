@@ -1202,6 +1202,17 @@ bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const std::string
   return this->MakeContextWithOnePolyVar(owner, varNameE);
 }
 
+bool Expression::MakeSqrt(CommandList& owner, const Rational& argument, const Rational& radicalSuperIndex)
+{ this->reset(owner,3);
+  Expression radicalIndexE, argumentE;
+  radicalIndexE.AssignValue(radicalSuperIndex, owner);
+  argumentE.AssignValue(argument, owner);
+  this->AddChildAtomOnTop(owner.opSqrt());
+  this->AddChildOnTop(radicalIndexE);
+  this->AddChildOnTop(argumentE);
+  return true;
+}
+
 bool Expression::MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right)
 { if (&left==this || &right==this)
   { Expression leftCopy=left;

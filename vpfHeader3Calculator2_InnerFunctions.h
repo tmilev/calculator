@@ -13,6 +13,7 @@ public:
   static bool innerFourierTransformEWA(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerFactorial(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerLog(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerSin(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCos(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerSec(CommandList& theCommands, const Expression& input, Expression& output);

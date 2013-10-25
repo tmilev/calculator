@@ -1125,7 +1125,7 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
       return output.AssignValue<std::string>("div ", theCommands);
     if (currentString=="^")
       return output.AssignValue<std::string>("exp ", theCommands);
-    if (currentString=="\\ln")
+    if (currentString=="\\log")
       return output.AssignValue<std::string>("ln ", theCommands);
     if (currentString=="\\sin")
       return output.AssignValue<std::string>(" 57.29578 mul sin ", theCommands);

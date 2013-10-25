@@ -59,6 +59,8 @@ void CommandList::reset()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.Clear();
   this->atomsThatFreezeArguments.Clear();
   this->atomsNotInterprettedAsFunctions.Clear();
+  this->atomsNotAllowingChainRule.Clear();
+  this->atomsWhoseExponentsAreInterprettedAsFunctions.Clear();
   this->FunctionHandlers.SetSize(0);
 
   this->syntacticSouP.SetSize(0);

@@ -1565,7 +1565,11 @@ int LargeInt::operator%(int x)
   if (remainder.theDigits.size ==0)
     return 0;
   else
-    return remainder.theDigits[0];
+  { if(this->sign == -1)
+      return x-remainder.theDigits[0];
+    else
+      return remainder.theDigits[0];
+  }
 }
 
 LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const

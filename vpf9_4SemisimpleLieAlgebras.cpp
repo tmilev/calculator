@@ -542,9 +542,11 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   int newIndexInNewComponent=0;
   if (newComponent.theRank==1)
   { this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
-    this->CartanSAsByComponent.LastObject()->SetSize(1);
+    this->CartanSAsByComponent.LastObject()->SetSize(0);
     if (newH!=0)
+    { this->CartanSAsByComponent.LastObject()->SetSize(1);
       (*this->CartanSAsByComponent.LastObject())[0]=*newH;
+    }
   } else
   { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponent.LastObject();
     Vectors<Rational>& currentHs=*this->CartanSAsByComponent.LastObject();
@@ -555,6 +557,8 @@ void CandidateSSSubalgebra::SetUpInjectionHs
       currentHs[theRootInjection[indexOffset+i]-indexOffset]=oldComponentHs[i];
     if (newH!=0)
       currentHs[newIndexInNewComponent]=*newH;
+    else
+      currentHs[newIndexInNewComponent].SetSize(0);
   }
 }
 
@@ -1165,7 +1169,8 @@ bool CandidateSSSubalgebra::isGoodHnew(const Vector<Rational>& HneW, int indexHn
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     if (this->CartanSAsByComponent[i].Contains(HneW))
       crash << "This is a programming error: I am told that " << HneW.ToString() << " is an OK weight to extend the weight subsystem, "
-      << " but the weight subsystem contains that weight already: " << this->CartanSAsByComponent[i].ToString() << ". " << crash;
+      << " but the weight subsystem contains that weight already: " << this->CartanSAsByComponent[i].ToString() << ". "
+      << "Here is a detailed subalgebra printout. " << this->ToString() << crash;
   //Vectors<Rational> tempVectors;
   //tempVectors.AssignListList(this->CartanSAsByComponent);
   //tempVectors.AddOnTop(HneW);

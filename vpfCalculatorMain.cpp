@@ -123,6 +123,7 @@ int main(int argc, char **argv)
   //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
   //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute a_2";
  // civilizedInput="\\sin ^2 x";
+//  civilizedInput=" g_{{i}}:= getChevalleyGenerator{}(B_4, i);  e:=g_13;";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

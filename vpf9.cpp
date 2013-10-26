@@ -4191,7 +4191,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
     outputImagesSimpleRoots->SetSize(0);
   currentImagesSimpleRootsCurrent.SetSize(this->theRank);
   DynkinSimpleType newType;
-  if (this->theLetter=='C' && this->theRank==3)
+  if (this->theLetter=='B' && this->theRank==3)
   { newType.MakeArbitrary('F', 4, this->lengthFirstCoRootSquared);
     output.AddOnTop(newType);
     if (outputImagesSimpleRoots!=0)

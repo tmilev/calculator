@@ -278,7 +278,11 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const DynkinSimpl
 
 bool Serialization::innerSSLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
-  return Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
+  Serialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
+  //theCommands.ToString();
+  //std::cout << "The semisimple lie alg: " << output.ToString();
+
+  return true;
 }
 
 bool Serialization::innerLoadDynkinType(CommandList& theCommands, const Expression& input, DynkinType& output)

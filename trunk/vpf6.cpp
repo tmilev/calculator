@@ -703,6 +703,8 @@ bool Expression::ConvertToType<ElementTensorsGeneralizedVermas<RationalFunctionO
 
 bool Expression::CheckConsistency()const
 { MacroRegisterFunctionWithName("Expression::CheckConsistency");
+  //warning: do not use ToString method from here: ToString itself calls CheckConosistency, so that causes an "infinite" recursion call cycle,
+  //i.e., stack overflow.
   if (this->flagDeallocated)
     crash << "Use after free of Expression. " << crash;
   this->CheckInitialization();
@@ -711,12 +713,12 @@ bool Expression::CheckConsistency()const
   if (this->IsBuiltInType())
   { if (this->children.size!=3)
       crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
-      << "children: type, context, and index in CommandList. The expression is " << this->ToString()
+      << "children: type, context, and index in CommandList. The expression is " << this->ToStringFull()
       << crash;
     const Expression& mustBeTheContext=(*this)[1];
     if (!mustBeTheContext.IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
       crash << "This is a programming error. At the moment of writing, the second child of a built-in type must be a context. It is instead "
-      << mustBeTheContext.ToString() << crash;
+      << mustBeTheContext.ToStringFull() << crash;
     for (int i=1; i<mustBeTheContext.children.size; i++)
     { bool isGood=false;
       const Expression& currentE=mustBeTheContext[i];
@@ -727,8 +729,8 @@ bool Expression::CheckConsistency()const
       if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
         isGood=true;
       if (!isGood)
-        crash << "This is a programming error. The context " << mustBeTheContext.ToString() << " has an entry which I do not recognize, namely, "
-        << currentE.ToString() << ". " << crash;
+        crash << "This is a programming error. The context " << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
+        << currentE.ToStringFull() << ". " << crash;
     }
   }
   return true;
@@ -912,8 +914,11 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
   if (index==indexInOwners)
     return true;
   Expression LieAlgContextE;
+  Expression emptyContext;
+  emptyContext.MakeEmptyContext(owner);
   LieAlgContextE.reset(owner, 2);
   LieAlgContextE.AddChildAtomOnTop(owner.opSSLieAlg());
+  LieAlgContextE.AddChildOnTop(emptyContext);
   LieAlgContextE.AddChildAtomOnTop(indexInOwners);
   return this->AddChildOnTop(LieAlgContextE);
 }
@@ -2572,7 +2577,8 @@ bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expressi
 }
 
 bool CommandList::innerGetChevGen(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CommandList::innerGetChevGen");
+  if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
@@ -2591,8 +2597,12 @@ bool CommandList::innerGetChevGen(CommandList& theCommands, const Expression& in
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
+  //theCommands.ToString();
   theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
-  return output.AssignValueWithContext(theUE, theContext, theCommands);
+  //theCommands.ToString();
+  output.AssignValueWithContext(theUE, theContext, theCommands);
+  //theCommands.ToString();
+  return true;
 }
 
 bool CommandList::innerGetCartanGen(CommandList& theCommands, const Expression& input, Expression& output)

@@ -4887,10 +4887,16 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
   { this->flagCentralizerIsWellChosen=true;
     return;
   }
-//  std::cout << "<hr>computing centralizer rank of " << this->theWeylNonEmbeddeD.theDynkinType.ToString();
+  ProgressReport theReport1(this->owner->theGlobalVariables);
   if (this->indexMaxSSContainer!=-1)
   { DynkinType centralizerType =this->owner->theSubalgebraCandidates[this->indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType;
     centralizerType-=this->theWeylNonEmbeddeD.theDynkinType;
+    if (this->owner->theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << "<hr>The centralizer of subalgebra of type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+      << " is of type " << centralizerType.ToString();
+      theReport1.Report(reportStream.str());
+    }
 //    std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
@@ -5388,8 +5394,8 @@ void SemisimpleSubalgebras::HookUpCentralizers()
   theReport1.Report("<hr>\nCentralizers computed, adjusing centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { std::stringstream reportStream2;
-    reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of "
-    << this->theSubalgebraCandidates.size << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
+    reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of " << this->theSubalgebraCandidates.size
+    << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
     theReport2.Report(reportStream2.str());
     this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(this->theGlobalVariables);
   }

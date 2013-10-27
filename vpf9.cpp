@@ -63,12 +63,12 @@ bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 //DrawingVariables TDV(200, 400);
 int rootSubalgebras::ProblemCounter=0;
 
-unsigned long long Rational::TotalLargeAdditions=0;
-unsigned long long Rational::TotalLargeGCDcalls=0;
-unsigned long long Rational::TotalLargeMultiplications=0;
-unsigned long long Rational::TotalSmallAdditions=0;
-unsigned long long Rational::TotalSmallGCDcalls=0;
-unsigned long long Rational::TotalSmallMultiplications=0;
+unsigned long long int Rational::TotalLargeAdditions=0;
+unsigned long long int Rational::TotalLargeGCDcalls=0;
+unsigned long long int Rational::TotalLargeMultiplications=0;
+unsigned long long int Rational::TotalSmallAdditions=0;
+unsigned long long int Rational::TotalSmallGCDcalls=0;
+unsigned long long int Rational::TotalSmallMultiplications=0;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;

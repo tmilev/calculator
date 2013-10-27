@@ -453,8 +453,8 @@ public:
   bool flagProduceLaTeXtables;
   double timeComputationStartInSeconds;
   double timeComputationEndInSeconds;
-  int numAdditions;
-  int numMultiplications;
+  signed long long int numAdditions;
+  signed long long int numMultiplications;
   bool flagDeallocated;
   int GetNumPossibleSAs()const;
   void ScaleDynkinType(DynkinType& theType)const;

@@ -723,7 +723,8 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       for (int k=0; k<theHCandidatesRescaled.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
-          out2 << "sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ".";
+          out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
+          << theLargerTypes[i].ToString() << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ".";
           theReport2.Report(out2.str());
         }
         if(newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], j, theLargerTypes[i], theRootInjections[i]))
@@ -4817,7 +4818,7 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   //DynkinType typeScaled=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
   //this->ScaleDynkinType(typeScaled);
   if (makeLink)
-    out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\">"
+    out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">"
     << CGI::GetHtmlMathSpanPure(this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]))
     << "</a> ";
   else
@@ -5032,7 +5033,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (this->AmRegularSA())
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
   if (this->indexIamInducedFrom!=-1)
-    out << "<br>Subalgebra is (parabolically) induced from " << this->owner->ToStringAlgebraLink(this->indexIamInducedFrom, theFormat);
+    out << "<br>Subalgebra is (parabolically) induced from " << this->owner->ToStringAlgebraLink(this->indexIamInducedFrom, theFormat) << ". ";
 //  else
 //    out << "<br>subalgebra outta nowhere!";
   if (this->flagSystemProvedToHaveNoSolution)

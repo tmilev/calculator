@@ -90,8 +90,8 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
   ProgressReport theReport2(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "Reducing basis. Current reduced basis: <br>" << this->theBasiS.ToString() << "<br> Polynomials to adjoin:<br> "
-    << this->basisCandidates.ToString();
+    out << "Reducing basis. Current reduced basis has " << this->theBasiS.size << " elements: <br>" << this->theBasiS.ToString()
+    << "<br> and there are " << this->basisCandidates.size << " polynomials to adjoin:<br> " << this->basisCandidates.ToString();
     theReport2.Report(out.str());
   }
   while (this->basisCandidates.size>0)

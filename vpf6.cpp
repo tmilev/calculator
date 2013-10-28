@@ -669,7 +669,8 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
 //  std::cout << "<hr>Getting ue from: " << this->ToString();
   SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner==0)
-  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " to element of universal enveloping -  failed to extract ambient Lie algebra. ";
+  { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
+    << ") to element of universal enveloping -  failed to extract ambient Lie algebra. ";
     return false;
   }
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -820,7 +821,10 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     return true;
   inputOutputMinContext=newContext;
   if (this->IsOfType<Rational>())
-    return this->SetChilD(1, inputOutputMinContext);
+  { this->SetChilD(1, inputOutputMinContext);
+//    std::cout << "<hr>Context of rational set; rational is: " << this->ToString();
+    return true;
+  }
   if (this->IsOfType<AlgebraicNumber>())
     return this->SetChilD(1, inputOutputMinContext);
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
@@ -916,7 +920,7 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
   Expression LieAlgContextE;
   Expression emptyContext;
   emptyContext.MakeEmptyContext(owner);
-  LieAlgContextE.reset(owner, 2);
+  LieAlgContextE.reset(owner, 3);
   LieAlgContextE.AddChildAtomOnTop(owner.opSSLieAlg());
   LieAlgContextE.AddChildOnTop(emptyContext);
   LieAlgContextE.AddChildAtomOnTop(indexInOwners);
@@ -986,6 +990,8 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   int leftSSindex=leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex=rightContext.ContextGetIndexAmbientSSalg();
+//  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
+//  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
   if (leftSSindex==-1)
     leftSSindex=rightSSindex;
   if (rightSSindex==-1)
@@ -1062,8 +1068,11 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   if (leftSSindex!=-1)
   { Expression ssAlgE;
+    Expression emptyContext;
+    emptyContext.MakeEmptyContext(owner);
     ssAlgE.reset(owner, 2);
     ssAlgE.AddChildAtomOnTop(owner.opSSLieAlg());
+    ssAlgE.AddChildOnTop(emptyContext);
     ssAlgE.AddChildAtomOnTop(leftSSindex);
     outputContext.AddChildOnTop(ssAlgE);
   }
@@ -3411,8 +3420,8 @@ int Expression::ContextGetIndexAmbientSSalg()const
     return -1;
 //  std::cout << ". I have " << this->children.size << " children. ";
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 2))
-      return (*this)[i][1].theData;
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 3))
+      return (*this)[i][2].theData;
   return -1;
 }
 
@@ -5016,22 +5025,24 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     { this->theBoss->Comments << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
+//    std::cout << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext))
     { this->theBoss->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
       return false;
     }
+//    std::cout << " ...  to get context: " << commonContext.ToString();
   }
   output.reset(*this->theBoss, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<this->children.size; i++)
   { convertedE=(*this)[i];
-//    std::cout << "<hr>Setting context of: " << convertedE.ToString();
+//    std::cout << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
     { this->theBoss->Comments << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
       return false;
     }
- //   std::cout << "... and the result is: " << convertedE.ToString();
+//    std::cout << "... and the result is: " << convertedE.ToString();
     output.AddChildOnTop(convertedE);
   }
   return true;

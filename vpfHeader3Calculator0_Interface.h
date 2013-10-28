@@ -1769,7 +1769,7 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
   Expression mergedContexts;
   if (!this->MergeContextsMyAruments(mergedContexts))
     return false;
-  //std::cout << "<br> continuing to merge " << mergedContexts.ToString();
+//  std::cout << "<br> continuing to merge " << mergedContexts.ToString();
   output.reset(*this->theBoss, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;

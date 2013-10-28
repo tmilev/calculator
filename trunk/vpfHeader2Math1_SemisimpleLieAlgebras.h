@@ -329,7 +329,7 @@ public:
   void GetGenericLinearCombinationInvolvedPosGens
   (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void ComputeCentralizerIsWellChosen();
-  void AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables);
+  void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void AddToSystem
   (const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish)
   ;
@@ -392,16 +392,16 @@ public:
   (const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const
   ;
   bool ComputeSystem
-  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool allowLieBracketFailure)
+  (bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
   ;
   bool ComputeSystemPart2
-  (GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization=true, bool allowLieBracketFailure=false)
+  (bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization, bool allowNonPolynomialSystemFailure)
   ;
   bool ComputeChar
-  (bool allowBadCharacter, GlobalVariables* theGlobalVariables)
+  (bool allowBadCharacter)
   ;
   bool AttemptToSolveSystem
-  (GlobalVariables* theGlobalVariables)
+  ()
   ;
   bool isGoodForTheTop
   (const Vector<Rational>& HneW)const
@@ -514,7 +514,7 @@ public:
   (CandidateSSSubalgebra& theCandidate)
   ;
   void HookUpCentralizers
-  ()
+  (bool allowNonPolynomialSystemFailure)
   ;
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings

@@ -314,6 +314,12 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   if (this->numAdditions!=-1)
     out << "<br>" << this->numAdditions+this->numMultiplications << " total arithmetic operations performed = " << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
+  out << "<hr>";
+  out << "The base field over which the subalgebra were realized is: ";
+  if (this->ownerField==0)
+    out << CGI::GetHtmlMathSpanPure("\\mathbb Q");
+  else
+    out << this->ownerField->ToString();
   out << "<hr> ";
   out << "Summary:" << this->ToStringSSsumaryHTML(theFormat) << "<hr>";
   if (this->flagProduceLaTeXtables)
@@ -405,7 +411,6 @@ void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, Semisim
   theCandidate.owner=this;
 //  bool aaarg;
   this->ExtendOneComponentOneTypeAllLengthsRecursive(theCandidate, theType, false);
-//  this->HookUpCentralizers(theGlobalVariables);
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
@@ -416,7 +421,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
   this->ExtendCandidatesRecursive(emptyCandidate);
-  this->HookUpCentralizers();
+  this->HookUpCentralizers(false);
 }
 
 bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
@@ -574,13 +579,13 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   this->RootInjectionsFromInducer=theRootInjection;
   //induction history is complete.
   ProgressReport theReport(this->owner->theGlobalVariables);
-  if (!this->ComputeChar(false, this->owner->theGlobalVariables))
+  if (!this->ComputeChar(false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " doesn't have fitting chars.");
     //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - bad character.";
     return false;
   }
-  if (!this->ComputeSystem(this->owner->theGlobalVariables, false,false))
+  if (!this->ComputeSystem(false,false))
   { if (this->owner->theGlobalVariables!=0)
       theReport.Report("Candidate " + this->theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) + " -> no system solution.");
     //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString() << " - couldnt solve system.";
@@ -619,8 +624,8 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   ProgressReport theReport1(theGlobalVariables), theReport2(theGlobalVariables), theReport3(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "Inducing from type " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". There are  "
-    << theLargerTypes.size << " possible extensions total. ";
+    reportStream << "So far " << this->theSubalgebraCandidates.size << " subalgebras found. Inducing from type "
+    << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". There are  " << theLargerTypes.size << " possible extensions total. ";
 //    std::cout << "<hr>" << reportStream.str();
     theReport1.Report(reportStream.str());
   }
@@ -760,7 +765,7 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasOLDPart2()
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
   this->ExtendCandidatesRecursiveOLD(emptyCandidate, true);
-  this->HookUpCentralizers();
+  this->HookUpCentralizers(false);
 }
 
 void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input)
@@ -957,7 +962,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
   if (numVectorsFound==theNewTypE.theRank)
   { newCandidate=baseCandidate;
     this->RegisterPossibleCandidate(newCandidate);
-    if (!newCandidate.ComputeChar(false, theGlobalVariables))
+    if (!newCandidate.ComputeChar(false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " doesn't have fitting chars.");
       //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
       //std::cout << "<hr>"
@@ -966,7 +971,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
 
       return;
     }
-    if (!newCandidate.ComputeSystem(theGlobalVariables, false, false))
+    if (!newCandidate.ComputeSystem(false, false))
     { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " -> no system solution.");
       //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
       //std::cout << "Candidate "
@@ -1276,8 +1281,7 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<
   return true;
 }
 
-bool CandidateSSSubalgebra::ComputeSystem
-(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool allowLieBracketFailure)
+bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
   ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
@@ -1319,7 +1323,7 @@ bool CandidateSSSubalgebra::ComputeSystem
       return false;
     }
   }
-  return this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, true, allowLieBracketFailure);
+  return this->ComputeSystemPart2(AttemptToChooseCentalizer, true, allowNonPolynomialSystemFailure);
 }
 
 bool CandidateSSSubalgebra::CheckGensBracketToHs()
@@ -1338,8 +1342,7 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
 }
 
 bool CandidateSSSubalgebra::ComputeSystemPart2
-(GlobalVariables* theGlobalVariables, bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization,
- bool allowLieBracketFailure)
+(bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
@@ -1367,9 +1370,12 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   { int rankCentralizer=-1;
     bool tempB= this->centralizerRank.IsSmallInteger(&rankCentralizer);
     if (!tempB || rankCentralizer<0 || rankCentralizer>this->GetAmbientWeyl().GetDim())
+    { if (allowNonPolynomialSystemFailure)
+        return false;
       crash << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
       << " Currently rankCentalizer is supposed to be " << rankCentralizer << ". Here is a detailed printout of the candidate subalgebra. "
       << this->ToString() << crash;
+    }
     this->totalNumUnknownsWithCentralizer+=rankCentralizer*this->GetAmbientWeyl().GetDim()+1;
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
   }
@@ -1471,14 +1477,14 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
     if (this->owner->flagAttemptToSolveSystems)
-      this->AttemptToSolveSystem(theGlobalVariables);
+      this->AttemptToSolveSystem();
   } else
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
   }
   if (!this->flagSystemSolved && useInducedSubalgebraRealization)
   { //bool seedHadNoSolution=this->flagSystemProvedToHaveNoSolution;
-    bool result=this->ComputeSystemPart2(theGlobalVariables, AttemptToChooseCentalizer, false);
+    bool result=this->ComputeSystemPart2(AttemptToChooseCentalizer, false, allowNonPolynomialSystemFailure);
 //    if (seedHadNoSolution && this->flagSystemSolved)
 //      std::cout << "<hr>I did not expect that: seed system coming from inducer had NO solution, but system DID HAVE overall a solution. "
 //      << "This may be a programming mistake. If not, then this needs to be investigated. Here is the subalgebra: " << this->ToString();
@@ -1494,7 +1500,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
     if (this->theBasis.size>0)
     { this->owner->owneR->GenerateLieSubalgebra(this->theBasis);
       if (this->theBasis.size!=this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank())
-      { if (!allowLieBracketFailure)
+      { if (!allowNonPolynomialSystemFailure)
           crash << "This is a programming error. Lie subalgebra dimension doesn't fit: dimension of generated subalgebra is "
           << this->theBasis.size << ", must be " << this->theWeylNonEmbeddeD.theDynkinType.GetRootSystemPlusRank()
           << ". The subalgebra is " << this->ToString() << "<br>Involved generators: " << this->theInvolvedNegGenerators.ToString()
@@ -1503,8 +1509,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
       }
     }
     this->owner->owneR->GetCommonCentralizer(this->thePosGens, this->HighestVectorsNonSorted);
-    this->ComputeCartanOfCentralizer(theGlobalVariables);
-    this->ComputePrimalModuleDecompositionHWsHWVsOnly(theGlobalVariables);
+    this->ComputeCartanOfCentralizer(this->owner->theGlobalVariables);
+    this->ComputePrimalModuleDecompositionHWsHWVsOnly(this->owner->theGlobalVariables);
   }
   return true;
 }
@@ -2704,7 +2710,7 @@ void SemisimpleSubalgebras::reset()
   this->theSl2sOfSubalgebras=0;
 }
 
-bool CandidateSSSubalgebra::AttemptToSolveSystem(GlobalVariables* theGlobalVariables)
+bool CandidateSSSubalgebra::AttemptToSolveSystem()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->CheckInitialization();
   this->transformedSystem=this->theSystemToSolve;
@@ -2716,7 +2722,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem(GlobalVariables* theGlobalVaria
 //  ;
   for (int i=401; i<6402; i+=2000)
   { theComputation.MaxNumComputations=i;
-    theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, theGlobalVariables);
+    theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
     if (theComputation.flagSystemProvenToHaveNoSolution || theComputation.flagSystemProvenToHaveSolution)
       break;
   }
@@ -2803,7 +2809,7 @@ void CandidateSSSubalgebra::GetGenericLinearCombination(int numVars, int varOffs
   }
 }
 
-bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables* theGlobalVariables)
+bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
 { if (this->indexInOwnersOfNonEmbeddedMe==-1)
     crash << "This is a programming error: attempting to compute char of candidate subalgebra that has not been initialized properly. " << crash;
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
@@ -2873,7 +2879,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter, GlobalVariables*
     freudenthalChar.AddMonomial(tempMon, accumChar.theCoeffs[currentIndex]);
     this->theCharNonPrimalFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
-    bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, theGlobalVariables);
+    bool tempBool=freudenthalChar.FreudenthalEvalMeFullCharacter(outputChar, -1, &tempS, this->owner->theGlobalVariables);
     if (!tempBool && !allowBadCharacter)
     { crash << "This is a programming error: failed to evaluate full character via the Freudenthal formula on a relatively small example, namely "
       << freudenthalChar.ToString() << ". The failure message was: " << tempS << ". This shouldn't happen. " << crash;
@@ -5333,7 +5339,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
   return false;
 }
 
-void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGlobalVariables)
+void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AdjustCentralizerAndRecompute");
   if (this->flagSystemProvedToHaveNoSolution)
     return;
@@ -5341,7 +5347,7 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(GlobalVariables* theGl
   if (!this->flagCentralizerIsWellChosen)
   { //std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
     //std::cout << "<br>Starting generators: " << this->ToStringGenerators();
-    this->ComputeSystem(theGlobalVariables, true, false);
+    this->ComputeSystem(true, allowNonPolynomialSystemFailure);
     //std::cout << "<br>... and final generators: " << this->ToStringGenerators();
     this->ComputeCentralizerIsWellChosen();
   }
@@ -5354,7 +5360,7 @@ int CandidateSSSubalgebra::GetNumModules()const
   return result;
 }
 
-void SemisimpleSubalgebras::HookUpCentralizers()
+void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::HookUpCentralizers");
   List<int> theCandidatePermutation;
   theCandidatePermutation.SetSize(this->theSubalgebraCandidates.size);

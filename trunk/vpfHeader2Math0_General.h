@@ -3076,7 +3076,7 @@ void Vectors<coefficient>::SelectABasisInSubspace
     theMat.GetVectorFromRow(i, output[i]);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "Selecting a basis of a vector space with " << input.size << "generators in dimension " << theDim << "... DONE! " ;
+    reportStream << "Selecting a basis of a vector space with " << input.size << " generators in dimension " << theDim << "... DONE! " ;
     theReport.Report(reportStream.str());
   }
 }

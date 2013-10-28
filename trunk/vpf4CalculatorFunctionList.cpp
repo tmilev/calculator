@@ -220,7 +220,7 @@ void CommandList::initPredefinedInnerFunctions()
    ;
   this->AddOperationInnerHandler
   ("GenerateVectorSpaceClosedWRTLieBracket", CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket, "",
-   "Generates a vector space closed with respect to the Lie bracket from input of type elements of weyl algebra. \
+   "Generates a vector space closed with respect to the Lie bracket from input of type elements of weyl algebra or Lie algebra. \
    The first argument of the input is an upper bound for the dimension of the vector space. The remaining \
    arguments must be differential operators. The output is a vector space \
    basis printout. Fails if the dimension of the vector space is larger than the upper bound.",
@@ -234,7 +234,11 @@ void CommandList::initPredefinedInnerFunctions()
     \ng_-3:=(x_{3} \\partial_{4} -2x_{2} \\partial_{3} );\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50, g_1, g_-1, g_2, g_-2, g_3, g_-3);\
     \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1,g_2, g_-2, g_3, g_-3);\
-    \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3);", true, false)
+    \nGenerateVectorSpaceClosedWRTLieBracket{}(50,g_1, g_-1, g_2, g_-2, g_3); \
+    q_{{i}}:= getChevalleyGenerator{}(F_4, i);  \
+    s_2:=-q_{-5}-q_{-6};\ns_1:=q_{20}+q_{19};\n s_-1:=-q_{-19}-q_{-20}\n; s_-2:=2q_{6}+2q_{5};\
+    \nGenerateVectorSpaceClosedWRTLieBracket(52, s_1, s_2, s_-1, s_-2);\
+    ", true, false)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupNaturalRep", WeylGroupCalculatorFunctions::innerWeylGroupNaturalRep, "",

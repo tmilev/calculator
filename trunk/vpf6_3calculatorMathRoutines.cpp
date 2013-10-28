@@ -54,8 +54,37 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
   }
   Expression inputModded=input;
   inputModded.children.RemoveIndexShiftDown(1);
+
   if (!theCommands.GetVectorFromFunctionArguments(inputModded, theOps, &theContext))
-    return false;
+  { Vector<ElementUniversalEnveloping<RationalFunctionOld> > theLieAlgElts;
+    theContext.MakeEmptyContext(theCommands);
+    if (!theCommands.GetVectorFromFunctionArguments(inputModded, theLieAlgElts, &theContext))
+    { theCommands.Comments << "<hr>Failed to extract elements of weyl algebra and failed to extract elements of UE algebra from input "
+      << input.ToString();
+      return false;
+    }
+    FormatExpressions theFormat;
+    theContext.ContextGetFormatExpressions(theFormat);
+    std::stringstream out;
+    out << "Starting elements: <br>";
+    for (int i=0; i<theLieAlgElts.size; i++)
+      out << CGI::GetHtmlMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
+    bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound, theCommands.theGlobalVariableS);
+    if (!success)
+      out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
+      << "The basis generated before exceeding the limit was: " << theLieAlgElts.ToString();
+    else
+    { out << "<br>Lie bracket generates vector space of dimension " << theLieAlgElts.size << " with basis:";
+      for (int i=0; i<theLieAlgElts.size; i++)
+      { out << "<br>";
+        if (theLieAlgElts.size>50)
+          out << theLieAlgElts[i].ToString(&theFormat);
+        else
+          out << CGI::GetHtmlMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
+      }
+    }
+    return output.AssignValue(out.str(), theCommands);
+  }
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   std::stringstream out;

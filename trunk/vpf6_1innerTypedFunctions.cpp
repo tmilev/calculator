@@ -388,6 +388,7 @@ bool CommandListInnerTypedFunctions::innerMultiplyAnyByUE(CommandList& theComman
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
+  //std::cout << "before simplification: " << result.ToString() << " and after: " << result.ToString();
   result.Simplify(theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
@@ -885,7 +886,9 @@ bool CommandListInnerTypedFunctions::innerLieBracketRatOrUEWithRatOrUE(CommandLi
   if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() && rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
   { ElementUniversalEnveloping<RationalFunctionOld> result;
     leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().LieBracketOnTheRight(rightE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
+    //std::cout << "before simplification: " << result.ToString();
     result.Simplify(theCommands.theGlobalVariableS);
+    //std::cout << " after: " << result.ToString();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
   }
   return false;

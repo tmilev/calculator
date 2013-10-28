@@ -307,7 +307,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       out << " and "  << candidatesNotRealizedNotProvenImpossible << " subalgebra candidate(s) which were not realized (but not proven impossible)";
     out << ". ";
   }
-  out << "The subalgebras are ordered by rank, dimensions of simple constituents and Dynkin indices of simple constituents. "
+  out << "The subalgebras are ordered by rank, Dynkin indices of simple constituents and dimensions of simple constituents. "
   << "The upper index indicates the Dynkin index, the lower index indicates the rank of the subalgebra. ";
   if (this->timeComputationStartInSeconds!=-1 && this->timeComputationEndInSeconds!=-1)
     out << "<br>Computation time in seconds: " << this->timeComputationEndInSeconds - this->timeComputationStartInSeconds << ".";
@@ -315,7 +315,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << "<br>" << this->numAdditions+this->numMultiplications << " total arithmetic operations performed = " << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
   out << "<hr>";
-  out << "The base field over which the subalgebra were realized is: ";
+  out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField==0)
     out << CGI::GetHtmlMathSpanPure("\\mathbb Q");
   else
@@ -4858,20 +4858,21 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
 }
 
 std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFormat)const
-{ if (this->flagSystemProvedToHaveNoSolution)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringCentralizer");
+  if (this->flagSystemProvedToHaveNoSolution)
     return "";
   std::stringstream out;
   bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
-  FormatExpressions tempFormat;
-  tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
-  tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].lengthFirstCoRootSquared;
+//  FormatExpressions tempFormat;
+//  tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
+//  tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].lengthFirstCoRootSquared;
   if (this->flagCentralizerIsWellChosen && this->indexMaxSSContainer!=-1)
   { out << "<br>Centralizer type: ";
     if (useLaTeX && useHtml)
-      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToString(&tempFormat));
+      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToStringRelativeToAmbientType(this->owner->owneR->theWeyl.theDynkinType[0], theFormat));
     else
-      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToString(&tempFormat));
+      out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToStringRelativeToAmbientType(this->owner->owneR->theWeyl.theDynkinType[0], theFormat));
     out << ". ";
   }
   if (!this->flagCentralizerIsWellChosen)

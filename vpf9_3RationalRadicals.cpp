@@ -788,11 +788,26 @@ void AlgebraicNumber::RadicalMeDefault(int theRad)
 }
 
 std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("AlgebraicClosureRationals::ToString");
+  std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=false;
   tempFormat.flagUseLatex=true;
-  out << "Multiplicative basis";
+  if (this->theBasisMultiplicative.size==1)
+  { out << CGI::GetHtmlMathSpanPure("\\mathbb Q");
+    return out.str();
+  }
+  if (this->flagIsQuadraticRadicalExtensionRationals)
+  { out << "\\mathbb Q[";
+    for (int i=0; i<this->theQuadraticRadicals.size; i++)
+    { out << "\\sqrt{" << this->theQuadraticRadicals[i].ToString() << "}";
+      if (i!=this->theQuadraticRadicals.size-1)
+        out << ", ";
+    }
+    out << "]";
+    return CGI::GetHtmlMathSpanPure(out.str());
+  }
+  out << "Dimension over the rationals: " << this->theBasisMultiplicative.size << ". Multiplicative basis follows. ";
   for (int i=0; i<this->theBasisMultiplicative.size; i++)
   { out << "<br>";
     std::stringstream theFlaStream;

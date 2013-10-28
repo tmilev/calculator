@@ -173,42 +173,45 @@ bool Serialization::innerStoreObject(CommandList& theCommands, const MonomialP& 
 template <>
 bool Serialization::DeSerializeMon<DynkinSimpleType>(CommandList& theCommands, const Expression& input, const Expression& inputContext, DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon_DynkinSimpleType");
-    //std::cout << "here i am again. ";
-  //std::cout.flush();
-    //std::cout << "here i am again 1.001. ";
-  //std::cout.flush();
-
-  if (input.children.size!=2)
-  { //    std::cout << "here i am again 1.002. ";
-  //std::cout.flush();
-    theCommands.Comments << "<hr>Error while extracting Dynkin simple type: the monomial " << input.ToString() << " appears not to be a Dynkin simple type<hr>";
+  Expression rankE, typeLetterE, firstCoRootLengthE;
+  if (input.children.size==2)
+  { rankE=input[1];
+    typeLetterE=input[0];
+    if (typeLetterE.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+    { firstCoRootLengthE=typeLetterE[2];
+      typeLetterE=typeLetterE[1];
+    } else
+      firstCoRootLengthE.AssignValue(1, theCommands);
+  } else if (input.children.size==3)
+  { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+    { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
+      << " Input is " << input.ToString() << ".";
+      return false;
+    }
+    firstCoRootLengthE=input[2];
+    if (!input[1].IsListNElements(2))
+    { theCommands.Comments << "<hr>Failed to extract rank, type from " << input[1].ToString() << ". The expression does not have two children.";
+      return false;
+    }
+    rankE=input[1][1];
+    typeLetterE=input[1][0];
+  } else
+  { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length from expression " << input.ToString();
     return false;
   }
-    //std::cout << "here i am again 1.05. ";
-  //std::cout.flush();
-  Expression rankE=input[1];
-  Expression typeLetter=input[0];
-  Rational firstCoRootSquaredLength=1;
-    //std::cout << "here i am again 1.1. ";
-  //std::cout.flush();
-  if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
-  { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
-    { theCommands.Comments << "<hr>Couldn't extract first co-root length from " << input.ToString() << "<hr>";
-      return false;
-    }
-    if (firstCoRootSquaredLength<=0)
-    { theCommands.Comments << "Couldn't extract positive rational first co-root length from " << input.ToString();
-      return false;
-    }
-    //  std::cout << "here i am again1.2. ";
-  //std::cout.flush();
-    typeLetter.AssignMeMyChild(1);
+  Rational firstCoRootSquaredLength;
+  if (!firstCoRootLengthE.IsOfType<Rational>(&firstCoRootSquaredLength))
+  { theCommands.Comments << "<hr>Failed to extract first co-root length: expression " << firstCoRootLengthE.ToString()
+    << " is not a rational number.";
+    return false;
   }
-  //std::cout << "here i am again1.5. ";
-  //std::cout.flush();
+  if (firstCoRootSquaredLength<=0)
+  { theCommands.Comments << "<hr>Couldn't extract first co-root length: " << firstCoRootSquaredLength.ToString() << " is non-positive.";
+    return false;
+  }
   std::string theTypeName;
-  if (!typeLetter.IsAtom(&theTypeName))
-  { theCommands.Comments << "I couldn't extract a type letter from " << input.ToString();
+  if (!typeLetterE.IsAtom(&theTypeName))
+  { theCommands.Comments << "I couldn't extract a type letter from " << typeLetterE.ToString();
     return false;
   }
   if (theTypeName.size()!=1)
@@ -288,50 +291,25 @@ bool Serialization::innerSSLieAlgebra(CommandList& theCommands, const Expression
 bool Serialization::innerLoadDynkinType(CommandList& theCommands, const Expression& input, DynkinType& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerLoadDynkinType");
-  Expression polyE;
-  if (!Serialization::innerPolynomial<Rational>(theCommands, input, polyE))
+  MonomialCollection<Expression, Rational> theType;
+  if (!theCommands.CollectSummands(theCommands, input, theType))
     return false;
-  if (!polyE.IsOfType<Polynomial<Rational> >())
-    return true;
-//  std::cout << "<br>Got de poly!";
-//  std::cout.flush();
-  Polynomial<Rational> theType=polyE.GetValue<Polynomial<Rational> >();
-//  std::cout << "<br>its " << theType.ToString();
-//  std::cout.flush();
-  Expression theContext=polyE.GetContext();
-  FormatExpressions theFormat;
-  theContext.ContextGetFormatExpressions(theFormat);
   DynkinSimpleType simpleComponent;
   output.MakeZero();
-//  std::cout << "<br>context is here. theType.size()=" << theType.size();
-//  std::cout.flush();
+  Expression emptyE;
   for (int i=0; i<theType.size(); i++)
-  { const MonomialP& currentMon=theType[i];
-    int variableIndex;
-    if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
-    { theCommands.Comments << "Failed to extract type from monomial " << currentMon.ToString(&theFormat);
+  { if (!Serialization::DeSerializeMon(theCommands, theType[i], emptyE, simpleComponent))
       return false;
-    }
-    Expression typEE= theContext.ContextGetContextVariable(variableIndex);
-    if (!Serialization::DeSerializeMon(theCommands, typEE, theContext, simpleComponent))
-      return false;
-//        std::cout << "got it!3.5";
-//    std::cout.flush();
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
-    { theCommands.Comments << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << currentMon.ToString(&theFormat)
+    { theCommands.Comments << "<hr>Failed to convert the coefficient " << theType.theCoeffs[i] << " of " << theType[i].ToString()
       << " to a small positive integer. ";
       return false;
     }
     output.AddMonomial(simpleComponent, theMultiplicity);
-//    std::cout << "accounting monomial " << i+1 << " " << currentMon.ToString();
-//    std::cout.flush();
   }
-//  std::cout << "got it!";
-//  std::cout.flush();
-
   return true;
 }
 
@@ -583,7 +561,8 @@ bool Serialization::innerStoreCandidateSA(CommandList& theCommands, const Candid
 }
 
 bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputSubalgebra, SemisimpleSubalgebras& owner)
-{ if (!input.IsListNElements(4) && !input.IsListNElements(5))
+{ MacroRegisterFunctionWithName("Serialization::innerLoadCandidateSA");
+  if (!input.IsListNElements(4) && !input.IsListNElements(5))
   { theCommands.Comments << "<hr>Failed to load candidate subalgebra: I expect to get a list of 4 or 5 children, but got one with "
     << input.children.size << " children instead.<hr> ";
     return false;
@@ -659,8 +638,8 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   outputSubalgebra.indexInOwnersOfNonEmbeddedMe=owner.theSubalgebrasNonEmbedded->AddNoRepetitionOrReturnIndexFirst(tempSA);
   owner.theSubalgebrasNonEmbedded->GetElement(outputSubalgebra.indexInOwnersOfNonEmbeddedMe).theWeyl.ComputeRho(true);
   outputSubalgebra.theWeylNonEmbeddeD.ComputeRho(true);
-  outputSubalgebra.ComputeSystem(theCommands.theGlobalVariableS, false, true);
-  if (!outputSubalgebra.ComputeChar(true, theCommands.theGlobalVariableS))
+  outputSubalgebra.ComputeSystem(false, true);
+  if (!outputSubalgebra.ComputeChar(true))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie subalgebra: the ambient Lie algebra does not decompose properly over the candidate subalgebra. ";
     return false;
 //    outputSubalgebra.theCharNonPrimalFundCoords.MakeZero(owner.owneR);
@@ -710,6 +689,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   theSAs.flagComputePairingTable=false;
   theSAs.flagComputeNilradicals=false;
   theSAs.flagComputeModuleDecomposition=true;
+  theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
   { std::stringstream reportStream;
@@ -724,7 +704,7 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
 //    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
-  theSAs.HookUpCentralizers();//theCommands.theGlobalVariableS);
+  theSAs.HookUpCentralizers(true);
 //  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
 //  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
 //  std::cout << theCommands.theObjectContainer.ToString();

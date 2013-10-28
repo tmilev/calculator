@@ -686,8 +686,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theCandidatesE.children.size-1);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagComputePairingTable=false;
-  theSAs.flagComputeNilradicals=false;
+  theSAs.flagComputePairingTable=true;
+  theSAs.flagComputeNilradicals=true;
   theSAs.flagComputeModuleDecomposition=true;
   theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();

@@ -302,7 +302,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     out << "<br>Total, there are " << this->theSubalgebraCandidates.size << " = " << candidatesRealized << " realized + "
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
   } else
-  { out << "Total, there are " << candidatesRealized << " subalgebras";
+  { out << "Up to linear equivalence, there are total " << candidatesRealized << " subalgebras ";
     if (candidatesNotRealizedNotProvenImpossible!=0)
       out << " and "  << candidatesNotRealizedNotProvenImpossible << " subalgebra candidate(s) which were not realized (but not proven impossible)";
     out << ". ";

@@ -722,7 +722,7 @@ void rootSubalgebra::ElementToHtml
   << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
-  output << " \">";
+  output << " \">" << " <script src=\"../../jsmath/easy/load.js\"></script>";
 //  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
   output << "<body>" << tempS << "</body></html>";
   output.close();
@@ -837,8 +837,8 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
       }
     }
 //    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream2.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream3.str()) << "\n<hr>\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanPure(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanPure(tempStream3.str()) << "\n<hr>\n";
   }
   if (useLatex)
     out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
@@ -905,11 +905,11 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
       out << latexFooter << latexHeader;
     }
     if (i!=this->kModules.size-1)
-    { LatexLineCounter+=this->kModules.TheObjects[i].size;
+    { LatexLineCounter+=this->kModules[i].size;
       if (useLatex)
-       if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
+       if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules[i].size))
         { out << latexFooter << latexHeader;
-          LatexLineCounter = this->kModules.TheObjects[i].size;
+          LatexLineCounter = this->kModules[i].size;
         }
     }
   }

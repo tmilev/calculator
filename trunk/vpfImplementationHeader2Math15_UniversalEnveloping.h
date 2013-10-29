@@ -148,7 +148,8 @@ bool MonomialUniversalEnveloping<coefficient>::AdjointRepresentationAction
 template<class coefficient>
 bool ElementUniversalEnveloping<coefficient>::AdjointRepresentationAction
 (const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables)const
-{ assert(&input!=&output);
+{ if (&input==&output)
+    crash << crash;
   output.MakeZero(*this->owneR);
   ElementUniversalEnveloping<coefficient> summand;
   for (int i=0; i<this->size(); i++)
@@ -520,7 +521,6 @@ void MonomialUniversalEnveloping<coefficient>::ModOutVermaRelations
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);
       outputCoeff*=(theSubbedH);
 //      std::cout << "&nbsp outputCoeff=" << outputCoeff.ToString();
-      //assert(this->Coefficient.checkConsistency());
       this->generatorsIndices.size--;
       this->Powers.size--;
     }
@@ -1061,7 +1061,8 @@ template <class coefficient>
 void ElementVermaModuleOrdered<coefficient>::AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
 (ElementUniversalEnvelopingOrdered<coefficient>& input, const ElementVermaModuleOrdered<coefficient>& theRingZero, GlobalVariables* theContext, const coefficient& theRingUnit)
 { this->theElT.operator=(input);
-  assert(theRingZero.theSubNthElementIsImageNthCoordSimpleBasis.size==3);
+  if (theRingZero.theSubNthElementIsImageNthCoordSimpleBasis.size!=3)
+    crash << crash;
   this->theSubNthElementIsImageNthCoordSimpleBasis=theRingZero.theSubNthElementIsImageNthCoordSimpleBasis;
   this->theElT.ModOutVermaRelationSOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, theContext, theRingUnit);
 }
@@ -1228,7 +1229,8 @@ void ElementUniversalEnvelopingOrdered<coefficient>::operator/=
 
 template <class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other)
-{ assert(this!=&other);
+{ if(this==&other)
+    crash << crash;
   this->generatorsIndices.Reserve(other.generatorsIndices.size+this->generatorsIndices.size);
   this->Powers.Reserve(other.generatorsIndices.size+this->generatorsIndices.size);
   this->Coefficient.MultiplyBy(other.Coefficient);
@@ -1283,7 +1285,8 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::IsProportionalTo
 
 template<class coefficient>
 void MonomialUniversalEnvelopingOrdered<coefficient>::operator*=(const MonomialUniversalEnvelopingOrdered& other)
-{ assert(this!=&other);
+{ if (this==&other)
+    crash << crash;
   this->Coefficient*=other.Coefficient;
   for (int i=0; i<other.generatorsIndices.size; i++)
     this->MultiplyByGeneratorPowerOnTheRight(other.generatorsIndices.TheObjects[i], other.Powers.TheObjects[i]);
@@ -1844,9 +1847,7 @@ void MonomialUniversalEnvelopingOrdered<coefficient>::ModOutVermaRelations
         theSubbedH+=(*subHiGoesToIthElement)[j]*currentH[j];
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);
 //      this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.ComputeDebugString();
-      //assert(this->Coefficient.checkConsistency());
       this->Coefficient.operator*=(theSubbedH);
-      //assert(this->Coefficient.checkConsistency());
       this->generatorsIndices.size--;
       this->Powers.size--;
     }

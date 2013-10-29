@@ -175,7 +175,8 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
  const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX");
   int numGenerators=this->GetOwner().GetNumGenerators();
-  assert(generatorIndex>=0 && generatorIndex<numGenerators);
+  if (generatorIndex<0 || generatorIndex>=numGenerators)
+    crash << crash;
   if (this->ComputedGeneratorActions.selected[generatorIndex])
   { //std::cout << "<br>generator index " << generatorIndex << " is precomputed: "
     //<< this->actionsGeneratorsMaT[generatorIndex].ToString(true, false);
@@ -234,13 +235,11 @@ MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
 }
 
 template  <class coefficient>
-void ModuleSSalgebra<coefficient>::
-GetMatrixHomogenousElt
-(ElementUniversalEnveloping<coefficient>& inputHomogeneous,
-  List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
-  Vector<Rational>& weightUEEltSimpleCoords, MatrixTensor<coefficient>& output,
-  GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
-{// std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ToString();
+void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt
+(ElementUniversalEnveloping<coefficient>& inputHomogeneous, List<List<ElementUniversalEnveloping<coefficient> > >& outputSortedByArgumentWeight,
+ Vector<Rational>& weightUEEltSimpleCoords, MatrixTensor<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra::GetMatrixHomogenousElt");
+  // std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ToString();
   this->GetAdActionHomogenousElT
   (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theGlobalVariables, theRingUnit, theRingZero)
   ;
@@ -250,10 +249,12 @@ GetMatrixHomogenousElt
     { MonomialUniversalEnveloping<coefficient>& currentMon=this->theGeneratingWordsGrouppedByWeight[j][k];
       ElementUniversalEnveloping<coefficient>& imageCurrentMon=outputSortedByArgumentWeight[j][k];
       int indexColumn=this->theGeneratingWordsNonReduced.GetIndex(currentMon);
-      assert(indexColumn!=-1);
+      if(indexColumn==-1)
+        crash << crash;
       for (int l=0; l< imageCurrentMon.size; l++)
       { int indexRow=this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
-        assert(indexRow!=-1);
+        if(indexRow==-1)
+          crash << crash;
         output.AddMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
 //        std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
       }
@@ -979,7 +980,9 @@ template <class coefficient>
 bool ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft
 (const MonomialUniversalEnveloping<coefficient>& theUE, ElementTensorsGeneralizedVermas<coefficient>& output, SemisimpleLieAlgebra& ownerAlgebra,
  GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
-{ assert(&output!=this);
+{ MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::MultiplyOnTheLeft");
+  if (&output==this)
+    crash << crash;
 //  int commentmewhendone;
 //  static int problemCounter=0;
 //  problemCounter++;

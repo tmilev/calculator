@@ -155,7 +155,8 @@ public:
   }
   static void VectorPlusVectorTimesScalar(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const coefficient& theCoeff, Vector<coefficient>& output)
   { coefficient tempRat;
-    assert(r1.size==r2.size);
+    if(r1.size!=r2.size)
+      crash << crash;
     output=r1;
     for (int i=0; i<r1.size; i++)
     { tempRat=r2[i];
@@ -275,7 +276,8 @@ public:
   }
   Vector<coefficient> GetShiftToTheLeft(int numPositions)
   { Vector<coefficient> result;
-    assert(numPositions<=this->size);
+    if (numPositions>this->size)
+      crash << crash;
     result.SetSize(this->size-numPositions);
     for (int i=0; i<result.size; i++)
       result[i]=this->TheObjects[i+numPositions];
@@ -285,13 +287,15 @@ public:
   { this->ShiftToTheLeft(1);
   }
   void ShiftToTheLeft(int numPositions)
-  { assert(numPositions<=this->size);
+  { if(numPositions>this->size)
+      crash << crash;
     for (int i=0; i<this->size-numPositions; i++)
       this->TheObjects[i]=this->TheObjects[i+numPositions];
     this->size-=numPositions;
   }
   void ShiftToTheRightInsertZeroes(int numPositions, const coefficient& theRingZero)
-  { assert(numPositions>=0);
+  { if(numPositions<0)
+      crash << crash;
     this->SetSize(this->size+numPositions);
     for (int i=this->size-1; i>=numPositions; i--)
       this->TheObjects[i]=this->TheObjects[i-numPositions];
@@ -465,7 +469,8 @@ public:
   void ReadFromFile(std::fstream& input)
   { std::string tempS;
     input >> tempS;
-    assert(tempS=="root_dim:");
+    if(tempS!="root_dim:")
+      crash << crash;
     int tempI;
     input >> tempI;
     this->SetSize(tempI);
@@ -563,7 +568,8 @@ int Vector<coefficient>::FindLCMDenominatorsTruncateToInt()
 { int result=1;
   for (int i=0; i<this->size; i++)
   { result = MathRoutines::lcm(result, this->TheObjects[i].DenShort);
-    assert(this->TheObjects[i].Extended==0);
+    if((*this)[i].Extended!=0)
+      crash << crash;
   }
   return result;
 }
@@ -613,7 +619,8 @@ class Vectors: public List<Vector<coefficient> >
       return false;
     int theDimension=this->TheObjects[0].size;
     output.SetSize(theDimension);
-    assert(theDimension -1== theSelection.CardinalitySelection);
+    if(theDimension -1!= theSelection.CardinalitySelection)
+      crash << crash;
     buffer.init((int)(theDimension-1), (int)theDimension);
     for (int i =0; i<theDimension-1; i++)
       for (int j=0; j<theDimension; j++)
@@ -854,7 +861,8 @@ class Vectors: public List<Vector<coefficient> >
   void BeefUpWithEiToLinearlyIndependentBasis(int theDim, const coefficient& ringUnit =(coefficient) 1, const coefficient& ringZero=(coefficient) 0)
   { Selection BufferSel;
     Matrix<coefficient> Buffer;
-    assert(this->size==0 || theDim==this->GetDim());
+    if(this->size!=0 && theDim!=this->GetDim())
+      crash << crash;
     int currentRank=this->GetRankOfSpanOfElements(Buffer, BufferSel);
     if (currentRank==theDim)
       return;
@@ -868,7 +876,8 @@ class Vectors: public List<Vector<coefficient> >
       else
         this->size--;
     }
-    assert(currentRank==theDim);
+    if(currentRank!=theDim)
+      crash << crash;
   }
   void ChooseABasis(GlobalVariables& theGlobalVariables)
   { Vectors<Rational> output;
@@ -1051,7 +1060,8 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
   //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   Vector<coefficient> tempRoot, theCombination;
-  assert(this!=&output);
+  if(this==&output)
+    crash << crash;
   output.MakeZero(inputBasis.size);
   theCombination=*this;
   int col=0;
@@ -1218,7 +1228,8 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
       tempRoots.RemoveIndexSwapWithLast(tempRoots.size-1);
     else
     { this->SwapTwoIndices(oldRank, i);
-      assert(oldRank+1==newRank);
+      if(oldRank+1!=newRank)
+        crash << crash;
       oldRank=newRank;
     }
     if (oldRank== theDimension)

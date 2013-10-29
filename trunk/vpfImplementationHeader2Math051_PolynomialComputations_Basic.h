@@ -368,7 +368,8 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   //{ this->ComputeDebugString();
    // tempInput.ComputeDebugString();
   //}
-  assert(remainderMaxMonomial<outputRemainder.size());
+  if (remainderMaxMonomial>=outputRemainder.size())
+    crash << crash;
   if (inputMaxMonomial>=tempInput.size() || inputMaxMonomial<0)
     crash << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial << " while the polynomial has "
     << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString() << " by " << inputDivisor.ToString() << ". " << crash;
@@ -376,7 +377,8 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
-  { assert(remainderMaxMonomial<outputRemainder.size());
+  { if (remainderMaxMonomial>=outputRemainder.size())
+      crash << crash;
     tempMon=outputRemainder[remainderMaxMonomial];
     tempMon/=tempInput[inputMaxMonomial];
     if (!tempMon.HasPositiveOrZeroExponents())

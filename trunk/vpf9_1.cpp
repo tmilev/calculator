@@ -1,23 +1,33 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
+#include <assert.h>
 
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher crash;
 
+void Crasher::FirstRun()
+{ if (this->flagFirstRun)
+    this->theCrashReport << "\n<hr>\n\n";
+  this->flagFirstRun=false;
+}
+
 Crasher& Crasher::operator<<(const std::string& input)
-{ this->theCrashReport << input;
+{ this->FirstRun();
+  this->theCrashReport << input;
   return *this;
 }
 
 Crasher& Crasher::operator<<(int x)
-{ this->theCrashReport << x;
+{ this->FirstRun();
+  this->theCrashReport << x;
   return *this;
 }
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
-{ this->theCrashReport << "<hr>This is a program crash. ";
+{ this->FirstRun();
+  this->theCrashReport << "<hr>This is a program crash. ";
   if (this->userInputStringIfAvailable!="")
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -116,12 +126,14 @@ void rootSubalgebra::MatrixToRelation( coneRelation& output, Matrix<Rational> & 
   output.BetaCoeffs.size=0;  output.Betas.size=0;
   Vector<Rational> tempRoot; tempRoot.SetSize(theDimension);
   matX.ScaleToIntegralForMinRationalHeightNoSignChange();
-  assert(matA.NumCols==matX.NumRows);
+  if(matA.NumCols!=matX.NumRows)
+    crash << crash;
   for (int i=0; i<matA.NumCols; i++)
     if (!matX.elements[i][0].IsEqualToZero())
     { for (int j=0; j<theDimension; j++)
         tempRoot.TheObjects[j].Assign(matA.elements[j][i]);
-      assert(matX.elements[i][0].DenShort==1);
+      if(!(matX.elements[i][0].DenShort==1))
+        crash << crash;
       if (i<NilradicalRoots.size)
       { output.Betas.AddOnTop(tempRoot);
         output.BetaCoeffs.AddOnTop(matX.elements[i][0]);
@@ -178,7 +190,8 @@ void rootSubalgebra::ExtractRelations
           if (theRel.IsStrictlyWeaklyProhibiting(*this, NilradicalRoots, theGlobalVariables, owner, indexInOwner))
             break;
         }
-      assert(theRel.CheckForBugs(*this, NilradicalRoots));
+      if(!theRel.CheckForBugs(*this, NilradicalRoots))
+        crash << crash;
     }
     owner.theBadRelations.AddOnTop(theRel);
   }
@@ -348,11 +361,12 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     Vector<Rational> tempRoot;
     if (this->kModulesKepsCoords[i].size>0)
     { this->kModulesKepsCoords[i].average(tempRoot, this->kModulesKepsCoords[i][0].size);
-      assert(tempRoot.IsEqualToZero());
+      if(!tempRoot.IsEqualToZero())
+        crash << crash;
     }
    // this->kModulesgEpsCoords.TheObjects[i].Average
      // (tempRoot, this->kModulesgEpsCoords.TheObjects[i].TheObjects[0].size);
-    //assert(tempRoot.IsEqualToZero());
+    //if(!tempRoot.IsEqualToZero())crash << crash;
   //  this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
   this->GetAmbientWeyl().GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, this->SimpleBasisK, this->SimpleBasisKEpsCoords);
@@ -430,7 +444,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     //  for (int k=0; k<theRootSA.kModules.TheObjects[j].size; k++)
     //  { tempRoot.Assign(theRootSA.kModules.TheObjects[j].TheObjects[k]);
     //    theSubgroup.ActByElement(i+1, tempRoot);
-    //    assert(tempI==theRootSA.GetIndexKmoduleContainingRoot(tempRoot));
+    //    if(tempI!=theRootSA.GetIndexKmoduleContainingRoot(tempRoot))crash << crash;
     //  }
     }
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
@@ -569,7 +583,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
 { Matrix<Rational> tempMat;
   Selection tempSel;
   int CurrentRank=Domain.GetRankOfSpanOfElements(&tempMat, &tempSel);
-  assert(CurrentRank==Range.GetRankOfSpanOfElements(&tempMat, &tempSel));
+  if(CurrentRank!=Range.GetRankOfSpanOfElements(&tempMat, &tempSel))
+    crash << crash;
   if (abortKmodule!=0)
     *abortKmodule=false;
   if (CurrentRank==this->GetAmbientWeyl().CartanSymmetric.NumRows)
@@ -620,7 +635,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   domainRec.AddOnTop(leftSA.HighestWeightsGmodK[counter]);
   while(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank)
   { counter++;
-    assert(leftSA.kModules.size>counter);
+    if(leftSA.kModules.size<=counter)
+      crash << crash;
     domainRec.RemoveIndexSwapWithLast(domainRec.size-1);
     domainRec.AddOnTop(leftSA.HighestWeightsGmodK[counter]);
   }
@@ -633,7 +649,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
       else
         counter=i;
     }
-  assert(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank+1);
+  if(!(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank+1))
+    crash << crash;
   Vectors<Rational>& firstKmodLeft= leftSA.kModules[counter];
   bool result=false;
   bool tempBool;
@@ -1070,7 +1087,8 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
     return true;
   if (this->RankTotal()<right.RankTotal())
     return false;
-  assert(this->SimpleComponentTypes.size==this->SimpleBasesConnectedComponents.size);
+  if(this->SimpleComponentTypes.size!=this->SimpleBasesConnectedComponents.size)
+    crash << crash;
   for (int i=0; i<this->SimpleComponentTypes.size; i++)
   { if (this->SimpleBasesConnectedComponents[i].size>right.SimpleBasesConnectedComponents[i].size)
       return true;
@@ -1086,18 +1104,18 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
 
 void DynkinDiagramRootSubalgebra::GetMapFromPermutation(Vectors<Rational>& domain, Vectors<Rational>& range, List<int>& thePerm, List<List<List<int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
 { for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    for (int j=0; j<this->SimpleBasesConnectedComponents.TheObjects[i].size; j++)
-    { assert(this->SimpleBasesConnectedComponents.TheObjects[i].size==right.SimpleBasesConnectedComponents.TheObjects[thePerm.TheObjects[i]].size);
-      domain.AddOnTop( this->SimpleBasesConnectedComponents.TheObjects[i].TheObjects[j]);
-      int indexTargetComponent=thePerm.TheObjects[i];
-      int indexAutomorphismInComponent=theAutosPerm.Multiplicities.TheObjects[i];
-      int indexRoot=theAutos.TheObjects[i].TheObjects[indexAutomorphismInComponent].TheObjects[j];
-      range.AddOnTop(right.SimpleBasesConnectedComponents.TheObjects[indexTargetComponent].TheObjects[indexRoot]);
+    for (int j=0; j<this->SimpleBasesConnectedComponents[i].size; j++)
+    { if(this->SimpleBasesConnectedComponents[i].size!=right.SimpleBasesConnectedComponents[thePerm[i]].size)
+        crash << crash;
+      domain.AddOnTop( this->SimpleBasesConnectedComponents[i][j]);
+      int indexTargetComponent=thePerm[i];
+      int indexAutomorphismInComponent=theAutosPerm.Multiplicities[i];
+      int indexRoot=theAutos[i][indexAutomorphismInComponent][j];
+      range.AddOnTop(right.SimpleBasesConnectedComponents[indexTargetComponent][indexRoot]);
     }
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDynkinStrings
-  (const Matrix<Rational>& theBilinearForm)
+void DynkinDiagramRootSubalgebra::ComputeDynkinStrings(const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinStrings");
   this->indicesThreeNodes.SetSize(this->SimpleBasesConnectedComponents.size);
   this->SimpleComponentTypes.SetSize(this->SimpleBasesConnectedComponents.size);
@@ -1172,7 +1190,8 @@ int DynkinDiagramRootSubalgebra::RankTotal()
 
 int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram()
 { int result=0;
-  assert(this->SimpleBasesConnectedComponents.size==this->SimpleComponentTypes.size);
+  if(this->SimpleBasesConnectedComponents.size!=this->SimpleComponentTypes.size)
+    crash << crash;
   for (int i=0; i<this->SimpleComponentTypes.size; i++)
   { int Rank=this->SimpleBasesConnectedComponents[i].size;
     if (this->SimpleComponentTypes[i].theLetter=='A')
@@ -1219,11 +1238,16 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
       this->indicesEnds[indexComponent].AddOnTop(i);
     }
   }
-  assert(result<=1);
+  if (result>1)
+    crash << crash;
   if (result==1)
-    assert(numEnds==3);
+  { if(numEnds!=3)
+      crash << crash;
+  }
   else
-    assert(numEnds<=2);
+  { if(numEnds>2)
+      crash << crash;
+  }
   return result;
 }
 
@@ -1389,8 +1413,7 @@ void rootSubalgebra::DoKRootsEnumeration(GlobalVariables& theGlobalVariables)
 
 void rootSubalgebra::DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables)
 { int theRank=this->theKComponentRanks[indexEnumeration];
-  int numRuns=MathRoutines::NChooseK
-  (this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
+  int numRuns=MathRoutines::NChooseK(this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
   this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
   for (int i=0; i<numRuns; i++)
   { this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
@@ -1487,7 +1510,8 @@ bool affineHyperplane::operator ==(const affineHyperplane& right)
 bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
 { Rational tempRat;
   int tempI=input.GetIndexFirstNonZeroCoordinate();
-  assert(tempI!=-1);
+  if(tempI==-1)
+    crash << crash;
   if (tempI==input.size-1)
     return false;
   this->affinePoint.MakeZero(input.size);
@@ -1677,7 +1701,8 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
       tempS="";
     if (tempS=="-1")
       tempS="-";
-    assert(!(tempS=="0"));
+    if((tempS=="0"))
+      crash << crash;
     out<< tempS;
     if (!EpsilonForm)
       tempS=theRoots[i].ToString();
@@ -1691,7 +1716,8 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
 }
 
 void coneRelation::RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, Vectors<Rational>& theRoots, bool useLatex, rootSubalgebra& owner)
-{ assert(theRoots.size==coeffs.size);
+{ if(theRoots.size!=coeffs.size)
+    crash << crash;
   std::stringstream out;
   std::string tempS;
   if (useLatex)
@@ -1706,7 +1732,8 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
       tempS="";
     if (tempS=="-1")
       tempS="-";
-    assert(!(tempS=="0"));
+    if((tempS=="0"))
+      crash << crash;
     out << tempS;
     if (!useLatex)
     { tempS=theRoots[i].ToString();
@@ -1755,8 +1782,8 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
 int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts)
 { std::string tempS;
   std::stringstream out;
-  assert(this->AlphaCoeffs.size==this->Alphas.size);
-  assert(this->BetaCoeffs.size==this->Betas.size);
+  if(this->AlphaCoeffs.size!=this->Alphas.size || this->BetaCoeffs.size!=this->Betas.size)
+    crash << crash;
   int LatexLineCounter=0;
   this->ComputeConnectedComponents(this->Alphas, owners.TheObjects[this->IndexOwnerRootSubalgebra],  this->AlphaKComponents);
   this->ComputeConnectedComponents(this->Betas, owners.TheObjects[this->IndexOwnerRootSubalgebra], this->BetaKComponents);
@@ -1905,7 +1932,8 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
           { this->BetaCoeffs.RemoveIndexSwapWithLast(remainingIndex);
             this->Betas.RemoveIndexSwapWithLast(remainingIndex);
           }
-          assert(NilradicalRoots.Contains(tempRoot));
+          if(!NilradicalRoots.Contains(tempRoot))
+            crash << crash;
           hasChanged=true;
         }
       }
@@ -1927,7 +1955,8 @@ bool coneRelation::CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& Nilrad
 }
 
 void coneRelation::GetSumAlphas(Vector<Rational>& output, int theDimension)
-{ assert(this->AlphaCoeffs.size==this->Alphas.size);
+{ if (this->AlphaCoeffs.size!=this->Alphas.size)
+    crash << crash;
   output.MakeZero(theDimension);
   Vector<Rational> tempRoot;
   for(int i=0; i<this->Alphas.size; i++)
@@ -2051,14 +2080,15 @@ void permutation::initPermutation(List<int>& disjointSubsets, int TotalNumElemen
 { this->initIncomplete(TotalNumElements);
   int counter=0;
   for(int i=0; i<disjointSubsets.size; i++)
-  { for (int j=0; j<disjointSubsets.TheObjects[i]; j++)
-    { this->MaxMultiplicities.TheObjects[counter]=disjointSubsets.TheObjects[i]-j-1;
-      this->Multiplicities.TheObjects[counter]=0;
+  { for (int j=0; j<disjointSubsets[i]; j++)
+    { this->MaxMultiplicities[counter]=disjointSubsets[i]-j-1;
+      this->Multiplicities[counter]=0;
       counter++;
     }
-    TotalNumElements-=disjointSubsets.TheObjects[i];
+    TotalNumElements-=disjointSubsets[i];
   }
-  assert(TotalNumElements==0);
+  if(TotalNumElements!=0)
+    crash << crash;
 }
 
 void permutation::incrementAndGetPermutation(List<int>& output)
@@ -2581,7 +2611,8 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
 void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
 { Vector<Rational>& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
   Vector<Rational>& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
-  assert(!(rootI+rootJ).IsEqualToZero());
+  if((rootI+rootJ).IsEqualToZero())
+    crash << crash;
   //int indexMinusI= this->theWeyl.RootSystem.GetIndex(-rootI);
   //int indexMinusJ= this->theWeyl.RootSystem.GetIndex(-rootJ);
   //this->ComputeDebugString();
@@ -2598,13 +2629,15 @@ void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int ind
 void SemisimpleLieAlgebra::ExploitSymmetryChevalleyConstants(int indexI, int indexJ)
 { Vector<Rational>& rootI= this->theWeyl.RootSystem.TheObjects[indexI];
   Vector<Rational>& rootJ= this->theWeyl.RootSystem.TheObjects[indexJ];
-  assert(this->Computed.elements[indexI][indexJ]);
+  if(!this->Computed.elements[indexI][indexJ])
+    crash << crash;
   int indexMinusI = this->theWeyl.RootSystem.GetIndex(-rootI);
   int indexMinusJ = this->theWeyl.RootSystem.GetIndex(-rootJ);
   this->ChevalleyConstants.elements[indexJ][indexI].Assign(this->ChevalleyConstants.elements[indexI][indexJ]*(-1));
   //this->ComputeDebugString();
   this->Computed.elements[indexJ][indexI]=true;
-  assert(!(rootI+rootJ).IsEqualToZero());
+  if((rootI+rootJ).IsEqualToZero())
+    crash << crash;
   int thePower;
   this->GetMaxQForWhichBetaMinusQAlphaIsARoot
   (this->theWeyl.RootSystem.TheObjects[indexMinusI],
@@ -2624,9 +2657,12 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
   Vector<Rational>& rootK= this->theWeyl.RootSystem.TheObjects[k];
   Vector<Rational>& rootJ= this->theWeyl.RootSystem.TheObjects[j];
   //the following three checks can be commented out to increase speed. They have never failed so far.
-  assert((rootI+rootK+rootJ).IsEqualToZero());
-  assert(!(rootI+rootJ).IsEqualToZero() && !(rootK+rootK).IsEqualToZero() && !(rootJ+rootI).IsEqualToZero());
-  assert(this->Computed.elements[i][j]);
+  if(!(rootI+rootK+rootJ).IsEqualToZero())
+    crash << crash;
+  if((rootI+rootJ).IsEqualToZero() || (rootK+rootK).IsEqualToZero() || (rootJ+rootI).IsEqualToZero())
+    crash << crash;
+  if(!this->Computed.elements[i][j])
+    crash << crash;
   /////////////////////////////////////////////////////////////////
   Rational& tempRat= this->ChevalleyConstants.elements[i][j];
   Rational tempRat2= this->theWeyl.RootScalarCartanRoot(rootK, rootK);
@@ -2661,20 +2697,26 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
   Vector<Rational>& minusEpsilon= this->theWeyl.RootSystem.TheObjects[indexMinusEpsilon];
   Vector<Rational>& eta= this->theWeyl.RootSystem.TheObjects[indexEta];
   Vector<Rational>& minusZeta=this->theWeyl.RootSystem.TheObjects[indexMinusZeta];
-  assert(eta==gamma+delta);
-  assert(this->theWeyl.IsARoot(eta+minusEpsilon));
-  assert(this->Computed.elements[indexDelta][indexMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma] && this->Computed.elements[indexGamma][indexDelta] );
-  assert(!this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero());
+  if(eta!=gamma+delta)
+    crash << crash;
+  if(!this->theWeyl.IsARoot(eta+minusEpsilon))
+    crash << crash;
+  if(!this->Computed.elements[indexDelta][indexMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma] || !this->Computed.elements[indexGamma][indexDelta] )
+   crash << crash;
+  if(this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero())
+    crash << crash;
   int indexDeltaMinusEpsilon= this->theWeyl.RootSystem.GetIndex(delta+minusEpsilon);
   int indexGammaMinusEpsilon= this->theWeyl.RootSystem.GetIndex(gamma+minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon!=-1)
-  { assert(this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] && this->Computed.elements[indexDelta][indexMinusEpsilon]);
+  { if(!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon]);
+      crash << crash;
     FirstSummand=this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon]*this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else
     FirstSummand.MakeZero();
   if (indexGammaMinusEpsilon!=-1)
-  { assert(this->Computed.elements[indexDelta][indexGammaMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma]);
+  { if(!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma]);
+      crash << crash;
     SecondSummand =this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else
     SecondSummand.MakeZero();

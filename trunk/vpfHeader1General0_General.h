@@ -781,7 +781,8 @@ template <class Object>
 std::iostream& operator>>(std::iostream& input, List<Object>& theList)
 { std::string tempS; int tempI;
   input >> tempS >> tempI;
-  assert(tempS=="size:");
+  if(tempS!="size:")
+    crash << crash;
   theList.SetSize(tempI);
   for (int i=0; i<theList.size; i++)
     input >> theList[i];
@@ -1833,8 +1834,8 @@ public:
     standsOnTheLeft=output;
   }
   void ActMultiplyVectorRowOnTheRight(const Vector<coefficient>& standsOnTheLeft, Vector<coefficient>& output, const coefficient& TheRingZero=0)const
-  { assert(&standsOnTheLeft!=&output);
-    assert(this->NumRows==standsOnTheLeft.size);
+  { if (&standsOnTheLeft==&output || this->NumRows!=standsOnTheLeft.size)
+      crash << crash;
     output.MakeZero(this->NumCols);
     coefficient tempElt;
     for (int i=0; i<this->NumCols; i++)
@@ -1886,7 +1887,8 @@ public:
   }
   template <class otherType>
   void ActOnVectorsColumn(const Vectors<otherType>& input, Vectors<otherType>& output, const otherType& TheRingZero=0)const
-  { assert(&input!=&output);
+  { if(&input==&output)
+      crash << crash;
     if (input.size==0)
       return;
     if (this->NumCols!=input.GetDim())
@@ -1943,7 +1945,8 @@ public:
   { return this->ScalarProduct(left, right, (coefficient) 0);
   }
   coefficient ScalarProduct(const Vector<coefficient>& left, const Vector<coefficient>& right, const coefficient& theRingZero)
-  { assert(left.size==this->NumCols && right.size==this->NumRows);
+  { if(left.size!=this->NumCols || right.size!=this->NumRows)
+      crash << crash;
     coefficient Result, tempElt;
     Result=theRingZero;
     for (int i=0; i<this->NumRows; i++)
@@ -2066,12 +2069,14 @@ public:
       this->elements[i][0]=input.TheObjects[i];
   }
   void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input)
-  { assert(input.size==this->NumCols && rowIndex<this->NumRows && rowIndex>=0);
+  { if(input.size!=this->NumCols || rowIndex>=this->NumRows || rowIndex<0)
+      crash << crash;
     for (int i=0; i<this->NumCols; i++)
       this->elements[rowIndex][i]=input[i];
   }
   void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<coefficient>& input)
-  { assert(input.size==this->NumRows && colIndex<this->NumCols && colIndex>=0);
+  { if(input.size!=this->NumRows || colIndex>=this->NumCols || colIndex<0)
+      crash << crash;
     for (int i=0; i<this->NumRows; i++)
       this->elements[i][colIndex]=input[i];
   }
@@ -2163,7 +2168,8 @@ public:
     *this=tempMat;
   }
   static void LieBracket(const Matrix<coefficient>& left, const Matrix<coefficient>& right, Matrix<coefficient>& output)
-  { assert(left.NumCols==left.NumRows && right.NumCols==right.NumRows && left.NumCols==right.NumCols);
+  { if (left.NumCols!=left.NumRows || right.NumCols!=right.NumRows || left.NumCols!=right.NumCols)
+      crash << crash;
     Matrix<coefficient> tempPlus, tempMinus;
     tempPlus=(right);
     tempPlus.MultiplyOnTheLeft(left);
@@ -2484,7 +2490,8 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
 { int r, c; std::string tempS;
   int NumReadWords;
   XMLRoutines::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
-  assert(NumReadWords==0);
+  if(NumReadWords!=0)
+    crash << crash;
   input >> tempS >> r >> tempS >> c;
   if (tempS!="c:")
   { crash << crash;
@@ -2495,7 +2502,8 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j].ReadFromFile(input);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
-  assert(NumReadWords==0);
+  if(NumReadWords!=0)
+    crash << crash;
   return true;
 }
 
@@ -2588,7 +2596,8 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 
 template<typename Element>
 void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
-{ assert(this!=&m1 && this!=&m2);
+{ if(this==&m1 || this==&m2)
+    crash << crash;
   this->Resize(m1.NumRows+m2.NumRows, m1.NumCols+m2.NumCols, false);
   this->NullifyAll();
   for(int i=0; i<m1.NumRows; i++)
@@ -2671,7 +2680,8 @@ inline void Matrix<Element>::SwitchTwoRows(int row1, int row2)
 
 template <typename Element>
 bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output)
-{ assert(A.NumRows== b.NumRows);
+{ if(A.NumRows!= b.NumRows)
+    crash << crash;
   Selection thePivotPoints;
   A.GaussianEliminationByRows(&b, 0, &thePivotPoints);
   return A.RowEchelonFormToLinearSystemSolution(thePivotPoints, b, output);
@@ -2679,7 +2689,8 @@ bool Matrix<Element>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(M
 
 template <typename Element>
 bool Matrix<Element>::RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution)
-{ assert(inputPivotPoints.MaxSize==this->NumCols && inputRightHandSide.NumCols==1 && inputRightHandSide.NumRows==this->NumRows);
+{ if(inputPivotPoints.MaxSize!=this->NumCols || inputRightHandSide.NumCols!=1 || inputRightHandSide.NumRows!=this->NumRows)
+    crash << crash;
   //this->ComputeDebugString();
   //inputRightHandSide.ComputeDebugString();
   //inputPivotPoints.ComputeDebugString();

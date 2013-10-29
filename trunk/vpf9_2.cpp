@@ -121,7 +121,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   rootsInPlay.size=0;
   int theRelativeDimension = simpleBasisSA.size;
 //  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
-  assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
+  if(theRelativeDimension!=theZeroCharacteristics.MaxSize)
+    crash << crash;
   Vector<Rational> tempRoot, tempRoot2;
   //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+... a_kg^\alpha_k, and
   // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
@@ -217,7 +218,8 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   //outputSystemToBeSolved.ComputeDebugString();
 //  ElementSemisimpleLieAlgebra g1, g2;
   for (int i=0; i<rootsInPlay.size; i++)
-  { assert(rootsInPlay.size==halfNumberVariables);
+  { if(rootsInPlay.size!=halfNumberVariables)
+      crash << crash;
     this->GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
     { tempM.MakeOne(numberVariables);
@@ -582,7 +584,8 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
   this->GetOwnerWeyl().ReadFromFile(input);
   this->GetOwnerWeyl().ComputeRho(true);
   input >> tempS >> tempI;
-  assert(tempS=="Number_subalgebras:");
+  if(tempS!="Number_subalgebras:")
+    crash << crash;
   this->SetSize(tempI);
   //////////////////////////////////////////////////////////////////////////////////////
   input >> tempS >> this->IndexCurrentSANilradicalsGeneration;
@@ -611,7 +614,8 @@ void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output, Globa
 void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS;
   input >> tempS;
-  assert(tempS=="Simple_basis_k:");
+  if(tempS!="Simple_basis_k:")
+    crash << crash;
   this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
   this->genK=(this->SimpleBasisK);
   this->init(*owner.owneR);
@@ -673,7 +677,7 @@ void rootSubalgebra::GeneratePossibleNilradicals
       for (int s=0; s<impliedSelections.TheObjects[0].CardinalitySelection; s++)
         tempRootsTest.AddOnTop(this->kModules.TheObjects[impliedSelections.TheObjects[0].elements[s]].TheObjects[0]);
       tempS=out.str();
-      assert(this->RootsDefineASubalgebra(tempRootsTest));*/
+      if(!this->RootsDefineASubalgebra(tempRootsTest)) crash << crash;*/
     for (; parabolicsCounter<StartingNilradicalsNoRepetition.size; parabolicsCounter++, owner.flagNilradicalComputationInitialized=false)
     { if (!owner.flagNilradicalComputationInitialized)
       { impliedSelections[0]=(StartingNilradicalsNoRepetition[parabolicsCounter]);
@@ -728,7 +732,8 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   this->Betas.ReadFromFile(input, theGlobalVariables);
   input >> this->BetaKComponents;
   input >> tempS >> this->IndexOwnerRootSubalgebra;
-  assert(tempS=="Index_owner_root_SA:");
+  if(tempS!="Index_owner_root_SA:")
+    crash << crash;
   this->ComputeTheDiagramAndDiagramRelAndK(owner.TheObjects[this->IndexOwnerRootSubalgebra]);
   this->ComputeDebugString(owner, true, true);
 }
@@ -751,7 +756,8 @@ void WeylGroup::ReadFromFile(std::fstream& input)
   std::cout << "This code is not implemented yet (due to a regression).";
   crash << crash;
   //input >> this->WeylLetter >> tempI >> tempS;
-  assert(tempS=="Long_root_length:");
+  if(tempS!="Long_root_length:")
+    crash << crash;
 //  this->lengthLongestRootSquared.ReadFromFile(input);
   this->CartanSymmetric.ReadFromFile(input);
 }
@@ -1315,7 +1321,8 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 (const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
-{ assert(&output!=&input);
+{ if(&output==&input)
+    crash << crash;
   output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   for (int i=0; i<input.size(); i++)
@@ -1629,7 +1636,8 @@ bool RationalFunctionOld::ConvertToType(int theType)
 
 void RationalFunctionOld::Invert()
 { //std::cout << "inverting " << this->ToString();
-  assert(this->checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
   if (this->expressionType==this->typeRational)
   { if (this->ratValue.IsEqualToZero())
       crash  << "This is a programming error: division by zero. Division by zero errors must be caught earlier in the program and "
@@ -1639,12 +1647,14 @@ void RationalFunctionOld::Invert()
   }
   if (this->expressionType==this->typePoly)
     this->ConvertToType(this->typeRationalFunction);
-  assert(!this->Numerator.GetElement().IsEqualToZero());
+  if(this->Numerator.GetElement().IsEqualToZero())
+    crash << crash;
   MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
   this->expressionType=this->typeRationalFunction;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  assert(this->checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
   //std::cout << " to get: " << this->ToString();
 }
 
@@ -1744,7 +1754,8 @@ void RationalFunctionOld::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   this->Denominator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
   if (newNumVars<oldNumVars)
     this->Simplify();
-//    assert(this->checkConsistency());
+//    if(!this->checkConsistency())
+//      crash << crash;
 }
 
 void RationalFunctionOld::operator=(const RationalFunctionOld& other)
@@ -1762,13 +1773,15 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
       //this->Denominator.FreeMemory();
       break;
     case RationalFunctionOld::typePoly:
-      assert(!other.Numerator.IsZeroPointer() );
+      if(other.Numerator.IsZeroPointer() )
+        crash << crash;
       this->Numerator.GetElement()=other.Numerator.GetElementConst();
       //The below is for testing purposes. I think it is generally better to comment those lines!
       //this->Denominator.FreeMemory();
       break;
     case RationalFunctionOld::typeRationalFunction:
-      assert(!other.Numerator.IsZeroPointer() && !other.Denominator.IsZeroPointer());
+      if(other.Numerator.IsZeroPointer() || other.Denominator.IsZeroPointer())
+        crash << crash;
       this->Numerator.GetElement()=other.Numerator.GetElementConst();
       this->Denominator.GetElement()=other.Denominator.GetElementConst();
       break;
@@ -1883,13 +1896,15 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
   //theGCD.ComputeDebugString();
   //theResult.ComputeDebugString();
   //tempP.ComputeDebugString();
-  assert(tempP.IsEqualToZero());
+  if(!tempP.IsEqualToZero())
+    crash << crash;
   this->Numerator.GetElement()=theResult;
   this->Denominator.GetElement().DivideBy(theGCD, theResult, tempP);
   //theGCD.ComputeDebugString();
   //theResult.ComputeDebugString();
 //  tempP.ComputeDebugString();
-  assert(tempP.IsEqualToZero());
+  if(!tempP.IsEqualToZero())
+    crash << crash;
   this->Denominator.GetElement()=theResult;
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
@@ -1913,12 +1928,13 @@ void RationalFunctionOld::operator/=(const RationalFunctionOld& other)
   tempRF.Invert();
   tempRF.checkConsistency();
   *this*=(tempRF);
-  assert(this->checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
 }
 
 
 void RationalFunctionOld::operator*=(const Rational& other)
-{ //assert(this->checkConsistency());
+{ //if(!this->checkConsistency()) crash << crash;
   if (other.IsEqualToZero())
   { this->MakeZero(this->context);
     return;
@@ -1985,15 +2001,19 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2, this->context);
   this->Numerator.GetElement().DivideBy(theGCD1, tempP1, tempP2);
   this->Numerator.GetElement()=tempP1;
-  assert(tempP2.IsEqualToZero());
+  if(!tempP2.IsEqualToZero())
+    crash << crash;
   other.Denominator.GetElementConst().DivideBy(theGCD1, tempP1, tempP2);
-  assert(tempP2.IsEqualToZero());
+  if(!tempP2.IsEqualToZero())
+    crash << crash;
   this->Denominator.GetElement()*=tempP1;
   this->Denominator.GetElement().DivideBy(theGCD2, tempP1, tempP2);
-  assert(tempP2.IsEqualToZero());
+  if(!tempP2.IsEqualToZero())
+    crash << crash;
   this->Denominator.GetElement()=tempP1;
   other.Numerator.GetElementConst().DivideBy(theGCD2, tempP1, tempP2);
-  assert(tempP2.IsEqualToZero());
+  if(!tempP2.IsEqualToZero())
+    crash << crash;
   this->Numerator.GetElement()*=(tempP1);
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
@@ -2010,8 +2030,10 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
   { *this*=(Rational)2;
     return;
   }
-  assert(this->checkConsistency());
-  assert(other.checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
+  if(!other.checkConsistency())
+    crash << crash;
   if (this->context==0)
     this->context=other.context;
   if (other.expressionType< this->expressionType)
@@ -2019,22 +2041,26 @@ void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
     tempRF=other;
     tempRF.ConvertToType(this->expressionType);
     this->AddSameTypes(tempRF);
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
     return;
   }
   if (this->expressionType==other.expressionType)
   { //std::string tempS;
     //tempS=other.ToString();
     this->AddSameTypes(other);
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
     return;
   }
   if (this->expressionType<other.expressionType)
   { this->ConvertToType(other.expressionType);
     this->AddSameTypes(other);
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
   }
-  assert(this->checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
 }
 
 void RationalFunctionOld::Simplify()
@@ -2060,7 +2086,8 @@ void RationalFunctionOld::Simplify()
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
 //  int commentMeWhendone;
-//  assert(this->checkConsistency());
+//  if(!this->checkConsistency())
+//   crash << crash;
 }
 
 void RationalFunctionOld::SimplifyLeadingCoefficientOnly()
@@ -2321,7 +2348,8 @@ bool ElementSemisimpleLieAlgebra<coefficient>::NeedsBrackets()const
 }
 
 void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& input, Matrix<Rational>& output, Rational& outputCoeff, int generatorPower)
-{ assert(&input!=&output);
+{ if(&input==&output);
+    crash << crash;
   Rational currentWeight;
   Matrix<Rational> ::LieBracket(this->theH, input, output);
   bool tempBool=input.IsProportionalTo(output, currentWeight);
@@ -2458,7 +2486,8 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
         outputTheHWVectors.AddOnTop(tempMat);
       }
     }
-    //assert(!theCoeff.IsEqualToZero());
+    //if(theCoeff.IsEqualToZero())
+      crash << crash;
     component/=(theCoeff);
     outputDecompositionOfInput.AddOnTop(component);
     //std::cout << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
@@ -2473,7 +2502,8 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
 
 void slTwoInSlN::ClimbUpFromVector(Matrix<Rational>& input, Matrix<Rational>& outputLastNonZero, int& largestPowerNotKillingInput)
 { Matrix<Rational>  tempMat;
-  assert(&input!=&outputLastNonZero);
+  if(&input==&outputLastNonZero)
+    crash << crash;
   outputLastNonZero=input;
   largestPowerNotKillingInput=0;
   for(Matrix<Rational> ::LieBracket(this->theE, outputLastNonZero, tempMat); !tempMat.IsEqualToZero(); Matrix<Rational> ::LieBracket(this->theE, outputLastNonZero, tempMat))
@@ -2671,7 +2701,8 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     buffer*=(other.Numerator.GetElementConst());
     this->Numerator.GetElement()+=(buffer);
     this->Denominator.GetElement()*=(other.Denominator.GetElementConst());
-    assert(!this->Denominator.GetElement().IsEqualToZero());
+    if(this->Denominator.GetElement().IsEqualToZero())
+      crash << crash;
     this->Simplify();
 //    this->ComputeDebugString();
   } else
@@ -2682,7 +2713,8 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     this->ReduceMemory();
     this->SimplifyLeadingCoefficientOnly();
   }
-  assert(this->checkConsistency());
+  if(!this->checkConsistency())
+    crash << crash;
 }
 
 void CGI::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)

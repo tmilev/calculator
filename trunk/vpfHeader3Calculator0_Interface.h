@@ -758,7 +758,8 @@ public:
   bool DecreaseStackSetCharacterRangeS(int decrease)
   { if (decrease<=0)
       return true;
-    assert((*this->CurrentSyntacticStacK).size-decrease>0);
+    if ((*this->CurrentSyntacticStacK).size-decrease<=0)
+      crash << crash;
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1].IndexLastCharPlusOne=
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
@@ -767,7 +768,8 @@ public:
   bool DecreaseStackExceptLast(int decrease)
   { if (decrease<=0)
       return true;
-    assert((*this->CurrentSyntacticStacK).size-decrease>0);
+    if ((*this->CurrentSyntacticStacK).size-decrease<=0)
+      crash << crash;
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
 //    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=

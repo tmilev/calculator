@@ -3615,7 +3615,8 @@ void slTwoSubalgebra::ComputePrimalModuleDecomposition
   positiveRootsContainingRegularSA.GetCoordsInBasis(this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
   { tempRat=this->hCharacteristic.ScalarEuclidean(coordsInPreferredSimpleBasis[k]);
-    assert(tempRat.DenShort==1);
+    if(tempRat.DenShort!=1)
+      crash << crash;
     if (tempRat>positiveRootsContainingRegularSA.size*2)
     { crash << "This is a programming error. The scalar product of the h-Characteristic " << this->hCharacteristic.ToString()
       << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString() << " is larger than " << positiveRootsContainingRegularSA.size*2

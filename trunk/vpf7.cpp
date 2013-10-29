@@ -163,7 +163,8 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
     return;
   Rational theMin=0;
   int minIndex=-1;
-  assert (this->owner!=0);
+  if (this->owner==0)
+    crash << crash;
   WeylGroup& theWeyl=*this->owner;
   theWeyl.ComputeRho(true);
   Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
@@ -799,7 +800,7 @@ std::string ProjectInformation::ToString()
   }
   out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\")."
   << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
-  out << " <br>The calculator errors get caught either by 1) in-line asserts() (blank screen), "
+  out << " <br>The calculator errors get caught either by 1) in-line asserts() (you will get a stack trace printout), "
   << "or 2) by Apache/the system (internal server error)."
   << "  \n  <br> The file input/output is done via std::fstream. "
   << "<br>The LaTeX'ing is called using std::system() "

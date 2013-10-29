@@ -1503,7 +1503,8 @@ private:
       case RationalFunctionOld::typeRationalFunction: this->AddHonestRF(other); break;
     }
     this->ReduceMemory();
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
   }
   void AddHonestRF(const RationalFunctionOld& other);
   void ReduceRFToPoly()
@@ -1528,7 +1529,8 @@ private:
         this->Numerator.FreeMemory();
       }
 //    int commentMEWhenDone;
-//    assert(this->checkConsistency());
+//    if(!this->checkConsistency())
+//      crash << crash;
   }
   bool ConvertToType(int theType);
 public:
@@ -1615,7 +1617,8 @@ public:
   void ReduceMemory()
   { this->ReduceRFToPoly();
     this->ReducePolyToRational();
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
   }
   void operator=(const Polynomial<Rational> & other)
   { this->expressionType=this->typePoly;
@@ -1750,7 +1753,8 @@ public:
       this->context=theContext;
     this->Numerator.FreeMemory();
     this->Denominator.FreeMemory();
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
   }
   void MakeConst(const Rational& theCoeff, GlobalVariables* theContext)
   { this->MakeZero(theContext);
@@ -1797,23 +1801,28 @@ public:
   { *this-=(Rational) other;
   }
   inline void operator-=(const Rational& other)
-  { assert(this->checkConsistency());
+  { if(!this->checkConsistency())
+      crash << crash;
     RationalFunctionOld tempRF;
     tempRF.MakeConst(other, this->context);
     tempRF.Minus();
     this->operator+=(tempRF);
-    assert(this->checkConsistency());
+    if(!(this->checkConsistency()))
+      crash << crash;
   }
   inline void operator-=(const RationalFunctionOld& other)
-  { assert(this->checkConsistency());
-    assert(other.checkConsistency());
+  { if (!this->checkConsistency())
+      crash << crash;
+    if(!other.checkConsistency())
+      crash << crash;
     if (other.context!=0)
       this->context=other.context;
     RationalFunctionOld tempRF;
     tempRF=other;
     tempRF.Minus();
     this->operator+=(tempRF);
-    assert(this->checkConsistency());
+    if (!this->checkConsistency())
+      crash << crash;
   }
   inline void operator/=(int other)
   { RationalFunctionOld tempRF;
@@ -1825,10 +1834,15 @@ public:
     tempRF=other;
     tempRF.Invert();
     *this*=(tempRF);
-    assert(this->checkConsistency());
+    if(!this->checkConsistency())
+      crash << crash;
   }
   void operator/=(const RationalFunctionOld& other);
-  void Minus(){this->operator*=((Rational) -1); assert(this->checkConsistency());}
+  void Minus()
+  { this->operator*=((Rational) -1);
+    if(!this->checkConsistency())
+      crash << crash;
+  }
 };
 
 template <class TemplateMonomial, class coefficient>
@@ -1898,7 +1912,8 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std:
     this->AddMonomial(tempM, theCoeff);
   }
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  assert(numReadWords==0);
+  if(numReadWords!=0)
+    crash << crash;
   return result;
 }
 
@@ -2207,7 +2222,8 @@ void PolynomialSubstitution<Element>::MakeIdSubstitution(int numVars, const Elem
 
 template <class Element>
 void PolynomialSubstitution<Element>::MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Element& theRingUnit)
-{ assert(numStartingVars<=numTargetVarsMustBeLargerOrEqual);
+{ if(numStartingVars>numTargetVarsMustBeLargerOrEqual)
+    crash << crash;
   this->SetSize(numStartingVars);
   for (int i=0; i<this->size; i++)
   { Polynomial<Element>& currentPoly=this->TheObjects[i];
@@ -2351,7 +2367,8 @@ public:
   int ColorIndex;
   double precomputedX1, precomputedY1, precomputedX2, precomputedY2;
   void init(const Vector<Rational> & input1, const Vector<Rational> & input2, unsigned long PenStyle, int colorIndex)
-  { assert(input1.size==input2.size);
+  { if(input1.size!=input2.size)
+      crash << crash;
     int theDimension=input1.size;
     this->v1.SetSize(theDimension);
     this->v2.SetSize(theDimension);
@@ -3102,9 +3119,11 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
 { std::string tempS;
   int ActualListSize; int NumWordsBeforeTag;
   XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
-  assert(NumWordsBeforeTag==0);
+  if(NumWordsBeforeTag!=0)
+    crash << crash;
   input >> tempS >> ActualListSize;
-  assert(tempS=="size:");
+  if(tempS!="size:")
+    crash << crash;
   if(tempS!="size:")
     return false;
   int CappedListSize = ActualListSize;
@@ -3127,7 +3146,8 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
     //</reporting_and_safepoint_duties>
   }
   bool tempBool= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
-  assert(tempBool);
+  if(!tempBool)
+    crash << crash;
   return true;
 }
 
@@ -3342,7 +3362,8 @@ int Matrix<Element>::FindPositiveGCDCoefficientNumeratorsTruncated()
     for (int j=0; j<this->NumCols; j++)
       if (this->elements[i][j].NumShort!=0)
         result=Rational::gcdSigned(result, this->elements[i][j].NumShort);
-  assert(result!=0);
+  if(result==0)
+    crash << crash;
   if (result<0)
     result=-result;
   return result;
@@ -3470,11 +3491,13 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
   { Rational tempRat;
     for(int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
     { coneStrictlyPositiveCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
-      assert(tempRat.IsPositive());
+      if(!tempRat.IsPositive())
+        crash << crash;
     }
     for(int i=0; i<coneNonNegativeCoeffs.size; i++)
     { coneNonNegativeCoeffs[i].ScalarEuclidean(outputNormal, tempRat);
-      assert(tempRat.IsNonPositive());
+      if (!tempRat.IsNonPositive())
+        crash << crash;
     }
   }
 //  outputNormal.ComputeDebugString();
@@ -3516,7 +3539,8 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
 
 template <typename Element>
 inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output)
-{ assert(this->NumRows==this->NumCols);
+{ if(this->NumRows!=this->NumCols)
+    crash << crash;
   MonomialP tempMon;
   output.MakeZero();
   Rational coeff;
@@ -3964,7 +3988,8 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>* carbonCopyMat, 
           this->AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
           if (carbonCopyMat!=0)
             carbonCopyMat->AddTwoRows(NumFoundPivots, j, 0, tempElement, theGlobalVariables);
-          //assert(tempElement.checkConsistency());
+          //if(!tempElement.checkConsistency())
+          //  crash << crash;
           //this->ComputeDebugString();
         }
     NumFoundPivots++;
@@ -4902,9 +4927,7 @@ class WeylGroupRepresentation
 template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
 { if (this->OwnerGroup==0)
-  { std::cout << "This is a programming error: working with a representation with non-initialized owner Weyl group. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { crash << "This is a programming error: working with a representation with non-initialized owner Weyl group. " << crash;
     return false;
   }
   return true;
@@ -6827,7 +6850,8 @@ class MonomialGeneralizedVerma
     return false;
   }
   void SetNumVariables(int GoalNumVars)
-  { assert(this->owneR->size>this->indexInOwner);
+  { if (this->owneR->size<=this->indexInOwner)
+      crash << crash;
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
@@ -7102,7 +7126,8 @@ public:
     }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
     input >> tempS >> this->computationPhase;
-    assert(tempS=="ComputationPhase:");
+    if (tempS!="ComputationPhase:")
+      crash << crash;
     bool result=true;
     if (this->computationPhase!=0)
       result= this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
@@ -7255,7 +7280,8 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const E
 { int tempI;
   output=theRingOne;
   Element tempRat;
-  assert(this->NumCols==this->NumRows);
+  if (this->NumCols!=this->NumRows)
+    crash << crash;
   int dim =this->NumCols;
   for (int i=0; i<dim; i++)
   {  //this->ComputeDebugString();
@@ -7708,7 +7734,8 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
   for(int i=0; i<tempSel.CardinalitySelection; i++)
   { int currentIndex=tempSel.elements[i];
 //    std::cout << "<br>current pivot index : " << currentIndex;
-    assert(currentIndex>=firstReduced.size);
+    if(currentIndex<firstReduced.size)
+      crash << crash;
     nextIntersection.MakeZero(theDim);
     for (int j=0; j<firstReduced.size; j++)
       if (!tempSel.selected[j])
@@ -8064,7 +8091,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
     bufferCoeff=hwPlusRhoSquared;
     bufferCoeff-=this->AmbientWeyl.RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
-    assert(!bufferCoeff.IsEqualToZero());
+    if(bufferCoeff.IsEqualToZero())
+      crash << crash;
     currentAccum/=bufferCoeff;
 //    std::cout << "<br>Coeff we divide by: " << bufferCoeff.ToString()
  //   ;
@@ -8689,7 +8717,8 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<coefficient>& t
 
 template <class coefficient>
 void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElement, const Vector<coefficient>& input, Vector<coefficient>& output)const
-{ assert(&input!=&output);
+{ if(&input==&output)
+    crash << crash;
   int NumElts=theElement.reflections.size;
   Vector<coefficient> tempRoot, tempRoot2;
   output=(input);
@@ -8711,7 +8740,8 @@ void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElemen
 
 template<class coefficient>
 void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const
-{ assert(&input!=&output);
+{ if(&input==&output)
+    crash << crash;
   output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     this->ActByElement(theElement, input[i], output[i]);

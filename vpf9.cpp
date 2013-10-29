@@ -246,7 +246,8 @@ void CGI::ElementToStringTooltip(const std::string& input, const std::string& in
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
   CGI::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
-  assert(fileIn.is_open());
+  if(!fileIn.is_open())
+    crash << crash;
   fileIn.clear(std::ios::goodbit);
   fileIn.seekg(0, std::ios_base::end);
   int theSize= fileIn.tellg();
@@ -561,7 +562,8 @@ void Selection::ReadFromFile(std::fstream& input)
   input >> tempS >> tempI;
   this->init(tempI);
   input >> tempS >> card;
-  assert(tempS=="cardinality:");
+  if(tempS!="cardinality:")
+    crash << crash;
   for (int i=0; i<card; i++)
   { input >> tempI;
     this->AddSelectionAppendNewIndex(tempI);
@@ -899,7 +901,8 @@ inline void Rational::RaiseToPower(int x)
 inline void Rational::Invert()
 { if (this->Extended==0)
   { int tempI= this->DenShort;
-    assert(tempI>0);
+    if(tempI<=0)
+      crash << crash;
     if (this->NumShort<0)
     { this->DenShort=-this->NumShort;
       this->NumShort=-tempI;
@@ -1043,7 +1046,8 @@ void Rational::AssignFracValue()
   this->Extended->num.value=newNum;
   if (this->Extended->num.IsNegative())
     this->Extended->num.AddLargeIntUnsigned(this->Extended->den);
-  assert(this->Extended->num.IsPositiveOrZero());
+  if(!this->Extended->num.IsPositiveOrZero())
+    crash << crash;
   this->Simplify();
 }
 
@@ -1216,7 +1220,8 @@ void Rational::Simplify()
 }
 
 inline void LargeIntUnsigned::AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift)
-{ assert(x<LargeIntUnsigned::CarryOverBound);
+{ if(!(x<LargeIntUnsigned::CarryOverBound))
+    crash << crash;
   while (x>0)
   { if (shift>=this->theDigits.size)
     { int oldsize=this->theDigits.size;
@@ -1315,7 +1320,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
         this->theDigits[i]=LargeIntUnsigned::CarryOverBound-1;
   }
   this->FitSize();
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
@@ -1339,7 +1344,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& o
       output.AddShiftedUIntSmallerThanCarryOverBound((unsigned int) highPart, i+j+1);
     }
   output.FitSize();
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeIntUnsigned::FitSize()
@@ -1350,7 +1355,7 @@ void LargeIntUnsigned::FitSize()
     else
       break;
   this->theDigits.SetSize(newSize);
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeIntUnsigned::MultiplyByUInt(unsigned int x)
@@ -1363,7 +1368,7 @@ void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x)
 { LargeIntUnsigned tempInt;
   this->MultiplyBy(x, tempInt);
   *this=tempInt;
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeInt::MultiplyByInt(int x)
@@ -1435,7 +1440,7 @@ void LargeInt::AssignInt(int x)
     x=-x;
   }
   this->value.AssignShiftedUInt( (unsigned int)x, 0);
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 bool LargeInt::GetDivisors(List<int>& output, bool includeNegative)
@@ -1482,7 +1487,7 @@ void LargeInt::operator+=(const LargeInt& x)
       this->sign= x.sign;
     }
   }
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 int LargeIntUnsigned::GetUnsignedIntValueTruncated()
@@ -1507,7 +1512,7 @@ void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
     q=r;
   }
   output=p;
-//  assert(output.CheckForConsistensy());
+//  if(!output.CheckForConsistensy())crash << crash;
 }
 
 void LargeInt::MakeZero()
@@ -1519,13 +1524,13 @@ void LargeInt::operator=(const Rational& other)
 { if (!other.IsInteger(this))
     crash << "This is a programming error: converting implicitly rational number " << other.ToString()
     << " to integer is not possible as the Rational number is not integral. " << crash;
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 void LargeInt::operator=(const LargeInt& x)
 { this->sign=x.sign;
   this->value=(x.value);
-//  assert(this->CheckForConsistensy());
+//  if(!this->CheckForConsistensy())crash << crash;
 }
 
 LargeInt LargeInt::operator/(int x)const
@@ -1539,7 +1544,7 @@ LargeInt LargeInt::operator/(int x)const
   }
   tempX.AssignShiftedUInt(absX, 0);
   this->value.DivPositive(tempX, result.value, remainder);
-//  assert(result.CheckForConsistensy());
+//  if(!result.CheckForConsistensy()) crash << crash;
   result.sign=this->sign* signX;
   return result;
 }
@@ -1549,12 +1554,14 @@ LargeInt LargeInt::operator/(LargeInt& x)const
   LargeInt remainder;
   this->value.DivPositive(x.value, result.value, remainder.value);
   result.sign= this->sign* x.sign;
-  assert(result.CheckForConsistensy());
+  if(!result.CheckForConsistensy())
+    crash << crash;
   return result;
 }
 
 int LargeInt::operator%(int x)
-{ assert(x>0);
+{ if(x<=0)
+    crash << crash;
   LargeIntUnsigned result;
   LargeIntUnsigned remainder;
   LargeIntUnsigned tempX;
@@ -1578,7 +1585,7 @@ LargeIntUnsigned LargeIntUnsigned::operator/(unsigned int x)const
   LargeIntUnsigned tempX;
   tempX.AssignShiftedUInt(x, 0);
   this->DivPositive(tempX, result, remainder);
-//  assert(result.CheckForConsistensy());
+//  if(!result.CheckForConsistensy()) crash << crash;
   return result;
 }
 
@@ -1626,7 +1633,7 @@ bool PartFraction::reduceOnceTotalOrderMethod
 (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
 { for (int i=0; i<this->IndicesNonZeroMults.size; i++)
     for (int j=0; j<this->IndicesNonZeroMults.size; j++)
-    { //assert (this->IndicesNonZeroMults[i]<this->IndicesNonZeroMults[j]);
+    { //if (this->IndicesNonZeroMults[i]>=this->IndicesNonZeroMults[j])crash << crash;
       int AminusBindex = owner.TableAllowedAminusB.elements
       [this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
       int Aminus2Bindex = owner.TableAllowedAminus2B.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
@@ -1764,7 +1771,8 @@ void PartFraction::ReadFromFile(PartFractions& owner, std::fstream& input, Globa
 { std::string tempS;
   int tempI;
   input >> tempS >> tempI;
-  assert(tempI==owner.startingVectors.size);
+  if(tempI!=owner.startingVectors.size)
+    crash << crash;
   this->init(tempI);
   for (int j=0; j<this->size; j++)
   { input >> tempI;
@@ -1967,7 +1975,7 @@ bool PartFraction::DecomposeFromLinRelation
   (ParticipatingIndices, theGreatestElongations, theCoefficients, GainingMultiplicityIndex, ElongationGainingMultiplicityIndex, output, theGlobalVariables, Indicator, startingVectors);
 
   //if (this->MakingConsistencyCheck)
-  //{ assert(this->CheckSum2.IsEqualTo(this->CheckSum));
+  //{ if(!this->CheckSum2.IsEqualTo(this->CheckSum))crash << crash;
   //}
   /*if (PartFraction::flagAnErrorHasOccurredTimeToPanic)
   { Rational tempRat2, tempRat;
@@ -1977,7 +1985,7 @@ bool PartFraction::DecomposeFromLinRelation
     tempRat.ToString(tempS1);
     this->CheckSum2.ToString(tempS2);
     tempRat2.Subtract(tempRat);
-    assert(oldCheckSum.IsEqualTo(tempRat2));
+    if(!oldCheckSum.IsEqualTo(tempRat2))crash << crash;
   }*/
   //Accum.ComputeDebugString();
   return true;
@@ -2080,7 +2088,7 @@ void PartFraction::ApplyGeneralizedSzenesVergneFormulA
   { //Rational tempRat;
     //output.ComputeOneCheckSum(tempRat, theGlobalVariables);
     //tempRat.Subtract(theDiff);
-    //assert(tempRat.IsEqualTo(StartCheckSum));
+    //if(!tempRat.IsEqualTo(StartCheckSum))crash << crash;
   }
 }
 
@@ -2124,7 +2132,7 @@ void PartFraction::ApplySzenesVergneFormulA
   {// Rational tempRat;
     //Accum.ComputeOneCheckSum(tempRat, theGlobalVariables);
     //tempRat.Subtract(theDiff);
-    //assert(tempRat.IsEqualTo(StartCheckSum));
+    //if(!tempRat.IsEqualTo(StartCheckSum)) crash << crash;
   }
   //this->Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
 }
@@ -2262,7 +2270,8 @@ void PartFraction::ComputeNormals(PartFractions& owner, Vectors<Rational>& outpu
   for (int i=0; i<theDimension; i++)
   { dens.ComputeNormalExcludingIndex(tempRoot, i, buffer);
     tempRat=tempRoot.ScalarEuclidean(dens[i]);
-    assert(!tempRat.IsEqualToZero());
+    if(tempRat.IsEqualToZero())
+      crash << crash;
     tempRoot/=tempRat;
     output.AddOnTop(tempRoot);
 //    tempRoot.ComputeDebugString();
@@ -2376,7 +2385,6 @@ void PartFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
       theReport1.Report(out1.str());
       theReport2.Report(out2.str());
     }
-    assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
       crash << "<b>This is a programmign error. The checksum of the partial fractions failed. " << crash;
     else
@@ -2524,7 +2532,8 @@ int PartFractions::ReadFromFileComputedContributions(std::fstream& input, Global
     input >> x >> fileStoragePosition;
     if (fileStoragePosition>lastNonZero)
       lastNonZero=fileStoragePosition;
-    assert(x==i);
+    if(x!=i)
+      crash << crash;
   }
   this->LimitSplittingSteps=0;
   return lastNonZero;
@@ -2649,7 +2658,8 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, G
         { Rational tempFracsCheckSum;
           tempFracs.ComputeOneCheckSum(tempFracsCheckSum, theGlobalVariables);
           tempFracs.ComputeDebugString(theGlobalVariables);
-          assert(tempFracsCheckSum.IsEqualTo(tempDiff));
+          if(!tempFracsCheckSum.IsEqualTo(tempDiff))
+            crash << crash;
         }
       }
     }
@@ -2660,7 +2670,8 @@ void PartFraction::ReduceMonomialByMonomial(PartFractions& owner, int myIndex, G
   { Rational tempRat;
     owner.ComputeOneCheckSum(tempRat, theGlobalVariables);
     tempRat.Subtract(theDiff);
-    assert(tempRat.IsEqualTo(StartCheckSum));
+    if(!tempRat.IsEqualTo(StartCheckSum))
+      crash << crash;
   }*/
 }
 
@@ -2670,7 +2681,8 @@ void PartFraction::ReduceMonomialByMonomialModifyOneMonomial
   Polynomial<LargeInt>& tempP=theGlobalVariables.PolyLargeIntPartFracBuffer6.GetElement();
   theNumerator.MakeZero(Accum.AmbientDimension);
   theNumerator.AddMonomial(input, inputCoeff);
-  assert(thePowersSigned.size== thePowers.Multiplicities.size);
+  if(thePowersSigned.size!= thePowers.Multiplicities.size)
+    crash << crash;
   if (this->flagAnErrorHasOccurredTimeToPanic)
   {// theNumerator.ComputeDebugString();
   }
@@ -2716,7 +2728,8 @@ void PartFraction::GetPolyReduceMonomialByMonomial
       output.AddMonomial(tempMon, theCoeff);
     } else
     { Vector<Rational> tempRoot;
-      assert(StartMonomialPower>=startDenominatorPower);
+      if(StartMonomialPower<startDenominatorPower)
+        crash << crash;
       for (int k=0; k<=StartMonomialPower-startDenominatorPower; k++)
       { tempMon= theExponent;
         tempMon.RaiseToPower(k);
@@ -3002,7 +3015,8 @@ void PartFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
 void FileSetPutPointerToEnd(std::fstream& theFile, bool StoreToFile)
 { //theFile.close();
   //theFile.open(path);
-  assert(theFile.is_open()||!StoreToFile);
+  if(!theFile.is_open() && StoreToFile)
+    crash << crash;
   std::filebuf* pbuf = theFile.rdbuf();
   int tempSize = pbuf->pubseekoff(0, std::fstream::end);
   theFile.seekp(tempSize);
@@ -3078,7 +3092,8 @@ void PartFractions::ComputeDebugStringBasisChange(Matrix<LargeInt>& VarChange, G
 }
 
 bool PartFractions::IsHigherThanWRTWeight(const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights)
-{ assert(left.size == r.size);
+{ if(left.size != r.size)
+    crash << crash;
   Rational accum=0;
   for (int i=0; i<left.size; i++)
     accum+=(left[i]-r[i])*theWeights[i];
@@ -3130,7 +3145,8 @@ void PartFractions::ComputeKostantFunctionFromWeylGroup
 //  this->initFromRoots(theVPbasis, 0, theGlobalVariables);
   //this->flagSplitTestModeNoNumerators=true;
 //  this->split(theGlobalVariables, ChamberIndicator);
-  assert(this->CheckForMinimalityDecompositionWithRespectToRoot(ChamberIndicator, theGlobalVariables));
+  if(!this->CheckForMinimalityDecompositionWithRespectToRoot(ChamberIndicator, theGlobalVariables))
+    crash << crash;
   //return;
   Vector<Rational> tempRoot;
   if (ChamberIndicator!=0)
@@ -3154,7 +3170,8 @@ unsigned int oneFracWithMultiplicitiesAndElongations::HashFunction() const
 }
 
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(Polynomial<LargeInt>& output, int MultiplicityIndex, Vector<Rational>& theExponent)
-{ assert(MultiplicityIndex<this->Multiplicities.size);
+{ if(MultiplicityIndex>=this->Multiplicities.size)
+    crash << crash;
   MonomialP tempM;
   output.MakeOne(theExponent.size);
   tempM.MakeOne(theExponent.size);
@@ -3164,11 +3181,12 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(Polynomial<Larg
 }
 
 int oneFracWithMultiplicitiesAndElongations::GetLargestElongation()
-{ int result=this->Elongations.TheObjects[0];
+{ int result=this->Elongations[0];
   for (int i=1; i<this->Elongations.size; i++)
-  { assert(this->Elongations.TheObjects[i]!=result);
-    if (this->Elongations.TheObjects[i]>result)
-      result= this->Elongations.TheObjects[i];
+  { if(this->Elongations[i]==result)
+      crash << crash;
+    if (this->Elongations[i]>result)
+      result= this->Elongations[i];
   }
   return result;
 }
@@ -3176,8 +3194,9 @@ int oneFracWithMultiplicitiesAndElongations::GetLargestElongation()
 int oneFracWithMultiplicitiesAndElongations::GetLCMElongations()
 { int result =1;
   for (int i=0; i<this->Elongations.size; i++)
-  { assert(this->Elongations.TheObjects[i]!=0);
-    result=MathRoutines::lcm(this->Elongations.TheObjects[i], result);
+  { if(this->Elongations[i]==0)
+      crash << crash;
+    result=MathRoutines::lcm(this->Elongations[i], result);
   }
   return result;
 }
@@ -3185,7 +3204,7 @@ int oneFracWithMultiplicitiesAndElongations::GetLCMElongations()
 int oneFracWithMultiplicitiesAndElongations::GetTotalMultiplicity() const
 { int result=0;
   for (int i=0; i<this->Elongations.size; i++)
-    result+= this->Multiplicities.TheObjects[i];
+    result+= this->Multiplicities[i];
   return result;
 }
 
@@ -3261,9 +3280,10 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
     this->Multiplicities.AddObjectOnTopLight(tempI);
     ElongationIndex= this->Multiplicities.size-1;
   }
-  this->Multiplicities.TheObjects[ElongationIndex]+=MultiplicityIncrement;
-  assert(this->Multiplicities.TheObjects[ElongationIndex]>=0);
-  if (this->Multiplicities.TheObjects[ElongationIndex]==0)
+  this->Multiplicities[ElongationIndex]+=MultiplicityIncrement;
+  if(!this->Multiplicities[ElongationIndex]>=0)
+    crash << crash;
+  if (this->Multiplicities[ElongationIndex]==0)
   { this->Multiplicities.PopIndexSwapWithLastLight(ElongationIndex);
     this->Elongations.PopIndexSwapWithLastLight(ElongationIndex);
   }
@@ -3476,7 +3496,8 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
       currentCardinality-=this->MaxMultiplicity;
     }
   for (int i=this->Multiplicities.size-1; currentCardinality<Cardinality; i--)
-  { assert(this->Multiplicities.TheObjects[i]==0);
+  { if(this->Multiplicities[i]!=0)
+      crash << crash;
     if (Cardinality-currentCardinality>=this->MaxMultiplicity)
       this->Multiplicities.TheObjects[i]=this->MaxMultiplicity;
     else
@@ -5038,8 +5059,8 @@ int KLpolys::ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator)
       this->TheWeylGroup->RootScalarCartanRoot(tempRoot, this->TheWeylGroup->RootSystem[j], tempRat2);
       tempBool1=tempRat1.IsPositive();
       tempBool2=tempRat2.IsPositive();
-      assert(!tempRat1.IsEqualToZero());
-      assert(!tempRat2.IsEqualToZero());
+      if(tempRat1.IsEqualToZero() || tempRat2.IsEqualToZero())
+        crash << crash;
       if (tempBool1!=tempBool2)
       { haveSameSigns=false;
         break;
@@ -5651,7 +5672,8 @@ void rootSubalgebra::ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, 
   input >> tempS;
   for (int i=0; i<outMultTable.size; i++)
     input >> outOpposites[i];
-  assert(tempS=="opposites:");
+  if(tempS!="opposites:")
+    crash << crash;
 }
 
 bool rootSubalgebra::rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input)

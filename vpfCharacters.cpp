@@ -685,10 +685,7 @@ void CoxeterRepresentation<coefficient>::MultiplyBy
   }
   //////////////////////////////////
   if (this->G!=other.G)
-  { std::cout << "This is a programming error: attempting to multiply representations with "
-    << " different owner groups. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
+    crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
   output.reset(this->G);
   int Vd = this->basis[0].size;
   int Wd = other.basis[0].size;

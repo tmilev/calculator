@@ -23,10 +23,12 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   Selection& BaseVariables =theGlobalVariables==0 ? tempSel.GetElement() : theGlobalVariables->selSimplexAlg2.GetElement();
   Rational GlobalGoal;
   GlobalGoal.MakeZero();
-  assert (matA.NumRows== matb.NumRows);
+  if (matA.NumRows!= matb.NumRows)
+    crash << crash;
   for (int j=0; j<matb.NumRows; j++)
   { GlobalGoal+=(matb.elements[j][0]);
-    assert(!matb.elements[j][0].IsNegative());
+    if(matb.elements[j][0].IsNegative())
+      crash << crash;
   }
 //  std::cout << "<hr>Starting matrix A: " << matA.ToString();
 //  std::cout << "<hr>Starting matrix b: " << matb.ToString();
@@ -124,7 +126,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
       BaseVariables.selected[EnteringVariable]= true;
       //BaseVariables.ComputeDebugString();
       for (int i=0; i<tempMatA.NumRows; i++)
-        assert(tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1));
+        if(!tempMatA.elements[i][BaseVariables.elements[i]].IsEqualTo(1))
+          crash << crash;
     }
 //    if (::Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic)
 //    { Matrix<Rational>  tempMat;
@@ -133,7 +136,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //      tempDebugMat.ComputeDebugString();
 //      tempMat.MultiplyOnTheLeft(tempDebugMat);
 //      tempMat.ComputeDebugString();
-//      assert(tempMat.IsEqualTo(matb));
+//      if(!tempMat.IsEqualTo(matb)) crash << crash;
 //    }
   }
 //  std::string tempS;

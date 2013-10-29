@@ -4,7 +4,6 @@
 #define MacroVPFMacros_included
 
 //External dependencies:
-#include <assert.h>
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
@@ -89,7 +88,9 @@ class Crasher
   GlobalVariables* theGlobalVariables;
   std::string userInputStringIfAvailable;
   std::stringstream theCrashReport;
-  Crasher():theGlobalVariables(0){}
+  bool flagFirstRun; //<-we crash only once, and we do not resume execution after a crash
+  Crasher():theGlobalVariables(0), flagFirstRun(true){}
+  void FirstRun();
   Crasher& operator<<(const std::string& input);
   Crasher& operator<<(int x);
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);

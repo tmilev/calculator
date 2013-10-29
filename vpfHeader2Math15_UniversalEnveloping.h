@@ -61,7 +61,8 @@ public:
   }
   void SubstitutionCoefficients(PolynomialSubstitution<Rational>& theSub);
   bool operator==(const MonomialUniversalEnvelopingOrdered& other)const
-  { assert(this->owner==other.owner);
+  { if(this->owner!=other.owner)
+      crash << crash;
     return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);

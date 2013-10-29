@@ -514,7 +514,7 @@ public:
 template <typename coefficient>
 Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const
 { if(i>=this->rank)
-    assert(false);
+    crash << crash;
   Vector<coefficient> out;
   if(basis.basis.NumRows > i)
   { basis.basis.GetVectorFromRow(i,out);
@@ -527,7 +527,7 @@ Vector<coefficient> VectorSpace<coefficient>::GetBasisVector(int i) const
 template <typename coefficient>
 Vector<coefficient> VectorSpace<coefficient>::GetCanonicalBasisVector(int i) const
 { if(i>=this->rank)
-    assert(false);
+    crash << crash;
   Vector<coefficient> out;
   fastbasis.GetVectorFromRow(i,out);
   return out;
@@ -542,8 +542,8 @@ void Basis<coefficient>::AddVector(const Vector<coefficient>& v)
     basis.NumRows = 0;
   }
   if(basis.NumRows == basis.NumCols)
-  { std::cout << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols << std::endl;
-    assert(false);
+  { crash.theCrashReport << "Programming error: attempting to add the "<< basis.NumRows << " vector to a Basis of degree " << basis.NumCols;
+    crash << crash;
   }
   haveGramMatrix = false;
   for(int i = 0; i<v.size; i++)
@@ -707,9 +707,7 @@ template<typename coefficient>
 VectorSpace<coefficient> VectorSpace<coefficient>::Intersection(const VectorSpace<coefficient>& other) const
 { // perhaps at some point it would be nice to ban intersections with spaces of unspecified degree
   if(this->degree != other.degree && ((this->degree != -1) && (other.degree != -1)))
-  { std::cout << "attempting to intersect vector spaces of different degree" << __LINE__ << ", " << __FILE__ << std::endl;
-    assert(false);
-  }
+    crash << "Attempting to intersect vector spaces of different degrees, " << this->degree << " and " << other.degree << ". " << crash;
   VectorSpace<coefficient> output;
   output.degree = this->degree;
   if((this->rank==0) or (other.rank==0))

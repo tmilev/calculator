@@ -466,7 +466,8 @@ void WeylGroup::GetElementOfMatrix(Matrix<Rational> &input, ElementWeylGroup &ou
 void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output)
 { Matrix<Rational> & currentExtendedOperator=this->theLinearOperatorsExtended[indexOperator];
   Vector<Rational>& currentTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
-  assert (!input.LastObject()->IsEqualToZero());
+  if (input.LastObject()->IsEqualToZero())
+    crash << crash;
   output=input;
   Rational tempRat=*output.LastObject();
   output/=tempRat;
@@ -621,8 +622,8 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
 }
 
 void ConeComplex::InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables)
-{ assert(inputDirections.size==inputAffinePoints.size);
-  assert(inputDirections.size>0);
+{ if(inputDirections.size!=inputAffinePoints.size || inputDirections.size<=0)
+    crash << crash;
   Vectors<Rational> projectivizedDirections;
   projectivizedDirections.SetSize(inputDirections.size*2);
   int theAffineDim= inputDirections[0].size;
@@ -640,7 +641,8 @@ void ConeComplex::InitFromAffineDirectionsAndRefine(Vectors<Rational>& inputDire
 }
 
 void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
-{ assert(&output!=this);
+{ if(&output==this)
+    crash << crash;
   output.init();
   Cone tempCone;
   Vectors<Rational> newNormals;
@@ -665,7 +667,8 @@ Vector<coefficient> Vector<coefficient>::GetProjectivizedNormal(Vector<coefficie
 }
 
 void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
-{ assert(&input!=&output);
+{ if(&input==&output)
+    crash << crash;
   Vectors<Rational> theBasis;
   Vector<Rational> tempRoot;
   theBasis.AssignMatrixRows(this->basisRationalForm);
@@ -680,11 +683,11 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo(Vector<Rational>& i
   tempRoots.AddOnTop(input);
   Lattice tempLattice=*this;
   tempLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  assert(tempLattice.basisRationalForm.NumRows==1);
+  if(!tempLattice.basisRationalForm.NumRows==1)crash << crash;
   tempLattice.basisRationalForm.RowToRoot(0, output);
   Rational tempRat;
   bool tempBool=  output.IsProportionalTo(input, tempRat);
-  assert(tempBool);
+  if(!tempBool)crash << crash;
   if (tempRat.IsNegative())
     output.Minus();*/
 }
@@ -815,7 +818,8 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain(Vector<Rational>& o
 }
 
 void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector)
-{ assert(theTranslationVector.size==this->GetDim()-1);
+{ if(theTranslationVector.size!=this->GetDim()-1)
+    crash << crash;
   Vector<Rational> tempRoot;
   for (int i=0; i<this->Normals.size; i++)
   { tempRoot=this->Normals[i];
@@ -883,7 +887,8 @@ void ConeComplex::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theT
 }
 
 void PiecewiseQuasipolynomial::TranslateArgument(Vector<Rational>& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables)
-{ assert(this->theBuffers!=0);
+{ if(!this->theBuffers!=0)
+    crash << crash;
   Vector<Rational> chamberShift=-translateToBeAddedToArgument;
 //  std::cout << "the translation: " << translateToBeAddedToArgument.ToString();
   this->theProjectivizedComplex.TranslateMeMyLastCoordinateAffinization(chamberShift, theGlobalVariables);
@@ -977,7 +982,8 @@ Rational QuasiPolynomial::Evaluate(const Vector<Rational>& input)
 }
 
 Rational PiecewiseQuasipolynomial::Evaluate(const Vector<Rational>& input)
-{ assert(input.size==this->theProjectivizedComplex.GetDim()-1);
+{ if(input.size!=this->theProjectivizedComplex.GetDim()-1)
+    crash << crash;
   Vector<Rational> ProjectivizedInput=input;
   ProjectivizedInput.SetSize(input.size+1);
   *ProjectivizedInput.LastObject()=1;
@@ -986,7 +992,8 @@ Rational PiecewiseQuasipolynomial::Evaluate(const Vector<Rational>& input)
 
 Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Rational>& input)
 { Rational result;
-  assert(input.size==this->theProjectivizedComplex.GetDim());
+  if(input.size!=this->theProjectivizedComplex.GetDim())
+    crash << crash;
   Vector<Rational> AffineInput=input;
   AffineInput.SetSize(input.size-1);
   int theIndex=this->theProjectivizedComplex.GetLowestIndexchamberContaining(input);
@@ -1027,13 +1034,14 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
         }
         firstFail=false;
       }
-//      assert(result==altResult);
+//      if(result!=altResult) crash << crash;
     }
   return result;
 }
 
 void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
-{ assert(this->theBuffers!=0);
+{ if(this->theBuffers==0)
+    crash << crash;
   GlobalVariables& theGlobalVariables=*this->theBuffers;
   List<QuasiPolynomial> oldQPList=this->theQPs;
   ConeComplex oldComplex=this->theProjectivizedComplex;
@@ -1248,7 +1256,8 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
 void DynkinDiagramRootSubalgebra::ComputeDynkinString
 (int indexComponent, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
-  assert(indexComponent<this->SimpleBasesConnectedComponents.size);
+  if(indexComponent>=this->SimpleBasesConnectedComponents.size)
+    crash << crash;
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds=this->indicesEnds[indexComponent];
@@ -1274,7 +1283,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     tempRoots.RemoveIndexSwapWithLast(tripleNodeindex);
     DynkinDiagramRootSubalgebra tempDiagram;
     tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theBilinearForm);
-    assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
+    if(tempDiagram.SimpleBasesConnectedComponents.size!=3)
+      crash << crash;
     List<int> indicesLongComponents;
     indicesLongComponents.size=0;
     Rational tempRat;
@@ -1759,7 +1769,8 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
   for (; this->numProcessedNonParam<this->numNonParaM; this->numProcessedNonParam++)
   { while(this->theConesLargerDim.size>0)
     { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
-      assert(this->LPtoMaximizeLargerDim.LastObject()->size==currentCLS.GetDimAffine()+1);
+      if(this->LPtoMaximizeLargerDim.LastObject()->size!=currentCLS.GetDimAffine()+1)
+        crash << crash;
       if (!this->LPtoMaximizeLargerDim.LastObject()->IsEqualToZero())
         currentCLS.FindExtremaInDirectionOverLatticeOneNonParam
           (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim,
@@ -1886,7 +1897,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       { //std::cout << "<hr>";
         //std::cout << "<br>currentWall: " << currentNormal.ToString();
         numNonPerpWalls++;
-        assert(numNonPerpWalls<3);
+        if(numNonPerpWalls>=3)
+          crash << crash;
         if (!currentNormal.ScalarEuclidean(direction).IsPositive() && !foundExitNormal)
         { theLattice.GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
             (directionSmallerDim, directionSmallerDimOnLattice, theShift, currentNormal, exitRepresentatives,
@@ -1911,7 +1923,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     std::cout << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ToString() : "not found");
     std::cout << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ToString() : "not found");
     std::cout << "<br>The shifted lattice representatives: " << exitRepresentatives.ToString() << "<br>exitNormalsShiftedAffineProjected";
-    assert(theNewNormals.size>0);
+    if(theNewNormals.size<=0)
+      crash << crash;
     for (int j=0; j<exitRepresentatives.size; j++)
     { tempCLS.theProjectivizedCone.Normals=theNewNormals;
       exitNormalShiftedAffineProjected=exitNormalAffine.GetShiftToTheLeftOnePosition();
@@ -1927,7 +1940,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
       tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
-      assert(tempCLS.theProjectivizedCone.Normals.size>0);
+      if(tempCLS.theProjectivizedCone.Normals.size<=0)
+        crash << crash;
       Vectors<Rational> tempTempRoots=tempCLS.theProjectivizedCone.Normals;
       //bool tempBool=
       tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, &theGlobalVariables);
@@ -1952,7 +1966,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
             i=i+2;
         while(true){}
       }*/
-      //assert(tempBool);
+      //if(!tempBool)crash << crash;
       //std::cout << tempCLS.theProjectivizedCone.ToString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
       { theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
@@ -1961,7 +1975,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
         { theReport.Report(tempTempRoots.ToString());
           while(true) {}
         }
-        assert(tempCLS.GetDimProjectivized()==theDimProjectivized-1);
+        if(tempCLS.GetDimProjectivized()!=theDimProjectivized-1)
+          crash << crash;
       }
     }
   }
@@ -2063,9 +2078,9 @@ bool ConeComplex::SplitChamber
   newMinusCone.Vertices.AddListOnTop(ZeroVertices);
 /*  Cone tempCone;
   tempCone.CreateFromNormals(newPlusCone.Normals, theGlobalVariables);
-  assert(tempCone.Vertices.size==newPlusCone.Vertices.size);
+  if(tempCone.Vertices.size!=newPlusCone.Vertices.size)crash << crash;
   tempCone.CreateFromNormals(newMinusCone.Normals, theGlobalVariables);
-  assert(tempCone.Vertices.size==newMinusCone.Vertices.size);
+  if(tempCone.Vertices.size!=newMinusCone.Vertices.size)crash << crash;
 */
   this->PopChamberSwapWithLast(indexChamberBeingRefined);
   if (needToRecomputeVertices)
@@ -2661,7 +2676,7 @@ void Lattice::Reduce
 //    std::cout << "<br>basis rational form: " << this->basisRationalForm.ToString(true, false);
 //    out << "<br>basis rational form: " << this->basisRationalForm.ToString(true, false);
 //    std::string tempS=out.str();
-//    assert(testMatrix==this->basisRationalForm);
+//    if(testMatrix!=this->basisRationalForm)crash << crash;
 //  }
 }
 
@@ -2681,8 +2696,8 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
     return;
   if (other.basis==this->basis && this->Den==other.Den)
     return;
-
-  assert(other.GetDim()==this->GetDim());
+  if(other.GetDim()!=this->GetDim())
+    crash << crash;
   int theDim=this->GetDim();
   LargeIntUnsigned oldDen=this->Den;
   LargeIntUnsigned::lcm(other.Den, oldDen, this->Den);
@@ -2758,7 +2773,8 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
   LargeIntUnsigned remainder, quotient, divisor;
   remainder=(*this);
   divisor=(x);
-  assert(!divisor.IsEqualToZero());
+  if(divisor.IsEqualToZero())
+    crash << crash;
   quotient.MakeZero();
   //std::string tempS1, tempS2, tempS3;
   while (remainder.IsGEQ(divisor))
@@ -2791,7 +2807,7 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
   quotientOutput=(quotient);
 //  std::cout << "Dividing " << this->ToString() << " by " << x.ToString() << " yields quotient " << quotientOutput.ToString()
 //  << " and remainder " << remainderOutput.ToString();
-//  assert(remainderOut.CheckForConsistensy());
+//  if(!remainderOut.CheckForConsistensy())crash << crash;
 }
 #ifdef WIN32
 #pragma warning(default:4244)//warning 4244: data loss from conversion
@@ -2957,7 +2973,8 @@ void Lattice::IntersectWithPreimageOfLattice(const Matrix<Rational> & theLinearM
   imageStartingBasis=(tempImageStartingBasis);
   bool tempBool= tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
   ImageBasisInImageStartingBasisCoords=(tempImageBasisInImageStartingBasisCoords);
-  assert(tempBool);
+  if(!tempBool)
+    crash << crash;
   //std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ToString();
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i=0; i<resultNonKernelPart.size; i++)
@@ -3024,7 +3041,8 @@ void Lattice::IntersectWith(const Lattice& other)
 void Lattice::IntersectWithBothOfMaxRank(const Lattice& other)
 { Lattice dualLatticeThis, dualLatticeOther;
   //std::cout << "intersecting " << this->ToString() << " and " << other.ToString();
-  assert(this->basis.NumRows==this->GetDim() && this->GetDim()==other.GetDim() && other.basis.NumRows== this->GetDim());
+  if(this->basis.NumRows!=this->GetDim() || this->GetDim()!=other.GetDim() || other.basis.NumRows!= this->GetDim())
+    crash << crash;
   this->GetDualLattice(dualLatticeThis);
   //std::cout << "<br>dual lattice of left: " << dualLatticeThis.ToString();
   other.GetDualLattice(dualLatticeOther);
@@ -3154,7 +3172,8 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice
 
 bool Lattice::ReduceVector(Vector<Rational>& theVector)const
 { Vector<Rational> output;
-  assert(theVector.size==this->GetDim());
+  if(theVector.size!=this->GetDim())
+    crash << crash;
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
   //std::cout <<  "the basis: " << basisRoots.ToString();
@@ -3184,7 +3203,8 @@ void QuasiPolynomial::MakeZeroOverLattice(Lattice& theLattice)
 }
 
 void QuasiPolynomial::MakeZeroLatTiceZn(int theDim)
-{ assert(theDim>0);
+{ if(theDim<=0)
+    crash << crash;
   this->AmbientLatticeReduced.MakeZn(theDim);
   this->LatticeShifts.size=0;
   this->valueOnEachLatticeShift.size=0;
@@ -3195,7 +3215,8 @@ void PartFraction::GetRootsFromDenominator(PartFractions& owner, Vectors<Rationa
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { output[i]=owner.startingVectors[this->IndicesNonZeroMults[i]];
     oneFracWithMultiplicitiesAndElongations& current=this->TheObjects[this->IndicesNonZeroMults[i]];
-    assert(current.Elongations.size==1);
+    if(current.Elongations.size!=1)
+      crash << crash;
     output[i]*=current.Elongations[0];
   }
 }
@@ -3251,8 +3272,8 @@ void PartFraction::GetVectorPartitionFunction
 //  if (PartFraction::MakingConsistencyCheck)
 //  { Rational tempLRat;
 //    output.Evaluate(PartFraction::theVectorToBePartitioned, tempLRat);
-//    assert(tempLRat.DenShort==1);
-//    assert(tempLRat.IsEqualTo(PartFraction::CheckSum));
+//    if(tempLRat.DenShort!=1)crash << crash;
+//    if(!tempLRat.IsEqualTo(PartFraction::CheckSum))crash << crash;
 //  }
 //  if (StoreToFile)
 //  { this->FileStoragePosition= PartFraction::TheBigDump.tellp();
@@ -3304,10 +3325,10 @@ bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<R
         tempLRat4.Add(tempLRat3);
         PartFraction::CheckSum.ToString(tempS3);
         PartFractions::CheckSum.ToString(tempS4);
-        assert(tempLRat2.den.IsEqualTo(LIOne));
-        assert(tempLRat3.den.IsEqualTo(LIOne));
-        assert(tempLRat2.IsEqualTo(PartFraction::CheckSum));
-        assert(tempLRat4.IsEqualTo(PartFractions::CheckSum));
+        if(!tempLRat2.den.IsEqualTo(LIOne))crash << crash;
+        if(!tempLRat3.den.IsEqualTo(LIOne))crash << crash;
+        if(!tempLRat2.IsEqualTo(PartFraction::CheckSum))crash << crash;
+        if(!tempLRat4.IsEqualTo(PartFractions::CheckSum))crash << crash;
         if (i==4)
         { Stop();
           QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic=true;
@@ -3481,14 +3502,14 @@ void QuasiPolynomial::Substitution
   //a_11 ... a_1n
   //...
   //a_m1 ... a_mn
-  assert(this!=&output);
-  assert(mapFromNewSpaceToOldSpace.NumRows==this->GetNumVars());
-  assert(ambientLatticeNewSpace.GetDim()==mapFromNewSpaceToOldSpace.NumCols);
+  if(this==&output || mapFromNewSpaceToOldSpace.NumRows!=this->GetNumVars() || ambientLatticeNewSpace.GetDim()!=mapFromNewSpaceToOldSpace.NumCols)
+    crash << crash;
   output.AmbientLatticeReduced=ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
   Vectors<Rational> allRepresentatives, imagesAllRepresentatives;
   bool tempBool=ambientLatticeNewSpace.GetAllRepresentatives(output.AmbientLatticeReduced, allRepresentatives);
-  assert(tempBool);
+  if(!tempBool)
+    crash << crash;
   mapFromNewSpaceToOldSpace.ActOnVectorsColumn(allRepresentatives, imagesAllRepresentatives);
   PolynomialSubstitution<Rational> theSub;
   theSub.SetSize(this->GetNumVars());
@@ -3643,7 +3664,8 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   { theZnLattice.basisRationalForm.GetVectorFromRow(i, tempRoot);
     orthogonalComponent=tempRoot.ScalarEuclidean(theScalarProducts)/theScalarProducts.ScalarEuclidean(theScalarProducts);
     tempRoot-=theScalarProducts*orthogonalComponent;
-    assert(orthogonalComponent.IsInteger());
+    if(!orthogonalComponent.IsInteger())
+      crash << crash;
     if (!tempRoot.IsEqualToZero())
     { resultRoot.MakeZero(this->GetDim());
       for (int j=0; j<startingBasis.size; j++)
@@ -3771,7 +3793,8 @@ bool Cone::ReadFromFile
 { std::string tempS, rootString;
   int NumWordsRead;
   XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
-  assert(NumWordsRead==0);
+  if(NumWordsRead!=0)
+    crash << crash;
   input >> tempS;
   buffer.size=0;
   Vector<Rational> tempRoot;
@@ -3798,7 +3821,7 @@ bool Cone::ReadFromFile
   bool result;
   result=this->CreateFromNormals(buffer, theGlobalVariables);
   result= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
-//  assert(tempBool);
+//  if(!tempBool) crash << crash;
   return result;
 }
 
@@ -3949,12 +3972,12 @@ bool ConeLatticeAndShiftMaxComputation::ReadFromFile
   this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  assert(numReadWords==0);
+  if(numReadWords!=0)
+    crash << crash;
   return true;
 }
 
-void GeneralizedVermaModuleCharacters::WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
+void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "ComputationPhase: " << this->computationPhase << "\n";
   output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
@@ -4042,7 +4065,8 @@ bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariab
   bool result=this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
-  assert(numReadWords==0);
+  if(numReadWords!=0)
+    crash << crash;
   return result;
 }
 
@@ -4174,15 +4198,16 @@ Rational WeylGroup::GetKillingDivTraceRatio()
   return result;
 }
 
-void Cone::IntersectAHyperplane
-  (Vector<Rational>& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
-{ assert(!theNormal.IsEqualToZero());
+void Cone::IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
+{ if(theNormal.IsEqualToZero())
+    crash << crash;
   int theDimension=theNormal.size;
   Matrix<Rational> tempMat, theEmbedding, theProjection;
   tempMat.AssignVectorRow(theNormal);
   Vectors<Rational> theBasis;
   tempMat.GetZeroEigenSpace(theBasis);
-  assert(theBasis.size==theNormal.size-1);
+  if(theBasis.size!=theNormal.size-1)
+    crash << crash;
   theEmbedding.AssignVectorsToRows(theBasis);
   theEmbedding.Transpose();
   theBasis.AddOnTop(theNormal);
@@ -4196,12 +4221,11 @@ void Cone::IntersectAHyperplane
   Vectors<Rational> newNormals=this->Normals;
   theProjection.ActOnVectorsColumn(newNormals);
   bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, &theGlobalVariables);
-  assert(!tempBool);
-
+  if(tempBool)
+    crash << crash;
 }
 
-bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
-(Polynomial<Rational>& inputLPoly, Vector<Rational>& output)
+bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output)
 { if (!inputLPoly.IsLinear())
     return false;
   output.MakeZero(inputLPoly.GetMinNumVars()+1);
@@ -4336,7 +4360,8 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
     bool found=false;
     for (int j=0; j<this->projectivizedChamber.size; j++)
       if (this->projectivizedChamber.TheObjects[j].IsInCone(tempRoot))
-      { assert(!found);
+      { if(found)
+          crash << crash;
         found=true;
       }
   }
@@ -4433,24 +4458,24 @@ bool PartFractions::RemoveRedundantShortRootsIndex
       { int ElongationValue=currentFrac.Elongations[i];
         if (ElongationValue!=LCMElongations)
         { int numSummands=LCMElongations/ElongationValue;
-          thePF.GetNElongationPoly
-          (this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
+          thePF.GetNElongationPoly(this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
           //tempIP.ComputeDebugString();
-          tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
+          tempIP.RaiseToPower(currentFrac.Multiplicities[i], (LargeInt) 1);
           //tempIP.ComputeDebugString();
           currentCoeff*=tempIP;
 //          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
-          currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i], LCMElongations);
-          currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i], ElongationValue);
+          currentFrac.AddMultiplicity(currentFrac.Multiplicities[i], LCMElongations);
+          currentFrac.AddMultiplicity(-currentFrac.Multiplicities[i], ElongationValue);
 //          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
-          assert(localEndCheckSum.IsEqualTo(localStartCheckSum));
+          if(!localEndCheckSum.IsEqualTo(localStartCheckSum))
+            crash << crash;
         }
       }
     }
     if (PartFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
     { //thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
       //localEndCheckSum.ToString(tempS1);
-      //assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
+      //if(!localStartCheckSum.IsEqualTo(localEndCheckSum))crash << crash;
     }
   }
   this->AddMonomial(thePF, currentCoeff);
@@ -4545,7 +4570,8 @@ void LargeIntUnsigned::lcm(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
   a.MultiplyBy(b, tempUI2);
   output=(tempUI2);
   output.DivPositive(tempUI, output, tempUI2);
-  assert(!output.IsEqualToZero());
+  if(output.IsEqualToZero())
+    crash << crash;
 }
 
 void LargeIntUnsigned::operator=(const LargeIntUnsigned& x)
@@ -4748,7 +4774,8 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
       currentCLS.theShift.MakeZero(theAffineDim);
       currentCLS.theLattice=ZnLattice;
       bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax, (Rational) 0);
-      assert(tempBool);
+      if(!tempBool)
+        crash << crash;
       this->theMaxComputation.theConesLargerDim.AddOnTop(currentCLS);
       this->theMaxComputation.LPtoMaximizeLargerDim.AddOnTop(theLPtoMax);
       this->numNonZeroMults++;
@@ -5075,7 +5102,8 @@ bool Cone::DrawMeProjective
   { Rational sumAbsValuesCoords=0;
     for (int j=0; j<this->GetDim(); j++)
       sumAbsValuesCoords+=(VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : -VerticesScaled[i][j];
-    assert(!sumAbsValuesCoords.IsEqualToZero());
+    if(sumAbsValuesCoords.IsEqualToZero())
+      crash << crash;
     VerticesScaled[i]/=sumAbsValuesCoords;
   }
   Vector<Rational> tempRoot;
@@ -5537,7 +5565,8 @@ void WeylGroup::DrawRootSystem
     this->GetCoxeterPlane(theTwoPlane[0], theTwoPlane[1], theGlobalVariables);
   else
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
-  assert(theTwoPlane.size==2);
+  if(theTwoPlane.size!=2)
+    crash << crash;
 //  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ToString(false, true, false);
 //  std::stringstream tempStream;
 //  tempStream << "<hr>the eigen mat:";
@@ -5631,8 +5660,8 @@ void AnimationBuffer::operator=(const AnimationBuffer& other)
   this->flagAnimating=other.flagAnimating;
   this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
   this->indexVirtualOp=other.indexVirtualOp;
-  assert(this->indexVirtualOp<this->theVirtualOpS.size);
-
+  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+    crash << crash;
 }
 
 AnimationBuffer::AnimationBuffer()
@@ -5732,7 +5761,8 @@ void AnimationBuffer::operator+=(const AnimationBuffer& other)
 int AnimationBuffer::GetIndexCurrentDrawOps()
 { if (!this->flagAnimating || this->thePhysicalDrawOps.size==0 || this->indexVirtualOp<0)
     return -1;
-  assert(this->indexVirtualOp<this->theVirtualOpS.size);
+  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+    crash << crash;
   return this->theVirtualOpS[this->indexVirtualOp].indexPhysicalDrawOp;
 }
 
@@ -5770,7 +5800,8 @@ bool AnimationBuffer::IncrementOpReturnNeedsRedraw()
 int AnimationBuffer::GetIndexCurrentPhysicalFrame()
 { if (this->theVirtualOpS.size<=0 || this->indexVirtualOp<0)
     return 0;
-  assert(this->indexVirtualOp<this->theVirtualOpS.size);
+  if(this->indexVirtualOp>=this->theVirtualOpS.size)
+    crash << crash;
   int result=this->theVirtualOpS[this->indexVirtualOp].indexPhysicalFrame;
   if (result<0)
     result=0;
@@ -6216,7 +6247,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
       for (int k=0; k<arrows[i][j].size; k++)
       { out << " \\ar[d";
         int indexInLayer=Layers[i+1].GetIndex(arrows[i][j][k]);
-        assert(indexInLayer!=-1);
+        if(indexInLayer==-1)
+          crash << crash;
         int nextOffset=indexInLayer+nextRowOffset;
         if (Layers[i+1].size%2==0)
           if (nextOffset>=GraphWidth/2)
@@ -6271,7 +6303,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
       for (int k=0; k<this->simpleGenerators.size; k++)
       { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
         int index=orbit.GetIndex(tempRoot);
-        assert(index!=-1);
+        if(index==-1)
+          crash << crash;
         if (this->TheObjects[index].reflections.size>this->TheObjects[Layers[i][j]].reflections.size)
           arrows[i][j].AddOnTop(index);
       }
@@ -6348,7 +6381,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //  int commentMEWhenDone;
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
-//      assert(this->checkConsistency());
+//      if(!this->checkConsistency())crash << crash;
       return;
     case RationalFunctionOld::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
@@ -6359,7 +6392,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 //      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
-//      assert(this->checkConsistency());
+//      if(!this->checkConsistency())crash << crash;
       return;
     case RationalFunctionOld::typeRationalFunction:
       if (!this->Numerator.GetElement().Substitution(theSub, 1))
@@ -6369,7 +6402,7 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
         crash << "This is a programming error: substitution   " << theSub.ToString() << " into polynomial " << this->Denominator.GetElement().ToString()
         << " failed but the current function does not handle this properly. " << crash;
       this->Simplify();
-//      assert(this->checkConsistency());
+//      if(!this->checkConsistency())crash << crash;
       return;
     default:
       crash << crash;

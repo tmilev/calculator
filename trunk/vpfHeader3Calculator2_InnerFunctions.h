@@ -54,6 +54,10 @@ public:
   static bool innerSort(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetUserDefinedSubExpressions(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGrowDynkinType(CommandList& theCommands, const Expression& input, Expression& output);
+
+  static bool innerGetCentralizerChainsSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerComputeSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
+
   static bool outerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(CommandList& theCommands, const Expression& input, Expression& output);
 

@@ -1028,3 +1028,35 @@ bool CommandListFunctions::innerGetUserDefinedSubExpressions(CommandList& theCom
   input.GetBlocksOfCommutativity(theList);
   return output.MakeSequence(theCommands, theList);
 }
+
+bool CommandListFunctions::innerComputeSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
+{ //bool showIndicator=true;
+  MacroRegisterFunctionWithName("CommandList::innerComputeSemisimpleSubalgebras");
+  SemisimpleLieAlgebra* ownerSSPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
+  std::stringstream out;
+  if (ownerSS.GetRank()>6)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    return output.AssignValue(out.str(), theCommands);
+  } else
+    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
+  SemisimpleSubalgebras tempSSsas
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  SemisimpleSubalgebras& theSSsubalgebras=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
+  return output.AssignValue(theSSsubalgebras, theCommands);
+}
+
+bool CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
+{ //bool showIndicator=true;
+  MacroRegisterFunctionWithName("CommandList::innerGetCentralizerChainsSemisimpleSubalgebras");
+  if (!input.IsOfType<SemisimpleSubalgebras>())
+  { theCommands.Comments << "<hr>Input of GetCentralizerChains must be of type semisimple subalgebras. ";
+    return false;
+  }
+  std::stringstream out;
+  out << "Not implemented yet. ";
+  return output.AssignValue(out.str(), theCommands);
+}

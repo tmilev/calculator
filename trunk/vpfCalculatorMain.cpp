@@ -122,8 +122,9 @@ int main(int argc, char **argv)
   //civilizedInput="GrowDynkinType(A^30_1+d^30_4, e_6);";
   //civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute b_3";
   //  civilizedInput="experimentalPrintSemisimpleSubalgebrasForceRecompute a_2";
- // civilizedInput="\\sin ^2 x";
-//  civilizedInput=" g_{{i}}:= getChevalleyGenerator{}(B_4, i);  e:=g_13;";
+  // civilizedInput="\\sin ^2 x";
+  //  civilizedInput=" g_{{i}}:= getChevalleyGenerator{}(B_4, i);  e:=g_13;";
+  //civilizedInput="SemisimpleLieAlgebra(B_3)";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

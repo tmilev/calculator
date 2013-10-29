@@ -446,7 +446,7 @@ bool CommandList::innerPrintSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
+  MacroRegisterFunctionWithName("CommandList::innerPrintSSsubalgebras");
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
@@ -516,28 +516,6 @@ bool CommandList::innerPrintSSsubalgebras
     theFile << "</body></html>";
   }
   return output.AssignValue(out.str(), theCommands);
-}
-
-bool CommandList::innerSSsubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
-{ //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
-  SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  std::stringstream out;
-  if (ownerSS.GetRank()>6)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    return output.AssignValue(out.str(), theCommands);
-  } else
-    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-  SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
-  theSSsubalgebras.FindTheSSSubalgebrasOLD(ownerSS);
-  return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
 bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Expression& input, Expression& output)

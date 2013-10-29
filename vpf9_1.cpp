@@ -2709,13 +2709,13 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
   int indexGammaMinusEpsilon= this->theWeyl.RootSystem.GetIndex(gamma+minusEpsilon);
   Rational FirstSummand, SecondSummand;
   if (indexDeltaMinusEpsilon!=-1)
-  { if(!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon]);
+  { if(!this->Computed.elements[indexGamma][indexDeltaMinusEpsilon] || !this->Computed.elements[indexDelta][indexMinusEpsilon])
       crash << crash;
     FirstSummand=this->ChevalleyConstants.elements[indexGamma][indexDeltaMinusEpsilon]*this->ChevalleyConstants.elements[indexDelta][indexMinusEpsilon];
   } else
     FirstSummand.MakeZero();
   if (indexGammaMinusEpsilon!=-1)
-  { if(!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma]);
+  { if(!this->Computed.elements[indexDelta][indexGammaMinusEpsilon] || !this->Computed.elements[indexMinusEpsilon][indexGamma])
       crash << crash;
     SecondSummand =this->ChevalleyConstants.elements[indexDelta][indexGammaMinusEpsilon]*this->ChevalleyConstants.elements[indexMinusEpsilon][indexGamma];
   } else

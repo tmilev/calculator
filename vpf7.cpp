@@ -799,50 +799,27 @@ std::string ProjectInformation::ToString()
     out << CGI::GetHtmlLinkFromProjectFileName(this->theFiles[i].FileName, this->theFiles[i].FileDescription);
   }
   out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\")."
-  << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
-  out << " <br>The calculator errors get caught either by 1) in-line asserts() (you will get a stack trace printout), "
-  << "or 2) by Apache/the system (internal server error)."
-  << "  \n  <br> The file input/output is done via std::fstream. "
-  << "<br>The LaTeX'ing is called using std::system() "
-  << " calls. The LaTeX logs can be found by viewing the calculator page's source. <br> "
-  << "The html output is hardcoded. ";
-  out << " ";
-  out << " \n";
-  out << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> "
-  << "In order to get the calculator running on your machine you need to do the following. "
-  << " Simplifying the installation procedure is on our to-do list. "
-  << "<br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. "
-  << "If you are interested in making the system run on Windows please write us an email. "
-  << "<br>1) Download the c++ files in the links above. Alternatively you "
-  << " can check out the program's "
-  << " svn repository. The svn check out command is  &nbsp&nbsp"
-  << " svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code"
-  << " &nbsp&nbsp."
-  << "<br>2) Change dir to (directoryWhereCodeIs)/trunk/ . Execute the  &nbsp&nbsp  make &nbsp&nbsp  command. "
-  << "<br>2-Alternative) For those who love C++ IDE's: open your favorite IDE and create a project "
+  << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. "
+  << "\n<br>\nThe calculator errors get caught either by 1) in-line asserts() (you will get a stack trace printout, and possibly a human-readable explanation), "
+  << "or 2) by Apache/the system (internal server error).\n <br> The file input/output is done via std::fstream. \n<br>\nThe LaTeX'ing is called using std::system() "
+  << " calls. The LaTeX logs can be found by viewing the calculator page's source. \n<br>\n The html output is hardcoded. "
+  << "\n<hr>\n<b>Installing the calculator on your machine from c++ source. </b><br>\n"
+  << "\nIn order to get the calculator running on your machine you need to do the following. \nSimplifying the installation procedure is on our to-do list. "
+  << "\n<br>\n0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. "
+  << "\n<br>\n1) Download the c++ files in the links above. Alternatively you can check out the program's svn repository. The svn check out command at the moment of writing "
+  << "is  &nbsp&nbsp     svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code     &nbsp&nbsp."
+  << "\n<br>\n2) Change dir to (directoryWhereCodeIs)/trunk/ . Execute the  &nbsp&nbsp  make &nbsp&nbsp  command. "
+  << "\n<br>\n2-Alternative) For those who love C++ IDE's: open your favorite IDE and create a project "
   << " including all .cpp and .h files that are listed in the file (directoryWhereCodeIs)/trunk/makefile, and make sure everything compiles and builds. "
-  << "<br>3) Build the project to a console application named  &nbsp&nbsp "
-  << "calculator &nbsp&nbsp with default console application settings.  "
-  << "<br>4) Create a folder to contain the server files; assume without loss of "
-  << "generality the so created folder is called "
-  << "&nbsp&nbsp ServerBase/    &nbsp&nbsp."
-  << "<br>5) Create folders &nbsp&nbsp ServerBase/cgi-bin  "
-  << "&nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
-  << "<br>6) Enable full read/write access for every user in the folder "
-  << "&nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
-  << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp "
-  << "ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
-  << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> "
-  << "and enable cgi scripts "
-  << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
-  << "<br>9) Configure the Apache server so the address of physical folder "
-  << "&nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /ServerBase/ &nbsp&nbsp."
-  << "<br>10) The basic installation is now complete; test the calculator by "
-  << "running it through your web browser."
-  << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp "
-  << "ServerBase/jsmath/ &nbsp&nbsp.";
-  out <<	"</div>";
-
+  << "\n<br>3) Build the project to a console application named  &nbsp&nbsp calculator &nbsp&nbsp with default console application settings.  "
+  << "\n<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called "
+  << "&nbsp&nbsp ServerBase/    &nbsp&nbsp. <br>\n5) Create folders &nbsp&nbsp ServerBase/cgi-bin  &nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
+  << "\n<br>\n6) Enable full read/write access for every user in the folder &nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
+  << "\n<br>\n7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
+  << "\n<br>\n8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
+  << "\n<br>\n9) Configure the Apache server so the address of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /ServerBase/ &nbsp&nbsp."
+  << "\n<br>\n10) The basic installation is now complete; test the calculator by running it through your web browser."
+  << "\n<br>\n11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp. </div>";
   return out.str();
 }
 

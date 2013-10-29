@@ -1478,7 +1478,6 @@ public:
   }
   static bool innerMinPolyMatrix(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerCharacterSSLieAlgFD(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerSSsubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
    bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals);

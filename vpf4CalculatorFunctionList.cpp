@@ -5,7 +5,7 @@
 #include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
-//This file lists calculator funcitons only. Please do not use for any other purposes.
+//This file lists calculator functions and various hard-coded rules. Please do not use for any other purposes.
 
 void CommandList::initPredefinedInnerFunctions()
 { this->AddOperationInnerHandler
@@ -51,8 +51,6 @@ void CommandList::initPredefinedInnerFunctions()
   ("GrowDynkinType", CommandListFunctions::innerGrowDynkinType, "",
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
-
-
 
   this->AddOperationInnerHandler
   ("Differentiate", CommandListFunctions::innerDifferentiateSinCos, "",
@@ -126,7 +124,6 @@ void CommandList::initPredefinedInnerFunctions()
    (total degree= sum of degrees in the polynomial variables plus the degrees of the differential variables. ",
    "x:=ElementWeylAlgebraPoly{}(\\partial, x); \n\\partial:=ElementWeylAlgebraDO{}(\\partial, x);\
    \n  a:=x^3+x\\partial; b:=\\partial x+\\partial^3+\\partial;  \n[FourierTransformDO{}a,FourierTransformDO{}b]-FourierTransformDO{}[a,b]");
-
 
   this->AddOperationInnerHandler
   ("PerturbSplittingNormal", CommandList::innerPerturbSplittingNormal, "",
@@ -959,6 +956,16 @@ void CommandList::initPredefinedInnerFunctions()
    For a description of the algorithm used see the description of function GroebnerLexUpperLimit.",
    "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+1, x-a^4, y-b^4 );\n \
    GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
+
+  this->AddOperationInnerHandler
+  ("ComputeSemisimpleSubalgebras", CommandListFunctions::innerComputeSemisimpleSubalgebras, "",
+   "Computes the semisimple subalgebras of a semisimple Lie algebra and creates a data structure containing them. ",
+   "ComputeSemisimpleSubalgebras(A_2)", false);
+  this->AddOperationInnerHandler
+  ("CentralzierChains", CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras, "",
+   "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
+   "CentralzierChains (ComputeSemisimpleSubalgebras{}(B_3))");
+
   this->AddOperationInnerHandler
   ("experimentalPrintSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

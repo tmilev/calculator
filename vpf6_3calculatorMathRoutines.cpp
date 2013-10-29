@@ -1045,18 +1045,47 @@ bool CommandListFunctions::innerComputeSemisimpleSubalgebras(CommandList& theCom
   SemisimpleSubalgebras tempSSsas
   (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras, &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   SemisimpleSubalgebras& theSSsubalgebras=theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  theSSsubalgebras.flagComputePairingTable=false;
+  theSSsubalgebras.flagComputeNilradicals=false;
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
+bool CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras");
+  if (!input.IsOfType<SemisimpleSubalgebras>())
+  { theCommands.Comments << "<hr>Input of ComputeFKFT must be of type semisimple subalgebras. ";
+    return false;
+  }
+  SemisimpleSubalgebras& theSAs=input.GetValueNonConst<SemisimpleSubalgebras>();
+  theSAs.flagComputePairingTable=true;
+  theSAs.flagComputeNilradicals=true;
+  theSAs.ComputePairingTablesAndFKFTtypes();
+  output=input;
+  return true;
+}
+
 bool CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output)
-{ //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::innerGetCentralizerChainsSemisimpleSubalgebras");
+{ MacroRegisterFunctionWithName("CommandList::innerGetCentralizerChainsSemisimpleSubalgebras");
   if (!input.IsOfType<SemisimpleSubalgebras>())
   { theCommands.Comments << "<hr>Input of GetCentralizerChains must be of type semisimple subalgebras. ";
     return false;
   }
+  SemisimpleSubalgebras& theSAs=input.GetValueNonConst<SemisimpleSubalgebras>();
+  List<List<int> > theChains;
   std::stringstream out;
-  out << "Not implemented yet. ";
+  theSAs.GetCentralizerChains(theChains);
+  Expression currentChainE;
+  out << theChains.size << " chains total. <br>";
+  for (int i=0; i<theChains.size; i++)
+  { out << "<br>Chain " << i+1 << ": Load{}(Serialization{}(LoadSemisimpleSubalgebras, " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
+    for (int j=0; j<theChains[i].size; j++)
+    { Serialization::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
+      out << currentChainE.ToString();
+      if (j!=theChains[i].size-1)
+        out << ", ";
+    }
+    out << ") ) )";
+  }
   return output.AssignValue(out.str(), theCommands);
 }

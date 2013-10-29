@@ -57,6 +57,7 @@ public:
 
   static bool innerGetCentralizerChainsSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerComputeSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerComputePairingTablesAndFKFTsubalgebras(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool outerAssociateDivisionDivision(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(CommandList& theCommands, const Expression& input, Expression& output);

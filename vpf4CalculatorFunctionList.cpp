@@ -958,13 +958,18 @@ void CommandList::initPredefinedInnerFunctions()
    GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
 
   this->AddOperationInnerHandler
+  ("ComputeFKFT", CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras, "",
+   "Attempts to compute all Fernando-Kac subalgebras according to the most experimental, latest and greatest algorithm. Argument must be of type \
+   semisimple Lie subalgebras. ",
+   "ComputeFKFT( ComputeSemisimpleSubalgebras(c_3))");
+  this->AddOperationInnerHandler
   ("ComputeSemisimpleSubalgebras", CommandListFunctions::innerComputeSemisimpleSubalgebras, "",
    "Computes the semisimple subalgebras of a semisimple Lie algebra and creates a data structure containing them. ",
    "ComputeSemisimpleSubalgebras(A_2)", false);
   this->AddOperationInnerHandler
-  ("CentralzierChains", CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras, "",
+  ("CentralizerChains", CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras, "",
    "Creates a printout with centralizer chains of semisimple Lie subalgebras. ",
-   "CentralzierChains (ComputeSemisimpleSubalgebras{}(B_3))");
+   "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))");
 
   this->AddOperationInnerHandler
   ("experimentalPrintSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",

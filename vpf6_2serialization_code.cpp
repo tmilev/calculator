@@ -573,12 +573,11 @@ bool Serialization::innerLoadCandidateSA(CommandList& theCommands, const Express
   { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
     return false;
   }
-//  std::cout << "<br> input[2]: " << input[2].ToString();
-//  if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
-//    std::cout << "<br> loading " << input[2].ToString() << " to get "
-//    << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  //std::cout << "<hr>Making subalgebra from type "
-  //<< outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  //std::cout << "<br> input[2]: " << input[2].ToString();
+  //if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
+  //  std::cout << "<br> loading " << input[2].ToString() << " to get "
+  //  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  //std::cout << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
@@ -686,9 +685,9 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
   theSAs.theSubalgebrasNonEmbedded->SetExpectedSize(theCandidatesE.children.size-1);
   ProgressReport theReport(theCommands.theGlobalVariableS);
   theSAs.flagAttemptToSolveSystems=true;
-  theSAs.flagComputePairingTable=true;
-  theSAs.flagComputeNilradicals=true;
   theSAs.flagComputeModuleDecomposition=true;
+  theSAs.flagComputePairingTable=false;
+  theSAs.flagComputeNilradicals=false;
   theSAs.theGlobalVariables=theCommands.theGlobalVariableS;
   theSAs.timeComputationStartInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   for (int i=1; i<theCandidatesE.children.size; i++)
@@ -701,13 +700,13 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
     }
-//    std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
+    //std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
   theSAs.HookUpCentralizers(true);
-//  std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
-//  std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
-//  std::cout << theCommands.theObjectContainer.ToString();
+  //std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
+  //std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
+  //std::cout << theCommands.theObjectContainer.ToString();
   theSAs.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   return output.AssignValue(theSAs, theCommands);
 }
@@ -729,9 +728,9 @@ bool Serialization::innerStoreSemisimpleSubalgebras(CommandList& theCommands, co
     tempE.AddChildOnTop(candidateE);
   }
   output.AddChildOnTop(tempE);
-//  if (!Serialization::innerStoreObject(theCommands, input.theSl2s, tempE))
-//    return false;
-//  output.AddChildOnTop(tempE);
+  //if (!Serialization::innerStoreObject(theCommands, input.theSl2s, tempE))
+  //  return false;
+  //output.AddChildOnTop(tempE);
   return true;
 }
 
@@ -740,7 +739,6 @@ bool Serialization::innerStore(CommandList& theCommands, const Expression& input
   int theType;
   if (!input.IsBuiltInType(&theType))
     return false;
-  std::cout << "Here I aM!!!";
   if (theType==theCommands.opSSLieAlg())
     return Serialization::innerStoreSemisimpleLieAlgebra(theCommands, input, output);
   if (theType==theCommands.opPoly())

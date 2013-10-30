@@ -678,15 +678,15 @@ bool CommandListInnerTypedFunctions::innerPowerDoubleOrRatToDoubleOrRat(CommandL
     if (exp.IsEven())
     { if (!exp.IsSmallInteger(&thePower))
         return false;
-      return output.AssignValue(pow (-baseDouble, thePower), theCommands);
+      return output.AssignValue(FloatingPoint::power(-baseDouble, thePower), theCommands);
     }
     baseDouble*=-1;
-    return output.AssignValue(-pow (baseDouble, expDouble), theCommands);
+    return output.AssignValue(-FloatingPoint::power (baseDouble, expDouble), theCommands);
   }
   if (baseDouble==0)
     if (expDouble>0)
       return output.AssignValue<double>(0, theCommands);
-  return output.AssignValue(pow(baseDouble, expDouble), theCommands);
+  return output.AssignValue(FloatingPoint::power(baseDouble, expDouble), theCommands);
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyDoubleOrRatByDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output)
@@ -852,7 +852,8 @@ bool CommandListInnerTypedFunctions::innerMultiplyMatrixRationalOrRationalByMatr
 }
 
 bool CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrixTensor(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyMatrixTensorOrRationalByMatrixTensor");
+  if (!input.IsListNElements(3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
@@ -919,10 +920,9 @@ bool CommandListInnerTypedFunctions::innerLieBracketRatPolyOrEWAWithRatPolyOrEWA
   return output.AssignValueWithContext(resultE, leftConverted.GetContext(), theCommands);
 }
 
-
-
 bool CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElements(3))
+{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddMatrixRationalToMatrixRational");
+  if (!input.IsListNElements(3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];

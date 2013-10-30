@@ -2016,7 +2016,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
   { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
     n/=2;
   }
-  unsigned int upperboundPrimeDivisors= (unsigned int) sqrt((double)n);
+  unsigned int upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
   List<bool> theSieve;
   theSieve.initFillInObject(upperboundPrimeDivisors+1,true);
   for (unsigned int i=3; i<=upperboundPrimeDivisors; i+=2)
@@ -2024,7 +2024,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     { while (n%i==0)
       { this->AccountPrimeFactor(i, outputPrimeFactors, outputMultiplicites);
         n/=i;
-        upperboundPrimeDivisors= (unsigned int) sqrt((double)n);
+        upperboundPrimeDivisors= (unsigned int) FloatingPoint::sqrt((double)n);
       }
       for (unsigned int j=i; j<=upperboundPrimeDivisors; j+=i)
         theSieve[j]=false;

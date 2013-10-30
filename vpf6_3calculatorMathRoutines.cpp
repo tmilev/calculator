@@ -155,13 +155,13 @@ bool CommandListFunctions::innerLog(CommandList& theCommands, const Expression& 
     return false;
   }
   if (theArgument>0)
-    return output.AssignValue(log(theArgument), theCommands);
+    return output.AssignValue(FloatingPoint::log(theArgument), theCommands);
   theArgument*=-1;
   Expression iE, ipiE, piE, lnPart;
   iE.MakeSqrt(theCommands, -1);
   piE.MakeAtom(theCommands.opPi(), theCommands);
   ipiE.MakeXOX(theCommands, theCommands.opTimes(), piE, iE);
-  lnPart.AssignValue(log(theArgument), theCommands);
+  lnPart.AssignValue(FloatingPoint::log(theArgument), theCommands);
   return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
 }
 
@@ -173,10 +173,10 @@ bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& 
       return output.AssignValue(0, theCommands);
     if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
       if (input[1].IsDouble(&theArgument) && input[2].IsAtomGivenData(theCommands.opPi()))
-        return output.AssignValue(sin (theArgument*MathRoutines::Pi()), theCommands);
+        return output.AssignValue(FloatingPoint::sin (theArgument*MathRoutines::Pi()), theCommands);
     return false;
   }
-  return output.AssignValue(sin(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands );
 }
 
 bool CommandListFunctions::innerFactorial(CommandList& theCommands, const Expression& input, Expression& output)
@@ -196,10 +196,10 @@ bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& 
       return output.AssignValue(-1, theCommands);
     if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
       if (input[1].IsDouble(&theArgument) && input[2].IsAtomGivenData(theCommands.opPi()))
-        return output.AssignValue(cos (theArgument*MathRoutines::Pi()), theCommands);
+        return output.AssignValue(FloatingPoint::cos(theArgument*MathRoutines::Pi()), theCommands);
     return false;
   }
-  return output.AssignValue(cos(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
 }
 
 bool CommandListFunctions::innerTan(CommandList& theCommands, const Expression& input, Expression& output)
@@ -1049,6 +1049,63 @@ bool CommandListFunctions::innerComputeSemisimpleSubalgebras(CommandList& theCom
   theSSsubalgebras.flagComputeNilradicals=false;
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
+}
+
+bool CommandListFunctions::innerPlotConeUsualProjection(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerPlotConeUsualProjection");
+  if (input.children.size!=5)
+  { theCommands.Comments << "<hr>PlotConeUsualProjection takes 4 arguments. ";
+    return false;
+  }
+  Rational radius, height, distance, viewPointHeight;
+  if (!input[1].IsOfType<Rational>(&radius) || !input[2].IsOfType<Rational>(&height) ||
+      !input[3].IsOfType<Rational>(&distance) ||!input[4].IsOfType<Rational>(&viewPointHeight) )
+  { theCommands.Comments << "<hr> failed to extract radius, height, distance, viewpoint height from " << input.ToString();
+    return false;
+  }
+  affineHyperplane projectionPane;
+  projectionPane.normal.MakeZero(3);
+  projectionPane.normal[1]=-distance;
+  projectionPane.normal[2]=-viewPointHeight;
+  projectionPane.affinePoint.MakeZero(3);
+  projectionPane.affinePoint[1]=distance;
+  projectionPane.affinePoint[2]=viewPointHeight;
+  Vector<Rational> pointCircle1, pointCircle2;
+  Vector<Rational> axis1, axis2, axis3;
+
+  pointCircle1.MakeZero(3);
+  pointCircle2.MakeZero(3);
+  pointCircle1[1]=radius;
+  pointCircle2[1]=-radius;
+  Vector<Rational> projection1= projectionPane.ProjectOnMe(pointCircle1);
+  Vector<Rational> projection2= projectionPane.ProjectOnMe(pointCircle2);
+  Vector<Rational> XdiameterVectorProjection=projection1-projection2;
+  double theProjYradius= FloatingPoint::sqrt(XdiameterVectorProjection.GetVectorDouble().ScalarEuclidean(XdiameterVectorProjection.GetVectorDouble()))/2;
+  double theProjXradius=radius.DoubleValue();
+  CalculusFunctionPlot thePlot;
+  std::stringstream out;
+  out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{0}{6.283185307}{cos(t)*" << theProjXradius << " |sin(t)*" << theProjYradius << "}";
+  Vector<Rational> tipOfTheCone;
+  tipOfTheCone.MakeZero(3);
+  tipOfTheCone[2]=height;
+  Vector<Rational> coneTipProjectedShifted= projectionPane.ProjectOnMe(tipOfTheCone)-projectionPane.affinePoint;
+  double theConeProjectionHeight=FloatingPoint::sqrt(coneTipProjectedShifted.ScalarEuclidean(coneTipProjectedShifted).DoubleValue());
+  out << "\\psline[linecolor=\\psColorGraph](0,0)(0," << theConeProjectionHeight << ")";
+  if (theConeProjectionHeight>theProjYradius )
+  { double yCoordPointTangency= 2*theProjYradius*theProjYradius/theConeProjectionHeight;
+    double xCoordPointTangency=theProjXradius*FloatingPoint::sqrt(1- yCoordPointTangency*2/theConeProjectionHeight);
+    std::cout << "<br>" << yCoordPointTangency;
+    std::cout << "<br>" << xCoordPointTangency;
+
+    out << "\\psline[linecolor=\\psColorGraph](" << xCoordPointTangency << ", " << yCoordPointTangency << ")(0, " << theConeProjectionHeight << ")";
+    out << "\\psline[linecolor=\\psColorGraph](" << -xCoordPointTangency << ", " << yCoordPointTangency << ")(0, " << theConeProjectionHeight << ")";
+  }
+  thePlot.lowerBounds.AddOnTop(-5);
+  thePlot.upperBounds.AddOnTop(5);
+  thePlot.thePlotElementS.AddOnTop(input);
+  thePlot.thePlotStrings.AddOnTop(out.str());
+  thePlot.thePlotStringsWithHtml.AddOnTop(out.str());
+  return output.AssignValue(thePlot, theCommands);
 }
 
 bool CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras(CommandList& theCommands, const Expression& input, Expression& output)

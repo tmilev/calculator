@@ -134,8 +134,10 @@ public:
   }
   void ScalarEuclidean(const Vector<coefficient>& other, coefficient& output)const
   { if (this->size!=other.size)
-      crash << "This is a programming error: taking scalar product of elements of different dimensions: "
-      << this->ToString() << " and " << other.ToString() << ". " << crash;
+    { crash.theCrashReport << "This is a programming error: taking scalar product of elements of different dimensions: "
+      << *this << " and " << other << ". ";
+      crash << crash;
+    }
     coefficient tempElt;
     output=0;
     for (int i=0; i<this->size; i++)

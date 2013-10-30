@@ -8,16 +8,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <math.h>
-
-#ifndef WIN32
-#include <pthread.h>
-//#include <execinfo.h>
-#else
- #include<windows.h>
-// #include <unistd.h>
-// #include <Pthread.h>
-#endif
 
 #ifdef WIN32
 //have to disable C4100 in VS because it warns me on passing non-used parameters to my functions.

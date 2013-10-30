@@ -4905,8 +4905,8 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
   if (theDim>3)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i=0; i<theDim; i++)
-    { this->ProjectionsEiVectors[i][0]=sin((double)i/(double)theDim* MathRoutines::Pi());
-      this->ProjectionsEiVectors[i][1]=cos((double)i/(double)theDim* MathRoutines::Pi());
+    { this->ProjectionsEiVectors[i][0]=FloatingPoint:: sin((double)i/(double)theDim* MathRoutines::Pi());
+      this->ProjectionsEiVectors[i][1]=FloatingPoint:: cos((double)i/(double)theDim* MathRoutines::Pi());
     }
   }
   else
@@ -5431,8 +5431,8 @@ void rootSubalgebra::GetCoxeterPlane
 //    tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
   CompleX<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
   Matrix<CompleX<double> > eigenMat, idMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)
@@ -5492,8 +5492,8 @@ void WeylGroup::GetCoxeterPlane
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
   CompleX<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
   Matrix<CompleX<double> > eigenMat, idMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)
@@ -5582,7 +5582,7 @@ void WeylGroup::DrawRootSystem
       tempRoot[j]=this->RootSystem[i][j].DoubleValue();
     double Length1 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][0]);
     double Length2 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][1]);
-    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
+    lengths[i]=FloatingPoint::sqrt(Length1*Length1+Length2*Length2);
   }
   for (int i=0; i<RootSystemSorted.size; i++)
     for (int j=i; j<RootSystemSorted.size; j++)
@@ -5827,7 +5827,7 @@ void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVa
 double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
 { double result;
   if (x!=0)
-   result= atan(y/x);
+   result= FloatingPoint::arctan(y/x);
   else
     if (y>0)
       result= MathRoutines::Pi()/2;
@@ -5853,8 +5853,7 @@ void DrawOperations::click(double x , double y)
 }
 
 void DrawOperations::RotateOutOfPlane
-  (std::stringstream& logger, Vector<double>& input, Vector<double>& output,
-   Vector<double>& orthoBasis1, Vector<double>& orthoBasis2, double oldTanSquared, double newTanSquared)
+(std::stringstream& logger, Vector<double>& input, Vector<double>& output, Vector<double>& orthoBasis1, Vector<double>& orthoBasis2, double oldTanSquared, double newTanSquared)
 { Vector<double> projection= orthoBasis1;
   Vector<double> vComponent= input;
   double scal1= this->theBilinearForm.ScalarProduct(orthoBasis1, input);
@@ -5865,18 +5864,17 @@ void DrawOperations::RotateOutOfPlane
   logger << "\ngetScalarProd=" << this->theBilinearForm.ScalarProduct(projection, vComponent);
   if (oldTanSquared<0 || newTanSquared<0)
     return;
-  double oldAngle=atan(sqrt(oldTanSquared));
-  double newAngle=atan(sqrt(newTanSquared));
+  double oldAngle=FloatingPoint::arctan(FloatingPoint::sqrt(oldTanSquared));
+  double newAngle=FloatingPoint::arctan(FloatingPoint::sqrt(newTanSquared));
   double angleChange=-oldAngle+newAngle;
   projection=orthoBasis1;
-  projection*=cos(angleChange)*scal1-sin(angleChange)*scal2;
-  projection+=orthoBasis2*(sin(angleChange)*scal1+sin(angleChange)*scal2);
+  projection*=FloatingPoint::cos(angleChange)*scal1-FloatingPoint::sin(angleChange)*scal2;
+  projection+=orthoBasis2*(FloatingPoint::sin(angleChange)*scal1+FloatingPoint::sin(angleChange)*scal2);
   output = vComponent;
   output+=projection;
 }
 
-void DrawOperations::ModifyToOrthonormalNoShiftSecond
-(Vector<double>& root1, Vector<double>& root2)
+void DrawOperations::ModifyToOrthonormalNoShiftSecond(Vector<double>& root1, Vector<double>& root2)
 { //if  (this->getScalarProduct(root2, root2)==0)
   //  root2.MakeEi(this->theWeyl.CartanSymmetric.NumRows,1);
   double theScalar= this->theBilinearForm.ScalarProduct(root1, root2)/this->theBilinearForm.ScalarProduct(root2, root2);
@@ -5941,10 +5939,10 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY, GlobalV
   out << "\nnew angle:  " << newAngle;
   Vector<double> NewVectorE1, NewVectorE2;
   Vectors<double>& currentBasisPlane=this->BasisProjectionPlane[this->SelectedPlane];
-  NewVectorE1= currentBasisPlane[0]*cos(AngleChange);
-  NewVectorE1+=currentBasisPlane[1]*sin(AngleChange);
-  NewVectorE2= currentBasisPlane[1]*cos(AngleChange);
-  NewVectorE2+=currentBasisPlane[0]*(-sin(AngleChange));
+  NewVectorE1= currentBasisPlane[0]*FloatingPoint::cos(AngleChange);
+  NewVectorE1+=currentBasisPlane[1]*FloatingPoint::sin(AngleChange);
+  NewVectorE2= currentBasisPlane[1]*FloatingPoint::cos(AngleChange);
+  NewVectorE2+=currentBasisPlane[0]*(-FloatingPoint::sin(AngleChange));
   currentBasisPlane[0]=NewVectorE1;
   currentBasisPlane[1]=NewVectorE2;
   double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[0]);
@@ -6041,7 +6039,7 @@ class ImpreciseDouble
     return temp.IsPositive();
   }
   void AssignFloor()
-  { this->theValue=floor(this->theValue);
+  { this->theValue=FloatingPoint::floor(this->theValue);
   }
   void operator/=(const ImpreciseDouble& other)
   { ImpreciseDouble copyMe;
@@ -6101,8 +6099,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
-(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords,
- int upperBoundWeights, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
   double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
@@ -6116,9 +6113,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
     << highestWeightSimpleCoords.ToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
   std::string tempS;
-  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
-  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
-
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
   out << tempS << "<br>";
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
@@ -6214,8 +6209,7 @@ std::string ElementWeylGroup::ToString(int NumSimpleGens, FormatExpressions* the
   return out.str();
 }
 
-std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
-(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
+std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
 { std::stringstream out;
 //  std::cout << this->simpleGenerators.ToString();
   List<int> DisplayIndicesSimpleGenerators;
@@ -6337,14 +6331,12 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
   out << "<br>Simple roots:\n<br>\n ";
   head << "\\begin{array}{rcl}";
   for (int i=0; i<this->simpleGenerators.size; i++)
-    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i]
-    << "}&:=&" << this->simpleGenerators[i].ToString()
-    << "\\\\";
+    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ToString() << "\\\\";
   head << "\\end{array}";
   out << CGI::GetHtmlMathSpanFromLatexFormula(head.str());
   if (this->ExternalAutomorphisms.size>0)
   { out << "<br>Outer automorphisms: \n";
-    Matrix<Rational>  tempMat;
+    Matrix<Rational> tempMat;
     head2 << "\\begin{array}{rcl}";
     for (int i=0; i<this->ExternalAutomorphisms.size; i++)
     { tempMat.AssignVectorsToRows(this->ExternalAutomorphisms[i]);
@@ -6365,8 +6357,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     body << "\\begin{array}{l}";
     for (int i=0; i<this->size; i++)
     { const ElementWeylGroup& currentElt=(*this)[i];
-      body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators)
-      << "\\\\";
+      body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators) << "\\\\";
     }
     body << "\\end{array}";
     out << CGI::GetHtmlMathSpanFromLatexFormula(body.str());

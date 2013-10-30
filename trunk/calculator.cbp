@@ -56,6 +56,7 @@
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
+		<Unit filename="vpf9_7floating_point_routines.cpp" />
 		<Unit filename="vpf9_8GlobalObjects.cpp" />
 		<Unit filename="vpf9_91html_routines_calculator.cpp" />
 		<Unit filename="vpf9_9SystemFunctions.cpp" />

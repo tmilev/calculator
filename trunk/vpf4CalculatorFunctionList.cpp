@@ -445,6 +445,13 @@ void CommandList::initPredefinedInnerFunctions()
    ",
    "drawPolar{}(1+sin {} t, 0, 6.283)")
    ;
+  this->AddOperationInnerHandler ("plotConeUsualProjection", CommandListFunctions::innerPlotConeUsualProjection, "",
+   "<b>Calculus teaching function.</b>Plots a cone with center of base at (0,0,0) with base lying in the xy plane\
+    of radius r and height h(first and second argument) viewed from a distance d (third argument) and viewing height vh (fourth argument).\
+   ",
+   "plotConeUsualProjection(2, 4, 3, 2)")
+   ;
+
   this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \

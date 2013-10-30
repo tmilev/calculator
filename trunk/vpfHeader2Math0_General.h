@@ -10,6 +10,21 @@
 
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
+//we are wrapping the math.h c++ functions for portability reasons (if for some reason we want to change from math.h to a better floating point
+//library, we only need to change the implementation of the Floatingpoint class.
+class FloatingPoint
+{
+public:
+  static double sin(double argument);
+  static double cos(double argument);
+  static double arctan(double argument);
+  static double arcsin(double argument);
+  static double sqrt(double argument);
+  static double power(double base, double exponent);
+  static double log(double argument);
+  static double floor(double argument);
+};
+
 class WeylGroup;
 class AlgebraicClosureRationals;
 
@@ -2592,7 +2607,7 @@ public:
   double getAngleFromXandY(double x, double y, double neighborX, double neighborY);
   void ScaleToUnitLength(Vector<double>& theRoot)
   { double theLength=this->theBilinearForm.ScalarProduct(theRoot, theRoot);
-    theLength=sqrt(theLength);
+    theLength=FloatingPoint::sqrt(theLength);
     theRoot/=theLength;
   }
   void RotateOutOfPlane
@@ -7183,6 +7198,7 @@ public:
   }
 //  bool ProjectFromFacet(Facet& input);
   bool ProjectFromFacetNormal(Vector<Rational>& input);
+  Vector<Rational> ProjectOnMe(Vector<Rational>& input)const;
   bool ContainsPoint(Vector<Rational> & thePoint);
   void MakeFromNormalAndPoint(Vector<Rational>& inputPoint, Vector<Rational>& inputNormal);
   bool HasACommonPointWithPositiveTwoToTheNth_ant();

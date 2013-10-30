@@ -1507,6 +1507,15 @@ bool affineHyperplane::operator ==(const affineHyperplane& right)
   return tempRat1.IsEqualTo(tempRat2);
 }
 
+Vector<Rational> affineHyperplane::ProjectOnMe(Vector<Rational>& input)const
+{ //output=input+x*normal  and <input+x*normal, normal>=0 =>
+  //x=-<input, normal>/<normal,normal>
+  Rational theNormalCoeff=-input.ScalarEuclidean(this->normal)/this->normal.ScalarEuclidean(this->normal);
+  Vector<Rational> output;
+  output=input+this->normal*theNormalCoeff;
+  return output;
+}
+
 bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
 { Rational tempRat;
   int tempI=input.GetIndexFirstNonZeroCoordinate();
@@ -1516,9 +1525,9 @@ bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
     return false;
   this->affinePoint.MakeZero(input.size);
   this->affinePoint.SetSize(input.size-1);
-  this->affinePoint.TheObjects[tempI].Assign(input.TheObjects[input.size-1]);
-  this->affinePoint.TheObjects[tempI].Minus();
-  this->affinePoint.TheObjects[tempI].DivideBy(input.TheObjects[tempI]);
+  this->affinePoint[tempI]=(input[input.size-1]);
+  this->affinePoint[tempI].Minus();
+  this->affinePoint[tempI].DivideBy(input[tempI]);
   this->normal=(input);
   this->normal.SetSize(input.size-1);
   return true;

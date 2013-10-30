@@ -1146,7 +1146,7 @@ void CoxeterGroup::ComputeIrreducibleRepresentations()
 // by masking. dividing by 3 a few times earlier and only checking
 // 1 and 5 mod 6 would require more complicated iteration that +=2
 void factor_integer_l(int n, List<int> f)
-{  for(int i=2; i<sqrt(n); i+=2)
+{  for(int i=2; i<FloatingPoint::sqrt(n); i+=2)
    {  if(n%i==0)
       {  f.AddOnTop(i);
          factor_integer_l(n/i,f);

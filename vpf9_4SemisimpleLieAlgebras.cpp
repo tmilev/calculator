@@ -4577,7 +4577,14 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
 
 std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFormat)const
 { if (this->FKNilradicalCandidates.size==0)
-    return "";
+  { if (this->owner->flagComputeNilradicals)
+    { if (this->AmRegularSA())
+        return "Nilradicals not computed, but that is OK because this a root subalgebra. ";
+      else
+        return "<b>Nilradicals not computed AND this is not a root subalgebra.</b>";
+    } else
+      return "";
+  }
   std::stringstream out;
   out << this->ToStringNilradicalsSummary(theFormat);
   Vector<Rational> primalBase;
@@ -5446,6 +5453,8 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes()
       << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << "... ";
       theReport.Report(reportStream2.str());
     }
+    if (currentSA.AmRegularSA())
+      continue;
     currentSA.ComputePairingTable(this->theGlobalVariables);
     if (this->theGlobalVariables!=0)
     { std::stringstream reportStream2;

@@ -1062,7 +1062,19 @@ bool CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras(CommandLi
   theSAs.flagComputeNilradicals=true;
   theSAs.ComputePairingTablesAndFKFTtypes();
   output=input;
-  return true;
+  std::fstream theFile;
+  std::string theFileName;
+  theFileName=theCommands.PhysicalPathOutputFolder + "FKFTcomputation.html";
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML=true;
+  tempFormat.flagUseLatex=true;
+  tempFormat.flagUseHTML=true;
+  tempFormat.flagCandidateSubalgebraShortReportOnly=false;
+  CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  theFile << theSAs.ToString(&tempFormat);
+  std::stringstream out;
+  out << "<a href=\"" << theCommands.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(CommandList& theCommands, const Expression& input, Expression& output)

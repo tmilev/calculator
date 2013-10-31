@@ -68,7 +68,7 @@ public:
   static bool outerDifferentiateWRTxTimesAny(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotConeUsualProjection(CommandList& theCommands, const Expression& input, Expression& output);
-
+  static bool innerPlotWedge(CommandList& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

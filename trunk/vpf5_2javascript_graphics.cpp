@@ -711,14 +711,12 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     { std::stringstream tmpStream, tmpStream2;
       tmpStream << "textEbasisUserInput" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesUserInput[i][j]=tmpStream.str();
-      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j]
-      << "\">" << "</textarea>\n";
+      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j] << "\">" << "</textarea>\n";
     }
     out << "<br>";
   }
   out << "<button onclick=\"startProjectionPlaneUser" << timesCalled << "();\">Change to basis</button><br>";
-  out
-  << "The bilinear form of the vector space follows. The ij^th element "
+  out << "The bilinear form of the vector space follows. The ij^th element "
   << " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite "
   << " symmetric bilinear form"
   << " the javascript might crash. You are expected to enter a symmetric strictly positive definite matrix. <br> \n";
@@ -774,8 +772,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
       out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
     out << "\n";
   }
-  this->theBuffer.ModifyToOrthonormalNoShiftSecond
-  (this->theBuffer.BasisProjectionPlane[0][1], this->theBuffer.BasisProjectionPlane[0][0]);
+  this->theBuffer.ModifyToOrthonormalNoShiftSecond(this->theBuffer.BasisProjectionPlane[0][1], this->theBuffer.BasisProjectionPlane[0][0]);
 //  (this->theBuffer.BasisProjectionPlane[0][0], this->theBuffer.BasisProjectionPlane[0][1]);
   out
   << "var VectorE1Cone" << timesCalled << "= new Array(" << theDimension << ");\n"

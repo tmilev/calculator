@@ -83,6 +83,7 @@ class quasiDiffOp;
 class Cone;
 class ConeComplex;
 class Lattice;
+template <class coefficient>
 class affineHyperplane;
 class affineCones;
 
@@ -398,6 +399,9 @@ public:
         return -1;
     }
     return result;
+  }
+  static inline double E()
+  { return 2.718281828459;
   }
   static inline double Pi()
   { return 3.141592653589793238462643383279;

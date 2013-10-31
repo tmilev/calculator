@@ -451,6 +451,12 @@ void CommandList::initPredefinedInnerFunctions()
    ",
    "plotConeUsualProjection(2, 4, 3, 2)")
    ;
+  this->AddOperationInnerHandler ("plotWedge", CommandListFunctions::innerPlotWedge, "",
+   "<b>Calculus teaching function.</b>Plots a wedge centered at x,y (first, second argument) or radius r (third argument) \
+   with starting/end angle given by fourth and fifth argument.\
+   ",
+   "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
+   ;
 
   this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \

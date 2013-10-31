@@ -5217,7 +5217,7 @@ public:
   void GenerateRootSystemFromKillingFormMatrix();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
-  void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
+  void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(Vector<Rational> & orthonormalBasisVector1, Vector<Rational> & orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   void GetLowestElementInOrbit
   (Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis, bool RhoAction, bool UseMinusRho, int* sign=0,
@@ -7179,69 +7179,6 @@ void Matrix<Element>::GetVectorFromColumn(int colIndex, Vector<Element>& output)
   for (int i=0; i<this->NumRows; i++)
     output[i]=this->elements[i][colIndex];
 }
-
-class affineHyperplane
-{
-public:
-  std::string DebugString;
-  Vector<Rational> affinePoint;
-  Vector<Rational> normal;
-  void ToString(std::string& output);
-  void ComputeDebugString()
-  { this->ToString(this->DebugString);
-  }
-  //void InduceFromFacet(Facet& input);
-  //the below returns false if the projection is not of full dimension
-  unsigned int HashFunction()const;
-  static inline unsigned int HashFunction(const affineHyperplane& input)
-  { return input.HashFunction();
-  }
-//  bool ProjectFromFacet(Facet& input);
-  bool ProjectFromFacetNormal(Vector<Rational>& input);
-  Vector<Rational> ProjectOnMe(Vector<Rational>& input)const;
-  bool ContainsPoint(Vector<Rational> & thePoint);
-  void MakeFromNormalAndPoint(Vector<Rational>& inputPoint, Vector<Rational>& inputNormal);
-  bool HasACommonPointWithPositiveTwoToTheNth_ant();
-  void Assign(const affineHyperplane& right)
-  { this->affinePoint=right.affinePoint;
-    this->normal=right.normal;
-  }
-  inline void operator=(const affineHyperplane& right){ this->Assign(right); }
-  bool operator==(const affineHyperplane& right);
-};
-
-class affineHyperplanes: public List<affineHyperplane>
-{
-public:
-  std::string DebugString;
-  void ToString(std::string& output);
-  void ComputeDebugString(){this->ToString(this->DebugString); }
-};
-
-class affineCone
-{
-public:
-  affineHyperplanes theWalls;
-  unsigned int HashFunction() const;
-  inline static unsigned int HashFunction(const affineCone& input){return input.HashFunction();}
-  inline int GetDimension();
-  void SuperimposeAffineCones(affineCones& theOtherComplex);
-  //void induceFromCombinatorialChamber(CombinatorialChamber& input);
-  bool WallIsInternalInCone(affineHyperplane& theKillerCandidate);
-  //The below function returns true if the system of homogeneous linear inequalities Ax<=b
-  //has a solution, false otherwise, where A is a matrix and x and b are column vectors.
-//  bool SystemLinearInequalitiesHasSolution
-//    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
-  bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
-  void Assign(const affineCone& right){this->theWalls=(right.theWalls); }
-  inline void operator=(const affineCone& right){this->Assign(right); }
-};
-
-class affineCones: public HashedList<affineCone>
-{
-public:
-  void SuperimposeAffineCones(affineCones& theOtherComplex);
-};
 
 class KLpolys: public HashedList<Vector<Rational> >
 {

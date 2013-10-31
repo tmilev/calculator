@@ -183,7 +183,6 @@ class Expression
     return (*this)[1].IsAtom();
   }
   bool HasSameContextArgumentsNoLog()const;
-  bool IsConstantNumber()const;
   bool IsFrozen()const;
   bool IsAtomThatFreezesArguments(std::string* outputWhichAtom=0)const;
   bool IsAtomWhoseExponentsAreInterprettedAsFunction(std::string* outputWhichAtom=0)const;
@@ -375,7 +374,9 @@ class Expression
   bool CheckConsistency()const;
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
-  bool IsDouble(double* whichDouble=0)const;
+  bool IsConstantNumber()const;
+  bool IsRealDouble(double* whichDouble=0)const;
+
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
@@ -1116,7 +1117,7 @@ public:
   int opPi()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\pi");
   }
-  int opEulerConstant()
+  int opE()
   { return this->theAtoms.GetIndexIMustContainTheObject("e");
   }
   int opLog()
@@ -1274,9 +1275,9 @@ public:
   static bool innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output);
   void AutomatedTestRun
-(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
+  (List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
   ;
-
+  static bool innerEvaluateToDouble(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerTranspose(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerUnion(CommandList& theCommands, const Expression& input, Expression& output);

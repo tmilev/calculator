@@ -8,11 +8,7 @@ static ProjectInformationInstance ProjectInfoVpfImplementationHeaderModulesSSLie
 
 template<class coefficient>
 Rational ModuleSSalgebra<coefficient>::hwTrace
-(const Pair
- <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
- MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
- & thePair, ProgressReport* theProgressReport
-   )
+(const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> > &thePair, ProgressReport* theProgressReport)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::hwTrace");
   int indexInCache=this->cachedPairs.GetIndex(thePair);
   if (indexInCache!=-1)
@@ -31,8 +27,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   { newLeft.generatorsIndices.size--;
     newLeft.Powers.size--;
   }
-  int theIndexMinus=
-  2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
+  int theIndexMinus=2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
   int theSimpleIndex= theIndex-this->GetOwner().GetNumPosRoots()-this->GetOwner().GetRank();
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
   Accum.Powers.ReservE(oldRight.Powers.size);
@@ -90,8 +85,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
   }
   if (theProgressReport!=0 && this->cachedPairs.size<500000)
   { std::stringstream tempStream;
-    tempStream << "Number of cached pairs: " << this->cachedPairs.size
-    << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
+    tempStream << "Number of cached pairs: " << this->cachedPairs.size << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
     theProgressReport->Report(tempStream.str());
   }
 
@@ -104,8 +98,7 @@ Rational ModuleSSalgebra<coefficient>::hwTrace
 }
 
 template<class coefficient>
-void ModuleSSalgebra<coefficient>::ApplyTAA
-(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
+void ModuleSSalgebra<coefficient>::ApplyTAA(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
 { for (int i=0; i<theMon.generatorsIndices.size; i++)
     theMon.generatorsIndices[i]=
     this->GetOwner().GetNumPosRoots()*2+
@@ -116,9 +109,7 @@ void ModuleSSalgebra<coefficient>::ApplyTAA
 
 template<class coefficient>
 Rational ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly
-  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
-   ProgressReport* theProgressReport)
+(const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon, const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon, ProgressReport* theProgressReport)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly");
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
@@ -140,8 +131,7 @@ Rational ModuleSSalgebra<coefficient>::hwtaabfSimpleGensOnly
 }
 
 template<class coefficient>
-void ModuleSSalgebra<coefficient>::Substitution
-(const PolynomialSubstitution<Rational>& theSub)
+void ModuleSSalgebra<coefficient>::Substitution(const PolynomialSubstitution<Rational>& theSub)
 { for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
     this->actionsGeneratorsMaT[i].Substitution(theSub);
   for (int i=0; i<this->actionsGeneratorS.size; i++)
@@ -171,8 +161,7 @@ void ModuleSSalgebra<coefficient>::Substitution
 
 template <class coefficient>
 MatrixTensor<coefficient>& ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX
-(int generatorIndex, GlobalVariables& theGlobalVariables,
- const coefficient& theRingUnit, const coefficient& theRingZero)
+(int generatorIndex, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<coefficient>::GetActionGeneratorIndeX");
   int numGenerators=this->GetOwner().GetNumGenerators();
   if (generatorIndex<0 || generatorIndex>=numGenerators)

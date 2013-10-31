@@ -22,7 +22,7 @@ double FloatingPoint::log(double argument)
 }
 
 double FloatingPoint::arctan(double argument)
-{ return ::log(argument);
+{ return ::atan(argument);
 }
 
 double FloatingPoint::floor(double argument)

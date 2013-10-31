@@ -149,8 +149,8 @@ bool CommandListFunctions::innerLog(CommandList& theCommands, const Expression& 
   double theArgument;
   if (input.IsEqualToZero())
     return output.SetError("Logarithm of zero is undefined.", theCommands);
-  if (!input.IsDouble(&theArgument))
-  { if (input.IsAtomGivenData(theCommands.opEulerConstant()))
+  if (!input.IsRealDouble(&theArgument))
+  { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue(1, theCommands);
     return false;
   }
@@ -167,16 +167,12 @@ bool CommandListFunctions::innerLog(CommandList& theCommands, const Expression& 
 
 bool CommandListFunctions::innerSin(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerSin");
+  if (input.IsAtomGivenData(theCommands.opPi()))
+    return output.AssignValue(0, theCommands);
   double theArgument;
-  if (!input.IsDouble(&theArgument))
-  { if (input.IsAtomGivenData(theCommands.opPi()))
-      return output.AssignValue(0, theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
-      if (input[1].IsDouble(&theArgument) && input[2].IsAtomGivenData(theCommands.opPi()))
-        return output.AssignValue(FloatingPoint::sin (theArgument*MathRoutines::Pi()), theCommands);
+  if (!input.IsRealDouble(&theArgument))
     return false;
-  }
-  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
 }
 
 bool CommandListFunctions::innerFactorial(CommandList& theCommands, const Expression& input, Expression& output)
@@ -190,15 +186,11 @@ bool CommandListFunctions::innerFactorial(CommandList& theCommands, const Expres
 
 bool CommandListFunctions::innerCos(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCos");
+  if (input.IsAtomGivenData(theCommands.opPi()))
+    return output.AssignValue(-1, theCommands);
   double theArgument;
-  if (!input.IsDouble(&theArgument))
-  { if (input.IsAtomGivenData(theCommands.opPi()))
-      return output.AssignValue(-1, theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
-      if (input[1].IsDouble(&theArgument) && input[2].IsAtomGivenData(theCommands.opPi()))
-        return output.AssignValue(FloatingPoint::cos(theArgument*MathRoutines::Pi()), theCommands);
+  if (!input.IsRealDouble(&theArgument))
     return false;
-  }
   return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
 }
 
@@ -1051,54 +1043,115 @@ bool CommandListFunctions::innerComputeSemisimpleSubalgebras(CommandList& theCom
   return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
+bool CommandListFunctions::innerPlotWedge(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerPlotWedge");
+  if (input.children.size!=6)
+  { theCommands.Comments << "<hr>innerPlotWedge takes as input 4 arguments: x,y coordinates of center, starting angle, final angle. ";
+    return false;
+  }
+  Rational xCoord, yCoord, radius, startAngle, endAngle;
+  if (!input[1].IsOfType<Rational>(&xCoord) || !input[2].IsOfType<Rational>(&yCoord) || !input[3].IsOfType<Rational>(&radius) ||
+      !input[4].IsOfType<Rational>(&startAngle) || !input[5].IsOfType<Rational>(&endAngle))
+  { theCommands.Comments << "<hr>Failed to extract x, y coordinate, radius, start angle, end angle from " << input.ToString() << ". ";
+    return false;
+  }
+  std::stringstream out;
+  CalculusFunctionPlot thePlot;
+  double x1wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(startAngle.DoubleValue()));
+  double y1wedge= MathRoutines::ReducePrecision(yCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::sin(startAngle.DoubleValue()));
+  double x2wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(endAngle.DoubleValue()));
+  double y2wedge= MathRoutines::ReducePrecision(yCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::sin(endAngle.DoubleValue()));
+  double xCoordDouble=MathRoutines::ReducePrecision(xCoord.DoubleValue());
+  double yCoordDouble=MathRoutines::ReducePrecision(yCoord.DoubleValue());
+  double startAngleDouble=MathRoutines::ReducePrecision(startAngle.DoubleValue());
+  double radiusDouble=MathRoutines::ReducePrecision(radius.DoubleValue());
+  double endAngleDouble=MathRoutines::ReducePrecision(endAngle.DoubleValue());
+  out << "\\pscustom*[linecolor=cyan]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
+  << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
+  << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
+  out << "\\pscustom[linecolor=blue]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
+  << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
+  << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
+  thePlot.lowerBounds.AddOnTop(-5);
+  thePlot.upperBounds.AddOnTop(5);
+  thePlot.thePlotElementS.AddOnTop(input);
+  thePlot.thePlotStrings.AddOnTop(out.str());
+  thePlot.thePlotStringsWithHtml.AddOnTop(out.str());
+  return output.AssignValue(thePlot, theCommands);
+}
+
 bool CommandListFunctions::innerPlotConeUsualProjection(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerPlotConeUsualProjection");
   if (input.children.size!=5)
   { theCommands.Comments << "<hr>PlotConeUsualProjection takes 4 arguments. ";
     return false;
   }
-  Rational radius, height, distance, viewPointHeight;
-  if (!input[1].IsOfType<Rational>(&radius) || !input[2].IsOfType<Rational>(&height) ||
-      !input[3].IsOfType<Rational>(&distance) ||!input[4].IsOfType<Rational>(&viewPointHeight) )
+  double radius, height, distance, viewPointHeight;
+  if (!input[1].IsRealDouble(&radius) || !input[2].IsRealDouble(&height) || !input[3].IsRealDouble(&distance) || !input[4].IsRealDouble(&viewPointHeight) )
   { theCommands.Comments << "<hr> failed to extract radius, height, distance, viewpoint height from " << input.ToString();
     return false;
   }
-  affineHyperplane projectionPane;
+  affineHyperplane<double> projectionPane;
   projectionPane.normal.MakeZero(3);
   projectionPane.normal[1]=-distance;
   projectionPane.normal[2]=-viewPointHeight;
   projectionPane.affinePoint.MakeZero(3);
   projectionPane.affinePoint[1]=distance;
   projectionPane.affinePoint[2]=viewPointHeight;
-  Vector<Rational> pointCircle1, pointCircle2;
-  Vector<Rational> axis1, axis2, axis3;
+  Vector<double> pointCircle1, pointCircle2;
+  Vector<double> axis1, axis2, axis3;
 
   pointCircle1.MakeZero(3);
   pointCircle2.MakeZero(3);
   pointCircle1[1]=radius;
   pointCircle2[1]=-radius;
-  Vector<Rational> projection1= projectionPane.ProjectOnMe(pointCircle1);
-  Vector<Rational> projection2= projectionPane.ProjectOnMe(pointCircle2);
-  Vector<Rational> XdiameterVectorProjection=projection1-projection2;
-  double theProjYradius= FloatingPoint::sqrt(XdiameterVectorProjection.GetVectorDouble().ScalarEuclidean(XdiameterVectorProjection.GetVectorDouble()))/2;
-  double theProjXradius=radius.DoubleValue();
+  Vector<double> projection1= projectionPane.ProjectOnMe(pointCircle1);
+  Vector<double> projection2= projectionPane.ProjectOnMe(pointCircle2);
+  //std::cout << "<br>projection1: " << projection1.ToString();
+  //std::cout << "<br>projection2: " << projection2.ToString();
+  Vector<double> XdiameterVectorProjection=projection1-projection2;
+  double theProjYradius= FloatingPoint::sqrt(XdiameterVectorProjection.ScalarEuclidean(XdiameterVectorProjection))/2;
+  double theProjXradius=radius;
+  //std::cout << "<br>theProjYradius: " << theProjYradius;
+  //std::cout << "<br>theProjXradius: " << theProjXradius;
   CalculusFunctionPlot thePlot;
   std::stringstream out;
-  out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{0}{6.283185307}{cos(t)*" << theProjXradius << " |sin(t)*" << theProjYradius << "}";
-  Vector<Rational> tipOfTheCone;
+  Vector<double> tipOfTheCone, centerOfTheCone;
+  centerOfTheCone.MakeZero(3);
   tipOfTheCone.MakeZero(3);
   tipOfTheCone[2]=height;
-  Vector<Rational> coneTipProjectedShifted= projectionPane.ProjectOnMe(tipOfTheCone)-projectionPane.affinePoint;
-  double theConeProjectionHeight=FloatingPoint::sqrt(coneTipProjectedShifted.ScalarEuclidean(coneTipProjectedShifted).DoubleValue());
-  out << "\\psline[linecolor=\\psColorGraph](0,0)(0," << theConeProjectionHeight << ")";
-  if (theConeProjectionHeight>theProjYradius )
-  { double yCoordPointTangency= 2*theProjYradius*theProjYradius/theConeProjectionHeight;
-    double xCoordPointTangency=theProjXradius*FloatingPoint::sqrt(1- yCoordPointTangency*2/theConeProjectionHeight);
-    std::cout << "<br>" << yCoordPointTangency;
-    std::cout << "<br>" << xCoordPointTangency;
-
-    out << "\\psline[linecolor=\\psColorGraph](" << xCoordPointTangency << ", " << yCoordPointTangency << ")(0, " << theConeProjectionHeight << ")";
-    out << "\\psline[linecolor=\\psColorGraph](" << -xCoordPointTangency << ", " << yCoordPointTangency << ")(0, " << theConeProjectionHeight << ")";
+  std::cout << "<br>radius, height, distance, view height: " << radius << ", " << height << ", " << distance << ", " << viewPointHeight;
+//  std::cout << "<br>projectionPane.ProjectOnMe(tipOfTheCone): " << projectionPane.ProjectOnMe(tipOfTheCone);
+  Vector<double> coneHeightVectorProjectedShifted= projectionPane.ProjectOnMe(tipOfTheCone)-projectionPane.ProjectOnMe(centerOfTheCone);
+//  std::cout << "<br>coneHeightVectorProjectedShifted: " << coneHeightVectorProjectedShifted.ToString();
+  double theConeProjectionHeight=FloatingPoint::sqrt(coneHeightVectorProjectedShifted.ScalarEuclidean(coneHeightVectorProjectedShifted));
+//  std::cout << "<br>theConeProjectionHeight: " << theConeProjectionHeight;
+  out << "\\psline[linecolor=black](0,0)(0," << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
+  if (theConeProjectionHeight>theProjYradius)
+  { double yCoordPointTangency= theProjYradius*theProjYradius/theConeProjectionHeight;
+    double xCoordPointTangency=theProjXradius*FloatingPoint::sqrt(1- yCoordPointTangency/theConeProjectionHeight);
+    out << "\\psline[linecolor=\\psColorGraph](" << MathRoutines::ReducePrecision(xCoordPointTangency) << ", "
+    << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
+    out << "\\psline[linecolor=\\psColorGraph](" << MathRoutines::ReducePrecision(-xCoordPointTangency) << ", "
+    << MathRoutines::ReducePrecision(yCoordPointTangency) << ")(0, " << MathRoutines::ReducePrecision(theConeProjectionHeight) << ")";
+    double theAngleVisibleEnd=MathRoutines::Pi()/2;
+    double theAngleVisibleStart=-theAngleVisibleEnd;
+    double theAngleHiddenEnd=MathRoutines::Pi()/2;
+    if (theProjXradius!=0)
+    { theAngleVisibleEnd=FloatingPoint::arctan(yCoordPointTangency*theProjXradius/(xCoordPointTangency*theProjYradius));
+      theAngleVisibleStart = -MathRoutines::Pi()-theAngleVisibleEnd;
+      theAngleHiddenEnd=MathRoutines::Pi()-theAngleVisibleEnd;
+    }
+    out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleStart)
+    << "}{" << MathRoutines::ReducePrecision(theAngleVisibleEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
+    << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
+    out << "\\psparametricplot[algebraic, linestyle=dashed, linecolor=\\psColorGraph]{" << MathRoutines::ReducePrecision(theAngleVisibleEnd)
+    << "}{" << MathRoutines::ReducePrecision(theAngleHiddenEnd) << "}{" << MathRoutines::ReducePrecision(theProjXradius)
+    << "*cos(t) |" << MathRoutines::ReducePrecision(theProjYradius) << "*sin(t)}";
+  } else
+  { theCommands.Comments << "<hr>Cone is not high enough and therefore has no tip. ";
+    out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{0}{6.283185307}{cos(t)*" << MathRoutines::ReducePrecision(theProjXradius)
+    << " |sin(t)*" << MathRoutines::ReducePrecision(theProjYradius) << "}";
   }
   thePlot.lowerBounds.AddOnTop(-5);
   thePlot.upperBounds.AddOnTop(5);
@@ -1157,4 +1210,59 @@ bool CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(Comman
     out << ") ) )";
   }
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerEvaluateToDouble(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
+  std::cout << "<br>evaluatetodouble: " << input.ToString();
+  if (input.IsOfType<double>())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<Rational>())
+    return output.AssignValue(input.GetValue<Rational>().DoubleValue(), theCommands);
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  if (theCommands.RecursionDeptH >theCommands.MaxRecursionDeptH)
+  { theCommands.Comments << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+    return false;
+  }
+  if (input.IsAtomGivenData(theCommands.opE()))
+    return output.AssignValue(MathRoutines::E(), theCommands);
+  if (input.IsAtomGivenData(theCommands.opPi()))
+    return output.AssignValue(MathRoutines::Pi(), theCommands);
+
+  bool isArithmeticOperationTwoArguments=
+  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
+  ;
+  if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+    std::cout << "Starting with sqrt: " << input.ToStringFull();
+  if (isArithmeticOperationTwoArguments)
+  { double leftD, rightD;
+    if (!input[1].IsRealDouble(&leftD) || !input[2].IsRealDouble(&rightD))
+      return false;
+    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+      return output.AssignValue(leftD*rightD, theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3))
+      return output.AssignValue(leftD+rightD, theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+      return output.AssignValue(FloatingPoint::power(leftD, rightD) , theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3))
+      return output.AssignValue(FloatingPoint::power(rightD,1/leftD), theCommands);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+      return output.AssignValue(leftD/rightD, theCommands);
+    crash << "This is a piece of code which should never be reached. " << crash;
+  }
+  if(input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),2))
+  { double argumentD;
+    if (!input[1].IsRealDouble(&argumentD))
+      return false;
+    if (argumentD<0)
+      return false;
+    return output.AssignValue(FloatingPoint::sqrt(argumentD), theCommands);
+  }
+  return false;
 }

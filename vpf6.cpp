@@ -3291,15 +3291,17 @@ bool Expression::IsSmallInteger(int* whichInteger)const
   return theRat.IsSmallInteger(whichInteger);
 }
 
-bool Expression::IsDouble(double* whichDouble)const
-{ if (this->IsOfType<double>(whichDouble))
-    return true;
-  if (this->IsOfType<Rational>())
-  { if (whichDouble!=0)
-      *whichDouble=this->GetValue<Rational>().DoubleValue();
-    return true;
-  }
-  return false;
+bool Expression::IsRealDouble(double* whichDouble)const
+{ if (this->theBoss==0)
+    return false;
+  Expression doubleE;
+  if (!this->theBoss->innerEvaluateToDouble(*this->theBoss, *this, doubleE))
+    return false;
+  if (!doubleE.IsOfType<double>())
+    return false;
+  if (whichDouble!=0)
+    *whichDouble=doubleE.GetValue<double>();
+  return true;
 }
 
 bool Expression::IsConstantNumber()const
@@ -3307,7 +3309,7 @@ bool Expression::IsConstantNumber()const
     return false;
   if (this->IsAtomGivenData(this->theBoss->opPi()))
     return true;
-  if (this->IsAtomGivenData(this->theBoss->opEulerConstant()))
+  if (this->IsAtomGivenData(this->theBoss->opE()))
     return true;
 //  std::cout << "testing for constant: " << this->ToString();
 //  std::cout << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];

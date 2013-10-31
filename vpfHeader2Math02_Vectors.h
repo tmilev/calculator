@@ -251,7 +251,7 @@ public:
     output/=(this->TheObjects[this->size-1]);
     return true;
   }
-  bool MakeAffineProjectionFromNormal(affineHyperplane& output);
+  bool MakeAffineProjectionFromNormal(affineHyperplane<Rational>& output);
 /*  { int tempI= this->GetIndexFirstNonZeroCoordinate();
     if (tempI==this->size-1)
       return false;
@@ -1239,5 +1239,151 @@ int Vectors<coefficient>::ArrangeFirstVectorsBeOfMaxPossibleRank(Matrix<coeffici
   }
   return (oldRank);
 }
+
+template <class coefficient>
+class affineHyperplane
+{
+public:
+  Vector<coefficient> affinePoint;
+  Vector<coefficient> normal;
+  void ToString(std::string& output);
+  //void InduceFromFacet(Facet& input);
+  //the below returns false if the projection is not of full dimension
+  unsigned int HashFunction()const;
+  static inline unsigned int HashFunction(const affineHyperplane& input)
+  { return input.HashFunction();
+  }
+//  bool ProjectFromFacet(Facet& input);
+  bool ProjectFromFacetNormal(Vector<coefficient>& input);
+  Vector<coefficient> ProjectOnMe(Vector<coefficient>& input)const;
+  bool ContainsPoint(Vector<coefficient> & thePoint);
+  void MakeFromNormalAndPoint(Vector<coefficient>& inputPoint, Vector<coefficient>& inputNormal);
+  bool HasACommonPointWithPositiveTwoToTheNth_ant();
+  bool operator==(const affineHyperplane& right);
+};
+
+template <class coefficient>
+bool affineHyperplane<coefficient>::operator ==(const affineHyperplane& right)
+{ Vector<Rational> tempRoot1, tempRoot2;
+  tempRoot1=(this->normal);
+  tempRoot2=(right.normal);
+  tempRoot1.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+  tempRoot2.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+  if (!(tempRoot1==tempRoot2))
+    return false;
+  Rational tempRat1, tempRat2;
+  tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
+  tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
+  return tempRat1.IsEqualTo(tempRat2);
+}
+
+template <class coefficient>
+Vector<coefficient> affineHyperplane<coefficient>::ProjectOnMe(Vector<coefficient>& input)const
+{ //output=input+x*normal  and <input+x*normal, normal>=0 =>
+  //x=-<input, normal>/<normal,normal>
+  coefficient theNormalCoeff=-input.ScalarEuclidean(this->normal)/this->normal.ScalarEuclidean(this->normal);
+  Vector<coefficient> output;
+  output=input+this->normal*theNormalCoeff;
+  return output;
+}
+
+template <class coefficient>
+bool affineHyperplane<coefficient>::ProjectFromFacetNormal(Vector<coefficient>& input)
+{ Rational tempRat;
+  int tempI=input.GetIndexFirstNonZeroCoordinate();
+  if(tempI==-1)
+    crash << crash;
+  if (tempI==input.size-1)
+    return false;
+  this->affinePoint.MakeZero(input.size);
+  this->affinePoint.SetSize(input.size-1);
+  this->affinePoint[tempI]=(input[input.size-1]);
+  this->affinePoint[tempI].Minus();
+  this->affinePoint[tempI].DivideBy(input[tempI]);
+  this->normal=(input);
+  this->normal.SetSize(input.size-1);
+  return true;
+}
+
+template <class coefficient>
+bool affineHyperplane<coefficient>::ContainsPoint(Vector<coefficient>& thePoint)
+{ Rational tempRat1, tempRat2;
+  tempRat1=this->normal.ScalarEuclidean(thePoint);
+  tempRat2=this->normal.ScalarEuclidean(this->affinePoint);
+  return tempRat2.IsEqualTo(tempRat1);
+}
+
+template <class coefficient>
+bool affineHyperplane<coefficient>::HasACommonPointWithPositiveTwoToTheNth_ant()
+{ Rational tempRat;
+  tempRat= this->normal.ScalarEuclidean(this->affinePoint);
+  if (tempRat.IsEqualToZero())
+    return true;
+  for(int i=0; i<this->normal.size; i++)
+  { Rational& tempRat2= this->normal[i];
+    if (tempRat.IsNegative() && tempRat2.IsNegative())
+      return true;
+    if (tempRat.IsPositive() && tempRat2.IsPositive())
+      return true;
+  }
+  return false;
+}
+
+template <class coefficient>
+void affineHyperplane<coefficient>::MakeFromNormalAndPoint(Vector<coefficient>& inputPoint, Vector<coefficient>& inputNormal)
+{ this->affinePoint=(inputPoint);
+  this->normal=(inputNormal);
+}
+
+template <class coefficient>
+void affineHyperplane<coefficient>::ToString(std::string& output)
+{ std::stringstream out;
+  out << "point: " << this->affinePoint << ", normal: " << this->normal;
+  output= out.str();
+}
+
+template <class coefficient>
+unsigned int affineHyperplane<coefficient>::HashFunction() const
+{ //warning: if normal gets streched, the hashfunction should not change!
+  Vector<Rational> tempNormal;
+  tempNormal=(this->normal);
+  tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+  Rational tempRat=this->normal.ScalarEuclidean(this->affinePoint);
+  return this->normal.HashFunction()+ tempRat.HashFunction();
+}
+
+class affineHyperplanes: public List<affineHyperplane<Rational> >
+{
+public:
+  std::string DebugString;
+  void ToString(std::string& output);
+  void ComputeDebugString(){this->ToString(this->DebugString); }
+};
+
+class affineCone
+{
+public:
+  affineHyperplanes theWalls;
+  unsigned int HashFunction() const;
+  inline static unsigned int HashFunction(const affineCone& input)
+  { return input.HashFunction();
+  }
+  inline int GetDimension();
+  void SuperimposeAffineCones(affineCones& theOtherComplex);
+  //void induceFromCombinatorialChamber(CombinatorialChamber& input);
+  bool WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate);
+  //The below function returns true if the system of homogeneous linear inequalities Ax<=b
+  //has a solution, false otherwise, where A is a matrix and x and b are column vectors.
+//  bool SystemLinearInequalitiesHasSolution
+//    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
+  bool SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output);
+};
+
+class affineCones: public HashedList<affineCone>
+{
+public:
+  void SuperimposeAffineCones(affineCones& theOtherComplex);
+};
+
 
 #endif

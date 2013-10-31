@@ -4485,7 +4485,7 @@ void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ration
     theRoot[index]+=-1;
 }
 
-void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
+void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
 { int tempI= this->theElements[index].reflections.size;
   for (int i=0; i<tempI; i++)
   { this->SimpleReflectionRoot(this->theElements[index].reflections[i], output.affinePoint, RhoAction, UseMinusRho);

@@ -1471,11 +1471,11 @@ void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
   this->modifiedRoot=right.modifiedRoot;
 }
 
-bool affineCone::SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output)
+bool affineCone::SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output)
 { return true;
 }
 
-bool affineCone::WallIsInternalInCone(affineHyperplane& theKillerCandidate)
+bool affineCone::WallIsInternalInCone(affineHyperplane<Rational>& theKillerCandidate)
 { return true;
 }
 
@@ -1491,91 +1491,6 @@ inline unsigned int affineCone::HashFunction() const
   for (int i=0; i<tempMin; i++)
     result+= this->theWalls[i].HashFunction()*::SomeRandomPrimes[i];
   return result;
-}
-
-bool affineHyperplane::operator ==(const affineHyperplane& right)
-{ Vector<Rational> tempRoot1, tempRoot2;
-  tempRoot1=(this->normal);
-  tempRoot2=(right.normal);
-  tempRoot1.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  tempRoot2.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  if (!(tempRoot1==tempRoot2))
-    return false;
-  Rational tempRat1, tempRat2;
-  tempRoot1.ScalarEuclidean(this->affinePoint, tempRat1);
-  tempRoot1.ScalarEuclidean(right.affinePoint, tempRat2);
-  return tempRat1.IsEqualTo(tempRat2);
-}
-
-Vector<Rational> affineHyperplane::ProjectOnMe(Vector<Rational>& input)const
-{ //output=input+x*normal  and <input+x*normal, normal>=0 =>
-  //x=-<input, normal>/<normal,normal>
-  Rational theNormalCoeff=-input.ScalarEuclidean(this->normal)/this->normal.ScalarEuclidean(this->normal);
-  Vector<Rational> output;
-  output=input+this->normal*theNormalCoeff;
-  return output;
-}
-
-bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
-{ Rational tempRat;
-  int tempI=input.GetIndexFirstNonZeroCoordinate();
-  if(tempI==-1)
-    crash << crash;
-  if (tempI==input.size-1)
-    return false;
-  this->affinePoint.MakeZero(input.size);
-  this->affinePoint.SetSize(input.size-1);
-  this->affinePoint[tempI]=(input[input.size-1]);
-  this->affinePoint[tempI].Minus();
-  this->affinePoint[tempI].DivideBy(input[tempI]);
-  this->normal=(input);
-  this->normal.SetSize(input.size-1);
-  return true;
-}
-
-bool affineHyperplane::ContainsPoint(Vector<Rational>& thePoint)
-{ Rational tempRat1, tempRat2;
-  tempRat1=this->normal.ScalarEuclidean(thePoint);
-  tempRat2=this->normal.ScalarEuclidean(this->affinePoint);
-  return tempRat2.IsEqualTo(tempRat1);
-}
-
-bool affineHyperplane::HasACommonPointWithPositiveTwoToTheNth_ant()
-{ Rational tempRat;
-  tempRat= this->normal.ScalarEuclidean(this->affinePoint);
-  if (tempRat.IsEqualToZero())
-    return true;
-  for(int i=0; i<this->normal.size; i++)
-  { Rational& tempRat2= this->normal[i];
-    if (tempRat.IsNegative() && tempRat2.IsNegative())
-      return true;
-    if (tempRat.IsPositive() && tempRat2.IsPositive())
-      return true;
-  }
-  return false;
-}
-
-void affineHyperplane::MakeFromNormalAndPoint(Vector<Rational>& inputPoint, Vector<Rational>& inputNormal)
-{ this->affinePoint=(inputPoint);
-  this->normal=(inputNormal);
-}
-
-void affineHyperplane::ToString(std::string& output)
-{ std::stringstream out;
-  std::string tempS=this->affinePoint.ToString();
-  out << "point: " << tempS;
-  tempS=this->normal.ToString();
-  out << " normal: " << tempS;
-  output= out.str();
-}
-
-unsigned int affineHyperplane::HashFunction() const
-{ //warning: if normal gets streched, the hashfunction should not change!
-  Vector<Rational> tempNormal;
-  tempNormal=(this->normal);
-  tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-  Rational tempRat=this->normal.ScalarEuclidean(this->affinePoint);
-  return this->normal.HashFunction()+ tempRat.HashFunction();
 }
 
 void affineHyperplanes::ToString(std::string& output)

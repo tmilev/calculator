@@ -1502,7 +1502,12 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
     if (this->owner->flagAttemptToSolveSystems)
+    { int startNumAdditions=Rational::TotalLargeAdditions;
+      int startNumMultiplications=Rational::TotalLargeMultiplications;
       this->AttemptToSolveSystem();
+      this->totalRationalAdditionsToSolveSystem+=Rational::TotalLargeAdditions-startNumAdditions;
+      this->totalRationalMultiplicationsToSolveSystem+=Rational::TotalLargeMultiplications-startNumMultiplications;
+    }
   } else
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
@@ -1710,6 +1715,8 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
   this->flagCentralizerIsWellChosen=(false);
   this->totalNumUnknownsNoCentralizer=(0);
   this->totalNumUnknownsWithCentralizer=(0);
+  this->totalRationalAdditionsToSolveSystem=0;
+  this->totalRationalMultiplicationsToSolveSystem=0;
   this->NumConeIntersections=(-1);
   this->NumCasesNoLinfiniteRelationFound=(-1);
   this->NumBadParabolics=(0);

@@ -9,6 +9,7 @@
 
 #include "wxParserMain.h"
 #include <wx/msgdlg.h>
+#include "../vpfHeader4SystemFunctionsGlobalObjects.h"
 
 //(*InternalHeaders(wxParserFrame)
 #include <wx/string.h>
@@ -63,13 +64,8 @@ public:
 #endif
 };
 
-void CallSystemWrapper(const std::string& theCommand)
-{ system(theCommand.c_str());
-}
-
 wxParserFrame* theMainWindow;
 WorkThreadClass theComputationalThread;
-GlobalVariables theGlobalVariables;
 extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
 void drawtext(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize)

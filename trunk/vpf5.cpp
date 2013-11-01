@@ -2005,7 +2005,8 @@ bool CommandList::fDifferential(CommandList& theCommands, const Expression& inpu
 }
 
 bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites)
-{ if (this->theDigits.size>1)
+{ MacroRegisterFunctionWithName("LargeIntUnsigned::Factor");
+  if (this->theDigits.size>1)
     return false;
   if (this->IsEqualToZero())
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;

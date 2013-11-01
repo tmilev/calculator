@@ -501,8 +501,7 @@ bool CommandList::innerPrintSSsubalgebras
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
     theSSsubalgebras.numAdditions=Rational::TotalSmallAdditions+Rational::TotalLargeAdditions;
-    theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+
-    Rational::TotalLargeMultiplications;
+    theSSsubalgebras.numMultiplications=Rational::TotalSmallMultiplications+Rational::TotalLargeMultiplications;
 
     theFormat.flagUseHTML=true;
     theFormat.flagUseHtmlAndStoreToHD=true;

@@ -506,12 +506,12 @@ public:
   //changed it back to int. Grrrrr.
   int DenShort;
   LargeRationalExtended *Extended;
-  static unsigned long long TotalSmallAdditions;
-  static unsigned long long TotalLargeAdditions;
-  static unsigned long long TotalSmallMultiplications;
-  static unsigned long long TotalLargeMultiplications;
-  static unsigned long long TotalSmallGCDcalls;
-  static unsigned long long TotalLargeGCDcalls;
+  static unsigned long long int TotalSmallAdditions;
+  static unsigned long long int TotalLargeAdditions;
+  static unsigned long long int TotalSmallMultiplications;
+  static unsigned long long int TotalLargeMultiplications;
+  static unsigned long long int TotalSmallGCDcalls;
+  static unsigned long long int TotalLargeGCDcalls;
   bool NeedsBrackets()const
   { return false;
     //return this->IsNegative();
@@ -764,6 +764,9 @@ ParallelComputing::GlobalPointerCounter++;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue()
   { if(this->IsNegative())this->Minus();
+  }
+  static long long int TotalArithmeticOperations()
+  { return Rational::TotalLargeAdditions+Rational::TotalLargeMultiplications+Rational::TotalSmallAdditions+Rational::TotalSmallMultiplications;
   }
   static Rational NChooseK(const Rational& n, int k);
   static Rational Factorial(int n, GlobalVariables* theGlobalVariables);

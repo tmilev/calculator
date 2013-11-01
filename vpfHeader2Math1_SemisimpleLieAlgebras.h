@@ -260,6 +260,8 @@ public:
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
+  long long int totalRationalAdditionsToSolveSystem;
+  long long int totalRationalMultiplicationsToSolveSystem;
 
   List<NilradicalCandidate> FKNilradicalCandidates;
   int NumConeIntersections;

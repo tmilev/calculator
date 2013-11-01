@@ -46,6 +46,10 @@
 		<Unit filename="../vpf9_2.cpp" />
 		<Unit filename="../vpf9_3RationalRadicals.cpp" />
 		<Unit filename="../vpf9_4SemisimpleLieAlgebras.cpp" />
+		<Unit filename="../vpf9_7floating_point_routines.cpp" />
+		<Unit filename="../vpf9_8GlobalObjects.cpp" />
+		<Unit filename="../vpf9_91html_routines_calculator.cpp" />
+		<Unit filename="../vpf9_9SystemFunctions.cpp" />
 		<Unit filename="../vpfCharacters.cpp" />
 		<Unit filename="../vpfCharacters_CalculatorInterface.cpp" />
 		<Unit filename="../vpfGraph.cpp" />
@@ -65,6 +69,7 @@
 		<Unit filename="../vpfHeader3Calculator1_InnerTypedFunctions.h" />
 		<Unit filename="../vpfHeader3Calculator2_InnerFunctions.h" />
 		<Unit filename="../vpfHeader3Calculator3_WeylGroupCharacters.h" />
+		<Unit filename="../vpfHeader4SystemFunctionsGlobalObjects.h" />
 		<Unit filename="../vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
 		<Unit filename="../vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
 		<Unit filename="../vpfImplementationHeader2Math15_UniversalEnveloping.h" />
@@ -89,11 +94,11 @@
 			<wxsmith version="1">
 				<gui name="wxWidgets" src="wxParserApp.cpp" main="wxParserFrame" init_handlers="necessary" language="CPP" />
 				<resources>
-					<wxFrame wxs="wxsmith/wxParserframe.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserFrame" language="CPP" />
-					<wxFrame wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" name="wxDrawPanel" language="CPP" />
-					<wxFrame wxs="wxsmith/wxParserOutput1.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
-					<wxFrame wxs="wxsmith/wxPNGdisplay.wxs" src="wxPNGdisplay.cpp" hdr="wxPNGdisplay.h" name="wxPNGdisplay" language="CPP" />
-					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" name="wxStatus" language="CPP" />
+					<wxFrame wxs="wxsmith/wxParserframe.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" fwddecl="0" i18n="1" name="wxParserFrame" language="CPP" />
+					<wxFrame wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" fwddecl="0" i18n="1" name="wxDrawPanel" language="CPP" />
+					<wxFrame wxs="wxsmith/wxParserOutput1.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" fwddecl="0" i18n="1" name="wxParserOutput" language="CPP" />
+					<wxFrame wxs="wxsmith/wxPNGdisplay.wxs" src="wxPNGdisplay.cpp" hdr="wxPNGdisplay.h" fwddecl="0" i18n="1" name="wxPNGdisplay" language="CPP" />
+					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" fwddecl="0" i18n="1" name="wxStatus" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

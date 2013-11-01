@@ -1502,11 +1502,11 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
     if (this->owner->flagAttemptToSolveSystems)
-    { int startNumAdditions=Rational::TotalLargeAdditions;
-      int startNumMultiplications=Rational::TotalLargeMultiplications;
+    { long long int startNumOps=Rational::TotalArithmeticOperations();
+//      std::cout << "<br>startnumAdditions: " << startNumOps;
       this->AttemptToSolveSystem();
-      this->totalRationalAdditionsToSolveSystem+=Rational::TotalLargeAdditions-startNumAdditions;
-      this->totalRationalMultiplicationsToSolveSystem+=Rational::TotalLargeMultiplications-startNumMultiplications;
+//      std::cout << "<br>final num additions: " << Rational::TotalArithmeticOperations();
+      this->totalArithmeticOpsToSolveSystem+=Rational::TotalArithmeticOperations()-startNumOps;
     }
   } else
   { this->flagSystemGroebnerBasisFound=false;
@@ -1715,8 +1715,7 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
   this->flagCentralizerIsWellChosen=(false);
   this->totalNumUnknownsNoCentralizer=(0);
   this->totalNumUnknownsWithCentralizer=(0);
-  this->totalRationalAdditionsToSolveSystem=0;
-  this->totalRationalMultiplicationsToSolveSystem=0;
+  this->totalArithmeticOpsToSolveSystem=0;
   this->NumConeIntersections=(-1);
   this->NumCasesNoLinfiniteRelationFound=(-1);
   this->NumBadParabolics=(0);
@@ -2757,6 +2756,7 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
 //  std::cout << "<hr>"
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
+  //std::cout << "<br>additions so far: " << Rational::total
   for (int i=401; i<6402; i+=2000)
   { theComputation.MaxNumComputations=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
@@ -5197,8 +5197,6 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): "
     << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 2000):this->thePrimalChaR.ToString(&charFormatNonConst));
   }
-  if (!this->flagSystemSolved || !this->flagCentralizerIsWellChosen)
-    out << this->ToStringSystem(theFormat);
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
   { int numZeroWeights=0;
     out << "<br>The number of zero weights w.r.t. the Cartan subalgebra minus the dimension of the centralizer of the subalgebra equals " ;
@@ -5251,6 +5249,18 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << "LaTeX version of pairing table: <br><br>" << this->ToStringPairingTableLaTeX(theFormat) << "<br><br>";
     out << "<br>" << this->ToStringDrawWeights(theFormat) << "<br>";
   }
+  bool shouldDisplaySystem=false;
+  if (this->totalArithmeticOpsToSolveSystem!=0)
+  { out << "<br>Made total " << totalArithmeticOpsToSolveSystem << " arithmetic operations while solving the Serre relations polynomial system. ";
+    if (this->totalArithmeticOpsToSolveSystem>1000000 && !shortReportOnly)
+    { shouldDisplaySystem=true;
+      out << "<br>The total number of arithmetic operations I needed to solve the Serre relations polynomial system was larger than 1 000 000. I am printing out "
+      << " the Serre relations system for you: maybe that can help improve the polynomial system algorithms. ";
+    }
+  }
+  shouldDisplaySystem=shouldDisplaySystem || !this->flagSystemSolved || !this->flagCentralizerIsWellChosen;
+  if (shouldDisplaySystem)
+    out << this->ToStringSystem(theFormat);
   return out.str();
 }
 

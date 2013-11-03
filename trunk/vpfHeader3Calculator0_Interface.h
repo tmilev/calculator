@@ -579,7 +579,6 @@ struct ExpressionTripleCrunchers
 
 class CommandList
 {
-
 public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
@@ -714,6 +713,8 @@ public:
   char DefaultWeylLetter;
   int DefaultWeylRank;
   std::string javaScriptDisplayingIndicator;
+  std::fstream theTestFile;
+  std::string theTestFileName;
   std::string DisplayPathServerBase;
   std::string PhysicalPathServerBase;
   int numOutputFiles;
@@ -1201,7 +1202,6 @@ public:
   int opDivide()
   { return this->theAtoms.GetIndexIMustContainTheObject("/");
   }
-  bool ReadTestFromFile(std::fstream& theFile, List<std::string>& commandStrings, List<std::string>& commandResultStrings);
   bool AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp);
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical(Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
@@ -1272,11 +1272,14 @@ public:
   static bool innerTimes(CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
+  static bool innerCrash(CommandList& theCommands, const Expression& input, Expression& output);
+  bool ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults);
+  bool WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults);
   static bool innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output);
+  int GetNumBuiltInFunctions();
   void AutomatedTestRun
-  (List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
-  ;
+  (List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit);
   static bool innerEvaluateToDouble(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerTranspose(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(CommandList& theCommands, const Expression& input, Expression& output);

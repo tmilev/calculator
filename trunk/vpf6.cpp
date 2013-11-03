@@ -1149,7 +1149,7 @@ std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
 
   fileName << this->PhysicalNameDefaultOutput << this->numOutputFiles;
-  CGI::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
   theFile << fileContent;
   theFile.flush();
   theFile.close();

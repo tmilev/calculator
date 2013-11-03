@@ -363,7 +363,7 @@ bool CommandListFunctions::innerMakeMakeFile(CommandList& theCommands, const Exp
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  CGI::OpenFileCreateIfNotPresent(theFileStream, theCommands.PhysicalPathOutputFolder+"makefile", false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFileStream, theCommands.PhysicalPathOutputFolder+"makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: Debug\n";
@@ -766,7 +766,7 @@ bool CommandListFunctions::innerDdivDxToDifferentiation(CommandList& theCommands
   return output.AddChildAtomOnTop(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(denominatorString));
 }
 
-bool CommandListFunctions::innerCrash(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::innerCrash(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandListFunctions::innerCrash");
   crash << "<hr>This is a test of the crashing mechanism of the calculator. Are log files created correctly? Check the /output/ directory." << crash;
   return output.AssignValue((std::string)"Crashed succesfully", theCommands);
@@ -781,59 +781,6 @@ bool CommandList::CheckConsistencyAfterInitializationExpressionStackEmpty()
     << " instead they contain respectively " << this->cachedExpressions.size << ", " << this->imagesCachedExpressions.size << ", "
     << this->ExpressionStack.size << " and " << this->theExpressionContainer.size << " elements. " << crash;
   return true;
-}
-
-void CommandList::AutomatedTestRun(List<std::string>& inputStringsTest, List<std::string>& outputStringsTestWithInit, List<std::string>& outputStringsTestNoInit)
-{ MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
-  CommandList theTester;
-  int numFunctionsToTest=0;
-  for (int i=0; i<this->FunctionHandlers.size; i++)
-    numFunctionsToTest+=this->FunctionHandlers[i].size;
-  numFunctionsToTest+=operationsCompositeHandlers.size;
-  inputStringsTest.SetExpectedSize(numFunctionsToTest);
-  inputStringsTest.SetSize(0);
-  for (int i=0; i<this->FunctionHandlers.size; i++)
-    for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      if (this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTest &&
-          this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTestSetKnownGoodCopy &&
-          this->FunctionHandlers[i][j].theFunction!=CommandListFunctions::innerCrash
-          )
-        inputStringsTest.AddOnTop(this->FunctionHandlers[i][j].theExample);
-  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
-    for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
-      inputStringsTest.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
-  outputStringsTestWithInit.SetSize(inputStringsTest.size);
-  outputStringsTestNoInit.SetSize(inputStringsTest.size);
-  ProgressReport theReport(this->theGlobalVariableS);
-  for (int i=0; i<inputStringsTest.size; i++)
-  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
-    theTester.reset();
-    theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
-    theTester.init(*this->theGlobalVariableS);
-    Expression dummyCommands, tempE;
-    tempE.AssignValue<std::string>("Input suppressed", theTester);
-    dummyCommands.reset(theTester);
-    dummyCommands.AddChildAtomOnTop(theTester.opEndStatement());
-    dummyCommands.AddChildOnTop(tempE);
-
-    std::cout << "<hr>Evaluating command of index " << i << ": " << inputStringsTest[i];
-    theTester.Evaluate(inputStringsTest[i]);
-    outputStringsTestWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
-    std::cout << "<br>To get: " << theTester.theProgramExpression.ToString();
-    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
-    std::stringstream reportStream;
-    reportStream << "Testing expression " << i << " out of " << inputStringsTest.size << ". ";
-    theReport.Report(reportStream.str());
-  }
-/*  theTester.init(*this->theGlobalVariableS);
-  for (int i=0; i<inputStringsTest.size; i++)
-  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
-    std::cout << "<hr>Evaluating without initialization: " << inputStringsTest[i];
-    theTester.Evaluate(inputStringsTest[i]);
-    outputStringsTestNoInit[i]=theTester.theProgramExpression.ToString();
-    std::cout << "<br>To get: " << outputStringsTestNoInit[i];
-    std::cout << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
-  }*/
 }
 
 bool CommandListFunctions::outerAdivBpowerItimesBpowerJ(CommandList& theCommands, const Expression& input, Expression& output)
@@ -1180,7 +1127,7 @@ bool CommandListFunctions::innerComputePairingTablesAndFKFTsubalgebras(CommandLi
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=true;
   tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-  CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << theCommands.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
@@ -1214,7 +1161,7 @@ bool CommandListFunctions::innerGetCentralizerChainsSemisimpleSubalgebras(Comman
 
 bool CommandList::innerEvaluateToDouble(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
-  std::cout << "<br>evaluatetodouble: " << input.ToString();
+//  std::cout << "<br>evaluatetodouble: " << input.ToString();
   if (input.IsOfType<double>())
   { output=input;
     return true;

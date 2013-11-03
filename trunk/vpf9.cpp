@@ -245,7 +245,7 @@ void CGI::ElementToStringTooltip(const std::string& input, const std::string& in
 
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  CGI::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
+  XML::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
   if(!fileIn.is_open())
     crash << crash;
   fileIn.clear(std::ios::goodbit);
@@ -256,7 +256,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(buffer, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::CGI::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
+  ::XML::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
     switch(buffer[i])
@@ -277,7 +277,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-bool CGI::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool XML::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -311,13 +311,73 @@ bool CGI::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& t
   return theFile.is_open();
 }
 
-bool CGI::FileExists(const std::string& theFileName)
+bool XML::ReadFromFile(std::fstream& inputFile)
+{ MacroRegisterFunctionWithName("XML::ReadFromFile");
+  inputFile.seekg(0, std::fstream::end);
+  unsigned int theFileSize = inputFile.tellg();
+  char* memblock = new char [theFileSize];
+  inputFile.seekg (0, std::fstream::beg);
+  inputFile.read (memblock, theFileSize);
+  this->theString=memblock;
+  delete[] memblock;
+  return true;
+}
+
+bool XML::FileExists(const std::string& theFileName)
 { std::fstream theFile;
   theFile.open(theFileName.c_str(), std::fstream::in);
   if(theFile.is_open())
     return true;
   else
     return false;
+}
+
+XML::XML()
+{ this->positionInString=-1;
+}
+
+bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& outputString)
+{ MacroRegisterFunctionWithName("XML::GetStringEnclosedIn");
+  std::string charReader="";
+  std::string theOpenTagWithSymbols=this->GetOpenTagNoInputCheck(theTagName);
+  std::string theCloseTagWithSymbols=this->GetCloseTagNoInputCheck(theTagName);
+  int positionInOpenTag=0;
+  int positionInCloseTag=0;
+  int numTags=0;
+  std::stringstream out;
+  if (this->positionInString<0 || this->positionInString>=this->theString.size())
+    this->positionInString=0;
+  for (; this->positionInString<this->theString.size(); this->positionInString++)
+  { charReader.push_back(this->theString[this->positionInString]);
+    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
+    { positionInOpenTag++;
+      if (positionInOpenTag>=theOpenTagWithSymbols.size())
+      { charReader="";
+        numTags++;
+        positionInOpenTag=0;
+      }
+      continue;
+    }
+    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInCloseTag])
+    { positionInCloseTag++;
+      if (positionInCloseTag>=theCloseTagWithSymbols.size())
+      { positionInCloseTag=0;
+        charReader= "";
+        numTags--;
+        if (numTags<0)
+          return false;
+        if (numTags==0)
+        { this->positionInString++;
+          break;
+        }
+        continue;
+      }
+    }
+    out << charReader;
+    charReader="";
+  }
+  outputString=out.str();
+  return true;
 }
 
 void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rational>& r, double& x, double& y)

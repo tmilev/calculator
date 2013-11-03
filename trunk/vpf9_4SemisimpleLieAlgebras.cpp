@@ -351,7 +351,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
       if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
-        if (!CGI::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, theFormat), false, true, false))
+        if (!XML::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, theFormat), false, true, false))
         { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, theFormat)
           << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
@@ -362,7 +362,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebraCandidates[i].ToString(theFormat);
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
-          if (!CGI::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, theFormat), false, true, false))
+          if (!XML::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, theFormat), false, true, false))
           { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
             << this->GetPhysicalFileNameFKFTNilradicals(i, theFormat) << " for output. However, the file failed to create. "
@@ -1349,7 +1349,8 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
       return false;
     }
   }
-  return this->ComputeSystemPart2(AttemptToChooseCentalizer, true, allowNonPolynomialSystemFailure);
+  this->flagUsedInducingSubalgebraRealization=true;
+  return this->ComputeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
 }
 
 bool CandidateSSSubalgebra::CheckGensBracketToHs()
@@ -1367,7 +1368,7 @@ bool CandidateSSSubalgebra::CheckGensBracketToHs()
   return true;
 }
 
-bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization, bool allowNonPolynomialSystemFailure)
+bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > lieBracketMinusGoalValue, goalValue;
@@ -1405,13 +1406,13 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     this->theUnknownCartanCentralizerBasis.SetSize(rankCentralizer);
   }
   if (this->indexIamInducedFrom==-1)
-    useInducedSubalgebraRealization=false;
+    this->flagUsedInducingSubalgebraRealization=false;
   int indexNewRoot=-1;
-  if (useInducedSubalgebraRealization)
+  if (this->flagUsedInducingSubalgebraRealization)
     indexNewRoot=DynkinType::GetNewIndexFromRootInjection(this->RootInjectionsFromInducer);
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { bool seedsHaveBeenSown=false;
-    if (useInducedSubalgebraRealization)
+    if (this->flagUsedInducingSubalgebraRealization)
     { CandidateSSSubalgebra& theInducer=this->owner->theSubalgebraCandidates[this->indexIamInducedFrom];
       if (theInducer.flagSystemSolved && i!=indexNewRoot)
       { //std::cout << " <hr>... and the inducer is: " << theInducer.theWeylNonEmbeddeD.theDynkinType.ToString();
@@ -1512,9 +1513,10 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
   { this->flagSystemGroebnerBasisFound=false;
     this->flagSystemProvedToHaveNoSolution=false;
   }
-  if (!this->flagSystemSolved && useInducedSubalgebraRealization)
+  if (!this->flagSystemSolved && this->flagUsedInducingSubalgebraRealization)
   { //bool seedHadNoSolution=this->flagSystemProvedToHaveNoSolution;
-    bool result=this->ComputeSystemPart2(AttemptToChooseCentalizer, false, allowNonPolynomialSystemFailure);
+    this->flagUsedInducingSubalgebraRealization=false;
+    bool result=this->ComputeSystemPart2(AttemptToChooseCentalizer, allowNonPolynomialSystemFailure);
     //if (seedHadNoSolution && this->flagSystemSolved)
     //  std::cout << "<hr>I did not expect that: seed system coming from inducer had NO solution, but system DID HAVE overall a solution. "
     //  << "This may be a programming mistake. If not, then this needs to be investigated. Here is the subalgebra: " << this->ToString();
@@ -1713,6 +1715,7 @@ void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
   this->flagSystemProvedToHaveNoSolution=(false);
   this->flagSystemGroebnerBasisFound=(false);
   this->flagCentralizerIsWellChosen=(false);
+  this->flagUsedInducingSubalgebraRealization=true;
   this->totalNumUnknownsNoCentralizer=(0);
   this->totalNumUnknownsWithCentralizer=(0);
   this->totalArithmeticOpsToSolveSystem=0;
@@ -3283,7 +3286,7 @@ void slTwoSubalgebra::ElementToHtml(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
-  CGI::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
 void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
@@ -3876,7 +3879,7 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
   if(usePNG)
   { fileName= physicalPathSl2s;
     fileName.append("sl2s.html");
-    CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
+    XML::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<HMTL><title>sl(2)-subalgebras of "
     << this->theRootSAs[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</title>";
@@ -3898,7 +3901,7 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
   theFormat->flagUsePNG=false;
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
-  CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s.html\"> .png rich html for your viewing pleasure</a><br>\n"
   << tempS << "</HTML></BODY>";
   theFile.close();
@@ -3906,7 +3909,7 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
   { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { CGI::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
+    { XML::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
       tempStreamLatex << "latex " << " -output-directory=" << physicalPathSl2s << " " << this->texFileNamesForPNG[i];

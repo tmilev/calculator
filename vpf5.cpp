@@ -674,7 +674,7 @@ bool CommandList::innerSplitFDpartB3overG2Init(CommandList& theCommands, const E
 { MacroRegisterFunctionWithName("CommandList::innerSplitFDpartB3overG2Init");
   if (!input.IsListNElements(4))
     return output.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
-  std::cout << input.ToString();
+  //std::cout << input.ToString();
   if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, theCommands.innerRationalFunction))
     output.SetError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
@@ -2449,14 +2449,13 @@ bool CommandList::ReadTestStrings(HashedList<std::string, MathRoutines::hashStri
   outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
   outputResults.ReservE(this->GetNumBuiltInFunctions());
   std::string buffer;
-  while (theFileReader.positionInString< (signed) theFileReader.theString.size())
+  while (theFileReader.positionInString<(signed) theFileReader.theString.size())
   { if(!theFileReader.GetStringEnclosedIn("input", buffer))
-    { this->Comments << "<hr>Failed to read input string from test file: is the test file corrupt?";
-      return false;
-    }
+      break;
+//    std::cout << "<br>adding on top " << buffer;
     outputCommands.AddOnTop(buffer);
     if (!theFileReader.GetStringEnclosedIn("output", buffer))
-    { this->Comments << "<hr>Failed to read input string from test file: is the test file corrupt?";
+    { this->Comments << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
       return false;
     }
     outputResults.AddOnTop(buffer);
@@ -2480,6 +2479,9 @@ bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, c
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
+  theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
+  if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
+    crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
   double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
   theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
@@ -2493,10 +2495,7 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
   if (!XML::FileExists(theCommands.theTestFileName))
-  { if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
-      crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
-  }
   if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
     crash << "This is a programming error or worse: failed to open an existing file: " << theCommands.theTestFileName << ". Something is very wrong. " << crash;
   List<std::string> knownResults;
@@ -2511,29 +2510,40 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
   std::string newCommand="";
   std::stringstream errorTableStream;
   int numInconsistencies=0;
+  List<std::string> newCommands;
+//  std::cout << knownCommands.size << " known commands must be " << commandStrings.size;
+//  for (int i=0; i< knownCommands.size; i++)
+//    std::cout << "<br>known command " << i+1 << ":" << knownCommands[i] << ", known result: " << i+1 << ":" << knownResults[i];
   for (int i=0; i<commandStrings.size; i++)
   { if (!knownCommands.Contains(commandStrings[i]))
-    { newCommand=commandStrings[i];
+    { newCommands.AddOnTop(commandStrings[i]);
+      //std::cout << "<br>Command <span style=\"color:#FF0000\">" << commandStrings[i] << "</span> not present in test file: <span style=\"color:#FF0000\">"
+      //<< knownCommands[i] << "</span> sits there instead. ";
+      if (knownCommands[i]==commandStrings[i])
+        crash << crash;
       continue;
     }
     int theIndex=knownCommands.GetIndex(commandStrings[i]);
     if (knownResults[theIndex]!=resultStringsWithInit[i])
-    { errorTableStream << "<tr><td>" << commandStrings[i] << "</td><td>" << knownResults[theIndex] << "</td><td>" << resultStringsWithInit[i]
-      << "</td></tr>";
+    { errorTableStream << "\n<tr><td>" << commandStrings[i] << "</td><td>" << knownResults[theIndex] << "</td><td>" << resultStringsWithInit[i]
+      << "</td></tr>\n";
       numInconsistencies++;
     }
   }
   if (numInconsistencies>0)
-  { out << "<span style=\"color:#0000FF\"><b>The test file results do not match the current results. </b></span> There were "
+  { out << "<span style=\"color:#FF0000\"><b>The test file results do not match the current results. </b></span> There were "
     << numInconsistencies << " inconsistencies out of " << knownCommands.size << " input strings. The inconsistent result table follows. "
-    << "<hr><table>" << errorTableStream.str() << "</table><hr>";
+    << "\n<hr>\n<table><tr><td>Input</td><td>Desired result</td><td>Computed result</td></tr>" << errorTableStream.str() << "</table>\n<hr>\n";
   }
-  if (commandStrings.size!=knownCommands.size || newCommand!="")
+  if (commandStrings.size!=knownCommands.size || newCommands.size>0)
   { if (commandStrings.size!=knownCommands.size)
       out << "There were " << knownCommands.size << " known commands read from the test file but the calculator has "
       << commandStrings.size << " functions total. ";
-    if (newCommand!="")
-      out << "The command " << newCommand << " was not recorded in the test file. ";
+    if (newCommands.size>0)
+    { out << "There were " << newCommands.size << " commands not recorded in the test file. The new commands follow. <br>";
+      for (int i=0; i<newCommands.size; i++)
+        out << newCommands[i] << "<br>";
+    }
     out << "The test file must be out of date. Please update it.<hr>";
   }
   out << "The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetGoodKnownCopy 0") << "<hr>";

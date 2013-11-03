@@ -415,6 +415,7 @@ public:
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsFinal;
+  bool flagIncludeMutableInformation;
   bool flagExpressionNewLineAllowed;
   bool flagIncludeLieAlgebraNonTechnicalNames;
   bool flagIncludeLieAlgebraTypes;

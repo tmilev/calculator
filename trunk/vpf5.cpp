@@ -1209,12 +1209,12 @@ bool CommandList::fSplitFDpartB3overG2inner(CommandList& theCommands, branchingD
   ModuleSSalgebra<RationalFunctionOld>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   std::stringstream out;
-  out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theCommands.Comments << "<hr>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg
   (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
    &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, 0);
-   out << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
+   theCommands.Comments << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
@@ -2530,10 +2530,12 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
       numInconsistencies++;
     }
   }
+  bool allWentGreat=true;
   if (numInconsistencies>0)
   { out << "<span style=\"color:#FF0000\"><b>The test file results do not match the current results. </b></span> There were "
     << numInconsistencies << " inconsistencies out of " << knownCommands.size << " input strings. The inconsistent result table follows. "
     << "\n<hr>\n<table><tr><td>Input</td><td>Desired result</td><td>Computed result</td></tr>" << errorTableStream.str() << "</table>\n<hr>\n";
+    allWentGreat=false;
   }
   if (commandStrings.size!=knownCommands.size || newCommands.size>0)
   { if (commandStrings.size!=knownCommands.size)
@@ -2545,9 +2547,12 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
         out << newCommands[i] << "<br>";
     }
     out << "The test file must be out of date. Please update it.<hr>";
+    allWentGreat=false;
   }
-  out << "The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetGoodKnownCopy 0") << "<hr>";
-  out << "<hr>Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
+  if (allWentGreat)
+    out << "<span style=\"color:#0000FF\">All " << commandStrings.size << " results coincide with previously recorded values.</span> ";
+  out << "<br>The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetGoodKnownCopy 0");
+  out << "<br>Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
   return output.AssignValue(out.str(), theCommands);
 }
 

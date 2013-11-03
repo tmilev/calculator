@@ -3656,6 +3656,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=true;
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly=false;
+    contextFormat.GetElement().flagIncludeMutableInformation=false;
     out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())

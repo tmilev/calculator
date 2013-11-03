@@ -945,6 +945,7 @@ FormatExpressions::FormatExpressions()
   this->flagIncludeLieAlgebraTypes=true;
   this->flagUseReflectionNotation=false;
   this->flagUseHtmlAndStoreToHD=false;
+  this->flagIncludeMutableInformation=true;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

@@ -307,7 +307,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   candidatesNotRealizedNotProvenImpossible=  this->theSubalgebraCandidates.size-candidatesRealized- candidatesProvenImpossible;
   if (!writingToHD)
   { out << candidatesRealized << " subalgebras realized.";
-    out << "<br>Total, there are " << this->theSubalgebraCandidates.size << " = " << candidatesRealized << " realized + "
+    out << "<br>Up to linear equivalence, there are " << this->theSubalgebraCandidates.size << " = " << candidatesRealized << " realized + "
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
   } else
   { out << "Up to linear equivalence, there are total " << candidatesRealized << " semisimple subalgebras";
@@ -317,8 +317,10 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   }
   out << "The subalgebras are ordered by rank, Dynkin indices of simple constituents and dimensions of simple constituents. "
   << "The upper index indicates the Dynkin index, the lower index indicates the rank of the subalgebra. ";
-  if (this->timeComputationStartInSeconds!=-1 && this->timeComputationEndInSeconds!=-1)
-    out << "<br>Computation time in seconds: " << this->timeComputationEndInSeconds - this->timeComputationStartInSeconds << ".";
+  bool showTime= theFormat==0 ? true : theFormat->flagIncludeMutableInformation;
+  if (showTime)
+    if (this->timeComputationStartInSeconds!=-1 && this->timeComputationEndInSeconds!=-1)
+      out << "<br>Computation time in seconds: " << this->timeComputationEndInSeconds - this->timeComputationStartInSeconds << ".";
   if (this->numAdditions!=-1)
     out << "<br>" << this->numAdditions+this->numMultiplications << " total arithmetic operations performed = " << this->numAdditions << " additions and "
     << this->numMultiplications << " multiplications. ";
@@ -4161,6 +4163,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
 { if (!this->flagCentralizerIsWellChosen)
     return "";
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeights");
+  if (theFormat!=0)
+    if (!theFormat->flagIncludeMutableInformation)
+      return "<br>Weight diagram not drawn to avoid javascript problems (use command PrintSemisimpleSubalgebras if you want to see the weight diagram). ";
   int thePrimalRank=-1;
   (this->centralizerRank+this->theHs.size).IsSmallInteger(&thePrimalRank);
   if (thePrimalRank<2)

@@ -1067,7 +1067,7 @@ bool CommandListFunctions::innerPlotConeUsualProjection(CommandList& theCommands
   centerOfTheCone.MakeZero(3);
   tipOfTheCone.MakeZero(3);
   tipOfTheCone[2]=height;
-  std::cout << "<br>radius, height, distance, view height: " << radius << ", " << height << ", " << distance << ", " << viewPointHeight;
+//  std::cout << "<br>radius, height, distance, view height: " << radius << ", " << height << ", " << distance << ", " << viewPointHeight;
 //  std::cout << "<br>projectionPane.ProjectOnMe(tipOfTheCone): " << projectionPane.ProjectOnMe(tipOfTheCone);
   Vector<double> coneHeightVectorProjectedShifted= projectionPane.ProjectOnMe(tipOfTheCone)-projectionPane.ProjectOnMe(centerOfTheCone);
 //  std::cout << "<br>coneHeightVectorProjectedShifted: " << coneHeightVectorProjectedShifted.ToString();

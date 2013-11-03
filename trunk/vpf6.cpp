@@ -2546,7 +2546,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
 
 bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerFunctionToMatrix");
-  std::cout << input.ToString();
+//  std::cout << input.ToString();
   if (!input.IsListNElements(4))
     return false;
   const Expression& leftE  =input[1];
@@ -3543,7 +3543,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { if (isFinal)
       out << this->GetValue<std::string>();
     else
-    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript)";
+    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems~ (in~ case~ the~ string~ has~ javascript))";
       //out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     }
     result=true;

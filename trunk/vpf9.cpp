@@ -341,40 +341,63 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   std::string charReader="";
   std::string theOpenTagWithSymbols=this->GetOpenTagNoInputCheck(theTagName);
   std::string theCloseTagWithSymbols=this->GetCloseTagNoInputCheck(theTagName);
+  int lengthOpenTag=theOpenTagWithSymbols.size();
+  int lengthCloseTag=theCloseTagWithSymbols.size();
   int positionInOpenTag=0;
   int positionInCloseTag=0;
   int numTags=0;
+  //std::cout << "open tag with symbols: " << theOpenTagWithSymbols << ", close tag: " << theCloseTagWithSymbols;
+//  std::cout << "lengths are :" << lengthOpenTag << " and "<< lengthCloseTag;
   std::stringstream out;
-  if (this->positionInString<0 || this->positionInString>=this->theString.size())
+  if (this->positionInString<0)
     this->positionInString=0;
-  for (; this->positionInString<this->theString.size(); this->positionInString++)
-  { charReader.push_back(this->theString[this->positionInString]);
-    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
+  bool tagWasClosed=false;
+  int numCharRead=0;
+  for (; this->positionInString<(signed)this->theString.size(); this->positionInString++)
+  { numCharRead++;
+    charReader.push_back(this->theString[this->positionInString]);
+    bool tagStarted=false;
+  if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInOpenTag])
     { positionInOpenTag++;
-      if (positionInOpenTag>=theOpenTagWithSymbols.size())
+      if (positionInOpenTag>=lengthOpenTag)
       { charReader="";
         numTags++;
+//        std::cout << "<br>numTags: " << numTags;
         positionInOpenTag=0;
       }
-      continue;
-    }
-    if (this->theString[this->positionInString]==theOpenTagWithSymbols[positionInCloseTag])
+      //std::cout << "<br>found " << charReader << " from " << theOpenTagWithSymbols;
+      tagStarted=true;
+    } else
+      positionInOpenTag=0;
+    if (this->theString[this->positionInString]==theCloseTagWithSymbols[positionInCloseTag])
     { positionInCloseTag++;
-      if (positionInCloseTag>=theCloseTagWithSymbols.size())
+      if (positionInCloseTag>=lengthCloseTag)
       { positionInCloseTag=0;
         charReader= "";
         numTags--;
+//        std::cout << "<br>numTags: " << numTags;
         if (numTags<0)
           return false;
         if (numTags==0)
         { this->positionInString++;
+          tagWasClosed=true;
           break;
         }
-        continue;
       }
-    }
-    out << charReader;
+      //std::cout << "<br>found " << charReader << " from " << theCloseTagWithSymbols;
+      tagStarted=true;
+    } else
+      positionInCloseTag=0;
+    if (tagStarted)
+      continue;
+    if (numTags>0)
+      out << charReader;
     charReader="";
+  }
+  if (!tagWasClosed)
+  { //std::cout << "tag wasn't closed. Read so far: " << out.str();
+    //std::cout << "num chars read: " << numCharRead;
+    return false;
   }
   outputString=out.str();
   return true;
@@ -384,8 +407,8 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rationa
 { x=TDV.theBuffer.centerX[0];
   y=TDV.theBuffer.centerY[0];
   for (int k=0; k<r.size; k++)
-  { x+=(r.TheObjects[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][0]);
-    y-=(r.TheObjects[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][1]);
+  { x+=(r[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][0]);
+    y-=(r[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][1]);
   }
 }
 

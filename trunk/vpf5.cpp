@@ -2579,18 +2579,15 @@ void CommandList::AutomatedTestRun
   outputResultsWithInit.SetSize(outputCommandStrings.size);
   outputResultsNoInit.SetSize(outputCommandStrings.size);
   ProgressReport theReport(this->theGlobalVariableS);
+  FormatExpressions theFormat;
+  theFormat.flagExpressionIsFinal=true;
   for (int i=0; i<outputCommandStrings.size; i++)
   { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
     theTester.reset();
     theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
     theTester.init(*this->theGlobalVariableS);
-    Expression dummyCommands, tempE;
-    tempE.AssignValue<std::string>("Input suppressed", theTester);
-    dummyCommands.reset(theTester);
-    dummyCommands.AddChildAtomOnTop(theTester.opEndStatement());
-    dummyCommands.AddChildOnTop(tempE);
     theTester.Evaluate(outputCommandStrings[i]);
-    outputResultsWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
+    outputResultsWithInit[i]=theTester.theProgramExpression.ToString(&theFormat);
     std::stringstream reportStream;
     reportStream << "<br>Tested expression " << i+1 << " out of " << outputCommandStrings.size << ". ";
     reportStream << "<br>To get: " << theTester.theProgramExpression.ToString();

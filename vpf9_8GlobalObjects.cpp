@@ -30,7 +30,7 @@ void CGI::makeReportIndicatorFile(IndicatorWindowVariables& input)
   //  if (counter%10!=0)
   //    return;
   std::fstream theFile;
-  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
   for (int i=input.ProgressReportStringS.size-1; i>=0; i--)

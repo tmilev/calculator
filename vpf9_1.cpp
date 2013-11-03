@@ -41,9 +41,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   std::fstream theFile;
   std::string theFileName="../output/crashdump.txt";
   bool succeededToDump=true;
-  if (!CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
+  if (!XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
   { theFileName="../output/crashdump2.txt";
-    succeededToDump=CGI::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+    succeededToDump=XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
   if (succeededToDump)
     std::cout << "<hr>Crash dumped in file " << theFileName;
@@ -731,7 +731,7 @@ void rootSubalgebra::ElementToHtml
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
-  CGI::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
+  XML::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
   this->ToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
@@ -2123,8 +2123,8 @@ void rootSubalgebras::ElementToHtml
   MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_");
   childrenPathServer.append("rootHtml_");
-  CGI::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
-  if (!CGI::FileExists(MyPathPhysical))
+  XML::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
+  if (!XML::FileExists(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
     << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
     << crash;

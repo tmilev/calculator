@@ -507,7 +507,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  CGI::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  XML::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -584,18 +584,18 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  if (!CGI::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
+  if (!XML::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  CGI::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
+  XML::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  CGI::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  XML::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 
@@ -3762,7 +3762,7 @@ void QuasiPolynomial::operator*=(const Rational& theConst)
 
 void Cone::WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "Cone( ";
   for (int i=0; i<this->Normals.size; i++)
   { output << "(";
@@ -3776,7 +3776,7 @@ void Cone::WriteToFile
       output << ", ";
   }
   output << " ) ";
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 bool Cone::ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -3792,7 +3792,7 @@ bool Cone::ReadFromFile
   (std::fstream& input, Vectors<Rational>& buffer, GlobalVariables* theGlobalVariables)
 { std::string tempS, rootString;
   int NumWordsRead;
-  XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
   if(NumWordsRead!=0)
     crash << crash;
   input >> tempS;
@@ -3800,7 +3800,7 @@ bool Cone::ReadFromFile
   Vector<Rational> tempRoot;
   if (tempS!="Cone(")
   { std::cout << "tempS was instead " << tempS;
-    XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
+    XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
   for (input >> tempS; tempS!=")" && tempS!=""; input >> tempS)
@@ -3809,176 +3809,176 @@ bool Cone::ReadFromFile
     //std::cout << "vector input " << tempS << " read as " << tempRoot.ToString();
   }
   if (buffer.size<1)
-  { XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
+  { XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
   int theDim=buffer.TheObjects[0].size;
   for (int i=1; i<buffer.size; i++)
     if (buffer.TheObjects[i].size!=theDim)
-    { XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
+    { XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
       return false;
     }
   bool result;
   result=this->CreateFromNormals(buffer, theGlobalVariables);
-  result= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
+  result= XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
 //  if(!tempBool) crash << crash;
   return result;
 }
 
 void ConeLatticeAndShift::WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   this->theLattice.WriteToFile(output, theGlobalVariables);
   this->theProjectivizedCone.WriteToFile(output, theGlobalVariables);
   this->theShift.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 bool ConeLatticeAndShift::ReadFromFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
-{ XMLRoutines::ReadThroughFirstOpenTag(output, this->GetXMLClassName());
+{ XML::ReadThroughFirstOpenTag(output, this->GetXMLClassName());
   this->theLattice.ReadFromFile(output, theGlobalVariables);
   this->theProjectivizedCone.ReadFromFile(output, theGlobalVariables);
   this->theShift.ReadFromFile(output);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(output, this->GetXMLClassName());
+  XML::ReadEverythingPassedTagOpenUntilTagClose(output, this->GetXMLClassName());
   return true;
 }
 
 void ConeLatticeAndShiftMaxComputation::WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << " NumParam: " << this->numNonParaM << " numProcessedNonParam: " << this->numProcessedNonParam << "\n";
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
   this->complexStartingPerRepresentative.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("complexStartingPerRepresentative");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
   this->complexRefinedPerRepresentative.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("complexRefinedPerRepresentative");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theMaximaCandidates");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theMaximaCandidates");
   this->theMaximaCandidates.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theMaximaCandidates");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theMaximaCandidates");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("startingLPtoMaximize");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("startingLPtoMaximize");
   this->startingLPtoMaximize.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("startingLPtoMaximize");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("startingLPtoMaximize");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("finalMaxima");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("finalMaxima");
   this->finalMaxima.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("finalMaxima");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("finalMaxima");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theStartingLattice");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theStartingLattice");
   this->theStartingLattice.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theStartingLattice");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theStartingLattice");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theFinalRougherLattice");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theFinalRougherLattice");
   this->theFinalRougherLattice.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theFinalRougherLattice");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theFinalRougherLattice");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theStartingRepresentative");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theStartingRepresentative");
   this->theStartingRepresentative.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theStartingRepresentative");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theStartingRepresentative");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theFinalRepresentatives");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theFinalRepresentatives");
   this->theFinalRepresentatives.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theFinalRepresentatives");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theFinalRepresentatives");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theConesLargerDim");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theConesLargerDim");
   this->theConesLargerDim.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theConesLargerDim");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theConesLargerDim");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theConesSmallerDim");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theConesSmallerDim");
   this->theConesSmallerDim.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theConesSmallerDim");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theConesSmallerDim");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("IsInfinity");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("IsInfinity");
   output << this->IsInfinity;
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("IsInfinity");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("IsInfinity");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
   this->LPtoMaximizeLargerDim.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeLargerDim");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
   this->LPtoMaximizeSmallerDim.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("LPtoMaximizeSmallerDim");
 
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 bool ConeLatticeAndShiftMaxComputation::ReadFromFile
 (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
 { ProgressReport theReport(theGlobalVariables);
   int numReadWords;
-  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string tempS;
   input >> tempS >> this->numNonParaM >> tempS >> this->numProcessedNonParam;
   theReport.Report("Loading complex starting per representative...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "complexStartingPerRepresentative");
+  XML::ReadThroughFirstOpenTag(input, "complexStartingPerRepresentative");
   this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "complexStartingPerRepresentative");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "complexStartingPerRepresentative");
   theReport.Report("Loading complex refined per representative...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "complexRefinedPerRepresentative");
+  XML::ReadThroughFirstOpenTag(input, "complexRefinedPerRepresentative");
   this->complexRefinedPerRepresentative.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "complexRefinedPerRepresentative");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "complexRefinedPerRepresentative");
   theReport.Report("Loading the max candidates...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theMaximaCandidates");
+  XML::ReadThroughFirstOpenTag(input, "theMaximaCandidates");
   this->theMaximaCandidates.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theMaximaCandidates");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theMaximaCandidates");
   theReport.Report("Loading starting linear polys...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "startingLPtoMaximize");
+  XML::ReadThroughFirstOpenTag(input, "startingLPtoMaximize");
   this->startingLPtoMaximize.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "startingLPtoMaximize");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "startingLPtoMaximize");
   theReport.Report("Loading final maxima...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "finalMaxima");
+  XML::ReadThroughFirstOpenTag(input, "finalMaxima");
   this->finalMaxima.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "finalMaxima");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "finalMaxima");
   theReport.Report("Loading starting lattice...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theStartingLattice");
+  XML::ReadThroughFirstOpenTag(input, "theStartingLattice");
   this->theStartingLattice.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingLattice");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingLattice");
   theReport.Report("Loading final rougher lattice...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theFinalRougherLattice");
+  XML::ReadThroughFirstOpenTag(input, "theFinalRougherLattice");
   this->theFinalRougherLattice.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRougherLattice");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRougherLattice");
   theReport.Report("Loading starting representative...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theStartingRepresentative");
+  XML::ReadThroughFirstOpenTag(input, "theStartingRepresentative");
   this->theStartingRepresentative.ReadFromFile(input);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingRepresentative");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingRepresentative");
   theReport.Report("Loading final representatives...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theFinalRepresentatives");
+  XML::ReadThroughFirstOpenTag(input, "theFinalRepresentatives");
   this->theFinalRepresentatives.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRepresentatives");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRepresentatives");
   theReport.Report("Loading cones larger dim...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theConesLargerDim");
+  XML::ReadThroughFirstOpenTag(input, "theConesLargerDim");
   this->theConesLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesLargerDim");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesLargerDim");
   theReport.Report("Loading cones smaller dim...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "theConesSmallerDim");
+  XML::ReadThroughFirstOpenTag(input, "theConesSmallerDim");
   this->theConesSmallerDim.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesSmallerDim");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesSmallerDim");
   theReport.Report("Loading IsInfinite array...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "IsInfinity");
+  XML::ReadThroughFirstOpenTag(input, "IsInfinity");
   input >> this->IsInfinity;
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "IsInfinity");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "IsInfinity");
   theReport.Report("Loading LPtoMaximizeLargerDim...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "LPtoMaximizeLargerDim");
+  XML::ReadThroughFirstOpenTag(input, "LPtoMaximizeLargerDim");
   this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeLargerDim");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeLargerDim");
   theReport.Report("Loading LPtoMaximizeSmallerDim...");
-  XMLRoutines::ReadThroughFirstOpenTag(input, "LPtoMaximizeSmallerDim");
+  XML::ReadThroughFirstOpenTag(input, "LPtoMaximizeSmallerDim");
   this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if(numReadWords!=0)
     crash << crash;
   return true;
 }
 
 void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "ComputationPhase: " << this->computationPhase << "\n";
   output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
   output << "NumProcessedExtremaEqualOne: " << this->NumProcessedExtremaEqualOne << "\n";
@@ -4011,15 +4011,15 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->theQPsNonSubstituted.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
     theReport.Report("Writing QP's subbed... ");
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("QPsSubbed");
   this->theQPsSubstituted.WriteToFile(output, theGlobalVariables);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("QPsSubbed");
   if (theGlobalVariables!=0)
     theReport.Report("Writing small data... ");
 
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
+  output << XML::GetOpenTagNoInputCheckAppendSpacE("theMultiplicities");
   this->theMultiplicities.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
+  output << XML::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
 //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
   this->theTranslationS.WriteToFile(output, theGlobalVariables);
@@ -4036,7 +4036,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile(std::fstream& output, GlobalV
   this->projectivizedChambeR.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   if (theGlobalVariables!=0)
     theReport.Report("Writing to file done...");
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 void QuasiPolynomial::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -4054,17 +4054,17 @@ bool QuasiPolynomial::ReadFromFile(std::fstream& input, GlobalVariables* theGlob
 }
 
 void Lattice::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   this->basisRationalForm.WriteToFile(output);
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { int numReadWords;
-  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   bool result=this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if(numReadWords!=0)
     crash << crash;
   return result;
@@ -4109,13 +4109,13 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->WeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
+  XML::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
   this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "QPsSubbed");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "QPsSubbed");
   theReport.Report("Loading multiplicities... ");
-  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, "theMultiplicities");
+  XML::ReadThroughFirstOpenTag(input, numReadWords, "theMultiplicities");
   this->theMultiplicities.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
   this->theCoeffs.ReadFromFile(input);
   this->theTranslationS.ReadFromFile(input, theGlobalVariables);
   this->theTranslationsProjectedBasisChanged.ReadFromFile(input, theGlobalVariables);

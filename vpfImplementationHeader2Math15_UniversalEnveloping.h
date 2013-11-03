@@ -61,7 +61,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
     leftE.MakeGenerator(i, theOwner);
     rightE.MakeGenerator(indexOpposite, theOwner);
     theCF=theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
-    std::cout << "<hr>Killing product: " << leftE.ToString() << " and " << rightE.ToString() << " = " << theCF.ToString();
+//    std::cout << "<hr>Killing product: " << leftE.ToString() << " and " << rightE.ToString() << " = " << theCF.ToString();
     theCF.Invert();
 //    theCFconverted=theCF;
     this->AddMonomial(theMon, theCF);
@@ -77,7 +77,7 @@ void ElementUniversalEnveloping<coefficient>::MakeCasimirWRTLeviParabolic(Semisi
       killingRestrictedToCartan(i,j)=theOwner.GetKillingFormProductWRTLevi(leftE, rightE, rootsNotInLEvi);
       killingRestrictedToCartan(j,i)=killingRestrictedToCartan(i,j);
     }
-  std::cout << "<br>The killing restricted to Cartan: " << killingRestrictedToCartan.ToString();
+//  std::cout << "<br>The killing restricted to Cartan: " << killingRestrictedToCartan.ToString();
   killingRestrictedToCartan.Invert();
   ElementUniversalEnveloping<coefficient> leftUE, rightUE;
   Vector<Rational> currentEj;

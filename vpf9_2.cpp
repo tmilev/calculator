@@ -544,7 +544,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  if (CGI::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
+  if (XML::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
@@ -554,7 +554,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* t
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  CGI::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 

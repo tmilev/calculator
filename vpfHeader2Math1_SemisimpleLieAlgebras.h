@@ -257,6 +257,7 @@ public:
   bool flagSystemProvedToHaveNoSolution;
   bool flagSystemGroebnerBasisFound;
   bool flagCentralizerIsWellChosen;
+  bool flagUsedInducingSubalgebraRealization;
   int RecursionDepthCounterForNilradicalGeneration;
   int totalNumUnknownsNoCentralizer;
   int totalNumUnknownsWithCentralizer;
@@ -367,7 +368,7 @@ public:
   bool CheckGensBracketToHs();
   void GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const;
   bool ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
-  bool ComputeSystemPart2(bool AttemptToChooseCentalizer, bool useInducedSubalgebraRealization, bool allowNonPolynomialSystemFailure);
+  bool ComputeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool ComputeChar(bool allowBadCharacter);
   bool AttemptToSolveSystem();
   bool isGoodForTheTop(const Vector<Rational>& HneW)const;

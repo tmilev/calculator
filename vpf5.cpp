@@ -226,7 +226,7 @@ bool CommandList::innerRootSAsAndSltwos(CommandList& theCommands, const Expressi
   theCommands.GetOutputFolders(ownerSS->theWeyl.theDynkinType, outMainPatH, outMainDisplayPatH, theFormat);
   outSltwoPath << outMainPatH << "sl2s/";
   outSltwoDisplayPath << outMainDisplayPatH << "sl2s/";
-  bool NeedToCreateFolders=(!CGI::FileExists(outMainPatH) || !CGI::FileExists(outSltwoPath.str()));
+  bool NeedToCreateFolders=(!XML::FileExists(outMainPatH) || !XML::FileExists(outSltwoPath.str()));
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << outMainPatH;
@@ -241,7 +241,7 @@ bool CommandList::innerRootSAsAndSltwos(CommandList& theCommands, const Expressi
   outRootHtmlDisplayName << outMainDisplayPatH << "rootHtml.html";
   bool mustRecompute=false;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
+  if (!XML::FileExists(outSltwoMainFile.str()) || !XML::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
   std::stringstream out;
   if (mustRecompute)
@@ -1552,8 +1552,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
   std::string fileName, filename2;
   fileName=theCommands.PhysicalNameDefaultOutput+"1";
   filename2=theCommands.PhysicalNameDefaultOutput+"2";
-  CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
+  XML::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  XML::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
     return output.SetError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
@@ -2094,13 +2094,13 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   AllPointsOfEvaluation.SetSize(degree+1);
   thePrimeFactorsAtPoints.SetSize(degreeLeft+1);
   thePrimeFactorsMults.SetSize(degreeLeft+1);
-//  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
-//  std::cout << "<br>Degree left: " << degreeLeft;
-//  std::cout << "<br>Interpolating at: 0,";
+  //std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
+  //std::cout << "<br>Degree left: " << degreeLeft;
+  //std::cout << "<br>Interpolating at: 0,";
   AllPointsOfEvaluation[0]=0;
   for (int i=1; i<AllPointsOfEvaluation.size; i++)
   { AllPointsOfEvaluation[i]= i%2==1 ? i/2+1 : -(i/2);
-//    std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
+    //std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
   }
   Vector<Rational> theArgument;
   theArgument.SetSize(1);
@@ -2118,7 +2118,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       //std::cout << "<br>divident: " << this->ToString();
       return true;
     }
-//    std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
+    //std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
     if (i<degreeLeft+1)
     { theValuesAtPoints[i].IsInteger(&tempLI);
       if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
@@ -2126,10 +2126,10 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer " << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
-//      std::cout << "=+/- ";
-//      for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
-//        for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
-//          std::cout << thePrimeFactorsAtPoints[i][j] << "*";
+      //std::cout << "=+/- ";
+      //for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
+      //  for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
+      //    std::cout << thePrimeFactorsAtPoints[i][j] << "*";
     }
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
@@ -2149,7 +2149,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     PointsOfInterpolationRight.AddOnTop(AllPointsOfEvaluation[i]);
   theDivisorSel.initFromMults(thePrimeFactorsMults);
   signSel.initFromMults(1, degreeLeft+1);
-//  signSel.theElements[0].initFromMults(0);
+  //signSel.theElements[0].initFromMults(0);
   valuesLeftInterpolands.SetSize(degreeLeft+1);
   valuesRightInterpolands.SetSize(degreeRight+1);
   this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands);
@@ -2159,11 +2159,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     valuesRightInterpolands=valuesLeftInterpolands;
   do do
   { //std::cout << "<hr>Selection: " << theDivisorSel.ToString() << "<br>Sign selection: " << signSel.ToString();
-      //continue;
+    //continue;
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood=false;//<-we shall first check if the divisor is constant.
-//    std::cout << "<hr>Values left candidate: ";
+    //std::cout << "<hr>Values left candidate: ";
     for (int j=0; j<theDivisorSel.theElements.size; j++)
     { currentPointContribution=1;
       for (int k=0; k<theDivisorSel[j].theElements.size; k++)
@@ -2178,15 +2178,15 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       else
         if (firstValue!=currentPointContribution)
           isGood=true; //<- the divisor has takes two different values, hence is non-constant.
-//      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
+      //std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
       //std::cout << theValuesAtPointsLeft.ToString();
-//      std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
-//      << " to " << theValuesAtPointsLeft.ToString();
-//      std::cout.flush();
+      //std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
+      //<< " to " << theValuesAtPointsLeft.ToString();
+      //std::cout.flush();
       theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
-//      std::cout << " to get " << theValuesAtPointsLeft.ToString();
+      //std::cout << " to get " << theValuesAtPointsLeft.ToString();
     }
-//    std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
+    //std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
     if (!isGood)
       continue;
     theValuesAtPointsRight.MakeZero(theValuesAtPoints.size);
@@ -2202,7 +2202,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       }
       theValuesAtPointsRight+=valuesRightInterpolands[j]*currentPointContribution;
     }
-//    std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
+    //std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
     if (!isGood)
       continue;
     for (int k=valuesRightInterpolands.size; k<theValuesAtPoints.size; k++)
@@ -2242,7 +2242,7 @@ bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& in
   while (!thePoly.IsAConstant())
   { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, &theCommands.Comments))
       return false;
-//    std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
+    //std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
     Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     thePoly/=tempRat;
     theFactors.AddOnTop(smallestDiv);
@@ -2255,7 +2255,7 @@ bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& in
     output.AddChildOnTop(tempE);
   }
   output.format=output.formatMatrix;
-//  std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
+  //std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }
 
@@ -2279,7 +2279,6 @@ bool CommandList::innerZmodP(CommandList& theCommands, const Expression& input, 
   outputElt.theModulo=base.value;
   outputElt=left.GetNumerator();
   return output.AssignValue(outputElt, theCommands);
-
 }
 
 bool CommandList::innerDouble(CommandList& theCommands, const Expression& input, Expression& output)
@@ -2415,10 +2414,10 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
 { MacroRegisterFunctionWithName("CommandList::innerEWAorPoly");
   if (!input.IsListNElements(3))
     return false;
-//  const Expression& diffE=input[1];
-//  const Expression& polyE=input[2];
-//  if (diffE.HasBoundVariables() || polyE.HasBoundVariables())
-//    return false;
+  //const Expression& diffE=input[1];
+  //const Expression& polyE=input[2];
+  //if (diffE.HasBoundVariables() || polyE.HasBoundVariables())
+  //  return false;
   Vector<Polynomial<Rational> > inputPolForm;
   Expression startContext;
   if (!theCommands.GetVectorFromFunctionArguments(input, inputPolForm, &startContext, 2, Serialization::innerPolynomial<Rational>))
@@ -2440,43 +2439,154 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool CommandList::ReadTestFromFile(std::fstream& theFile, List<std::string>& commandStrings, List<std::string>& commandResultStrings)
-{
-  return false;
+bool CommandList::ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults)
+{ MacroRegisterFunctionWithName("CommandList::ReadTestStrings");
+  XML theFileReader;
+  if (!theFileReader.ReadFromFile(this->theTestFile))
+    return false;
+  outputCommands.Clear();
+  outputResults.SetSize(0);
+  outputCommands.SetExpectedSize(this->GetNumBuiltInFunctions());
+  outputResults.ReservE(this->GetNumBuiltInFunctions());
+  std::string buffer;
+  while (theFileReader.positionInString< (signed) theFileReader.theString.size())
+  { if(!theFileReader.GetStringEnclosedIn("input", buffer))
+    { this->Comments << "<hr>Failed to read input string from test file: is the test file corrupt?";
+      return false;
+    }
+    outputCommands.AddOnTop(buffer);
+    if (!theFileReader.GetStringEnclosedIn("output", buffer))
+    { this->Comments << "<hr>Failed to read input string from test file: is the test file corrupt?";
+      return false;
+    }
+    outputResults.AddOnTop(buffer);
+  }
+  if (outputCommands.size!=outputResults.size || outputCommands.size==0)
+  { this->Comments << "<hr>Corrupt test file: got " << outputCommands.size << " commands and " << outputResults.size << " results, which should not happen. ";
+    return false;
+  }
+  return true;
+}
+
+bool CommandList::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults)
+{ MacroRegisterFunctionWithName("CommandList::WriteTestStrings");
+  for (int i=0; i<inputCommands.size; i++)
+    this->theTestFile << "<input>" << inputCommands[i] << "</input>" << "<output>" << inputResults[i] << "</output>\n\n";
+  return true;
 }
 
 bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAutomatedTestSetKnownGoodCopy");
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  List<std::string> inputStringsTest,outputStringsTestWithInit, outputStringsTestNoInit;
+  List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
+  theCommands.WriteTestStrings(inputStringsTest, outputStringsTestWithInit);
   out << "Test run completed in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startTime << " seconds.";
   return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
-  return output.AssignValue<std::string>("Not implemented yet. ", theCommands);
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  std::stringstream out;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  std::fstream theTestFile;
-  std::string theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.html";
-  List<std::string> goodInputStrings, goodOutputStrings;
-  if (CGI::FileExists(theTestFileName))
-  { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, false, false))
-      crash << "This is a programming error or worse: failed to open an existing file: " << theTestFileName << ". Something is very wrong. " << crash;
-    if (!theCommands.ReadTestFromFile(theTestFile, goodInputStrings, goodOutputStrings))
-      crash << "Failed to get input/output strings from file: " << theTestFileName << ". Something is very wrong. " << crash;
-  } else
-  { if (!CGI::OpenFileCreateIfNotPresent(theTestFile, theTestFileName, false, true, false))
-      crash << "This is a programming error or worse: file " << theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
+  theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
+  if (!XML::FileExists(theCommands.theTestFileName))
+  { if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
+      crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   }
-  out << "Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
+  if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
+    crash << "This is a programming error or worse: failed to open an existing file: " << theCommands.theTestFileName << ". Something is very wrong. " << crash;
+  List<std::string> knownResults;
+  HashedList<std::string, MathRoutines::hashString> knownCommands;
+  std::stringstream out;
+  if (!theCommands.ReadTestStrings(knownCommands, knownResults))
+  { out << "Error: failed to load test strings: the test file " << theCommands.theTestFileName << " may be corrupt. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  List<std::string> commandStrings, resultStringsWithInit, resultStringsNoInit;
+  theCommands.AutomatedTestRun(commandStrings, resultStringsWithInit, resultStringsNoInit);
+  std::string newCommand="";
+  std::stringstream errorTableStream;
+  int numInconsistencies=0;
+  for (int i=0; i<commandStrings.size; i++)
+  { if (!knownCommands.Contains(commandStrings[i]))
+    { newCommand=commandStrings[i];
+      continue;
+    }
+    int theIndex=knownCommands.GetIndex(commandStrings[i]);
+    if (knownResults[theIndex]!=resultStringsWithInit[i])
+    { errorTableStream << "<tr><td>" << commandStrings[i] << "</td><td>" << knownResults[theIndex] << "</td><td>" << resultStringsWithInit[i]
+      << "</td></tr>";
+      numInconsistencies++;
+    }
+  }
+  if (numInconsistencies>0)
+  { out << "<span style=\"color:#0000FF\"><b>The test file results do not match the current results. </b></span> There were "
+    << numInconsistencies << " inconsistencies out of " << knownCommands.size << " input strings. The inconsistent result table follows. "
+    << "<hr><table>" << errorTableStream.str() << "</table><hr>";
+  }
+  if (commandStrings.size!=knownCommands.size || newCommand!="")
+  { if (commandStrings.size!=knownCommands.size)
+      out << "There were " << knownCommands.size << " known commands read from the test file but the calculator has "
+      << commandStrings.size << " functions total. ";
+    if (newCommand!="")
+      out << "The command " << newCommand << " was not recorded in the test file. ";
+    out << "The test file must be out of date. Please update it.<hr>";
+  }
+  out << "The command for updating the test file is " << theCommands.GetCalculatorLink("AutomatedTestSetGoodKnownCopy 0") << "<hr>";
+  out << "<hr>Total time for the test: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-startingTime;
   return output.AssignValue(out.str(), theCommands);
+}
+
+int CommandList::GetNumBuiltInFunctions()
+{ int result=0;
+  for (int i=0; i<this->FunctionHandlers.size; i++)
+    result+=this->FunctionHandlers[i].size;
+  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
+    result+=this->operationsCompositeHandlers[i].size;
+  return result;
+}
+
+void CommandList::AutomatedTestRun
+(List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit)
+{ MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
+  CommandList theTester;
+  int numFunctionsToTest=this->GetNumBuiltInFunctions();
+  outputCommandStrings.SetExpectedSize(numFunctionsToTest);
+  outputCommandStrings.SetSize(0);
+  for (int i=0; i<this->FunctionHandlers.size; i++)
+    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      if (this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTest &&
+          this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTestSetKnownGoodCopy &&
+          this->FunctionHandlers[i][j].theFunction!=CommandList::innerCrash)
+        outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
+  for (int i=0; i<this->operationsCompositeHandlers.size; i++)
+    for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)
+      outputCommandStrings.AddOnTop(this->operationsCompositeHandlers[i][j].theExample);
+  outputResultsWithInit.SetSize(outputCommandStrings.size);
+  outputResultsNoInit.SetSize(outputCommandStrings.size);
+  ProgressReport theReport(this->theGlobalVariableS);
+  for (int i=0; i<outputCommandStrings.size; i++)
+  { double startingTime=this->theGlobalVariableS->GetElapsedSeconds();
+    theTester.reset();
+    theTester.CheckConsistencyAfterInitializationExpressionStackEmpty();
+    theTester.init(*this->theGlobalVariableS);
+    Expression dummyCommands, tempE;
+    tempE.AssignValue<std::string>("Input suppressed", theTester);
+    dummyCommands.reset(theTester);
+    dummyCommands.AddChildAtomOnTop(theTester.opEndStatement());
+    dummyCommands.AddChildOnTop(tempE);
+    theTester.Evaluate(outputCommandStrings[i]);
+    outputResultsWithInit[i]=theTester.theProgramExpression.ToString(0, &dummyCommands);
+    std::stringstream reportStream;
+    reportStream << "<br>Tested expression " << i+1 << " out of " << outputCommandStrings.size << ". ";
+    reportStream << "<br>To get: " << theTester.theProgramExpression.ToString();
+    reportStream << "<br>Done in: " << this->theGlobalVariableS->GetElapsedSeconds()-startingTime << " seconds. ";
+    theReport.Report(reportStream.str());
+  }
 }
 
 class DoxygenInstance

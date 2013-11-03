@@ -118,7 +118,7 @@ class FormatExpressions;
 struct IndicatorWindowVariables;
 class DrawingVariables;
 class DrawOperations;
-class XMLRoutines;
+class XML;
 struct CGI;
 
 //The calculator parsing routines:
@@ -490,7 +490,7 @@ public:
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
 };
 
-class XMLRoutines
+class XML
 {
 private:
   static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters)
@@ -506,6 +506,12 @@ private:
     return result;
   }
   public:
+  std::string theString;
+  int positionInString;
+  XML();
+  bool ReadFromFile(std::fstream& inputFile);
+  static bool FileExists(const std::string& theFileName);
+  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters)
   { std::string result=" <";
     result.append(tagNameNoSpacesNoForbiddenCharacters);
@@ -520,14 +526,14 @@ private:
   }
   inline static bool ReadThroughFirstOpenTag(std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters)
   { int tempInt;
-    return XMLRoutines::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+    return XML::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
   inline static bool ReadEverythingPassedTagOpenUntilTagClose(std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters)
   { int tempInt;
-    return XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+    return XML::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
   }
   static bool ReadThroughFirstOpenTag(std::istream& streamToMoveIn, int& NumReadWordsExcludingTag, const std::string& tagNameNoSpacesNoForbiddenCharacters)
-  { std::string tagOpen=XMLRoutines::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+  { std::string tagOpen=XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
     std::string tempS;
     NumReadWordsExcludingTag=0;
     while (!streamToMoveIn.eof())
@@ -539,8 +545,8 @@ private:
     return false;
   }
   static bool ReadEverythingPassedTagOpenUntilTagClose(std::istream& streamToMoveIn, int& NumReadWordsExcludingTag, const std::string& tagNameNoSpacesNoForbiddenCharacters)
-  { std::string tagClose=XMLRoutines::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
-    std::string tagOpen=XMLRoutines::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+  { std::string tagClose=XML::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+    std::string tagOpen=XML::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
     int TagDepth=1;
     std::string tempS;
     NumReadWordsExcludingTag=0;
@@ -556,8 +562,8 @@ private:
     }
     return false;
   }
+  bool GetStringEnclosedIn(const std::string& theTagName, std::string& outputString);
 };
-
 
 class DrawElementInputOutput
 {
@@ -1177,8 +1183,6 @@ public:
   }
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
   static std::string GetHtmlSpanHidableStartsHiddeN(const std::string& input);
-  static bool FileExists(const std::string& theFileName);
-  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static std::string clearSlashes(const std::string& theString);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
@@ -2477,7 +2481,7 @@ public:
 
 template <typename Element>
 void Matrix<Element>::WriteToFile(std::fstream& output)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "r: " << this->NumRows << " c: " << this->NumCols << "\n";
   for (int i=0; i<this->NumRows; i++)
   { for (int j=0; j<this->NumCols; j++)
@@ -2486,14 +2490,14 @@ void Matrix<Element>::WriteToFile(std::fstream& output)
     }
     output << "\n";
   }
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 template <typename Element>
 bool Matrix<Element>::ReadFromFile(std::fstream& input)
 { int r, c; std::string tempS;
   int NumReadWords;
-  XMLRoutines::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
   if(NumReadWords!=0)
     crash << crash;
   input >> tempS >> r >> tempS >> c;
@@ -2505,7 +2509,7 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j].ReadFromFile(input);
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
   if(NumReadWords!=0)
     crash << crash;
   return true;

@@ -1886,7 +1886,7 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==(const 
 
 template <class TemplateMonomial, class coefficient>
 void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile(std::fstream& output)
-{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+{ output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << " numMons: " << this->size();
   for (int i=0; i<this->size(); i++)
   { output << " ";
@@ -1897,13 +1897,13 @@ void MonomialCollection<TemplateMonomial, coefficient>::WriteToFile(std::fstream
     const TemplateMonomial& tempM=(*this)[i];
     tempM.WriteToFile(output);
   }
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 template <class TemplateMonomial, class coefficient>
 inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { int numReadWords, targetSize;
-  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string ReaderString;
   bool result=true;
   input >> ReaderString >> targetSize;
@@ -1926,7 +1926,7 @@ inline bool MonomialCollection<TemplateMonomial, coefficient>::ReadFromFile(std:
       break;
     this->AddMonomial(tempM, theCoeff);
   }
-  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   if(numReadWords!=0)
     crash << crash;
   return result;
@@ -3118,7 +3118,7 @@ void List<Object>::WriteToFile(std::fstream& output, GlobalVariables* theGlobalV
 { int NumWritten=this->size;
   if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
     NumWritten=UpperLimitForDebugPurposes;
-  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << XML::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "size: " << NumWritten << "\n";
   for (int i=0; i<NumWritten; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
@@ -3126,14 +3126,14 @@ void List<Object>::WriteToFile(std::fstream& output, GlobalVariables* theGlobalV
     if (theGlobalVariables!=0)
       theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
   }
-  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
+  output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 template <class Object>
 bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)
 { std::string tempS;
   int ActualListSize; int NumWordsBeforeTag;
-  XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
+  XML::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
   if(NumWordsBeforeTag!=0)
     crash << crash;
   input >> tempS >> ActualListSize;
@@ -3160,7 +3160,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
     }
     //</reporting_and_safepoint_duties>
   }
-  bool tempBool= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
+  bool tempBool= XML::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
   if(!tempBool)
     crash << crash;
   return true;
@@ -7139,14 +7139,14 @@ public:
 //      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
   //    this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
     }
-    XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+    XML::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
     input >> tempS >> this->computationPhase;
     if (tempS!="ComputationPhase:")
       crash << crash;
     bool result=true;
     if (this->computationPhase!=0)
       result= this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
-    XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+    XML::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
     return result;
   }
   bool ReadFromFileNoComputationPhase(std::fstream& input, GlobalVariables* theGlobalVariables);

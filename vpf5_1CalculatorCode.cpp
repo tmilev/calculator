@@ -496,6 +496,8 @@ bool CommandList::innerPrintSSsubalgebras
       << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
+    std::cout << "<br>Centralizers off.";
+    theSSsubalgebras.flagAttemptToAdjustCentralizers=false;
     if (!isAlreadySubalgebrasObject)
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
     theSSsubalgebras.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();

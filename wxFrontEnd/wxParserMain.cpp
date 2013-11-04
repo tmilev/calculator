@@ -383,14 +383,14 @@ void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
 
 void wxParserFrame::WriteSettings()
 { std::fstream fileSettings;
-  CGI::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
-  fileSettings << "mainDialogX_Y_Width_Height: " <<  this->GetRect().x << " " << this->GetRect().y << " "
+  XML::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
+  fileSettings << "mainDialogX_Y_Width_Height: " << this->GetRect().x << " " << this->GetRect().y << " "
   << this->GetRect().width << " " << this->GetRect().height << "\n";
   fileSettings << "drawDialogX_Y_Width_Height: " <<  this->theDrawPanel->GetRect().x << " " << this->theDrawPanel->GetRect().y << " "
   << this->theDrawPanel->GetRect().width << " " << this->theDrawPanel->GetRect().height << "\n";
-  fileSettings << "indicatorDialogX_Y_Width_Height: " <<  this->theStatus->GetRect().x << " " << this->theStatus->GetRect().y << " "
+  fileSettings << "indicatorDialogX_Y_Width_Height: " << this->theStatus->GetRect().x << " " << this->theStatus->GetRect().y << " "
   << this->theStatus->GetRect().width << " " << this->theStatus->GetRect().height << "\n";
-  fileSettings << "outputDialogX_Y_Width_Height: " <<  this->theParserOutput->GetRect().x << " " << this->theParserOutput->GetRect().y << " "
+  fileSettings << "outputDialogX_Y_Width_Height: " << this->theParserOutput->GetRect().x << " " << this->theParserOutput->GetRect().y << " "
   << this->theParserOutput->GetRect().width << " " << this->theParserOutput->GetRect().height << "\n";
   fileSettings << "outputDialogX_Y_Width_Height: " <<  this->thePNGdisplay->GetRect().x << " " << this->thePNGdisplay->GetRect().y << " "
   << this->thePNGdisplay->GetRect().width << " " << this->thePNGdisplay->GetRect().height << "";
@@ -400,10 +400,10 @@ void wxParserFrame::WriteSettings()
 }
 
 void wxParserFrame::ReadSettings()
-{ if (!CGI::FileExists(this->theSettingsFileName))
+{ if (!XML::FileExists(this->theSettingsFileName))
     return;
   std::fstream fileSettings;
-  CGI::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
+  XML::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
   std::string tempS;
   wxRect tempRect;
   fileSettings >> tempS >> tempRect.x >> tempRect.y >> tempRect.width >> tempRect.height;
@@ -422,8 +422,8 @@ void wxParserFrame::ReadSettings()
   List<std::string>& slides=this->theSlidesFileNames;
   List<int>& ind=this->theSlideFrameIndices;
   int s=0;
-  s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=0+                    1; slides[s-1]="jacobs.png";
-  s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=ind[s-2]+        40; slides[s-1]="karlin.png";
+  s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=0+               1; slides[s-1]="jacobs.png";
+  s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=ind[s-2]+       40; slides[s-1]="karlin.png";
   s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=ind[s-2]+       20; slides[s-1]="page_1.png";
   s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=ind[s-2]+       80; slides[s-1]="page_2.png";
   s++; ind.SetSize(s); slides.SetSize(s); ind[s-1]=ind[s-2]+       80; slides[s-1]="page_3.png";
@@ -453,7 +453,7 @@ void wxParserFrame::ReadSettings()
   this->theSlides.SetSize(s);
   for (int i=0; i<s-1; i++)
   { slides[i]=this->thePath+slides[i];
-    if (::CGI::FileExists(slides[i]))
+    if (::XML::FileExists(slides[i]))
       this->theSlides[i].LoadFile(wxString(slides[i].c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
   }
   /*
@@ -464,7 +464,7 @@ void wxParserFrame::ReadSettings()
     if (oldfileName==newFileName)
       break;
     oldfileName=newFileName;
-    if (CGI::FileExists(newFileName))
+    if (XML::FileExists(newFileName))
     { this->theSlides.SetSize(this->theSlides.size+1);
       this->theSlidesFileNames.AddObjectOnTop(newFileName);
       this->theSlideFrameIndices.AddObjectOnTop(framecount);
@@ -481,7 +481,7 @@ void wxParserFrame::ReadSettings()
 #ifdef WIN32
 void RunComputationalThread()
 #else
-void* RunComputationalThread(void*ptr)
+void* RunComputationalThread(void* ptr)
 #endif
 { theGlobalVariables.theLocalPauseController.InitComputation();
   theMainWindow->theCommandList.Evaluate(theMainWindow->theCommandList.inputString);

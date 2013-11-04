@@ -1213,3 +1213,10 @@ bool CommandList::innerEvaluateToDouble(CommandList& theCommands, const Expressi
   }
   return false;
 }
+
+bool CommandListFunctions::innerTestMathMouseHover(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandListFunctions::innerTestMathMouseHover");
+  std::stringstream out;
+  out << CGI::GetMathMouseHover(input.ToString());
+  return output.AssignValue(out.str(), theCommands);
+}

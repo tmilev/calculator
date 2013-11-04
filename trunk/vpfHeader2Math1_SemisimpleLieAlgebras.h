@@ -414,6 +414,7 @@ public:
   bool flagComputeModuleDecomposition;
   bool flagComputeNilradicals;
   bool flagProduceLaTeXtables;
+  bool flagAttemptToAdjustCentralizers;
   double timeComputationStartInSeconds;
   double timeComputationEndInSeconds;
   signed long long int numAdditions;

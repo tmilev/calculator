@@ -44,6 +44,7 @@ public:
 
   static bool innerPowerAnyToZero(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDdivDxToDifferentiation(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerTestMathMouseHover(CommandList& theCommands, const Expression& input, Expression& output);
 
   static bool outerAdivBpowerItimesBpowerJ(CommandList& theCommands, const Expression& input, Expression& output);
   static bool outerAtimesBpowerJplusEtcDivBpowerI(CommandList& theCommands, const Expression& input, Expression& output);

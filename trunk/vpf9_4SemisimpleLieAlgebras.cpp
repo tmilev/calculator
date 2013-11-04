@@ -2743,6 +2743,7 @@ void SemisimpleSubalgebras::reset()
   this->flagComputePairingTable=false;
   this->flagComputeNilradicals=false;
   this->flagProduceLaTeXtables=false;
+  this->flagAttemptToAdjustCentralizers=true;
   this->timeComputationStartInSeconds=-1;
   this->timeComputationEndInSeconds=-1;
   this->numAdditions=-1;
@@ -2762,6 +2763,8 @@ bool CandidateSSSubalgebra::AttemptToSolveSystem()
 //  << "System before transformation: " << this->transformedSystem.ToString()
 //  ;
   //std::cout << "<br>additions so far: " << Rational::total
+  if (this->owner->theGlobalVariables==0)
+    crash << crash;
   for (int i=401; i<6402; i+=2000)
   { theComputation.MaxNumComputations=i;
     theComputation.SolveSerreLikeSystem(this->transformedSystem, this->owner->ownerField, this->owner->theGlobalVariables);
@@ -5447,13 +5450,14 @@ void CandidateSSSubalgebra::AdjustCentralizerAndRecompute(bool allowNonPolynomia
   if (this->flagSystemProvedToHaveNoSolution)
     return;
   this->ComputeCentralizerIsWellChosen();
-  if (!this->flagCentralizerIsWellChosen)
-  { //std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
-    //std::cout << "<br>Starting generators: " << this->ToStringGenerators();
-    this->ComputeSystem(true, allowNonPolynomialSystemFailure);
-    //std::cout << "<br>... and final generators: " << this->ToStringGenerators();
-    this->ComputeCentralizerIsWellChosen();
-  }
+  if (this->owner->flagAttemptToAdjustCentralizers)
+    if (!this->flagCentralizerIsWellChosen)
+    { //std::cout << "<hr>Adjusting " << this->ToStringTypeAndHs();
+      //std::cout << "<br>Starting generators: " << this->ToStringGenerators();
+      this->ComputeSystem(true, allowNonPolynomialSystemFailure);
+      //std::cout << "<br>... and final generators: " << this->ToStringGenerators();
+      this->ComputeCentralizerIsWellChosen();
+    }
 }
 
 int CandidateSSSubalgebra::GetNumModules()const
@@ -5530,13 +5534,13 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
       }// else std::cout << " NOT direct summand of " << otherSA.theWeylNonEmbeddeD.theDynkinType.ToString() << ", ";
     }
   }
-  theReport1.Report("<hr>\nCentralizers computed, adjusing centralizers with respect to the Cartan subalgebra.");
+  theReport1.Report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { std::stringstream reportStream2;
     reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of " << this->theSubalgebraCandidates.size
     << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
     theReport2.Report(reportStream2.str());
-    this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(this->theGlobalVariables);
+    this->theSubalgebraCandidates[i].AdjustCentralizerAndRecompute(allowNonPolynomialSystemFailure);
   }
   theReport1.Report("<hr>\nComputing pairing tables.");
   if (this->flagComputeModuleDecomposition)

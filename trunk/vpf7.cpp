@@ -873,10 +873,28 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars
 { std::stringstream out;
 //  int dirtylittleHAckHEre;
 //  upperNumChars=1;
-  if (input.size()< (unsigned) upperNumChars)
-    out << "<span class=\"math\">" << input << "</span>";
-  else
-    out << "<b>LaTeX output is long and I dare not use jsmath. Here is the output as plain LaTeX.</b><br> " << input;
+  if (input.size()> (unsigned) upperNumChars)
+  { out << "<b>LaTeX output is longer than " << upperNumChars << " and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
+    return out.str();
+  }
+  out << "<span class=\"math\">" << input << "</span>";
+  return out.str();
+}
+
+std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
+{ std::stringstream out;
+//  int dirtylittleHAckHEre;
+//  upperNumChars=1;
+  if (input.size()> (unsigned) upperNumChars)
+  { out << "<b>LaTeX output is longer than " << upperNumChars << "  and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
+    return out.str();
+  }
+  std::stringstream idSpanStream;
+  idSpanStream << "mathFormula" << MathRoutines::hashString(input);
+  out << "<span id=\"container" << idSpanStream.str() << "\">"  << "<span id=\"" << idSpanStream.str()
+  << "\" onmouseover=\"if (this.className=='math') return; this.className='math'; window.alert('Calling jsmath.ProcessBeforeShowing');  "
+  << "jsMath.ProcessBeforeShowing('container" << idSpanStream.str() << "');\" >"
+  << input << "</span>" << "</span>";
   return out.str();
 }
 

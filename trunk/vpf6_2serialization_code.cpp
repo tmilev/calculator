@@ -703,6 +703,8 @@ bool Serialization::innerLoadSemisimpleSubalgebras(CommandList& theCommands, con
     //std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
+  std::cout << "centralizers off";
+  theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);
   //std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
   //std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];

@@ -1177,6 +1177,7 @@ public:
   }
   static std::string GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input);
   static std::string GetHtmlMathSpanPure(const std::string& input, int upperNumChars=700);
+  static std::string GetMathMouseHover(const std::string& input, int upperNumChars=700);
   static std::string GetHtmlMathFromLatexFormulA(const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL);
   static std::string GetStyleButtonLikeHtml()
   { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";

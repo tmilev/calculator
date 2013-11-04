@@ -1084,6 +1084,11 @@ void CommandList::initPredefinedInnerFunctions()
     Argument format same as the Freudenthal function. ",
    "FreudenthalFull{}(G_2, (2,1))", true, false)
    ;
+   this->AddOperationInnerHandler
+  ("TestMouseHover", CommandListFunctions::innerTestMathMouseHover, "",
+   "This is not a mahtematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
+   "TestMouseHover(x^2)", true, false)
+   ;
 //  this->AddOperationInnerHandler
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",

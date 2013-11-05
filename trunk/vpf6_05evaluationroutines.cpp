@@ -318,7 +318,7 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << CGI::GetHtmlMathSpanPure(output.ToString()) << "  ->  " << CGI::GetHtmlMathSpanPure(tempE.ToString())
+        this->Comments << CGI::GetMathSpanPure(output.ToString()) << "  ->  " << CGI::GetMathSpanPure(tempE.ToString())
         << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
       output=tempE;
       continue;
@@ -343,8 +343,8 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
       if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments, this->flagLogPatternMatching))
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
-          this->Comments << CGI::GetHtmlMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
-          << CGI::GetHtmlMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
+          this->Comments << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
+          << CGI::GetMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
         break;
       }
     }

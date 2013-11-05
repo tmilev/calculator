@@ -1163,22 +1163,10 @@ public:
     CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS);
     theString=tempS;
   }
-  static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
-  { return CGI::GetHtmlMathFromLatexFormulA(input, "", "", true, false);
-  }
-  static std::string GetHtmlMathDivFromLatexAddBeginArrayL(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);
-  }
-  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);
-  }
-  static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
-  }
-  static std::string GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input);
-  static std::string GetHtmlMathSpanPure(const std::string& input, int upperNumChars=700);
+  static std::string GetMathSpanPure(const std::string& input, int upperNumChars=700);
+  static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=700);
   static std::string GetMathMouseHover(const std::string& input, int upperNumChars=700);
-  static std::string GetHtmlMathFromLatexFormulA(const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL);
+  static std::string GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars=700);
   static std::string GetStyleButtonLikeHtml()
   { return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";
   }

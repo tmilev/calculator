@@ -697,12 +697,12 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOrbitOuterSimple(CommandList& t
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
+    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
     << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << (useMathTag ? CGI::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? CGI::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
+    << (useMathTag ? CGI::GetMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $"
     << orbitEltStringEpsilonCoords
@@ -772,12 +772,12 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit(CommandList& theCommands, cons
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
+    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
     << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << (useMathTag ? CGI::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? CGI::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
+    << (useMathTag ? CGI::GetMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
@@ -802,7 +802,7 @@ bool WeylGroupCalculatorFunctions::innerWeylOrbit(CommandList& theCommands, cons
       }
       out << "<td>";
       if (isGood)
-        out << CGI::GetHtmlMathSpanPure(standardElt.ToString(&theFormat));
+        out << CGI::GetMathSpanPure(standardElt.ToString(&theFormat));
       else
         out << "-";
       out << "</td>";
@@ -832,7 +832,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupIrrepsAndCharTable(CommandList&
   { //out << "<br>" << theGroup.irreps[i].theCharacter.ToString();
     charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroup.irreps[i].GetCharacter());
   }
-  out << CGI::GetHtmlMathSpanPure(charMat.ToString(&tempFormat));
+  out << CGI::GetMathSpanPure(charMat.ToString(&tempFormat));
   out << "<br>Explicit realizations of each representation follow.";
   for (int i=0; i<theGroup.irreps.size; i++)
   { out << "<hr>" << theGroup.irreps[i].ToString(&tempFormat);
@@ -853,7 +853,7 @@ bool WeylGroupCalculatorFunctions::innerWeylGroupOuterAutoGeneratorsPrint(Comman
   tempFormat.flagUseHTML=false;
   for (int i=0; i<theGens.size; i++)
   { outCommand << "<br>s_{" << i+1 << "}:=MatrixRationals" << theGens[i].ToString(&tempFormat) << ";";
-    out << "<br>s_" << i+1 << " = " << CGI::GetHtmlMathSpanPure(theGens[i].ToString(&tempFormat) );
+    out << "<br>s_" << i+1 << " = " << CGI::GetMathSpanPure(theGens[i].ToString(&tempFormat) );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i=0; i<theGens.size; i++)

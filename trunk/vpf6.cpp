@@ -1420,14 +1420,14 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
     theWeyl.ActOn(indexInWeyl, currentHW);
     currentHW-=theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
-    out << "<td>" << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(currentChar.ToString(&formatChars)) << "</td>";
+    out << "<td>" << CGI::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
     if (currentElt.reflections.size%2==1)
       currentChar*=-1;
     theChar+=currentChar;
     out << "</tr>";
   }
   out << "</table>";
-  out << "Final char: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(theChar.ToString(&formatChars));
+  out << "Final char: " << CGI::GetMathMouseHover(theChar.ToString(&formatChars));
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
@@ -2049,7 +2049,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
 //      std::cout << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
 //        std::cout << theUEformat.polyAlphabeT[k] << ", ";
-      out << "<tr><td>General monomial in U(n_-):</td><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
+      out << "<tr><td>General monomial in U(n_-):</td><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
@@ -2060,7 +2060,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td>";
+      out << "<tr><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero);
@@ -2069,14 +2069,14 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
         theSSalgebra.OrderSetNilradicalNegativeMostReversed(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(theCommands.theGlobalVariableS);
         theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
-        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
+        out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}") << "</td>";
         theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << "</td>";
+    out << "<tr><td>" << CGI::GetMathMouseHover(theMod.theChaR.ToString()) << "</td>";
     latexReport2 << "\\begin{longtable}{rll}";
     latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline" << "\\multirow{" << theGeneratorsItry.size
     << "}{*}{$" << theSSalgebra.GetLieAlgebraName() << "$}" << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
@@ -2090,7 +2090,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
+      out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
       theWeylFormat.MaxLineLength=300;
@@ -2106,11 +2106,11 @@ bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
     out << "</tr>";
     if (theMod.GetDim()==1)
     { ElementWeylAlgebra<Rational> diffOpPart, transformedDO;
-      reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
+      reportFourierTransformedCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators Fourier transformed - formatted for calculator input. <br><br>";
       reportFourierTransformedCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
-      reportCalculatorCommands << "<hr>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
+      reportCalculatorCommands << "<hr>" << CGI::GetMathMouseHover(theMod.theChaR.ToString())
       << ", differential operators - formatted for calculator input. <br><br>";
       reportCalculatorCommands << "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i);\n<br>"
       << "\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n";
@@ -2172,7 +2172,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   latexFormat.flagUseLatex=true;
   latexFormat.flagUseHTML=false;
   if (this->theCharOverH.size()<100)
-    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(this->theCharOverH.ToString(&latexFormat));
+    out << CGI::GetMathMouseHover(this->theCharOverH.ToString(&latexFormat));
   else
     out << this->theCharOverH.ToString();
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
@@ -2206,13 +2206,13 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
     if (this->ComputedGeneratorActions.selected[i])
     { tempSSElt.MakeGenerator(i, theAlgebrA);
       out << "<tr>";
-      out << "<td>" << CGI::GetHtmlMathSpanPure(tempSSElt.ToString(theFormat)) << "</td>";
+      out << "<td>" << CGI::GetMathMouseHover(tempSSElt.ToString(theFormat)) << "</td>";
       out << "<td>";
       if (this->GetDim()<28)
       { Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
         //std::cout << outputMat.ToString(&latexFormat);
-        out << CGI::GetHtmlMathSpanPure(outputMat.ToString(&latexFormat), 5000) << " = ";
+        out << CGI::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
         out << this->actionsGeneratorsMaT[i].ToString();
       }
       else
@@ -2426,9 +2426,9 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   tempFormat.fundamentalWeightLetter="\\psi";
   tempFormat.CustomPlusSign="\\oplus ";
   hwContext.ContextGetFormatExpressions(tempFormat);
-  out << "<br>Character of finite dimensional module:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDChaR.ToString());
+  out << "<br>Character of finite dimensional module:" << CGI::GetMathMouseHover(theFDChaR.ToString());
   if (theGenMod.parabolicSelectionSelectedAreElementsLevi.CardinalitySelection>0)
-    out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDLeviSplit.ToString(&tempFormat));
+    out << "<br>theFDChar split over levi:" << CGI::GetMathMouseHover(theFDLeviSplit.ToString(&tempFormat));
   //out << "<br> Splitting report: " << report;
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
@@ -2518,7 +2518,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
 //      std::cout << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
     out << "<tr><td>"
     << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-    << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
+    << "</td><td>" << CGI::GetMathMouseHover(tempStream.str()) << "</td><td>" << tempRat.ToString() << "</td>";
     latexReport2
     << "$" << theSSalgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
@@ -2527,14 +2527,14 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
     if (theNumVars==1)
     { tmpGCD= theElt.FindGCDCoefficientNumeratorsOverRationals();
       tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-      out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tmpGCD.ToString(&tempFormat)) << "</td>";
+      out << "<td>" << CGI::GetMathMouseHover(tmpGCD.ToString(&tempFormat)) << "</td>";
     }
-    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theElt.ToString(&tempFormat)) << "</td>";
+    out << "<td>" << CGI::GetMathMouseHover(theElt.ToString(&tempFormat)) << "</td>";
     latexReport2 << "&$\\begin{array}{l}" << theElt.ToString(&tempFormat) << "\\end{array}$\\\\<br>";
     if (theNumVars==1)
     { tmpRF=tmpGCD;
       theElt/=tmpRF;
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}" + theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      out << "<td>" << CGI::GetMathMouseHover("\\begin{array}{l}" + theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
     }
     out << "</tr>";
   }
@@ -2712,7 +2712,7 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   }
   out << "We define the symmetric Cartan matrix by requesting that the entry in the i-th row and j-th column "
   << " be the scalar product of the i^th and j^th roots. Symmetric Cartan matrix:<br>"
-  << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat));
+  << CGI::GetMathSpanPure(theWeyl.CartanSymmetric.ToString(&latexFormat));
   Rational tempRat;
   Matrix<Rational> tempMat;
   tempMat = theWeyl.CartanSymmetric;
@@ -2744,13 +2744,13 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
   Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
-  out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
+  out << "= " << CGI::GetMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
   out << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br>with the j^th simple root times 2 divided by the root length squared,<br> "
   << " and 0 with the remaining simple roots): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
-  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> " << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> " << CGI::GetMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -2758,7 +2758,7 @@ bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Express
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
-  { out << "<tr><td>" << simpleBasis[i].ToString() << " </td><td>=</td> <td>" << CGI::GetHtmlMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
+  { out << "<tr><td>" << simpleBasis[i].ToString() << " </td><td>=</td> <td>" << CGI::GetMathSpanPure(simplebasisEpsCoords[i].ToStringEpsilonFormat())
     << "</td></tr>";
   }
   out << "</table>";
@@ -3993,7 +3993,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       { out << "<hr> ";
         if (!this->theBoss->flagHideLHS)
         { if (i<(*startingExpression).children.size)
-            out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL((*startingExpression)[i].ToString(theFormat));
+            out << CGI::GetMathMouseHoverBeginArrayL((*startingExpression)[i].ToString(theFormat));
           else
             out << "No matching starting expression- possible use of the Melt keyword.";
         } else
@@ -4003,12 +4003,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValue<std::string>();
-        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() ||
-                  (*this)[i].IsOfType<WeylGroup>() || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >())
-                 && isFinal)
+        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroup>()
+                  || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()) && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
-          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL((*this)[i].ToString(theFormat));
+          out << CGI::GetMathSpanBeginArrayL((*this)[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -4070,12 +4069,12 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
     else
-    { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
+    { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat));
       if ((this->IsOfType<std::string>() || this->IsOfType<CalculusFunctionPlot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroup>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";
+        outTrue << "</td><td>" << CGI::GetMathSpanBeginArrayL(out.str()) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();

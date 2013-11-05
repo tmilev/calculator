@@ -679,10 +679,10 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   }
   this->CheckCommonOwner(other);
   AlgebraicNumber otherCopy=other;
-//  std::cout << "Converting <hr>" << CGI::GetHtmlMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
-//  << CGI::GetHtmlMathSpanPure(otherCopy.ToString());
-//  std::cout << " <br><br>To get: " << CGI::GetHtmlMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
-//  << CGI::GetHtmlMathSpanPure(otherCopy.ToString()) ;
+//  std::cout << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
+//  << CGI::GetMathSpanPure(otherCopy.ToString());
+//  std::cout << " <br><br>To get: " << CGI::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
+//  << CGI::GetMathSpanPure(otherCopy.ToString()) ;
   //std::cout << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
   FormatExpressions tempformat;
@@ -690,12 +690,12 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   tempformat.flagUseHTML=false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(otherCopy,rightMat);
-//  std::cout << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
-//  << CGI::GetHtmlMathSpanPure(rightMat.ToStringMatForm(&tempformat));
+//  std::cout << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
+//  << CGI::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;
   this->basisIndex=this->owner->theBasesAdditive.size-1;
   this->theElT.MaKeEi(0);
-  //std::cout << "matrix " << CGI::GetHtmlMathSpanPure(leftMat.ToStringMatForm(&tempformat));
+  //std::cout << "matrix " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));
   leftMat.ActOnVectorColumn(this->theElT);
   //std::cout << this->theElt.ToString();
 }
@@ -794,7 +794,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   tempFormat.flagUseHTML=false;
   tempFormat.flagUseLatex=true;
   if (this->theBasisMultiplicative.size==1)
-  { out << CGI::GetHtmlMathSpanPure("\\mathbb Q");
+  { out << CGI::GetMathSpanPure("\\mathbb Q");
     return out.str();
   }
   if (this->flagIsQuadraticRadicalExtensionRationals)
@@ -805,7 +805,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
         out << ", ";
     }
     out << "]";
-    return CGI::GetHtmlMathSpanPure(out.str());
+    return CGI::GetMathSpanPure(out.str());
   }
   out << "Dimension over the rationals: " << this->theBasisMultiplicative.size << ". Multiplicative basis follows. ";
   for (int i=0; i<this->theBasisMultiplicative.size; i++)
@@ -819,7 +819,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
     } else
       theFlaStream << " e_{" << i+1 << "}";
     theFlaStream << ":=" << this->theBasisMultiplicative[i].ToStringMatForm(&tempFormat);
-    out << CGI::GetHtmlMathSpanPure(theFlaStream.str());
+    out << CGI::GetMathSpanPure(theFlaStream.str());
     if (i!=this->theBasisMultiplicative.size-1)
       out << ",  ";
   }
@@ -831,7 +831,7 @@ std::string AlgebraicClosureRationals::ToString(FormatExpressions* theFormat)con
   for (int i=0; i<this->theBasesAdditive.size; i++)
   { out << "<hr>Basis " << i+1 << " has " << this->theBasesAdditive[i].size << " elements: ";
     for (int j=0; j<this->theBasesAdditive[i].size; j++)
-    { out << CGI::GetHtmlMathSpanPure(this->theBasesAdditive[i][j].ToString(&tempFormat));
+    { out << CGI::GetMathSpanPure(this->theBasesAdditive[i][j].ToString(&tempFormat));
       if (j!=this->theBasesAdditive[i].size-1)
         out << ", ";
     }

@@ -5032,8 +5032,8 @@ std::string KLpolys::ToString(FormatExpressions* theFormat)
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
   if (this->theKLcoeffs.size==this->TheWeylGroup->theElements.size)
   { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
-    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
-    << " in " <<  CGI::GetHtmlMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
+    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of " << CGI::GetMathSpanPure("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  CGI::GetMathSpanPure(" M_{w_1\\cdot \\lambda }  ") << " where \\cdot stands for the \\rho-modified action"
     << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
     << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: <br><table border=\"1\"><tr><td>Weyl elt.</td>";
     for (int i=0; i<this->TheWeylGroup->theElements.size; i++)

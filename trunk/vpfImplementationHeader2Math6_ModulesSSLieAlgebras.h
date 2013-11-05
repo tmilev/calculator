@@ -587,11 +587,9 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
           theReport.Report(tempStream.str());
           if (outputReport!=0)
           { if (this->GetDim() <50)
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
-              << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ToString());
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << CGI::GetMathMouseHover(theMatrix.ToString(), 5000);
             else
-              out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
-              << theMatrix.ToString();
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>" << theMatrix.ToString();
           }
       /*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
             for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)

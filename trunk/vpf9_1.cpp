@@ -27,7 +27,11 @@ Crasher& Crasher::operator<<(int x)
 
 Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
 { this->FirstRun();
-  this->theCrashReport << "<hr>This is a program crash. ";
+  this->theCrashReport << "<hr>This is a program crash";
+  if (this->theGlobalVariables!=0)
+    this->theCrashReport << " " << this->theGlobalVariables->GetElapsedSeconds() << " second(s) from the start. ";
+  else
+    this->theCrashReport << ". ";
   if (this->userInputStringIfAvailable!="")
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

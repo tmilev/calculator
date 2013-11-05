@@ -559,8 +559,8 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRoot
 }
 
 void CandidateSSSubalgebra::SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
-   Vector<Rational>* newH, int newHorbitIndex)
+(const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
+ Vector<Rational>* newH, int newHorbitIndex)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::SetUpInjectionHs");
   this->reset(baseSubalgebra.owner);
   this->theWeylNonEmbeddeD.MakeFromDynkinType(theNewType);
@@ -1334,6 +1334,7 @@ bool CandidateSSSubalgebra::ComputeSystem(bool AttemptToChooseCentalizer, bool a
     currentInvolvedNegGens.SetSize(0);
     currentInvolvedPosGens.SetSize(0);
     for (int j=0; j<this->GetAmbientWeyl().RootSystem.size; j++)
+//    for (int j=this->GetAmbientWeyl().RootSystem.size-1; j>=0; j--)
     { const Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
       int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
       int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-currentAmbRoot);

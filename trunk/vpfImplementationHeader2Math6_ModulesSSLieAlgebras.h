@@ -547,8 +547,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
       this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
     }
   }
-  this->IntermediateStepForMakeFromHW
-  (this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
+  this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
   this->NumCachedPairsBeforeSimpleGen=this->cachedPairs.size;
   this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
   =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions+Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications-startingNumRationalOperations;
@@ -732,8 +731,7 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
         << "<br>This is a programming error: something is wrong with the algorithm, a check fails! " << crash;
       else
       { std::stringstream tempStream;
-        tempStream << "tested index" << i+1 << " out of " << this->GetOwner().GetNumGenerators() << ", " << j+1 << " out of "
-        << this->GetOwner().GetNumGenerators();
+        tempStream << "tested index" << i+1 << " out of " << this->GetOwner().GetNumGenerators() << ", " << j+1 << " out of " << this->GetOwner().GetNumGenerators();
         theReport.Report(tempStream.str());
       }
     }
@@ -768,8 +766,7 @@ void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement
 //    << " )=";
 //    std::cout << theScalarProducts[i].ToString() ;
 
-    inputHomogeneous.HWTAAbilinearForm
-    (inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, &tempStream);
+    inputHomogeneous.HWTAAbilinearForm(inputBasis[i], theScalarProducts[i], &subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, &tempStream);
 /*    std::cout << "<br>Computation details: " << tempStream.str();
     if ( inputHomogeneous.ToString(false, false, theGlobalVariables, theGlobalVariables.theDefaultFormat)=="x_{-1}"
         &&  theScalarProducts[i].ToString()=="0"
@@ -860,8 +857,8 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT
     int theIndex=this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
     for (int j=0; j<currentWordList.size; j++)
     { std::stringstream progressStream;
-      progressStream << "Computing action of " << generatorString << " on weight layer " << i+1 << " out of "
-      << this->theGeneratingWordsGrouppedByWeight.size << ", word " << j+1 << " out of " << currentWordList.size << "...";
+      progressStream << "Computing action of " << generatorString << " on weight layer " << i+1 << " out of " << this->theGeneratingWordsGrouppedByWeight.size
+      << ", word " << j+1 << " out of " << currentWordList.size << "...";
       theReport.Report(progressStream.str());
       ElementUniversalEnveloping<coefficient>& currentOutputWord=outputCurrentList[j];
       if (theIndex==-1)
@@ -869,8 +866,7 @@ void ModuleSSalgebra<coefficient>::GetAdActionHomogenousElT
       else
       { theElt=inputHomogeneous;
         theElt.MultiplyBy(currentWordList[j], theRingUnit);
-        this->ExpressAsLinearCombinationHomogenousElement
-        (theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
+        this->ExpressAsLinearCombinationHomogenousElement(theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
       }
       progressStream << " done!";
       theReport.Report(progressStream.str());

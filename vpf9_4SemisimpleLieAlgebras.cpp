@@ -289,6 +289,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
+  CGI::GlobalFormulaIdentifier=0;
   bool writingToHD=theFormat==0? false: theFormat->flagUseHtmlAndStoreToHD;
   std::stringstream out;
   int candidatesRealized=0;
@@ -327,7 +328,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   out << "<hr>";
   out << "The base field over which the subalgebras were realized is: ";
   if (this->ownerField==0)
-    out << CGI::GetHtmlMathSpanPure("\\mathbb Q");
+    out << CGI::GetMathSpanPure("\\mathbb Q");
   else
     out << this->ownerField->ToString();
   out << "<hr> ";
@@ -3194,7 +3195,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<br>";
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
-  out << CGI::GetHtmlMathSpanPure(tempS) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempS) << "\n<br>\n";
   if (indexInContainer!=-1)
   { this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
     this->container->IndicesSl2decompositionFlas[indexInContainer]=
@@ -3206,20 +3207,20 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
   tempS=this->theH.ToString(theFormat);
   tempStreamH << "\nh= " << tempS << "";
-  out << CGI::GetHtmlMathSpanPure(tempStreamH.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamH.str()) << "\n<br>\n";
   tempStreamE << "\ne= " << this->theE.ToString(theFormat) << "\n<br>\n";
-  out << CGI::GetHtmlMathSpanPure(tempStreamE.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamE.str()) << "\n<br>\n";
   tempStreamF << "\nf= " << this->theF.ToString(theFormat) << "\n<br>\n";
-  out << CGI::GetHtmlMathSpanPure(tempStreamF.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamF.str()) << "\n<br>\n";
   out << "\nLie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n[e, f]=" <<  this->bufferEbracketF.ToString(theFormat) << "";
-  out << CGI::GetHtmlMathSpanPure(tempStreamEF.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamEF.str()) << "\n<br>\n";
   tempStreamHE << "\n[h, e]=" << this->bufferHbracketE.ToString(theFormat) << "";
-  out << CGI::GetHtmlMathSpanPure(tempStreamHE.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamHE.str()) << "\n<br>\n";
   tempStreamHF << "\n[h, f]= " << this->bufferHbracketF.ToString(theFormat) << "";
-  out << CGI::GetHtmlMathSpanPure(tempStreamHF.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamHF.str()) << "\n<br>\n";
   //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
@@ -3232,7 +3233,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "\nThe system we need to solve:\n";
   if (useHtml)
     out << "\n<br>\n";
-  out << CGI::GetHtmlMathSpanPure(tempStreamActual.str()) << "\n<br>\n";
+  out << CGI::GetMathMouseHover(tempStreamActual.str()) << "\n<br>\n";
   return out.str();
 }
 
@@ -3589,7 +3590,7 @@ void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool use
     if (i!=this->highestWeights.size-1)
       out << "+";
   }
-  output=out.str();
+  output=CGI::GetMathMouseHover(out.str());
 }
 
 void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
@@ -4052,8 +4053,8 @@ void rootSubalgebra::ToString
       }
     }
 //    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream2.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream3.str()) << "\n<hr>\n";
+    out << "\n<hr>\n" << CGI::GetMathMouseHover(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetMathMouseHover(tempStream3.str()) << "\n<hr>\n";
   }
   if (useLatex)
     out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
@@ -4334,7 +4335,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
         out << "<td>";
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
-      out << CGI::GetHtmlMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+      out << CGI::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
       out << "</td>";
     }
   }
@@ -4420,7 +4421,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   if (this->CharsPrimalModules.size>0)
     for (int i=0; i<this->CharsPrimalModules.size; i++)
     { out << "<td>";
-      out << CGI::GetHtmlMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+      out << CGI::GetMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -4432,7 +4433,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   if (this->CharsPrimalModulesMerged.size>0)
     for (int i=0; i<this->CharsPrimalModulesMerged.size; i++)
     { out << "<td>";
-      out << CGI::GetHtmlMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
+      out << CGI::GetMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -4873,18 +4874,23 @@ void SemisimpleSubalgebras::ScaleDynkinType(DynkinType& theType)const
 std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { if (ActualIndexSubalgebra<0)
     return "(non-initialized)";
+  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   std::stringstream out;
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->theSubalgebraCandidates[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
     makeLink=false;
   //DynkinType typeScaled=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
   //this->ScaleDynkinType(typeScaled);
+  std::string theTypeString=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]);
   if (makeLink)
-    out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">"
-    << CGI::GetHtmlMathSpanPure(this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]))
-    << "</a> ";
-  else
-    out << this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]) << "";
+  { out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">";
+    if (shortReportOnly)
+      out << CGI::GetMathMouseHover(theTypeString);
+    else
+      out << CGI::GetMathSpanPure(theTypeString);
+    out << "</a> ";
+  } else
+    out << theTypeString << "";
   return out.str();
 }
 
@@ -4898,10 +4904,15 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
   tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].lengthFirstCoRootSquared;
   out << "<br>Elements Cartan subalgebra by components: ";
+  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
+
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { if (useLaTeX && useHtml)
-      out << CGI::GetHtmlMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
-    else
+    { if (shortReportOnly)
+        out << CGI::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+      else
+        out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+    } else
       out << theSimpleTypes[i].ToString(&tempFormat) << ":";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString() << ": "
@@ -4942,14 +4953,14 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
       if (dimToralPartCentralizer!=0)
         out << " + ";
     } else if (!this->theCentralizerType.IsEqualToZero())
-    { out << CGI::GetHtmlMathSpanPure(this->theCentralizerType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) );
+    { out << CGI::GetMathSpanPure(this->theCentralizerType.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) );
       out << " (can't determine subalgebra number - subalgebras computed partially?)";
       dimToralPartCentralizer-=this->theCentralizerType.GetRank();
     }
     if (dimToralPartCentralizer!=0)
     { std::stringstream toralPartStream;
       toralPartStream << "\\mathbb{h}_{" << dimToralPartCentralizer.ToString() << "}";
-      out << CGI::GetHtmlMathSpanPure(toralPartStream.str());
+      out << CGI::GetMathSpanPure(toralPartStream.str());
       out << " (toral part, subscript=dimension)";
     }
     out << ". ";
@@ -5096,12 +5107,16 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
     return "";
   bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
+  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
   std::stringstream out;
   out << "<br>Dimension of subalgebra generated by predefined or computed generators: " << this->theBasis.size << ". " << "<br>Negative simple generators: ";
   for (int i=0; i<this->theNegGens.size; i++)
   { if (useHtml && useLaTeX)
-      out << CGI::GetHtmlMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
-    else
+    { if (shortReportOnly)
+        out << CGI::GetMathMouseHover(this->theNegGens[i].ToString(theFormat), 2000);
+      else
+        out << CGI::GetMathSpanPure(this->theNegGens[i].ToString(theFormat), 2000);
+    } else
       out << this->theNegGens[i].ToString(theFormat);
     if (i!=this->theNegGens.size-1)
       out << ", ";
@@ -5109,8 +5124,11 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   out << "<br>Positive simple generators: ";
   for (int i=0; i<this->thePosGens.size; i++)
   { if (useHtml && useLaTeX)
-      out <<  CGI::GetHtmlMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
-    else
+    { if (shortReportOnly)
+        out <<  CGI::GetMathMouseHover(this->thePosGens[i].ToString(theFormat), 2000);
+      else
+        out << CGI::GetMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
+    } else
       out << this->thePosGens[i].ToString(theFormat);
     if (i!=this->thePosGens.size-1)
       out << ", ";
@@ -5196,17 +5214,30 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   if (!this->charFormaT.IsZeroPointer())
     charFormatNonConst= this->charFormaT.GetElementConst();
   if (useLaTeX && useHtml)
-    out << CGI::GetHtmlMathSpanPure(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
+  { if (shortReportOnly)
+      out << CGI::GetMathMouseHover(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
+    else
+      out << CGI::GetMathSpanPure(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
+  }
   else
     out << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
-    out << CGI::GetHtmlMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst));
-  else
+  { if (shortReportOnly)
+      out << CGI::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst));
+    else
+      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst));
+  } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
-  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): "
-    << (useLaTeX ? CGI::GetHtmlMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 2000):this->thePrimalChaR.ToString(&charFormatNonConst));
+  { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): ";
+    if (useLaTeX)
+    { if (shortReportOnly)
+        out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 2000);
+      else
+        out << CGI::GetMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 2000);
+    } else
+      out << this->thePrimalChaR.ToString(&charFormatNonConst);
   }
   if (this->flagCentralizerIsWellChosen&& weightsAreCoordinated)
   { int numZeroWeights=0;

@@ -581,8 +581,8 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theComma
 //  std::cout << "<br>The elts: " <<  theOperators.ToString();
 //  std::cout << "<br> The common ad: " << commonAd.ToString();
   if (success)
-    out << CGI::GetHtmlMathSpanPure("F:="+theF.ToString() + ";") << "<br>" << CGI::GetHtmlMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
-    << CGI::GetHtmlMathSpanPure("E:="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
+    out << CGI::GetMathSpanPure("F:="+theF.ToString() + ";") << "<br>" << CGI::GetMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
+    << CGI::GetMathSpanPure("E:="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
   else
     out << "<br>Couldn't extend E to sl(2)-triple. The log stream follows. " << logStream.str();
   return output.AssignValue(out.str(), theCommands);
@@ -696,12 +696,12 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   for(int i=0; i<inputVector.size; i++)
-    out << "<br>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
+    out << "<br>" << CGI::GetMathSpanPure(inputVector[i].ToString(&theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
     << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
-      out << "<br> " << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner[i].ToString(&theFormat));
+      out << "<br> " << CGI::GetMathSpanPure(outputGroebner[i].ToString(&theFormat));
   } else
   { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
     out << "<br>A partial result, a (non-Groebner) basis of the ideal with " << theGroebnerComputation.theBasiS.size << " elements follows ";
@@ -844,7 +844,7 @@ bool CommandList::innerDrawPolarRfunctionTheta(CommandList& theCommands, const E
   if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
     return false;
   std::stringstream out, resultStream;
-  out << CGI::GetHtmlMathSpanPure(input[1].ToString()) << "<br>";
+  out << CGI::GetMathSpanPure(input[1].ToString()) << "<br>";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";

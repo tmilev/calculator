@@ -18,7 +18,7 @@ std::string CoxeterGroup::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
 //  out << "this: " << this
   out << "Symmetric Cartan matrix: ";
-  out << CGI::GetHtmlMathSpanPure(this->CartanSymmetric.ToString(theFormat));
+  out << CGI::GetMathSpanPure(this->CartanSymmetric.ToString(theFormat));
   out << "<br>Conjugacy classes (total " << this->conjugacyClasses.size
   << ").\n";
   if (this->irreps.size>0)
@@ -1755,7 +1755,7 @@ std::string CoxeterRepresentation<coefficient>::ToString(FormatExpressions* theF
   { std::stringstream tempStream;
     tempStream << "s_" << i+1 << ":=MatrixRationals{}" << this->gens[i].ToString(theFormat) << "; \\\\\n";
     forYourCopyConvenience << tempStream.str();
-    out << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
+    out << CGI::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
   }
   out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();
   return out.str();

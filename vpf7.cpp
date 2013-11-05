@@ -857,10 +857,16 @@ std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& ad
   return out.str();
 }
 
-std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input)
+std::string CGI::GetMathMouseHoverBeginArrayL(const std::string& input, int upperNumChars)
 { std::stringstream out;
-  out << "<span class=\"math\">\\begin{array}{l}" << input << "\\end{array} </span>";
-  return out.str();
+  out << "\\begin{array}{l}" << input << "\\end{array}";
+  return CGI::GetMathMouseHover(out.str(), upperNumChars);
+}
+
+std::string CGI::GetMathSpanBeginArrayL(const std::string& input, int upperNumChars)
+{ std::stringstream out;
+  out << "\\begin{array}{l}" << input << "\\end{array}";
+  return CGI::GetMathSpanPure(out.str(), upperNumChars);
 }
 
 std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, const std::string& input)
@@ -869,12 +875,12 @@ std::string CGI::GetCalculatorLink(const std::string& DisplayNameCalculator, con
   return out.str();
 }
 
-std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars)
+std::string CGI::GetMathSpanPure(const std::string& input, int upperNumChars)
 { std::stringstream out;
 //  int dirtylittleHAckHEre;
 //  upperNumChars=1;
   if (input.size()> (unsigned) upperNumChars)
-  { out << "<b>LaTeX output is longer than " << upperNumChars << " and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
+  { out << "<b>LaTeX output is longer than " << upperNumChars << " characters and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
   out << "<span class=\"math\">" << input << "</span>";
@@ -883,17 +889,19 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars
 
 std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
 { std::stringstream out;
-//  int dirtylittleHAckHEre;
-//  upperNumChars=1;
   if (input.size()> (unsigned) upperNumChars)
-  { out << "<b>LaTeX output is longer than " << upperNumChars << "  and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
+  { out << "<b>LaTeX output is longer than " << upperNumChars << " characters and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
   std::stringstream idSpanStream;
-  idSpanStream << "mathFormula" << MathRoutines::hashString(input);
-  out << "<span id=\"container" << idSpanStream.str() << "\">"  << "<span id=\"" << idSpanStream.str()
-  << "\" onmouseover=\"if (this.className=='math') return; this.className='math'; window.alert('Calling jsmath.ProcessBeforeShowing');  "
-  << "jsMath.ProcessBeforeShowing('container" << idSpanStream.str() << "');\" >"
+  CGI::GlobalFormulaIdentifier++;
+  idSpanStream << "mathFormula" << CGI::GlobalFormulaIdentifier;
+  std::string containterString="container"+idSpanStream.str();
+  out << "<span id=\"" << containterString << "\">"  << "<span id=\"" << idSpanStream.str()
+  << "\" onmouseover=\"if (document.getElementById('" << containterString << "').className=='math') return; "
+  << "this.className='math'; document.getElementById('" << containterString << "').className='math';"
+//  << "window.alert('Calling jsmath.Process'); "
+  << "jsMath.Process('container" << idSpanStream.str() << "');\" >"
   << input << "</span>" << "</span>";
   return out.str();
 }

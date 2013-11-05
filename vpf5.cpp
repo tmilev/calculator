@@ -752,18 +752,18 @@ bool CommandList::fPrintB3G2branchingIntermediate(CommandList& theCommands, cons
     << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
     << "\\endhead \n<br>";
   } else
-  { out << "Let " << CGI::GetHtmlMathSpanPure("p\\subset so(7)") << " be the "
+  { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theG2B3Data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetHtmlMathSpanPure("{p}':= p\\cap G_2")
-    << ". Then  " << CGI::GetHtmlMathSpanPure("{p}'") << " is the "
+    << " and let " << CGI::GetMathSpanPure("{p}':= p\\cap G_2")
+    << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table border=\"1\"><tr><td>$so(7)$-highest weight</td>"
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
-    << CGI::GetHtmlMathSpanPure("p'")
-    << "</td><td>" << CGI::GetHtmlMathSpanPure("p'\\cap b")
+    << CGI::GetMathSpanPure("p'")
+    << "</td><td>" << CGI::GetMathSpanPure("p'\\cap b")
     << "-eigenvectors</td><td>Casimir projector</td><td>Extra multiplier</td><td>corresponding "
-    << CGI::GetHtmlMathSpanPure("G_2\\cap b")
+    << CGI::GetMathSpanPure("G_2\\cap b")
     << "-eigenvectors</td><td>Shapovalov square</td></tr>";
     latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
     << theG2B3Data.selInducing.ToString() << "} "
@@ -845,15 +845,15 @@ bool CommandList::fPrintB3G2branchingIntermediate(CommandList& theCommands, cons
           latexTable << "&";
         latexTable << "&";
         theG2B3Data.theFormat.CustomPlusSign="";
-        out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)) << "</td>";
+        out << "<td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)) << "</td>";
         theG2B3Data.theFormat.MaxLineLength=20;
         latexTable << "$\\begin{array}{l}" << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
         if (!isFD)
         { std::string tempS1=theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
           std::string tempS2= "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat)+ ")\\cdot v_\\lambda";
-          out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempS1) << "</td>";
+          out << "<td>" << CGI::GetMathSpanPure(tempS1) << "</td>";
           out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].ToString() << "</td>";
-          out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempS2) << "</td>";
+          out << "<td>" << CGI::GetMathSpanPure(tempS2) << "</td>";
           out << "<td>" << theG2B3Data.theShapovalovProducts[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
           out << "</td>";
           int theIndex;
@@ -991,16 +991,16 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly(CommandList& theCommands, co
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   } else
-  { out << "Let " << CGI::GetHtmlMathSpanPure("p\\subset so(7)") << " be the "
+  { out << "Let " << CGI::GetMathSpanPure("p\\subset so(7)") << " be the "
     << theg2b3data.selInducing.ToString() << "-parabolic subalgebra"
-    << " and let " << CGI::GetHtmlMathSpanPure("{p}':= p\\cap G_2")
-    << ". Then  " << CGI::GetHtmlMathSpanPure("{p}'") << " is the "
+    << " and let " << CGI::GetMathSpanPure("{p}':= p\\cap G_2")
+    << ". Then  " << CGI::GetMathSpanPure("{p}'") << " is the "
     << theg2b3data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table><tr><td>$so(7)$-highest weight</td>"
     << "<td>Dimension of inducing fin. dim. "
-    << CGI::GetHtmlMathSpanPure(" p")
+    << CGI::GetMathSpanPure(" p")
     << "-module</td><td>Decomposition of inducing module over "
-    << CGI::GetHtmlMathSpanPure("p'")
+    << CGI::GetMathSpanPure("p'")
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
@@ -1134,7 +1134,7 @@ bool CommandList::fSplitFDpartB3overG2old(CommandList& theCommands, const Expres
     << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
     << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
     << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
-    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theG2B3Data.theChars[i].ToString()) << "</td>";
+    out << "<td>" << CGI::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
     out << "</tr>";
   }
   readyForLatexConsumptionTable1 <<"\\hline \n";
@@ -1152,8 +1152,7 @@ bool CommandList::fSplitFDpartB3overG2old(CommandList& theCommands, const Expres
         formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].ToString() <<  "))";
     }
     formulaStream1 << "v_\\lambda";
-    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(formulaStream1.str()) << "</td><td>"
-    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
+    out << CGI::GetMathSpanPure(formulaStream1.str()) << "</td><td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
   }
   out << "</table>";
   out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -1388,8 +1387,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   theFormat.flagUseLatex=true;
   theFormat.CustomPlusSign="\\oplus ";
   theFormat.fundamentalWeightLetter="\\omega";
-  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(remainingCharDominantLevI.ToString(&theFormat));
-  //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+  out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << CGI::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
+  //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
   //(remainingCharDominantLevI.ToString());
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
@@ -1452,8 +1451,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //    std::cout << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
   }
   theFormat.fundamentalWeightLetter="\\psi";
-  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(output.ToString(&theFormat));
-//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+  out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << CGI::GetMathSpanPure(output.ToString(&theFormat));
+//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
 //  (output.ToString())
 //  ;
 
@@ -1526,7 +1525,7 @@ bool CommandList::fParabolicWeylGroups(CommandList& theCommands, const Expressio
   std::stringstream out;
   for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
   { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, *theCommands.theGlobalVariableS, 2000);
-    out << "<hr>" << CGI::GetHtmlMathDivFromLatexFormulA(theSubgroup.ToString());
+    out << "<hr>" << CGI::GetMathSpanPure(theSubgroup.ToString());
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -1601,20 +1600,20 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
     { ElementWeylGroup& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
-      << (useJavascript ? CGI::GetHtmlMathSpanPure(current.ToString()) : current.ToString())
+      << (useJavascript ? CGI::GetMathSpanPure(current.ToString()) : current.ToString())
       << "</td>";
       theHWsimplecoords=
       theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
       theSSalgebra.theWeyl.ActOnRhoModified
       (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
       out << "<td>"
-      << (useJavascript ? CGI::GetHtmlMathSpanPure(theHWsimplecoords.ToString(&theFormat))
+      << (useJavascript ? CGI::GetMathSpanPure(theHWsimplecoords.ToString(&theFormat))
       : theHWsimplecoords.ToString(&theFormat))
       << "</td>";
       tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString=
       tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
-      out << "<td>" << (useJavascript ? CGI::GetHtmlMathSpanPure(theFundString): theFundString)
+      out << "<td>" << (useJavascript ? CGI::GetMathSpanPure(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
     }
@@ -1930,10 +1929,10 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
   theFormat.flagUseLatex=true;
   theFormat.flagUseHTML=false;
   theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
-  out << "Computing " << CGI::GetHtmlMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  out << "Computing " << CGI::GetMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
   tempMat=mat;
   tempMat.AppendMatrixOnTheRight(outputMat);
-  out << "<br>" << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat)) ;
+  out << "<br>" << CGI::GetMathSpanPure(tempMat.ToString(&theFormat)) ;
   for (int i=0; i<mat.NumCols; i++)
   { tempI = mat.FindPivot(i, NumFoundPivots);
     if (tempI!=-1)
@@ -1943,7 +1942,7 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
         out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << "<br>" << CGI::GetHtmlMathSpanPure(outputMat.ToString(&theFormat));
+        out << "<br>" << CGI::GetMathSpanPure(outputMat.ToString(&theFormat));
       }
       tempElement=mat.elements[NumFoundPivots][i];
       tempElement.Invert();
@@ -1954,7 +1953,7 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
       if (tempElement!=1)
       { tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
       bool found = false;
       for (int j = 0; j<mat.NumRows; j++)
@@ -1976,7 +1975,7 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
       { out << ": <br> ";
         tempMat=mat;
         tempMat.AppendMatrixOnTheRight(outputMat);
-        out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
+        out << CGI::GetMathSpanPure(tempMat.ToString(&theFormat));
       }
       NumFoundPivots++;
     }
@@ -1985,7 +1984,7 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
     out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   else
     out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
-    << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
+    << CGI::GetMathSpanPure(output.ToString(&theFormat));
   return output.AssignValue(out.str(), theCommands);
 }
 

@@ -767,9 +767,9 @@ bool PiecewiseQuasipolynomial::MakeVPF(Vectors<Rational>& theRoots, std::string&
   std::string whatWentWrong;
 
   theFracs.initFromRoots(theRoots, theGlobalVariables);
-  out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ToString(theGlobalVariables, theFormat));
+  out << CGI::GetMathMouseHover(theFracs.ToString(theGlobalVariables, theFormat));
   theFracs.split(theGlobalVariables, 0);
-  out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ToString(theGlobalVariables, theFormat));
+  out << CGI::GetMathMouseHover(theFracs.ToString(theGlobalVariables, theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
   crash << crash ;
 //  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
@@ -913,10 +913,9 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
       out << "<br>";
     out << "quasipolynomial: ";
     if (useLatex& useHtml)
-      out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(currentQP.ToString(useHtml, useLatex));
+      out << CGI::GetMathSpanBeginArrayL(currentQP.ToString(useHtml, useLatex));
     else
-    { out << currentQP.ToString(useHtml, useLatex);
-    }
+      out << currentQP.ToString(useHtml, useLatex);
     if (useHtml)
       out << "<hr>";
   }
@@ -4836,12 +4835,12 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     gLetter=theFormat->chevalleyGgeneratorLetter;
   }
   out << "Type " << this->theWeyl.theDynkinType.ToString() << ".";
-  out << "The letter " << CGI::GetHtmlMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " << CGI::GetHtmlMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
-  << " The generator " << CGI::GetHtmlMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
-  << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
-  << ", <br> where g is a Chevalley generator, " << CGI::GetHtmlMathSpanPure("\\gamma") << " is its weight, and <br>"
-  << CGI::GetHtmlMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
+  out << "The letter " << CGI::GetMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
+  << " the letter " << CGI::GetMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " The generator " << CGI::GetMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
+  << "i^th simple root, that is, " << CGI::GetMathSpanPure("[" + hLetter + "_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
+  << ", <br> where g is a Chevalley generator, " << CGI::GetMathSpanPure("\\gamma") << " is its weight, and <br>"
+  << CGI::GetMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
   std::stringstream theTableLateXStream, theHtmlStream;
   theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
   << "<td>[,]</td>";
@@ -5148,16 +5147,13 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   return out.str();
 }
 
-std::string CGI::GetHtmlButton
-(const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
+std::string CGI::GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
 { std::stringstream out;
-  out << "\n<button id=\"" << buttonID << "\" " << CGI::GetStyleButtonLikeHtml()
-    << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
+  out << "\n<button id=\"" << buttonID << "\" " << CGI::GetStyleButtonLikeHtml() << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
   return out.str();
 }
 
-std::string CGI::GetHtmlSpanHidableStartsHiddeN
-  (const std::string& input)
+std::string CGI::GetHtmlSpanHidableStartsHiddeN(const std::string& input)
 { std::stringstream out;
   CGI::GlobalFormulaIdentifier ++;
   std::stringstream buttonLabel;
@@ -5168,42 +5164,6 @@ std::string CGI::GetHtmlSpanHidableStartsHiddeN
   out << "<span";
   out << " id=\"" << spanLabel.str() << "\" style=\"display: none\">";
   out << input << "</span>";
-  return out.str();
-}
-
-std::string CGI::GetHtmlMathFromLatexFormulA
-  (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton,
-   bool useDiv, bool useBeginArrayRCL)
-{ std::stringstream out;
-  CGI::GlobalFormulaIdentifier++;
-  out << prependString;
-  if (useDiv)
-    out << "<div";
-  else
-    out << "<span";
-  out << " id=\"theResult" << CGI::GlobalFormulaIdentifier << "\" class=\"math\" scale=\"50\">";
-  if (useBeginArrayRCL)
-    out << "\\begin{array}{l}\n";
-  out << input;
-  if (useBeginArrayRCL)
-    out << "\n\\end{array}";
-  if (useDiv)
-    out << "</div><br>";
-  else
-    out << "</span>";
-  out << "<textarea id=\"theResultLatex" << CGI::GlobalFormulaIdentifier << "\" style=\"display: none\">";
-  if (useBeginArrayRCL)
-    out << "\\begin{array}{l}\n";
-  out << input ;
-  if (useBeginArrayRCL)
-    out << "\n\\end{array}";
-  out << "</textarea>";
-  if (useDiv)
-    out << "\n<br>";
-  out << appendStringBeforeButton;
-  out << "\n<button id=\"ButtonToggleLatex"  << CGI::GlobalFormulaIdentifier
-        << " \" " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
-        << "'); switchMenu('theResultLatex" << CGI::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
   return out.str();
 }
 
@@ -6307,7 +6267,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
 }
 
 void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElements)
-{ std::stringstream out, head, head2;
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::ToString");
+  std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
   DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
   FormatExpressions latexFormat;
@@ -6333,7 +6294,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
   for (int i=0; i<this->simpleGenerators.size; i++)
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ToString() << "\\\\";
   head << "\\end{array}";
-  out << CGI::GetHtmlMathSpanFromLatexFormula(head.str());
+  out << CGI::GetMathMouseHover(head.str());
   if (this->ExternalAutomorphisms.size>0)
   { out << "<br>Outer automorphisms: \n";
     Matrix<Rational> tempMat;
@@ -6344,7 +6305,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
       head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
-    out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());
+    out << CGI::GetMathMouseHover(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->GetRho().ToString();
   out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
@@ -6360,7 +6321,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
       body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators) << "\\\\";
     }
     body << "\\end{array}";
-    out << CGI::GetHtmlMathSpanFromLatexFormula(body.str());
+    out << CGI::GetMathMouseHover(body.str());
   }
   output=out.str();
 }

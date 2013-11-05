@@ -2105,7 +2105,7 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
     *IvemadeARowSwitch=false;
 //  std::cout << "<br><b>starting list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+//    std::cout << //"<br>" << CGI::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
   coefficient tempCF, tempCF2;
@@ -2144,9 +2144,9 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
         int otherColIndex=currentOther.theMonomials.GetIndex(currentMon);
         if (otherColIndex!=-1)
         { tempCF=currentOther.theCoeffs[otherColIndex];
-          //std::cout << "<br>subtracting " << CGI::GetHtmlMathSpanPure(currentPivot.ToString())
+          //std::cout << "<br>subtracting " << CGI::GetMathSpanPure(currentPivot.ToString())
             //<< " times " << tempCF.ToString() << " from "
-            //<< CGI::GetHtmlMathSpanPure(currentOther.ToString());
+            //<< CGI::GetMathSpanPure(currentOther.ToString());
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
           if (carbonCopyList!=0)
             (*carbonCopyList)[j].SubtractOtherTimesCoeff((*carbonCopyList)[currentRowIndex], &tempCF);
@@ -2155,14 +2155,14 @@ void MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRow
             tempCF2*=-1;
             carbonCopyMatrix->AddTwoRows(currentRowIndex, j, 0, tempCF2);
           }
-          //std::cout << "<br>to get " << CGI::GetHtmlMathSpanPure(currentOther.ToString());
+          //std::cout << "<br>to get " << CGI::GetMathSpanPure(currentOther.ToString());
         }
       }
     currentRowIndex++;
   }
 //    std::cout << "<br><b>final list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+//    std::cout << //"<br>" << CGI::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
@@ -8149,7 +8149,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
       }
   }
   output.MakeZero();
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(remainingCharDominantLevi.ToString());
+  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(remainingCharDominantLevi.ToString());
 //  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharDominantLevi.ToString());
 
@@ -8189,7 +8189,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     }
 //    std::cout << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ToString();
   }
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(output.ToString());
+  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(output.ToString());
   if (Report!=0)
   { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
     DrawingVariables theDV;
@@ -8917,7 +8917,7 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
     { std::stringstream tempStream;
       tempStream << "s_" << i << ":=MatrixRationals{}" << this->theElementImages[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
-      out << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
+      out << CGI::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
     } else
       out << "Element s_{" << i << "} not computed ";
   out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();

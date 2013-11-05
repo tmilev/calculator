@@ -854,8 +854,8 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
       }
     }
 //    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanPure(tempStream2.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetHtmlMathSpanPure(tempStream3.str()) << "\n<hr>\n";
+    out << "\n<hr>\n" << CGI::GetMathSpanPure(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetMathSpanPure(tempStream3.str()) << "\n<hr>\n";
   }
   if (useLatex)
     out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";

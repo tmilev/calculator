@@ -68,7 +68,7 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
     std::stringstream out;
     out << "Starting elements: <br>";
     for (int i=0; i<theLieAlgElts.size; i++)
-      out << CGI::GetHtmlMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
+      out << CGI::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat)) << "<br>";
     bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theLieAlgElts, upperBound, theCommands.theGlobalVariableS);
     if (!success)
       out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theLieAlgElts.size << " exceeding the limit. "
@@ -80,7 +80,7 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
         if (theLieAlgElts.size>50)
           out << theLieAlgElts[i].ToString(&theFormat);
         else
-          out << CGI::GetHtmlMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
+          out << CGI::GetMathSpanPure(theLieAlgElts[i].ToString(&theFormat));
       }
     }
     return output.AssignValue(out.str(), theCommands);
@@ -90,7 +90,7 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
   std::stringstream out;
   out << "Starting elements: <br>";
   for (int i=0; i<theOps.size; i++)
-    out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
+    out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat)) << "<br>";
   bool success=MathRoutines::GenerateVectorSpaceClosedWRTLieBracket(theOps, upperBound, theCommands.theGlobalVariableS);
   if (!success)
     out << "<br>Did not succeed with generating vector space, instead got a vector space with basis " << theOps.size << " exceeding the limit. "
@@ -102,7 +102,7 @@ bool CommandListFunctions::innerGenerateVectorSpaceClosedWRTLieBracket(CommandLi
       if (theOps.size>50)
         out << theOps[i].ToString(&theFormat);
       else
-        out << CGI::GetHtmlMathSpanPure(theOps[i].ToString(&theFormat));
+        out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat));
     }
   }
 
@@ -924,7 +924,7 @@ bool CommandListFunctions::innerGrowDynkinType(CommandList& theCommands, const E
           out << ", ";
       }
       out << "</td><td>";
-      out << CGI::GetHtmlMathSpanPure
+      out << CGI::GetMathSpanPure
       (tempSas.GetHighestWeightFundNewComponentFromRootInjection(largerTypes[i], theRootInjections[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
     }

@@ -497,7 +497,7 @@ bool CommandList::innerPrintSSsubalgebras
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
     std::cout << "<br>Centralizers off.";
-    theSSsubalgebras.flagAttemptToAdjustCentralizers=true;
+    theSSsubalgebras.flagAttemptToAdjustCentralizers=false;
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);

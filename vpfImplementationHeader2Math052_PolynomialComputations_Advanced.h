@@ -844,15 +844,21 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   newComputation.flagSystemProvenToHaveNoSolution=false;
   newComputation.flagSystemSolvedOverBaseField=false;
   newComputation.flagSystemProvenToHaveSolution=false;
+  List<int> twoSolutionsToTry;
+  twoSolutionsToTry.SetSize(2);
+  twoSolutionsToTry[0]=0;
+  twoSolutionsToTry[1]=1;
+//  if (this->RecursionCounterSerreLikeSystem==1)
+//    twoSolutionsToTry.SwapTwoIndices(0,1);
 
   int theVarIndex=this->GetPreferredSerreSystemSubIndex(inputSystem);
   if (theVarIndex==-1)
     crash << "This is a programming error: preferred substitution variable index is -1. Input system in calculator-input format: <br>"
     << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
-  theSub[theVarIndex]=0;
+  theSub[theVarIndex]=twoSolutionsToTry[0];
   //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
-  newComputation.SetSerreLikeSolutionIndex(theVarIndex, 0);
+  newComputation.SetSerreLikeSolutionIndex(theVarIndex, twoSolutionsToTry[0]);
   //std::cout << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
   for (int i=0; i<inputSystem.size; i++)
     inputSystem[i].Substitution(theSub);
@@ -879,9 +885,9 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   newComputation.flagSystemProvenToHaveSolution=false;
 
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
-  theSub[theVarIndex]=1;
+  theSub[theVarIndex]=twoSolutionsToTry[1];
   //std::cout << "<hr>Setting x_{" << theVarIndex+1 << "}:=1";
-  newComputation.SetSerreLikeSolutionIndex(theVarIndex, 1);
+  newComputation.SetSerreLikeSolutionIndex(theVarIndex, twoSolutionsToTry[1]);
 
   //std::cout << "<hr>Input system before second recursive call. " << inputSystem.ToString();
   //std::cout << "<br>Solution before second recursive call. "

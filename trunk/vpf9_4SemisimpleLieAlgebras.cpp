@@ -4973,8 +4973,8 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     << this->owner->ToStringAlgebraLink(this->GetSSpartCentralizerOfSSPartCentralizer(), theFormat);
   }
   if (!this->flagCentralizerIsWellChosen)
-    out << "<br><b>My weight spaces were not chosen well so I did not get a good basis for the Cartan of the centralizer. The Cartan of the centralizer needs to have "
-    << this->centralizerRank.ToString() << " elements, it has instead " << this->CartanOfCentralizer.size << " elements. </b> ";
+    out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
+    << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension " << this->centralizerRank.ToString() << ". ";
   if (this->centralizerRank!=0)
   { out << "<br>Basis of Cartan of centralizer: ";
     out << this->CartanOfCentralizer.ToString();
@@ -5149,7 +5149,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
-  //bool writingToHD=theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
+  bool writingToHD=theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat) << " (click on type for detailed printout).";
   if (this->AmRegularSA())
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
@@ -5225,18 +5225,18 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
   { if (shortReportOnly)
-      out << CGI::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst));
+      out << CGI::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
     else
-      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst));
+      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst),20000);
   } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
   { out << "<br>Primal decomposition of the ambient Lie algebra (refining the above decomposition; the order from the above decomposition is not preserved): ";
     if (useLaTeX)
     { if (shortReportOnly)
-        out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 2000);
+        out << CGI::GetMathMouseHover(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
       else
-        out << CGI::GetMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 2000);
+        out << CGI::GetMathSpanPure(this->thePrimalChaR.ToString(&charFormatNonConst), 20000);
     } else
       out << this->thePrimalChaR.ToString(&charFormatNonConst);
   }
@@ -5302,6 +5302,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     }
   }
   shouldDisplaySystem=shouldDisplaySystem || !this->flagSystemSolved || !this->flagCentralizerIsWellChosen;
+  if (writingToHD)
+    shouldDisplaySystem=shouldDisplaySystem && !shortReportOnly;
   if (shouldDisplaySystem)
     out << this->ToStringSystem(theFormat);
   return out.str();

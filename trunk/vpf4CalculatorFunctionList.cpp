@@ -985,30 +985,25 @@ void CommandList::initPredefinedInnerFunctions()
    "CentralizerChains (ComputeSemisimpleSubalgebras{}(B_3))");
 
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
+  ("printSemisimpleSubalgebras", this->innerPrintSSsubalgebrasRegular, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebras{}(A_2)", true, false);
+   "printSemisimpleSubalgebras(B_3)", true, false);
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasForceRecompute", this->innerPrintSSsubalgebrasForceRecomputeNoPairingTable, "",
+  ("printSemisimpleSubalgebrasRecompute", this->innerPrintSSsubalgebrasRecompute, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)", false, false);
+   "printSemisimpleSubalgebrasRecompute(C_3)", false, false);
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasRecompute", this->innerPrintSSsubalgebrasForceRecomputeWithPairingTable, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
-   Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebrasRecompute{}(A_2)", false, false);
-  this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasShort", this->innerPrintSSsubalgebrasNoSolutions, "",
+  ("printSemisimpleSubalgebrasNoCentralizers", this->innerPrintSSsubalgebrasNoCentralizers, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebra candidates of a Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebrasForceRecompute{}(A_2)", false, false);
+   "printSemisimpleSubalgebrasNoCentralizers(A_3)", false, false);
   this->AddOperationInnerHandler
-  ("experimentalPrintSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasForceRecomputeWithNilradicals, "",
+  ("printSemisimpleSubalgebrasFull", this->innerPrintSSsubalgebrasNilradicals, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "experimentalPrintSemisimpleSubalgebrasFull{}(B_3)", false, false);
+   "printSemisimpleSubalgebrasFull{}(A_2)", false, false);
   this->AddOperationInnerHandler
   ("experimentalEmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

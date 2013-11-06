@@ -1568,8 +1568,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
-  }
-  else
+  } else
   { bool useJavascript=theSubgroup.size<100;
     outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
     outputFile << "\n\\end{document}";
@@ -1582,8 +1581,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
     out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
     << "1.png\" width=\"800\" height=\"600\">"
     << theCommands.DisplayNameDefaultOutput << "1.png</iframe>";
-    out << "<hr>"
-    << " The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
+    out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
     << theCommands.DisplayNameDefaultOutput

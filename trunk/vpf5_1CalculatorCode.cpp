@@ -397,6 +397,7 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, con
   }
   theType.MakeSimpleType('G', 2);
   out << theCommands.ToStringLinksToCalculator(theType);
+  out2 << theCommands.ToStringLinksToCalculatorDirectlyFromHD(theType);
   for (int i=1; i<=8; i++)
   { theType.MakeSimpleType('A', i);
     out << theCommands.ToStringLinksToCalculator(theType);

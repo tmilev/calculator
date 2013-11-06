@@ -1484,10 +1484,10 @@ public:
   static bool innerCharacterSSLieAlgFD(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
-   bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals);
-  static bool innerPrintSSsubalgebrasForceRecomputeWithNilradicals(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasForceRecomputeNoPairingTable(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintSSsubalgebrasForceRecomputeWithPairingTable(CommandList& theCommands, const Expression& input, Expression& output);
+   bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers);
+  static bool innerPrintSSsubalgebrasNilradicals(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasRecompute(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintSSsubalgebrasNoCentralizers(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasNoSolutions(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasRegular(CommandList& theCommands, const Expression& input, Expression& output);
   static bool innerDouble(CommandList& theCommands, const Expression& input, Expression& output);

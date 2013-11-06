@@ -330,17 +330,19 @@ bool CommandList::innerPolynomialDivisionVerbose(CommandList& theCommands, const
 }
 
 bool DynkinSimpleType::HasEasySubalgebras()const
-{ if(this->theLetter=='F')
+{ if (this->theLetter=='F')
     return true;
   if (this->theLetter=='G')
     return true;
   if (this->theLetter=='A' && this->theRank<=6)
     return true;
-  if (this->theLetter=='B' && this->theRank<=4)
+  if (this->theLetter=='B' && this->theRank<=5)
     return true;
-  if (this->theLetter=='D' && this->theRank<=4)
+  if (this->theLetter=='D' && this->theRank<=6)
     return true;
   if (this->theLetter=='C' && this->theRank<=5)
+    return true;
+  if (this->theLetter=='E' && this->theRank==6)
     return true;
   return false;
 }
@@ -367,7 +369,7 @@ std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, Fo
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=experimentalPrintSemisimpleSubalgebras%7B%7D%28"
+    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSemisimpleSubalgebras%7B%7D%28"
     << theType[0].theLetter << "_" << theType[0].theRank << "%29\">" << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
   else
     out << "<td>Not available</td>\n";
@@ -422,29 +424,29 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, con
   return output.AssignValue(out2.str(), theCommands);
 }
 
-bool CommandList::innerPrintSSsubalgebrasForceRecomputeWithNilradicals(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true);
+bool CommandList::innerPrintSSsubalgebrasNilradicals(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true, true);
 }
 
-bool CommandList::innerPrintSSsubalgebrasForceRecomputeNoPairingTable(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false);
-}
-
-bool CommandList::innerPrintSSsubalgebrasForceRecomputeWithPairingTable(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, false);
+bool CommandList::innerPrintSSsubalgebrasRecompute(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, true);
 }
 
 bool CommandList::innerPrintSSsubalgebrasNoSolutions(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, true, true, true);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, false, false, false, false);
+}
+
+bool CommandList::innerPrintSSsubalgebrasNoCentralizers(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, false);
 }
 
 bool CommandList::innerPrintSSsubalgebrasRegular(CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false);
+{ return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false, true);
 }
 
 bool CommandList::innerPrintSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
- bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals)
+ bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::innerPrintSSsubalgebras");
   std::stringstream out;
@@ -489,6 +491,7 @@ bool CommandList::innerPrintSSsubalgebras
     theSSsubalgebras.flagComputeModuleDecomposition=doComputeModuleDecomposition;
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
     theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
+    theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
     std::fstream theFile;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
     if(!XML::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
@@ -496,8 +499,6 @@ bool CommandList::innerPrintSSsubalgebras
       << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
-    std::cout << "<br>Centralizers off.";
-    theSSsubalgebras.flagAttemptToAdjustCentralizers=false;
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);

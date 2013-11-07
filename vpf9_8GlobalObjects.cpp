@@ -6,7 +6,7 @@ ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global
 
 
 GlobalVariables theGlobalVariables;
-CommandList theParser;
+Calculator theParser;
 FormatExpressions consoleFormat;
 
 void InitializeGlobalObjects()

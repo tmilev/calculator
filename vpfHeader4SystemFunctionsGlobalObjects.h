@@ -15,7 +15,7 @@ static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHe
 
 extern GlobalVariables theGlobalVariables;
 extern FormatExpressions consoleFormat;
-extern CommandList theParser;
+extern Calculator theParser;
 extern std::string IPAdressCaller;
 
 extern double GetElapsedTimeInSeconds();

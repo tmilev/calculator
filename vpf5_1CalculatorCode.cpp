@@ -218,8 +218,8 @@ bool Vectors<coefficient>::ConesIntersect
   return true;
 }
 
-bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
-{ MacroRegisterFunctionWithName("CommandList::fGCD");
+bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input, Expression& output, bool doGCD)
+{ MacroRegisterFunctionWithName("Calculator::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
 //  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
@@ -237,7 +237,7 @@ bool CommandList::innerGCDOrLCM(CommandList& theCommands, const Expression& inpu
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
-bool CommandList::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
+bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
 { Expression theContextStart(*this);
   if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, Serialization::innerPolynomial<Rational>))
     return false;
@@ -269,8 +269,8 @@ bool CommandList::GetListPolysVariableLabelsInLex(const Expression& input, Vecto
   return outputContext.AddChildOnTop(PolyVarsE);
 }
 
-bool CommandList::innerPolynomialDivisionRemainder(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
+bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fPolynomialDivisionQuotientRemainder");
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
@@ -290,24 +290,24 @@ bool CommandList::innerPolynomialDivisionRemainder(CommandList& theCommands, con
   return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseGrLex(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPolynomialDivisionVerboseGrLex(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseGrLexRev(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPolynomialDivisionVerboseGrLexRev(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableWeakest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseLex(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPolynomialDivisionVerboseLex(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableStrongest);
 }
 
-bool CommandList::innerPolynomialDivisionVerboseLexRev(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPolynomialDivisionVerboseLexRev(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPolynomialDivisionVerbose(theCommands, input, output, MonomialP::LeftGreaterThanLexicographicLastVariableWeakest);
 }
 
-bool CommandList::innerPolynomialDivisionVerbose(CommandList& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
-{ MacroRegisterFunctionWithName("CommandList::innerPolynomialDivisionVerbose");
+bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const Expression& input, Expression& output, List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)
+{ MacroRegisterFunctionWithName("Calculator::innerPolynomialDivisionVerbose");
   Expression theContext;
   Vector<Polynomial<Rational> > thePolys;
   if (!theCommands.GetListPolysVariableLabelsInLex(input, thePolys, theContext))
@@ -338,7 +338,7 @@ bool DynkinSimpleType::HasEasySubalgebras()const
     return true;
   if (this->theLetter=='B' && this->theRank<=5)
     return true;
-  if (this->theLetter=='D' && this->theRank<=6)
+  if (this->theLetter=='D' && this->theRank<=5)
     return true;
   if (this->theLetter=='C' && this->theRank<=5)
     return true;
@@ -347,7 +347,7 @@ bool DynkinSimpleType::HasEasySubalgebras()const
   return false;
 }
 
-std::string CommandList::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
+std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
   std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
@@ -364,7 +364,7 @@ std::string CommandList::ToStringLinksToCalculatorDirectlyFromHD(const DynkinTyp
   return out.str();
 }
 
-std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
+std::string Calculator::ToStringLinksToCalculator(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
@@ -380,7 +380,7 @@ std::string CommandList::ToStringLinksToCalculator(const DynkinType& theType, Fo
   return out.str();
 }
 
-bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output)
 { std::stringstream out, out2;
   out << "\n\n<p>\n<table><tr><td>Structure constants </td><td>Semisimple subalgebras</td> "
   << "<td>sl(2) subalgebras</td><td>root subalgebras</td> </tr>\n";
@@ -425,31 +425,31 @@ bool CommandList::innerGetLinksToSimpleLieAlgerbas(CommandList& theCommands, con
   return output.AssignValue(out2.str(), theCommands);
 }
 
-bool CommandList::innerPrintSSsubalgebrasNilradicals(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintSSsubalgebrasNilradicals(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, true, true, true, true);
 }
 
-bool CommandList::innerPrintSSsubalgebrasRecompute(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintSSsubalgebrasRecompute(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, true);
 }
 
-bool CommandList::innerPrintSSsubalgebrasNoSolutions(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintSSsubalgebrasNoSolutions(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, false, false, false, false, false);
 }
 
-bool CommandList::innerPrintSSsubalgebrasNoCentralizers(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintSSsubalgebrasNoCentralizers(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, true, true, false, true, false, false);
 }
 
-bool CommandList::innerPrintSSsubalgebrasRegular(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintSSsubalgebrasRegular(Calculator& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerPrintSSsubalgebras(theCommands, input, output, false, true, false, true, false, true);
 }
 
-bool CommandList::innerPrintSSsubalgebras
-(CommandList& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
+bool Calculator::innerPrintSSsubalgebras
+(Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::innerPrintSSsubalgebras");
+  MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");
   std::stringstream out;
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
@@ -522,9 +522,9 @@ bool CommandList::innerPrintSSsubalgebras
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerEmbedSSalgInSSalg(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::innerEmbedSSalgInSSalg");
+  MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))
     return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
   const Expression& EsmallSA=input[1];
@@ -568,8 +568,8 @@ bool MathRoutines::IsPrime(int theInt)
   return true;
 }
 
-bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAttemptExtendingEtoHEFwithHinCartan");
+bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerAttemptExtendingEtoHEFwithHinCartan");
   if (input.children.size!=3)
     return output.SetError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS=0;
@@ -592,8 +592,8 @@ bool CommandList::innerAttemptExtendingEtoHEFwithHinCartan(CommandList& theComma
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAdCommonEigenSpaces");
+bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerAdCommonEigenSpaces");
   if (input.children.size<3)
     return output.SetError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
@@ -620,8 +620,8 @@ bool CommandList::innerAdCommonEigenSpaces(CommandList& theCommands, const Expre
   return true;
 }
 
-bool CommandList::innerGroebner(CommandList& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
-{ MacroRegisterFunctionWithName("CommandList::innerGroebner");
+bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex, bool useModZp)
+{ MacroRegisterFunctionWithName("Calculator::innerGroebner");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   Expression theContext;
@@ -728,8 +728,8 @@ bool CommandList::innerGroebner(CommandList& theCommands, const Expression& inpu
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerDeterminant(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDeterminant");
+bool Calculator::innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDeterminant");
   Matrix<Rational> matRat;
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
@@ -765,8 +765,8 @@ bool CommandList::innerDeterminant(CommandList& theCommands, const Expression& i
     return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
 }
 
-bool CommandList::innerDeterminantPolynomial(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDeterminantPolynomial");
+bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
   if (!theCommands.GetMatrix(input, matPol, &theContext, -1, Serialization::innerPolynomial<Rational>))
@@ -786,7 +786,7 @@ bool CommandList::innerDeterminantPolynomial(CommandList& theCommands, const Exp
   return output.AssignValueWithContext(outputPoly, theContext, theCommands);
 }
 
-bool CommandList::innerMatrixRational(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> outputMat;
   if (input.IsOfType<Matrix<Rational> >())
   { output=input;
@@ -799,7 +799,7 @@ bool CommandList::innerMatrixRational(CommandList& theCommands, const Expression
   return output.AssignValue(outputMat, theCommands);
 }
 
-bool CommandList::innerTranspose(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
 { //std::cout << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
   Matrix<Expression> theMat;
   output=input;
@@ -810,7 +810,7 @@ bool CommandList::innerTranspose(CommandList& theCommands, const Expression& inp
   return output.AssignMatrixExpressions(theMat, theCommands);
 }
 
-bool CommandList::innerMatrixRationalTensorForm(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output)
 { MatrixTensor<Rational> outputMat;
   output=input;
   if (!output.IsOfType<Matrix<Rational> >())
@@ -822,10 +822,10 @@ bool CommandList::innerMatrixRationalTensorForm(CommandList& theCommands, const 
   return output.AssignValue(outputMat, theCommands);
 }
 
-bool CommandList::innerMatrixRationalFunction(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CommandList::innerRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, Calculator::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
     return false;
   }
@@ -833,8 +833,8 @@ bool CommandList::innerMatrixRationalFunction(CommandList& theCommands, const Ex
   return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
 
-bool CommandList::innerDrawPolarRfunctionTheta(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDrawPolarRfunctionTheta");
+bool Calculator::innerDrawPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDrawPolarRfunctionTheta");
   if (!input.IsListNElements(4))
     return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
   const Expression& lowerE=input[2];
@@ -938,8 +938,8 @@ void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbed
     }
 }
 
-bool CommandList::innerPlot2DWithBars(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPlot2DWithBars");
+bool Calculator::innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPlot2DWithBars");
   //std::cout << input.ToString();
   if (input.children.size<6)
     return output.SetError("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands);
@@ -1067,8 +1067,8 @@ bool CommandList::innerPlot2DWithBars(CommandList& theCommands, const Expression
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CommandList::innerPlot2D(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPlot2D");
+bool Calculator::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPlot2D");
   //std::cout << input.ToString();
   if (input.children.size<4)
     return output.SetError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
@@ -1090,8 +1090,8 @@ bool CommandList::innerPlot2D(CommandList& theCommands, const Expression& input,
   return output.AssignValue(thePlot, theCommands);
 }
 
-bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerSuffixNotationForPostScript");
+bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
 //  std::cout << "<hr>Converting: " << input.ToString();
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
@@ -1163,8 +1163,8 @@ bool CommandList::innerSuffixNotationForPostScript(CommandList& theCommands, con
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerCharacterSSLieAlgFD(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerCharacterSSLieAlgFD");
+bool Calculator::innerCharacterSSLieAlgFD(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerCharacterSSLieAlgFD");
   Vector<Rational> theHW;
   Selection parSel;
   SemisimpleLieAlgebra* ownerSSLiealg;
@@ -1180,8 +1180,8 @@ bool CommandList::innerCharacterSSLieAlgFD(CommandList& theCommands, const Expre
   return output.AssignValue(theElt, theCommands);
 }
 
-bool CommandList::innerConesIntersect(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerConesIntersect");
+bool Calculator::innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerConesIntersect");
   if (!input.IsListNElements(3))
   { theCommands.Comments << "Function ConesIntersection expects 2 arguments, got " << input.children.size-1 << " instead. ";
     return false;
@@ -1244,8 +1244,8 @@ bool Expression::operator==(const std::string& other)const
   return tempS==other;
 }
 
-bool CommandList::innerReverseOrder(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerReverse");
+bool Calculator::innerReverseOrder(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerReverse");
   if (input.IsBuiltInType()||input.IsAtom())
   { output=input;
     return true;
@@ -1267,8 +1267,8 @@ bool CommandList::innerReverseOrder(CommandList& theCommands, const Expression& 
   return true;
 }
 
-bool CommandList::innerSolveSerreLikeSystem(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerSolveSerreLikeSystem");
+bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
   if (input.IsListNElementsStartingWithAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
@@ -1348,8 +1348,8 @@ coefficient SemisimpleLieAlgebra::GetKillingForm(const ElementSemisimpleLieAlgeb
   return result;
 }
 
-bool CommandList::innerKillingForm(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerKillingForm");
+bool Calculator::innerKillingForm(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerKillingForm");
   if (!input.IsListNElements(3))
     return false;
   Expression leftE=input[1];
@@ -1372,8 +1372,8 @@ bool CommandList::innerKillingForm(CommandList& theCommands, const Expression& i
   return output.AssignValueWithContext(left.GetKillingFormProduct(right), theContext, theCommands);
 }
 
-bool CommandList::innerRootSubsystem(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerRootSubsystem");
+bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerRootSubsystem");
   if (input.children.size<3)
     return false;
   SemisimpleLieAlgebra* theSSlieAlg=0;
@@ -1403,8 +1403,8 @@ bool CommandList::innerRootSubsystem(CommandList& theCommands, const Expression&
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerPerturbSplittingNormal(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPerturbSplittingNormal");
+bool Calculator::innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPerturbSplittingNormal");
   std::stringstream out;
   if (input.children.size!=4)
   { out << "Perturbing splitting normal takes 3 arguments: normal, positive vectors, and vectors relative to which to perturb. "

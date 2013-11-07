@@ -787,6 +787,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size || this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
     includeKEpsCoords=false;
   int LatexLineCounter=0;
+
   this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
   tempS=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   if (useLatex)

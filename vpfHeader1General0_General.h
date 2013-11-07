@@ -122,7 +122,7 @@ class XML;
 struct CGI;
 
 //The calculator parsing routines:
-class CommandList;
+class Calculator;
 class Function;
 class Expression;
 

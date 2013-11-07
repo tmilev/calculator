@@ -27,6 +27,8 @@ public:
 
 class WeylGroup;
 class AlgebraicClosureRationals;
+template <class coefficient>
+class MatrixTensor;
 
 class ChevalleyGenerator
 {
@@ -4777,7 +4779,7 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
-  void GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const;
+  void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex)const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetLongRootLengthSquared()const;
@@ -4819,8 +4821,8 @@ public:
       return false;
     return currentType==inputType && currentRank==inputRank;
   }
-  void GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const;
-  void GetOuterAutosGenerators(List<Matrix<Rational> >& output);
+  static void GetOuterAutosGeneratorsOneTypeActOnVectorColumn(List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity);
+  void GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output);
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
   void SortTheDynkinTypes();
@@ -5057,7 +5059,7 @@ public:
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
 
-  List<Matrix<Rational> > OuterAutomorphisms;
+  List<MatrixTensor<Rational> > OuterAutomorphisms;
   List<List<int> > conjugacyClasses;
   List<WeylGroupRepresentation<Rational> > irreps;
   List<Vector<Rational> > characterTable;
@@ -6643,7 +6645,14 @@ public:
     }
     return result+1;
   }
+  coefficient GetDeterminant()const
+  { Matrix<coefficient> theMat;
+    this->GetMatrix(theMat, this->GetMaxNumColsNumRows());
+    return theMat.GetDeterminant();
+  }
+  void DirectSumWith(const MatrixTensor<coefficient>& other);
   void GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows=-1);
+
   bool IsPositiveDefinite()
   { Matrix<coefficient> other;
     this->GetMatrix(other, this->GetMaxNumColsNumRows());
@@ -6699,7 +6708,7 @@ public:
   { MatrixTensor<coefficient> output;
     MonomialMatrix theMon;
     output.MakeZero();
-    for (int i=0; i<this->size; i++)
+    for (int i=0; i<this->size(); i++)
     { theMon=(*this)[i];
       theMon.Transpose();
       output.AddMonomial(theMon, this->theCoeffs[i]);
@@ -6771,6 +6780,29 @@ public:
   }
   void GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat=0);
   template <class otherType>
+  void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output)const
+  { if (&input==&output)
+    { Vector<otherType> inputCopy=input;
+      this->ActOnVectorColumn(inputCopy, output);
+      return;
+    }
+    output.MakeZero(input.size);
+    otherType currentCF;
+    for (int i=0; i<this->size(); i++)
+    { //note that, at the cost of one extra implicit conversion below, we preserve the order of multiplication:
+      //first is matrix element, then vector coordinate. The code should work as-is for non-commutative fields.
+      //(think in the generality of quaternion matrix acting on quaternion-coefficient polynomials!)
+      currentCF=this->theCoeffs[i];
+      currentCF*=input[(*this)[i].dualIndex];
+      output[(*this)[i].vIndex]+= currentCF;
+    }
+  }
+  template <class otherType>
+  void ActOnVectorsColumn(Vectors<otherType>& inputOutput)const
+  { for (int i=0; i<inputOutput.size; i++)
+      this->ActOnVectorColumn(inputOutput[i], inputOutput[i]);
+  }
+  template <class otherType>
   void ActOnVectorColumn(VectorSparse<otherType>& inputOutput)const
   { VectorSparse<otherType> output;
     output.MakeZero();
@@ -6821,6 +6853,23 @@ void MatrixTensor<coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<coe
   this->AssignVectorsToRows(theRows);
   if (carbonCopyMat!=0)
     carbonCopyMat->AssignVectorsToRows(theCarbonCopyRows);
+}
+
+template <class coefficient>
+void MatrixTensor<coefficient>::DirectSumWith(const MatrixTensor<coefficient>& other)
+{ if (&other==this)
+  { MatrixTensor<coefficient> otherCopy=other;
+    this->DirectSumWith(otherCopy);
+    return;
+  }
+  int indexShift= this->GetMaxNumColsNumRows();
+  this->SetExpectedSize(this->size()+other.size());
+  MonomialMatrix currentM;
+  for (int i=0; i<other.size(); i++)
+  { currentM.vIndex=other[i].vIndex+indexShift;
+    currentM.dualIndex=other[i].dualIndex+indexShift;
+    this->AddMonomial(currentM, other.theCoeffs[i]);
+  }
 }
 
 template <class coefficient>
@@ -7260,8 +7309,6 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const E
   }
 }
 
-
-
 template<class Element>
 void Matrix<Element>::Substitution(const PolynomialSubstitution<Rational>& theSub)
 { for (int i=0; i<this->NumRows; i++)
@@ -7269,11 +7316,8 @@ void Matrix<Element>::Substitution(const PolynomialSubstitution<Rational>& theSu
       this->elements[i][j].Substitution(theSub);
 }
 
-
-
 template <class coefficient>
-std::string MonomialTensorGeneralizedVermas<coefficient>::ToString
-  (FormatExpressions* theFormat, bool includeV)const
+std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpressions* theFormat, bool includeV)const
 { std::stringstream out;
   std::string tempS;
   if (this->theMons.size>1)
@@ -7326,8 +7370,7 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
 }
 
 template <class TemplateMonomial, class coefficient>
-std::ostream& operator<<
-  (std::ostream& output, const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
+std::ostream& operator<<(std::ostream& output, const MonomialCollection<TemplateMonomial, coefficient>& theCollection)
 { if (theCollection.size()==0)
   { output << "0";
     return output;
@@ -7385,8 +7428,7 @@ void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Elem
 }
 
 template <class coefficient>
-void MonomialGeneralizedVerma<coefficient>::Substitution
-(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
+void MonomialGeneralizedVerma<coefficient>::Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
 { //std::cout << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ToString();
   this->theMonCoeffOne.Substitution(theSub);
   //std::cout << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ToString();

@@ -714,7 +714,7 @@ bool Expression::CheckConsistency()const
   if (this->IsBuiltInType())
   { if (this->children.size!=3)
       crash << "This is a programming error. At the moment of writing, an expression of built-in type must have 3 "
-      << "children: type, context, and index in CommandList. The expression is " << this->ToStringFull()
+      << "children: type, context, and index in Calculator. The expression is " << this->ToStringFull()
       << crash;
     const Expression& mustBeTheContext=(*this)[1];
     if (!mustBeTheContext.IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
@@ -909,7 +909,7 @@ Expression Expression::ContextGetContextVariable(int variableIndex)const
   return thePolVars[variableIndex+1];
 }
 
-bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
+bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, Calculator& owner)
 { if (!this->IsContext())
     crash << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA on a non-context expression. " << crash;
   int index=this->ContextGetIndexAmbientSSalg();
@@ -1010,7 +1010,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   for (int i =1; i<rightPolyV.children.size; i++)
     polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
   polyVarUnion.QuickSortAscending();
-  CommandList& owner=*leftContext.theBoss;
+  Calculator& owner=*leftContext.theBoss;
   outputContext.reset(owner, 5+polyVarUnion.size);
   outputContext.AddChildAtomOnTop(owner.opContexT());
   if (polyVarUnion.size>0)
@@ -1136,13 +1136,13 @@ bool Expression::IsEqualToZero()const
   return false;
 }
 
-CommandList::CommandList()
+Calculator::Calculator()
 { this->theGlobalVariableS=0;
   this->numOutputFiles=0;
   this->flagHideLHS=false;
 }
 
-std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
+std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
 (const std::string& fileContent, bool useLatexDviPSpsTopdf)
 { std::fstream theFile;
   std::stringstream fileName;
@@ -1175,23 +1175,23 @@ inline int IntIdentity(const int& x)
 { return x;
 }
 
-void Expression::MakeProducT(CommandList& owner, const Expression& left, const Expression& right)
+void Expression::MakeProducT(Calculator& owner, const Expression& left, const Expression& right)
 { this->MakeXOX(owner, owner.opTimes(), left, right);
 }
 
-void Expression::MakeFunction(CommandList& owner, const Expression& theFunction, const Expression& theArgument)
+void Expression::MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument)
 { this->reset(owner, 2);
   this->AddChildOnTop(theFunction);
   this->AddChildOnTop(theArgument);
   this->format=this->formatFunctionUseUnderscore;
 }
 
-bool Expression::MakeEmptyContext(CommandList& owner)
+bool Expression::MakeEmptyContext(Calculator& owner)
 { this->reset(owner, 1);
   return this->AddChildAtomOnTop(owner.opContexT());
 }
 
-bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const Expression& inputPolyVarE)
+bool Expression::MakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE)
 { this->MakeEmptyContext(owner);
   Expression thePolyVars;
   thePolyVars.reset(owner, 2);
@@ -1200,23 +1200,23 @@ bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const Expression&
   return this->AddChildOnTop(thePolyVars);
 }
 
-bool Expression::MakeContextWithOnePolyVarOneDiffVar(CommandList& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
+bool Expression::MakeContextWithOnePolyVarOneDiffVar(Calculator& owner, const Expression& inputPolyVarE, const Expression& inputDiffVarE)
 { this->MakeEmptyContext(owner);
   return this->ContextSetDiffOperatorVar(inputPolyVarE, inputDiffVarE);
 }
 
-bool Expression::MakeContextSSLieAlg(CommandList& owner, const SemisimpleLieAlgebra& theSSLiealg)
+bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgebra& theSSLiealg)
 { this->MakeEmptyContext(owner);
   return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
 }
 
-bool Expression::MakeContextWithOnePolyVar(CommandList& owner, const std::string& inputPolyVarName)
+bool Expression::MakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName)
 { Expression varNameE;
   varNameE.MakeAtom(owner.AddOperationNoRepetitionOrReturnIndexFirst(inputPolyVarName), owner);
   return this->MakeContextWithOnePolyVar(owner, varNameE);
 }
 
-bool Expression::MakeSqrt(CommandList& owner, const Rational& argument, const Rational& radicalSuperIndex)
+bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex)
 { this->reset(owner,3);
   Expression radicalIndexE, argumentE;
   radicalIndexE.AssignValue(radicalSuperIndex, owner);
@@ -1227,7 +1227,7 @@ bool Expression::MakeSqrt(CommandList& owner, const Rational& argument, const Ra
   return true;
 }
 
-bool Expression::MakeXOX(CommandList& owner, int theOp, const Expression& left, const Expression& right)
+bool Expression::MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right)
 { if (&left==this || &right==this)
   { Expression leftCopy=left;
     Expression rightCopy=right;
@@ -1240,7 +1240,7 @@ bool Expression::MakeXOX(CommandList& owner, int theOp, const Expression& left, 
   return this->AddChildOnTop(right);
 }
 
-bool Expression::MakeOX(CommandList& owner, int theOp, const Expression& opArgument)
+bool Expression::MakeOX(Calculator& owner, int theOp, const Expression& opArgument)
 { if (&opArgument==this)
   { Expression copyE=opArgument;
     return this->MakeOX(owner, theOp, copyE);
@@ -1258,8 +1258,8 @@ bool Expression::Sequencefy()
   return this->MakeOX(*this->theBoss, this->theBoss->opSequence(), *this);
 }
 
-bool CommandList::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
-{ MacroRegisterFunctionWithName("CommandList::GetVectorExpressions");
+bool Calculator::GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory)
+{ MacroRegisterFunctionWithName("Calculator::GetVectorExpressions");
   output.ReservE(input.children.size);
   output.SetSize(0);
   if (!input.IsSequenceNElementS())
@@ -1293,15 +1293,15 @@ std::string BoundVariablesSubstitution::ToString()
 }
 
 template<class coefficient>
-bool CommandList::GetTypeHighestWeightParabolic
-(CommandList& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
+bool Calculator::GetTypeHighestWeightParabolic
+(Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
  Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
 { if (!input.IsListNElements(4) && !input.IsListNElements(3))
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;
@@ -1333,9 +1333,9 @@ bool CommandList::GetTypeHighestWeightParabolic
   return true;
 }
 
-bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::fDecomposeCharGenVerma");
+  MacroRegisterFunctionWithName("Calculator::fDecomposeCharGenVerma");
   Expression theContext;
   Vector<RationalFunctionOld> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
   Selection parSel, invertedParSel;
@@ -1431,7 +1431,7 @@ bool CommandList::fDecomposeCharGenVerma(CommandList& theCommands, const Express
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CommandList::innerPrintGenVermaModule(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
@@ -1451,7 +1451,7 @@ bool CommandList::innerPrintGenVermaModule(CommandList& theCommands, const Expre
   return output.AssignValue(theModule.ToString(), theCommands);
 }
 
-bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerHWV(Calculator& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
@@ -1464,8 +1464,8 @@ bool CommandList::innerHWV(CommandList& theCommands, const Expression& input, Ex
   return theCommands.innerHWVCommon(theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorUpToLevel");
+bool Calculator::innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperatorUpToLevel");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError("Function innerSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ", theCommands);
@@ -1941,10 +1941,10 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
   return true;
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperatorInner
-(CommandList& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
+bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
+(Calculator& theCommands, const Expression& input, Expression& output, Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
  Selection& selInducing, SemisimpleLieAlgebra* owner, bool AllGenerators, std::string* xLetter, std::string* partialLetter, std::string* exponentVariableLetter)
-{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperatorInner");
+{ MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
   if (theHws.size==0)
@@ -2263,10 +2263,10 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-bool CommandList::innerHWVCommon
-(CommandList& theCommands, Expression& output, Vector<RationalFunctionOld>& highestWeightFundCoords, Selection& selectionParSel,
+bool Calculator::innerHWVCommon
+(Calculator& theCommands, Expression& output, Vector<RationalFunctionOld>& highestWeightFundCoords, Selection& selectionParSel,
  Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose)
-{ MacroRegisterFunctionWithName("CommandList::innerHWVCommon");
+{ MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
@@ -2321,8 +2321,8 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
   }
 }
 
-bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerSplitGenericGenVermaTensorFD");
+bool Calculator::innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSplitGenericGenVermaTensorFD");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(4))
     return output.SetError
@@ -2336,7 +2336,7 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands);
-  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CommandList::innerRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Calculator::innerRationalFunction))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -2544,8 +2544,8 @@ bool CommandList::innerSplitGenericGenVermaTensorFD(CommandList& theCommands, co
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerFunctionToMatrix");
+bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
 //  std::cout << input.ToString();
   if (!input.IsListNElements(4))
     return false;
@@ -2585,8 +2585,8 @@ bool CommandList::innerFunctionToMatrix(CommandList& theCommands, const Expressi
   return true;
 }
 
-bool CommandList::innerGetChevGen(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerGetChevGen");
+bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerGetChevGen");
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
@@ -2614,7 +2614,7 @@ bool CommandList::innerGetChevGen(CommandList& theCommands, const Expression& in
   return true;
 }
 
-bool CommandList::innerGetCartanGen(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>Here I am with input: " << input.ToString();
   if (!input.IsListNElements(3))
     return false;
@@ -2649,8 +2649,8 @@ bool CommandList::innerGetCartanGen(CommandList& theCommands, const Expression& 
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
-bool CommandList::fKLcoeffs(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
+bool Calculator::fKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSalgebra))
@@ -2674,8 +2674,8 @@ bool CommandList::fKLcoeffs(CommandList& theCommands, const Expression& input, E
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerPrintSSLieAlgebra(CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
-{ MacroRegisterFunctionWithName("CommandList::innerPrintSSLieAlgebra");
+bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, bool Verbose)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
   SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, tempSSpointer))
@@ -2816,7 +2816,7 @@ bool Expression::HasBoundVariables()const
   return false;
 }
 
-bool CommandList::innerNot(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerNot(Calculator& theCommands, const Expression& input, Expression& output)
 { int theInt;
   if (!input.IsSmallInteger(&theInt))
     return false;
@@ -2825,7 +2825,7 @@ bool CommandList::innerNot(CommandList& theCommands, const Expression& input, Ex
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::innerIsInteger(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
     return false;
   if (input.IsInteger())
@@ -2835,7 +2835,7 @@ bool CommandList::innerIsInteger(CommandList& theCommands, const Expression& inp
   return true;
 }
 
-bool CommandList::innerIsRational(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerIsRational(Calculator& theCommands, const Expression& input, Expression& output)
 { if (input.HasBoundVariables())
     return false;
   if (input.IsOfType<Rational>())
@@ -2845,7 +2845,7 @@ bool CommandList::innerIsRational(CommandList& theCommands, const Expression& in
   return true;
 }
 
-bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp)
+bool Calculator::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& input, List<Expression>& output, int theOp)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
@@ -2862,8 +2862,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical(const Expression& in
   return result;
 }
 
-Expression::FunctionAddress CommandList::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
-{ crash << "Function CommandList::GetfOp not implemented yet. " << crash;
+Expression::FunctionAddress Calculator::GetInnerFunctionFromOp(int theOp, const Expression& left, const Expression& right)
+{ crash << "Function Calculator::GetfOp not implemented yet. " << crash;
   return 0;
 }
 
@@ -2893,10 +2893,10 @@ void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
   *this=output;
 }
 
-bool CommandList::outerTensor(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::StandardTensor");
+  MacroRegisterFunctionWithName("Calculator::StandardTensor");
   if (theCommands.outerDistribute
       (theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
     return true;
@@ -2911,7 +2911,7 @@ bool CommandList::outerTensor(CommandList& theCommands, const Expression& input,
   return false;
 }
 
-bool CommandList::innerCollectMultiplicands(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
 //  std::cout << "<hr>Collecting multiplicands. input: " << input.ToString();
@@ -2942,7 +2942,7 @@ bool CommandList::innerCollectMultiplicands(CommandList& theCommands, const Expr
   return false;
 }
 
-bool CommandList::outerCombineFractions(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
     return false;
   const Expression* quotientE=0;
@@ -2963,7 +2963,7 @@ bool CommandList::outerCombineFractions(CommandList& theCommands, const Expressi
   return output.MakeXOX(theCommands, theCommands.opDivide(), outputNumE, quotientDenominatorE);
 }
 
-bool CommandList::outerCheckRule(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDefine(), 3))
     return false;
   if (input[1]!=input[2])
@@ -2973,7 +2973,7 @@ bool CommandList::outerCheckRule(CommandList& theCommands, const Expression& inp
   return output.SetError(out.str(), theCommands);
 }
 
-bool CommandList::innerSubZeroDivAnythingWithZero(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
   if (input[1].IsEqualToZero())
@@ -2982,7 +2982,7 @@ bool CommandList::innerSubZeroDivAnythingWithZero(CommandList& theCommands, cons
   return false;
 }
 
-bool CommandList::innerCancelMultiplicativeInverse(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -2994,7 +2994,7 @@ bool CommandList::innerCancelMultiplicativeInverse(CommandList& theCommands, con
   return false;
 }
 
-bool CommandList::outerAssociateTimesDivision(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -3005,7 +3005,7 @@ bool CommandList::outerAssociateTimesDivision(CommandList& theCommands, const Ex
   return true;
 }
 
-bool CommandList::outerAssociate(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theOperation=input[0].theData;
@@ -3017,8 +3017,8 @@ bool CommandList::outerAssociate(CommandList& theCommands, const Expression& inp
   return true;
 }
 
-bool CommandList::StandardIsDenotedBy(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::StandardIsDenotedBy");
+bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
     return false;
@@ -3040,7 +3040,7 @@ bool CommandList::StandardIsDenotedBy(CommandList& theCommands, const Expression
   return true;
 }
 
-bool CommandList::innerMultiplyByOne(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListStartingWithAtom(theCommands.opTimes()) || input.children.size!=3)
     return false;
   if (!input[1].IsEqualToOne())
@@ -3049,8 +3049,8 @@ bool CommandList::innerMultiplyByOne(CommandList& theCommands, const Expression&
   return true;
 }
 
-bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerTimesToFunctionApplication");
+bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
     return false;
   if (input.children.size<2)
@@ -3075,7 +3075,7 @@ bool CommandList::outerTimesToFunctionApplication(CommandList& theCommands, cons
   return true;
 }
 
-bool CommandList::outerDistribute(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
+bool Calculator::outerDistribute(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (theCommands.flagDontDistribute)
     return false;
   if (theCommands.outerLeftDistributeBracketIsOnTheLeft(theCommands, input, output, AdditiveOp, multiplicativeOp))
@@ -3083,7 +3083,7 @@ bool CommandList::outerDistribute(CommandList& theCommands, const Expression& in
   return theCommands.outerRightDistributeBracketIsOnTheRight(theCommands, input, output, AdditiveOp, multiplicativeOp);
 }
 
-bool CommandList::outerLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
+bool Calculator::outerLeftDistributeBracketIsOnTheLeft(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -3097,7 +3097,7 @@ bool CommandList::outerLeftDistributeBracketIsOnTheLeft(CommandList& theCommands
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool CommandList::outerRightDistributeBracketIsOnTheRight(CommandList& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
+bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -3111,8 +3111,8 @@ bool CommandList::outerRightDistributeBracketIsOnTheRight(CommandList& theComman
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
-bool CommandList::CollectSummands(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
-{ MacroRegisterFunctionWithName("CommandList::CollectSummands");
+bool Calculator::CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
+{ MacroRegisterFunctionWithName("Calculator::CollectSummands");
   List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   Expression oneE; //used to record the constant term
@@ -3140,7 +3140,7 @@ bool CommandList::CollectSummands(CommandList& theCommands, const Expression& in
   return true;
 }
 
-bool CommandList::innerAssociateExponentExponent(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output)
 { int opPower=theCommands.opThePower();
   if (!input.IsListNElementsStartingWithAtom(opPower, 3))
     return false;
@@ -3151,7 +3151,7 @@ bool CommandList::innerAssociateExponentExponent(CommandList& theCommands, const
   return output.MakeXOX(theCommands, opPower, input[1][1], tempE);
 }
 
-bool CommandList::outerPowerRaiseToFirst(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     return false;
   if (input[2].IsEqualToOne())
@@ -3166,7 +3166,7 @@ bool CommandList::outerPowerRaiseToFirst(CommandList& theCommands, const Express
   return false;
 }
 
-bool Expression::MakeXOdotsOX(CommandList& owner, int theOp, const List<Expression>& input)
+bool Expression::MakeXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input)
 { MacroRegisterFunctionWithName("Expression::MakeXOdotsOX");
   if (input.size==0)
     crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
@@ -3186,7 +3186,7 @@ bool Expression::MakeXOdotsOX(CommandList& owner, int theOp, const List<Expressi
   return true;
 }
 
-bool Expression::MakeSum(CommandList& theCommands, const MonomialCollection<Expression, Rational>& theSum)
+bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum)
 { MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
@@ -3212,8 +3212,8 @@ bool Expression::MakeSum(CommandList& theCommands, const MonomialCollection<Expr
   return this->MakeXOdotsOX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
-bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerPlus");
+bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::outerPlus");
 //  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
   if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
     return false;
@@ -3222,7 +3222,7 @@ bool CommandList::outerPlus(CommandList& theCommands, const Expression& input, E
   return output.MakeSum(theCommands, theSum);
 }
 
-bool CommandList::EvaluateIf(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opDefineConditional(), 4))
     return output.SetError("Error: operation :if := takes three arguments.", theCommands);
   Rational conditionRat;
@@ -3239,7 +3239,7 @@ bool CommandList::EvaluateIf(CommandList& theCommands, const Expression& input, 
   return false;
 }
 
-bool CommandList::outerGreaterThan(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -3252,7 +3252,7 @@ bool CommandList::outerGreaterThan(CommandList& theCommands, const Expression& i
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::outerLessThan(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerLessThan(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -3265,7 +3265,7 @@ bool CommandList::outerLessThan(CommandList& theCommands, const Expression& inpu
   return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::outerEqualEqual(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
   const Expression& left=input[1];
@@ -3278,7 +3278,7 @@ bool CommandList::outerEqualEqual(CommandList& theCommands, const Expression& in
     return output.AssignValue(0, theCommands);
 }
 
-bool Expression::SetError(const std::string& theError, CommandList& owner)
+bool Expression::SetError(const std::string& theError, Calculator& owner)
 { this->reset(owner, 2);
   this->AddChildAtomOnTop(owner.opError());
   return this->AddChildValueOnTop(theError);
@@ -3323,7 +3323,7 @@ bool Expression::IsInteger(LargeInt* whichInteger)const
   return theRat.IsInteger(whichInteger);
 }
 
-bool CommandList::outerUnion(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerUnion(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElementsStartingWithAtom(theCommands.opUnion()))
     return false;
   int numElts=1;
@@ -3341,7 +3341,7 @@ bool CommandList::outerUnion(CommandList& theCommands, const Expression& input, 
   return true;
 }
 
-bool CommandList::outerUnionNoRepetition(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerUnionNoRepetition(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.IsLisT())
     return false;
   int numElts=1;
@@ -3367,8 +3367,8 @@ bool CommandList::outerUnionNoRepetition(CommandList& theCommands, const Express
   return true;
 }
 
-bool CommandList::outerDivide(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerDivide");
+bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::outerDivide");
 //  std::cout << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
 //  << input.Lispify() ;
   if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
@@ -3387,7 +3387,7 @@ bool CommandList::outerDivide(CommandList& theCommands, const Expression& input,
   return output.SetChilD(2, tempE);
 }
 
-bool CommandList::outerMinus(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!(input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 3) || input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 2)) )
     return false;
   Expression tempE, minusOne;
@@ -3483,7 +3483,7 @@ int Expression::GetExpressionTreeSize()const
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
     crash << "This is a run-time error, which may or may not be caused by a programming error. "
     << "While computing expression tree size, I exceeded the "
-    << " recrsion depth limit. To increase the recursion depth limit, modify CommandList::MaxRecursionDeptH. "
+    << " recrsion depth limit. To increase the recursion depth limit, modify Calculator::MaxRecursionDeptH. "
     << "The current max recursion depth limit is: " << this->theBoss->MaxRecursionDeptH << crash;
   if (this->IsAtom())
     return 1;
@@ -4109,7 +4109,7 @@ bool Expression::IsLisT()const
   if (this->children.size<=0)
     return false;
   if (this->theData!=this->theBoss->opLisT())
-    crash << "This is a programming error. List expressions must have data valule equal to CommandList::opList(). " << crash;
+    crash << "This is a programming error. List expressions must have data valule equal to Calculator::opList(). " << crash;
   return true;
 }
 
@@ -4266,7 +4266,7 @@ bool Expression::IsBuiltInType(int* outputWhichType)const
   return true;
 }
 
-int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
+int Calculator::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
 { int result=this->theAtoms.GetIndex(theOpName);
   if (result==-1)
   { this->theAtoms.AddOnTop(theOpName);
@@ -4277,12 +4277,12 @@ int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& t
   return result;
 }
 
-void CommandList::AddOperationBuiltInType(const std::string& theOpName)
+void Calculator::AddOperationBuiltInType(const std::string& theOpName)
 { this->AddOperationNoRepetitionAllowed(theOpName);
   this->builtInTypes.AddOnTop(theOpName);
 }
 
-void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
+void Calculator::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->GetOperations().Contains(theOpName))
     crash << "This is a programming error: operation " << theOpName << " already created. " << crash;
   this->theAtoms.AddOnTop(theOpName);
@@ -4290,7 +4290,7 @@ void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
   this->FunctionHandlers.LastObject()->SetSize(0);
 }
 
-void CommandList::AddOperationBinaryInnerHandlerWithTypes
+void Calculator::AddOperationBinaryInnerHandlerWithTypes
 (const std::string& theOpName, Expression::FunctionAddress innerHandler, int leftType, int rightType, const std::string& opDescription,
  const std::string& opExample, bool visible, bool experimental)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
@@ -4308,7 +4308,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
 
-void CommandList::AddOperationHandler
+void Calculator::AddOperationHandler
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
  const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
 { int indexOp=this->theAtoms.GetIndex(theOpName);
@@ -4328,10 +4328,10 @@ void CommandList::AddOperationHandler
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
-void CommandList::AddOperationComposite
+void Calculator::AddOperationComposite
 (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing,
  const std::string& opDescription, const std::string& opExample, bool isInner, bool visible, bool isExperimental)
-{ MacroRegisterFunctionWithName("CommandList::AddOperationComposite");
+{ MacroRegisterFunctionWithName("Calculator::AddOperationComposite");
   int theIndex=this->operationsComposite.GetIndex(theOpName);
   if (opArgumentListIgnoredForTheTimeBeing!="")
     crash << "This section of code is not implemented yet. Crashing to let you know. " << crash;
@@ -4345,7 +4345,7 @@ void CommandList::AddOperationComposite
   this->operationsCompositeHandlers[theIndex].AddOnTop(theFun);
 }
 
-std::string CommandList::ElementToStringNonBoundVars()
+std::string Calculator::ElementToStringNonBoundVars()
 { std::stringstream out;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
@@ -4389,7 +4389,7 @@ bool Function::inputFitsMyInnerType(const Expression& input)
   return argument1good && argument2good;
 }
 
-std::string Function::GetString(CommandList& theBoss)
+std::string Function::GetString(Calculator& theBoss)
 { if (!this->flagIamVisible)
     return "";
   std::stringstream out2;
@@ -4435,8 +4435,8 @@ std::string ObjectContainer::ToString()
   return out.str();
 }
 
-std::string CommandList::ToString()
-{ MacroRegisterFunctionWithName("CommandList::ToString");
+std::string Calculator::ToString()
+{ MacroRegisterFunctionWithName("Calculator::ToString");
   std::stringstream out, out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
@@ -4517,7 +4517,7 @@ std::string CommandList::ToString()
   return out2.str();
 }
 
-bool CommandList::ReplaceIntIntBy10IntPlusInt()
+bool Calculator::ReplaceIntIntBy10IntPlusInt()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Rational tempRat=left.theData.GetValue<Rational>();
@@ -4536,7 +4536,7 @@ bool CommandList::ReplaceIntIntBy10IntPlusInt()
   return true;
 }
 
-bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
+bool Calculator::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& lefT = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
@@ -4552,7 +4552,7 @@ bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
   return true;
 }
 
-bool CommandList::ReplaceEXdotsXbySsXdotsX(int numDots)
+bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   Expression newExpr;
   newExpr.reset(*this);
@@ -4565,7 +4565,7 @@ bool CommandList::ReplaceEXdotsXbySsXdotsX(int numDots)
   return true;
 }
 
-bool CommandList::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
+bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
   if (!left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
@@ -4580,7 +4580,7 @@ bool CommandList::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
   return true;
 }
 
-bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
+bool Calculator::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
@@ -4595,7 +4595,7 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
   return true;
 }
 
-bool CommandList::ReplaceEXEXByEX(int formatOptions)
+bool Calculator::ReplaceEXEXByEX(int formatOptions)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
@@ -4609,7 +4609,7 @@ bool CommandList::ReplaceEXEXByEX(int formatOptions)
   return true;
 }
 
-std::string CommandList::ElementToStringSyntacticStack()
+std::string Calculator::ElementToStringSyntacticStack()
 { std::stringstream out;
   if ((*this->CurrentSyntacticStacK).size<this->numEmptyTokensStart)
     return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
@@ -4633,13 +4633,13 @@ std::string CommandList::ElementToStringSyntacticStack()
   return out.str();
 }
 
-bool CommandList::ReplaceXXXByCon(int theCon)
+bool Calculator::ReplaceXXXByCon(int theCon)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=theCon;
   this->DecreaseStackSetCharacterRangeS(2);
   return true;
 }
 
-bool CommandList::ReplaceXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
+bool Calculator::ReplaceXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=con2;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=inputFormat2;
@@ -4648,13 +4648,13 @@ bool CommandList::ReplaceXXXByConCon(int con1, int con2, int inputFormat1, int i
   return true;
 }
 
-bool CommandList::ReplaceXXXXXByCon(int theCon, int inputFormat)
+bool Calculator::ReplaceXXXXXByCon(int theCon, int inputFormat)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].controlIndex=theCon;
   this->DecreaseStackSetCharacterRangeS(4);
   return true;
 }
 
-bool CommandList::ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
+bool Calculator::ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con2;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5].controlIndex=con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].theData.format=inputFormat2;
@@ -4663,7 +4663,7 @@ bool CommandList::ReplaceXXXXXByConCon(int con1, int con2, int inputFormat1, int
   return true;
 }
 
-bool CommandList::ReplaceXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
+bool Calculator::ReplaceXXXXByConCon(int con1, int con2, int inputFormat1, int inputFormat2)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].controlIndex=con2;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat2;
@@ -4672,28 +4672,28 @@ bool CommandList::ReplaceXXXXByConCon(int con1, int con2, int inputFormat1, int 
   return true;
 }
 
-bool CommandList::ReplaceXXXXByCon(int con1, int inputFormat1)
+bool Calculator::ReplaceXXXXByCon(int con1, int inputFormat1)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].controlIndex=con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4].theData.format=inputFormat1;
   this->DecreaseStackSetCharacterRangeS(3);
   return true;
 }
 
-bool CommandList::ReplaceXByCon(int theCon, int theFormat)
+bool Calculator::ReplaceXByCon(int theCon, int theFormat)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=theCon;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.format=theFormat;
   //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
 
-bool CommandList::ReplaceXByEusingO(int theOperation)
+bool Calculator::ReplaceXByEusingO(int theOperation)
 { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=this->conExpression();
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].theData.MakeAtom(theOperation, *this);
   //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
 
-bool CommandList::ReplaceXByConCon(int con1, int con2, int format1, int format2)
+bool Calculator::ReplaceXByConCon(int con1, int con2, int format1, int format2)
 { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size+1);
   (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
@@ -4786,21 +4786,21 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContext
   return true;
 }
 
-bool CommandList::IsBoundVarInContext(int inputOp)
+bool Calculator::IsBoundVarInContext(int inputOp)
 { for (int i=0; i<this->BoundVariablesStack.size; i++)
     if (this->BoundVariablesStack[i].Contains(inputOp))
       return true;
   return false;
 }
 
-bool CommandList::IsNonBoundVarInContext(int inputOp)
+bool Calculator::IsNonBoundVarInContext(int inputOp)
 { for (int i=0; i<this->NonBoundVariablesStack.size; i++)
     if (this->NonBoundVariablesStack[i].Contains(inputOp))
       return true;
   return false;
 }
 
-bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
+bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   int theBoundVar=theElt.theData.theData;
 //  std::cout << "<br>Registering bound variable index: " << theBoundVar;
@@ -4828,7 +4828,7 @@ bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
   return true;
 }
 
-bool CommandList::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
+bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
   int theBoundVar=theElt.theData.theData;
 //  std::cout << "<br>index of variable: " << theElt.ToString(*this);
@@ -4845,7 +4845,7 @@ bool CommandList::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
   return true;
 }
 
-void CommandList::InitJavaScriptDisplayIndicator()
+void Calculator::InitJavaScriptDisplayIndicator()
 { std::stringstream output;
   output << " <!>\n";
   output << " <script type=\"text/javascript\"> \n";
@@ -4884,7 +4884,7 @@ void CommandList::InitJavaScriptDisplayIndicator()
   this->javaScriptDisplayingIndicator=output.str();
 }
 
-void CommandList::initDefaultFolderAndFileNames(const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
+void Calculator::initDefaultFolderAndFileNames(const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
 { this->PhysicalPathServerBase = inputPathBinaryBaseIsFolderBelow + "../";
   this->DisplayPathServerBase = "/" + inputDisplayPathBase;
 
@@ -4903,8 +4903,8 @@ void CommandList::initDefaultFolderAndFileNames(const std::string& inputPathBina
 
 }
 
-bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands, const Expression& input, Expression& output, bool AllGenerators)
-{ MacroRegisterFunctionWithName("CommandList::innerWriteGenVermaModAsDiffOperators");
+bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators)
+{ MacroRegisterFunctionWithName("Calculator::innerWriteGenVermaModAsDiffOperators");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.SetSize(1);
@@ -4941,7 +4941,7 @@ bool CommandList::innerWriteGenVermaModAsDiffOperators(CommandList& theCommands,
   (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, AllGenerators, &letterString, &partialString, &exponentLetterString);
 }
 
-bool CommandList::innerFreudenthalFull(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerFreudenthalFull(Calculator& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
@@ -4963,7 +4963,7 @@ bool CommandList::innerFreudenthalFull(CommandList& theCommands, const Expressio
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerFreudenthalEval(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression& input, Expression& output)
 { Vector<Rational> hwFundamental, hwSimple;
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg=0;
@@ -5050,8 +5050,8 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
   return true;
 }
 
-bool CommandList::ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext)
-{ MacroRegisterFunctionWithName("CommandList::ConvertExpressionsToCommonContext");
+bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext)
+{ MacroRegisterFunctionWithName("Calculator::ConvertExpressionsToCommonContext");
   Expression commonContext;
   commonContext.MakeEmptyContext(*this);
   if (inputOutputStartingContext!=0)
@@ -5076,8 +5076,8 @@ bool CommandList::ConvertExpressionsToCommonContext(List<Expression>& inputOutpu
   return true;
 }
 
-bool CommandList::outerMeltBrackets(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerMeltBrackets");
+bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   //std::cout << "outerMeltBrackets meldet sich!";
   if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))

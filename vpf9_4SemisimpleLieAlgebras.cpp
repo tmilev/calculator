@@ -3,6 +3,7 @@
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "vpfHeader2Math7FinitelyGeneratedMatrixGroups.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
@@ -822,46 +823,55 @@ void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)const
   }
 }
 
-void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Matrix<Rational>& output, int AutoIndex)const
-{ MacroRegisterFunctionWithName("DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight");
+void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex)const
+{ MacroRegisterFunctionWithName("DynkinSimpleType::GetAutomorphismActingOnVectorColumn");
   if (AutoIndex==0 || this->theLetter=='B' || this->theLetter=='C' || this->theLetter=='G' || this->theLetter=='F' || this->theRank==1 || (this->theLetter=='E' && this->theRank!=6))
-  { output.MakeIdMatrix(this->theRank);
+  { output.MakeId(this->theRank);
     return;
   }
-  output.init(this->theRank, this->theRank);
-  output.NullifyAll();
+  output.MakeZero();
   if (this->theLetter=='A' && this->theRank!=1)
     for (int i=0; i<this->theRank; i++)
-      output(i, this->theRank-i-1)=1;
+      output.AddMonomial(MonomialMatrix(i, this->theRank-i-1),1);
   if (this->theLetter=='D')
   { if (this->theRank==4)
     { //Here be D_4 triality.
       //The automorphism group of Dynkin Diagram D_4 is S3
       //The triple node is always fixed:
-      output(1,1)=1;
+      output.AddMonomial(MonomialMatrix(1,1),1);
       if (AutoIndex==1)
       { //permutation (12), AutoIndex=1
-        output(0,2)=1; output(2,0)=1; output(3,3)=1;
+        output.AddMonomial(MonomialMatrix(0,2),1);
+        output.AddMonomial(MonomialMatrix(2,0),1);
+        output.AddMonomial(MonomialMatrix(3,3),1);
       } else if (AutoIndex==2)
       { //permutation (23), AutoIndex=2
-        output(0,0)=1; output(2,3)=1; output(3,2)=1;
+        output.AddMonomial(MonomialMatrix(0,0),1);
+        output.AddMonomial(MonomialMatrix(2,3),1);
+        output.AddMonomial(MonomialMatrix(3,2),1);
       } else if (AutoIndex==3)
       { //permutation (12)(23)=(123), AutoIndex=3
-        output(0,2)=1; output(2,3)=1; output(3,0)=1;
+        output.AddMonomial(MonomialMatrix(0,2),1);
+        output.AddMonomial(MonomialMatrix(2,3),1);
+        output.AddMonomial(MonomialMatrix(3,0),1);
       } else if (AutoIndex==4)
       { //permutation (23)(12)=(132), AutoIndex=4
-        output(0,3)=1; output(2,0)=1; output(3,2)=1;
+        output.AddMonomial(MonomialMatrix(0,3),1);
+        output.AddMonomial(MonomialMatrix(2,0),1);
+        output.AddMonomial(MonomialMatrix(3,2),1);
       } else if (AutoIndex==5)
       { //permutation (12)(23)(12)=(13), AutoIndex=5
-        output(0,3)=1; output(2,2)=1; output(3,0)=1;
+        output.AddMonomial(MonomialMatrix(0,3),1);
+        output.AddMonomial(MonomialMatrix(2,2),1);
+        output.AddMonomial(MonomialMatrix(3,0),1);
       } else
         crash << "This is a programming error: requesting triality automorphism with index not in the range 0-5. " << crash;
     } else
-    { output.MakeIdMatrix(this->theRank);
-      output(this->theRank-1, this->theRank-1)=0;
-      output(this->theRank-2, this->theRank-2)=0;
-      output(this->theRank-1, this->theRank-2)=1;
-      output(this->theRank-2, this->theRank-1)=1;
+    { output.MakeId(this->theRank);
+      output.AddMonomial(MonomialMatrix(this->theRank-1, this->theRank-1),0);
+      output.AddMonomial(MonomialMatrix(this->theRank-2, this->theRank-2),0);
+      output.AddMonomial(MonomialMatrix(this->theRank-1, this->theRank-2),1);
+      output.AddMonomial(MonomialMatrix(this->theRank-2, this->theRank-1),1);
     }
   }
   if (this->theLetter=='E' && this->theRank==6)
@@ -869,9 +879,12 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(Mat
     //and the triple node comes fourth.
     //Therefore, we must swap the 1st root with the 6th and the third root
     //with the 5th. Conventions, conventions... no way around 'em!
-     output(1,1)=1; output(3,3)=1;
-     output(0,5)=1; output(5,0)=1;
-     output(2,4)=1; output(4,2)=1;
+     output.AddMonomial(MonomialMatrix(1,1),1);
+     output.AddMonomial(MonomialMatrix(3,3),1);
+     output.AddMonomial(MonomialMatrix(0,5),1);
+     output.AddMonomial(MonomialMatrix(5,0),1);
+     output.AddMonomial(MonomialMatrix(2,4),1);
+     output.AddMonomial(MonomialMatrix(4,2),1);
   }
   Rational tempRat=output.GetDeterminant();
   if (tempRat!=1 && tempRat!=-1)
@@ -920,11 +933,10 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
   { if (outputSubset!=0)
       tempEW=outputSubset->TheObjects[i];
     for (int j=0; j<numGens; j++)
-    { currentRoot=output[i];
-      if(j<this->GetDim())
+    { if(j<this->GetDim())
         this->SimpleReflection(j, currentRoot);
       else
-        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(currentRoot);
+        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { tempEW.reflections.AddOnTop(j);
@@ -5390,7 +5402,8 @@ bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)cons
 }
 
 bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly)
-{ if (other.flagSystemProvedToHaveNoSolution)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::IsDirectSummandOf");
+  if (other.flagSystemProvedToHaveNoSolution)
     return false;
 //  bool doDebug=(this->theWeylNonEmbeddeD.theDynkinType.ToString()== "A^{2}_1" && other.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{2}_1+A^{1}_1");
 //  if (doDebug)
@@ -5404,7 +5417,6 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       return false;
     }
   Incrementable<SelectionFixedRank> selectedTypes;
-  Incrementable<SelectionWithMaxMultiplicity> selectedOuterAutos;
   List<DynkinSimpleType> isoTypes;
   SelectionFixedRank currentTypeSelection;
   SelectionWithMaxMultiplicity outerIsoSelector;
@@ -5416,65 +5428,34 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     if (!ratMult.IsSmallInteger(&intMult))
       return false;
     currentTypeSelection.SetNumItemsAndDesiredSubsetSize(intMult, theHsByType[i].size);
-    if (isoTypes[i].theLetter=='A' && isoTypes[i].theRank>1)
-      outerIsoSelector.initMaxMultiplicity(intMult, 1);
-    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank==4)
-      outerIsoSelector.initMaxMultiplicity(intMult, 5);
-    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank>4)
-      outerIsoSelector.initMaxMultiplicity(intMult, 1);
-    else if (isoTypes[i].theLetter=='D' && isoTypes[i].theRank==6)
-      outerIsoSelector.initMaxMultiplicity(intMult, 1);
-    else
-      outerIsoSelector.initMaxMultiplicity(intMult, 0);
     selectedTypes.theElements.AddOnTop(currentTypeSelection);
-    selectedOuterAutos.theElements.AddOnTop(outerIsoSelector);
   }
+  FinitelyGeneratedMatrixMonoid<Rational> theOuterAutos;
+  this->theWeylNonEmbeddeD.theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theOuterAutos.theGenerators);
+  for (int i=0; i<theOuterAutos.theGenerators.size; i++)
+    theOuterAutos.theGenerators[i].Transpose();
+  bool mustBeTrue=theOuterAutos.GenerateElements(100000);
+  if (!mustBeTrue)
+    crash << "Failed to generate outer automorphisms of Dynkin simple type. The upper limit for such automorphism group size is 100000" << crash;
   Rational numCyclesFromTypes=selectedTypes.GetNumTotalCombinations();
-  Rational numCyclesFromOuterIsos=selectedOuterAutos.GetNumTotalCombinations();
-  int intNumCyclesFromTypes, intNumCyclesFromOuterIsos;
-  if (!numCyclesFromTypes.IsSmallInteger(&intNumCyclesFromTypes) || !numCyclesFromOuterIsos.IsSmallInteger(&intNumCyclesFromOuterIsos))
+  if (!numCyclesFromTypes.IsSmallInteger())
     crash << "Computation is too large: I am crashing to let you know that the program cannot handle such a large number of outer automorphisms" << crash;
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
-  Matrix<Rational> currentOuterAuto;
-  // if (doDebug)
-  //   std::cout << "<br>Num combinations: " << selectedTypes.GetNumTotalCombinations().ToString()
-  //    << " type selections  times " << selectedOuterAutos.GetNumTotalCombinations().ToString()
-  //    << " outer autos.";
-  int counter=0;
-  /*if (doDebug)
-    do
-    { counter++;
-      std::cout << "<br>Testing combination " << counter << " out of "
-      << selectedTypes.GetNumTotalCombinations().ToString();
-      std::cout << "; the combination: " << selectedTypes.ToString();
-      if (counter>1000)
-        crash << crash;
-    } while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
-  counter=0;*/
-
   do
-    do
-    { counter++;
-      //if (counter>1000)
-      // crash << crash;
-      //std::cout << "<br>Checking combination " << counter << " out of "
-      //<< (selectedTypes.GetNumTotalCombinations()*selectedOuterAutos.GetNumTotalCombinations()).ToString();
-      conjugationCandidates.SetSize(0);
+    for (int k=0; k<theOuterAutos.theElements.size; k++)
+    { conjugationCandidates.SetSize(0);
       for (int i=0; i<selectedTypes.theElements.size; i++)
       { Selection& currentSel=selectedTypes.theElements[i].theSelection;
-        SelectionWithMaxMultiplicity& currentOuterSelector= selectedOuterAutos.theElements[i];
         for (int j=0; j<currentSel.CardinalitySelection; j++)
         { currentComponent= theHsByType[i][currentSel.elements[j]];
-          isoTypes[i].GetAutomorphismActingOnVectorROWSwhichStandOnTheRight
-          (currentOuterAuto, currentOuterSelector.Multiplicities[j]);
-          currentOuterAuto.ActOnVectorROWSOnTheLeft(currentComponent);
+          theOuterAutos.theElements[k].ActOnVectorsColumn(currentComponent);
           conjugationCandidates.AddListOnTop(currentComponent);
         }
       }
       if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
-    } while(selectedOuterAutos.IncrementReturnFalseIfBackToBeginning());
+    }
   while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
   return false;
 }

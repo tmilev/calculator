@@ -3,7 +3,7 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf6_05cpp(__FILE__, "Calculator core evaluation engine. ");
 
-StackMaintainerRules::StackMaintainerRules(CommandList* inputBoss)
+StackMaintainerRules::StackMaintainerRules(Calculator* inputBoss)
 { this->theBoss=inputBoss;
   if (this->theBoss!=0)
     this->startingRuleStackSize=inputBoss->RuleStack.size;
@@ -15,8 +15,8 @@ StackMaintainerRules::~StackMaintainerRules()
   this->theBoss=0;
 }
 
-std::string CommandList::ToStringFunctionHandlers()
-{ MacroRegisterFunctionWithName("CommandList::ToStringFunctionHandlers");
+std::string Calculator::ToStringFunctionHandlers()
+{ MacroRegisterFunctionWithName("Calculator::ToStringFunctionHandlers");
   std::stringstream out;
   int numOpsHandled=0;
   int numHandlers=0;
@@ -63,8 +63,8 @@ std::string CommandList::ToStringFunctionHandlers()
   return out.str();
 }
 
-bool CommandList::outerStandardFunction(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerStandardFunction");
+bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::outerStandardFunction");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsLisT())
@@ -125,8 +125,8 @@ bool CommandList::outerStandardFunction(CommandList& theCommands, const Expressi
   return false;
 }
 
-bool CommandList::ExpressionMatchesPattern(const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog)
-{ MacroRegisterFunctionWithName("CommandList::ExpressionMatchesPattern");
+bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions, std::stringstream* theLog)
+{ MacroRegisterFunctionWithName("Calculator::ExpressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (!(thePattern.theBoss==this && input.theBoss==this))
@@ -179,9 +179,9 @@ bool CommandList::ExpressionMatchesPattern(const Expression& thePattern, const E
   return true;
 }
 
-bool CommandList::EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree)
+bool Calculator::EvaluateExpression(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs, bool& outputIsFree)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::EvaluateExpression");
+  MacroRegisterFunctionWithName("Calculator::EvaluateExpression");
   if (this->flagLogFullTreeCrunching && this->RecursionDeptH<3)
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
@@ -363,9 +363,9 @@ bool CommandList::EvaluateExpression(const Expression& input, Expression& output
   return true;
 }
 
-Expression* CommandList::PatternMatch
+Expression* Calculator::PatternMatch
 (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, const Expression* condition, std::stringstream* theLog, bool logAttempts)
-{ MacroRegisterFunctionWithName("CommandList::PatternMatch");
+{ MacroRegisterFunctionWithName("Calculator::PatternMatch");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
@@ -403,8 +403,8 @@ Expression* CommandList::PatternMatch
   return 0;
 }
 
-void CommandList::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
-{ MacroRegisterFunctionWithName("CommandList::SpecializeBoundVars");
+void Calculator::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
+{ MacroRegisterFunctionWithName("Calculator::SpecializeBoundVars");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
   { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn);
@@ -423,9 +423,9 @@ void CommandList::SpecializeBoundVars(Expression& toBeSubbedIn, BoundVariablesSu
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
 }
 
-bool CommandList::ProcessOneExpressionOnePatternOneSub
+bool Calculator::ProcessOneExpressionOnePatternOneSub
 (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog, bool logAttempts)
-{ MacroRegisterFunctionWithName("CommandList::ProcessOneExpressionOnePatternOneSub");
+{ MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (!thePattern.IsListNElementsStartingWithAtom(this->opDefine(), 3) && !thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4))
     return false;
@@ -454,9 +454,9 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   return true;
 }
 
-bool CommandList::ParseAndExtractExpressions
+bool Calculator::ParseAndExtractExpressions
 (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup, List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
-{ MacroRegisterFunctionWithName("CommandList::ParseAndExtractExpressions");
+{ MacroRegisterFunctionWithName("Calculator::ParseAndExtractExpressions");
   this->CurrentSyntacticStacK=&outputSynStack;
   this->CurrrentSyntacticSouP=&outputSynSoup;
   this->ParseFillDictionary(theInputString);
@@ -466,8 +466,8 @@ bool CommandList::ParseAndExtractExpressions
   return result;
 }
 
-void CommandList::Evaluate(const std::string& theInput)
-{ MacroRegisterFunctionWithName("CommandList::Evaluate");
+void Calculator::Evaluate(const std::string& theInput)
+{ MacroRegisterFunctionWithName("Calculator::Evaluate");
   if (this->theGlobalVariableS==0)
   { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
     return;
@@ -478,8 +478,8 @@ void CommandList::Evaluate(const std::string& theInput)
   this->EvaluateCommands();
 }
 
-void CommandList::EvaluateCommands()
-{ MacroRegisterFunctionWithName("CommandList::EvaluateCommands");
+void Calculator::EvaluateCommands()
+{ MacroRegisterFunctionWithName("Calculator::EvaluateCommands");
   std::stringstream out;
   BoundVariablesSubstitution thePairs;
 

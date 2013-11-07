@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfHeader_HeaderModulesSSLielgebras
-#define vpfHeader_HeaderModulesSSLielgebras
+#ifndef vpfHeader_HeaderModulesSSLiealgebras
+#define vpfHeader_HeaderModulesSSLiealgebras
 #include "vpfHeader2Math0_General.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeaderModulesSSLielgebras(__FILE__, "Header, generalized Verma modules. ");

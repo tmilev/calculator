@@ -78,6 +78,7 @@
 		<Unit filename="vpfHeader2Math4_Graph.h" />
 		<Unit filename="vpfHeader2Math5_SubsetsSelections.h" />
 		<Unit filename="vpfHeader2Math6_ModulesSSLieAlgebras.h" />
+		<Unit filename="vpfHeader2Math7FinitelyGeneratedMatrixGroups.h" />
 		<Unit filename="vpfHeader3Calculator0_Interface.h" />
 		<Unit filename="vpfHeader3Calculator1_InnerTypedFunctions.h" />
 		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />

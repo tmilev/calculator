@@ -5,79 +5,79 @@
 
 static ProjectInformationInstance ProjectInfoVpf6_1Header(__FILE__, "Header, calculator inner binary typed functions. ");
 
-class CommandListInnerTypedFunctions
+class CalculatorFunctionsBinaryOps
 {
 public:
   template <class theType>
-  static bool innerMultiplyTypeByType(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output);
   template <class theType>
-  static bool innerAddTypeToType(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output);
   template <class theType>
-  static bool innerDivideTypeByType(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerAddDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddUEToAny(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddEltTensorToEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatOrPolyToRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddAlgNumPolyToAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddPlotToPlot(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddSequenceToSequence(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddMatrixRationalToMatrixRational(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddMatrixTensorToMatrixTensor(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddRatToRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddEltZmodPorRatToEltZmodPorRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerAddAlgebraicNumberToAlgebraicNumber(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerAddDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyOrEWAToRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddRatOrPolyToRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddAlgNumPolyToAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddMatrixRationalToMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddMatrixTensorToMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAlgNumPolyByAlgNumPoly(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatOrPolyByRatOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyLRObyLRO(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyLRObyLSPath(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRationalBySequence(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplySequenceByRational(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixSequenceByMatrixSequence(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyDoubleOrRatByDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCoxeterEltByCoxeterElt(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCharacterByCharacter(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByUE(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyAnyByEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAlgNumPolyByAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyByRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRationalBySequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplySequenceByRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixSequenceByMatrixSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyDoubleOrRatByDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyCoxeterEltByCoxeterElt(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyCharacterByCharacter(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerLieBracketRatOrUEWithRatOrUE(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerDivideRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDivideDoubleByDouble(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerDivideRFOrPolyOrRatByRFOrPoly(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideDoubleByDouble(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerPowerRatByRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerAlgNumPolyBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerAlgebraicNumberBySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerEWABySmallInteger(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerElementUEbyRatOrPolyOrRF(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerDoubleOrRatToDoubleOrRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerPowerSequenceByT(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerAlgebraicNumberBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerEWABySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerSequenceByT(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerNChooseK(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerTensorEltTensorByEltTensor(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerTensorMatRatByMatRat(CommandList& theCommands, const Expression& input, Expression& output);
-  static bool innerTensorMatByMatTensor(CommandList& theCommands, const Expression& input, Expression& output);
+  static bool innerTensorEltTensorByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTensorMatRatByMatRat(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTensorMatByMatTensor(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerMultiplyTypeByType(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerMultiplyTypeByType");
+bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyTypeByType");
   if (input.children.size!=3)
     return false;
   Expression inputContextsMerged;
@@ -90,8 +90,8 @@ bool CommandListInnerTypedFunctions::innerMultiplyTypeByType(CommandList& theCom
 }
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerAddTypeToType(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
+bool CalculatorFunctionsBinaryOps::innerAddTypeToType(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.children.size!=3)
     return false;
   Expression inputContextsMerged;
@@ -103,8 +103,8 @@ bool CommandListInnerTypedFunctions::innerAddTypeToType(CommandList& theCommands
 }
 
 template <class theType>
-bool CommandListInnerTypedFunctions::innerDivideTypeByType(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandListInnerTypedFunctions::innerAddTypeToType");
+bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddTypeToType");
   if (input.children.size!=3)
     return false;
   Expression inputContextsMerged;

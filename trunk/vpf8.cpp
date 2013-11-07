@@ -21,7 +21,7 @@ void LargeIntUnsigned::AssignString(const std::string& input)
     if (whichDigit>9 || whichDigit<0)
       crash << "This is a programming error: LargeIntUnsigned::AssignString" << " called on the string " << input
       << " which does not consist entirely of digits. Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
-      << " internal use only. If you want to parse arbitrary unsafe expressions coming from the user, please use the big gun (a.k.a. CommandList). "
+      << " internal use only. If you want to parse arbitrary unsafe expressions coming from the user, please use the big gun (a.k.a. Calculator). "
       << crash;
     this->operator+=((unsigned) whichDigit);
   }
@@ -1252,8 +1252,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
     this->projectivizedChambeR.AddOnTop(tempList[i]);
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDynkinString
-(int indexComponent, const Matrix<Rational>& theBilinearForm)
+void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDynkinString");
   if(indexComponent>=this->SimpleBasesConnectedComponents.size)
     crash << crash;
@@ -1306,7 +1305,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents[i]);
     Rational theCoRootLength=4;
     theCoRootLength/=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
-    if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
+    if (indicesLongComponents.size==1 || indicesLongComponents.size==0)
       outputType.MakeArbitrary('D', currentComponent.size, theCoRootLength);
     else
       outputType.MakeArbitrary('E', currentComponent.size, theCoRootLength);

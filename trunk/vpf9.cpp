@@ -3706,55 +3706,53 @@ void DynkinType::GetTypesWithMults(List<DynkinSimpleType>& output)const
   }
 }
 
-void DynkinType::GetOuterAutosGeneratorsOneType(List<Matrix<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)const
-{ MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGeneratorsOneType");
+void DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn(List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity)
+{ MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn");
   output.SetSize(0);
-  Matrix<Rational> tempMat, finalMat;
+  MatrixTensor<Rational> directSummand, finalMat;
   if (theType.theLetter=='D' || (theType.theLetter=='A'&& theType.theRank>1) || (theType.theLetter=='E' && theType.theRank==6))
-  { tempMat.MakeIdMatrix(theType.theRank*(multiplicity-1));
+  { directSummand.MakeId(theType.theRank*(multiplicity-1));
     int numGens=1;
     if (theType.theLetter=='D' && theType.theRank==4)
       numGens=2;
     for (int i=1; i<numGens+1; i++)
-    { theType.GetAutomorphismActingOnVectorROWSwhichStandOnTheRight(finalMat, i);
-      finalMat.Transpose();
-      finalMat.DirectSumWith(tempMat);
+    { theType.GetAutomorphismActingOnVectorColumn(finalMat, i);
+      finalMat.DirectSumWith(directSummand);
       output.AddOnTop(finalMat);
     }
   }
   if (multiplicity<2)
     return;
   for (int i=0; i<multiplicity-1; i++)
-  { tempMat.init(theType.theRank*2, theType.theRank*2);
-    tempMat.NullifyAll();
+  { directSummand.MakeZero();
     for (int j=0; j<theType.theRank; j++)
-    { tempMat(j, theType.theRank+j)=1;
-      tempMat(theType.theRank+j,j)=1;
+    { directSummand.AddMonomial(MonomialMatrix(j, theType.theRank+j),1);
+      directSummand.AddMonomial(MonomialMatrix(theType.theRank+j,j),1);
     }
-    finalMat.MakeIdMatrix(i*theType.theRank);
-    finalMat.DirectSumWith(tempMat);
-    tempMat.MakeIdMatrix((multiplicity-2-i)*theType.theRank);
-    finalMat.DirectSumWith(tempMat);
+    finalMat.MakeId(i*theType.theRank);
+    finalMat.DirectSumWith(directSummand);
+    directSummand.MakeId((multiplicity-2-i)*theType.theRank);
+    finalMat.DirectSumWith(directSummand);
     output.AddOnTop(finalMat);
   }
 }
 
-void DynkinType::GetOuterAutosGenerators(List<Matrix<Rational> >& output)
+void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output)
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
   this->SortTheDynkinTypes();
 
-  List<Matrix<Rational> > intermediateGenerators;
-  Matrix<Rational> matrixFinal, matrixToGo;
+  List<MatrixTensor<Rational> > intermediateGenerators;
+  MatrixTensor<Rational> matrixFinal, matrixToGo;
   int currentMult;
   output.SetSize(0);
   int numRowsSoFar=0;
   for (int i=0; i<this->size(); i++)
   { if (!this->theCoeffs[i].IsSmallInteger(&currentMult))
       crash << crash;
-    this->GetOuterAutosGeneratorsOneType(intermediateGenerators,(*this)[i], currentMult);
-    matrixToGo.MakeIdMatrix(this->GetRank()-numRowsSoFar-currentMult*(*this)[i].theRank);
+    this->GetOuterAutosGeneratorsOneTypeActOnVectorColumn(intermediateGenerators,(*this)[i], currentMult);
+    matrixToGo.MakeId(this->GetRank()-numRowsSoFar-currentMult*(*this)[i].theRank);
     for (int j=0; j<intermediateGenerators.size; j++)
-    { matrixFinal.MakeIdMatrix(numRowsSoFar);
+    { matrixFinal.MakeId(numRowsSoFar);
       matrixFinal.DirectSumWith(intermediateGenerators[j]);
       matrixFinal.DirectSumWith(matrixToGo);
       output.AddOnTop(matrixFinal);
@@ -4764,7 +4762,7 @@ void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational*
 
 void WeylGroup::ComputeExternalAutos()
 { if (!this->flagOuterAutosComputed)
-    this->theDynkinType.GetOuterAutosGenerators(this->OuterAutomorphisms);
+    this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(this->OuterAutomorphisms);
   this->flagOuterAutosComputed=true;
 }
 

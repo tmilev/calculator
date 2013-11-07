@@ -150,7 +150,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
-bool CommandList::fWeylDimFormula(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.SetError("This function takes 2 arguments", theCommands);
@@ -177,7 +177,7 @@ bool CommandList::fWeylDimFormula(CommandList& theCommands, const Expression& in
   return output.AssignValueWithContext(tempRF, newContext, theCommands);
 }
 
-bool CommandList::fAnimateLittelmannPaths(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.SetError("This function takes 2 arguments", theCommands);
@@ -197,7 +197,7 @@ bool CommandList::fAnimateLittelmannPaths(CommandList& theCommands, const Expres
   return output.AssignValue(thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
 }
 
-void CommandList::GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat)
+void Calculator::GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat)
 { std::stringstream outMainPath, outMainDisplayPath;
   outMainPath << this->PhysicalPathOutputFolder << theType.ToString() << "/";
   outputFolderPhysical=outMainPath.str();
@@ -212,8 +212,8 @@ void CommandList::GetOutputFolders(const DynkinType& theType, std::string& outpu
   outputFormat.PathDisplayServerBaseFolder=this->DisplayPathServerBase;
 }
 
-bool CommandList::innerRootSAsAndSltwos(CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
-{ MacroRegisterFunctionWithName("CommandList::innerRootSAsAndSltwos");
+bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos)
+{ MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");
   //bool showIndicator=true;
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSS))
@@ -266,7 +266,7 @@ bool CommandList::innerRootSAsAndSltwos(CommandList& theCommands, const Expressi
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(5))
     return output.SetError("Function fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
@@ -301,7 +301,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart(CommandList
   return output.AssignValue(report, theCommands);
 }
 
-bool CommandList::innerCasimir(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSalg))
@@ -319,7 +319,7 @@ bool CommandList::innerCasimir(CommandList& theCommands, const Expression& input
   return output.AssignValueWithContext(theCasimir, contextE, theCommands);
 }
 
-bool CommandList::innerDrawWeightSupportWithMults(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))
     return output.SetError("Error: the function for drawing weight support takes two  arguments (type and highest weight)", theCommands);
@@ -346,7 +346,7 @@ bool CommandList::innerDrawWeightSupportWithMults(CommandList& theCommands, cons
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerDrawRootSystem(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   bool hasPreferredProjectionPlane= input.IsListNElements(4);
   const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
@@ -374,7 +374,7 @@ bool CommandList::innerDrawRootSystem(CommandList& theCommands, const Expression
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerDrawWeightSupport(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (!input.IsListNElements(3))
     return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
@@ -402,7 +402,7 @@ bool CommandList::innerDrawWeightSupport(CommandList& theCommands, const Express
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerEmbedG2inB3(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output)
 { output=input;
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
     return output.SetError("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
@@ -665,13 +665,13 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     *comments << out.str();
 }
 
-bool CommandList::fSplitFDpartB3overG2CharsOnly(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
 { branchingData theG2B3Data;
   return theCommands.fSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
 }
 
-bool CommandList::innerSplitFDpartB3overG2Init(CommandList& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext)
-{ MacroRegisterFunctionWithName("CommandList::innerSplitFDpartB3overG2Init");
+bool Calculator::innerSplitFDpartB3overG2Init(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext)
+{ MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2Init");
   if (!input.IsListNElements(4))
     return output.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
   //std::cout << input.ToString();
@@ -686,7 +686,7 @@ bool CommandList::innerSplitFDpartB3overG2Init(CommandList& theCommands, const E
   return true;
 }
 
-bool CommandList::fSplitFDpartB3overG2CharsOutput(CommandList& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data)
+bool Calculator::fSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data)
 { MacroRegisterFunctionWithName("fSplitFDpartB3overG2CharsOutput");
   Expression theContext(theCommands);
   theCommands.innerSplitFDpartB3overG2Init(theCommands, input, output, theG2B3Data, theContext);
@@ -708,7 +708,7 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput(CommandList& theCommands, cons
   return output.AssignValue(out.str(), theCommands);
 }
 
-void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
+void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 { SemisimpleLieAlgebra tempb3alg, tempg2alg;
   tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
   tempg2alg.theWeyl.MakeArbitrarySimple('G',2);
@@ -739,8 +739,8 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
 }
 
-bool CommandList::fPrintB3G2branchingIntermediate(CommandList& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
-{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingIntermediate");
+bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
+{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
   bool isFD=(theG2B3Data.selInducing.CardinalitySelection==0);
@@ -910,9 +910,9 @@ bool CommandList::fPrintB3G2branchingIntermediate(CommandList& theCommands, cons
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fPrintB3G2branchingTableInit
-(CommandList& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
-{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableInit");
+bool Calculator::fPrintB3G2branchingTableInit
+(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
+{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableInit");
   if (input.children.size!=3)
     return output.SetError("I need two arguments: first is height, second is parabolic selection. ", theCommands);
   desiredHeight=0;
@@ -927,8 +927,8 @@ bool CommandList::fPrintB3G2branchingTableInit
   return false;
 }
 
-bool CommandList::fPrintB3G2branchingTable(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTable");
+bool Calculator::fPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTable");
   Vectors<RationalFunctionOld> theHWs;
   branchingData theG2B3Data;
   Expression theContext(theCommands);
@@ -940,9 +940,9 @@ bool CommandList::fPrintB3G2branchingTable(CommandList& theCommands, const Expre
   return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
-bool CommandList::fPrintB3G2branchingTableCommon
-(CommandList& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext)
-{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCommon");
+bool Calculator::fPrintB3G2branchingTableCommon
+(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext)
+{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableCommon");
   std::stringstream out, timeReport;
   Vector<Rational> theHW;
   Vector<RationalFunctionOld> theHWrf;
@@ -971,8 +971,8 @@ bool CommandList::fPrintB3G2branchingTableCommon
   return true;
 }
 
-bool CommandList::fPrintB3G2branchingTableCharsOnly(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCharsOnly");
+bool Calculator::fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableCharsOnly");
   branchingData theg2b3data;
   Expression theContext(theCommands);
   Vectors<RationalFunctionOld> theHWs;
@@ -1089,8 +1089,8 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly(CommandList& theCommands, co
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fSplitFDpartB3overG2(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2");
+bool Calculator::fSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2");
   branchingData theG2B3Data;
   Expression theContext(theCommands);
   theCommands.innerSplitFDpartB3overG2Init(theCommands, input, output, theG2B3Data, theContext);
@@ -1102,8 +1102,8 @@ bool CommandList::fSplitFDpartB3overG2(CommandList& theCommands, const Expressio
   return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
-bool CommandList::fSplitFDpartB3overG2old(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2old");
+bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2old");
   branchingData theG2B3Data;
   theCommands.fSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
   if (output.IsError())
@@ -1186,8 +1186,8 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(ElementUniversal
   return true;
 }
 
-bool CommandList::fSplitFDpartB3overG2inner(CommandList& theCommands, branchingData& theG2B3Data, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2inner");
+bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
@@ -1500,7 +1500,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   return true;
 }
 
-bool CommandList::fJacobiSymbol(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fJacobiSymbol(Calculator& theCommands, const Expression& input, Expression& output)
 { //this function is not implemented yet.
   return false;
   if (input.children.size!=3)
@@ -1514,7 +1514,7 @@ bool CommandList::fJacobiSymbol(CommandList& theCommands, const Expression& inpu
   return true;
 }
 
-bool CommandList::fParabolicWeylGroups(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   SemisimpleLieAlgebra* theSSPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSPointer))
@@ -1530,8 +1530,8 @@ bool CommandList::fParabolicWeylGroups(CommandList& theCommands, const Expressio
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fParabolicWeylGroupsBruhatGraph");
+bool Calculator::fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fParabolicWeylGroupsBruhatGraph");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   Selection parabolicSel;
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
@@ -1638,8 +1638,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph(CommandList& theCommands, cons
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fPrintAllPartitions(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fPrintAllPartitions");
+bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fPrintAllPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.SetError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
@@ -1724,8 +1724,8 @@ void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rationa
   outputHighestWeightsFundCoords=output;
 }
 
-bool CommandList::fTestMonomialBaseConjecture(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fTestMonomialBaseConjecture");
+bool Calculator::fTestMonomialBaseConjecture(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
     return output.SetError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
@@ -1877,8 +1877,8 @@ bool CommandList::fTestMonomialBaseConjecture(CommandList& theCommands, const Ex
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fLittelmannOperator(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fLittelmannOperator");
+bool Calculator::fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::fLittelmannOperator");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (input.HasBoundVariables())
     return false;
@@ -1890,9 +1890,9 @@ bool CommandList::fLittelmannOperator(CommandList& theCommands, const Expression
   return output.AssignValue(theIndex, theCommands);
 }
 
-bool CommandList::fLSPath(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::fLSPath");
+  MacroRegisterFunctionWithName("Calculator::fLSPath");
   if (input.children.size<3)
     return output.SetError("LSPath needs at least two arguments.", theCommands);
   SemisimpleLieAlgebra* theSSowner;
@@ -1911,7 +1911,7 @@ bool CommandList::fLSPath(CommandList& theCommands, const Expression& input, Exp
   return output.AssignValue(theLSpath, theCommands);
 }
 
-bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> mat, outputMat, tempMat;
   if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
     return output.SetError
@@ -1986,7 +1986,7 @@ bool CommandList::innerInvertMatrix(CommandList& theCommands, const Expression& 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fDifferential(CommandList& theCommands, const Expression& input, Expression& output)
+bool Calculator::fDifferential(Calculator& theCommands, const Expression& input, Expression& output)
 { return false;
   /* if (!theExpression.EvaluatesToAtom())
     if (!theCommands.CallCalculatorFunction
@@ -2223,8 +2223,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   return true;
 }
 
-bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerFactorPoly");
+bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   //std::cout << "here I am .";
   if (!theCommands.CallCalculatorFunction(Serialization::innerPolynomial<Rational>, input, output))
@@ -2256,8 +2256,8 @@ bool CommandList::innerFactorPoly(CommandList& theCommands, const Expression& in
   return true;
 }
 
-bool CommandList::innerZmodP(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerZmodP");
+bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerZmodP");
   if (!input.IsListNElements(3))
     return false;
   Rational left, right;
@@ -2278,8 +2278,8 @@ bool CommandList::innerZmodP(CommandList& theCommands, const Expression& input, 
   return output.AssignValue(outputElt, theCommands);
 }
 
-bool CommandList::innerDouble(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerDouble");
+bool Calculator::innerDouble(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerDouble");
   Rational ratValue;
   if (input.IsOfType<double>())
   { output=input;
@@ -2292,8 +2292,8 @@ bool CommandList::innerDouble(CommandList& theCommands, const Expression& input,
   return output.AssignValue(ratValue.DoubleValue(), theCommands);
 }
 
-bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerSqrt");
+bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.children.size!=3)
     return false;
   int thePower;
@@ -2317,8 +2317,8 @@ bool CommandList::innerSqrt(CommandList& theCommands, const Expression& input, E
   return output.AssignValue(theNumber, theCommands);
 }
 
-bool CommandList::innerInterpolatePoly(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerInterpolatePoly");
+bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerInterpolatePoly");
   Matrix<Rational> pointsOfInterpoly;
   if (!theCommands.GetMatriXFromArguments(input, pointsOfInterpoly, 0, 2))
   { theCommands.Comments << "<hr>Failed to extract points of interpolation from " << input.ToString();
@@ -2334,8 +2334,8 @@ bool CommandList::innerInterpolatePoly(CommandList& theCommands, const Expressio
   return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 
-bool CommandList::innerPrintZnEnumeration(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPrintZnEnumeration");
+bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPrintZnEnumeration");
   if (!input.IsListNElements(3))
     return false;
   int grade, dimension;
@@ -2356,7 +2356,7 @@ bool CommandList::innerPrintZnEnumeration(CommandList& theCommands, const Expres
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, CommandList& owner)
+bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner)
 { this->reset(owner, input.NumRows+1);
   this->AddChildAtomOnTop(owner.opSequence());
   Expression currentRow;
@@ -2373,7 +2373,7 @@ bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Comman
   return true;
 }
 
-bool CommandList::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
+bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
 { if (!input.IsSequenceNElementS())
   { output.init(1,1);
     output(0,0)=input;
@@ -2407,8 +2407,8 @@ bool CommandList::GetMatrixExpressions(const Expression& input, Matrix<Expressio
   return true;
 }
 
-bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& input, Expression& output, bool assignPoly)
-{ MacroRegisterFunctionWithName("CommandList::innerEWAorPoly");
+bool Calculator::innerEWAorPoly(Calculator& theCommands, const Expression& input, Expression& output, bool assignPoly)
+{ MacroRegisterFunctionWithName("Calculator::innerEWAorPoly");
   if (!input.IsListNElements(3))
     return false;
   //const Expression& diffE=input[1];
@@ -2436,8 +2436,8 @@ bool CommandList::innerEWAorPoly(CommandList& theCommands, const Expression& inp
   return output.AssignValueWithContext(outputEWA, endContext, theCommands);
 }
 
-bool CommandList::ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults)
-{ MacroRegisterFunctionWithName("CommandList::ReadTestStrings");
+bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashString>& outputCommands, List<std::string>& outputResults)
+{ MacroRegisterFunctionWithName("Calculator::ReadTestStrings");
   XML theFileReader;
   if (!theFileReader.ReadFromFile(this->theTestFile))
     return false;
@@ -2464,15 +2464,15 @@ bool CommandList::ReadTestStrings(HashedList<std::string, MathRoutines::hashStri
   return true;
 }
 
-bool CommandList::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults)
-{ MacroRegisterFunctionWithName("CommandList::WriteTestStrings");
+bool Calculator::WriteTestStrings(List<std::string>& inputCommands, List<std::string>& inputResults)
+{ MacroRegisterFunctionWithName("Calculator::WriteTestStrings");
   for (int i=0; i<inputCommands.size; i++)
     this->theTestFile << "<input>" << inputCommands[i] << "</input>" << "<output>" << inputResults[i] << "</output>\n\n";
   return true;
 }
 
-bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTestSetKnownGoodCopy");
+bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerAutomatedTestSetKnownGoodCopy");
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
@@ -2486,8 +2486,8 @@ bool CommandList::innerAutomatedTestSetKnownGoodCopy(CommandList& theCommands, c
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerAutomatedTest");
+bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
@@ -2553,7 +2553,7 @@ bool CommandList::innerAutomatedTest(CommandList& theCommands, const Expression&
   return output.AssignValue(out.str(), theCommands);
 }
 
-int CommandList::GetNumBuiltInFunctions()
+int Calculator::GetNumBuiltInFunctions()
 { int result=0;
   for (int i=0; i<this->FunctionHandlers.size; i++)
     result+=this->FunctionHandlers[i].size;
@@ -2562,18 +2562,18 @@ int CommandList::GetNumBuiltInFunctions()
   return result;
 }
 
-void CommandList::AutomatedTestRun
+void Calculator::AutomatedTestRun
 (List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit)
-{ MacroRegisterFunctionWithName("CommandList::AutomatedTestRun");
-  CommandList theTester;
+{ MacroRegisterFunctionWithName("Calculator::AutomatedTestRun");
+  Calculator theTester;
   int numFunctionsToTest=this->GetNumBuiltInFunctions();
   outputCommandStrings.SetExpectedSize(numFunctionsToTest);
   outputCommandStrings.SetSize(0);
   for (int i=0; i<this->FunctionHandlers.size; i++)
     for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      if (this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTest &&
-          this->FunctionHandlers[i][j].theFunction!=CommandList::innerAutomatedTestSetKnownGoodCopy &&
-          this->FunctionHandlers[i][j].theFunction!=CommandList::innerCrash)
+      if (this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTest &&
+          this->FunctionHandlers[i][j].theFunction!=Calculator::innerAutomatedTestSetKnownGoodCopy &&
+          this->FunctionHandlers[i][j].theFunction!=Calculator::innerCrash)
         outputCommandStrings.AddOnTop(this->FunctionHandlers[i][j].theExample);
   for (int i=0; i<this->operationsCompositeHandlers.size; i++)
     for (int j=0; j<this->operationsCompositeHandlers[i].size; j++)

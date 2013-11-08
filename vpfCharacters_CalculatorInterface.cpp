@@ -837,7 +837,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTable(Calculator& 
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calculator& theCommands, const Expression& input, Expression& output)
-{ DynkinType theType;
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint");
+  DynkinType theType;
   if (!Serialization::innerLoadDynkinType(theCommands, input, theType))
     return output.SetError("Failed to extract Dynkin type from argument. ", theCommands);
   std::stringstream out, outCommand;
@@ -847,8 +848,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
   for (int i=0; i<groupGeneratedByMatrices.theGenerators.size; i++)
-  { outCommand << "<br>s_{" << i+1 << "}:=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToString(&tempFormat) << ";";
-    out << "<br>s_" << i+1 << " = " << CGI::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToString(&tempFormat) );
+  { outCommand << "<br>s_{" << i+1 << "}:=MatrixRationals" << groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) << ";";
+    out << "<br>s_" << i+1 << " = " << CGI::GetMathSpanPure(groupGeneratedByMatrices.theGenerators[i].ToStringMatForm(&tempFormat) );
   }
   outCommand << "<br>GenerateFiniteMultiplicativelyClosedSet(1000, ";
   for (int i=0; i<groupGeneratedByMatrices.theGenerators.size; i++)
@@ -871,8 +872,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOuterAutoGeneratorsPrint(Calcul
       { std::stringstream elementNameStream;
         elementNameStream << "t_" << i+1;
         out << "<tr><td>" << CGI::GetMathMouseHover(elementNameStream.str())<< "</td><td>"
-        << CGI::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToString(&tempFormat)) << "</td>";
+        << CGI::GetMathMouseHover(groupGeneratedByMatrices.theElements[i].ToStringMatForm(&tempFormat)) << "</td></tr>";
       }
+      out << "</table>";
     }
   }
   return output.AssignValue(out.str(), theCommands);

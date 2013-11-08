@@ -5154,11 +5154,11 @@ std::string CGI::GetHtmlButton(const std::string& buttonID, const std::string& t
 
 std::string CGI::GetHtmlSpanHidableStartsHiddeN(const std::string& input)
 { std::stringstream out;
-  CGI::GlobalFormulaIdentifier ++;
+  CGI::GlobalGeneralPurposeID ++;
   std::stringstream buttonLabel;
   std::stringstream spanLabel;
-  spanLabel << "hidableSpan" << CGI::GlobalFormulaIdentifier;
-  buttonLabel << "button" << CGI::GlobalFormulaIdentifier;
+  spanLabel << "hidableSpan" << CGI::GlobalGeneralPurposeID;
+  buttonLabel << "buttonHS" << CGI::GlobalGeneralPurposeID;
   out << CGI::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", "info expand/collapse");
   out << "<span";
   out << " id=\"" << spanLabel.str() << "\" style=\"display: none\">";

@@ -290,7 +290,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ToString");
-  CGI::GlobalFormulaIdentifier=0;
+  CGI::GlobalMathSpanID=0;
   bool writingToHD=theFormat==0? false: theFormat->flagUseHtmlAndStoreToHD;
   std::stringstream out;
   int candidatesRealized=0;
@@ -867,9 +867,8 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
       } else
         crash << "This is a programming error: requesting triality automorphism with index not in the range 0-5. " << crash;
     } else
-    { output.MakeId(this->theRank);
-      output.AddMonomial(MonomialMatrix(this->theRank-1, this->theRank-1),0);
-      output.AddMonomial(MonomialMatrix(this->theRank-2, this->theRank-2),0);
+    { for (int i=0; i<this->theRank-2; i++)
+        output.AddMonomial(MonomialMatrix(i,i), 1);
       output.AddMonomial(MonomialMatrix(this->theRank-1, this->theRank-2),1);
       output.AddMonomial(MonomialMatrix(this->theRank-2, this->theRank-1),1);
     }
@@ -888,8 +887,13 @@ void DynkinSimpleType::GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational
   }
   Rational tempRat=output.GetDeterminant();
   if (tempRat!=1 && tempRat!=-1)
+  { FormatExpressions theFormat;
+    theFormat.flagUseHTML=false;
+    theFormat.flagUseLatex=true;
     crash << "This is a programming error: the determinant of the automorphism matrix of the Dynkin graph must be +/-1, it is instead "
-    << tempRat.ToString() << ". " << crash;
+    << tempRat.ToString() << ". The auto matrix is: " << CGI::GetMathMouseHover(output.ToStringMatForm(&theFormat)) << " and the dynkin type is: "
+    << this->ToString() << "." << crash;
+  }
 }
 
 DynkinSimpleType DynkinType::GetSmallestSimpleType()const
@@ -914,7 +918,8 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
 
 template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
-{ this->ComputeExternalAutos();
+{ MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
+  this->ComputeExternalAutos();
   output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots[i]);
@@ -934,8 +939,9 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
       tempEW=outputSubset->TheObjects[i];
     for (int j=0; j<numGens; j++)
     { if(j<this->GetDim())
+      { currentRoot=output[i];
         this->SimpleReflection(j, currentRoot);
-      else
+      } else
         this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)

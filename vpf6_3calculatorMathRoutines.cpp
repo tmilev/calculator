@@ -1217,6 +1217,7 @@ bool Calculator::innerEvaluateToDouble(Calculator& theCommands, const Expression
 bool CalculatorFunctionsGeneral::innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestMathMouseHover");
   std::stringstream out;
-  out << CGI::GetMathMouseHover(input.ToString());
+  out << "Hover mouse to render: " << CGI::GetMathMouseHover(input.ToString());
+//  out << "<br>Directly rendered: " << CGI::GetMathSpanPure(input.ToString());
   return output.AssignValue(out.str(), theCommands);
 }

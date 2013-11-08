@@ -6786,7 +6786,7 @@ public:
       this->ActOnVectorColumn(inputCopy, output);
       return;
     }
-    output.MakeZero(input.size);
+    output.MakeZero(this->GetMaxNumRows());
     otherType currentCF;
     for (int i=0; i<this->size(); i++)
     { //note that, at the cost of one extra implicit conversion below, we preserve the order of multiplication:

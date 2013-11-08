@@ -1110,7 +1110,9 @@ struct CGI
 {
 public:
   static std::stringstream outputStream;
-  static int GlobalFormulaIdentifier;
+  static int GlobalMathSpanID;
+  static int GlobalCanvasID;
+  static int GlobalGeneralPurposeID;
   static int numLinesAll;
   static int numRegularLines;
   static int numDashedLines;

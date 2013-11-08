@@ -894,8 +894,10 @@ std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
     return out.str();
   }
   std::stringstream idSpanStream;
-  CGI::GlobalFormulaIdentifier++;
-  idSpanStream << "mathFormula" << CGI::GlobalFormulaIdentifier;
+  CGI::GlobalMathSpanID++;
+  if (CGI::GlobalMathSpanID==1)
+    out << "<span class=\"math\"></span>"; //<- empty math spann class forces jsMath to load.
+  idSpanStream << "mathFormula" << CGI::GlobalMathSpanID;
   std::string containterString="container"+idSpanStream.str();
   out << "<span id=\"" << containterString << "\">"  << "<span id=\"" << idSpanStream.str()
   << "\" onmouseover=\"if (document.getElementById('" << containterString << "').className=='math') return; "

@@ -29,12 +29,14 @@ Rational PartFraction::CheckSum;
 Rational PartFraction::CheckSum2;
 int DrawingVariables::NumHtmlGraphics=0;
 
-int CGI::GlobalFormulaIdentifier=0;
+int CGI::GlobalMathSpanID=0;
+int CGI::GlobalCanvasID=0;
+int CGI::GlobalGeneralPurposeID=0;
 
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
 
-template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
+template < > bool CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
 
 template <class ElementLeft, class ElementRight, class coefficient>
@@ -4762,7 +4764,13 @@ void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational*
 
 void WeylGroup::ComputeExternalAutos()
 { if (!this->flagOuterAutosComputed)
-    this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(this->OuterAutomorphisms);
+  { this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(this->OuterAutomorphisms);
+    for (int i=0; i<this->OuterAutomorphisms.size; i++)
+      if (this->OuterAutomorphisms[i].GetMaxNumColsNumRows()!=this->GetDim() || this->OuterAutomorphisms[i].GetMaxNumCols()!=this->GetDim() ||
+          this->OuterAutomorphisms[i].GetMaxNumRows()!=this->GetDim() )
+      { crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
+      }
+  }
   this->flagOuterAutosComputed=true;
 }
 

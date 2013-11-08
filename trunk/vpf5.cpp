@@ -425,11 +425,11 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
 
 std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
 { std::stringstream out;
-  CGI::GlobalFormulaIdentifier++;
+  CGI::GlobalGeneralPurposeID++;
   std::stringstream idStringStream;
   idStringStream << desiredID;
   if (desiredID=="")
-    idStringStream << "UnnamedSpan" << CGI::GlobalFormulaIdentifier;
+    idStringStream << "UnnamedSpan" << CGI::GlobalGeneralPurposeID;
   out << "<a href=\"javascript:;\" onmusedown=\"document.getElementById('"  << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
   out << "<span id=\"" << idStringStream.str() << "\" style=\"display:none\">" << content << "</span>";
   return out.str();

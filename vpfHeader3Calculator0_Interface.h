@@ -325,6 +325,7 @@ class Expression
   bool MakeEmptyContext(Calculator& owner);
   std::string Lispify()const;
   bool ToStringData(std::string& output, FormatExpressions* theFormat=0)const;
+  std::string ToStringSemiFull()const;
   std::string ToStringFull()const;
   std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0, Expression* Context=0)const;
   static unsigned int HashFunction(const Expression& input)

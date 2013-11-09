@@ -69,6 +69,8 @@ public:
 
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

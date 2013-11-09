@@ -318,8 +318,8 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
-        this->Comments << CGI::GetMathSpanPure(output.ToString()) << "  ->  " << CGI::GetMathSpanPure(tempE.ToString())
-        << "<br>" << output.ToStringFull() << "  ->  " << tempE.ToStringFull();
+        this->Comments << CGI::GetMathMouseHover(output.ToString()) << "  ->  " << CGI::GetMathMouseHover(tempE.ToString())
+        << "<br>" << output.ToStringSemiFull() << "  ->  " << tempE.ToStringSemiFull();
       output=tempE;
       continue;
     }
@@ -344,7 +344,7 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
       { ReductionOcurred=true;
         if (this->flagLogEvaluatioN)
           this->Comments << CGI::GetMathSpanPure(beforePatternMatch.ToString()) << "  ->  "
-          << CGI::GetMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringFull() << "  ->  " << output.ToStringFull();
+          << CGI::GetMathSpanPure(output.ToString()) << "<br>" << beforePatternMatch.ToStringSemiFull() << "  ->  " << output.ToStringSemiFull();
         break;
       }
     }

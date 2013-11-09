@@ -1,7 +1,7 @@
 #include "vpfJson.h"
 
 #include <sys/stat.h>
-
+#include <cassert>
 
 void JSData::operator=(const bool other)
 { this->type = JSBOOL;

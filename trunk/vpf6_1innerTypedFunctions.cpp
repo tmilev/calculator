@@ -18,13 +18,23 @@ bool Calculator::innerOperationBinary(Calculator& theCommands, const Expression&
 bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
+ // bool hereBeTrouble = input.ToString()=="e^{-2 x} -2";
+//  if (hereBeTrouble)
+//    std::cout << "<hr>Here be trouble";
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   bool result=false;
   //  std::cout << "<br>handling base extraction of: " << input.ToString();
   //handle Anything*Rational:=Rational*Anything
   output=input;
+//  if (hereBeTrouble)
+//    std::cout << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
   if (output[2].IsOfType<Rational>())
+  { output.children.SwapTwoIndices(1, 2);
+    result=true;
+//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
+  }
+  if (output[2].IsOfType<double>() && !output[1].IsOfType<Rational>())
   { output.children.SwapTwoIndices(1, 2);
     result=true;
 //    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();

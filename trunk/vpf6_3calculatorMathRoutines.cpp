@@ -151,11 +151,14 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
     return output.SetError("Logarithm of zero is undefined.", theCommands);
   if (!input.IsRealDouble(&theArgument))
   { if (input.IsAtomGivenData(theCommands.opE()))
-      return output.AssignValue(1, theCommands);
+      return output.AssignValue((Rational) 1, theCommands);
     return false;
   }
   if (theArgument>0)
+  { if (input.IsAtomGivenData(theCommands.opE()))
+      return output.AssignValue((Rational) 1, theCommands);
     return output.AssignValue(FloatingPoint::log(theArgument), theCommands);
+  }
   theArgument*=-1;
   Expression iE, ipiE, piE, lnPart;
   iE.MakeSqrt(theCommands, -1);
@@ -988,6 +991,16 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(Calculator& t
   theSSsubalgebras.flagComputeNilradicals=false;
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
   return output.AssignValue(theSSsubalgebras, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerLispify(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLispify");
+  return output.AssignValue(input.ToStringSemiFull(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLispifyFull");
+  return output.AssignValue(input.ToStringFull(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output)

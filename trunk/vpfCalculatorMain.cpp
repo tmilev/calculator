@@ -118,6 +118,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
 //  civilizedInput="printSemisimpleSubalgebrasNoCentralizers d_5";
+//  civilizedInput="f:=e^{-2x};d/dx (f);";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

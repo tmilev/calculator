@@ -2912,7 +2912,8 @@ bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, E
 }
 
 bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+{ MacroRegisterFunctionWithName("Calculator::innerCollectMultiplicands");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
 //  std::cout << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
@@ -3686,6 +3687,24 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   }
   output=out.str();
   return result;
+}
+
+std::string Expression::ToStringSemiFull()const
+{ std::stringstream out;
+  std::string tempS;
+  if (this->ToStringData(tempS))
+    out << tempS << " ";
+  else
+    if (this->children.size>0)
+    { out << "(";
+      for (int i=0; i<this->children.size; i++)
+      { out << (*this)[i].ToStringSemiFull();
+        if (i!=this->children.size-1)
+          out << ", ";
+      }
+      out << ")";
+    }
+  return out.str();
 }
 
 std::string Expression::ToStringFull()const

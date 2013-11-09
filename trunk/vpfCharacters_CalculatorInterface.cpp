@@ -893,17 +893,16 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple
 { return CalculatorFunctionsWeylGroup::innerWeylOrbit(theCommands, input, output, false, false);
 }
 
-bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ SemisimpleLieAlgebra* thePointer;
+bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses");
+  SemisimpleLieAlgebra* thePointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, thePointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   output.AssignValue(thePointer->theWeyl, theCommands);
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   if (theGroup.CartanSymmetric.NumRows>6)
     return output.AssignValue<std::string>
-    ("I have been instructed not to do this for Weyl groups of rank greater \
-     than 6 because of the size of the computation.", theCommands);
+    ("I have been instructed not to do this for Weyl groups of rank greater than 6 because of the size of the computation.", theCommands);
 
 //  CoxeterGroup otherGroup;
 //  otherGroup.MakeFrom(theGroup.CartanSymmetric);
@@ -923,9 +922,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses
   return true;
 }
 
-bool CalculatorFunctionsWeylGroup::innerTensorWeylReps
-(Calculator& theCommands, const Expression& input, Expression& output)
-{ //std::cout << "Here i am!";
+bool CalculatorFunctionsWeylGroup::innerTensorWeylReps(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerTensorWeylReps");
+  //std::cout << "Here i am!";
   if (input.children.size!=3)
     return false;
   WeylGroupRepresentation<Rational> leftRep;
@@ -1113,13 +1112,12 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   return output.AssignValue(out.str(), theCommands);
 }
 
-
 bool CalculatorFunctionsWeylGroup::innerCoxeterElement(Calculator& theCommands, const Expression& input, Expression& output)
-{ //if (!input.IsSequenceNElementS(2))
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerCoxeterElement");
+  //if (!input.IsSequenceNElementS(2))
   //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
   if(input.children.size<2){
-    return output.SetError
-    ("Function CoxeterElement needs to know what group the element belongs to", theCommands);
+    return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
   }
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
@@ -1153,7 +1151,8 @@ bool CalculatorFunctionsWeylGroup::innerCoxeterElement(Calculator& theCommands, 
 }
 
 bool Calculator::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!theCommands.innerMatrixRational(theCommands, input, output))
+{ MacroRegisterFunctionWithName("Calculator::innerMinPolyMatrix");
+  if (!theCommands.innerMatrixRational(theCommands, input, output))
     return false;
   Matrix<Rational> theMat;
   if (!output.IsOfType<Matrix<Rational> >(&theMat))
@@ -1177,12 +1176,10 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
     return output.SetError("I need at least two arguments - upper bound and at least one element to multiply.", theCommands);
   int upperLimit;
   if (!input[1].IsSmallInteger(&upperLimit))
-    return output.SetError
-    ("First argument must be a small integer, serving as upper bound for the set.", theCommands);
+    return output.SetError("First argument must be a small integer, serving as upper bound for the set.", theCommands);
   if (upperLimit <=0)
   { upperLimit=10000;
-    theCommands.Comments << "The upper computation limit I got was 0 or less; I replaced it with the default value "
-    << upperLimit << ".";
+    theCommands.Comments << "The upper computation limit I got was 0 or less; I replaced it with the default value " << upperLimit << ".";
   }
   HashedList<Expression> theSet;
   theSet.SetExpectedSize(input.children.size-2);
@@ -1211,8 +1208,7 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
       theSet.AddOnTopNoRepetition(evaluatedProduct);
       if (theSet.size>upperLimit)
       { std::stringstream out;
-        out << "<hr>While generating multiplicatively closed set, I went above the upper limit of "
-        << upperLimit << " elements.";
+        out << "<hr>While generating multiplicatively closed set, I went above the upper limit of " << upperLimit << " elements.";
         evaluatedProduct.SetError(out.str(), theCommands);
         theSet.AddOnTop(evaluatedProduct);
         i=theSet.size; break;
@@ -1283,7 +1279,8 @@ void WeylGroupVirtualRepresentation::AssignWeylGroupRep(const WeylGroupRepresent
 }
 
 bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (input.IsOfType<WeylGroupVirtualRepresentation>())
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep");
+  if (input.IsOfType<WeylGroupVirtualRepresentation>())
   { output=input;
     return true;
   }

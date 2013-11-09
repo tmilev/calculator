@@ -13,6 +13,17 @@ void Calculator::initPredefinedInnerFunctions()
    "Crashes the calculator: tests the crashing mechanism (are crash logs properly created, etc.).",
    "crash(0)");
   this->AddOperationInnerHandler
+  ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
+   "Shows the internal tree structure of an expression, without completely unfolding the tree structure of object that are a single mathematical\
+   entity.",
+   "Lispify( e^x)");
+
+  this->AddOperationInnerHandler
+  ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
+   "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
+   "LispifyFull( e^x)");
+
+  this->AddOperationInnerHandler
   ("MakeMakefile", CalculatorFunctionsGeneral::innerMakeMakeFile, "",
    "Makes a makefile. ",
    "MakeMakefile(0)", false);

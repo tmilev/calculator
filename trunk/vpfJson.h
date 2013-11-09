@@ -1,6 +1,6 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfJsons_h_already_included
+#ifndef vpfJson_h_already_included
 #define vpfJson_h_already_included
 
 #include "vpfHeader2Math01_LargeIntArithmetic.h"

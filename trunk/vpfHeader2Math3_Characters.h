@@ -429,42 +429,6 @@ bool ClassFunction<coefficient>::operator>(const ClassFunction<coefficient>& rig
 }
 
 
-class f65521
-{ public:
-  unsigned int n;
-
-  f65521(){};
-
-  f65521(const int right)
-  { *this = right;
-  }
-
-  f65521(const Rational right)
-  { *this = right;
-  }
-
-  f65521 operator+(const f65521 right) const;
-  void operator+=(const f65521 right);
-  void Minus();
-  f65521 operator-() const;
-  f65521 operator-(const f65521 right) const;
-  void operator-=(const f65521 right);
-  f65521 operator*(const f65521 right) const;
-  void operator*=(const f65521 right);
-  void Invert();
-  f65521 operator/(const f65521 right) const;
-  void operator/=(const f65521 right);
-  void operator=(const int rhs);
-  void operator=(const Rational rhs);
-
-  bool operator==(const f65521 rhs) const;
-  bool operator!=(const f65521 rhs) const;
-  bool IsEqualToZero() const;
-  bool IsEqualToOne() const;
-
-  std::string ToString(FormatExpressions* f = 0) const;
-};
-std::ostream& operator<<(std::ostream& out, const f65521& data);
 
 template <typename coefficient>
 class Basis

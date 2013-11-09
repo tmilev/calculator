@@ -6922,7 +6922,7 @@ class MonomialGeneralizedVerma
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods);
   unsigned int HashFunction()const
-  { return this->indexFDVector*SomeRandomPrimes[0]+ (*((unsigned *)&(this->owneR)))*SomeRandomPrimes[1];
+  { return this->indexFDVector*SomeRandomPrimes[0]+ ((unsigned int)(uintptr_t)this->owneR)*SomeRandomPrimes[1];
   }
   static inline unsigned int HashFunction(const MonomialGeneralizedVerma<coefficient>& input)
   { return input.HashFunction();

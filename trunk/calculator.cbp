@@ -65,6 +65,8 @@
 		</Unit>
 		<Unit filename="vpfCharacters.cpp" />
 		<Unit filename="vpfCharacters_CalculatorInterface.cpp" />
+		<Unit filename="vpfFiniteFields.cpp" />
+		<Unit filename="vpfFiniteFields.h" />
 		<Unit filename="vpfGraph.cpp" />
 		<Unit filename="vpfHeader1General0_General.h" />
 		<Unit filename="vpfHeader1General1_ListReferences.h" />
@@ -89,6 +91,7 @@
 		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />
 		<Unit filename="vpfImplementationHeader2Math3_WeylAlgebra.h" />
 		<Unit filename="vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h" />
+		<Unit filename="vpfJson.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

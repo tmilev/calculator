@@ -1425,6 +1425,7 @@ public:
   static bool fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEmbedSSalgInSSalgMethod2(Calculator& theCommands, const Expression& input, Expression& output);
 //  static bool innerSSLieAlgebra
 //  (Calculator& theCommands, const Expression& input, Expression& output)
 //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);

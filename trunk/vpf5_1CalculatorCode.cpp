@@ -522,9 +522,9 @@ bool Calculator::innerPrintSSsubalgebras
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
+bool Calculator::innerEmbedSSalgInSSalgMethod2(Calculator& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalg");
+  MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalgMethod2");
   if (!input.IsListNElements(3))
     return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
   const Expression& EsmallSA=input[1];
@@ -541,7 +541,7 @@ bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expressio
   SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
   std::stringstream out;
   if (ownerSS.GetRank()>6)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+  { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
   }
   else

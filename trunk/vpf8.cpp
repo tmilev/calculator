@@ -1381,7 +1381,6 @@ std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const Dyn
   theType.MakeZero();
   for (int j=0; j<this->SimpleComponentTypes.size; j++)
     theType.AddMonomial(this->SimpleComponentTypes[j], 1);
-
   return theType.ToStringRelativeToAmbientType(ambientType);
 }
 

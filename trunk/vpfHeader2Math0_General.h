@@ -1552,11 +1552,11 @@ private:
   }
   bool ConvertToType(int theType);
 public:
-  friend std::iostream& operator<< (std::iostream& output, const RationalFunctionOld& theRF)
+  friend std::ostream& operator<< (std::ostream& output, const RationalFunctionOld& theRF)
   { output << theRF.ToString();
     return output;
   }
-  friend std::iostream& operator>> (std::iostream& input, RationalFunctionOld& theRF);
+  friend std::istream& operator>> (std::istream& input, RationalFunctionOld& theRF);
 
   MemorySaving<Polynomial<Rational> > Numerator;
   MemorySaving<Polynomial<Rational> > Denominator;
@@ -4786,6 +4786,7 @@ class DynkinSimpleType
 
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
+  bool CanBeExtendedParabolicallyTo(const DynkinSimpleType& otherType)const;
   bool HasEasySubalgebras()const;
   Rational GetRatioLongRootToFirst()const
   { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
@@ -4868,6 +4869,7 @@ public:
   }
   static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
+  bool CanBeExtendedParabolicallyTo(const DynkinType& other)const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
@@ -6625,19 +6627,19 @@ public:
     }
   }
   void Invert();
-  int GetMaxNumRows()const
+  int GetMinNumRows()const
   { int result=-1;
     for (int i=0; i<this->size(); i++)
       result=MathRoutines::Maximum(result, (*this)[i].vIndex);
     return result+1;
   }
-  int GetMaxNumCols()const
+  int GetMinNumCols()const
   { int result=-1;
     for (int i=0; i<this->size(); i++)
       result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
     return result+1;
   }
-  int GetMaxNumColsNumRows()const
+  int GetMinNumColsNumRows()const
   { int result=-1;
     for (int i=0; i<this->size(); i++)
     { result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
@@ -6647,7 +6649,7 @@ public:
   }
   coefficient GetDeterminant()const
   { Matrix<coefficient> theMat;
-    this->GetMatrix(theMat, this->GetMaxNumColsNumRows());
+    this->GetMatrix(theMat, this->GetMinNumColsNumRows());
     return theMat.GetDeterminant();
   }
   void DirectSumWith(const MatrixTensor<coefficient>& other);
@@ -6655,7 +6657,7 @@ public:
 
   bool IsPositiveDefinite()
   { Matrix<coefficient> other;
-    this->GetMatrix(other, this->GetMaxNumColsNumRows());
+    this->GetMatrix(other, this->GetMinNumColsNumRows());
     return other.IsPositiveDefinite();
   }
   void operator=(const Matrix<coefficient>& other)
@@ -6678,10 +6680,10 @@ public:
       return;
     }
     //The basis of the tensor product vector space MUST be in the SAME order as the one used by Matrix::AssignTensorProduct.
-    //int leftDomainDim=left.GetMaxNumCols();
-    int rightDomainDim=right.GetMaxNumCols();
-    //int leftRangeDim=left.GetMaxNumRows();
-    int rightRangeDim=right.GetMaxNumRows();
+    //int leftDomainDim=left.GetMinNumCols();
+    int rightDomainDim=right.GetMinNumCols();
+    //int leftRangeDim=left.GetMinNumRows();
+    int rightRangeDim=right.GetMinNumRows();
     MonomialMatrix tempM;
     this->MakeZero();
     coefficient tempCF;
@@ -6750,11 +6752,11 @@ public:
   { if (this->IsEqualToZero())
       return "(0)";
     Matrix<coefficient> tempMat;
-    this->GetMatrix(tempMat, this->GetMaxNumColsNumRows());
+    this->GetMatrix(tempMat, this->GetMinNumColsNumRows());
     return tempMat.ToString(theFormat);
   }
   void GetMatrix(Matrix<coefficient>& output, int theDim)const
-  { theDim=MathRoutines::Maximum(theDim, this->GetMaxNumColsNumRows());
+  { theDim=MathRoutines::Maximum(theDim, this->GetMinNumColsNumRows());
     output.init(theDim, theDim);
     output.NullifyAll();
     for (int i=0; i<this->size(); i++)
@@ -6786,7 +6788,7 @@ public:
       this->ActOnVectorColumn(inputCopy, output);
       return;
     }
-    output.MakeZero(this->GetMaxNumRows());
+    output.MakeZero(this->GetMinNumRows());
     otherType currentCF;
     for (int i=0; i<this->size(); i++)
     { //note that, at the cost of one extra implicit conversion below, we preserve the order of multiplication:
@@ -6796,6 +6798,25 @@ public:
       currentCF*=input[(*this)[i].dualIndex];
       output[(*this)[i].vIndex]+= currentCF;
     }
+  }
+  void ActOnVectorROWSOnTheLeft(const List<Vector<coefficient> >& inputStandToTheLeftAsVectorRows, List<Vector<coefficient> >& output)const
+  { if (&inputStandToTheLeftAsVectorRows==&output)
+    { List<Vector<coefficient> > inputCopy=inputStandToTheLeftAsVectorRows;
+      this->ActOnVectorROWSOnTheLeft(inputCopy, output);
+      return;
+    }
+    output.SetSize(this->GetMinNumRows());
+    int numColsTarget=inputStandToTheLeftAsVectorRows[0].size;
+    if (this->GetMinNumCols()!=inputStandToTheLeftAsVectorRows.size)
+    { crash << "This is a programming error: attemtping to act by matrix " << this->ToString() << " (" << this->GetMinNumCols() << " columns) "
+      << " on the " << inputStandToTheLeftAsVectorRows.size << " vector-rows: " << inputStandToTheLeftAsVectorRows.ToString() << ". "
+      << crash;
+    }
+    for (int i=0; i<inputStandToTheLeftAsVectorRows.size; i++)
+      output[i].MakeZero(numColsTarget);
+    for (int i=0; i<this->size(); i++)
+      for (int j=0; j<numColsTarget; j++)
+        output[(*this)[i].vIndex][j]+=inputStandToTheLeftAsVectorRows[(*this)[i].dualIndex][j]*this->theCoeffs[i];
   }
   template <class otherType>
   void ActOnVectorsColumn(Vectors<otherType>& inputOutput)const
@@ -6828,7 +6849,7 @@ public:
 
 template <class coefficient>
 void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows)
-{ MinNumRows=MathRoutines::Maximum(MinNumRows, this->GetMaxNumRows());
+{ MinNumRows=MathRoutines::Maximum(MinNumRows, this->GetMinNumRows());
   output.SetSize(MinNumRows);
   for (int i=0; i<output.size; i++)
     output[i].MakeZero();
@@ -6842,9 +6863,9 @@ void MatrixTensor<coefficient>::GetVectorsSparseFromRowsIncludeZeroRows(List<Vec
 template <class coefficient>
 void MatrixTensor<coefficient>::GaussianEliminationByRowsMatrix(MatrixTensor<coefficient>* carbonCopyMat)
 { List<VectorSparse<coefficient> > theRows, theCarbonCopyRows;
-  int numRows=this->GetMaxNumRows();
+  int numRows=this->GetMinNumRows();
   if (carbonCopyMat!=0)
-  { numRows=MathRoutines::Maximum(numRows, carbonCopyMat->GetMaxNumRows());
+  { numRows=MathRoutines::Maximum(numRows, carbonCopyMat->GetMinNumRows());
     carbonCopyMat->GetVectorsSparseFromRowsIncludeZeroRows(theCarbonCopyRows, numRows);
   }
   this->GetVectorsSparseFromRowsIncludeZeroRows(theRows, numRows);
@@ -6862,7 +6883,7 @@ void MatrixTensor<coefficient>::DirectSumWith(const MatrixTensor<coefficient>& o
     this->DirectSumWith(otherCopy);
     return;
   }
-  int indexShift= this->GetMaxNumColsNumRows();
+  int indexShift= this->GetMinNumColsNumRows();
   this->SetExpectedSize(this->size()+other.size());
   MonomialMatrix currentM;
   for (int i=0; i<other.size(); i++)
@@ -6875,7 +6896,7 @@ void MatrixTensor<coefficient>::DirectSumWith(const MatrixTensor<coefficient>& o
 template <class coefficient>
 void MatrixTensor<coefficient>::Invert()
 { MatrixTensor<coefficient> theId;
-  theId.MakeId(this->GetMaxNumColsNumRows());
+  theId.MakeId(this->GetMinNumColsNumRows());
   MatrixTensor<coefficient> result=theId;
 //  std::cout << "<hr>Inverting: " << this->ToStringMatForm();
   this->GaussianEliminationByRowsMatrix(&result);
@@ -7681,8 +7702,11 @@ coefficient WeylGroup::WeylDimFormulaFundamentalCoords(Vector<coefficient>& weig
 template<class leftType, class rightType>
 void WeylGroup::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const
 { if (r1.size!=r2.size || r1.size!=this->GetDim())
-    crash << "This is a programming error: attempting to get the scalar products of two weights that are not of the same dimension as the rank of the Weyl group. "
-    << crash;
+  { crash.theCrashReport << "This is a programming error: attempting to get the scalar product of the weight " << r1 << " (dimension " << r1.size
+    << ") with the weight " << r2 << " (dimension " << r2.size << "), while the dimension of the ambient Weyl group is " << this->GetDim()
+    << ". ";
+    crash << crash;
+  }
   output=r1[0].GetZero();
   leftType buffer;
   for (int i=0; i<this->CartanSymmetric.NumRows; i++)

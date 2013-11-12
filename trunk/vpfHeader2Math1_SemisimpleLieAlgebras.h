@@ -474,7 +474,7 @@ public:
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   void FindTheSSSubalgebrasOLD(SemisimpleLieAlgebra& newOwner);
-  void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner);
+  void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
   void FindTheSSSubalgebrasOLDPart2();
   void ExtendCandidatesRecursiveOLD(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion);
   void ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0);

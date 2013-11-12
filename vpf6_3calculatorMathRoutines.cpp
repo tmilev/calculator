@@ -1234,3 +1234,47 @@ bool CalculatorFunctionsGeneral::innerTestMathMouseHover(Calculator& theCommands
 //  out << "<br>Directly rendered: " << CGI::GetMathSpanPure(input.ToString());
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo");
+  if (!input.IsListNElements(3))
+    return false;
+  DynkinType smallType, targetType;
+  if (!Serialization::DeSerializeMonCollection(theCommands, input[1], smallType) ||
+      !Serialization::DeSerializeMonCollection(theCommands, input[2], targetType))
+  { theCommands.Comments << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
+    return false;
+  }
+  return output.AssignValue((int)smallType.CanBeExtendedParabolicallyTo(targetType), theCommands);
+}
+
+bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalg");
+  if (!input.IsListNElements(3))
+    return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
+  const Expression& EsmallSA=input[1];
+  const Expression& ElargeSA=input[2];
+
+  SemisimpleLieAlgebra* theSmallSapointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra* thelargeSapointer=0;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
+  std::stringstream out;
+  if (ownerSS.GetRank()>6)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  else
+    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
+  SemisimpleSubalgebras tempSSsas
+  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
+   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
+  out << "Attempting to embed " << theSmallSapointer->theWeyl.theDynkinType.ToString() << " in " << ownerSS.GetLieAlgebraName();
+  theSSsubalgebras.FindTheSSSubalgebras(ownerSS, &theSmallSapointer->theWeyl.theDynkinType);
+  return output.AssignValue(theSSsubalgebras, theCommands);
+}

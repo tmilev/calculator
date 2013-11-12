@@ -1016,10 +1016,21 @@ void Calculator::initPredefinedInnerFunctions()
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "printSemisimpleSubalgebrasFull{}(A_2)", false, false);
   this->AddOperationInnerHandler
-  ("experimentalEmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
+  ("CanBeExtendedParabolicallyTo", CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo, "",
+   "Finds whether a Dynkin type extends via the standard parabolic extension to another. ",
+   "CanBeExtendedParabolicallyTo(A^3_1, A_5); CanBeExtendedParabolicallyTo(a_2, b_3); CanBeExtendedParabolicallyTo(g_2, b_3);\
+   CanBeExtendedParabolicallyTo(d_5, e_6); CanBeExtendedParabolicallyTo(b_3, a_10); CanBeExtendedParabolicallyTo(c_2, c_10);\
+   CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)\
+   ", true, false);
+  this->AddOperationInnerHandler
+  ("EmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
+   " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
+   "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
+  this->AddOperationInnerHandler
+  ("EmbedSemisimpleInSemisimpleMethod2", this->innerEmbedSSalgInSSalgMethod2, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints all embeddings of the first subalgebra into the second. ",
-   "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
+   "EmbedSemisimpleInSemisimpleMethod2{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

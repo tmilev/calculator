@@ -3742,7 +3742,6 @@ void DynkinType::GetOuterAutosGeneratorsOneTypeActOnVectorColumn(List<MatrixTens
 void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output)
 { MacroRegisterFunctionWithName("DynkinType::GetOuterAutosGenerators");
   this->SortTheDynkinTypes();
-
   List<MatrixTensor<Rational> > intermediateGenerators;
   MatrixTensor<Rational> matrixFinal, matrixToGo;
   int currentMult;
@@ -3760,6 +3759,10 @@ void DynkinType::GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rati
       output.AddOnTop(matrixFinal);
     }
     numRowsSoFar+=currentMult*(*this)[i].theRank;
+  }
+  if (output.size==0)
+  { output.SetSize(1);
+    output[0].MakeId(this->GetRank());
   }
 }
 
@@ -3811,6 +3814,30 @@ int DynkinType::GetNewIndexFromRootInjection(const List<int>& inputRootInjection
   return selectedIndices.elements[0];
 }
 
+bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
+{ MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
+  if (other.IsEqualToZero())
+    return false;
+  if (this->IsEqualToZero())
+    return true;
+  DynkinSimpleType targetType, currentType;
+  targetType=other[0];
+  DynkinType remainderThis, remainderOther;
+  //std::cout << "<hr>Testing whether " << this->ToString() << " fits in " << other.ToString();
+  for (int i=0; i< this->size(); i++)
+  { currentType=(*this)[i];
+    if (currentType.CanBeExtendedParabolicallyTo(targetType))
+    { remainderThis=*this;
+      remainderThis.SubtractMonomial(currentType, 1);
+      remainderOther= other;
+      remainderOther.SubtractMonomial(targetType, 1);
+      if (remainderThis.CanBeExtendedParabolicallyTo(remainderOther))
+        return true;
+    }
+  }
+  return false;
+}
+
 int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection)
 { MacroRegisterFunctionWithName("DynkinType::GetIndexPreimageFromRootInjection");
   for (int i=0; i<inputRootInjection.size; i++)
@@ -3821,7 +3848,6 @@ int DynkinType::GetIndexPreimageFromRootInjection(int inputIndex, const List<int
   crash << crash;
   return -1;
 }
-
 
 void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength)
 { DynkinSimpleType theMon;
@@ -4034,8 +4060,8 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
       //  << theRatio.ToString() << crash;
       //}
       out << theLetter;
-      if (theDynkinIndex!=1)
-        out << "^{" << theDynkinIndex.ToString() << "}";
+//      if (theDynkinIndex!=1)
+      out << "^{" << theDynkinIndex.ToString() << "}";
     }
     if (this->theRank>=10)
       out << "_{" << this->theRank << "}";
@@ -4284,6 +4310,29 @@ void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output)const
 void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 { this->GetAn(n, output);
   output(n-1,n-1)=1;
+}
+
+bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
+{ MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
+  if (this->lengthFirstCoRootSquared!=other.lengthFirstCoRootSquared)
+    return false;
+  if (other.theRank<=this->theRank)
+    return false;
+  if (other.theLetter=='F')
+  { if (this->theLetter=='A' && this->theRank<3)
+      return true;
+    if (this->theLetter=='B' && this->theRank==3)
+      return true;
+    return false;
+  }
+  if (other.theLetter=='E')
+  { if (this->theRank<5)
+      return this->theLetter=='A';
+    if (this->theRank==5)
+      return this->theLetter=='D';
+    return this->theLetter=='E';
+  }
+  return this->theLetter=='A';
 }
 
 void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* outputImagesSimpleRoots)const
@@ -4766,8 +4815,8 @@ void WeylGroup::ComputeExternalAutos()
 { if (!this->flagOuterAutosComputed)
   { this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(this->OuterAutomorphisms);
     for (int i=0; i<this->OuterAutomorphisms.size; i++)
-      if (this->OuterAutomorphisms[i].GetMaxNumColsNumRows()!=this->GetDim() || this->OuterAutomorphisms[i].GetMaxNumCols()!=this->GetDim() ||
-          this->OuterAutomorphisms[i].GetMaxNumRows()!=this->GetDim() )
+      if (this->OuterAutomorphisms[i].GetMinNumColsNumRows()!=this->GetDim() || this->OuterAutomorphisms[i].GetMinNumCols()!=this->GetDim() ||
+          this->OuterAutomorphisms[i].GetMinNumRows()!=this->GetDim() )
       { crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
       }
   }

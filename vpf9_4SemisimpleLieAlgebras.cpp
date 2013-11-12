@@ -442,14 +442,17 @@ void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, Semisim
   this->ExtendOneComponentOneTypeAllLengthsRecursive(theCandidate, theType, false);
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner)
+void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
   this->owneR=&newOwner;
   this->ComputeSl2sInitOrbitsForComputationOnDemand();
   this->CheckConsistency();
   CandidateSSSubalgebra emptyCandidate;
   emptyCandidate.owner=this;
-  this->ExtendCandidatesRecursive(emptyCandidate);
+  this->ExtendCandidatesRecursive(emptyCandidate, targetType);
+  std::cout << "Num candidates so far: " << this->theSubalgebraCandidates.size;
+  if (targetType!=0)
+    this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
 }
 
@@ -643,10 +646,13 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   int baseRank=baseCandidate.theWeylNonEmbeddeD.GetDim();
   if (baseRank>=this->owneR->GetRank())
     return;
+  if (targetType!=0)
+    if (!baseCandidate.theWeylNonEmbeddeD.theDynkinType.CanBeExtendedParabolicallyTo(*targetType))
+      return;
   List<DynkinType> theLargerTypes;
   List<List<int> > theRootInjections;
   this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-//  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
+  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
@@ -660,7 +666,6 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   }
   List<int> indicesModulesNewComponentExtensionMod;
   indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
-
   Vectors<Rational> startingVector;
   Vector<Rational> Hrescaled;
   Vectors<Rational> theHCandidatesRescaled;
@@ -669,6 +674,10 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   for (int i=0; i<theLargerTypes.size; i++)
   { if (theLargerTypes[i].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
       continue;
+    if (targetType!=0)
+      if (!theLargerTypes[i].CanBeExtendedParabolicallyTo(*targetType))
+        if (theLargerTypes[i]!=*targetType)
+          continue;
     if (theGlobalVariables!=0)
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
@@ -767,7 +776,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesRescaled.size << "). ";
-            //std::cout << reportStream.str();
+            std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
@@ -1197,7 +1206,8 @@ bool CandidateSSSubalgebra::isGoodHnew(const Vector<Rational>& HneW, int indexHn
       if (theScalarProd>0)
         canBeRaisingReflection=false;
       if (theScalarProd<0)
-        crash << "This is a programming error. The candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
+        crash << "This is a programming error. While trying to realize type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
+        <<  ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
         << this->theHsInOrderOfCreation[l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
         << " preceding roots. Hnew equals: " << HneW.ToString() << " Here are all preceding roots: "
@@ -4991,8 +5001,12 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
     << this->owner->ToStringAlgebraLink(this->GetSSpartCentralizerOfSSPartCentralizer(), theFormat);
   }
   if (!this->flagCentralizerIsWellChosen)
-    out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
-    << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension " << this->centralizerRank.ToString() << ". ";
+  { if (this->owner->flagAttemptToAdjustCentralizers)
+      out << "<br><span style=\"color:#FF0000\"><b>The Cartan of the centralizer does not lie in the ambient Cartan (the computation was too large?).</b></span> "
+      << "The intersection of the ambient Cartan with the centralizer is of dimension " << this->CartanOfCentralizer.size << " instead of the desired dimension " << this->centralizerRank.ToString() << ". ";
+    else
+      out << "<br><span style=\"color:#FF0000\"><b>I was unable to compute the centralizer (not all subalgebras were computed?).</b></span> ";
+  }
   if (this->centralizerRank!=0)
   { out << "<br>Basis of Cartan of centralizer: ";
     out << this->CartanOfCentralizer.ToString();
@@ -5448,6 +5462,22 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     crash << "Computation is too large: I am crashing to let you know that the program cannot handle such a large number of outer automorphisms" << crash;
   List<Vector<Rational> > conjugationCandidates;
   Vectors<Rational> currentComponent;
+  ProgressReport theReport(this->owner->theGlobalVariables);
+  if (this->owner->theGlobalVariables!=0)
+  { std::stringstream reportStream;
+    reportStream << "Computing whether " << this->theWeylNonEmbeddeD.theDynkinType << " is direct summand of "
+    << other.theWeylNonEmbeddeD.theDynkinType.ToString() << ". The outer automorphisms of the smaller type are: ";
+    FormatExpressions theFormat;
+    theFormat.flagUseHTML=false;
+    theFormat.flagUseLatex=true;
+    for (int i=0; i<theOuterAutos.theElements.size; i++)
+    { if (i>=100)
+        reportStream << "... and so on, only the first 100 elements printed out of total " << theOuterAutos.theElements.size << ". ";
+      else
+        reportStream << "<br>" << CGI::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
+    }
+    theReport.Report(reportStream.str());
+  }
   do
     for (int k=0; k<theOuterAutos.theElements.size; k++)
     { conjugationCandidates.SetSize(0);
@@ -5455,10 +5485,10 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       { Selection& currentSel=selectedTypes.theElements[i].theSelection;
         for (int j=0; j<currentSel.CardinalitySelection; j++)
         { currentComponent= theHsByType[i][currentSel.elements[j]];
-          theOuterAutos.theElements[k].ActOnVectorsColumn(currentComponent);
           conjugationCandidates.AddListOnTop(currentComponent);
         }
       }
+      theOuterAutos.theElements[k].ActOnVectorROWSOnTheLeft(conjugationCandidates, conjugationCandidates);
       if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
     }

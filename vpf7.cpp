@@ -893,18 +893,18 @@ std::string CGI::GetMathMouseHover(const std::string& input, int upperNumChars)
   { out << "<b>LaTeX output is longer than " << upperNumChars << " characters and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }
-  std::stringstream idSpanStream;
+//  std::stringstream idSpanStream;
   CGI::GlobalMathSpanID++;
   if (CGI::GlobalMathSpanID==1)
-    out << "<span class=\"math\"></span>"; //<- empty math spann class forces jsMath to load.
-  idSpanStream << "mathFormula" << CGI::GlobalMathSpanID;
-  std::string containterString="container"+idSpanStream.str();
-  out << "<span id=\"" << containterString << "\">"  << "<span id=\"" << idSpanStream.str()
-  << "\" onmouseover=\"if (document.getElementById('" << containterString << "').className=='math') return; "
-  << "this.className='math'; document.getElementById('" << containterString << "').className='math';"
+    out << "<span class=\"math\"></span>"; //<- empty math span class forces jsMath to load.
+//  idSpanStream << "mathFormula" << CGI::GlobalMathSpanID;
+//  std::string containterString="container"+idSpanStream.str();
+//  out << "<span id=\"" << containterString << "\">"  << "<span id=\"" << idSpanStream.str()
+  out << "<span><span onmouseover=\"if (this.parentNode.className=='math') return; "
+  << "this.className='math'; this.parentNode.className='math';"
 //  << "window.alert('Calling jsmath.Process'); "
-  << "jsMath.Process('container" << idSpanStream.str() << "');\" >"
-  << input << "</span>" << "</span>";
+  << "jsMath.Process(this.parentNode);\" >"
+  << input << "</span></span>";
   return out.str();
 }
 

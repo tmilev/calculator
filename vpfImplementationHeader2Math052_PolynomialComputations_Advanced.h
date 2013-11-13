@@ -668,9 +668,9 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
   MonomialP tempM;
   Polynomial<coefficient> tempP;
   coefficient theCF;
-  if (theAlgebraicClosure!=0)
-  { std::cout << "running with non-zero algebraic closure";
-  }
+//  if (theAlgebraicClosure!=0)
+//  { std::cout << "running with non-zero algebraic closure";
+//  }
   for (int i=0; i<inputSystem.size; i++)
   { tempP=inputSystem[i];
     for (int j=0; j<numVars; j++)

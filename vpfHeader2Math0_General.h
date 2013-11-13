@@ -413,6 +413,7 @@ public:
   bool flagUsePNG;
   bool flagUseHTML;
   bool flagUseHtmlAndStoreToHD;
+  bool flagUseMathSpanPureVsMouseHover;
 //  bool flagDynkinTypeDontUsePlusAndUpperIndex;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
@@ -1456,9 +1457,10 @@ class GroebnerBasisComputation
   List<Polynomial<coefficient> > basisCandidates;
   List<MonomialP> leadingMons;
   List<coefficient> leadingCoeffs;
-  int TotalNumComputationsSerreLikeSystem;
-  int NumberOfComputations;
-  int MaxNumComputations;
+  int NumberSerreSystemComputations;
+  int MaxNumSerreSystemComputations;
+  int NumberGBComputations;
+  int MaxNumGBComputations;
   int RecursionCounterSerreLikeSystem;
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
@@ -1488,6 +1490,9 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
+  static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
+  static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
+  static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
   static bool IsContradictoryReducedSystem(const List<Polynomial<coefficient> >& input);
   void RemainderDivisionWithRespectToBasis
   (Polynomial<coefficient>& inputOutput, Polynomial<coefficient>* outputRemainder=0, GlobalVariables* theGlobalVariables=0, int basisIndexToIgnore=-1);
@@ -1497,7 +1502,7 @@ class GroebnerBasisComputation
   (List<Polynomial<coefficient> >& inputSystem, PolynomialSubstitution<coefficient>& outputSub, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables)
   ;
   int GetPreferredSerreSystemSubIndex(List<Polynomial<coefficient> >& inputSystem);
-  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, bool firstRun, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
+  void SolveSerreLikeSystemRecursively(List<Polynomial<coefficient> >& inputSystem, AlgebraicClosureRationals* theAlgebraicClosure, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoPolySystem(List<PolynomialSubstitution<coefficient> >& theImpliedSubs, GlobalVariables* theGlobalVariables);
   void BackSubstituteIntoSinglePoly(Polynomial<coefficient>& thePoly, int theIndex, PolynomialSubstitution<coefficient>& theFinalSub, GlobalVariables* theGlobalVariables);
   bool AddRemainderToBasis(GlobalVariables* theGlobalVariables);
@@ -4867,6 +4872,7 @@ public:
       crash << "This is a programming error: multiplicity of simple type is not a small integer. " << crash;
     return intResult;
   }
+  bool IsTypeA_1()const;
   static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool CanBeExtendedParabolicallyTo(const DynkinType& other)const;

@@ -668,6 +668,9 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
   MonomialP tempM;
   Polynomial<coefficient> tempP;
   coefficient theCF;
+  if (theAlgebraicClosure!=0)
+  { std::cout << "running with non-zero algebraic closure";
+  }
   for (int i=0; i<inputSystem.size; i++)
   { tempP=inputSystem[i];
     for (int j=0; j<numVars; j++)
@@ -701,7 +704,8 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
     if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
       if (theAlgebraicClosure!=0)
         if (this->GetOneVarPolySolution(tempP, theCF, *theAlgebraicClosure, theGlobalVariables))
-        { outputSub.MakeIdSubstitution(numVars);
+        { std::cout << "<br>adjoining root of " << tempP.ToString();
+          outputSub.MakeIdSubstitution(numVars);
           outputSub[oneVarIndex].MakeConst(theCF);
           //check our work:
           tempP.Substitution(outputSub);
@@ -1008,7 +1012,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   }
   this->SolveSerreLikeSystemRecursively(workingSystem, 0, theGlobalVariables);
   if (theAlgebraicClosure!=0)
-    if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveSolution)
+    if (!this->flagSystemSolvedOverBaseField && !this->flagSystemProvenToHaveNoSolution)
     { if (theGlobalVariables!=0)
       { reportStream << "<br><b>Failed to solve system over the rationals... attempting to solve allowing algebraic extensions.</b> ";
         theReport.Report(reportStream.str());

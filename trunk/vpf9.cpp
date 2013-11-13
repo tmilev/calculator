@@ -948,6 +948,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseReflectionNotation=false;
   this->flagUseHtmlAndStoreToHD=false;
   this->flagIncludeMutableInformation=true;
+  this->flagUseMathSpanPureVsMouseHover=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

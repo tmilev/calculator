@@ -349,12 +349,16 @@ bool DynkinSimpleType::HasEasySubalgebras()const
 
 std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType& theType, FormatExpressions* theFormat)
 { std::stringstream out;
-  std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
+  std::string theTitlePageFileNameNoPathSlowLoad= "SemisimpleSubalgebras_" + theType.ToString() + ".html";
+  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + theType.ToString() + ".html";
   out << "<tr><td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?textInput=printSemisimpleLieAlgebra%7B%7D"
   << theType[0].theLetter << "_" << theType[0].theRank << "\">" << theType[0].theLetter << theType[0].theRank << "</a></td>\n ";
   if (theType[0].HasEasySubalgebras())
-    out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPath << "\">"
-    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a></td>\n ";
+  { out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad << "\">"
+    << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a><br>"
+    << "<a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
+    << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a>, hover mouse above f-las to see</td>\n ";
+  }
   else
     out << "<td>Not available</td>\n";
   out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?%20textType=Calculator&textDim=1&textInput=printSlTwoSubalgebras%7B%7D%28"
@@ -470,17 +474,20 @@ bool Calculator::innerPrintSSsubalgebras
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
   std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
-  std::string theTitlePageFileName= physicalFolder+theTitlePageFileNameNoPath;
+  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
+  std::string theTitlePageFileNameSlowLoad= physicalFolder+theTitlePageFileNameNoPath;
+  std::string theTitlePageFileNameFastLoad= physicalFolder+theTitlePageFileNameNoPathFastLoad;
   out << "<br>Output file: <a href= \"" << displayFolder << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";
-  out << "<script> var reservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
-  << "= --reservedCountDownToRefresh;}, 1000); </script>";
-  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
-  << "seconds...  </b>"
+  out << "<br>Output file, fast load, hover mouse over math expressions to get formulas: <a href= \"" << displayFolder << theTitlePageFileNameNoPathFastLoad << "\"> " << theTitlePageFileNameNoPathFastLoad << "</a>";
+  //  out << "<script> var reservedCountDownToRefresh = 5; setInterval(function(){document.getElementById('reservedCountDownToRefresh').innerHTML "
+  //  << "= --reservedCountDownToRefresh;}, 1000); </script>";
+  //  out << "<b>... Redirecting to output file in <span style=\"font-size:36pt;\"><span id=\"reservedCountDownToRefresh\">5</span></span> "
+  //  << "seconds...  </b>"
   //<< "<meta http-equiv=\"refresh\" content=\"5; url="
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!XML::FileExists(theTitlePageFileName)|| doForceRecompute)
+  if (!XML::FileExists(theTitlePageFileNameSlowLoad)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas
     (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
      &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
@@ -493,13 +500,15 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.flagAttemptToSolveSystems=doAttemptToSolveSystems;
     theSSsubalgebras.flagComputePairingTable=doComputePairingTable;
     theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
-    std::fstream theFile;
+    std::fstream theFileSlowLoad, theFileFastLoad;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
-    if(!XML::OpenFileCreateIfNotPresent(theFile, theTitlePageFileName, false, true, false))
-    { crash << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileName
+    if(!XML::OpenFileCreateIfNotPresent(theFileSlowLoad, theTitlePageFileNameSlowLoad, false, true, false))
+    { crash << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileNameSlowLoad
       << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
+    XML::OpenFileCreateIfNotPresent(theFileFastLoad, theTitlePageFileNameFastLoad, false, true, false);
+
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;
       theSSsubalgebras.FindTheSSSubalgebras(ownerSS);
@@ -511,13 +520,19 @@ bool Calculator::innerPrintSSsubalgebras
     theFormat.flagUseHTML=true;
     theFormat.flagUseHtmlAndStoreToHD=true;
     theFormat.flagUseLatex=true;
-    theFile << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
+    theFormat.flagUseMathSpanPureVsMouseHover=true;
+    theFileSlowLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
+    << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
+    << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
+    theFormat.flagUseMathSpanPureVsMouseHover=false;
+    theFileFastLoad << "<html><title>Semisimple subalgebras of the semisimple Lie algebras: the subalgebras of " << theSSsubalgebras.owneR->theWeyl.theDynkinType.ToString()
     << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
     Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
-    theFile << "Load{}" << theSSE.ToString();
-    theFile << "</body></html>";
+    theFileFastLoad << "Load{}" << theSSE.ToString();
+    theFileFastLoad << "</body></html>";
+    theFileSlowLoad << "</body></html>";
   }
   return output.AssignValue(out.str(), theCommands);
 }
@@ -689,7 +704,7 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
     theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
   }
-  theGroebnerComputation.MaxNumComputations=upperBoundComputations;
+  theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
   bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "Letter/expression ordrer: ";
@@ -703,7 +718,7 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     out << "<br>" << CGI::GetMathSpanPure(inputVector[i].ToString(&theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with " << outputGroebner.size << " elements, computed using algorithm 1, using "
-    << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
+    << theGroebnerComputation.MaxNumGBComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> " << CGI::GetMathSpanPure(outputGroebner[i].ToString(&theFormat));
   } else
@@ -1283,14 +1298,15 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   GroebnerBasisComputation<AlgebraicNumber> theComputation;
-  theComputation.MaxNumComputations=1001;
+  theComputation.MaxNumGBComputations=2001;
+  theComputation.MaxNumSerreSystemComputations=2001;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
 //  std::cout << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
   out << "<br>The polynomials: " << thePolysAlgebraic.ToString(&theFormat);
-  out << "<br>Total number of polynomial computations: " << theComputation.TotalNumComputationsSerreLikeSystem;
+  out << "<br>Total number of polynomial computations: " << theComputation.NumberSerreSystemComputations;
   if (theComputation.flagSystemProvenToHaveNoSolution)
     out << "<br>The system does not have a solution. ";
   else if(theComputation.flagSystemProvenToHaveSolution)

@@ -357,7 +357,7 @@ std::string Calculator::ToStringLinksToCalculatorDirectlyFromHD(const DynkinType
   { out << "<td><a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathSlowLoad << "\">"
     << theType[0].theLetter << theType[0].theRank << " semisimple subalgebras</a><br>"
     << "<a href=\"http://vector-partition.jacobs-university.de/vpf/output/" << theType.ToString() << "/" << theTitlePageFileNameNoPathFastLoad << "\">"
-    << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a>, hover mouse above f-las to see</td>\n ";
+    << theType[0].theLetter << theType[0].theRank << " semisipmles subalgebras, fast load</a></td>\n ";
   }
   else
     out << "<td>Not available</td>\n";

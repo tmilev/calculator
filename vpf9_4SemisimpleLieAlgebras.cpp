@@ -343,7 +343,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       numSl2s++;
   }
   out << "Number of root subalgebras other than the Cartan and full subalgebra: " << numRegularSAs-1;
-  out << "<br>Number of sl(2)'s: " << numSl2s;
+  out << "<br>Number of sl(2)'s: " << numSl2s << "<hr>";
   std::string summaryString= this->ToStringSSsumaryHTML(theFormat);
   if (summaryString!="")
   { out << "Summary:" << summaryString << "<hr>";
@@ -351,44 +351,51 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
       out << "Summary in LaTeX<br><br>" << this->ToStringSSsumaryLaTeX(theFormat) << "<br><br><hr>";
   }
   if (!writingToHD)
-    for (int i=0; i<this->theSubalgebraCandidates.size; i++)
+  { for (int i=0; i<this->theSubalgebraCandidates.size; i++)
     { if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
         out << "Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
       out << this->theSubalgebraCandidates[i].ToString(theFormat) << "\n<hr>\n ";
     }
+  }
   else
-  { theFormat->flagCandidateSubalgebraShortReportOnly=true;
-    theFormat->flagUseHtmlAndStoreToHD=true;
+  { if (theFormat!=0)
+    { theFormat->flagCandidateSubalgebraShortReportOnly=true;
+      theFormat->flagUseHtmlAndStoreToHD=true;
+    }
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
       if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
       { if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
           out << "Subalgebra number " << this->GetDisplayIndexFromActual(i) << ".<br>";
         out << this->theSubalgebraCandidates[i].ToString(theFormat) << "\n<hr>\n ";
       }
-    theFormat->flagCandidateSubalgebraShortReportOnly=false;
+    FormatExpressions theFormatCopy;
+    if (theFormat!=0)
+      theFormatCopy=*theFormat;
+    theFormatCopy.flagUseMathSpanPureVsMouseHover=true;
+    theFormatCopy.flagCandidateSubalgebraShortReportOnly=false;
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
       if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
-        if (!XML::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, theFormat), false, true, false))
+        if (!XML::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, &theFormatCopy), false, true, false))
         { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
-          << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, theFormat)
+          << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, &theFormatCopy)
           << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
           << "2. The calculator has no write permission to the folder in which the file is located. "
           << "3. The folder does not exist for some reason lying outside of the calculator. " << crash;
         }
         outputFileSubalgebra << "<html>" << "<script src=\"../../jsmath/easy/load.js\"></script>\n<body>Subalgebra number "
-        << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebraCandidates[i].ToString(theFormat);
+        << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebraCandidates[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
-          if (!XML::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, theFormat), false, true, false))
+          if (!XML::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, &theFormatCopy), false, true, false))
           { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
-            << this->GetPhysicalFileNameFKFTNilradicals(i, theFormat) << " for output. However, the file failed to create. "
+            << this->GetPhysicalFileNameFKFTNilradicals(i, &theFormatCopy) << " for output. However, the file failed to create. "
             << " Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
             << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
           }
-          outputFileFKFTnilradicals << "<html>" << "<script src=\"" << theFormat->PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script><body>"
-          << this->ToStringAlgebraLink(i, theFormat) << this->theSubalgebraCandidates[i].ToStringNilradicals(theFormat) << "\n</body></html>";
+          outputFileFKFTnilradicals << "<html>" << "<script src=\"" << theFormatCopy.PathDisplayServerBaseFolder << "jsmath/easy/load.js\"></script><body>"
+          << this->ToStringAlgebraLink(i, &theFormatCopy) << this->theSubalgebraCandidates[i].ToStringNilradicals(&theFormatCopy) << "\n</body></html>";
         }
         outputFileSubalgebra << "\n</body></html>\n ";
       }
@@ -1822,7 +1829,7 @@ void CandidateSSSubalgebra::ComputeSinglePair(int leftIndex, int rightIndex, Lis
   for (int i=0; i<leftModule.size; i++)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStream;
-      reportStream << "Bracketing element number" << i+1 << " out of " << leftModule.size << " with other module. ";
+      reportStream << "Bracketing element number " << i+1 << " out of " << leftModule.size << " with other module. ";
       theReport.Report(reportStream.str());
     }
     this->ComputePairKweightElementAndModule(leftModule[i], rightIndex, tempList, theGlobalVariables);
@@ -4366,6 +4373,7 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
 { if (this->Modules.size<=0)
     return "";
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringModuleDecompo");
+  bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   out << "Isotypic module decomposition over primal subalgebra (total " << this->Modules.size << " isotypic components). ";
   out << "<table border=\"1\">";
@@ -4389,7 +4397,10 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
         out << "<td>";
       std::stringstream tempStream;
       tempStream << "V_{" << this->HighestWeightsPrimal[i].ToStringLetterFormat("\\omega", &tempCharFormat) << "} ";
-      out << CGI::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+      if (useMouseHover)
+        out << CGI::GetMathMouseHover(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
+      else
+        out << CGI::GetMathSpanPure(tempStream.str()) << "-> " << this->HighestWeightsPrimal[i].ToString();
       out << "</td>";
     }
   }
@@ -4475,7 +4486,10 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   if (this->CharsPrimalModules.size>0)
     for (int i=0; i<this->CharsPrimalModules.size; i++)
     { out << "<td>";
-      out << CGI::GetMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+      if (useMouseHover)
+        out << CGI::GetMathMouseHover(this->CharsPrimalModules[i].ToString(&tempCharFormat));
+      else
+        out << CGI::GetMathSpanPure(this->CharsPrimalModules[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -4487,7 +4501,10 @@ std::string CandidateSSSubalgebra::ToStringModuleDecompo(FormatExpressions* theF
   if (this->CharsPrimalModulesMerged.size>0)
     for (int i=0; i<this->CharsPrimalModulesMerged.size; i++)
     { out << "<td>";
-      out << CGI::GetMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
+      if (useMouseHover)
+        out << CGI::GetMathMouseHover(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
+      else
+        out << CGI::GetMathSpanPure(this->CharsPrimalModulesMerged[i].ToString(&tempCharFormat));
       out << "</td>";
     }
   else
@@ -4928,8 +4945,8 @@ void SemisimpleSubalgebras::ScaleDynkinType(DynkinType& theType)const
 std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { if (ActualIndexSubalgebra<0)
     return "(non-initialized)";
-  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover=theFormat==0 ? true : shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover;
+//  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
+  bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   std::stringstream out;
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->theSubalgebraCandidates[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
@@ -4953,8 +4970,7 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
 { std::stringstream out;
   bool useLaTeX=theFormat==0? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0? true : theFormat->flagUseHTML;
-  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover=theFormat==0 ? true : shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
 
   List<DynkinSimpleType> theSimpleTypes;
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theSimpleTypes);
@@ -4994,8 +5010,7 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
   if (this->flagSystemProvedToHaveNoSolution)
     return "";
   std::stringstream out;
-  bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover=theFormat==0 ? true : shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   if (this->flagCentralizerIsWellChosen && this->centralizerRank!=0 )
   { out << "<br>Centralizer: ";
     Rational dimToralPartCentralizer=this->centralizerRank;
@@ -5047,7 +5062,9 @@ std::string CandidateSSSubalgebra::ToStringCentralizer(FormatExpressions* theFor
 void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCentralizerIsWellChosen");
   if (this->flagSystemProvedToHaveNoSolution)
+  { this->flagCentralizerIsWellChosen=false;
     return;
+  }
   MonomialChar<Rational> theZeroWeight;
   theZeroWeight.owner=0;
   theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
@@ -5171,7 +5188,7 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   bool useLaTeX=theFormat==0 ? true : theFormat->flagUseLatex;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover=theFormat==0 ? true : shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover=theFormat==0 ? true : ((shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover) || !theFormat->flagUseHtmlAndStoreToHD);
   std::stringstream out;
   out << "<br>Dimension of subalgebra generated by predefined or computed generators: " << this->theBasis.size << ". " << "<br>Negative simple generators: ";
   for (int i=0; i<this->theNegGens.size; i++)
@@ -5214,7 +5231,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool writingToHD=theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   bool shortReportOnly=theFormat==0 ? true : theFormat->flagCandidateSubalgebraShortReportOnly;
-  bool useMouseHover=theFormat==0 ? true : shortReportOnly && !theFormat->flagUseMathSpanPureVsMouseHover;
+  bool useMouseHover=theFormat==0 ? true : !theFormat->flagUseMathSpanPureVsMouseHover;
   out << "Subalgebra type: " << this->owner->ToStringAlgebraLink(this->indexInOwner, theFormat) << " (click on type for detailed printout).";
   if (this->AmRegularSA())
     out << "<br>The subalgebra is regular (= the semisimple part of a root subalgebra). ";
@@ -5574,7 +5591,7 @@ void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes()
       << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << "... DONE. Computing Fernando-Kac subalgebra candidates.";
       theReport.Report(reportStream2.str());
     }
-    if (this->flagComputeNilradicals && this->theSubalgebraCandidates[i].GetNumModules()<30)
+    if (this->flagComputeNilradicals && !this->theSubalgebraCandidates[i].AmRegularSA())
       currentSA.EnumerateAllNilradicals(this->theGlobalVariables);
   }
 }
@@ -5592,7 +5609,9 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
   std::stringstream reportStream;
   theReport1.Report("<hr>\nHooking up centralizers ");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
-  { CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];
+  { if (!this->theSubalgebraCandidates[i].flagSystemSolved)
+      continue;
+    CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];
     std::stringstream reportStream2;
     reportStream2 << "Computing centralizer of subalgebra number " << i+1 << " out of " << this->theSubalgebraCandidates.size
     << ". The subalgebra is of type " << currentSA.ToStringTypeAndHs() << ". ";
@@ -5619,7 +5638,9 @@ void SemisimpleSubalgebras::HookUpCentralizers(bool allowNonPolynomialSystemFail
   }
   theReport1.Report("<hr>\nCentralizers computed, adjusting centralizers with respect to the Cartan subalgebra.");
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
-  { std::stringstream reportStream2;
+  { if (!this->theSubalgebraCandidates[i].flagSystemSolved)
+      continue;
+    std::stringstream reportStream2;
     reportStream2 << "Adjusting the centralizer of subalgebra number " << i+1 << " out of " << this->theSubalgebraCandidates.size
     << ". The subalgebra is of type " << this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
     theReport2.Report(reportStream2.str());

@@ -1432,7 +1432,8 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
 }
 
 bool Calculator::innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output)
-{ Selection selectionParSel;
+{ MacroRegisterFunctionWithName("Calculator::innerPrintGenVermaModule");
+  Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
@@ -3658,10 +3659,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseHTML=true;
     contextFormat.GetElement().flagCandidateSubalgebraShortReportOnly=false;
     contextFormat.GetElement().flagIncludeMutableInformation=false;
+    contextFormat.GetElement().flagUseMathSpanPureVsMouseHover=false;
     out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())
-  { out << this->GetValue<double>();
+  { out << std::fixed << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
   { out << this->GetValue<AlgebraicNumber>().ToString();

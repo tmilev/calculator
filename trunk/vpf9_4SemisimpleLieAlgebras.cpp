@@ -628,6 +628,9 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   //set up induction history:
+  std::cout << "<hr><b>Testing actual extension!!! Type base: "
+  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
+  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
   this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
   this->RootInjectionsFromInducer=theRootInjection;
   //induction history is complete.
@@ -668,12 +671,21 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   if (baseRank>=this->owneR->GetRank())
     return;
   if (targetType!=0)
+  { std::cout << "<hr><b>I am aiming at extending " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
+    << " to " << targetType->ToString() << "</b>";
+
+  }
+  if (targetType!=0)
     if (!baseCandidate.theWeylNonEmbeddeD.theDynkinType.CanBeExtendedParabolicallyTo(*targetType))
       return;
+  if (targetType!=0)
+  { std::cout << "<b>... continuing to actual computations!!!</b>";
+
+  }
   List<DynkinType> theLargerTypes;
   List<List<int> > theRootInjections;
   this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-  //std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
+  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
@@ -696,18 +708,23 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   { if (theLargerTypes[i].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
       continue;
     if (targetType!=0)
-      if (!theLargerTypes[i].CanBeExtendedParabolicallyTo(*targetType))
+      if (!theLargerTypes[i].CanBeExtendedParabolicallyOrIsEqualTo(*targetType))
         if (theLargerTypes[i]!=*targetType)
+        { std::cout << "<br>" << theLargerTypes[i].ToString() << " cannot be extended to " << targetType->ToString();
           continue;
+        }
     if (theGlobalVariables!=0)
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
       << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      //std::cout << "<hr>" << reportStream.str();
+      std::cout << "<hr>" << reportStream.str();
       theReport2.Report(reportStream.str());
     }
     if (baseRank!=0)
     { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
+      std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+      << " base candidate is: " << baseCandidate.ToString();
+
       indicesModulesNewComponentExtensionMod.SetSize(0);
       for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
         if (baseCandidate.HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
@@ -717,7 +734,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         { std::stringstream reportStream;
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
           << " cannot be realized: no appropriate module.";
-        //  std::cout << "<hr>" << reportStream.str();
+          std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
         continue;
@@ -736,16 +753,18 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         reportStreamX << "Trying to realize the root of index " << indexNewRootInSmallType << " in simple component of type " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
         { reportStreamX << " which is no good.<br> ";
-          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
+          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
         } else
         { reportStreamX << " which is all nice and dandy.<br>";
-          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
+          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
         }
-        //std::cout << "<br>" << reportStreamX.str();
+        std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
       if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
+      { std::cout << "<hr>Lengths dont match!";
         continue;
+      }
       theHCandidatesRescaled.SetSize(0);
       if (baseRank!=0)
       { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
@@ -759,6 +778,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             { std::stringstream out2;
               out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
               theReport2.Report(out2.str());
+              std::cout << "<hr>" << out2.str();
             }
             theHCandidatesRescaled.AddOnTop(Hrescaled);
           } else
@@ -766,6 +786,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             { std::stringstream out2;
               out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). ";
               theReport2.Report(out2.str());
+              std::cout << "<hr>" << out2.str();
             }
         }
       } else
@@ -783,13 +804,16 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         out2 << "Sl(2) orbit " << j+1 << ": no extension " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
         << " to " << theLargerTypes[i].ToString()  << " not possible because there were no h candidates.";
         theReport2.Report(out2.str());
+        std::cout << "<hr>" << out2.str();
       }
+      std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
       for (int k=0; k<theHCandidatesRescaled.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
           out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
           << theLargerTypes[i].ToString() << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ".";
           theReport2.Report(out2.str());
+          std::cout << "<br>" << out2.str();
         }
         if(newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], j, theLargerTypes[i], theRootInjections[i]))
         { if (theGlobalVariables!=0)
@@ -797,17 +821,18 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesRescaled.size << "). ";
-            //std::cout << reportStream.str();
+            std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
         } else
         { std::stringstream out2;
           out2 << "sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ": did not succeed extending. ";
-          //std::cout << out2.str();
+          std::cout << out2.str();
           theReport2.Report(out2.str());
         }
       }
+      std::cout << "<hr>Done with the type";
     }
   }
 }
@@ -3385,7 +3410,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA[i].size=0;
   ProgressReport theReport(&theGlobalVariables);
-  for (int i=0; i<output.theRootSAs.size-1; i++)
+  for (int i=0; i<output.theRootSAs.size; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra " << output.theRootSAs[i].theDynkinDiagram.ToStringRelativeToAmbientType(inputOwner.theWeyl.theDynkinType[0])
     << "(" << (i+1) << " out of " << output.theRootSAs.size-1 << " non-trivial)\n";
@@ -3455,25 +3480,26 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
-  Selection theRootsWithZeroCharacteristic;
+  int theRelativeDimension= this->SimpleBasisK.size;
+  if (theRelativeDimension==0)
+    return;
+  Selection selectionRootsWithZeroCharacteristic;
   Selection simpleRootsChar2;
   Vectors<Rational> RootsWithCharacteristic2;
   Vectors<Rational> reflectedSimpleBasisK;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
   ElementWeylGroup raisingElt;
-  DynkinDiagramRootSubalgebra tempDiagram;
-  int theRelativeDimension= this->SimpleBasisK.size;
-  theRootsWithZeroCharacteristic.init(theRelativeDimension);
+  selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
     for (int j=0; j<theRelativeDimension; j++)
       InvertedRelativeKillingForm.elements[k][j]=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
-  int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
+  int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport(&theGlobalVariables);
-  Vectors<Rational> tempRoots;
-  tempRoots.ReservE(theRootsWithZeroCharacteristic.MaxSize);
+  Vectors<Rational> rootsZeroChar;
+  rootsZeroChar.ReservE(selectionRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;
   Matrix<Rational> tempMat;
 //  Selection tempSel;
@@ -3482,14 +3508,20 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   theSl2.container=&output;
   theSl2.owneR=this->owneR;
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
-  for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
-  { tempRoots.size=0;
-    for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
-      tempRoots.AddOnTop(this->SimpleBasisK[theRootsWithZeroCharacteristic.elements[j]]);
-    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->GetAmbientWeyl());
+  DynkinDiagramRootSubalgebra diagramZeroCharRoots;
+//  std::cout << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+  bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
+  if (ereBeProbs)
+  { std::cout << "<hr>Ere be probs. ";
+  }
+  if (ereBeProbs)
+    std::cout << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
+  for (int i=0; i<numCycles; i++, selectionRootsWithZeroCharacteristic.incrementSelection())
+  { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
+    diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
     int theSlack=0;
     RootsWithCharacteristic2.size=0;
-    simpleRootsChar2=theRootsWithZeroCharacteristic;
+    simpleRootsChar2=selectionRootsWithZeroCharacteristic;
     simpleRootsChar2.InvertSelection();
     Vector<Rational> simpleRootsChar2Vect;
     simpleRootsChar2Vect=simpleRootsChar2;
@@ -3498,65 +3530,66 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       { theSlack++;
         RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK[j]);
       }
-    int theDynkinEpsilon =tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
+    int theDynkinEpsilon =diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is //
     //except for G_2 (go figure!).
-    //(but generatorootsWithZeroCharVectorrs still have to be found)
+    //(but selectionRootsWithZeroCharacteristic still have to be found)
     //this is done in the below code.
-//    std::cout << "Simple basis k: " << this->SimpleBasisK.ToString();
-    if (theDynkinEpsilon==0)
-    { Vector<Rational> tempRoot, tempRoot2;
-      tempRoot.MakeZero(theRelativeDimension);
-      for (int k=0; k<theRelativeDimension; k++)
-        if(!theRootsWithZeroCharacteristic.selected[k])
-          tempRoot[k]=2;
-      InvertedRelativeKillingForm.ActOnVectorColumn(tempRoot, tempRoot2);
-      Vector<Rational> characteristicH;
-      characteristicH.MakeZero(theLieAlgebra.GetRank());
-      for(int j=0; j<theRelativeDimension; j++)
-        characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-      this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-      ////////////////////
-      reflectedSimpleBasisK=this->SimpleBasisK;
-      for (int k=0; k<reflectedSimpleBasisK.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
-      ////////////////////
-      theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
-      for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
+    if (ereBeProbs)
+      std::cout << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
+    if (theDynkinEpsilon!=0)
+      continue;
+    Vector<Rational> tempRoot, tempRoot2;
+    tempRoot.MakeZero(theRelativeDimension);
+    for (int k=0; k<theRelativeDimension; k++)
+      if(!selectionRootsWithZeroCharacteristic.selected[k])
+        tempRoot[k]=2;
+    InvertedRelativeKillingForm.ActOnVectorColumn(tempRoot, tempRoot2);
+    Vector<Rational> characteristicH;
+    characteristicH.MakeZero(theLieAlgebra.GetRank());
+    for(int j=0; j<theRelativeDimension; j++)
+      characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
+    this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
+    ////////////////////
+    reflectedSimpleBasisK=this->SimpleBasisK;
+    for (int k=0; k<reflectedSimpleBasisK.size; k++)
+      this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
+    ////////////////////
+    theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
+    for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
+      this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
 
-      theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
-      theSl2.theE.MakeZero();
-      theSl2.theF.MakeZero();
-      //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-//      std::cout << "<br>accounting " << characteristicH.ToString();
-      if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-         (theSl2.RootsWithScalar2WithH, theRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
-          theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
-      { int indexIsoSl2;
-        theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
-        if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-        { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexInContainer);
-          output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
-        } else
-        { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
-          theSl2.indexInContainer=output.size;
-          output.AddOnTop(theSl2);
-        }
+    theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
+    theSl2.theE.MakeZero();
+    theSl2.theF.MakeZero();
+    //theSl2.ComputeDebugString(false, false, theGlobalVariables);
+//    std::cout << "<br>accounting " << characteristicH.ToString();
+    if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
+       (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
+        theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+    { int indexIsoSl2;
+      theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
+      if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
+      { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexInContainer);
+        output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
       } else
-      { output.BadHCharacteristics.AddOnTop(characteristicH);
-/*        std::cout << "<br>obtained bad characteristic "
-        << characteristicH.ToString() << ". The zero diagram is "
-        << tempDiagram.ElementToStrinG()
-        << "; the Dynkin epsilon is " << theDynkinEpsilon
-        << "= the num roots generated by diagram " << tempDiagram.NumRootsGeneratedByDiagram()
-        << " + the relative dimension " << theRelativeDimension
-        << " - the slack " << theSlack
-        << "<br>The relative root system is: "
-        << relativeRootSystem.ToString();
-        std::cout << "<br> I was exploring " << this->ToString();*/
+      { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
+        theSl2.indexInContainer=output.size;
+        output.AddOnTop(theSl2);
       }
+    } else
+    { output.BadHCharacteristics.AddOnTop(characteristicH);
+/*      std::cout << "<br>obtained bad characteristic "
+      << characteristicH.ToString() << ". The zero diagram is "
+      << tempDiagram.ElementToStrinG()
+      << "; the Dynkin epsilon is " << theDynkinEpsilon
+      << "= the num roots generated by diagram " << tempDiagram.NumRootsGeneratedByDiagram()
+      << " + the relative dimension " << theRelativeDimension
+      << " - the slack " << theSlack
+      << "<br>The relative root system is: "
+      << relativeRootSystem.ToString();
+      std::cout << "<br> I was exploring " << this->ToString();*/
     }
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
@@ -3792,17 +3825,12 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   std::string tooltipHvalue=
   "The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given \
   *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
-  //if (this->owner==0)
-
-  bool usePNG=theFormat==0? false : theFormat->flagUsePNG;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
   std::string physicalPath, displayPath;
   physicalPath=theFormat==0 ? "../" : theFormat->PathPhysicalOutputFolder;
   displayPath=theFormat==0 ? "../" : theFormat->PathDisplayOutputFolder;
   out << "Number of sl(2) subalgebras " << this->size << ".\n";
-  if (this->IndicesSl2decompositionFlas.size < this->size)
-    usePNG = false;
   std::stringstream out2;
   out2 << "<br>Length longest root ambient algebra squared/4= " << this->GetOwnerWeyl().GetLongestRootLengthSquared()/4 << "<br>";
   out2 << "<br> Given a root subsystem P, and a root subsubsystem P_0, in (10.2) of Semisimple subalgebras of semisimple Lie algebras, E. Dynkin defines "
@@ -3853,15 +3881,10 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "<b>This is wrong!!!!!!!!!!!!! The h is not dual to a dominant weight... </b>";
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
-    if (useHtml && usePNG)
-//      out << "<img src=\"./fla"
-//      << this->IndicesSl2decompositionFlas[i]+1 << ".png\"></td><td>";
-//    else
-    { theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
-      out << tempS;
-      if (useHtml)
-        out << "</td><td>";
-    }
+    theSl2.ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
+    out << tempS;
+    if (useHtml)
+      out << "</td><td>";
     out << theSl2.LengthHsquared;
     if (useHtml)
       out << "</td><td>";

@@ -91,7 +91,7 @@ public:
       result[i]=(*this)[i].RationalValue();
     return result;
   }
-  Vector<double> GetVectorDouble()
+  Vector<double> GetVectorDouble()const
   { Vector<double> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)

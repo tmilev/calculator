@@ -2484,6 +2484,8 @@ public:
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
   List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   List<DrawCircleAtVectorOperation> theDrawCircleAtVectorOperations;
+  Vectors<double> labeledVectors;
+  List<std::string> labelsOfLabeledVectors;
   List<List<double> > ProjectionsEiVectors;
   List<Vectors<double> > BasisProjectionPlane;
   static const int GraphicsUnitDefault=150;
@@ -2503,32 +2505,6 @@ public:
   int indexStartingModifiableTextCommands;
   void (*specialOperationsOnBasisChange)(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
   static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
-  void operator=(const DrawOperations& other)
-  { this->indexStartingModifiableTextCommands=other.indexStartingModifiableTextCommands;
-    this->specialOperationsOnBasisChange=other.specialOperationsOnBasisChange;
-    this->IndexNthDrawOperation=other.IndexNthDrawOperation;
-    this->TypeNthDrawOperation=other.TypeNthDrawOperation;
-    this->theDrawTextOperations=other.theDrawTextOperations;
-    this->theDrawLineOperations=other.theDrawLineOperations;
-    this->theDrawLineBetweenTwoRootsOperations=other.theDrawLineBetweenTwoRootsOperations;
-    this->theDrawTextAtVectorOperations=other.theDrawTextAtVectorOperations;
-    this->theDrawCircleAtVectorOperations=other.theDrawCircleAtVectorOperations;
-    this->ProjectionsEiVectors=other.ProjectionsEiVectors;
-    this->BasisProjectionPlane=other.BasisProjectionPlane;
-    this->SelectedCircleMinus2noneMinus1Center=other.SelectedCircleMinus2noneMinus1Center;
-    this->BasisToDrawCirclesAt=other.BasisToDrawCirclesAt;
-    this->theBilinearForm=other.theBilinearForm;
-    this->ClickToleranceX=other.ClickToleranceX;
-    this->ClickToleranceY=other.ClickToleranceY;
-    this->centerX=other.centerX;
-    this->centerY=other.centerY;
-    this->GraphicsUnit=other.GraphicsUnit;
-    this->flagRotatingPreservingAngles=other.flagRotatingPreservingAngles;
-    this->flagAnimatingMovingCoordSystem=other.flagAnimatingMovingCoordSystem;
-    this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
-    this->SelectedPlane=other.SelectedPlane;
-    this->DebugString=other.DebugString;
-  }
   void MakeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions(Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
@@ -2631,30 +2607,7 @@ public:
     this->specialOperationsOnBasisChange=0;
     this->indexStartingModifiableTextCommands=0;
   }
-  void init()
-  { this->IndexNthDrawOperation.ReservE(10000);
-    this->TypeNthDrawOperation.ReservE(10000);
-    this->theDrawLineBetweenTwoRootsOperations.ReservE(10000);
-    this->theDrawTextAtVectorOperations.ReservE(15);
-    this->theDrawCircleAtVectorOperations.ReservE(280);
-    this->IndexNthDrawOperation.size=0;
-    this->TypeNthDrawOperation.size=0;
-    this->theDrawTextOperations.size=0;
-    this->theDrawLineOperations.size=0;
-    this->theDrawLineBetweenTwoRootsOperations.size=0;
-    this->theDrawTextAtVectorOperations.size=0;
-    this->theDrawCircleAtVectorOperations.size=0;
-    this->centerX.initFillInObject(this->BasisProjectionPlane.size, 300);
-    this->centerY.initFillInObject(this->BasisProjectionPlane.size, 300);
-    this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, DrawOperations::GraphicsUnitDefault);
-    this->ClickToleranceX=5;
-    this->ClickToleranceY=5;
-    this->SelectedCircleMinus2noneMinus1Center=-2;
-    this->SelectedPlane=0;
-    this->flagRotatingPreservingAngles=true;
-    this->flagAnimatingMovingCoordSystem=false;
-    this->flagIsPausedWhileAnimating=false;
-  }
+  void init();
   enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector,};
 };
 
@@ -4876,6 +4829,7 @@ public:
   static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool CanBeExtendedParabolicallyTo(const DynkinType& other)const;
+  bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;

@@ -261,8 +261,9 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
   } else
     out << "The table is precomputed and served from the hard disk. <br>";
 //  out << "The full file name: " << outSltwoFileDisplayName.str();
-  out << "<a href=\"" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">See the result in a separate file/page. </a>";
-  out << "<meta http-equiv=\"refresh\" content=\"1; url=" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">";
+  out << "<a href=\"" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">"
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
+//  out << "<meta http-equiv=\"refresh\" content=\"1; url=" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">";
   return output.AssignValue(out.str(), theCommands);
 }
 

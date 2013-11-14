@@ -5489,10 +5489,38 @@ void WeylGroup::GetCoxeterPlane
   }
 }
 
+void DrawOperations::init()
+{ this->IndexNthDrawOperation.ReservE(10000);
+  this->TypeNthDrawOperation.ReservE(10000);
+  this->theDrawLineBetweenTwoRootsOperations.ReservE(10000);
+  this->theDrawTextAtVectorOperations.ReservE(15);
+  this->theDrawCircleAtVectorOperations.ReservE(280);
+  this->IndexNthDrawOperation.size=0;
+  this->TypeNthDrawOperation.size=0;
+  this->theDrawTextOperations.size=0;
+  this->theDrawLineOperations.size=0;
+  this->theDrawLineBetweenTwoRootsOperations.size=0;
+  this->theDrawTextAtVectorOperations.size=0;
+  this->theDrawCircleAtVectorOperations.size=0;
+  this->centerX.initFillInObject(this->BasisProjectionPlane.size, 300);
+  this->centerY.initFillInObject(this->BasisProjectionPlane.size, 300);
+  this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, DrawOperations::GraphicsUnitDefault);
+  this->labeledVectors.SetSize(0);
+  this->labelsOfLabeledVectors.SetSize(0);
+  this->ClickToleranceX=5;
+  this->ClickToleranceY=5;
+  this->SelectedCircleMinus2noneMinus1Center=-2;
+  this->SelectedPlane=0;
+  this->flagRotatingPreservingAngles=true;
+  this->flagAnimatingMovingCoordSystem=false;
+  this->flagIsPausedWhileAnimating=false;
+}
+
 void WeylGroup::DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables, bool drawWeylChamber, Vector<Rational>* bluePoint,
  bool LabelDynkinDiagramVertices, Vectors<Rational>* predefinedProjectionPlane)
-{ DrawOperations& output=outputDV.theBuffer;
+{ MacroRegisterFunctionWithName("WeylGroup::DrawRootSystem");
+  DrawOperations& output=outputDV.theBuffer;
   if (wipeCanvas)
     output.init();
   int theDimension=this->GetDim();
@@ -5595,9 +5623,12 @@ void WeylGroup::DrawRootSystem
     output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     if (LabelDynkinDiagramVertices)
     { Vector<Rational>& current=epsNotationSimpleBasis[i];
-      output.drawTextAtVectorBuffer
-      (tempRootRat, current.ToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
+      output.drawTextAtVectorBuffer(tempRootRat, current.ToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
     }
+  }
+  for (int i=0; i<this->RootSystem.size; i++)
+  { output.labeledVectors.AddOnTop(this->RootSystem[i].GetVectorDouble());
+    output.labelsOfLabeledVectors.AddOnTop(this->RootSystem[i].ToString());
   }
   std::stringstream tempStream;
   tempStream << this->theDynkinType.GetWeylGroupName();

@@ -392,15 +392,13 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
     { bufferSAs[RecursionDepth].genK.AddOnTop(bufferSAs[RecursionDepth-1].HighestWeightsGmodK[k]);
       bufferSAs[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
       std::stringstream out;
-      out << "Included root " << k+1 << " out of " << bufferSAs[RecursionDepth-1].kModules.size
-      << " Total found SAs: " << this->size;
+      out << "Included root " << k+1 << " out of " << bufferSAs[RecursionDepth-1].kModules.size << " Total found SAs: " << this->size;
       theReport.Report(out.str());
       int indexSA= this->IndexSubalgebra(bufferSAs[RecursionDepth], theGlobalVariables);
       if (indexSA==-1)
       { bufferSAs[RecursionDepth].ComputeAllButAmbientWeyl();
         (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->size);
-        this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
-        (bufferSAs, RecursionDepth+1, theGlobalVariables);
+        this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
         (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
       bufferSAs[RecursionDepth].genK.RemoveIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);

@@ -3815,12 +3815,24 @@ int DynkinType::GetNewIndexFromRootInjection(const List<int>& inputRootInjection
   return selectedIndices.elements[0];
 }
 
+bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)const
+{ if ((*this)==other)
+    return true;
+  return this->CanBeExtendedParabolicallyTo(other);
+}
+
 bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 { MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
+  std::cout << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
+  << other.ToString();
   if (other.IsEqualToZero())
+  { std::cout << "... it can't";
     return false;
+  }
   if (this->IsEqualToZero())
+  { std::cout << "... it can";
     return true;
+  }
   DynkinSimpleType targetType, currentType;
   targetType=other[0];
   DynkinType remainderThis, remainderOther;
@@ -3832,10 +3844,11 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
       remainderThis.SubtractMonomial(currentType, 1);
       remainderOther= other;
       remainderOther.SubtractMonomial(targetType, 1);
-      if (remainderThis.CanBeExtendedParabolicallyTo(remainderOther))
+      if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther))
         return true;
     }
   }
+  std::cout << "...it cant";
   return false;
 }
 
@@ -4315,6 +4328,7 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
+  std::cout << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
   if (this->lengthFirstCoRootSquared!=other.lengthFirstCoRootSquared)
     return false;
   if (other.theRank<=this->theRank)

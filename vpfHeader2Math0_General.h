@@ -2484,6 +2484,7 @@ public:
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
   List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   List<DrawCircleAtVectorOperation> theDrawCircleAtVectorOperations;
+  List<Vectors<double> > toBeHighlightedWhenLabeledVectorHovered;
   Vectors<double> labeledVectors;
   List<std::string> labelsOfLabeledVectors;
   List<List<double> > ProjectionsEiVectors;

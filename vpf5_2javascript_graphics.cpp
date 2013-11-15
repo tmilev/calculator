@@ -4,6 +4,28 @@
 #include "vpfHeader2Math0_General.h"
 ProjectInformationInstance ProjectInfoVpf5_2cpp(__FILE__, "Calculator javascript/html/graphics. ");
 
+std::string CreateJavaScriptVectors(Vectors<double>& inputVectors, const std::string& arrayName, bool useVar)
+{ MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
+  if (inputVectors.size==0)
+    return "";
+  std::stringstream out;
+  out << "\n";
+  if (useVar)
+    out << "var ";
+  out << arrayName << "=new Array(" << inputVectors.size << ");\n";
+  int theDimension=inputVectors[0].size;
+  for (int i=0; i<inputVectors.size; i++)
+  { out << arrayName << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << inputVectors[i][j];
+      if(j!=theDimension-1)
+        out << ",";
+     }
+    out <<  "];\n";
+  }
+  return out.str();
+}
+
 std::string CreateStaticJavaScriptVectorsArrayWithProjection
 (Vectors<double>& inputVectors, const std::string& arrayName, const std::string& projectionsName)
 { MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
@@ -31,8 +53,38 @@ std::string CreateStaticJavaScriptVectorsArrayWithProjection
   return out.str();
 }
 
-std::string CreateStaticJavaScriptTextArray
-(List<std::string>& theLabels, const std::string& arrayName)
+std::string CreateStaticJavaScriptListVectorsWithProjection
+(List<Vectors<double> >& inputVectors, const std::string& arrayName, const std::string& projectionsName)
+{ MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectorsWithProjection");
+  if (inputVectors.size==0)
+    return "";
+  std::stringstream out;
+  out << "\nvar " << arrayName << "=new Array(" << inputVectors.size << ");\n";
+  out << "var " << projectionsName << "=new Array(" << inputVectors.size << ");\n";
+  for (int i=0; i<inputVectors.size; i++)
+  { std::stringstream projNamesWithIndex, arrayNameWithIndex;
+    arrayNameWithIndex << arrayName << "[" << i << "]";
+    projNamesWithIndex << projectionsName << "[" << i << "]";
+    out << CreateStaticJavaScriptVectorsArrayWithProjection(inputVectors[i], arrayNameWithIndex.str(), projNamesWithIndex.str());
+  }
+  return out.str();
+}
+
+std::string CreateJavaScriptListVectors(List<Vectors<double> >& inputVectors, const std::string& arrayName)
+{ MacroRegisterFunctionWithName("CreateStaticJavaScriptListVectors");
+  if (inputVectors.size==0)
+    return "";
+  std::stringstream out;
+  out << "\nvar " << arrayName << "=new Array(" << inputVectors.size << ");\n";
+  for (int i=0; i<inputVectors.size; i++)
+  { std::stringstream projNamesWithIndex, arrayNameWithIndex;
+    arrayNameWithIndex << arrayName << "[" << i << "]";
+    out << CreateJavaScriptVectors(inputVectors[i], arrayNameWithIndex.str(), false);
+  }
+  return out.str();
+}
+
+std::string CreateStaticJavaScriptTextArray(List<std::string>& theLabels, const std::string& arrayName)
 { MacroRegisterFunctionWithName("CreateStaticJavaScriptVectorsArrayWithProjection");
   if (theLabels.size==0)
     return "";
@@ -320,6 +372,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << CreateStaticJavaScriptVectorsArrayWithProjection(this->theBuffer.labeledVectors, labeledVectorsVarName, "proj"+labeledVectorsVarName);
   out << CreateStaticJavaScriptTextArray(this->theBuffer.labelsOfLabeledVectors, "labels"+labeledVectorsVarName);
+  out << CreateJavaScriptListVectors(this->theBuffer.toBeHighlightedWhenLabeledVectorHovered, "highlight"+labeledVectorsVarName);
+  out << "var selectedLabels" << timesCalled << "= new Array(" << this->theBuffer.labeledVectors.size << ");\n";
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
@@ -399,8 +453,21 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "result=[resultX, resultY];\n";
   out << "return result;\n";
   out << "}\n";
-  out << "var " << theSurfaceName << "=0;\n"
-  << "function " << theDrawFunctionName << "(){\n"
+  out << "var " << theSurfaceName << "=0;\n";
+  out << "function drawHighlights" << timesCalled << "() {\n"
+  << "for (var i=0; i<" << this->theBuffer.labeledVectors.size << "; i++)\n"
+  << "  if (selectedLabels" << timesCalled << "[i])\n"
+  << "    for (var j=0; j<highlight" << labeledVectorsVarName << "[i].length; j++)\n"
+  << "    { " << theSurfaceName << ".strokeStyle=\"#555555\";\n "
+  << "      " << theSurfaceName << ".beginPath();\n "
+  << "      " << theSurfaceName << ".arc("
+  << functionConvertToXYName << "(highlight" << labeledVectorsVarName << "[i][j])[0],"
+  << functionConvertToXYName << "(highlight" << labeledVectorsVarName << "[i][j])[1], 7"
+  << ", 0, 2*Math.PI);\n "
+  << "      " << theSurfaceName << ".stroke();\n"
+  << "    }\n"
+  << "}\n";
+  out << "function " << theDrawFunctionName << "(){\n"
   << "  if (" << theSurfaceName << "==0)\n"
   << "    " << theInitFunctionName << "();\n"
   << "ComputeProjections" << timesCalled << "();\n";
@@ -447,9 +514,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       default: break;
     }
   }
-//  out << theSurfaceName << ".stroke();\n";
-  out << "}\n"
-  << "function " << theInitFunctionName << "(){\n"
+  out << "drawHighlights" << timesCalled << "();\n";
+  out << "}\n";
+  out << "function " << theInitFunctionName << "(){\n"
   << theSurfaceName << " = document.getElementById(\"" << theCanvasId << "\").getContext(\"2d\");\n"
   << theDrawFunctionName << "();\n";
   if (this->theBuffer.BasisProjectionPlane.size>2)
@@ -535,8 +602,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "(VectorE1Cone" << timesCalled << ", " << labeledVectorsVarName << "[i]);\n"
   << "    proj" << labeledVectorsVarName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << labeledVectorsVarName << "[i]);\n"
-  << "  }\n"
-  << "}\n";
+  << "  }\n";
+  out << "}\n";
   out << "\nfunction getScalarProduct" << timesCalled << "(root1, root2)\n"
   << "{ var result=0;\n"
   << "  for (var i=0; i<" << theDimension << "; i++)\n"
@@ -625,10 +692,23 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "}\n";
   out << "function processMousePosition" << timesCalled << "(x, y){\n"
   << "  labelString=\"\";\n"
+  << "  needRedraw=false;\n"
   << "  for (i=0; i<" << this->theBuffer.labeledVectors.size << "; i++)\n"
   << "    if (ptsWithinClickToleranceCone" << timesCalled << "(x,y,proj" << labeledVectorsVarName << "[i][0], proj" << labeledVectorsVarName << "[i][1]))\n"
-  << "      labelString+=labels" << labeledVectorsVarName << "[i];\n"
-  << "  document.getElementById(\"canvas" << timesCalled << "Notes\").innerHTML=labelString;"
+  << "    { labelString+=labels" << labeledVectorsVarName << "[i];\n "
+  << "      if (!selectedLabels" << timesCalled << "[i])\n"
+  << "        needRedraw=true;\n"
+  << "      selectedLabels" << timesCalled << "[i]=true;\n "
+  << "    } else\n"
+  << "    { if (selectedLabels" << timesCalled << "[i])\n"
+  << "        needRedraw=true;\n"
+  << "      selectedLabels" << timesCalled << "[i]=false;\n "
+  << "    }\n"
+  << "  if (needRedraw)\n"
+  << "  { document.getElementById(\"canvas" << timesCalled << "Notes\").innerHTML=labelString;\n"
+  << "    " << theDrawFunctionName << "();\n"
+  << "    jsMath.Process(document.getElementById(\"canvas" << timesCalled << "Notes\"));\n"
+  << "  }\n"
   << "\n}\n";
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
   << "{ divPosX=0;\n  divPosY=0;\n  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
@@ -839,8 +919,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     << textEbasisNamesUserInput[0][i] << "\").value;\n"
     << "  VectorE2ConeGoal" << timesCalled << "[" << i << "]=document.getElementById(\""
     << textEbasisNamesUserInput[1][i] << "\").value;\n";
-  out
-  << "  changeProjectionPlaneUser" << timesCalled << "();\n"
+  out << "  changeProjectionPlaneUser" << timesCalled << "();\n"
   << "\n}\n";
   out << "function changeProjectionPlaneUser" << timesCalled << "(){\n"
   << "  frameCount" << timesCalled << "++;\n"

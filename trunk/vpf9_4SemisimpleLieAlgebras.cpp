@@ -628,9 +628,9 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
   //set up induction history:
-  std::cout << "<hr><b>Testing actual extension!!! Type base: "
-  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
-  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
+//  std::cout << "<hr><b>Testing actual extension!!! Type base: "
+//  << baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString()
+//  << ", type target: " << this->theWeylNonEmbeddeD.theDynkinType.ToString() << "</b><br>";
   this->indexIamInducedFrom=baseSubalgebra.indexInOwner;
   this->RootInjectionsFromInducer=theRootInjection;
   //induction history is complete.
@@ -670,22 +670,20 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   int baseRank=baseCandidate.theWeylNonEmbeddeD.GetDim();
   if (baseRank>=this->owneR->GetRank())
     return;
-  if (targetType!=0)
-  { std::cout << "<hr><b>I am aiming at extending " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
-    << " to " << targetType->ToString() << "</b>";
-
-  }
+//  if (targetType!=0)
+//  { std::cout << "<hr><b>I am aiming at extending " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
+//    << " to " << targetType->ToString() << "</b>";
+//  }
   if (targetType!=0)
     if (!baseCandidate.theWeylNonEmbeddeD.theDynkinType.CanBeExtendedParabolicallyTo(*targetType))
       return;
-  if (targetType!=0)
-  { std::cout << "<b>... continuing to actual computations!!!</b>";
-
-  }
+//  if (targetType!=0)
+//  { std::cout << "<b>... continuing to actual computations!!!</b>";
+//  }
   List<DynkinType> theLargerTypes;
   List<List<int> > theRootInjections;
   this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
+  //std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
@@ -710,20 +708,20 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     if (targetType!=0)
       if (!theLargerTypes[i].CanBeExtendedParabolicallyOrIsEqualTo(*targetType))
         if (theLargerTypes[i]!=*targetType)
-        { std::cout << "<br>" << theLargerTypes[i].ToString() << " cannot be extended to " << targetType->ToString();
+        { //std::cout << "<br>" << theLargerTypes[i].ToString() << " cannot be extended to " << targetType->ToString();
           continue;
         }
     if (theGlobalVariables!=0)
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
       << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      std::cout << "<hr>" << reportStream.str();
+      //std::cout << "<hr>" << reportStream.str();
       theReport2.Report(reportStream.str());
     }
     if (baseRank!=0)
     { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
-      std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-      << " base candidate is: " << baseCandidate.ToString();
+      //std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+      //<< " base candidate is: " << baseCandidate.ToString();
 
       indicesModulesNewComponentExtensionMod.SetSize(0);
       for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
@@ -734,7 +732,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         { std::stringstream reportStream;
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
           << " cannot be realized: no appropriate module.";
-          std::cout << "<hr>" << reportStream.str();
+          //std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
         continue;
@@ -753,16 +751,16 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         reportStreamX << "Trying to realize the root of index " << indexNewRootInSmallType << " in simple component of type " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
         { reportStreamX << " which is no good.<br> ";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
+          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
         } else
         { reportStreamX << " which is all nice and dandy.<br>";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
+          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
         }
-        std::cout << "<br>" << reportStreamX.str();
+        //std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
       if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
-      { std::cout << "<hr>Lengths dont match!";
+      { //std::cout << "<hr>Lengths dont match!";
         continue;
       }
       theHCandidatesRescaled.SetSize(0);
@@ -778,7 +776,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             { std::stringstream out2;
               out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
               theReport2.Report(out2.str());
-              std::cout << "<hr>" << out2.str();
+              //std::cout << "<hr>" << out2.str();
             }
             theHCandidatesRescaled.AddOnTop(Hrescaled);
           } else
@@ -786,7 +784,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             { std::stringstream out2;
               out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). ";
               theReport2.Report(out2.str());
-              std::cout << "<hr>" << out2.str();
+              //std::cout << "<hr>" << out2.str();
             }
         }
       } else
@@ -804,16 +802,16 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         out2 << "Sl(2) orbit " << j+1 << ": no extension " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
         << " to " << theLargerTypes[i].ToString()  << " not possible because there were no h candidates.";
         theReport2.Report(out2.str());
-        std::cout << "<hr>" << out2.str();
+        //std::cout << "<hr>" << out2.str();
       }
-      std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
+      //std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
       for (int k=0; k<theHCandidatesRescaled.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
           out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
           << theLargerTypes[i].ToString() << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ".";
           theReport2.Report(out2.str());
-          std::cout << "<br>" << out2.str();
+          //std::cout << "<br>" << out2.str();
         }
         if(newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], j, theLargerTypes[i], theRootInjections[i]))
         { if (theGlobalVariables!=0)
@@ -821,18 +819,18 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesRescaled.size << "). ";
-            std::cout << reportStream.str();
+            //std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
         } else
         { std::stringstream out2;
           out2 << "sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesRescaled.size << ": did not succeed extending. ";
-          std::cout << out2.str();
+          //std::cout << out2.str();
           theReport2.Report(out2.str());
         }
       }
-      std::cout << "<hr>Done with the type";
+      //std::cout << "<hr>Done with the type";
     }
   }
 }
@@ -4247,6 +4245,61 @@ Rational CandidateSSSubalgebra::GetScalarSA(const Vector<Rational>& primalWeight
 { return primalWeightLeft.ScalarProduct(primalWeightRight, this->BilinearFormFundPrimal);
 }
 
+std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight)const
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringDrawWeightsHelper");
+  std::stringstream out;
+  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > >& currentMod=this->Modules[indexModule];
+  FormatExpressions charFormat;
+  charFormat.vectorSpaceEiBasisNames.SetSize(this->GetPrimalRank());
+  for (int i=0; i<this->GetRank(); i++)
+  { std::stringstream tempStream;
+    tempStream << "\\\\omega_{" << i+1 << "}";
+    charFormat.vectorSpaceEiBasisNames[i]=tempStream.str();
+  }
+  for (int i=this->GetRank(); i<this->GetPrimalRank(); i++)
+  { std::stringstream tempStream;
+    tempStream << "\\\\psi_{" << i+1 << "}";
+    charFormat.vectorSpaceEiBasisNames[i]=tempStream.str();
+  }
+  for (int i=0; i<currentMod.size; i++)
+  { out << "<table style=\\\"border:1px solid #000;\\\">";
+    out << "<tr><td colspan=\\\"3\\\">"
+    << "<span class=\\\"math\\\">"
+    << "V_{" << this->HighestWeightsPrimal[indexModule].ToStringLetterFormat("\\\\omega", &charFormat) << "}"
+    << " </span></td></tr>"
+    << "<tr>"
+    << "<td style=\\\"text-align: center;\\\">basis</td>"
+    << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">weights fund.coords.</td>"
+    << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">weights primal</td>"
+    << "</tr>";
+    for (int j=0; j<currentMod[i].size; j++)
+    { std::string openTag="", closeTag="";
+      if (this->WeightsModulesPrimal[indexModule][j]==theWeight)
+      { openTag="<span style=\\\"color:#FF0000\\\">";
+        closeTag="</span>";
+      }
+      out << "<tr>";
+
+      out << "<td style=\\\"text-align: center;\\\">" << openTag;
+      out << "<span class=\\\"math\\\">" << currentMod[i][j].ToString() << "</span>";
+      out << closeTag << "</td>";
+
+      out << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
+      out << "<span class=\\\"math\\\">"
+      << this->WeightsModulesNONprimal[indexModule][j].ToStringLetterFormat("\\\\omega", &charFormat) << "</span>";
+      out << closeTag << "</td>";
+
+      out << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
+      out << "<span class=\\\"math\\\">"
+      << this->WeightsModulesPrimal[indexModule][j].ToStringLetterFormat("\\\\omega", &charFormat) << "</span>";
+      out << closeTag << "</td>";
+      out << "</tr>";
+    }
+    out << "</table>";
+  }
+  return out.str();
+}
+
 std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFormat)const
 { if (!this->flagCentralizerIsWellChosen)
     return "";
@@ -4311,6 +4364,23 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
       for (int k=j+1; k<cornerWeights.size; k++)
         if (minDist==Vector<Rational>::ScalarProduct((cornerWeights[k]-cornerWeights[j]), (cornerWeights[k]-cornerWeights[j]), this->BilinearFormFundPrimal))
           theDV.drawLineBetweenTwoVectorsBuffer(cornerWeights[k], cornerWeights[j], theDV.PenStyleNormal, color);
+    }
+  }
+  theDV.theBuffer.labeledVectors.SetSize(0);
+  theDV.theBuffer.labelsOfLabeledVectors.SetSize(0);
+  theDV.theBuffer.toBeHighlightedWhenLabeledVectorHovered.SetSize(0);
+  HashedList<Vector<Rational> > currentWeights;
+  for (int i=0; i<this->Modules.size; i++)
+  { currentWeights.Clear();
+    currentWeights.AddOnTopNoRepetition(this->WeightsModulesPrimal[i]);
+    Vectors<double> currentWeightsDouble;
+    currentWeightsDouble.SetSize(currentWeights.size);
+    for (int j=0; j<currentWeightsDouble.size; j++)
+      currentWeightsDouble[j]=currentWeights[j].GetVectorDouble();
+    for (int j=0; j<currentWeights.size; j++)
+    { theDV.theBuffer.labeledVectors.AddOnTop(currentWeights[j].GetVectorDouble());
+      theDV.theBuffer.toBeHighlightedWhenLabeledVectorHovered.AddOnTop(currentWeightsDouble);
+      theDV.theBuffer.labelsOfLabeledVectors.AddOnTop(this->ToStringDrawWeightsHelper(i, currentWeights[j]));
     }
   }
   theDV.theBuffer.BasisToDrawCirclesAt.SetSize(BasisToDrawCirclesAt.size);

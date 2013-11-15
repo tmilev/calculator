@@ -5629,6 +5629,10 @@ void WeylGroup::DrawRootSystem
   for (int i=0; i<this->RootSystem.size; i++)
   { output.labeledVectors.AddOnTop(this->RootSystem[i].GetVectorDouble());
     output.labelsOfLabeledVectors.AddOnTop(this->RootSystem[i].ToString());
+    output.toBeHighlightedWhenLabeledVectorHovered.SetSize(output.toBeHighlightedWhenLabeledVectorHovered.size+1);
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->SetSize(0);
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop(this->RootSystem[i].GetVectorDouble());
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop((-this->RootSystem[i]).GetVectorDouble());
   }
   std::stringstream tempStream;
   tempStream << this->theDynkinType.GetWeylGroupName();

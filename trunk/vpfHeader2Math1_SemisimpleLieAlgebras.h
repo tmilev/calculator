@@ -224,6 +224,10 @@ public:
   Vectors<Rational> theHsInOrderOfCreation;
   Matrix<Rational> BilinearFormSimplePrimal;
   Matrix<Rational> BilinearFormFundPrimal;
+  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
+  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
+  Matrix<Rational> MatMultiplyFundCoordsToGetSimple;
+
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;
   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;

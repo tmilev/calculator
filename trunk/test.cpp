@@ -1380,7 +1380,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
@@ -2151,7 +2151,7 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(localGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)

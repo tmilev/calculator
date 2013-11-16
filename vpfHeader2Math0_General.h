@@ -5719,6 +5719,7 @@ public:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
   SemisimpleLieAlgebra* owneR;
+  GlobalVariables* theGlobalVariables;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
@@ -5756,7 +5757,9 @@ public:
   void GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
+
+  void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
+  void GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);

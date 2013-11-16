@@ -501,6 +501,7 @@ rootSubalgebras::rootSubalgebras()
   this->UpperLimitNumElementsWeyl=0;
   this->owneR=0;
   this->initForNilradicalGeneration();
+  this->theGlobalVariables=0;
 }
 
 void rootSubalgebras::initForNilradicalGeneration()

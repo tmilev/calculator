@@ -1095,7 +1095,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     return output.SetError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(*theCommands.theGlobalVariableS, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(*theCommands.theGlobalVariableS, true, false);
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;

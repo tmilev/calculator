@@ -3401,7 +3401,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.reset(inputOwner);
   output.CheckConsistency();
   output.GetOwner().ComputeChevalleyConstants(&theGlobalVariables);
-  output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
+  output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.theSubalgebras.size);
   output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.theSubalgebras.size*2);
@@ -3456,8 +3456,8 @@ SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()
   return *this->owneR;
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
-{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism");
+void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
+{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD");
   this->theSubalgebras.size=0;
   this->GetOwnerWeyl().ComputeRho(true);
   //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);

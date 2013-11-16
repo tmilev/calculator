@@ -5705,9 +5705,10 @@ public:
   void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
 };
 
-class rootSubalgebras: public List<rootSubalgebra>
+class rootSubalgebras
 {
 public:
+  List<rootSubalgebra> theSubalgebras;
   coneRelations theBadRelations;
   coneRelations theGoodRelations;
   coneRelations theMinRels;
@@ -5758,7 +5759,7 @@ public:
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-  void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
+  void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
   void ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
   void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
   void SortDescendingOrderBySSRank();
@@ -5780,34 +5781,8 @@ public:
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void initForNilradicalGeneration()
-  { this->NumSubalgebrasProcessed=0;
-    this->NumConeConditionFailures=0;
-    this->NumSubalgebrasCounted=0;
-    this->IndexCurrentSANilradicalsGeneration=0;
-    this->ReportStringNonNilradicalParabolic="";
-    this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration=this->size-1;
-    if (this->size>0)
-    { this->TheObjects[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
-      this->NumConeConditionHoldsBySSpart.initFillInObject(this->size, 0);
-    }
-  }
-  rootSubalgebras()
-  { this->flagNilradicalComputationInitialized=false;
-    this->flagStoringNilradicals=false;
-    this->flagUsingParabolicsInCentralizers=true;
-    this->flagUseDynkinClassificationForIsomorphismComputation=true;
-    this->flagCountingNilradicalsOnlyNoComputation = false;
-    this->flagComputingLprohibitingWeights=false;
-    this->flagComputeConeCondition=false;
-    this->flagUsingActionsNormalizerCentralizerNilradical=true;
-    this->flagLookingForMinimalRels=false;
-    this->NumLinesPerTableLatex=20;
-    this->NumColsPerTableLatex=4;
-    this->UpperLimitNumElementsWeyl=0;
-    this->owneR=0;
-    this->initForNilradicalGeneration();
-  }
+  void initForNilradicalGeneration();
+  rootSubalgebras();
 };
 
 class VectorPartition

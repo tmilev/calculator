@@ -331,7 +331,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
 { std::stringstream out; std::string tempS;
   //W'' stands for the graph isomorphisms of C(k_ss) extending to Vector<Rational> system isomorphisms of the entire algebra.
   for (int i=fromIndex; i<NumToProcess; i++)
-    this->GenerateKintersectBOuterIsos(this->TheObjects[i], theGlobalVariables);
+    this->GenerateKintersectBOuterIsos(this->theSubalgebras[i], theGlobalVariables);
   if (useLatex)
     out << "\\begin{tabular}{ccccc}$\\mathfrak{k}_{ss}$& $C(k_{ss})_{ss}$ & $\\#W''$ &$\\#W'''$&$\\#(W'''\\rtimes W'')$\\\\\\hline";
   if (useHtml)
@@ -339,8 +339,8 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   Vectors<Rational> emptyRoots;
   emptyRoots.size=0;
   for (int i=fromIndex; i<NumToProcess; i++)
-  { rootSubalgebra& current= this->TheObjects[i];
-    ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
+  { rootSubalgebra& current= this->theSubalgebras[i];
+    ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms[i];
     theOuterIsos.ComputeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.ExternalAutomorphisms, &theGlobalVariables, 0, true);
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
@@ -560,7 +560,7 @@ void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* th
 
 void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->GetOwnerWeyl().WriteToFile(output);
-  output << "Number_subalgebras: " << this->size << "\n";
+  output << "Number_subalgebras: " << this->theSubalgebras.size << "\n";
   //////////////////////////////////////////////////////////////////////////////////////
   output << "Index_current_SA_nilradicals_generation: " << this->IndexCurrentSANilradicalsGeneration << "\n";
   output << "Num_SAs_to_be_processed: " << this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration << "\n";
@@ -573,8 +573,8 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
   output << this->CountersNilradicalsGeneration;
   output << "\nRecursion_depth: " << this->RecursionDepthNilradicalsGeneration << "\n";
   ////////////////////////////////////////////////////////////////////////////////////////
-  for (int  i=0; i<this->size; i++)
-    this->TheObjects[i].WriteToFileNilradicalGeneration(output, theGlobalVariables, *this);
+  for (int  i=0; i<this->theSubalgebras.size; i++)
+    this->theSubalgebras[i].WriteToFileNilradicalGeneration(output, theGlobalVariables, *this);
   this->theGoodRelations.WriteToFile(output, theGlobalVariables);
   this->theBadRelations.WriteToFile(output, theGlobalVariables);
 }
@@ -586,7 +586,7 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
   input >> tempS >> tempI;
   if(tempS!="Number_subalgebras:")
     crash << crash;
-  this->SetSize(tempI);
+  this->theSubalgebras.SetSize(tempI);
   //////////////////////////////////////////////////////////////////////////////////////
   input >> tempS >> this->IndexCurrentSANilradicalsGeneration;
   input >> tempS >> this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
@@ -599,8 +599,8 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
   input >> this->CountersNilradicalsGeneration;
   input >> tempS >> this->RecursionDepthNilradicalsGeneration;
   /////////////////////////////////////////////////////////////////////////////////////
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ReadFromFileNilradicalGeneration(input, theGlobalVariables, *this);
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    this->theSubalgebras[i].ReadFromFileNilradicalGeneration(input, theGlobalVariables, *this);
   this->theGoodRelations.ReadFromFile(input, theGlobalVariables, *this);
   this->theBadRelations.ReadFromFile(input, theGlobalVariables, *this);
   this->flagNilradicalComputationInitialized=true;
@@ -734,7 +734,7 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   input >> tempS >> this->IndexOwnerRootSubalgebra;
   if(tempS!="Index_owner_root_SA:")
     crash << crash;
-  this->ComputeTheDiagramAndDiagramRelAndK(owner.TheObjects[this->IndexOwnerRootSubalgebra]);
+  this->ComputeTheDiagramAndDiagramRelAndK(owner.theSubalgebras[this->IndexOwnerRootSubalgebra]);
   this->ComputeDebugString(owner, true, true);
 }
 
@@ -787,9 +787,9 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       << this->GetOwnerWeyl().CartanSymmetric.NumRows*2 << ")}$";
     out << "} \\\\\\hline";
   }
-  for (int i=0; i<this->size-1; i++)
+  for (int i=0; i<this->theSubalgebras.size-1; i++)
     if (this->storedNilradicals[i].size>0)
-    { rootSubalgebra& currentRootSA=this->TheObjects[i];
+    { rootSubalgebra& currentRootSA=this->theSubalgebras[i];
       tempRoots.size=0;
       for (int j=0; j<currentRootSA.PositiveRootsK.size; j++)
       { tempRoots.AddOnTop(currentRootSA.PositiveRootsK[j]);

@@ -378,9 +378,9 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 }
 
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
-(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
-{ this->AddOnTop(bufferSAs[RecursionDepth-1]);
-  int currentAlgebraIndex=this->size-1;
+(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
+{ this->theSubalgebras.AddOnTop(bufferSAs[RecursionDepth-1]);
+  int currentAlgebraIndex=this->theSubalgebras.size-1;
   rootSubalgebra::ProblemCounter++;
   if (RecursionDepth>=bufferSAs.size)
     bufferSAs.SetSize(bufferSAs.size+this->GetOwnerWeyl().CartanSymmetric.NumRows);
@@ -392,15 +392,16 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
     { bufferSAs[RecursionDepth].genK.AddOnTop(bufferSAs[RecursionDepth-1].HighestWeightsGmodK[k]);
       bufferSAs[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
       std::stringstream out;
-      out << "Included root " << k+1 << " out of " << bufferSAs[RecursionDepth-1].kModules.size << " Total found SAs: " << this->size;
+      out << "Included root " << k+1 << " out of " << bufferSAs[RecursionDepth-1].kModules.size
+      << " Total found SAs: " << this->theSubalgebras.size;
       theReport.Report(out.str());
       int indexSA= this->IndexSubalgebra(bufferSAs[RecursionDepth], theGlobalVariables);
       if (indexSA==-1)
       { bufferSAs[RecursionDepth].ComputeAllButAmbientWeyl();
-        (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->size);
+        this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->theSubalgebras.size);
         this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
-        (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
+        this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
       bufferSAs[RecursionDepth].genK.RemoveIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);
     }
 }
@@ -458,8 +459,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
 }
 
 void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
-(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots,
- rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
+(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> selectedRootsBasisCentralizer;
   selectedRootsBasisCentralizer.size=0;
   for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
@@ -467,19 +467,17 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
       selectedRootsBasisCentralizer.AddOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
   outputSubgroup.AmbientWeyl=(theRootSA.GetAmbientWeyl());
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
-  theRootSA.GenerateIsomorphismsPreservingBorel
-  (theRootSA, theGlobalVariables, &outputSubgroup, true);
+  theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
   //theSubgroup.ToString(tempS);
   //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
   //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   outputSubgroup.ComputeSubGroupFromGeneratingReflections
-  (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables,
-   this->UpperLimitNumElementsWeyl, false);
+  (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
   outputSubgroup.simpleGenerators=(selectedRootsBasisCentralizer);
-  this->CentralizerIsomorphisms.ReservE(this->size);
-  this->CentralizerOuterIsomorphisms.ReservE(this->size);
+  this->CentralizerIsomorphisms.ReservE(this->theSubalgebras.size);
+  this->CentralizerOuterIsomorphisms.ReservE(this->theSubalgebras.size);
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
   this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
@@ -488,11 +486,41 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical
   //theSubgroup.ComputeDebugString();
 }
 
+rootSubalgebras::rootSubalgebras()
+{ this->flagNilradicalComputationInitialized=false;
+  this->flagStoringNilradicals=false;
+  this->flagUsingParabolicsInCentralizers=true;
+  this->flagUseDynkinClassificationForIsomorphismComputation=true;
+  this->flagCountingNilradicalsOnlyNoComputation = false;
+  this->flagComputingLprohibitingWeights=false;
+  this->flagComputeConeCondition=false;
+  this->flagUsingActionsNormalizerCentralizerNilradical=true;
+  this->flagLookingForMinimalRels=false;
+  this->NumLinesPerTableLatex=20;
+  this->NumColsPerTableLatex=4;
+  this->UpperLimitNumElementsWeyl=0;
+  this->owneR=0;
+  this->initForNilradicalGeneration();
+}
+
+void rootSubalgebras::initForNilradicalGeneration()
+{ this->NumSubalgebrasProcessed=0;
+  this->NumConeConditionFailures=0;
+  this->NumSubalgebrasCounted=0;
+  this->IndexCurrentSANilradicalsGeneration=0;
+  this->ReportStringNonNilradicalParabolic="";
+  this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration=this->theSubalgebras.size-1;
+  if (this->theSubalgebras.size>0)
+  { this->theSubalgebras[0].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
+    this->NumConeConditionHoldsBySSpart.initFillInObject(this->theSubalgebras.size, 0);
+  }
+}
+
 bool rootSubalgebras::ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables)
 { if (!this->flagUsingActionsNormalizerCentralizerNilradical)
     return true;
   for (int i=0; i<this->ActionsNormalizerCentralizerNilradical.size; i++)
-    if (!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables))
+    if (!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel, theGlobalVariables))
       return false;
   return true;
 }
@@ -502,8 +530,8 @@ void rootSubalgebras::RaiseSelectionUntilApproval(Selection& targetSel, GlobalVa
   while (raised)
   { raised=false;
     for (int i=0; i<this->ActionsNormalizerCentralizerNilradical.size; i++)
-      if(!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables))
-      { this->ApplyOneGenerator(this->ActionsNormalizerCentralizerNilradical.TheObjects[i], targetSel, theGlobalVariables);
+      if(!this->ApproveSelAgainstOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel, theGlobalVariables))
+      { this->ApplyOneGenerator(this->ActionsNormalizerCentralizerNilradical[i], targetSel, theGlobalVariables);
         raised=true;
       }
   }
@@ -534,8 +562,8 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
 int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
 { this->ProblemCounter++;
   int result=-1;
-  for (int j=0; j<this->size; j++)
-  { rootSubalgebra& right=this->TheObjects[j];
+  for (int j=0; j<this->theSubalgebras.size; j++)
+  { rootSubalgebra& right=this->theSubalgebras[j];
     if (input.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) ==
         right.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) &&
         input.theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])==
@@ -595,8 +623,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   { int theDimension= this->GetAmbientWeyl().CartanSymmetric.NumRows;
     theGlobalVariables.rootsAttemptExtensionIso1.GetElement().SetSize(theGlobalVariables.rootsAttemptExtensionIso1.GetElement().size+theDimension);
     theGlobalVariables.rootsAttemptExtensionIso2.GetElement().SetSize(theGlobalVariables.rootsAttemptExtensionIso2.GetElement().size+theDimension);
-    theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().SetSize(theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().size+theDimension);
-    theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().SetSize(theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().size+theDimension);
+    theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().theSubalgebras.SetSize(theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().theSubalgebras.size+theDimension);
+    theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().theSubalgebras.SetSize(theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().theSubalgebras.size+theDimension);
     theGlobalVariables.rootsAttemptExtensionIso3.GetElement().SetSize(theGlobalVariables.rootsAttemptExtensionIso3.GetElement().size+theDimension);
     theGlobalVariables.rootsAttemptExtensionIso4.GetElement().SetSize(theGlobalVariables.rootsAttemptExtensionIso4.GetElement().size+theDimension);
   }
@@ -606,8 +634,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   Vectors<Rational>& rangeRec =theGlobalVariables.rootsAttemptExtensionIso2.GetElement().TheObjects[RecursionDepth];
   domainRec=(Domain);
   rangeRec=(Range);
-  rootSubalgebra& leftSA=theGlobalVariables.rootSAAttemptExtensionIso1.GetElement()[RecursionDepth];
-  rootSubalgebra& rightSA= theGlobalVariables.rootSAAttemptExtensionIso2.GetElement()[RecursionDepth];
+  rootSubalgebra& leftSA=theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().theSubalgebras[RecursionDepth];
+  rootSubalgebra& rightSA= theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().theSubalgebras[RecursionDepth];
   Rational tempRatD, tempRatR;
   Vector<Rational>& LastRootD=*domainRec.LastObject();
   Vector<Rational>& LastRootR=*rangeRec.LastObject();
@@ -1712,16 +1740,16 @@ int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool us
   if(this->AlphaCoeffs.size!=this->Alphas.size || this->BetaCoeffs.size!=this->Betas.size)
     crash << crash;
   int LatexLineCounter=0;
-  this->ComputeConnectedComponents(this->Alphas, owners.TheObjects[this->IndexOwnerRootSubalgebra],  this->AlphaKComponents);
-  this->ComputeConnectedComponents(this->Betas, owners.TheObjects[this->IndexOwnerRootSubalgebra], this->BetaKComponents);
-  this->RelationOneSideToString(tempS, "\\alpha", this->AlphaCoeffs, this->AlphaKComponents, this->Alphas, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+  this->ComputeConnectedComponents(this->Alphas, owners.theSubalgebras[this->IndexOwnerRootSubalgebra],  this->AlphaKComponents);
+  this->ComputeConnectedComponents(this->Betas, owners.theSubalgebras[this->IndexOwnerRootSubalgebra], this->BetaKComponents);
+  this->RelationOneSideToString(tempS, "\\alpha", this->AlphaCoeffs, this->AlphaKComponents, this->Alphas, useLatex, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]);
   out << tempS;
   if (useLatex)
     out << " &\\begin{tabular}{c} ";
   out << "=";
   if (useLatex)
     out << " \\\\~ \\end{tabular} & ";
-  this->RelationOneSideToString(tempS, "\\beta", this->BetaCoeffs, this->BetaKComponents, this->Betas, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+  this->RelationOneSideToString(tempS, "\\beta", this->BetaCoeffs, this->BetaKComponents, this->Betas, useLatex, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]);
   out << tempS;
   if (useLatex)
     out << " & ";
@@ -1733,13 +1761,13 @@ int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool us
   out << tempS;
   if (includeScalarsProductsEachSide)
   { out << " & ";
-    LatexLineCounter+=this->RootsToScalarProductString(this->Alphas, this->Alphas, "\\alpha", "\\alpha", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+    LatexLineCounter+=this->RootsToScalarProductString(this->Alphas, this->Alphas, "\\alpha", "\\alpha", tempS, useLatex, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]);
     out << tempS;
-    LatexLineCounter+=this->RootsToScalarProductString(this->Betas, this->Betas, "\\beta", "\\beta", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+    LatexLineCounter+=this->RootsToScalarProductString(this->Betas, this->Betas, "\\beta", "\\beta", tempS, useLatex, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]);
     out << " " << tempS;
   }
   if (includeMixedScalarProducts)
-  { LatexLineCounter+= this->RootsToScalarProductString(this->Alphas, this->Betas, "\\alpha", "\\beta", tempS, useLatex, owners.TheObjects[this->IndexOwnerRootSubalgebra]);
+  { LatexLineCounter+= this->RootsToScalarProductString(this->Alphas, this->Betas, "\\alpha", "\\beta", tempS, useLatex, owners.theSubalgebras[this->IndexOwnerRootSubalgebra]);
     out << tempS;
   }
   out << "\n";
@@ -1983,11 +2011,10 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
   int i=this->GetHash(input);
   List<int>& theIndices= this->TheHashedArrays[i];
   for (int j=0; j<theIndices.size; j++)
-  { if(this->TheObjects[theIndices.TheObjects[j]].GenerateAutomorphisms(input, owners))
+    if(this->TheObjects[theIndices[j]].GenerateAutomorphisms(input, owners))
       return;
-  }
   if (!this->flagIncludeSmallerRelations)
-    if (input.theDiagramRelAndK.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0])!=owners[0].theDynkinDiagram.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0]))
+    if (input.theDiagramRelAndK.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0])!=owners.theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0]))
       return;
   this->AddOnTop(input);
   if (this->flagIncludeCoordinateRepresentation)
@@ -1998,8 +2025,8 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
 void permutation::initPermutation(int n)
 { this->initIncomplete(n);
   for(int i=0; i<n; i++)
-  { this->MaxMultiplicities.TheObjects[i]=n-i-1;
-    this->Multiplicities.TheObjects[i]=0;
+  { this->MaxMultiplicities[i]=n-i-1;
+    this->Multiplicities[i]=0;
   }
 }
 
@@ -2033,9 +2060,8 @@ void permutation::GetPermutationLthElementIsTheImageofLthIndex(List<int>& output
 }
 
 void rootSubalgebras::ComputeKmodMultTables(GlobalVariables* theGlobalVariables)
-{ for (int i=0; i<this->size; i++)
-    (*this)[i].GenerateKmodMultTable
-    ((*this)[i].theMultTable, (*this)[i].theOppositeKmods, theGlobalVariables);
+{ for (int i=0; i<this->theSubalgebras.size; i++)
+    this->theSubalgebras[i].GenerateKmodMultTable(this->theSubalgebras[i].theMultTable, this->theSubalgebras[i].theOppositeKmods, theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed)
@@ -2043,22 +2069,22 @@ void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGloba
   this->NumConeConditionFailures=0;
   this->NumSubalgebrasCounted=0;
   for (int i=StartingIndex; i<NumToBeProcessed+StartingIndex; i++)
-  { (*this)[i].flagComputeConeCondition=this->flagComputeConeCondition;
-    (*this)[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, *this, i);
+  { this->theSubalgebras[i].flagComputeConeCondition=this->flagComputeConeCondition;
+    this->theSubalgebras[i].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, false, *this, i);
     if (i!=NumToBeProcessed+StartingIndex-1)
-      (*this)[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
+      this->theSubalgebras[i+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
 }
 
 void rootSubalgebras::ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables)
 { if (this->flagStoringNilradicals)
-  { this->storedNilradicals.SetSize(this->size);
+  { this->storedNilradicals.SetSize(this->theSubalgebras.size);
   }
   for (; this->IndexCurrentSANilradicalsGeneration<this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration; this->IndexCurrentSANilradicalsGeneration++)
-  { this->TheObjects[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
-    this->TheObjects[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
+  { this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].flagComputeConeCondition=this->flagComputeConeCondition;
+    this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration].GeneratePossibleNilradicals(this->controllerLProhibitingRelations, this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration, theGlobalVariables, this->flagUsingParabolicsInCentralizers, *this, this->IndexCurrentSANilradicalsGeneration);
     if (this->IndexCurrentSANilradicalsGeneration!= this->NumReductiveRootSAsToBeProcessedNilradicalsGeneration-1)
-      this->TheObjects[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
+      this->theSubalgebras[this->IndexCurrentSANilradicalsGeneration+1].GeneratePossibleNilradicalsInit(this->ImpiedSelectionsNilradical, this->parabolicsCounterNilradicalGeneration);
   }
 }
 
@@ -2067,28 +2093,28 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   rootSubalgebras output;
   List<int> SortingArray;
   List<int> inverseOfSortingArray;
-  SortingArray.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
-    SortingArray.TheObjects[i]=i;
-  for (int i=0; i<this->size; i++)
-    for (int j=i+1; j<this->size; j++)
-      if(this->TheObjects[SortingArray.TheObjects[j]].theDynkinDiagram.IsGreaterThan(this->TheObjects[SortingArray.TheObjects[i]].theDynkinDiagram))
+  SortingArray.SetSize(this->theSubalgebras.size);
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    SortingArray[i]=i;
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    for (int j=i+1; j<this->theSubalgebras.size; j++)
+      if(this->theSubalgebras[SortingArray[j]].theDynkinDiagram.IsGreaterThan(this->theSubalgebras[SortingArray[i]].theDynkinDiagram))
         SortingArray.SwapTwoIndices(i, j);
   inverseOfSortingArray.SetSize(SortingArray.size);
   for(int i=0; i<SortingArray.size; i++)
-    inverseOfSortingArray.TheObjects[SortingArray.TheObjects[i]]=i;
-  output.ReservE(this->size);
-  for (int i=0; i<this->size; i++)
-  { output.AddOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
-    List<int>& otherArray=this->TheObjects[SortingArray.TheObjects[i]].indicesSubalgebrasContainingK;
-    List<int>& currentArray=output.LastObject()->indicesSubalgebrasContainingK;
+    inverseOfSortingArray[SortingArray[i]]=i;
+  output.theSubalgebras.ReservE(this->theSubalgebras.size);
+  for (int i=0; i<this->theSubalgebras.size; i++)
+  { output.theSubalgebras.AddOnTop(this->theSubalgebras[SortingArray[i]]);
+    List<int>& otherArray=this->theSubalgebras[SortingArray[i]].indicesSubalgebrasContainingK;
+    List<int>& currentArray=output.theSubalgebras.LastObject()->indicesSubalgebrasContainingK;
     currentArray.ReservE(otherArray.size);
     currentArray.size=0;
     for(int j=0; j<otherArray.size; j++)
       currentArray.AddOnTop(inverseOfSortingArray[otherArray[j]]);
   }
-  for(int i=0; i<this->size; i++)
-    this->TheObjects[i]=(output[i]);
+  for(int i=0; i<this->theSubalgebras.size; i++)
+    this->theSubalgebras[i]=(output.theSubalgebras[i]);
 }
 
 void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml)
@@ -2096,7 +2122,7 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
   if (useHtml)
   { out1 << "<table border=\"1\">\n <colgroup>";
     for (int i=0; i<this->NumColsPerTableLatex; i++)
-      out1<< "<col width=\"80\">";
+      out1 << "<col width=\"80\">";
     out1<< "</colgroup><tr>";
     out2 << "</td></tr></table>";
   }
@@ -2132,8 +2158,8 @@ void rootSubalgebras::ElementToHtml
     << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
     << crash;
   }
-  output << "<html><title> Root subsystems of " << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
-  output << "<meta name=\"keywords\" content=\"" << (*this)[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
+  output << "<html><title> Root subsystems of " << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
+  output << "<meta name=\"keywords\" content=\"" << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
   << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
@@ -2141,8 +2167,8 @@ void rootSubalgebras::ElementToHtml
   this->ToString(tempS, Sl2s, false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables, calculatorDisplayName);
   output << "<body>" << header << tempS << "</body></html>";
   output.close();
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    this->theSubalgebras[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
 }
 
 void rootSubalgebras::ToString
@@ -2190,21 +2216,22 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
 { std::stringstream out; std::string header, footer, tempS, tempS2, tempS3;
   std::string tooltipSAs="h - fixed Cartan subalgebra. k - subalgebra containing h. k_{ss}=[k, k] - regular semisimple subalgebra in the sense of Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a Vector<Rational> subsytem of \\Delta(g). C(k_{ss}) consists Vector<Rational> spaces with Vectors<Rational> strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   this->GetTableHeaderAndFooter(header, footer, useLatex, useHtml);
-  int col=0; int row=0;
-  tempS=this->TheObjects[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+  int col=0;
+  int row=0;
+  tempS=this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   if (useLatex)
     out << "$\\mathfrak{g}$: ";
   else
     out << "g: ";
-  out << tempS << "  (Number of table entries: " << this->size-2 << " larger than the Cartan subalgebra + the Cartan subalgebra)\n\n";
-  for (int i=1; i<this->size; i++)
+  out << tempS << "  (Number of table entries: " << this->theSubalgebras.size-2 << " larger than the Cartan subalgebra + the Cartan subalgebra)\n\n";
+  for (int i=1; i<this->theSubalgebras.size; i++)
   { if (col==0 && row==0)
     { out << header;
       if (useHtml)
         out << "<td title=\"" << tooltipSAs << "\">";
     }
-    tempS=(*this)[i].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-    tempS2=(*this)[i].theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+    tempS=this->theSubalgebras[i].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+    tempS2=this->theSubalgebras[i].theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     if (tempS=="") tempS="-";
     if (useLatex)
     { CGI::subEqualitiesWithSimeq(tempS, tempS);
@@ -2245,9 +2272,9 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     if (useHtml)
       out << "\n<br>\n";
     int counter=0;
-    for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
-    { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK[j];
-      tempS=this->TheObjects[tempI].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+    for(int j=0; j<this->theSubalgebras[i].indicesSubalgebrasContainingK.size; j++)
+    { int tempI=this->theSubalgebras[i].indicesSubalgebrasContainingK[j];
+      tempS=this->theSubalgebras[tempI].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
       if (useLatex)
         CGI::subEqualitiesWithSimeq(tempS, tempS);
       counter+=(signed)tempS.length();
@@ -2275,7 +2302,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
         out << "\\\\\n\\hline";
       if (useHtml)
       { out << "</td></tr>";
-        if(i!=this->size-1)
+        if(i!=this->theSubalgebras.size-1)
           out << "<tr><td title=\"" << tooltipSAs << "\">";
       }
     }
@@ -2284,7 +2311,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
         out << " & ";
       if(useHtml)
         out << "</td>";
-      if (i!=this->size-1 && useHtml)
+      if (i!=this->theSubalgebras.size-1 && useHtml)
         out << "<td title=\"" << tooltipSAs << "\">";
     }
     if (row==0 && col==0)
@@ -2322,7 +2349,7 @@ void coneRelations::ToString
     { oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
       if (useLatex)
         out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
-        << owners[oldIndex].theDynkinDiagram.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0])
+        << owners.theSubalgebras[oldIndex].theDynkinDiagram.ToStringRelativeToAmbientType(owners.owneR->theWeyl.theDynkinType[0])
         << "}\\\\\n\\hline\\hline";
       //if (useHtml)
       //{ out << "<table>" << "<tr>"<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString

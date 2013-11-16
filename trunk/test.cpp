@@ -1383,8 +1383,8 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
-  for (int k=0; k<theRootSAs.size; k++)
-  { rootSubalgebra& currentRootSA=theRootSAs[k];
+  for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
+  { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
     roots=currentRootSA.PositiveRootsK;
     Polynomial<Rational> macdonaldPoly;
     make_macdonald_polynomial(W,roots,macdonaldPoly);
@@ -2154,15 +2154,15 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(localGlobalVariables, true, false);
   List<Vector<Rational> > roots;
 
-  for (int k=0; k<theRootSAs.size; k++)
-  { rootSubalgebra& currentRootSA=theRootSAs[k];
+  for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
+  { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
     roots=currentRootSA.PositiveRootsK;
     std::cout << "I am processing root subalgebra of type "
               << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    std::cout << "has character ";
+    std::cout << " has character ";
     std::cout << rep.GetCharacter() << std::endl;
     W.AddIrreducibleRepresentation(rep);
   }

@@ -200,6 +200,16 @@ void CGI::clearDollarSigns(std::string& theString, std::string& output)
   output=out.str();
 }
 
+std::string CGI::DoubleBackslashes(const std::string& input)
+{ std::stringstream out;
+  for (int i=0; i<(signed) input.size(); i++)
+  { out << input[i];
+    if (input[i]=='\\')
+      out << "\\";
+  }
+  return out.str();
+}
+
 std::string CGI::clearSlashes(const std::string& theString)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)

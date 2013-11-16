@@ -4013,7 +4013,8 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
 
 void rootSubalgebra::ToString
 (std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables* theGlobalVariables)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("rootSubalgebra::ToString");
+  std::stringstream out;
   std::string tempS;
   std::string latexFooter, latexHeader;
   if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size ||
@@ -4023,10 +4024,9 @@ void rootSubalgebra::ToString
   this->ElementToStringHeaderFooter(latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
   tempS=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   if (useLatex)
-    out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
+    out << "\\noindent$\\mathfrak{k}_{ss}:$ " << tempS;
   else
-    out << "k_{ss}: ";
-  out << tempS;
+    out << "k_{ss}: " << CGI::GetMathSpanPure(tempS);
   if (sl2s!=0)
   { out << " &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
@@ -4170,7 +4170,7 @@ void rootSubalgebra::ToString
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    out  << tempS;
+    out << tempS;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
@@ -4282,7 +4282,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
       out << "<tr>";
 
       out << "<td style=\\\"text-align: center;\\\">" << openTag;
-      out << "<span class=\\\"math\\\">" << currentMod[i][j].ToString() << "</span>";
+      out << "<span class=\\\"math\\\">" << CGI::DoubleBackslashes(currentMod[i][j].ToString()) << "</span>";
       out << closeTag << "</td>";
 
       Vector<Rational> tempV;

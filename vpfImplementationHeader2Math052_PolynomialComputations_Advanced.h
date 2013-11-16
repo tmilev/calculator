@@ -704,7 +704,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
     if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
       if (theAlgebraicClosure!=0)
         if (this->GetOneVarPolySolution(tempP, theCF, *theAlgebraicClosure, theGlobalVariables))
-        { std::cout << "<br>adjoining root of " << tempP.ToString();
+        { //std::cout << "<br>adjoining root of " << tempP.ToString();
           outputSub.MakeIdSubstitution(numVars);
           outputSub[oneVarIndex].MakeConst(theCF);
           //check our work:
@@ -911,9 +911,9 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem
-    << ". Managed to reduce " << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. "
-    << ". Number remaining variables to solve for: " << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. ";
+    out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
+    << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
+    << numVariablesToSolveForAfterReduction << ". Try 1 out of 2. ";
     theReport1.Report(out.str());
   }
 
@@ -959,9 +959,9 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   if (theGlobalVariables!=0)
   { std::stringstream out;
-    out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem
-    << ". Managed to reduce " << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. "
-    << ". Number remaining variables to solve for: " << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. ";
+    out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
+    << numVarsToSolveForStart-numVariablesToSolveForAfterReduction << " variables. Number remaining variables to solve for: "
+    << numVariablesToSolveForAfterReduction << ". Try 2 out of 2. ";
     theReport1.Report(out.str());
   }
   computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
@@ -1055,8 +1055,7 @@ template <class coefficient>
 void GroebnerBasisComputation<coefficient>::SetSerreLikeSolutionIndex(int theIndex, const coefficient& theConst)
 { this->systemSolution.GetElement()[theIndex]=theConst;
   if (this->solutionsFound.GetElement().selected[theIndex])
-    crash << "This a programming error: attempting to set value to a variable whose value has already been computed. "
-    << crash;
+    crash << "This a programming error: attempting to set value to a variable whose value has already been computed. " << crash;
   this->solutionsFound.GetElement().AddSelectionAppendNewIndex(theIndex);
 }
 #endif

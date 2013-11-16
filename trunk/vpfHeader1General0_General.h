@@ -1165,6 +1165,7 @@ public:
     CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS);
     theString=tempS;
   }
+  static std::string DoubleBackslashes(const std::string& input);
   static std::string GetMathSpanPure(const std::string& input, int upperNumChars=700);
   static std::string GetMathSpanBeginArrayL(const std::string& input, int upperNumChars=700);
   static std::string GetMathMouseHover(const std::string& input, int upperNumChars=700);

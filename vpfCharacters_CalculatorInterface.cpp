@@ -1099,8 +1099,8 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;
-  for (int i=0; i<theRootSAs.size; i++)
-  { rootSubalgebra& currentRootSA=theRootSAs[i];
+  for (int i=0; i<theRootSAs.theSubalgebras.size; i++)
+  { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[i];
     theGenerator.MakeFromRootSubsystem(currentRootSA.PositiveRootsK, *thePointer);
     theGenerator.GenerateMyOrbit(theOrbit);
     out << "<hr>Root subsystem type " << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(thePointer->theWeyl.theDynkinType[0]);
@@ -1108,7 +1108,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     for (int j=0; j<theOrbit.size; j++)
       out << "<br>" << theOrbit[j].ToString();
   }
-  out << "Type: " << theRootSAs.owneR->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.size;
+  out << "Type: " << theRootSAs.owneR->theWeyl.theDynkinType.ToString() << ". Number of root subsystems: " << theRootSAs.theSubalgebras.size;
   return output.AssignValue(out.str(), theCommands);
 }
 

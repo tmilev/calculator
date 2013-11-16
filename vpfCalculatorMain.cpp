@@ -120,6 +120,7 @@ int main(int argc, char **argv)
 //  civilizedInput="printSemisimpleSubalgebrasNoCentralizers d_5";
 //  civilizedInput="f:=e^{-2x};d/dx (f);";
 //  civilizedInput="EmbedSemisimpleInSemisimple{}(A^{4}_1+2A^{2}_1, D_5);";
+//  civilizedInput="printSemisimpleSubalgebrasRecompute a_3";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

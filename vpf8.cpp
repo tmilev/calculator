@@ -4902,11 +4902,10 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
   if (theDim>3)
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
     for (int i=0; i<theDim; i++)
-    { this->ProjectionsEiVectors[i][0]=FloatingPoint:: sin((double)i/(double)theDim* MathRoutines::Pi());
-      this->ProjectionsEiVectors[i][1]=FloatingPoint:: cos((double)i/(double)theDim* MathRoutines::Pi());
+    { this->ProjectionsEiVectors[i][0]=FloatingPoint::sin((double)i/(double)theDim* MathRoutines::Pi());
+      this->ProjectionsEiVectors[i][1]=FloatingPoint::cos((double)i/(double)theDim* MathRoutines::Pi());
     }
-  }
-  else
+  } else
   { this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
     this->ProjectionsEiVectors[0][0]=1;
     this->ProjectionsEiVectors[0][1]=0;
@@ -4928,8 +4927,7 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
     this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
 }
 
-std::string ConeComplex::DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
+std::string ConeComplex::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { bool isBad=false;
   isBad=this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;

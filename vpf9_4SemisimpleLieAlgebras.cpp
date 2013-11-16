@@ -3508,12 +3508,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
 //  std::cout << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-  bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
-  if (ereBeProbs)
-  { std::cout << "<hr>Ere be probs. ";
-  }
-  if (ereBeProbs)
-    std::cout << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
+  //bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
+  //if (ereBeProbs)
+  //{ std::cout << "<hr>Ere be probs. ";
+  //}
+  //if (ereBeProbs)
+  //  std::cout << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i=0; i<numCycles; i++, selectionRootsWithZeroCharacteristic.incrementSelection())
   { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
@@ -3534,8 +3534,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     //except for G_2 (go figure!).
     //(but selectionRootsWithZeroCharacteristic still have to be found)
     //this is done in the below code.
-    if (ereBeProbs)
-      std::cout << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
+//    if (ereBeProbs)
+//      std::cout << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
     if (theDynkinEpsilon!=0)
       continue;
     Vector<Rational> tempRoot, tempRoot2;
@@ -4269,8 +4269,9 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
     << " </span></td></tr>"
     << "<tr>"
     << "<td style=\\\"text-align: center;\\\">basis</td>"
-    << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">weights fund.coords.</td>"
-    << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">weights primal</td>"
+    << "<td style=\\\"text-align: center; border-left:1px solid #000; white-space: nowrap;\\\">weights simple coords.</td>"
+    << "<td style=\\\"text-align: center; border-left:1px solid #000; white-space: nowrap;\\\">weights fund.coords.</td>"
+    << "<td style=\\\"text-align: center; border-left:1px solid #000; white-space: nowrap;\\\">weights primal</td>"
     << "</tr>";
     for (int j=0; j<currentMod[i].size; j++)
     { std::string openTag="", closeTag="";
@@ -4282,6 +4283,12 @@ std::string CandidateSSSubalgebra::ToStringDrawWeightsHelper(int indexModule, co
 
       out << "<td style=\\\"text-align: center;\\\">" << openTag;
       out << "<span class=\\\"math\\\">" << currentMod[i][j].ToString() << "</span>";
+      out << closeTag << "</td>";
+
+      Vector<Rational> tempV;
+      this->MatMultiplyFundCoordsToGetSimple.ActOnVectorColumn(this->WeightsModulesPrimal[indexModule][j],tempV);
+      out << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
+      out << tempV.ToString();
       out << closeTag << "</td>";
 
       out << "<td style=\\\"text-align: center; border-left:1px solid #000;\\\">" << openTag;
@@ -4319,6 +4326,12 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   }
   out << "<br>Weight diagram. The coordinates corresponding to the simple roots of the subalgerba are fundamental.  "
   << "<br>The bilinear form is therefore given relative to the fundamental coordinates.<br> ";
+
+//  out << "Embeddings fund coords into fund coords ambient.";
+//  Matrix<Rational> theMat=this->MatMultiplyFundCoordsToGetSimple;
+//  theMat.
+
+
   Vectors<Rational> BasisToDrawCirclesAt;
   DrawingVariables theDV;
   theDV.theBuffer.theBilinearForm.init(thePrimalRank, thePrimalRank);
@@ -4329,6 +4342,10 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   zeroVector.MakeZero(thePrimalRank);
   BasisToDrawCirclesAt.MakeEiBasis(thePrimalRank);
   Vectors<Rational> cornerWeights;
+  int maxModDim=0;
+  for (int i=0; i<this->Modules.size; i++)
+    maxModDim=MathRoutines::Maximum(this->Modules[i][0].size, maxModDim);
+  theDV.DefaultHtmlHeight= MathRoutines::Maximum(600, maxModDim*35);
   for (int i=0; i<this->Modules.size; i++)
   { cornerWeights.SetSize(0);
     for (int j=0; j<this->Modules[i].size; j++)
@@ -5863,7 +5880,7 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
 */
   ////////////////
   this->BilinearFormSimplePrimal=this->theWeylNonEmbeddeD.CartanSymmetric;
-  Matrix<Rational> centralizerPart, diagMat, fundCoordsViaSimple, bilinearFormInverted;
+  Matrix<Rational> centralizerPart, matFundCoordsSimple, diagMat, diagMatrix2, bilinearFormInverted;
 //  std::cout << "<hr>Cartan of Centralizer: " << this->CartanOfCentralizer.ToString() << "<br>Cartan symmetric: "
 //  << this->owner->owneR->theWeyl.CartanSymmetric.ToString();
   this->CartanOfCentralizer.GetGramMatrix(centralizerPart, &this->owner->owneR->theWeyl.CartanSymmetric);
@@ -5871,26 +5888,41 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   bilinearFormInverted=this->BilinearFormSimplePrimal;
   bilinearFormInverted.Invert();
   diagMat.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
+  diagMatrix2.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
   diagMat.NullifyAll();
+  diagMatrix2.NullifyAll();
   for (int i=0; i<this->BilinearFormSimplePrimal.NumRows; i++)
     if (i<this->theHs.size)
-      diagMat(i,i)=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(i,i)/2;
-    else
-      diagMat(i,i).AssignNumeratorAndDenominator(1,2);
-  fundCoordsViaSimple=bilinearFormInverted;
-  fundCoordsViaSimple*=diagMat;
+    { diagMat(i,i)=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(i,i)/2;
+      diagMatrix2(i,i)=this->theWeylNonEmbeddeD.CartanSymmetric(i,i)/2;
+    } else
+    { diagMat(i,i).AssignNumeratorAndDenominator(1,2);
+      diagMatrix2(i,i)=1;
+    }
+  matFundCoordsSimple=bilinearFormInverted;
+  matFundCoordsSimple*=diagMat;
+  this->MatMultiplyFundCoordsToGetSimple=bilinearFormInverted;
+  this->MatMultiplyFundCoordsToGetSimple*=diagMatrix2;
 //  std::cout
 //  << "<br>diagMat=" << diagMat.ToString()
 //  << "<br>this->BilinearFormSimplePrimal= " << this->BilinearFormSimplePrimal.ToString()
 //  << "<br>fundCoordsViaSimple: " << fundCoordsViaSimple.ToString();
-  this->BilinearFormFundPrimal=fundCoordsViaSimple;
+  this->BilinearFormFundPrimal=matFundCoordsSimple;
   this->BilinearFormFundPrimal.Transpose();
 //  std::cout
 //  << "<br>fundCoordsViaSimple.Transpose(): " << this->BilinearFormFundPrimal.ToString();
   this->BilinearFormFundPrimal*=this->BilinearFormSimplePrimal;
 //  std::cout
 //  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal: " << this->BilinearFormFundPrimal.ToString();
-  this->BilinearFormFundPrimal*=fundCoordsViaSimple;
+  this->BilinearFormFundPrimal*=matFundCoordsSimple;
+/*  this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.init(this->GetAmbientWeyl().GetDim(), this->GetPrimalRank());
+  for (int i=0; i<this->GetRank(); i++)
+    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
+    (i, this->theHs[i]);
+  for (int i=this->GetRank(); i<this->GetPrimalRank(); i++)
+    this->InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords.AssignVectorToColumnKeepOtherColsIntactNoInit
+    (i, this->CartanOfCentralizer[i-this->GetRank()]);
+*/
 //  std::cout
 //  << "<br>fundCoordsViaSimple.Transpose()*this->BilinearFormSimplePrimal*fundCoordsViaSimple: " << this->BilinearFormFundPrimal.ToString()
 //  << "<hr>";

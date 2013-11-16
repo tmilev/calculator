@@ -791,8 +791,8 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
-    out << "k_{ss}: ";
-  out << tempS;
+    out << "Type: ";
+  out << CGI::GetMathSpanPure(tempS);
   tempS=this->SimpleBasisK.ToString();
   if (useHtml)
     out << "\n<br>\n";
@@ -2149,8 +2149,8 @@ void rootSubalgebras::ToString
 (std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer,
  GlobalVariables* theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out; std::string tempS;
-  if (useHtml)
-    out << " <a href=\"" << DisplayNameCalculator << "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\"> Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+  //if (useHtml)
+  //  out << " <a href=\"" << DisplayNameCalculator << "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\"> Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);

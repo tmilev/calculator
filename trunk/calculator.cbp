@@ -56,6 +56,7 @@
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
+		<Unit filename="vpf9_5SemisimpleLieAlgebras_RootSubalgebras.cpp" />
 		<Unit filename="vpf9_7floating_point_routines.cpp" />
 		<Unit filename="vpf9_8GlobalObjects.cpp" />
 		<Unit filename="vpf9_91html_routines_calculator.cpp" />
@@ -74,6 +75,7 @@
 		<Unit filename="vpfHeader2Math02_Vectors.h" />
 		<Unit filename="vpfHeader2Math0_General.h" />
 		<Unit filename="vpfHeader2Math15_UniversalEnveloping.h" />
+		<Unit filename="vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h" />
 		<Unit filename="vpfHeader2Math1_SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2Math2_AlgebraicNumbers.h" />
 		<Unit filename="vpfHeader2Math3_Characters.h" />

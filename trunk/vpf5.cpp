@@ -235,14 +235,16 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
     theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
   }
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << outMainPatH << "rootHtml.html";
-  outRootHtmlDisplayName << outMainDisplayPatH << "rootHtml.html";
+  outSltwoMainFile << outSltwoPath.str() << "sl2s_new.html";
+  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s_new.html";
+  outRootHtmlFileName << outMainPatH << "rootSubalgebras.html";
+  outRootHtmlDisplayName << outMainDisplayPatH << "rootSubalgebras.html";
   bool mustRecompute=false;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   if (!XML::FileExists(outSltwoMainFile.str()) || !XML::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
+  std::cout << "FORCED recompute!!! ";
+  mustRecompute=true;
   std::stringstream out;
   if (mustRecompute)
   { //std::cout << theCommands.javaScriptDisplayingIndicator;
@@ -256,8 +258,6 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
     theSl2s.ElementToHtml(&theFormat, theCommands.theGlobalVariableS);
-    theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
-    theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
   } else
     out << "The table is precomputed and served from the hard disk. <br>";
 //  out << "The full file name: " << outSltwoFileDisplayName.str();

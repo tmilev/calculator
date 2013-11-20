@@ -1476,10 +1476,10 @@ public:
   static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos);
-  static bool fprintRootSAs(Calculator& theCommands, const Expression& input, Expression& output)
+  static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerRootSAsAndSltwos(theCommands, input, output, false);
   }
-  static bool fprintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
+  static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerRootSAsAndSltwos(theCommands, input, output, true);
   }
   static bool innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);

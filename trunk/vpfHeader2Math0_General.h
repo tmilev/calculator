@@ -2893,12 +2893,6 @@ public:
   MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso3;
   MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso4;
 
-  MemorySaving<rootSubalgebra> rootSAProverIsos;
-  MemorySaving<rootSubalgebra> rootSAAttemptExtensionToIso1;
-  MemorySaving<rootSubalgebra> rootSAAttemptExtensionToIso2;
-  MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso1;
-  MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso2;
-  MemorySaving<rootSubalgebras> rootSAsGenerateAll;
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
   MemorySaving<Cone> coneBuffer1NewSplit;
@@ -4716,7 +4710,7 @@ class DynkinSimpleType
   void GetEn(int n, Matrix<Rational>& output)const;
   void GetF4(Matrix<Rational>& output)const;
   void GetG2(Matrix<Rational>& output)const;
-  void Grow(List<DynkinSimpleType>& output, List<List<int> >* outputImagesSimpleRoots)const;
+  void Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots)const;
   bool IsPossibleCoRootLength(const Rational& input)const;
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
@@ -4786,6 +4780,11 @@ public:
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
   void SortTheDynkinTypes();
+  bool Grow
+  (const List<Rational>& allowedLengths, int AmbientWeylDim, List<DynkinType>& output,
+   List<List<int> >* outputPermutationRoots)const
+  ;
+  bool ContainsType(char theTypeLetter)const;
   void GetDynkinTypeWithDefaultLengths(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;
   DynkinSimpleType GetSmallestSimpleType()const;
@@ -4827,7 +4826,6 @@ public:
     return intResult;
   }
   bool IsTypeA_1()const;
-  static int GetNewIndexFromRootInjection(const List<int>& inputRootInjection);
   static int GetIndexPreimageFromRootInjection(int inputIndex, const List<int>& inputRootInjection);
   bool CanBeExtendedParabolicallyTo(const DynkinType& other)const;
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)const;
@@ -5126,6 +5124,7 @@ public:
   coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords, const coefficient& theRingUnit=1);
   template <class coefficient>
   void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup* raisingElt=0);
+  bool AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos);
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeight, bool useOuterAutos);
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
@@ -5180,7 +5179,7 @@ public:
   (Vectors<coefficient>& theRoots, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
    HashedList<ElementWeylGroup>* outputSubset=0, int UpperLimitNumElements=-1);
 //  int GetNumRootsFromFormula();
-  void GenerateRootSystemFromKillingFormMatrix();
+  void GenerateRootSystem();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho);
@@ -5431,17 +5430,6 @@ bool ReflectionSubgroupWeylGroup::IsDominantWeight(const Vector<coefficient>& th
   return true;
 }
 
-class multTableKmods : public List<List<List<int> > >
-{
-public:
-  std::string DebugString;
-  void ToString(std::string& output, rootSubalgebra& owner);
-  void ToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner);
-  void ComputeDebugString(rootSubalgebra& owner)
-  { this->ToString(this->DebugString, owner);
-  }
-};
-
 class DynkinDiagramRootSubalgebra
 {
 public:
@@ -5459,6 +5447,7 @@ public:
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
+  void GetDynkinType(DynkinType& output)const;
   void SwapDynkinStrings(int i, int j);
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
   //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
@@ -5488,304 +5477,6 @@ public:
   void GetAutomorphism(List<List<int> >& output, int index);
   void GetAutomorphisms(List<List<List<int> > >& output);
   void GetMapFromPermutation(Vectors<Rational>& domain, Vectors<Rational>& range, List<int>& thePerm, List<List<List<int> > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
-};
-
-class coneRelation
-{
-public:
-  Vectors<Rational> Alphas;
-  Vectors<Rational> Betas;
-  List<Rational> AlphaCoeffs;
-  List<Rational> BetaCoeffs;
-  List<List<int> > AlphaKComponents;
-  List<List<int> > BetaKComponents;
-  int IndexOwnerRootSubalgebra;
-  bool GenerateAutomorphisms(coneRelation& right, rootSubalgebras& owners);
-  DynkinDiagramRootSubalgebra theDiagram;
-  DynkinDiagramRootSubalgebra theDiagramRelAndK;
-  std::string DebugString;
-  std::string stringConnectedComponents;
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
-  void ComputeDiagramRelAndK(rootSubalgebra& owner);
-  void FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs);
-  void RelationOneSideToString(std::string& output, const std::string& letterType, List<Rational>& coeffs, List<List<int> >& kComponents, Vectors<Rational>& theRoots, bool useLatex, rootSubalgebra& owner);
-  int ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts);
-  int RootsToScalarProductString(Vectors<Rational>& inputLeft, Vectors<Rational>& inputRight, const std::string& letterTypeLeft, const std::string& letterTypeRight, std::string& output, bool useLatex, rootSubalgebra& owner);
-  void ComputeConnectedComponents(Vectors<Rational>& input, rootSubalgebra& owner, List<List<int> >& output);
-  void ComputeDebugString(rootSubalgebras& owner, bool includeScalarsProducts, bool includeMixedScalarProducts){ this->ToString(this->DebugString, owner, true, includeScalarsProducts, includeMixedScalarProducts);  }
-  void MakeLookCivilized(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
-  bool IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner);
-  void FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
-  bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
-  void ComputeKComponents(Vectors<Rational>& input, List<List<int> >& output, rootSubalgebra& owner);
-  void RelationOneSideToStringCoordForm(std::string& output,  List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm);
-  void GetSumAlphas(Vector<Rational>& output, int theDimension);
-  bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
-  void SortRelation(rootSubalgebra& owner);
-  void operator=(const coneRelation& right)
-  { this->Alphas=(right.Alphas);
-    this->Betas=(right.Betas);
-    this->AlphaCoeffs=(right.AlphaCoeffs);
-    this->BetaCoeffs=(right.BetaCoeffs);
-    this->AlphaKComponents=(right.AlphaKComponents);
-    this->BetaKComponents=(right.BetaKComponents);
-    this->theDiagram=right.theDiagram;
-    this->theDiagramRelAndK=right.theDiagramRelAndK;
-    this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
-    this->DebugString= right.DebugString;
-  }
-  bool operator==(const coneRelation& right){ return this->DebugString==right.DebugString; }
-  unsigned int HashFunction() const
-  { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
-    unsigned int result=0;
-    for (int i=0; i<tempI; i++)
-      result+= this->DebugString[i]*::SomeRandomPrimes[i];
-    return result;
-  }
-  static inline unsigned int HashFunction(const coneRelation& input)
-  { return input.HashFunction();
-  }
-  coneRelation()
-  {this->IndexOwnerRootSubalgebra=-1;
-  }
-};
-
-class coneRelations: public HashedList<coneRelation>
-{
-public:
-  int NumAllowedLatexLines;
-  bool flagIncludeSmallerRelations;
-  bool flagIncludeCoordinateRepresentation;
-  bool flagIncludeSubalgebraDataInDebugString;
-  std::string DebugString;
-  List<std::string> CoordinateReps;
-  void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
-  void ToString
-  (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
-   std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator);
-  void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
-  { this->ToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables, "");
-  }
-  void ComputeDebugString(rootSubalgebras& owners, GlobalVariables& theGlobalVariables)
-  { this->ComputeDebugString(owners, 0, 0, theGlobalVariables);
-  }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
-  void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
-  coneRelations()
-  { this->NumAllowedLatexLines=40;
-    this->flagIncludeSmallerRelations=true;
-    this->flagIncludeCoordinateRepresentation=false;
-    this->flagIncludeSubalgebraDataInDebugString=false;
-  }
-};
-
-class rootSubalgebra
-{
-public:
-  int NumNilradicalsAllowed;
-  int NumConeConditionFailures;
-  int NumRelationsWithStronglyPerpendicularDecomposition;
-  //int NumRelationsgreaterLengthThan2;
-  int NumGmodKtableRowsAllowedLatex;
-  int NumTotalSubalgebras;
-  bool flagFirstRoundCounting;
-  bool flagComputeConeCondition;
-  bool flagMakingProgressReport;
-  bool flagAnErrorHasOccuredTimeToPanic;
-  static int ProblemCounter;
-  static int ProblemCounter2;
-  List<int> indicesSubalgebrasContainingK;
-  multTableKmods theMultTable;
-  List<int> theOppositeKmods;
-  DynkinDiagramRootSubalgebra theDynkinDiagram;
-  DynkinDiagramRootSubalgebra theCentralizerDiagram;
-  List<List<int> > coneRelationsBuffer;
-  List<int> coneRelationsNumSameTypeComponentsTaken;
-  List<DynkinDiagramRootSubalgebra> relationsDiagrams;
-  Vectors<Rational> genK;
-  Vectors<Rational> SimpleBasisK;
-  Vectors<Rational> PositiveRootsK;
-  Vectors<Rational> AllRootsK;
-  Selection NilradicalKmods;
-  Selection CentralizerKmods;
-  Vectors<Rational> LowestWeightsGmodK;
-  Vectors<Rational> HighestWeightsGmodK;
-  Vectors<Rational> HighestRootsK;
-  Vectors<Rational> TestedRootsAlpha;
-  Vectors<Rational> CentralizerRoots;
-  Vectors<Rational> SimpleBasisCentralizerRoots;
-  Vectors<Rational> SimpleBasisKEpsCoords;
-  Vectors<Rational> SimpleBasisgEpsCoords;
-  List<Vectors<Rational> > kModulesKepsCoords;
-  List<Vectors<Rational> > kModulesgEpsCoords;
-  List<Vectors<Rational> > kModules;
-  List<Vectors<Rational> > PosRootsKConnectedComponents;
-  List<Selection> theKEnumerations;
-  List<int> theKComponentRanks;
-  SemisimpleLieAlgebra* owneR;
-//  int indexInOwners;
-  rootSubalgebra();
-  WeylGroup& GetAmbientWeyl();
-  SemisimpleLieAlgebra& GetOwnerSSalg();
-  //returns -1 if the weight/root  is not in g/k
-  int GetIndexKmoduleContainingRoot(Vector<Rational>& input);
-  void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
-  void GetCoxeterElement(Matrix<Rational>& output);
-  bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
-  bool rootIsInCentralizer(Vector<Rational>& input);
-  bool IsBKhighest(Vector<Rational>& input);
-  bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input);
-  void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
-  bool AttemptTheTripleTrick(coneRelation& theRel, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
-  bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
-  void ExtractRelations(Matrix<Rational>& matA, Matrix<Rational>& matX, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, Vectors<Rational>& Ksingular);
-  bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
-  void GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms);
-  void MakeGeneratingSingularVectors(coneRelation& theRelation, Vectors<Rational>& nilradicalRoots);
-  bool attemptExtensionToIsomorphismNoCentralizer(Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
-  static bool attemptExtensionToIsomorphism
-  (Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-   bool actOnCentralizerOnly, SemisimpleLieAlgebra& inputOwner, bool* DomainAndRangeGenerateNonIsoSAs);
-  bool CheckForSmallRelations(coneRelation& theRel, Vectors<Rational>& nilradicalRoots);
-  int NumRootsInNilradical();
-  void MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<Rational>& NilradicalRoots);
-  bool IsARoot(const Vector<Rational> & input);
-  bool IsARootOrZero(Vector<Rational> & input);
-  void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
-  void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
-  void ComputeCentralizerFromKModulesAndSortKModules();
-  void MatrixToRelation(coneRelation& output, Matrix<Rational> & matA, Matrix<Rational> & matX, int theDimension, Vectors<Rational>& NilradicalRoots);
-  void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
-  void MakeProgressReportPossibleNilradicalComputation(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
-  void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
-  bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth,  multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
-  bool IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
-  bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
-  void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
-  void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
-  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
-  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
-  bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
-  bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations);
-  void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-  void ElementToStringHeaderFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
-  std::string ToString(FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
-  void ToString(std::string& output, GlobalVariables* theGlobalVariables)
-  { this->ToString(output, false, false, false, theGlobalVariables);
-  }
-  void ElementToHtml(int index, std::string& path, SltwoSubalgebras* sl2s, GlobalVariables* theGlobalVariables);
-  void ToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables* theGlobalVariables)
-  { this->ToString(output, 0, 0, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
-  }
-  void ToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables* theGlobalVariables);
-  bool RootsDefineASubalgebra(Vectors<Rational>& theRoots);
-  void GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables* theGlobalVariables);
-  void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
-  void init(SemisimpleLieAlgebra& inputOwner);
-  void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables);
-  void ComputeAllButAmbientWeyl();
-  void ComputeDynkinDiagramKandCentralizer();
-  void ComputeAll();
-  void ComputeRootsOfK();
-  void ComputeKModules();
-  void ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW);
-  void ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
-  void ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW);
-  void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
-//  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
-  void initForNilradicalGeneration();
-  void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
-  bool LinCombToString(Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
-  bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
-  void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
-  void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
-};
-
-class rootSubalgebras
-{
-public:
-  List<rootSubalgebra> theSubalgebras;
-  coneRelations theBadRelations;
-  coneRelations theGoodRelations;
-  coneRelations theMinRels;
-  List<List<int> > ActionsNormalizerCentralizerNilradical;
-  List<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
-  List<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
-  //Code used in nilradical generation:
-  List<Selection> ImpiedSelectionsNilradical;
-  List<List<List<int> > > storedNilradicals;
-  SemisimpleLieAlgebra* owneR;
-  GlobalVariables* theGlobalVariables;
-  int parabolicsCounterNilradicalGeneration;
-  List<int> numNilradicalsBySA;
-  int IndexCurrentSANilradicalsGeneration;
-  int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
-  List<int> CountersNilradicalsGeneration;
-  List<int> NumConeConditionHoldsBySSpart;
-  int RecursionDepthNilradicalsGeneration;
-  Controller controllerLProhibitingRelations;
-  int NumSubalgebrasProcessed;
-  int NumConeConditionFailures;
-  int NumSubalgebrasCounted;
-  int NumLinesPerTableLatex;
-  int NumColsPerTableLatex;
-  int UpperLimitNumElementsWeyl;
-  static int ProblemCounter;
-  std::string ReportStringNonNilradicalParabolic;
-  bool flagComputingLprohibitingWeights;
-  bool flagUseDynkinClassificationForIsomorphismComputation;
-  bool flagUsingParabolicsInCentralizers;
-  bool flagUsingActionsNormalizerCentralizerNilradical;
-  bool flagNilradicalComputationInitialized;
-  bool flagCountingNilradicalsOnlyNoComputation;
-  bool flagComputeConeCondition;
-  bool flagLookingForMinimalRels;
-  bool flagStoringNilradicals;
-  SemisimpleLieAlgebra& GetOwnerSSalgebra();
-  WeylGroup& GetOwnerWeyl();
-  std::string ToString();
-  void ComputeKmodMultTables(GlobalVariables* theGlobalVariables);
-  bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables);
-  bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
-  void RaiseSelectionUntilApproval(Selection& targetSel, GlobalVariables& theGlobalVariables);
-  void ApplyOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
-  void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-
-  void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
-  void GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
-  bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-  int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-  void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
-  void ElementToStringDynkinTable(bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, std::string& output);
-  void GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml);
-  void SortDescendingOrderBySSRank();
-  void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
-  void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
-  void WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);
-  bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);
-  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables);
-  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables);
-  void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input, GlobalVariables& theGlobalVariables);
-  void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables);
-  void ElementToHtml
-  (std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, const std::string& calculatorDisplayName,
-   GlobalVariables* theGlobalVariables);
-  void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
-  void ToString
-  (std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical,
-   std::string* htmlPathServer, GlobalVariables* theGlobalVariables, const std::string& DisplayNameCalculator);
-  void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
-  void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-  void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void initForNilradicalGeneration();
-  rootSubalgebras();
 };
 
 class VectorPartition

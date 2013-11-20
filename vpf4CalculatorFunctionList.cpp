@@ -1177,6 +1177,12 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddAlgebraicNumberToAlgebraicNumber, this->opRational(), this->opAlgNumber(),
    "Adds rational to algebraic number. ",
    "1/(1+\\sqrt {2}+\\sqrt{}6)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
+   "Adds double or rational to a double or rational approximately using the built-in cpp \
+   addition, returning double. ",
+   "DoubleValue{}(3.14159265358979323846)+1"
+   , true);
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
@@ -1194,12 +1200,6 @@ void Calculator::initPredefinedStandardOperations()
   ("+", CalculatorFunctionsBinaryOps::innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
    "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat, this->opDouble(), this->opRational(),
-   "Adds double or rational to a double or rational approximately using the built-in cpp \
-   addition, returning double. ",
-   "DoubleValue{}(3.14159265358979323846)+1"
-   , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly, this->opRational(), this->opPoly(),
    "Adds a rational to a polynomial. ",
@@ -1357,6 +1357,37 @@ void Calculator::initPredefinedStandardOperations()
   ("*", CalculatorFunctionsBinaryOps:: innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
    "2*3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opRational(), this->opDouble(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nz:=101^20;\
+   \nDoubleValue{}(z);\
+   \nDoubleValue{}(z)+DoubleValue{}(1)-DoubleValue{}(z); \
+   \n(z+1)-z;\
+   \n y:=101^200;\
+   \nDoubleValue(y)"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nDoubleValue{}((101)^{20});\
+   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opDouble(),
+   "Multiplies rational by a double approximately using the built-in cpp multiplication \
+   returning double. The cpp multiplication is supposed to call the system's \
+   hardware double multiplication routine. ",
+   "DoubleValue{}(1/3)*3; \
+   \nDoubleValue{}((101)^{20});\
+   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
+   , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt, this->opWeylGroupElement(), this->opWeylGroupElement(),
    "Multiplies two coxeter elements if possible. ",
@@ -1536,37 +1567,6 @@ void Calculator::initPredefinedStandardOperations()
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opRational(), this->opDouble(),
-   "Multiplies rational by a double approximately using the built-in cpp multiplication \
-   returning double. The cpp multiplication is supposed to call the system's \
-   hardware double multiplication routine. ",
-   "DoubleValue{}(1/3)*3; \
-   \nz:=101^20;\
-   \nDoubleValue{}(z);\
-   \nDoubleValue{}(z)+DoubleValue{}(1)-DoubleValue{}(z); \
-   \n(z+1)-z;\
-   \n y:=101^200;\
-   \nDoubleValue(y)"
-   , true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opRational(),
-   "Multiplies rational by a double approximately using the built-in cpp multiplication \
-   returning double. The cpp multiplication is supposed to call the system's \
-   hardware double multiplication routine. ",
-   "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((101)^{20});\
-   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
-   , true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat, this->opDouble(), this->opDouble(),
-   "Multiplies rational by a double approximately using the built-in cpp multiplication \
-   returning double. The cpp multiplication is supposed to call the system's \
-   hardware double multiplication routine. ",
-   "DoubleValue{}(1/3)*3; \
-   \nDoubleValue{}((101)^{20});\
-   \nDoubleValue{}(DoubleValue{}((101)^{20})+DoubleValue{}(1))-DoubleValue{}(101^{20})"
-   , true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence, this->opRational(), this->opSequence(),
    "Carries out multiplication between a rational number on left \

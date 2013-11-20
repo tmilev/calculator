@@ -1080,8 +1080,7 @@ public:
   }
   inline Object& operator[](int i)const
   { if (i>=this->size || i<0)
-      crash << "Programming error: attempting to access the entry of index " << i << " in an array of "
-      << this->size << " elements. " << crash;
+      crash << "Programming error: attempting to access the entry of index " << i << " in an array of " << this->size << " elements. " << crash;
     this->CheckConsistency();
     return this->TheObjects[i];
   }

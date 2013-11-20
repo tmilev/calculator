@@ -487,69 +487,10 @@ bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
 }
 
 bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const
-{ output.SetSize(0);
-  if (input.GetRank()>=this->owneR->GetRank())
-    return true;
-  if (outputImagesSimpleRoots!=0)
-    outputImagesSimpleRoots->SetSize(0);
-  if (input.IsEqualToZero())
-  { output.SetSize(this->theSl2s.size);
-    if (outputImagesSimpleRoots!=0)
-      outputImagesSimpleRoots->SetSize(this->theSl2s.size);
-    for (int i=0; i<this->theSl2s.size; i++)
-    { output[i].MakeSimpleType('A', 1, &this->theOrbitHelementLengths[i]);
-      if (outputImagesSimpleRoots!=0)
-        (*outputImagesSimpleRoots)[i].SetSize(0);
-    }
-    return true;
-  }
-  //  Rational minCoRootLengthSquared=-1;
-  //growth is allowed from the minimal component only
-  int indexMinComponentByLengthAndSimpleType=0;
-  for (int i=1; i<input.size(); i++)
-  { if (input[indexMinComponentByLengthAndSimpleType]>input[i])
-      indexMinComponentByLengthAndSimpleType=i;
-  }
-  DynkinType typeMinusMin=input;
-  typeMinusMin.SubtractMonomial(input[indexMinComponentByLengthAndSimpleType], 1);
-  List<DynkinSimpleType> theSimpleTypes;
-  List<List<int> > lastComponentRootInjections;
-  input[indexMinComponentByLengthAndSimpleType].Grow(theSimpleTypes, &lastComponentRootInjections);
-  List<int> currentRootInjection;
-  currentRootInjection.SetSize(typeMinusMin.GetRank());
-  for (int i=0; i<currentRootInjection.size; i++)
-    currentRootInjection[i]=i;
-  for (int i=0; i<theSimpleTypes.size; i++)
-  { bool isGood=true;
-    for (int j=0; j<typeMinusMin.size(); j++)
-      if (theSimpleTypes[i]>typeMinusMin[j])
-      { isGood=false;
-        break;
-      }
-    if (!isGood)
-      continue;
-    output.AddOnTop(typeMinusMin);
-    output.LastObject()->AddMonomial(theSimpleTypes[i],1);
-    if (outputImagesSimpleRoots!=0)
-    { currentRootInjection.SetSize(typeMinusMin.GetRank());
-      for (int j=0; j<lastComponentRootInjections[i].size; j++)
-        currentRootInjection.AddOnTop(lastComponentRootInjections[i][j]+typeMinusMin.GetRank());
-      outputImagesSimpleRoots->AddOnTop(currentRootInjection);
-    }
-  }
-  for (int i=0; i<this->theOrbitHelementLengths.size; i++)
-    if (this->theOrbitHelementLengths[i]<=input[indexMinComponentByLengthAndSimpleType].lengthFirstCoRootSquared)
-    { output.SetSize(output.size+1);
-      output.LastObject()->MakeSimpleType('A', 1, &this->theOrbitHelementLengths[i]);
-      *output.LastObject()+=input;
-      if (outputImagesSimpleRoots!=0)
-      { currentRootInjection.SetSize(input.GetRank());
-        for (int i=0; i<currentRootInjection.size; i++)
-          currentRootInjection[i]=i;
-        outputImagesSimpleRoots->AddOnTop(currentRootInjection);
-      }
-    }
-  return true;
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GrowDynkinType");
+  HashedList<Rational> theLengths;
+  theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths);
+  return input.Grow(theLengths, this->owneR->GetRank(), output, outputImagesSimpleRoots);
 }
 
 Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRootInjection
@@ -563,7 +504,7 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRoot
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.MakeFromDynkinType(input);
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeRho(true);
-  int newIndex=DynkinType::GetNewIndexFromRootInjection(theRootInjection);
+  int newIndex=*theRootInjection.LastObject();
   int newRank=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.GetDim();
   newSimpleRoot.MakeEi(newRank, newIndex);
   Vectors<Rational> simpleBasisOld;
@@ -596,7 +537,7 @@ void CandidateSSSubalgebra::SetUpInjectionHs
     this->theHsInOrderOfCreation.AddOnTop(*newH);
   DynkinSimpleType newComponent=theNewType.GetSmallestSimpleType();
   this->CartanSAsByComponent=baseSubalgebra.CartanSAsByComponent;
-  int newIndex=DynkinType::GetNewIndexFromRootInjection(theRootInjection);
+  int newIndex=*theRootInjection.LastObject();
   int newIndexInNewComponent=0;
   if (newComponent.theRank==1)
   { this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
@@ -739,7 +680,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       }
     }
     theSmallType=theLargerTypes[i].GetSmallestSimpleType();
-    int indexNewRooT=DynkinType::GetNewIndexFromRootInjection(theRootInjections[i]);
+    int indexNewRooT=*theRootInjections[i].LastObject();
     int indexNewRootInSmallType=indexNewRooT-theLargerTypes[i].GetRank()+theSmallType.theRank;
     Rational desiredLengthSquared=theSmallType.lengthFirstCoRootSquared;
     desiredLengthSquared*=theSmallType.GetDefaultRootLengthSquared(0);
@@ -1495,7 +1436,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     this->flagUsedInducingSubalgebraRealization=false;
   int indexNewRoot=-1;
   if (this->flagUsedInducingSubalgebraRealization)
-    indexNewRoot=DynkinType::GetNewIndexFromRootInjection(this->RootInjectionsFromInducer);
+    indexNewRoot=*this->RootInjectionsFromInducer.LastObject();
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { bool seedsHaveBeenSown=false;
     if (this->flagUsedInducingSubalgebraRealization)
@@ -3401,7 +3342,9 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   output.reset(inputOwner);
   output.CheckConsistency();
   output.GetOwner().ComputeChevalleyConstants(&theGlobalVariables);
-  output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, true);
+  output.theRootSAs.theGlobalVariables=&theGlobalVariables;
+  output.theRootSAs.owneR=&inputOwner;
+  output.theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.theSubalgebras.size);
   output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.theSubalgebras.size*2);
@@ -3437,164 +3380,6 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
 //  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
-}
-
-std::string rootSubalgebras::ToString()
-{ std::stringstream out;
-  for (int i=0; i<this->theSubalgebras.size; i++)
-    out << this->theSubalgebras[i].ToString();
-  return out.str();
-}
-
-WeylGroup& rootSubalgebras::GetOwnerWeyl()
-{ return this->GetOwnerSSalgebra().theWeyl;
-}
-
-SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()
-{ if (this->owneR==0)
-    crash << "This is a programming error. Attempting to access the ambient Lie algebra of a non-initialized collection of root subalgebras. " << crash;
-  return *this->owneR;
-}
-
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
-{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD");
-  this->theSubalgebras.size=0;
-  this->GetOwnerWeyl().ComputeRho(true);
-  //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
-  rootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.theSubalgebras.SetSize(this->GetOwnerSSalgebra().GetRank()*2+1);
-  rootSAsGenerateAll.theSubalgebras[0].genK.size=0;
-  rootSAsGenerateAll.theSubalgebras[0].owneR=this->owneR;
-  rootSAsGenerateAll.theSubalgebras[0].ComputeAll();
-  this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSAsGenerateAll.theSubalgebras, 1, theGlobalVariables);
-//  std::cout << this->ToString();
-  if (sort)
-    this->SortDescendingOrderBySSRank();
-  if(computeEpsCoords)
-    for(int i=0; i<this->theSubalgebras.size; i++)
-      this->theSubalgebras[i].ComputeEpsCoordsWRTk(theGlobalVariables);
-}
-
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
-  //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
-  int theRelativeDimension= this->SimpleBasisK.size;
-  if (theRelativeDimension==0)
-    return;
-  Selection selectionRootsWithZeroCharacteristic;
-  Selection simpleRootsChar2;
-  Vectors<Rational> RootsWithCharacteristic2;
-  Vectors<Rational> reflectedSimpleBasisK;
-  RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
-  ElementWeylGroup raisingElt;
-  selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
-  Matrix<Rational> InvertedRelativeKillingForm;
-  InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
-  for (int k=0; k<theRelativeDimension; k++)
-    for (int j=0; j<theRelativeDimension; j++)
-      InvertedRelativeKillingForm.elements[k][j]=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
-  InvertedRelativeKillingForm.Invert();
-  int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
-  ProgressReport theReport(&theGlobalVariables);
-  Vectors<Rational> rootsZeroChar;
-  rootsZeroChar.ReservE(selectionRootsWithZeroCharacteristic.MaxSize);
-  Vectors<Rational> relativeRootSystem, bufferVectors;
-  Matrix<Rational> tempMat;
-//  Selection tempSel;
-  this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
-  slTwoSubalgebra theSl2;
-  theSl2.container=&output;
-  theSl2.owneR=this->owneR;
-  SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
-  DynkinDiagramRootSubalgebra diagramZeroCharRoots;
-//  std::cout << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-  //bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
-  //if (ereBeProbs)
-  //{ std::cout << "<hr>Ere be probs. ";
-  //}
-  //if (ereBeProbs)
-  //  std::cout << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
-  for (int i=0; i<numCycles; i++, selectionRootsWithZeroCharacteristic.incrementSelection())
-  { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
-    diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
-    int theSlack=0;
-    RootsWithCharacteristic2.size=0;
-    simpleRootsChar2=selectionRootsWithZeroCharacteristic;
-    simpleRootsChar2.InvertSelection();
-    Vector<Rational> simpleRootsChar2Vect;
-    simpleRootsChar2Vect=simpleRootsChar2;
-    for (int j=0; j<relativeRootSystem.size; j++)
-      if (simpleRootsChar2Vect.ScalarEuclidean(relativeRootSystem[j])==1)
-      { theSlack++;
-        RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK[j]);
-      }
-    int theDynkinEpsilon =diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
-    //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
-    //otherwise, as far as I understand, it always is //
-    //except for G_2 (go figure!).
-    //(but selectionRootsWithZeroCharacteristic still have to be found)
-    //this is done in the below code.
-//    if (ereBeProbs)
-//      std::cout << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
-    if (theDynkinEpsilon!=0)
-      continue;
-    Vector<Rational> tempRoot, tempRoot2;
-    tempRoot.MakeZero(theRelativeDimension);
-    for (int k=0; k<theRelativeDimension; k++)
-      if(!selectionRootsWithZeroCharacteristic.selected[k])
-        tempRoot[k]=2;
-    InvertedRelativeKillingForm.ActOnVectorColumn(tempRoot, tempRoot2);
-    Vector<Rational> characteristicH;
-    characteristicH.MakeZero(theLieAlgebra.GetRank());
-    for(int j=0; j<theRelativeDimension; j++)
-      characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-    this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-    ////////////////////
-    reflectedSimpleBasisK=this->SimpleBasisK;
-    for (int k=0; k<reflectedSimpleBasisK.size; k++)
-      this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
-    ////////////////////
-    theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
-    for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
-      this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
-
-    theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
-    theSl2.theE.MakeZero();
-    theSl2.theF.MakeZero();
-    //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-//    std::cout << "<br>accounting " << characteristicH.ToString();
-    if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-       (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
-        theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
-    { int indexIsoSl2;
-      theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
-      if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-      { output.GetElement(indexIsoSl2).IndicesContainingRootSAs.AddOnTop(indexInContainer);
-        output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
-      } else
-      { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
-        theSl2.indexInContainer=output.size;
-        output.AddOnTop(theSl2);
-      }
-    } else
-    { output.BadHCharacteristics.AddOnTop(characteristicH);
-/*      std::cout << "<br>obtained bad characteristic "
-      << characteristicH.ToString() << ". The zero diagram is "
-      << tempDiagram.ElementToStrinG()
-      << "; the Dynkin epsilon is " << theDynkinEpsilon
-      << "= the num roots generated by diagram " << tempDiagram.NumRootsGeneratedByDiagram()
-      << " + the relative dimension " << theRelativeDimension
-      << " - the slack " << theSlack
-      << "<br>The relative root system is: "
-      << relativeRootSystem.ToString();
-      std::cout << "<br> I was exploring " << this->ToString();*/
-    }
-    std::stringstream out;
-    out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
-//    std::cout << "<br>" << out.str();
-    theReport.Report(out.str());
-  }
-//  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
 bool CandidateSSSubalgebra::CheckConsistency()const
@@ -3930,17 +3715,16 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 }
 
 void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
-{ std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
+{ MacroRegisterFunctionWithName("SltwoSubalgebras::ElementToHtml");
+  std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
   std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->PathDisplayOutputFolder;
   std::string physicalPathSl2s= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder+"sl2s/";
   std::string htmlPathServerSl2s= theFormat==0 ? "": theFormat->PathDisplayOutputFolder+"sl2s/";
   std::string PathDisplayServerBaseFolder= theFormat==0 ? "../../": theFormat->PathDisplayServerBaseFolder;
+  std::string DisplayNameCalculator= theFormat==0 ? "" : theFormat->PathDisplayNameCalculator;
   ProgressReport theReport(theGlobalVariables);
   theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
-  std::string tempS;
-  std::string DisplayNameCalculator= theFormat==0 ? "" : theFormat->PathDisplayNameCalculator;
-  this->theRootSAs.ElementToHtml
-  (tempS, physicalPathSAs, htmlPathServerSAs, this, DisplayNameCalculator, theGlobalVariables);
+  this->theRootSAs.ToHTML(theFormat, this);
   bool usePNG=true;
   if (physicalPathSAs=="")
     usePNG=false;
@@ -3961,9 +3745,10 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
   outNotationCommand << "printSemisimpleLieAlgebra{}("
   << this->GetOwnerWeyl().theDynkinType.ToStringRelativeToAmbientType(this->GetOwnerWeyl().theDynkinType[0]) << ")" ;
   outNotation << "Notation, structure constants and Weyl group info: " << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())
-  << "<br> <a href=\"" << DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
+  << "<br> <a href=\"" << DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootSubalgebras.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   out << this->ToString(theFormat);
+  std::string tempS;
   if(usePNG)
   { fileName= physicalPathSl2s;
     fileName.append("sl2s.html");
@@ -4009,223 +3794,6 @@ void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariabl
       fileFlas.close();
     }
   }
-}
-
-void rootSubalgebra::ToString
-(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("rootSubalgebra::ToString");
-  std::stringstream out;
-  std::string tempS;
-  std::string latexFooter, latexHeader;
-  if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size ||
-      this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
-    includeKEpsCoords=false;
-  int LatexLineCounter=0;
-  this->ElementToStringHeaderFooter(latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  tempS=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-  if (useLatex)
-    out << "\\noindent$\\mathfrak{k}_{ss}:$ " << tempS;
-  else
-    out << "k_{ss}: " << CGI::GetMathSpanPure(tempS);
-  if (sl2s!=0)
-  { out << " &nbsp&nbsp&nbsp Contained in: ";
-    for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
-    { if (useHtml)
-        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK[i] << ".html\">";
-      out << tempS;
-      if (useHtml)
-        out << "</a>, ";
-    }
-    if (useHtml)
-      out << "<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
-  }
-  tempS=this->SimpleBasisK.ToString();
-  if (useHtml)
-    out << "\n<br>\n";
-  if (useLatex)
-    out << "\n\\noindent";
-  out << " Simple basis: " << tempS;
-  tempS=this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
-  if (useHtml)
-    out << "\n<br>\nSimple basis epsilon form: " << tempS;
-  tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
-  if (useHtml)
-    out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  tempS= this->theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
-  if(!useLatex)
-    CGI::clearDollarSigns(tempS, tempS);
-  if (useLatex)
-    out << "\n\n\\noindent ";
-  if (useHtml)
-    out << "<br>\n";
-  if (useLatex)
-    out << "$C(\\mathfrak{k_{ss}})_{ss}$: ";
-  else
-    out << "C(k_{ss})_{ss}: ";
-  out << tempS;
-  //int CartanPieceSize=
-    //this->AmbientWeyl.CartanSymmetric.NumRows- this->SimpleBasisCentralizerRoots.size-
-    //  this->SimpleBasisK.size;
-  //if (CartanPieceSize!=0)
-  //{  if (useLatex)
-  //    out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
-  //  if (useHtml)
-  //    out <<"+h_"<<CartanPieceSize;
-  //}
-  if (useHtml)
-    out << "<br>\n simple basis centralizer: ";
-  if (useLatex)
-    out << "; simple basis centralizer: ";
-  tempS=this->SimpleBasisCentralizerRoots.ToString();
-  out << tempS;
-  if (sl2s!=0)
-  { if (useHtml)
-      out << "\n<hr>\n";
-    List<int> hCharacteristics_S_subalgebras;
-    //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
-    hCharacteristics_S_subalgebras.size=0;
-    out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total " << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
-    for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size; i++)
-    { int theSl2index=sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i];
-      const slTwoSubalgebra& theSl2 = (*sl2s)[theSl2index];
-      if (useHtml)
-        out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
-      out << theSl2.hCharacteristic.ToString() << ", ";
-      if (useHtml)
-        out << "</a>";
-      bool isS_subalgebra=true;
-//      theSl2.hCharacteristic.ComputeDebugString();
-      for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
-      { int indexComparison= theSl2.IndicesContainingRootSAs[j];
-        if (indexComparison!=indexInOwner && sl2s->theRootSAs.theSubalgebras[indexComparison].indicesSubalgebrasContainingK.Contains(indexInOwner))
-        { isS_subalgebra=false;
-          break;
-        }
-      }
-      if (isS_subalgebra)
-        hCharacteristics_S_subalgebras.AddOnTop(sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i]);
-    }
-    if (useHtml)
-      out << "\n<br>\n";
-    out << "\nS-sl(2) subalgebras in k (total " << hCharacteristics_S_subalgebras.size << "): ";
-    for (int i=0; i<hCharacteristics_S_subalgebras.size; i++)
-      out << sl2s->TheObjects[hCharacteristics_S_subalgebras[i]].hCharacteristic.ToString() << ", ";
-  }
-  if (useHtml)
-  { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
-    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2) simple coordinates w.r.t. g <br> ";
-    std::stringstream //tempStream1,
-    tempStream2, tempStream3;
-    for(int i=0; i<this->HighestWeightsGmodK.size; i++)
-    { //tempStream1 << "\\underbrace{V_{";
-      tempStream2 << "\\underbrace{V_{";
-      tempStream3 << "\\underbrace{V_{";
-      //tempStream1
-      //<< this->AmbientWeyl.GetFundamentalCoordinatesFromSimple
-      //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
-      tempStream2 << this->kModulesgEpsCoords[i][0].ToStringLetterFormat("\\epsilon");
-      tempStream3 << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
-      //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
-      tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
-      tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";
-      if (i!=this->HighestWeightsGmodK.size-1)
-      { //tempStream1 << "\\oplus";
-        tempStream2 << "\\oplus";
-        tempStream3 << "\\oplus";
-      }
-    }
-//    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetMathMouseHover(tempStream2.str()) << "\n";
-    out << "\n<hr>\n" << CGI::GetMathMouseHover(tempStream3.str()) << "\n<hr>\n";
-  }
-  if (useLatex)
-    out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
-  if (!useHtml)
-    out << this->LowestWeightsGmodK.size ;
-  if (useHtml)
-    out << "<br>\n";
-  if (useLatex)
-    out << "\n\n";
-  out << latexHeader;
-  this->kModulesgEpsCoords.SetSize(this->kModules.size);
-  for (int i=0; i<this->kModules.size; i++)
-  { tempS=this->LowestWeightsGmodK[i].ToString();
-    if (useHtml)
-      out << "\n<tr><td>";
-    if (useLatex)
-      out << "\\hline ";
-    out << i;
-    if (useHtml)
-      out << "</td><td>";
-    if (useLatex)
-      out << " & ";
-    out << this->kModules[i].size;
-    if (useHtml)
-      out << "</td><td>";
-    if (useLatex)
-      out << " & ";
-    out << tempS;
-    tempS=this->HighestWeightsGmodK[i].ToString();
-    if (useHtml)
-      out << "</td><td>";
-    if (useLatex)
-      out << " & ";
-    out << tempS;
-    if (useHtml)
-      out << "</td><td>";
-    if (useLatex)
-      out << " & \n";
-    out << this->kModules[i].ToString();
-    if (useHtml)
-      out << "</td><td>";
-    if (i>=this->kModulesgEpsCoords.size)
-      this->GetAmbientWeyl().GetEpsilonCoords(this->kModules[i], this->kModulesgEpsCoords[i]);
-    out << this->kModulesgEpsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
-    if (useLatex)
-      out << " & \n";
-    if (useHtml)
-      out << "</td>";
-    if (includeKEpsCoords)
-    { if (useHtml)
-        out << "<td>";
-      if (useLatex)
-        out << " & ";
-      out << tempS << this->kModulesKepsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
-      if (useHtml)
-        out << "</td>";
-      if (useLatex)
-        out << "\\\\\n";
-    }
-    if (useHtml)
-      out << "</tr>";
-    if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
-    { LatexLineCounter=0;
-      out << latexFooter << latexHeader;
-    }
-    if (i!=this->kModules.size-1)
-    { LatexLineCounter+=this->kModules[i].size;
-      if (useLatex)
-       if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules[i].size))
-        { out << latexFooter << latexHeader;
-          LatexLineCounter = this->kModules[i].size;
-        }
-    }
-  }
-  if (useHtml)
-    out << "</table>";
-  if (useLatex)
-    out << latexFooter;
-  if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
-    this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
-  if (this->theMultTable.size!=0)
-  { if (useHtml)
-      out << "\n\n Pairing table:\n\n";
-    if (useLatex)
-      out << "\n\n\\noindent Pairing table:\n\n\\noindent";
-    this->theMultTable.ToString(tempS, useLatex, useHtml, *this);
-    out << tempS << "\n";
-  }
-  output=out.str();
 }
 
 bool CandidateSSSubalgebra::IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const

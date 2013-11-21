@@ -242,6 +242,7 @@ public:
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
+  HashedList<Rational> coRootLengths;
   SemisimpleLieAlgebra* owneR;
   GlobalVariables* theGlobalVariables;
   int parabolicsCounterNilradicalGeneration;
@@ -281,6 +282,7 @@ public:
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 
+  void ComputeAllReductiveRootSAsInit();
   void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   void GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);

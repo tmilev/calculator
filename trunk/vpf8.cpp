@@ -5336,7 +5336,8 @@ void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rat
 }
 
 void WeylGroup::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
-{ this->ComputeRho(true);
+{ MacroRegisterFunctionWithName("WeylGroup::GetCoxeterPlane");
+  this->ComputeRho(true);
   Vector<Rational> ZeroRoot;
   int theDimension=this->GetDim();
   if (theDimension<2)

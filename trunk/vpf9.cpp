@@ -3856,8 +3856,7 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 }
 
 bool DynkinType::Grow
-(const List<Rational>& allowedLengths, int AmbientWeylDim, List<DynkinType>& output,
- List<List<int> >* outputPermutationRoots)const
+(const List<Rational>& allowedScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const
 { MacroRegisterFunctionWithName("DynkinType::Grow");
   output.SetSize(0);
   if (outputPermutationRoots!=0)
@@ -3865,11 +3864,11 @@ bool DynkinType::Grow
   if (this->GetRank()>=AmbientWeylDim)
     return true;
   if (this->IsEqualToZero())
-  { output.SetSize(allowedLengths.size);
+  { output.SetSize(allowedScales.size);
     if (outputPermutationRoots!=0)
-      outputPermutationRoots->SetSize(allowedLengths.size);
-    for (int i=0; i<allowedLengths.size; i++)
-    { output[i].MakeSimpleType('A', 1, &allowedLengths[i]);
+      outputPermutationRoots->SetSize(allowedScales.size);
+    for (int i=0; i<allowedScales.size; i++)
+    { output[i].MakeSimpleType('A', 1, &allowedScales[i]);
       if (outputPermutationRoots!=0)
       { (*outputPermutationRoots)[i].SetSize(1);
         (*outputPermutationRoots)[i][0]=0;
@@ -3910,10 +3909,10 @@ bool DynkinType::Grow
       outputPermutationRoots->AddOnTop(currentRootInjection);
     }
   }
-  for (int i=0; i<allowedLengths.size; i++)
-    if (allowedLengths[i]<=(*this)[indexMinComponentByLengthAndSimpleType].CartanSymmetricScale)
+  for (int i=0; i<allowedScales.size; i++)
+    if (allowedScales[i]<=(*this)[indexMinComponentByLengthAndSimpleType].CartanSymmetricScale)
     { output.SetSize(output.size+1);
-      output.LastObject()->MakeSimpleType('A', 1, &allowedLengths[i]);
+      output.LastObject()->MakeSimpleType('A', 1, &allowedScales[i]);
       *output.LastObject()+=*this;
       if (outputPermutationRoots!=0)
       { for (int i=0; i<currentRootInjection.size; i++)

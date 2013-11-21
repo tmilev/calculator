@@ -28,7 +28,7 @@ class NilradicalCandidate
   Vector<Rational> ConeIntersection;
   Vector<Rational> ConeStrongIntersection;
   Vector<Rational> ConeRelativelyStrongIntersection;
-//  Vector<Rational> LInfiniteRelation;
+  //  Vector<Rational> LInfiniteRelation;
   Vector<Rational> ConeSeparatingNormal;
   Vectors<Rational> theNilradicalWeights;
   Vectors<Rational> theNonFKhws;
@@ -340,13 +340,8 @@ public:
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
-  void FindTheSSSubalgebrasOLD(SemisimpleLieAlgebra& newOwner);
   void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
-  void FindTheSSSubalgebrasOLDPart2();
-  void ExtendCandidatesRecursiveOLD(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion);
   void ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0);
-  void ExtendOneComponentOneTypeAllLengthsRecursive(const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion);
-  void ExtendOneComponentRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion);
 };
 
 

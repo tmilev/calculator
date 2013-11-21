@@ -453,16 +453,6 @@ void SemisimpleSubalgebras::ComputeSl2sInitOrbitsForComputationOnDemand()
     this->theOrbitHelementLengths.AddOnTop(this->theSl2s[i].LengthHsquared);
 }
 
-void SemisimpleSubalgebras::FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindAllEmbeddings");
-  this->owneR=&theOwner;
-  this->ComputeSl2sInitOrbitsForComputationOnDemand();
-  CandidateSSSubalgebra theCandidate;
-  theCandidate.owner=this;
-//  bool aaarg;
-  this->ExtendOneComponentOneTypeAllLengthsRecursive(theCandidate, theType, false);
-}
-
 void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
   this->owneR=&newOwner;
@@ -776,21 +766,6 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   }
 }
 
-void SemisimpleSubalgebras::FindTheSSSubalgebrasOLD(SemisimpleLieAlgebra& newOwner)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebrasOLD");
-  this->owneR=&newOwner;
-  this->ComputeSl2sInitOrbitsForComputationOnDemand();
-  this->FindTheSSSubalgebrasOLDPart2();
-}
-
-void SemisimpleSubalgebras::FindTheSSSubalgebrasOLDPart2()
-{ this->CheckConsistency();
-  CandidateSSSubalgebra emptyCandidate;
-  emptyCandidate.owner=this;
-  this->ExtendCandidatesRecursiveOLD(emptyCandidate, true);
-  this->HookUpCentralizers(false);
-}
-
 void SemisimpleSubalgebras::RegisterPossibleCandidate(CandidateSSSubalgebra& input)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::RegisterPossibleCandidate");
   SemisimpleLieAlgebra tempSA;
@@ -994,149 +969,6 @@ const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(
   }
   this->theOrbitsAreComputed[indexSl2]=true;
   return this->theOrbits[indexSl2];
-}
-
-void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentRecursive");
-  baseCandidate.CheckMaximalDominance();
-  RecursionDepthCounter theCounter(&this->theRecursionCounter);
-  int numVectorsFound=baseCandidate.CartanSAsByComponent.LastObject()->size;
-  CandidateSSSubalgebra newCandidate;
-  DynkinSimpleType theNewTypE=baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetGreatestSimpleType();
-  ProgressReport theReport(theGlobalVariables);
-  ProgressReport theReport0(theGlobalVariables);
-  ProgressReport theReport1(theGlobalVariables);
-  ProgressReport theReport2(theGlobalVariables);
-  //std::cout << "<hr> Trying to realize " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
-  if (numVectorsFound==theNewTypE.theRank)
-  { newCandidate=baseCandidate;
-    this->RegisterPossibleCandidate(newCandidate);
-    if (!newCandidate.ComputeChar(false))
-    { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " doesn't have fitting chars.");
-      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-      //std::cout << "<hr>"
-      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
-      //<< newCandidate.theHs.ToString() << " has bad character.<br>";
-
-      return;
-    }
-    if (!newCandidate.ComputeSystem(false, false))
-    { theReport.Report("Candidate " + newCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) + " -> no system solution.");
-      //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-      //std::cout << "Candidate "
-      //<< newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ", "
-      //<< newCandidate.theHs.ToString()  << " -> no system solution. ";
-      return;
-    }
-    for (int i=0; i<this->theSubalgebraCandidates.size; i++)
-      if (newCandidate.theWeylNonEmbeddeD.theDynkinType==this->theSubalgebraCandidates[i].theWeylNonEmbeddeD.theDynkinType)
-      { if (newCandidate.IsDirectSummandOf(this->theSubalgebraCandidates[i], true))
-        { //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-            //std::cout << "<hr>Candidate "
-            //<< newCandidate.ToStringTypeAndHs() << " is a direct summand of  "
-            //<< this->theSubalgebraCandidates[i].ToStringTypeAndHs() << ". ";
-
-          return;
-        }
-//        std::cout << "<hr><hr>Found two candidates with identical Dynkin types, equal to "
-//        << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
-      }
-    //if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-    //std::cout << "<hr>" << newCandidate.ToStringTypeAndHs() << " <b> IS GOOD, adding.</b><br>";
-    newCandidate.indexInOwner=this->theSubalgebraCandidates.size;
-    this->theSubalgebraCandidates.AddOnTop(newCandidate);
-    if (!this->theSubalgebraCandidates.LastObject()->indexInOwner==this->theSubalgebraCandidates.size-1)
-      crash << "<hr>Something is very wrong: internal check failed! " << crash;
-    if (propagateRecursion)
-    { //std::cout << "<hr>Extending recursively: " << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
-    }
-    if (propagateRecursion)
-      this->ExtendCandidatesRecursiveOLD(newCandidate, propagateRecursion);
-    return;
-  }
-  int indexFirstWeight=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows - theNewTypE.theRank;
-  int indexCurrentWeight=indexFirstWeight+numVectorsFound;
-  Rational desiredLengthSquared=theNewTypE.CartanSymmetricScale;
-  desiredLengthSquared*=theNewTypE.GetDefaultRootLengthSquared(0);
-  desiredLengthSquared/=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
-  Vectors<Rational> startingVector;
-  Vector<Rational> Hrescaled;
-  Vectors<Rational> theHCandidatesRescaled;
-  List<ElementWeylGroup> theHCandidatesRescaledGenerators;
-  startingVector.SetSize(1);
-  std::stringstream out0;
-  if (theGlobalVariables!=0)
-  { out0 << "Attempting to complete component " << theNewTypE.ToString() << ", root " << baseCandidate.CartanSAsByComponent.LastObject()->size+1
-    << " out of " << theNewTypE.theRank << ".";
-    theReport0.Report(out0.str());
-  }
-  for (int i=0; i<this->theSl2s.size; i++)
-  { if (theGlobalVariables!=0)
-    { std::stringstream reportStreamX;
-      reportStreamX << "Trying to realize the last component of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
-      << ", " << numVectorsFound << " out of " << theNewTypE.theRank << ", desired length squared= " << desiredLengthSquared << " ."
-      << " Current length is " << this->theSl2s[i].LengthHsquared;
-      if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
-        reportStreamX << " which is no good.<br> ";
-      else
-        reportStreamX << " which is all nice and dandy.<br>";
-      theReport1.Report(reportStreamX.str());
-//      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
-//        std::cout << "<br>" << reportStreamX.str();
-    }
-    if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
-      continue;
-    theHCandidatesRescaled.SetSize(0);
-    theHCandidatesRescaledGenerators.SetSize(0);
-    if (indexCurrentWeight!=0)
-    { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(i);
-      const HashedList<ElementWeylGroup>& currentOrbitGeneratingElts=this->GetOrbitSl2HelementWeylGroupElt(i);
-      theHCandidatesRescaled.ReservE(currentOrbit.size);
-      theHCandidatesRescaledGenerators.ReservE(currentOrbit.size);
-      for (int j=0; j<currentOrbit.size; j++)
-      { Hrescaled=currentOrbit[j];
-        Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
-        Hrescaled/=2;
-        if (baseCandidate.isGoodForTheTop(Hrescaled))
-        { if (theGlobalVariables!=0)
-          { std::stringstream out2;
-            out2 << " Orbit candidate " << j+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
-            theReport2.Report(out2.str());
-          }
-          theHCandidatesRescaled.AddOnTop(Hrescaled);
-          theHCandidatesRescaledGenerators.AddOnTop(currentOrbitGeneratingElts[j]);
-        } else
-          if (theGlobalVariables!=0)
-          { std::stringstream out2;
-            out2 << " Orbit candidate " << j+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). " ;
-            theReport2.Report(out2.str());
-          }
-      }
-    }
-    else
-    { Hrescaled=this->theSl2s[i].theH.GetCartanPart();
-      Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
-      Hrescaled/=2;
-      theHCandidatesRescaled.AddOnTop(Hrescaled);
-      ElementWeylGroup theId;
-      theHCandidatesRescaledGenerators.AddOnTop(theId);
-      if (theGlobalVariables!=0)
-      { std::stringstream out;
-        out << "Orbit of " << Hrescaled.ToString() << " not generated because that is the very first H element selected.";
-      }
-    }
-    for (int j=0; j<theHCandidatesRescaled.size; j++)
-    { if (theGlobalVariables!=0)
-      { std::stringstream out2;
-        out2 << "Attempting to extend type by h element number " << j+1 << " out of " << theHCandidatesRescaled.size << ".";
-        theReport2.Report(out2.str());
-      }
-      newCandidate=baseCandidate;
-      newCandidate.AddHincomplete(theHCandidatesRescaled[j], theHCandidatesRescaledGenerators[j], i);
-      if (newCandidate.CheckMaximalDominance())
-        this->ExtendOneComponentRecursive(newCandidate, propagateRecursion);
-    }
-  }
 }
 
 bool CandidateSSSubalgebra::CheckInitialization()const
@@ -2944,143 +2776,6 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   return true;
 }
 
-void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
-(const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive");
-  crash << "This code has been deprecated" << crash;
-  /*baseCandidate.CheckInitialization();
-  CandidateSSSubalgebra theCandidate;
-  ProgressReport theProgressReport1(theGlobalVariables);
-  ProgressReport theProgressReport2(theGlobalVariables);
-  ProgressReport theProgressReport3(theGlobalVariables);
-  int currentRank=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows;
-  MonomialChar<Rational> tempMon;
-  tempMon.owner=0;
-  tempMon.weightFundamentalCoordS.MakeZero(currentRank);
-  Rational dimCentralizerBase=this->GetSSowner().GetNumGenerators();
-  if (!baseCandidate.theCharNonPrimalFundCoords.theMonomials.Contains(tempMon))
-  { if (currentRank>0)
-      return;
-  } else
-    dimCentralizerBase=baseCandidate.theCharNonPrimalFundCoords.theCoeffs[baseCandidate.theCharNonPrimalFundCoords.theMonomials.GetIndex(tempMon)];
-  Rational baseLength=-1;
-  List<DynkinSimpleType> theTypes;
-  baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-  if (theTypes.size!=0)
-    if (theType.theRank==theTypes.LastObject()->theRank && theType.theLetter==theTypes.LastObject()->theLetter)
-      baseLength=theTypes.LastObject()->CartanSymmetricScale;
-  //if (this->GetSSowner().GetRank()-(+)
-  std::stringstream consideringStream;
-  consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
-  consideringStream << "<br>\nCurrent rank: " << currentRank << "<br>\nConsidering: " << theType.ToString();
-  //std::cout << "<br>Considering: " << theType.ToString();
-  theProgressReport1.Report(consideringStream.str());
-  if (currentRank!=0 && dimCentralizerBase < theType.GetSSAlgDim())
-  { consideringStream << " turns out to be no good as the desired root system size is " << theType.GetRootSystemSize() << " but I have only "
-    << 2*baseCandidate.PosRootsPerpendicularPrecedingWeights.size << " weights to use. ";
-    theProgressReport1.Report(consideringStream.str());
-    //std::cout << consideringStream.str();
-    return;
-  }
-  if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
-    for (int i=0; i<theTypes.size; i++)
-      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theTypes[i].CartanSymmetricScale))
-        return;
-  SemisimpleLieAlgebra tempAlgebra;
-  for (int k=0; k<this->theSl2s.size; k++)
-  { theType.CartanSymmetricScale=this->theSl2s[k].LengthHsquared;
-    if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
-      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theType.CartanSymmetricScale))
-        continue;
-    if (theType.CartanSymmetricScale<baseLength)
-      continue;
-    theCandidate=baseCandidate;
-    tempAlgebra.theWeyl.MakeArbitrarySimple(theType.theLetter, theType.theRank);
-    int indexSubalgebra=this->theSubalgebrasNonEmbedded->GetIndex(tempAlgebra);
-    bool mustComputeSSalgebra=(indexSubalgebra==-1);
-    if (mustComputeSSalgebra)
-    { indexSubalgebra=this->theSubalgebrasNonEmbedded->size;
-      this->theSubalgebrasNonEmbedded->AddOnTop(tempAlgebra);
-    }
-    if (this->theSl2sOfSubalgebras->size!=this->theSubalgebrasNonEmbedded->size)
-      this->theSl2sOfSubalgebras->SetSize(this->theSubalgebrasNonEmbedded->size);
-    SemisimpleLieAlgebra& theSmallAlgebra=this->theSubalgebrasNonEmbedded->GetElement(indexSubalgebra);
-    SltwoSubalgebras& theSmallSl2s=(*this->theSl2sOfSubalgebras)[indexSubalgebra];
-    if (mustComputeSSalgebra)
-    { std::stringstream tempStream;
-      tempStream << "\nGenerating simple Lie algebra " << theType.ToString() << " (total " << this->theSubalgebrasNonEmbedded->size << ")...";
-      theProgressReport2.Report(tempStream.str());
-      theSmallAlgebra.CheckConsistency();
-      theSmallAlgebra.ComputeChevalleyConstants(theGlobalVariables);
-    }
-    if (theSmallSl2s.owner!=&theSmallAlgebra)
-    { std::stringstream tempStream;
-      tempStream << "\nGenerating  sl(2) subalgebras of " << theType.ToString() << " ...";
-      theProgressReport2.Report(tempStream.str());
-      theSmallSl2s.CheckConsistency();
-      theSmallAlgebra.FindSl2Subalgebras(theSmallAlgebra, theSmallSl2s, *theGlobalVariables);
-      tempStream << " done.";
-      theProgressReport2.Report(tempStream.str());
-    }
-    bool isGood=true;
-    for (int i=0; i<theSmallSl2s.size; i++)
-    { isGood=false;
-      for (int j=0; j<this->theSl2s.size; j++)
-      { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]))
-          continue;
-        isGood=true;
-        break;
-      }
-      if (!isGood)
-        break;
-    }
-    if (this->theGlobalVariables!=0)
-    { std::stringstream out;
-      out << " \n" << theType.ToString();
-      if (isGood)
-      { out << "<br>" << theType.ToString() << " has fitting sl(2) decompositions.";
-        //std::cout  << "<br>" << theType.ToString() << " has fitting sl(2) decompositions.";
-      } else
-      { out << "<br>" << theType.ToString() << " does not have fitting sl(2) decompositions.";
-        //std::cout  << "<br>" << theType.ToString() << " does not have fitting sl(2) decompositions.";
-      }
-      theProgressReport3.Report(out.str());
-    }
-    if (isGood)
-    { theCandidate.AddTypeIncomplete(theType);
-      this->ExtendOneComponentRecursive(theCandidate, propagateRecursion);
-    }
-  }*/
-}
-
-void SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD");
-  RecursionDepthCounter theCounter(&this->theRecursionCounter);
-  baseCandidate.CheckInitialization();
-  DynkinSimpleType theType;
-  ProgressReport theProgressReport1(theGlobalVariables);
-  DynkinSimpleType myType;
-  myType.theLetter='G';
-  myType.theRank=this->GetSSowner().GetRank();
-  myType.CartanSymmetricScale=this->theSl2s[0].LengthHsquared;
-  if(this->theGlobalVariables!=0)
-  { std::stringstream out;
-    out << "\nExploring extensions of " << baseCandidate.ToString();
-    theProgressReport1.Report(out.str());
-//    std::cout << "Exploring extensions of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " by: ";
-  }
-  List<DynkinSimpleType> theTypes;
-  baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
-//  bool dirtylittlehack;
-
-  if (theTypes.size==0 )
-    theType.MakeAone();
-  else
-    theType=*theTypes.LastObject();
-  for (; theType<myType; theType++, theType.CartanSymmetricScale=-1)
-    this->ExtendOneComponentOneTypeAllLengthsRecursive(baseCandidate, theType, propagateRecursion);
-}
-
 void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)const
 { std::stringstream out;
   std::string tempS;
@@ -3151,7 +2846,8 @@ bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
 }
 
 std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
-{ if (this->container==0)
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::ToString");
+  if (this->container==0)
     return "sl(2) subalgebra not initialized.";
   std::stringstream out;  std::string tempS;
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " << this->hCharacteristic.ToString() << "</a>";
@@ -4300,7 +3996,8 @@ void NilradicalCandidate::GetModGeneratedByNonHWVandNilradElt
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions* theFormat)const
-{ if (this->FKNilradicalCandidates.size==0)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringNilradicalsSummary");
+  if (this->FKNilradicalCandidates.size==0)
     return "";
   std::stringstream out;
   out << "<br>There are " << this->FKNilradicalCandidates.size << " possible isotypic nilradical extensions of the primal subalgebra. Of them "
@@ -4327,7 +4024,8 @@ std::string CandidateSSSubalgebra::ToStringNilradicalsSummary(FormatExpressions*
 }
 
 std::string CandidateSSSubalgebra::ToStringNilradicals(FormatExpressions* theFormat)const
-{ if (this->FKNilradicalCandidates.size==0)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringNilradicals");
+  if (this->FKNilradicalCandidates.size==0)
   { if (this->owner->flagComputeNilradicals)
     { if (this->AmRegularSA())
         return "Nilradicals not computed, but that is OK because this a root subalgebra. ";
@@ -4506,7 +4204,8 @@ std::string CandidateSSSubalgebra::ToStringPairingTableLaTeX(FormatExpressions* 
 }
 
 std::string CandidateSSSubalgebra::ToStringPairingTable(FormatExpressions* theFormat)const
-{ if (!this->NilradicalPairingTable.size>0)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToStringPairingTable");
+  if (!this->NilradicalPairingTable.size>0)
     return "";
   std::stringstream out;
   out << "<br>Below is the pairing table of the modules, defined as follows. Let g' be the subalgebra obtained by extending the current semisimple subalgebra "

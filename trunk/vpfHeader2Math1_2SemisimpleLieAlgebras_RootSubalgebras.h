@@ -242,7 +242,7 @@ public:
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
-  HashedList<Rational> coRootLengths;
+  HashedList<Rational> validScales;
   SemisimpleLieAlgebra* owneR;
   GlobalVariables* theGlobalVariables;
   int parabolicsCounterNilradicalGeneration;

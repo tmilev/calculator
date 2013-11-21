@@ -1027,11 +1027,6 @@ void Calculator::initPredefinedInnerFunctions()
    " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
-  ("EmbedSemisimpleInSemisimpleMethod2", this->innerEmbedSSalgInSSalgMethod2, "",
-   " <b>This function is being developed and is not imiplemented fully yet. </b> \
-   Prints all embeddings of the first subalgebra into the second. ",
-   "EmbedSemisimpleInSemisimpleMethod2{}(G_2, B_3)", true, false);
-  this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",

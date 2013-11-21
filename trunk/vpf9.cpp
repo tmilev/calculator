@@ -4592,8 +4592,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
 }
 
 Rational DynkinSimpleType::GetRatioLongRootToFirst(char inputWeylLetter, int inputRank)
-{ Rational result;
-  switch (inputWeylLetter)
+{ switch (inputWeylLetter)
   { case 'A': return 1;
     case 'B': return 1;
     case 'C': return 2;

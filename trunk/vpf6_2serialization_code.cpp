@@ -173,22 +173,22 @@ bool Serialization::innerStoreObject(Calculator& theCommands, const MonomialP& i
 template <>
 bool Serialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, const Expression& input, const Expression& inputContext, DynkinSimpleType& outputMon)
 { MacroRegisterFunctionWithName("Serialization::DeSerializeMon_DynkinSimpleType");
-  Expression rankE, typeLetterE, firstCoRootLengthE;
+  Expression rankE, typeLetterE, scaleE;
   if (input.children.size==2)
   { rankE=input[1];
     typeLetterE=input[0];
     if (typeLetterE.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
-    { firstCoRootLengthE=typeLetterE[2];
+    { scaleE=typeLetterE[2];
       typeLetterE=typeLetterE[1];
     } else
-      firstCoRootLengthE.AssignValue(1, theCommands);
+      scaleE.AssignValue(1, theCommands);
   } else if (input.children.size==3)
   { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
     { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
       << " Input is " << input.ToString() << ".";
       return false;
     }
-    firstCoRootLengthE=input[2];
+    scaleE=input[2];
     if (!input[1].IsListNElements(2))
     { theCommands.Comments << "<hr>Failed to extract rank, type from " << input[1].ToString() << ". The expression does not have two children.";
       return false;
@@ -199,14 +199,14 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, co
   { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length from expression " << input.ToString();
     return false;
   }
-  Rational firstCoRootSquaredLength;
-  if (!firstCoRootLengthE.IsOfType<Rational>(&firstCoRootSquaredLength))
-  { theCommands.Comments << "<hr>Failed to extract first co-root length: expression " << firstCoRootLengthE.ToString()
+  Rational theScale;
+  if (!scaleE.IsOfType<Rational>(&theScale))
+  { theCommands.Comments << "<hr>Failed to extract first co-root length: expression " << scaleE.ToString()
     << " is not a rational number.";
     return false;
   }
-  if (firstCoRootSquaredLength<=0)
-  { theCommands.Comments << "<hr>Couldn't extract first co-root length: " << firstCoRootSquaredLength.ToString() << " is non-positive.";
+  if (theScale<=0)
+  { theCommands.Comments << "<hr>Couldn't extract first co-root length: " << theScale.ToString() << " is non-positive.";
     return false;
   }
   std::string theTypeName;
@@ -253,14 +253,11 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, co
   }
   //std::cout << "here i am again 3. ";
   //std::cout.flush();
-  outputMon.MakeArbitrary(theWeylLetter, theRank);
-  firstCoRootSquaredLength*=2;
-  outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
+  outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
   return true;
 }
 
-bool Serialization::innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output,
- Expression* theContext, bool* isNonConst)
+bool Serialization::innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output, Expression* theContext, bool* isNonConst)
 { MacroRegisterFunctionWithName("Serialization::DynkinSimpleType");
   if (isNonConst!=0)
     *isNonConst=true;
@@ -268,7 +265,7 @@ bool Serialization::innerStoreObject(Calculator& theCommands, const DynkinSimple
   std::string letterS;
   letterS=input.theLetter;
   letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
-  indexE.AssignValue(input.lengthFirstCoRootSquared/2, theCommands);
+  indexE.AssignValue(input.CartanSymmetricScale/2, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
   output.reset(theCommands);

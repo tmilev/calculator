@@ -537,43 +537,6 @@ bool Calculator::innerPrintSSsubalgebras
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerEmbedSSalgInSSalgMethod2(Calculator& theCommands, const Expression& input, Expression& output)
-{ //bool showIndicator=true;
-  MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalgMethod2");
-  if (!input.IsListNElements(3))
-    return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
-  const Expression& EsmallSA=input[1];
-  const Expression& ElargeSA=input[2];
-
-  SemisimpleLieAlgebra* theSmallSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-  SemisimpleLieAlgebra* thelargeSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-
-  SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
-  SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
-  std::stringstream out;
-  if (ownerSS.GetRank()>6)
-  { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  else
-    out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
-  SemisimpleSubalgebras tempSSsas
-  (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
-   &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
-  SemisimpleSubalgebras& theSSsubalgebras=
-  theCommands.theObjectContainer.theSSsubalgebras[theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)];
-  DynkinSimpleType theType;
-  if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
-    return output.SetError("I've been instructed to act on simple types only. ", theCommands);
-  out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
-  theSSsubalgebras.FindAllEmbeddings(theType, ownerSS);
-  return output.AssignValue(theSSsubalgebras, theCommands);
-}
-
 bool MathRoutines::IsPrime(int theInt)
 { if (theInt<=1)
     return false;
@@ -1020,7 +983,8 @@ bool Calculator::innerPlot2DWithBars(Calculator& theCommands, const Expression& 
         { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
           return false;
         }
-      } else finalResultDouble=finalResultRat.DoubleValue();
+      } else
+        finalResultDouble=finalResultRat.DoubleValue();
       if (j==0)
       { xValues.AddOnTop(i.DoubleValue());
         fValuesLower.AddOnTop(finalResultDouble);

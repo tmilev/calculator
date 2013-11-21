@@ -1753,7 +1753,7 @@ void rootSubalgebra::ComputeAll()
 
 bool rootSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots)const
 { MacroRegisterFunctionWithName("rootSubalgebras::GrowDynkinType");
-  input.Grow(this->coRootLengths, this->GetOwnerWeyl().GetDim(), output, outputPermutationSimpleRoots);
+  input.Grow(this->validScales, this->GetOwnerWeyl().GetDim(), output, outputPermutationSimpleRoots);
   char theLetter;
   if (!this->owneR->theWeyl.theDynkinType.IsSimple(&theLetter))
     return true;
@@ -1984,11 +1984,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 
 void rootSubalgebras::ComputeAllReductiveRootSAsInit()
 { this->GetOwnerWeyl().ComputeRho(true);
-  this->coRootLengths.Clear();
-  this->coRootLengths.SetExpectedSize(this->owneR->GetRank()*2);
+  this->validScales.Clear();
+  this->validScales.SetExpectedSize(this->owneR->GetRank()*2);
   for (int i=0; i<this->owneR->GetRank(); i++)
-    this->coRootLengths.AddOnTopNoRepetition(this->owneR->theWeyl.CartanSymmetric(i,i));
-  std::cout << "Coroot lengths: " << this->coRootLengths.ToString();
+    this->validScales.AddOnTopNoRepetition(2/this->owneR->theWeyl.CartanSymmetric(i,i));
+  std::cout << "Valid scales: " << this->validScales.ToString();
 }
 
 void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()

@@ -4780,7 +4780,7 @@ public:
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
   void SortTheDynkinTypes();
-  bool Grow(const List<Rational>& allowedLengths, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
+  bool Grow(const List<Rational>& allowedScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
   bool ContainsType(char theTypeLetter)const;
   void GetDynkinTypeWithDefaultScales(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;

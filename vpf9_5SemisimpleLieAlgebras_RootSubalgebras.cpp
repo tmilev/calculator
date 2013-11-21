@@ -1795,21 +1795,25 @@ bool rootSubalgebra::ComputeEssentials()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeEssentials");
   this->CheckInitialization();
   if (this->indexInducingSubalgebra!=-1)
-  { Matrix<Rational>& scalarProdMatrixPermuted=this->bufferMatrix1;
-    Matrix<Rational>& scalarProdMatrixOrdered=this->bufferMatrix2;
-    this->SimpleBasisK.GetGramMatrix(scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
+  { this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
     int goodPermutation=-1;
     List<List<int> >& extensionRootPermutations=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
+    List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
+    { std::cout << "<hr>Checking " << this->theDynkinType.ToString() << " against " << extensionDynkinTypes[i].ToString();
+      this->scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
       for (int j=0; j<this->SimpleBasisK.size; j++)
         for (int k=0; k<this->SimpleBasisK.size; k++)
-          scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=scalarProdMatrixPermuted(j,k);
-      if (scalarProdMatrixOrdered==extensionCartanSymmetrics[i])
+          this->scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=this->scalarProdMatrixPermuted(j,k);
+      std::cout << ", comparing matrix " << this->scalarProdMatrixOrdered.ToString() << " to "
+      << extensionCartanSymmetrics[i].ToString();
+      if (this->scalarProdMatrixOrdered==extensionCartanSymmetrics[i])
       { goodPermutation=i;
         break;
+        std::cout << " ... bad!";
       }
+      std::cout << " ... good!";
     }
     if (goodPermutation==-1)
     { //if (this->indexInducingSubalgebra!=-1)
@@ -2099,8 +2103,8 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
   std::fstream output;
   XML::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   if (!XML::FileExists(MyPathPhysical))
-  { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical << ". "
-    << "Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
+  { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
+    << ". Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
     << crash;
   }
   output << "<html><title> Root subsystems of " << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";

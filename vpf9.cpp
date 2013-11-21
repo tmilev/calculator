@@ -3796,7 +3796,7 @@ void DynkinType::GetLettersTypesMults
     if (outputRanks!=0)
       outputRanks->AddOnTop((*this)[theIndex].theRank);
     if (outputFirstCoRootLengthsSquared!=0)
-      outputFirstCoRootLengthsSquared->AddOnTop((*this)[theIndex].lengthFirstCoRootSquared);
+      outputFirstCoRootLengthsSquared->AddOnTop((*this)[theIndex].CartanSymmetricScale);
     if (outputMults!=0)
       outputMults->AddOnTop(this->GetMult(theIndex));
   }
@@ -3911,7 +3911,7 @@ bool DynkinType::Grow
     }
   }
   for (int i=0; i<allowedLengths.size; i++)
-    if (allowedLengths[i]<=(*this)[indexMinComponentByLengthAndSimpleType].lengthFirstCoRootSquared)
+    if (allowedLengths[i]<=(*this)[indexMinComponentByLengthAndSimpleType].CartanSymmetricScale)
     { output.SetSize(output.size+1);
       output.LastObject()->MakeSimpleType('A', 1, &allowedLengths[i]);
       *output.LastObject()+=*this;
@@ -3940,11 +3940,11 @@ void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstC
   theMon.theRank=rank;
   theMon.theLetter=type;
   if (inputFirstCoRootSqLength==0)
-    theMon.lengthFirstCoRootSquared= 2;
+    theMon.CartanSymmetricScale= 2;
   else
-    theMon.lengthFirstCoRootSquared=*inputFirstCoRootSqLength;
-  if (theMon.lengthFirstCoRootSquared<=0)
-    crash  << "This is a programming error: co-root length must be positive, instead I got " << theMon.lengthFirstCoRootSquared.ToString()
+    theMon.CartanSymmetricScale=*inputFirstCoRootSqLength;
+  if (theMon.CartanSymmetricScale<=0)
+    crash  << "This is a programming error: co-root length must be positive, instead I got " << theMon.CartanSymmetricScale.ToString()
     << ". " << crash;
   this->MakeZero();
   this->AddMonomial(theMon, 1);
@@ -3975,7 +3975,7 @@ bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLen
   if (outputRank!=0)
     *outputRank=theMon.theRank;
   if (outputLength!=0)
-    *outputLength=theMon.lengthFirstCoRootSquared;
+    *outputLength=theMon.CartanSymmetricScale;
   return true;
 }
 
@@ -4061,8 +4061,8 @@ void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Ration
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->theMonomials.GetIndex(sortedMons[j]);
     int mult=this->GetMult(theIndex);
-    currentType.MakeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank);
-    currentType.lengthFirstCoRootSquared=currentType.GetDefaultCoRootLengthSquared(0);
+    currentType.MakeArbitrary(sortedMons[j].theLetter, sortedMons[j].theRank, 1);
+    currentType.CartanSymmetricScale=currentType.GetDefaultCoRootLengthSquared(0);
     for (int k=0; k<mult; k++)
     { currentType.GetCartanSymmetric(curCartan);
       output.DirectSumWith(curCartan);
@@ -4110,11 +4110,11 @@ Rational DynkinSimpleType::GetLongRootLengthSquared()const
     case 'D':
     case 'E':
     case 'F':
-      return this->lengthFirstCoRootSquared;
+      return this->CartanSymmetricScale*2;
     case 'G':
-      return this->lengthFirstCoRootSquared*3;
+      return this->CartanSymmetricScale*6;
     case 'C':
-      return this->lengthFirstCoRootSquared*2;
+      return this->CartanSymmetricScale*4;
     default:
       break;
   }
@@ -4133,20 +4133,19 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     hasAmbient=(theFormat->AmbientWeylLetter!='X');
   if (includeTechnicalNames)
   { if (!hasAmbient)
-      out << theLetter << "^{" << (this->lengthFirstCoRootSquared/2).ToString() << "}";
+      out << theLetter << "^{" << this->CartanSymmetricScale.ToString() << "}";
     else
     { DynkinSimpleType tempType;
       tempType.theLetter=theFormat->AmbientWeylLetter;
-      tempType.lengthFirstCoRootSquared=theFormat->AmbientWeylLengthFirstCoRoot;
-//      out << "[" << this->theLetter << "^{" << this->lengthFirstCoRootSquared << "}_" << this->theRank << "]";
-      Rational theDynkinIndex=this->lengthFirstCoRootSquared*tempType.GetRatioLongRootToFirst()/tempType.GetLongRootLengthSquared();
+      tempType.CartanSymmetricScale=theFormat->AmbientWeylLengthFirstCoRoot;
+//      out << "[" << this->theLetter << "^{" << this->CartanSymmetricScale << "}_" << this->theRank << "]";
+      Rational theDynkinIndex=this->CartanSymmetricScale*2*tempType.GetRatioLongRootToFirst()/tempType.GetLongRootLengthSquared();
       if (tempType.theLetter=='C')
         if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
           theDynkinIndex*=2;
       if (tempType.theLetter=='G')
         if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
           theDynkinIndex*=3;
-
       //Rational theRatio;
       //if (!theRatioSquared.GetSquareRootIfRational(theRatio))
       //{ crash << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
@@ -4204,8 +4203,7 @@ Rational DynkinSimpleType::GetDefaultCoRootLengthSquared(int rootIndex)const
   return result;
 }
 
-Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
-(int rootIndex)const
+Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared(int rootIndex)const
 { Rational result;
   switch (this->theLetter)
   { case 'A':
@@ -4408,7 +4406,7 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
   std::cout << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
-  if (this->lengthFirstCoRootSquared!=other.lengthFirstCoRootSquared)
+  if (this->CartanSymmetricScale!=other.CartanSymmetricScale)
     return false;
   if (other.theRank<=this->theRank)
     return false;
@@ -4440,7 +4438,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   currentImagesSimpleRootsCurrent.SetSize(this->theRank+1);
   DynkinSimpleType newType;
   if (this->theLetter=='B' && this->theRank==3)
-  { newType.MakeArbitrary('F', 4, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('F', 4, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
     { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
@@ -4449,7 +4447,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
     }
   }
   if (this->theLetter=='D' && this->theRank==5)
-  { newType.MakeArbitrary('E', 6, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('E', 6, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
     { currentImagesSimpleRootsCurrent[0]=0;
@@ -4462,7 +4460,7 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
     }
   }
   if (this->theLetter=='E' && this->theRank<8)
-  { newType.MakeArbitrary('E', this->theRank+1, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('E', this->theRank+1, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
     { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
@@ -4472,31 +4470,31 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
   }
   if (this->theLetter!='A')
     return;
-  newType.MakeArbitrary(this->theLetter, this->theRank+1, this->lengthFirstCoRootSquared);
+  newType.MakeArbitrary(this->theLetter, this->theRank+1, this->CartanSymmetricScale);
   output.AddOnTop(newType);
   if (outputPermutationRoots!=0)
   { for (int i=0; i<currentImagesSimpleRootsCurrent.size; i++)
       currentImagesSimpleRootsCurrent[i]=i;
     outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
-  newType.MakeArbitrary('B', this->theRank+1, this->lengthFirstCoRootSquared);
+  newType.MakeArbitrary('B', this->theRank+1, this->CartanSymmetricScale);
   output.AddOnTop(newType);
   if (outputPermutationRoots!=0)
     outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   if (this->theRank>1)
-  { newType.MakeArbitrary('C', this->theRank+1, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('C', this->theRank+1, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
   if (this->theRank>2)
-  { newType.MakeArbitrary('D', this->theRank+1, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('D', this->theRank+1, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
   }
   if (this->theRank==1)
-  { newType.MakeArbitrary('G', 2, this->lengthFirstCoRootSquared);
+  { newType.MakeArbitrary('G', 2, this->CartanSymmetricScale);
     output.AddOnTop(newType);
     if (outputPermutationRoots!=0)
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
@@ -4504,9 +4502,9 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
 }
 
 bool DynkinSimpleType::operator>(const DynkinSimpleType& other)const
-{ if (this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared)
+{ if (this->CartanSymmetricScale>other.CartanSymmetricScale)
     return true;
-  if (this->lengthFirstCoRootSquared<other.lengthFirstCoRootSquared)
+  if (this->CartanSymmetricScale<other.CartanSymmetricScale)
     return false;
   if (this->theRank>other.theRank)
     return true;
@@ -4521,7 +4519,7 @@ bool DynkinSimpleType::operator>(const DynkinSimpleType& other)const
 //    return true;
 //  if (this->theLetter<other.theLetter)
 //    return false;
-//  return this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared;
+//  return this->CartanSymmetricScale>other.CartanSymmetricScale;
 }
 
 
@@ -4588,7 +4586,7 @@ void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
       crash << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric from a non-initialized Dynkin simple type. " << crash;
       break;
   }
-  output*=this->lengthFirstCoRootSquared/2;
+  output*=this->CartanSymmetricScale;
 }
 
 Rational DynkinSimpleType::GetRatioLongRootToFirst(char inputWeylLetter, int inputRank)

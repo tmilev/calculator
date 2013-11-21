@@ -1740,7 +1740,7 @@ bool rootSubalgebra::CheckInitialization()const
 void rootSubalgebra::ComputePotentialExtensions()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputePotentialExtensions");
   this->ownEr->GrowDynkinType(this->theDynkinType, this->potentialExtensionDynkinTypes, &this->potentialExtensionRootPermutations);
-  std::cout << "<br>potential growth from " << this->theDynkinType.ToString() << ":" << this->potentialExtensionDynkinTypes.ToString();
+  std::cout << "<hr><hr>potential growth from " << this->theDynkinType.ToString() << ": " << this->potentialExtensionDynkinTypes.ToString();
   this->potentialExtensionCartanSymmetrics.SetSize(this->potentialExtensionDynkinTypes.size);
   for (int i=0; i<this->potentialExtensionDynkinTypes.size; i++)
     this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
@@ -1801,19 +1801,19 @@ bool rootSubalgebra::ComputeEssentials()
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { std::cout << "<hr>Checking " << this->theDynkinType.ToString() << " against " << extensionDynkinTypes[i].ToString();
+    { std::cout << "<hr>Looking to realize type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
+      << extensionCartanSymmetrics[i].ToString();
       this->scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
       for (int j=0; j<this->SimpleBasisK.size; j++)
         for (int k=0; k<this->SimpleBasisK.size; k++)
           this->scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=this->scalarProdMatrixPermuted(j,k);
-      std::cout << ", comparing matrix " << this->scalarProdMatrixOrdered.ToString() << " to "
-      << extensionCartanSymmetrics[i].ToString();
+      std::cout << "; my current matrix, properly permuted, is: " << this->scalarProdMatrixOrdered.ToString();
       if (this->scalarProdMatrixOrdered==extensionCartanSymmetrics[i])
       { goodPermutation=i;
+        std::cout << " ... good!";
         break;
-        std::cout << " ... bad!";
       }
-      std::cout << " ... good!";
+      std::cout << " ... bad!";
     }
     if (goodPermutation==-1)
     { //if (this->indexInducingSubalgebra!=-1)
@@ -1988,6 +1988,7 @@ void rootSubalgebras::ComputeAllReductiveRootSAsInit()
   this->coRootLengths.SetExpectedSize(this->owneR->GetRank()*2);
   for (int i=0; i<this->owneR->GetRank(); i++)
     this->coRootLengths.AddOnTopNoRepetition(this->owneR->theWeyl.CartanSymmetric(i,i));
+  std::cout << "Coroot lengths: " << this->coRootLengths.ToString();
 }
 
 void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()

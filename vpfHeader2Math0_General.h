@@ -4671,12 +4671,12 @@ class DynkinSimpleType
   public:
   char theLetter;
   int theRank;
-  Rational lengthFirstCoRootSquared;
-  DynkinSimpleType(): theLetter('X'), theRank(-1), lengthFirstCoRootSquared(0){}
+  Rational CartanSymmetricScale;
+  DynkinSimpleType(): theLetter('X'), theRank(-1), CartanSymmetricScale(0){}
   void MakeAone()
   { this->theLetter='A';
     this->theRank=1;
-    this->lengthFirstCoRootSquared=2;
+    this->CartanSymmetricScale=1;
   }
   int GetRootSystemSize()const;
   int GetRootSystemPlusRank()const
@@ -4685,7 +4685,7 @@ class DynkinSimpleType
   int GetSSAlgDim()const
   { return this->GetRootSystemSize()+this->theRank;
   }
-  void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared=0)
+  void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared)
   { if ((inputLetter!= 'A' && inputLetter!='B' && inputLetter!= 'C' && inputLetter!='D' &&
          inputLetter!= 'E' && inputLetter!='F' && inputLetter!= 'G') || inputRank<=0 )
       crash << "This is a programming error. Requested to create a simple Dynkin type of type " << inputLetter << " and rank "
@@ -4700,7 +4700,7 @@ class DynkinSimpleType
       inputLetter='A';
     this->theRank=inputRank;
     this->theLetter=inputLetter;
-    this->lengthFirstCoRootSquared=inputLengthFirstCorRootSquared;
+    this->CartanSymmetricScale=inputLengthFirstCorRootSquared;
   }
   void GetCartanSymmetric(Matrix<Rational>& output)const;
   void GetAn(int n, Matrix<Rational>& output)const;
@@ -4711,20 +4711,20 @@ class DynkinSimpleType
   void GetF4(Matrix<Rational>& output)const;
   void GetG2(Matrix<Rational>& output)const;
   void Grow(List<DynkinSimpleType>& output, List<List<int> >* outputPermutationRoots)const;
-  bool IsPossibleCoRootLength(const Rational& input)const;
+//  bool IsPossibleCoRootLength(const Rational& input)const;
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
-    this->lengthFirstCoRootSquared=other.lengthFirstCoRootSquared;
+    this->CartanSymmetricScale=other.CartanSymmetricScale;
   }
   bool operator==(const DynkinSimpleType& other)const
   { return
     this->theLetter==other.theLetter && this->theRank==other.theRank &&
-    this->lengthFirstCoRootSquared==other.lengthFirstCoRootSquared;
+    this->CartanSymmetricScale==other.CartanSymmetricScale;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int)
-    input.theLetter)*2+input.theRank +SomeRandomPrimes[0]*input.lengthFirstCoRootSquared.HashFunction();
+    input.theLetter)*2+input.theRank +SomeRandomPrimes[0]*input.CartanSymmetricScale.HashFunction();
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -4780,12 +4780,9 @@ public:
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
   void SortTheDynkinTypes();
-  bool Grow
-  (const List<Rational>& allowedLengths, int AmbientWeylDim, List<DynkinType>& output,
-   List<List<int> >* outputPermutationRoots)const
-  ;
+  bool Grow(const List<Rational>& allowedLengths, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
   bool ContainsType(char theTypeLetter)const;
-  void GetDynkinTypeWithDefaultLengths(DynkinType& output)const;
+  void GetDynkinTypeWithDefaultScales(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;
   DynkinSimpleType GetSmallestSimpleType()const;
   Rational GetSizeWeylGroupByFormula()const;
@@ -4797,12 +4794,6 @@ public:
     if(!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result))
       crash << "This is a programming error: Dynkin type has multiplicity that is not a small integer " << crash;
     return result;
-  }
-  bool IsPossibleCoRootLength(const Rational& input)const
-  { for (int i=0; i<this->size(); i++)
-      if ((*this)[i].IsPossibleCoRootLength(input))
-        return true;
-    return false;
   }
   int GetNumSimpleComponents()const;
   Rational GetRankRational()const;
@@ -4878,8 +4869,8 @@ class WeylGroupRepresentation
     return this->theElementImages[1].NumRows;
   }
   void Restrict
-(const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
- GlobalVariables* theGlobalVariables=0);
+  (const Vectors<coefficient>& VectorSpaceBasisSubrep, const Vector<Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
+   GlobalVariables* theGlobalVariables=0);
   bool DecomposeMeIntoIrrepsRecursive(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
   bool DecomposeMeIntoIrreps(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
   coefficient GetNumberOfComponents();

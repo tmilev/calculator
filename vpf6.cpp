@@ -2764,8 +2764,8 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   }
   out << "</table>";
   DynkinSimpleType tempSimpleType;
-  if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.lengthFirstCoRootSquared))
-    if (tempSimpleType.lengthFirstCoRootSquared==2)
+  if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricScale))
+    if (tempSimpleType.CartanSymmetricScale==2)
     { //std::cout << "here i am";
       Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);

@@ -179,7 +179,7 @@ std::string DynkinType::ToString(FormatExpressions* theFormat)const
 std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat)const
 { FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=ambientType.theLetter;
-  tempFormat.AmbientWeylLengthFirstCoRoot=ambientType.lengthFirstCoRootSquared;
+  tempFormat.AmbientWeylLengthFirstCoRoot=ambientType.CartanSymmetricScale;
   return this->ToString(&tempFormat);
 }
 
@@ -481,7 +481,7 @@ bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
 { if (input.GetRank()>this->owneR->GetRank())
     return false;
   for (int i=0; i<input.size(); i++)
-    if (!this->theOrbitHelementLengths.Contains(input[i].lengthFirstCoRootSquared))
+    if (!this->theOrbitHelementLengths.Contains(input[i].CartanSymmetricScale))
       return false;
   return true;
 }
@@ -682,7 +682,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     theSmallType=theLargerTypes[i].GetSmallestSimpleType();
     int indexNewRooT=*theRootInjections[i].LastObject();
     int indexNewRootInSmallType=indexNewRooT-theLargerTypes[i].GetRank()+theSmallType.theRank;
-    Rational desiredLengthSquared=theSmallType.lengthFirstCoRootSquared;
+    Rational desiredLengthSquared=theSmallType.CartanSymmetricScale;
     desiredLengthSquared*=theSmallType.GetDefaultRootLengthSquared(0);
     desiredLengthSquared/=theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
     newCandidate.SetUpInjectionHs(baseCandidate, theLargerTypes[i], theRootInjections[i]);
@@ -812,17 +812,16 @@ bool DynkinType::IsTypeA_1()const
   return (*this)[0].theLetter=='A';
 }
 
-void DynkinType::GetDynkinTypeWithDefaultLengths(DynkinType& output)const
+void DynkinType::GetDynkinTypeWithDefaultScales(DynkinType& output)const
 { if (&output==this)
   { DynkinType thisCopy=*this;
-    thisCopy.GetDynkinTypeWithDefaultLengths(output);
+    thisCopy.GetDynkinTypeWithDefaultScales(output);
     return;
   }
   output.MakeZero();
   DynkinSimpleType tempType;
   for (int i =0; i<this->size(); i++)
-  { tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank);
-    tempType.lengthFirstCoRootSquared=tempType.GetDefaultCoRootLengthSquared(0);
+  { tempType.MakeArbitrary((*this)[i].theLetter, (*this)[i].theRank, 1);
     output.AddMonomial(tempType, this->theCoeffs[i]);
   }
 }
@@ -1057,7 +1056,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive(const CandidateSSSubalge
   }
   int indexFirstWeight=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows - theNewTypE.theRank;
   int indexCurrentWeight=indexFirstWeight+numVectorsFound;
-  Rational desiredLengthSquared=theNewTypE.lengthFirstCoRootSquared;
+  Rational desiredLengthSquared=theNewTypE.CartanSymmetricScale;
   desiredLengthSquared*=theNewTypE.GetDefaultRootLengthSquared(0);
   desiredLengthSquared/=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
   Vectors<Rational> startingVector;
@@ -1178,7 +1177,7 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
     crash << "This is a programming error: I am given a simple Dynkin type of non-positive rank. " << crash;
   WeylGroup tempWeyl, tempWeylnonScaled;
   Rational two=2;
-  tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
+  tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.CartanSymmetricScale);
   tempWeylnonScaled.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank);
   this->theWeylNonEmbeddeD+=tempWeyl;
   this->theWeylNonEmbeddeDdefaultScale+=tempWeylnonScaled;
@@ -1306,28 +1305,11 @@ int charSSAlgMod<coefficient>::GetIndexExtremeWeightRelativeToWeyl(WeylGroup& th
 }
 
 bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace)
-{ //std::cout << "<br>h's: " << this->theHs << " testing: "
-  //<< AmbientRootTestedForWeightSpace << " for being e-possibility for "
-  //<< this->theHs[theIndex];
-  for (int k=0; k<this->theHs.size; k++)
+{ for (int k=0; k<this->theHs.size; k++)
   { Rational desiredScalarProd=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
-//    if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
-    /*{ std::cout << "<br>Desired scalar product of "
-      << AmbientRootTestedForWeightSpace.ToString() << " and "
-      << this->theHs[k].ToString() << ", determined by indices "
-      << k << " and " << theIndex << ", is " << desiredScalarProd
-      << " = "
-      << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[k])
-      << "*2/"
-      << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[theIndex]);
-    }*/
     Rational actualScalar= this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[k], AmbientRootTestedForWeightSpace);
     if (desiredScalarProd!=actualScalar)
-    { //if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
-      //{ std::cout << ", instead got " << actualScalar;
-      //}
       return false;
-    }
   }
   return true;
 }
@@ -2965,7 +2947,8 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
 void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
 (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive");
-  baseCandidate.CheckInitialization();
+  crash << "This code has been deprecated" << crash;
+  /*baseCandidate.CheckInitialization();
   CandidateSSSubalgebra theCandidate;
   ProgressReport theProgressReport1(theGlobalVariables);
   ProgressReport theProgressReport2(theGlobalVariables);
@@ -2985,7 +2968,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   baseCandidate.theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theTypes);
   if (theTypes.size!=0)
     if (theType.theRank==theTypes.LastObject()->theRank && theType.theLetter==theTypes.LastObject()->theLetter)
-      baseLength=theTypes.LastObject()->lengthFirstCoRootSquared;
+      baseLength=theTypes.LastObject()->CartanSymmetricScale;
   //if (this->GetSSowner().GetRank()-(+)
   std::stringstream consideringStream;
   consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
@@ -3001,15 +2984,15 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   }
   if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
     for (int i=0; i<theTypes.size; i++)
-      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theTypes[i].lengthFirstCoRootSquared))
+      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theTypes[i].CartanSymmetricScale))
         return;
   SemisimpleLieAlgebra tempAlgebra;
   for (int k=0; k<this->theSl2s.size; k++)
-  { theType.lengthFirstCoRootSquared=this->theSl2s[k].LengthHsquared;
+  { theType.CartanSymmetricScale=this->theSl2s[k].LengthHsquared;
     if (theType.theRank+ baseCandidate.theWeylNonEmbeddeD.GetDim()==this->owneR->GetRank())
-      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theType.lengthFirstCoRootSquared))
+      if (!this->owneR->theWeyl.theDynkinType.IsPossibleCoRootLength(theType.CartanSymmetricScale))
         continue;
-    if (theType.lengthFirstCoRootSquared<baseLength)
+    if (theType.CartanSymmetricScale<baseLength)
       continue;
     theCandidate=baseCandidate;
     tempAlgebra.theWeyl.MakeArbitrarySimple(theType.theLetter, theType.theRank);
@@ -3067,19 +3050,19 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     { theCandidate.AddTypeIncomplete(theType);
       this->ExtendOneComponentRecursive(theCandidate, propagateRecursion);
     }
-  }
+  }*/
 }
 
 void SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD(const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion)
-{ RecursionDepthCounter theCounter(&this->theRecursionCounter);
-  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD");
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD");
+  RecursionDepthCounter theCounter(&this->theRecursionCounter);
   baseCandidate.CheckInitialization();
   DynkinSimpleType theType;
   ProgressReport theProgressReport1(theGlobalVariables);
   DynkinSimpleType myType;
   myType.theLetter='G';
   myType.theRank=this->GetSSowner().GetRank();
-  myType.lengthFirstCoRootSquared=this->theSl2s[0].LengthHsquared;
+  myType.CartanSymmetricScale=this->theSl2s[0].LengthHsquared;
   if(this->theGlobalVariables!=0)
   { std::stringstream out;
     out << "\nExploring extensions of " << baseCandidate.ToString();
@@ -3094,7 +3077,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursiveOLD(const CandidateSSSubalg
     theType.MakeAone();
   else
     theType=*theTypes.LastObject();
-  for (; theType<myType; theType++, theType.lengthFirstCoRootSquared=-1)
+  for (; theType<myType; theType++, theType.CartanSymmetricScale=-1)
     this->ExtendOneComponentOneTypeAllLengthsRecursive(baseCandidate, theType, propagateRecursion);
 }
 
@@ -4607,7 +4590,7 @@ void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSqu
   DynkinSimpleType tempType;
   for (int i=0; i<this->size(); i++)
   { tempType=(*this)[i];
-    tempType.lengthFirstCoRootSquared*=multiplyCoRootSquaredLengthBy;
+    tempType.CartanSymmetricScale*=multiplyCoRootSquaredLengthBy;
     result.AddMonomial(tempType, this->theCoeffs[i]);
   }
   *this=result;
@@ -4615,7 +4598,7 @@ void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSqu
 
 void SemisimpleSubalgebras::ScaleDynkinType(DynkinType& theType)const
 { Rational theScale =
-  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().lengthFirstCoRootSquared/this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst();
+  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().CartanSymmetricScale/this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst();
   theScale.Invert();
   theType.ScaleFirstCoRootSquaredLength(theScale);
 }
@@ -4654,7 +4637,7 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theSimpleTypes);
   FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
-  tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].lengthFirstCoRootSquared;
+  tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].CartanSymmetricScale;
   out << "<br>Elements Cartan subalgebra by components: ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { if (useLaTeX && useHtml)
@@ -5362,30 +5345,6 @@ bool CandidateSSSubalgebra::operator>(const CandidateSSSubalgebra& other)const
   //  << crash;
   //}
   return this->theWeylNonEmbeddeD.theDynkinType>other.theWeylNonEmbeddeD.theDynkinType;
-}
-
-bool DynkinSimpleType::IsPossibleCoRootLength(const Rational& input)const
-{ if (this->theLetter=='C')
-  { if ((this->lengthFirstCoRootSquared/input)==2 || (this->lengthFirstCoRootSquared/input)==1)
-      return true;
-    return false;
-  }
-  if (this->theLetter=='F' || this->theLetter=='B' )
-  { if ((input/this->lengthFirstCoRootSquared)==2 || (input/this->lengthFirstCoRootSquared)==1)
-      return true;
-    return false;
-  }
-  if (this->theLetter=='G')
-  { //std::cout << "<br>Testing input co-root length " << input << " vs current co-root length: "
-    //<< this->lengthFirstCoRootSquared;
-    if ((this->lengthFirstCoRootSquared/input)==3 || (this->lengthFirstCoRootSquared/input)==1)
-      return true;
-    return false;
-  }
-  if (this->theLetter=='A' || this->theLetter=='D' || this->theLetter=='E')
-    return input==this->lengthFirstCoRootSquared;
-  crash << "This is a programmig error: non-initialized or otherwise faulty Dynkin simple type. " << crash;
-  return false;
 }
 
 void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables)

@@ -253,7 +253,7 @@ bool Serialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCommands, co
   }
   //std::cout << "here i am again 3. ";
   //std::cout.flush();
-  outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
+  outputMon.MakeArbitrary(theWeylLetter, theRank, 1/theScale);
   return true;
 }
 

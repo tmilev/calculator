@@ -1248,6 +1248,20 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
   return output.AssignValue((int)smallType.CanBeExtendedParabolicallyTo(targetType), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSymmetricCartan");
+  DynkinType theType;
+  if (!Serialization::DeSerializeMonCollection(theCommands, input, theType))
+  { theCommands.Comments << "Failed to convert " << input.ToString() << " to DynkinType.";
+    return false;
+  }
+  std::stringstream out;
+  Matrix<Rational> outputMat;
+  theType.GetCartanSymmetric(outputMat);
+  out << CGI::GetMathMouseHover(outputMat.ToStringLatex(),10000);
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))

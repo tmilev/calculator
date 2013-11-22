@@ -4572,6 +4572,15 @@ void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
   output(0,1)=-3;
 }
 
+void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
+{ Matrix<Rational> coOutput;
+  this->GetCartanSymmetric(coOutput);
+  output.init(coOutput.NumRows, coOutput.NumCols);
+  for (int i=0; i<coOutput.NumRows; i++)
+    for (int j=0; j<coOutput.NumCols; j++)
+      output(i,j)= coOutput(i,j)*4/(coOutput(i,i)*coOutput(j,j));
+}
+
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
 { switch(this->theLetter)
   { case 'A': this->GetAn(this->theRank, output); break;

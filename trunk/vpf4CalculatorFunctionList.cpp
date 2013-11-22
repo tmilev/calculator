@@ -58,7 +58,11 @@ void Calculator::initPredefinedInnerFunctions()
    "Creates an algebraic number that is a root of a polynomial with algebraic number coefficients. ",
    "AlgebraicNumberFromPoly{}(x^3+\\sqrt{2}x+1);");
 
-   this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
+  ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
+   "Gives the symmetric Cartan corresponding to a given dynkin type.",
+   "CartanSymmetric(A^30_1+d^30_4+e_8+3f^{1/7}_4);");//, false);
+  this->AddOperationInnerHandler
   ("GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
@@ -505,26 +509,16 @@ void Calculator::initPredefinedInnerFunctions()
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
-   "Creates a semisimple Lie algebra. The type of the semisimple Lie algebra is given in the format\
-    A_n or, alternatively, in the format A^k_n, where the capital letter stands for the type, \
-    the lower index stands for the rank, and the upper index stands for \
-    the length of the first root squared divided by two. \
-    <br>Omitting the upper index is means that the upper index is 1.\
-    <br>The upper index determines the scaling of \
-    the symmetric Cartan matrix.  A non-default value for the upper index \
-    will result in rescaling the structure constants of the corresponding \
-    Chevalley-Weyl generators (in general making those constants non-integral).\
-    <b>Remark.</b> It is advisable to omit the upper index (i.e., use default values) \
-    when computing with a single semisimple Lie algebra. \
-    <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
-    E_6, E_7, E_8, F_4, G_2 (A^1_n, B^1_n, C^1_n, D^1_n, E^1_n, F^1_4, \
-    G^1_2 in extended notation). \
-    The roots are ordered in order the order implied by \
-    the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
-    Introduction to Lie algebras and representation theory. \
-    By default (when the upper index is equal to 1), the roots are scaled so that the long \
-    root has squared length 2 in types \
-    A_n, B_n, D_n, E_6, E_7, E_8, and F_4, length 4 in C_n, and length 6 in type G_2.\
+   "Creates a semisimple Lie algebra. The type of the semisimple Lie algebra is by its Dynkin type, for example A^2_3, \
+    where the capital letter stands for the type, the lower index stands for the rank, and the upper index denotes the inverse of the scale of the \
+    symmetric Cartan matrix, see below. If the upper index is omitted, it is implied to be 1.<hr>\
+    <br>We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
+    <br>We assume the roots to be ordered in order the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
+    Introduction to Lie algebras and representation theory. If the upper index of the Dynkin type is 1, the corresponding symmetric Cartan matrix is\
+    assigned the default value. The default values are chosen so that the long root has squared length 2 in types \
+    A_n, B_n, D_n, E_6, E_7, E_8, and F_4, squared length 4 in C_n, and squared length 6 in type G_2. \
+    <br>If upper index is not equal to 1, the symmetric Cartan matrix is given by dividing the default symmetric Cartan matrix by the upper index. \
+    <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4, E_6, E_7, E_8, F_4, G_2. \
     ",
    "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\

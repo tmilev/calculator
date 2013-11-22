@@ -68,6 +68,7 @@ public:
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCanBeExtendedParabolicallyTo(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);

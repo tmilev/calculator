@@ -1910,6 +1910,7 @@ public:
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringLatex(FormatExpressions* theFormat=0)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->init(theDimension, theDimension);

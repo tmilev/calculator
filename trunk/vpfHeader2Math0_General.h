@@ -3717,6 +3717,15 @@ bool MonomialTensor<coefficient, inputHashFunction>::SimplifyEqualConsecutiveGen
 }
 
 template <typename Element>
+std::string Matrix<Element>::ToStringLatex(FormatExpressions* theFormat)const
+{ FormatExpressions formatCopy;
+  if (theFormat!=0)
+    formatCopy=*theFormat;
+  formatCopy.flagUseLatex=true;
+  return this->ToString(&formatCopy);
+}
+
+template <typename Element>
 std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   std::string tempS;
@@ -4702,6 +4711,7 @@ class DynkinSimpleType
     this->theLetter=inputLetter;
     this->CartanSymmetricScale=inputLengthFirstCorRootSquared;
   }
+  void GetCoCartanSymmetric(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
   void GetAn(int n, Matrix<Rational>& output)const;
   void GetBn(int n, Matrix<Rational>& output)const;

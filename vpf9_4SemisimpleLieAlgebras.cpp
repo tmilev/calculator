@@ -4648,7 +4648,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << "\"> Detailed information on isotypical nilradicals. </a><hr>";
   }
   out << this->ToStringGenerators(theFormat);
-  out << "<br>Symmetric Cartan matrix scaled: ";
+  out << "<br>Cartan subalgebra basis scalar products: ";
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
@@ -4660,8 +4660,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << CGI::GetMathMouseHover(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
     else
       out << CGI::GetMathSpanPure(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
-  }
-  else
+  } else
     out << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
@@ -4808,7 +4807,7 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
           theWeights=theWeightsCopy.GetElement();
         }
       }
-    }while (found);
+    } while (found);
 }
 
 bool CandidateSSSubalgebra::HasConjugateHsTo(List<Vector<Rational> >& input)const

@@ -1260,119 +1260,99 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
-    crash << "This is a programming error: currentComponent is empty "
-    << " which is impossible. " << crash;
+    crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
 //  std::cout << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
 //  << theBilinearForm.ToString();
   if (this->numberOfThreeValencyNodes(indexComponent, theBilinearForm)==1)
-  {//type D or E
+  { //type D or E
     //in type D first comes the triple node, then the long string, then the one-root strings
-    // the long string is oriented with the end that is connected to the triple node having
+    //the long string is oriented with the end that is connected to the triple node having
     //smaller index
     //in type E similarly the longest string comes first oriented with the root that is
     //linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-root string
     Vector<Rational> tripleNode;
-    int tripleNodeindex=this->indicesThreeNodes[indexComponent];
-    tripleNode=(currentComponent[tripleNodeindex]);
-    Vectors<Rational> tempRoots;
-    tempRoots=(currentComponent);
-    tempRoots.RemoveIndexSwapWithLast(tripleNodeindex);
-    DynkinDiagramRootSubalgebra tempDiagram;
-    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theBilinearForm);
-    if(tempDiagram.SimpleBasesConnectedComponents.size!=3)
-      crash << crash;
-    List<int> indicesLongComponents;
-    indicesLongComponents.size=0;
-    Rational tempRat;
+    tripleNode=currentComponent[this->indicesThreeNodes[indexComponent]];
+    Vectors<Rational> rootsWithoutTripleNode=currentComponent;
+    rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
+    DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
+    diagramWithoutTripleNode.ComputeDiagramTypeKeepInput(rootsWithoutTripleNode, theBilinearForm);
+    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
+      crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
     for (int i=0; i<3; i++)
-    { if(tempDiagram.SimpleBasesConnectedComponents[i].size>1)
-        indicesLongComponents.AddOnTop(i);
-      if (tempDiagram.SimpleBasesConnectedComponents[i][0].ScalarProduct(currentComponent[tripleNodeindex], theBilinearForm).IsEqualToZero())
-        tempDiagram.SimpleBasesConnectedComponents[i].ReverseOrderElements();
-    }
+      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i][0].ScalarProduct(tripleNode, theBilinearForm)==0)
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].ReverseOrderElements();
     for(int i=0; i<3; i++)
       for(int j=i+1; j<3; j++)
-        if (tempDiagram.SimpleBasesConnectedComponents[i].size<tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
-        { tempRoots=(tempDiagram.SimpleBasesConnectedComponents[i]);
-          tempDiagram.SimpleBasesConnectedComponents[i]=(tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
-          tempDiagram.SimpleBasesConnectedComponents[j]=(tempRoots);
-        }
-    currentComponent.size=0;
-    currentComponent.AddOnTop(tripleNode);
-    for (int i=0; i<3; i++)
-      currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents[i]);
-    Rational theCoRootLength=4;
-    theCoRootLength/=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
-    if (indicesLongComponents.size==1 || indicesLongComponents.size==0)
-      outputType.MakeArbitrary('D', currentComponent.size, theCoRootLength);
-    else
-      outputType.MakeArbitrary('E', currentComponent.size, theCoRootLength);
-  } else
-  { Rational length1, length2, tempRat;
-    Rational colength1, colength2;
-    length1=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
-    int numLength1=1;
-    int numLength2=0;
-    for(int i=1; i<currentComponent.size; i++)
-      if (currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm)==length1)
-        numLength1++;
-      else
-      { numLength2++;
-        length2=currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm);
-      }
-    if (numLength2==0 )
-    { //type A
-//      if (length1.IsEqualTo(theWeyl.GetLongestRootLengthSquared()))
-        outputType.MakeArbitrary('A', numLength1, ((Rational) 4)/length1);
-//      else
-//        out << this->SetComponent("A'", numLength1, indexComponent);
+        if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size<diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
+          diagramWithoutTripleNode.SimpleBasesConnectedComponents.SwapTwoIndices(i,j);
+    Rational theScale=2/tripleNode.ScalarProduct(tripleNode, theBilinearForm);
+    currentComponent.SetSize(0);
+    if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size==1)
+    { //<- components are sorted by length, therefore the second and third component are of length 1,
+      //therefore we have type D_n
+      currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
+      currentComponent.AddOnTop(tripleNode);//<-then triple node
+      currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
+      currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2]);//<-last two vectors
+      outputType.MakeArbitrary('D', currentComponent.size, theScale);
     } else
-    {//the longer root should have smaller index
-      Rational greaterlength, tempRat;
-      int numGreaterLength=numLength2;
-      int numSmallerLength=numLength1;
-      greaterlength=(length2);
-      if (length1>length2)
-      { greaterlength.Assign(length1);
-        numGreaterLength=numLength1;
-        numSmallerLength=numLength2;
-      }
-      colength1=(Rational) 4/length1;
-      colength2=(Rational) 4/length2;
-      if (greaterlength>currentComponent[currentEnds[0]].ScalarProduct(currentComponent[currentEnds[0]], theBilinearForm))
-        currentEnds.SwapTwoIndices(0, 1);
-      if (numLength1==numLength2)
-      {//B2, C2, F4 or G2
-        if (numLength1!=1)
-          outputType.MakeArbitrary('F', 4, colength1);
-        else
-        { if (length1>length2)
-          { MathRoutines::swap(length1, length2);
-            MathRoutines::swap(colength1, colength2);
-            currentEnds.SwapTwoIndices(0, 1);//<- in G_2, the longer root comes second.
-          }
-          if (length2/length1==3)
-            outputType.MakeArbitrary('G', 2, colength1);
-          else
-            outputType.MakeArbitrary('B', 2, colength1);
-        }
-      } else
-      { if (numGreaterLength>numSmallerLength)
-          outputType.MakeArbitrary('B', currentComponent.size, colength1);
-        else
-          outputType.MakeArbitrary('C', currentComponent.size, colength2);
-      }
+    { //the second largest component has more than one element, hence we are in type E_n.
+      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
+      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
+      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-next the second root from 2-element component
+      currentComponent.AddOnTop(tripleNode); //<- next the triple node
+      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0][0]); //<-finally the longest component. Conventions, conventions...
+      outputType.MakeArbitrary('E', currentComponent.size, theScale);
     }
-    currentComponent.SwapTwoIndices(0, currentEnds[0]);
-    for (int i=0; i<currentComponent.size; i++)
-      for (int j=i+1; j<currentComponent.size; j++)
-        if (!currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsEqualToZero())
-        { currentComponent.SwapTwoIndices(i+1, j);
-          break;
-        }
+   return;
   }
+  Rational length1, length2;
+  length1=currentComponent[0].ScalarProduct(currentComponent[0], theBilinearForm);
+  int numLength1=1;
+  int numLength2=0;
+  for(int i=1; i<currentComponent.size; i++)
+    if (currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm)==length1)
+      numLength1++;
+    else
+    { numLength2++;
+      length2=currentComponent[i].ScalarProduct(currentComponent[i], theBilinearForm);
+    }
+  if (numLength2==0)
+  { //type A
+    outputType.MakeArbitrary('A', numLength1, 2/length1);
+  } else
+  { if (length1<length2)
+    { MathRoutines::swap(length1, length2);
+      MathRoutines::swap(numLength1, numLength2);
+      currentEnds.SwapTwoIndices(0,1);
+    }//<-so far we made sure the first length is long
+    if (numLength1==numLength2)
+    {//B2, C2, F4 or G2
+      if (numLength1==2)
+        outputType.MakeArbitrary('F', 4, 2/length1);
+      else if (length1/length2==3)
+        outputType.MakeArbitrary('G', 2, 2/length2);
+      else
+        outputType.MakeArbitrary('B', 2, 2/length1);
+    } else
+    { if (numLength1>numLength2)
+        outputType.MakeArbitrary('B', currentComponent.size, 2/length1);
+      else
+        outputType.MakeArbitrary('C', currentComponent.size, 2/length2);
+    }
+  }
+  currentComponent.SwapTwoIndices(0, currentEnds[0]);
+  for (int i=0; i<currentComponent.size; i++)
+    for (int j=i+1; j<currentComponent.size; j++)
+      if (!currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsEqualToZero())
+      { currentComponent.SwapTwoIndices(i+1, j);
+        break;
+      }
+  //so far we made sure the entire component is one properly ordered string, starting with the long root.
+  if (outputType.theLetter=='G' || outputType.theLetter=='C' )
+    currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
 }
 
 std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType)const

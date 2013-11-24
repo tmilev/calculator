@@ -336,9 +336,9 @@ bool DynkinSimpleType::HasEasySubalgebras()const
     return true;
   if (this->theLetter=='A' && this->theRank<=6)
     return true;
-  if (this->theLetter=='B' && this->theRank<=5)
+  if (this->theLetter=='B' && this->theRank<=4)
     return true;
-  if (this->theLetter=='D' && this->theRank<=5)
+  if (this->theLetter=='D' && this->theRank<=4)
     return true;
   if (this->theLetter=='C' && this->theRank<=5)
     return true;

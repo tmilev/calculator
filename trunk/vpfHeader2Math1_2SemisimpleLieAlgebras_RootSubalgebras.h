@@ -123,6 +123,7 @@ public:
   List<DynkinDiagramRootSubalgebra> relationsDiagrams;
   Vectors<Rational> genK;
   Vectors<Rational> SimpleBasisK;
+  Vectors<Rational> SimpleBasisKScaledToActByTwo;
   Vectors<Rational> SimpleBasisKinOrderOfGeneration;
   Vectors<Rational> PositiveRootsK;
   HashedList<Vector<Rational> > AllRootsK;
@@ -143,8 +144,8 @@ public:
   List<int> theKComponentRanks;
   rootSubalgebras* ownEr;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
-  Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
-  List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
+  Matrix<Rational> scalarProdCoMatrixPermuted, scalarProdCoMatrixOrdered;
+  List<Matrix<Rational> > potentialExtensionCoCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
 //  int indexInOwners;

@@ -61,7 +61,7 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("CartanSymmetric", CalculatorFunctionsGeneral::innerGetSymmetricCartan, "",
    "Gives the symmetric Cartan corresponding to a given dynkin type.",
-   "CartanSymmetric(A^30_1+d^30_4+e_8+3f^{1/7}_4);");//, false);
+   "CartanSymmetric(e^7_6);");//, false);
   this->AddOperationInnerHandler
   ("GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
@@ -509,9 +509,10 @@ void Calculator::initPredefinedInnerFunctions()
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
   ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
-   "Creates a semisimple Lie algebra. The type of the semisimple Lie algebra is by its Dynkin type, for example A^2_3, \
-    where the capital letter stands for the type, the lower index stands for the rank, and the upper index denotes the inverse of the scale of the \
-    symmetric Cartan matrix, see below. If the upper index is omitted, it is implied to be 1.<hr>\
+   "Creates a semisimple Lie algebra. The semisimple Lie algebra is given via its Dynkin type. A simple Dynkin type is given by\
+    type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
+    the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (n+1)) with symmetric Cartan matrix scale equal to 1/2.\
+    If the upper index is omitted, it is implied to be 1.<hr>\
     <br>We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
     <br>We assume the roots to be ordered in order the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. If the upper index of the Dynkin type is 1, the corresponding symmetric Cartan matrix is\
@@ -525,11 +526,8 @@ void Calculator::initPredefinedInnerFunctions()
     \n[g_1,g_{-1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]");
   this->AddOperationInnerHandler
   ("printSemisimpleLieAlgebra", &this->innerPrintSSLieAlgebraVerbose, "",
-   "Creates a quite detailed \
-   printout with information about \
-   the semisimple Lie algebra, including the Lie bracket pairing table. \
-   In addition, this function creates a graphics of the root system. Warning. \
-   For E_8 is quite heavy and might put a slower computer to sleep.  \
+   "Creates a printout with information about the semisimple Lie algebra, including the Lie bracket pairing table. \
+   In addition, this function creates a graphics of the root system. \
    ",
    "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
   this->AddOperationInnerHandler

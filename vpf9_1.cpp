@@ -96,8 +96,7 @@ void DynkinDiagramRootSubalgebra::Sort()
   }
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
-(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
+void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput");
   this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);

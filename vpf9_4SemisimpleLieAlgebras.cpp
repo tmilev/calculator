@@ -4566,7 +4566,7 @@ std::string CandidateSSSubalgebra::ToStringGenerators(FormatExpressions* theForm
   for (int i=0; i<this->thePosGens.size; i++)
   { if (useHtml && useLaTeX)
     { if (useMouseHover)
-        out <<  CGI::GetMathMouseHover(this->thePosGens[i].ToString(theFormat), 2000);
+        out << CGI::GetMathMouseHover(this->thePosGens[i].ToString(theFormat), 2000);
       else
         out << CGI::GetMathSpanPure(this->thePosGens[i].ToString(theFormat), 2000);
     } else
@@ -4623,22 +4623,6 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   }
   out << "<br>" << this->ToStringCartanSA(theFormat);
   out << this->ToStringCentralizer(theFormat);
-//  if (!shortReportOnly)
-//  {
-//  }
-//  out << "<br>Predefined or computed simple generators follow. ";
-/*  out << "<br>Negative generators: ";
-  for (int i=0; i<this->theNegGens.size; i++)
-  { out << this->theNegGens[i].ToString(theFormat);
-    if (i!=this->theNegGens.size-1)
-      out << ", ";
-  }
-  out << "<br>Positive generators: ";
-  for (int i=0; i<this->thePosGens.size; i++)
-  { out << this->thePosGens[i].ToString(theFormat);
-    if (i!=this->thePosGens.size-1)
-      out << ", ";
-  }*/
   bool displayNilradSummary=(this->owner->flagComputeNilradicals && this->flagCentralizerIsWellChosen && this->flagSystemSolved);
   if (displayNilradSummary)
     displayNilradSummary=!shortReportOnly || (this->NumBadParabolics>0);
@@ -4648,7 +4632,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << "\"> Detailed information on isotypical nilradicals. </a><hr>";
   }
   out << this->ToStringGenerators(theFormat);
-  out << "<br>Cartan subalgebra basis scalar products: ";
+  out << "<br>Scalar products basis of Cartan subalgebra (Cartan symmetric co-matrix): ";
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
@@ -4667,7 +4651,7 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   { if (useMouseHover)
       out << CGI::GetMathMouseHover(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
     else
-      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst),20000);
+      out << CGI::GetMathSpanPure(this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst), 20000);
   } else
     out << this->theCharNonPrimalFundCoords.ToString(&charFormatNonConst);
   if (this->CartanOfCentralizer.size>0)
@@ -4879,11 +4863,10 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
     theFormat.flagUseHTML=false;
     theFormat.flagUseLatex=true;
     for (int i=0; i<theOuterAutos.theElements.size; i++)
-    { if (i>=100)
+      if (i>=100)
         reportStream << "... and so on, only the first 100 elements printed out of total " << theOuterAutos.theElements.size << ". ";
       else
         reportStream << "<br>" << CGI::GetMathMouseHover(theOuterAutos.theElements[i].ToStringMatForm(&theFormat));
-    }
     theReport.Report(reportStream.str());
   }
   do

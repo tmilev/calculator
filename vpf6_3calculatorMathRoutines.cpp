@@ -571,8 +571,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAplusB(Calculator& theCommand
   if (input.children.size!=3)
     return false;
   if (!input[1].IsAtom())
-    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString()
-    << " - possible user typo?";
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
   if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
@@ -687,7 +686,6 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
   rightSummand.MakeXOX(theCommands, theCommands.opTimes(), theArgument[1], changedMultiplicand);
   return output.MakeXOX(theCommands, theCommands.opMinus(), leftSummand, rightSummand);
 }
-
 
 bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate");
@@ -927,8 +925,7 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
           out << ", ";
       }
       out << "</td><td>";
-      out << CGI::GetMathSpanPure
-      (tempSas.GetHighestWeightFundNewComponentFromRootInjection(largerTypes[i], theRootInjections[i], tempCandidate).ToStringLetterFormat("\\omega"));
+      out << CGI::GetMathSpanPure(tempSas.GetHighestWeightFundNewComponentFromRootInjection(largerTypes[i], theRootInjections[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
     }
     out << "</table>";
@@ -1192,10 +1189,8 @@ bool Calculator::innerEvaluateToDouble(Calculator& theCommands, const Expression
     return output.AssignValue(MathRoutines::Pi(), theCommands);
 
   bool isArithmeticOperationTwoArguments=
-  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) || input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) || input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
   input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
   ;
   if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
@@ -1240,8 +1235,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
   if (!input.IsListNElements(3))
     return false;
   DynkinType smallType, targetType;
-  if (!Serialization::DeSerializeMonCollection(theCommands, input[1], smallType) ||
-      !Serialization::DeSerializeMonCollection(theCommands, input[2], targetType))
+  if (!Serialization::DeSerializeMonCollection(theCommands, input[1], smallType) || !Serialization::DeSerializeMonCollection(theCommands, input[2], targetType))
   { theCommands.Comments << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
     return false;
   }
@@ -1256,9 +1250,11 @@ bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands
     return false;
   }
   std::stringstream out;
-  Matrix<Rational> outputMat;
+  Matrix<Rational> outputMat, outputCoMat;
   theType.GetCartanSymmetric(outputMat);
-  out << CGI::GetMathMouseHover(outputMat.ToStringLatex(),10000);
+  theType.GetCoCartanSymmetric(outputCoMat);
+  out << "Symmetric Cartan matrix: " << CGI::GetMathMouseHover(outputMat.ToStringLatex(),10000)
+  << "<br>Symmetric Cartan co-matrix: " << CGI::GetMathMouseHover(outputCoMat.ToStringLatex(), 10000);
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1280,8 +1276,7 @@ bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expressio
   if (ownerSS.GetRank()>6)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
     return output.AssignValue(out.str(), theCommands);
-  }
-  else
+  } else
     out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";
   SemisimpleSubalgebras tempSSsas
   (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,

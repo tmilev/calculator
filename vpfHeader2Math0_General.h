@@ -4053,18 +4053,14 @@ public:
 //the following function follows the same convention as the preceding except that we allow n<m. However,
 // in order to assure that the preimage of the lattice is a lattice,
 //we provide as input an ambient lattice in the new vector space of dimension m
-  bool SubstitutionHomogeneous
-    (const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
-;
-  void Reduce
-  ()
-  ;
+  bool SubstitutionHomogeneous(const Matrix<Rational>& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables);
+  void Reduce();
   void IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis);
   void IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals);
   void IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal);
-static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
-(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output, GlobalVariables& theGlobalVariables)
-;
+  static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
+  (const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output, GlobalVariables& theGlobalVariables)
+  ;
   //returning false means that the lattice given as rougher is not actually rougher than the current lattice
   //or that there are too many representatives
   bool GetAllRepresentatives
@@ -4177,7 +4173,7 @@ public:
   }
   static const bool IsEqualToZero(){return false;}
   bool RemoveRedundantShortRootsClassicalRootSystem
-(PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
+  (PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
   bool RemoveRedundantShortRoots(PartFractions& owner, Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, int theDimension);
   bool AlreadyAccountedForInGUIDisplay;
@@ -4200,10 +4196,10 @@ public:
   (Vector<Rational>& normal, const MonomialP& shiftRational, int theMult,
    Polynomial<Rational>& output);
   void ComputeNormals
-(PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
+  (PartFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
   ;
   int ComputeGainingMultiplicityIndexInLinearRelation
-(bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation)
+  (bool flagUsingOrlikSolomon, Matrix<Rational>& theLinearRelation)
   ;
   void GetRootsFromDenominator
   (PartFractions& owner, Vectors<Rational>& output)const
@@ -4216,46 +4212,44 @@ public:
   //void MultiplyMinusShiftBy (int* theRoot, int Multiplicity);
   void MultiplyCoeffBy(Rational& r);
   void decomposeAMinusNB
-(int indexA, int indexB, int n, int indexAminusNB, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
- GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
+  (int indexA, int indexB, int n, int indexAminusNB, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, PartFractions& owner)
    ;
   bool DecomposeFromLinRelation
-(Matrix<Rational> & theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
- Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
+  (Matrix<Rational> & theLinearRelation, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   Vector<Rational>* Indicator, GlobalVariables& theGlobalVariables, bool flagUsingOSbasis, List<Vector<Rational> >& startingVectors)
    ;
   void ComputeOneCheckSuM
-(PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
+  (PartFractions& owner, Rational& output, int theDimension, GlobalVariables& theGlobalVariables)const
   ;
   bool ReduceMeOnce
-(const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, Vectors<Rational>& startingVectors)
+  (const Polynomial<LargeInt>& myCoeff, Polynomial<LargeInt>& outputCoeff, GlobalVariables& theGlobalVariables,
+   Vector<Rational>* Indicator, Vectors<Rational>& startingVectors)
   ;
   void ReduceMonomialByMonomial(PartFractions& owner, int myIndex, GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator);
   void ApplySzenesVergneFormulA
-(List<Vector<Rational> >& startingVectors,  List<int>& theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex,
- int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
- GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator)
+  (List<Vector<Rational> >& startingVectors,  List<int>& theSelectedIndices, List<int>& theElongations, int GainingMultiplicityIndex,
+   int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   GlobalVariables& theGlobalVariables, Vector<Rational> * Indicator)
   ;
   void ApplyGeneralizedSzenesVergneFormulA
-(List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients,
- int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex,
- MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
- GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator,
- List<Vector<Rational> >& startingVectors)
+  (List<int>& theSelectedIndices, List<int>& theGreatestElongations, List<int>& theCoefficients,
+   int GainingMultiplicityIndex, int ElongationGainingMultiplicityIndex, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output,
+   GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator, List<Vector<Rational> >& startingVectors)
    ;
   bool CheckForOrlikSolomonAdmissibility(List<int>& theSelectedIndices);
   bool reduceOnceTotalOrderMethod
-(MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, PartFractions& owner)
+  (MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+   Vector<Rational>* Indicator, PartFractions& owner)
    ;
 //  void reduceOnceOrlikSolomonBasis(PartFractions&Accum);
   bool reduceOnceGeneralMethodNoOSBasis
-(PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
+  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+   Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
    ;
   bool ReduceOnceGeneralMethod
-(PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
- Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
+  (PartFractions& owner, MonomialCollection<PartFraction, Polynomial<LargeInt> >& output, GlobalVariables& theGlobalVariables,
+   Vector<Rational>* Indicator, Vectors<Rational>& bufferVectors, Matrix<Rational>& bufferMat)
   ;
   bool AreEqual(PartFraction& p);
   bool IsReduced();
@@ -4271,8 +4265,8 @@ public:
   //void GetNumerator(Polynomial<Rational> & output);
   //void SetNumerator(Polynomial<Rational> & input);
   void PrepareFraction
-(int indexA, int indexB, int AminusNBindex, bool indexAisNullified, PartFraction& output,
- Polynomial<LargeInt>& AminusNbetaPoly, Polynomial<LargeInt>& outputCommonCoeff)
+  (int indexA, int indexB, int AminusNBindex, bool indexAisNullified, PartFraction& output,
+   Polynomial<LargeInt>& AminusNbetaPoly, Polynomial<LargeInt>& outputCommonCoeff)
   ;
   void Assign(const PartFraction& p);
   void AssignDenominatorOnly(const PartFraction& p);
@@ -4285,15 +4279,15 @@ public:
   ~PartFraction();
   void GetPolyReduceMonomialByMonomial(PartFractions& owner, GlobalVariables& theGlobalVariables, Vector<Rational>& theExponent, int StartMonomialPower, int DenPowerReduction, int startDenominatorPower, Polynomial<LargeInt>& output);
   void ReduceMonomialByMonomialModifyOneMonomial
-(PartFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
- List<int>& thePowersSigned, MonomialP& input, LargeInt& inputCoeff)
+  (PartFractions& Accum, GlobalVariables& theGlobalVariables, SelectionWithDifferentMaxMultiplicities& thePowers,
+   List<int>& thePowersSigned, MonomialP& input, LargeInt& inputCoeff)
   ;
   void GetAlphaMinusNBetaPoly
   (PartFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output)
   ;
   void GetNElongationPolyWithMonomialContribution
-(List<Vector<Rational> >& startingVectors, List<int>& theSelectedIndices, List<int>& theCoefficients,
- List<int>& theGreatestElongations, int theIndex, Polynomial<LargeInt>& output, int theDimension)
+  (List<Vector<Rational> >& startingVectors, List<int>& theSelectedIndices, List<int>& theCoefficients,
+   List<int>& theGreatestElongations, int theIndex, Polynomial<LargeInt>& output, int theDimension)
   ;
   void GetNElongationPoly
   (List<Vector<Rational> >& startingVectors, int index, int baseElongation, int LengthOfGeometricSeries,
@@ -4305,8 +4299,8 @@ public:
   void operator=(const PartFraction& right);
   bool initFromRoots(PartFractions& owner, Vectors<Rational>& input);
   std::string ToString
-(PartFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
- FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
+  (PartFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
+   FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
    ;
   void ReadFromFile(PartFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)const;
@@ -4400,7 +4394,7 @@ public:
   { return input.HashFunction();
   }
   bool ProduceNormalFromTwoNormalsAndSlicingDirection
-  (Vector<Rational> & SlicingDirection, Vector<Rational> & normal1, Vector<Rational> & normal2, Vector<Rational> & output);
+  (Vector<Rational> & SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output);
   bool ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   bool ReadFromFile(std::fstream& input, Vectors<Rational>& buffer, GlobalVariables* theGlobalVariables);
@@ -4423,7 +4417,7 @@ public:
   }
   void IntersectAHyperplane(Vector<Rational>& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables);
   bool GetRootFromLPolyConstantTermGoesToLastVariable(Polynomial<Rational>& inputLPoly, Vector<Rational>& output);
-  bool SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational> & inputLPoly, Cone& outputCone, GlobalVariables& theGlobalVariables);
+  bool SolveLPolyEqualsZeroIAmProjective(Polynomial<Rational>& inputLPoly, Cone& outputCone, GlobalVariables& theGlobalVariables);
   bool SolveLQuasiPolyEqualsZeroIAmProjective(QuasiPolynomial& inputLQP, List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables);
   bool operator>(const Cone& other)const
   { return this->Normals>other.Normals;
@@ -4451,8 +4445,8 @@ class ConeLatticeAndShift
   }
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
-  (Vector<Rational> & theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend,
-   Matrix<Rational> & theProjectionLatticeLevel, GlobalVariables& theGlobalVariables);
+  (Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend,
+   Matrix<Rational>& theProjectionLatticeLevel, GlobalVariables& theGlobalVariables);
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions& theFormat);
   int GetDimProjectivized()
@@ -4480,7 +4474,7 @@ public:
   void Sort(GlobalVariables& theGlobalVariables);
   void RefineAndSort(GlobalVariables& theGlobalVariables);
   void FindMaxmumOverNonDisjointChambers(Vectors<Rational>& theMaximaOverEachChamber, Vectors<Rational>& outputMaxima, GlobalVariables& theGlobalVariables);
-  void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational> & affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables);
+  void MakeAffineAndTransformToProjectiveDimPlusOne(Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables);
   void TransformToWeylProjective(GlobalVariables& theGlobalVariables);
   int GetDim()
   { if (this->size<=0)
@@ -4538,7 +4532,9 @@ public:
   { this->flagChambersHaveTooFewVertices=false;
     this->flagIsRefined=false;
   }
-  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+  { this->WriteToFile(output, theGlobalVariables, -1);
+  }
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit);
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
   { return this->ReadFromFile(input, theGlobalVariables, -1);
@@ -4712,6 +4708,7 @@ class DynkinSimpleType
     this->CartanSymmetricScale=inputLengthFirstCorRootSquared;
   }
   void GetCoCartanSymmetric(Matrix<Rational>& output)const;
+  static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void GetCartanSymmetric(Matrix<Rational>& output)const;
   void GetAn(int n, Matrix<Rational>& output)const;
   void GetBn(int n, Matrix<Rational>& output)const;
@@ -4832,6 +4829,7 @@ public:
   bool CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
   void GetEpsilonMatrix(Matrix<Rational>& output)const;
+  void GetCoCartanSymmetric(Matrix<Rational>& output)const;
   void GetCartanSymmetric(Matrix<Rational>& output)const;
   void GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output)const;
   int GetCoxeterEdgeWeight(int v, int w);
@@ -4925,8 +4923,6 @@ void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
   this->classFunctionMatricesComputed.initFillInObject(this->OwnerGroup->conjugacyClasses.size, false);
 }
 
-
-
 class ElementWeylGroup
 {
 public:
@@ -4969,7 +4965,6 @@ public:
     return this->reflections==other.reflections;
   }
 };
-
 
 template <typename coefficient>
 Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int elementIndex)
@@ -5014,6 +5009,7 @@ class WeylGroup
 public:
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
+  Matrix<Rational> CoCartanSymmetric;
   HashedList<ElementWeylGroup> theElements;
   int size;
   Vector<Rational> rho;
@@ -5039,8 +5035,10 @@ public:
   void AddCharacter(const Vector<Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToString(FormatExpressions* theFormat=0);
+  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
+  void ComputeCoCartanSymmetricFromCartanSymmetric();
   void ComputeExternalAutos();
   bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;
@@ -5055,7 +5053,6 @@ public:
   }
   void GetSignCharacter(Vector<Rational>& out);
   void StandardRepresentation(WeylGroupRepresentation<Rational>& output);
-  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational> & inputHWsimpleCoords, GlobalVariables& theGlobalVariables);
@@ -5354,7 +5351,11 @@ public:
   std::string ElementToStringBruhatGraph();
   std::string ElementToStringCosetGraph();
   std::string ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices);
-  std::string ToString(bool displayElements=true){std::string tempS; this->ToString(tempS, displayElements); return tempS;}
+  std::string ToString(bool displayElements=true)
+  { std::string tempS;
+    this->ToString(tempS, displayElements);
+    return tempS;
+  }
   Vector<Rational> GetRho();
   template <class coefficient>
   void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0);
@@ -5918,7 +5919,7 @@ class ConeLatticeAndShiftMaxComputation
   List<Vectors<Rational> > finalMaxima;
   Lattice theStartingLattice;
   Lattice theFinalRougherLattice;
-  Vector<Rational>  theStartingRepresentative;
+  Vector<Rational> theStartingRepresentative;
   Vectors<Rational> theFinalRepresentatives;
   List<ConeLatticeAndShift> theConesLargerDim;
   List<ConeLatticeAndShift> theConesSmallerDim;
@@ -5973,10 +5974,10 @@ class PiecewiseQuasipolynomial
   { this->MakeCommonRefinement(other.theProjectivizedComplex);
   }
   void MakeCommonRefinement(const ConeComplex& other);
-  void TranslateArgument(Vector<Rational> & translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
+  void TranslateArgument(Vector<Rational>& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
   bool MakeVPF(Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables);
-  Rational Evaluate(const Vector<Rational> & thePoint);
-  Rational EvaluateInputProjectivized(const Vector<Rational> & thePoint);
+  Rational Evaluate(const Vector<Rational>& thePoint);
+  Rational EvaluateInputProjectivized(const Vector<Rational>& thePoint);
   void MakeZero(int numVars, GlobalVariables& theGlobalVariables)
   { this->NumVariables=numVars;
     this->theProjectivizedComplex.init();

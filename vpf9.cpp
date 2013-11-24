@@ -4050,6 +4050,26 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   }
 }
 
+void DynkinSimpleType::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output)
+{ MacroRegisterFunctionWithName("DynkinType::GetCoCartanSymmetric");
+  if (&input==&output)
+  { Matrix<Rational> inputCopy=input;
+    DynkinSimpleType::GetCoCartanSymmetric(inputCopy, output);
+    return;
+  }
+  output.init(input.NumRows, input.NumCols);
+  for (int i=0; i<input.NumRows; i++)
+    for (int j=0; j<input.NumCols; j++)
+      output(i,j)= input(i,j)*4/(input(i,i)*input(j,j));
+}
+
+void DynkinType::GetCoCartanSymmetric(Matrix<Rational>& output)const
+{ MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
+  Matrix<Rational> curCartan;
+  this->GetCartanSymmetric(curCartan);
+  DynkinSimpleType::GetCoCartanSymmetric(curCartan, output);
+}
+
 void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output)const
 { MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder");
   output.init(0,0);
@@ -4573,12 +4593,9 @@ void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
 }
 
 void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
-{ Matrix<Rational> coOutput;
-  this->GetCartanSymmetric(coOutput);
-  output.init(coOutput.NumRows, coOutput.NumCols);
-  for (int i=0; i<coOutput.NumRows; i++)
-    for (int j=0; j<coOutput.NumCols; j++)
-      output(i,j)= coOutput(i,j)*4/(coOutput(i,i)*coOutput(j,j));
+{ Matrix<Rational> currentCartan;
+  this->GetCartanSymmetric(currentCartan);
+  this->GetCoCartanSymmetric(currentCartan, output);
 }
 
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
@@ -4893,10 +4910,28 @@ void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRan
       outputRank=4;
 }
 
-void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
+void WeylGroup::ComputeCoCartanSymmetricFromCartanSymmetric()
+{ DynkinSimpleType::GetCoCartanSymmetric(this->CartanSymmetric, this->CoCartanSymmetric);
+}
+
+void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
 { this->init();
-  this->theDynkinType.MakeSimpleType(WeylGroupLetter, n, firstCoRootLengthSquared);
+  this->theDynkinType=inputType;
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
+  this->ComputeCoCartanSymmetricFromCartanSymmetric();
+}
+
+void WeylGroup::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType)
+{ this->init();
+  this->theDynkinType=inputType;
+  this->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(this->CartanSymmetric);
+  this->ComputeCoCartanSymmetricFromCartanSymmetric();
+}
+
+void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
+{ DynkinType inputType;
+  inputType.MakeSimpleType(WeylGroupLetter, n, firstCoRootLengthSquared);
+  this->MakeFromDynkinType(inputType);
 }
 
 void WeylGroup::ComputeExternalAutos()
@@ -4909,18 +4944,6 @@ void WeylGroup::ComputeExternalAutos()
       }
   }
   this->flagOuterAutosComputed=true;
-}
-
-void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
-{ this->init();
-  this->theDynkinType=inputType;
-  this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
-}
-
-void WeylGroup::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType)
-{ this->init();
-  this->theDynkinType=inputType;
-  this->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(this->CartanSymmetric);
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)

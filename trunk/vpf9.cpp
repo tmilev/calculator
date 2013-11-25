@@ -3857,6 +3857,8 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 bool DynkinType::Grow
 (const List<Rational>& allowedInverseScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const
 { MacroRegisterFunctionWithName("DynkinType::Grow");
+  //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
+    //std::cout << "<br>Here be I!!!!" << this->ToString();
   output.SetSize(0);
   if (outputPermutationRoots!=0)
     outputPermutationRoots->SetSize(0);
@@ -3902,7 +3904,7 @@ bool DynkinType::Grow
     if (outputPermutationRoots!=0)
     { int baseTypeRank=typeMinusMin.GetRank();
       for (int j=0; j<baseTypeRank; j++)
-        currentRootInjection[j]=i;
+        currentRootInjection[j]=j;
       for (int j=0; j<lastComponentRootInjections[i].size; j++)
         currentRootInjection[j+baseTypeRank]=lastComponentRootInjections[i][j]+baseTypeRank;
       outputPermutationRoots->AddOnTop(currentRootInjection);
@@ -3914,11 +3916,13 @@ bool DynkinType::Grow
       output.LastObject()->MakeSimpleType('A', 1, &allowedInverseScales[i]);
       *output.LastObject()+=*this;
       if (outputPermutationRoots!=0)
-      { for (int i=0; i<currentRootInjection.size; i++)
-          currentRootInjection[i]=i;
+      { for (int j=0; j<currentRootInjection.size; j++)
+          currentRootInjection[j]=j;
         outputPermutationRoots->AddOnTop(currentRootInjection);
       }
     }
+  //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
+    //std::cout << "<br>output be: " << output.ToString();
   return true;
 }
 
@@ -3937,6 +3941,7 @@ void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstC
 { DynkinSimpleType theMon;
   Rational cartanSymmetricInvScale= (inputFirstCoRootSqLength==0 ? 1 : *inputFirstCoRootSqLength);
   theMon.MakeArbitrary(type, rank, cartanSymmetricInvScale);
+  this->MakeZero();
   this->AddMonomial(theMon, 1);
 }
 
@@ -4169,7 +4174,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
       out << "_{" << this->theRank << "}";
     else
       out << "_" << this->theRank;
-    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
+//    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
   if (includeNonTechnicalNames)
     if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')

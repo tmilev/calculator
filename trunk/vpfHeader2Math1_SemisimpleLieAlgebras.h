@@ -218,7 +218,6 @@ public:
   int GetNumModules()const;
   void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
-  void AddTypeIncomplete(const DynkinSimpleType& theNewType);
   void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit);
   bool CheckInitialization()const;
   bool CheckModuleDimensions()const;
@@ -288,7 +287,6 @@ public:
   signed long long int numMultiplications;
   bool flagDeallocated;
   int GetNumPossibleSAs()const;
-  void ScaleDynkinType(DynkinType& theType)const;
   std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
   int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
   std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;

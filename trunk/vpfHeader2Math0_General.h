@@ -400,7 +400,7 @@ public:
   std::string GetChevalleyHletter(int index)const;
   std::string GetChevalleyGletter(int index)const;
   char AmbientWeylLetter;
-  Rational AmbientWeylLengthFirstCoRoot;
+  Rational AmbientCartanSymmetricInverseScale;
   int ExtraLinesCounterLatex;
   int NumAmpersandsPerNewLineForLaTeX;
   int MaxRecursionDepthPerExpression;
@@ -4676,12 +4676,12 @@ class DynkinSimpleType
   public:
   char theLetter;
   int theRank;
-  Rational CartanSymmetricScale;
-  DynkinSimpleType(): theLetter('X'), theRank(-1), CartanSymmetricScale(0){}
+  Rational CartanSymmetricInverseScale;
+  DynkinSimpleType(): theLetter('X'), theRank(-1), CartanSymmetricInverseScale(0){}
   void MakeAone()
   { this->theLetter='A';
     this->theRank=1;
-    this->CartanSymmetricScale=1;
+    this->CartanSymmetricInverseScale=1;
   }
   int GetRootSystemSize()const;
   int GetRootSystemPlusRank()const
@@ -4705,7 +4705,7 @@ class DynkinSimpleType
       inputLetter='A';
     this->theRank=inputRank;
     this->theLetter=inputLetter;
-    this->CartanSymmetricScale=inputLengthFirstCorRootSquared;
+    this->CartanSymmetricInverseScale=inputLengthFirstCorRootSquared;
   }
   void GetCoCartanSymmetric(Matrix<Rational>& output)const;
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
@@ -4722,16 +4722,16 @@ class DynkinSimpleType
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
-    this->CartanSymmetricScale=other.CartanSymmetricScale;
+    this->CartanSymmetricInverseScale=other.CartanSymmetricInverseScale;
   }
   bool operator==(const DynkinSimpleType& other)const
   { return
     this->theLetter==other.theLetter && this->theRank==other.theRank &&
-    this->CartanSymmetricScale==other.CartanSymmetricScale;
+    this->CartanSymmetricInverseScale==other.CartanSymmetricInverseScale;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int)
-    input.theLetter)*2+input.theRank +SomeRandomPrimes[0]*input.CartanSymmetricScale.HashFunction();
+    input.theLetter)*2+input.theRank +SomeRandomPrimes[0]*input.CartanSymmetricInverseScale.HashFunction();
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -4787,7 +4787,7 @@ public:
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;
   void SortTheDynkinTypes();
-  bool Grow(const List<Rational>& allowedScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
+  bool Grow(const List<Rational>& allowedInverseScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const;
   bool ContainsType(char theTypeLetter)const;
   void GetDynkinTypeWithDefaultScales(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;

@@ -513,13 +513,12 @@ void Calculator::initPredefinedInnerFunctions()
     type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
     the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (n+1)) with symmetric Cartan matrix scale equal to 1/2.\
     If the upper index is omitted, it is implied to be 1.<hr>\
-    <br>We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
-    <br>We assume the roots to be ordered in order the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
+    We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
+    We assume the roots to be ordered in the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. If the upper index of the Dynkin type is 1, the corresponding symmetric Cartan matrix is\
     assigned the default value. The default values are chosen so that the long root has squared length 2 in types \
     A_n, B_n, D_n, E_6, E_7, E_8, and F_4, squared length 4 in C_n, and squared length 6 in type G_2. \
     <br>If upper index is not equal to 1, the symmetric Cartan matrix is given by dividing the default symmetric Cartan matrix by the upper index. \
-    <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4, E_6, E_7, E_8, F_4, G_2. \
     ",
    "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\

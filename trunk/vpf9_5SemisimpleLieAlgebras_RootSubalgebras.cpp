@@ -1740,10 +1740,9 @@ bool rootSubalgebra::CheckInitialization()const
 void rootSubalgebra::ComputePotentialExtensions()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputePotentialExtensions");
   this->ownEr->GrowDynkinType(this->theDynkinType, this->potentialExtensionDynkinTypes, &this->potentialExtensionRootPermutations);
-  std::cout << "<hr><hr>potential growth from " << this->theDynkinType.ToString() << ": " << this->potentialExtensionDynkinTypes.ToString();
-  this->potentialExtensionCoCartanSymmetrics.SetSize(this->potentialExtensionDynkinTypes.size);
+  this->potentialExtensionCartanSymmetrics.SetSize(this->potentialExtensionDynkinTypes.size);
   for (int i=0; i<this->potentialExtensionDynkinTypes.size; i++)
-    this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCoCartanSymmetrics[i]);
+    this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
 }
 
 void rootSubalgebra::ComputeAll()
@@ -1799,20 +1798,20 @@ bool rootSubalgebra::ComputeEssentials()
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
   if (this->indexInducingSubalgebra!=-1)
   { std::cout << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
-    this->SimpleBasisKScaledToActByTwo.GetGramMatrix(this->scalarProdCoMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
+    this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
     int goodPermutation=-1;
     List<List<int> >& extensionRootPermutations=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
-    List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCoCartanSymmetrics;
+    List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { std::cout << "<br>Looking to realize type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
+    { std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
       << extensionCartanSymmetrics[i].ToString();
-      this->scalarProdCoMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
+      this->scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
       for (int j=0; j<this->SimpleBasisK.size; j++)
         for (int k=0; k<this->SimpleBasisK.size; k++)
-          this->scalarProdCoMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=this->scalarProdCoMatrixPermuted(j,k);
-      std::cout << "; my current matrix, properly permuted, is: " << this->scalarProdCoMatrixOrdered.ToString();
-      if (this->scalarProdCoMatrixOrdered==extensionCartanSymmetrics[i])
+          this->scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=this->scalarProdMatrixPermuted(j,k);
+      std::cout << "; my current matrix, properly permuted, is: " << this->scalarProdMatrixOrdered.ToString();
+      if (this->scalarProdMatrixOrdered==extensionCartanSymmetrics[i])
       { goodPermutation=i;
         std::cout << " ... good!";
         break;
@@ -1999,7 +1998,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
 { MacroRegisterFunctionWithName("rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism");
   this->initOwnerMustBeNonZero();
   this->ComputeAllReductiveRootSAsInit();
-  ProgressReport theReport(this->theGlobalVariables);
+  ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   rootSubalgebra currentSA;
   currentSA.genK.size=0;
   currentSA.ownEr=this;
@@ -2011,12 +2010,20 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   List<DynkinType> possibleExtensions;
   DynkinType currentType;
   for (int i=0; i<this->theSubalgebras.size; i++)
+  { if (this->theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << "Exploring extensions of " << this->theSubalgebras[i].theDynkinType.ToString() << ". Possible standard parabolic extensions: ";
+      for (int j=0; j<this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j++)
+        reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString() << ", ";
+      std::cout << "<hr><hr>" << reportStream.str();
+      theReport1.Report(reportStream.str());
+    }
     for (int j=0; j<this->theSubalgebras[i].kModules.size; j++)
     { if (this->theGlobalVariables!=0)
       { std::stringstream out;
         out << " Total found SAs: " << this->theSubalgebras.size << "Attempting extension by lowest weight vector of module "
         << j+1 << " out of " << this->theSubalgebras[i].kModules.size;
-        theReport.Report(out.str());
+        theReport2.Report(out.str());
       }
       currentSA.initNoOwnerReset();
       currentSA.SimpleBasisK=this->theSubalgebras[i].SimpleBasisK;
@@ -2024,11 +2031,13 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       currentSA.SimpleBasisKinOrderOfGeneration=this->theSubalgebras[i].SimpleBasisKinOrderOfGeneration;
       currentSA.SimpleBasisKinOrderOfGeneration.AddOnTop(this->theSubalgebras[i].LowestWeightsGmodK[j]);
       currentSA.indexInducingSubalgebra=i;
+
       if (!currentSA.ComputeEssentials())
         continue;
       this->theSubalgebras.AddOnTop(currentSA);
       this->theSubalgebras.LastObject()->ComputePotentialExtensions();
     }
+  }
   for (int i=0; i<this->theSubalgebras.size; i++)
     this->theSubalgebras[i].ComputeAll();
   this->SortDescendingOrderBySSRank();

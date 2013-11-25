@@ -376,7 +376,7 @@ class Expression
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsConstantNumber()const;
-  bool IsRealDouble(double* whichDouble=0)const;
+  bool EvaluatesToRealDouble(double* whichDouble=0)const;
 
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
@@ -495,11 +495,11 @@ class CalculusFunctionPlot
 { public:
   List<std::string> thePlotStrings;
   List<std::string> thePlotStringsWithHtml;
-  List<Rational> lowerBounds;
-  List<Rational> upperBounds;
+  List<double> lowerBounds;
+  List<double> upperBounds;
   List<Expression> thePlotElementS;
   std::string GetPlotStringAddLatexCommands(bool useHtml);
-  void AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, const Rational& inputLowerBound, const Rational& inputUpperBound);
+  void AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound);
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound, const Rational& upperBound);
   void operator+=(const CalculusFunctionPlot& other);
@@ -1353,9 +1353,6 @@ public:
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDrawPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsRational(Calculator& theCommands, const Expression& input, Expression& output);

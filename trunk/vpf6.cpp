@@ -3293,7 +3293,7 @@ bool Expression::IsSmallInteger(int* whichInteger)const
   return theRat.IsSmallInteger(whichInteger);
 }
 
-bool Expression::IsRealDouble(double* whichDouble)const
+bool Expression::EvaluatesToRealDouble(double* whichDouble)const
 { if (this->theBoss==0)
     return false;
   Expression doubleE;

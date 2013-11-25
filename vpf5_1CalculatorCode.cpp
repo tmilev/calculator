@@ -811,34 +811,6 @@ bool Calculator::innerMatrixRationalFunction(Calculator& theCommands, const Expr
   return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
 
-bool Calculator::innerDrawPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerDrawPolarRfunctionTheta");
-  if (!input.IsListNElements(4))
-    return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  Expression functionE;
-  Rational upperBound, lowerBound;
-  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
-    return false;
-  std::stringstream out, resultStream;
-  out << CGI::GetMathSpanPure(input[1].ToString()) << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
-  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
-  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
-  std::string funString=functionE.GetValue<std::string>();
-  resultStream << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
-  resultStream << "\\end{pspicture}\\end{document}";
-  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
-  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
-  return output.AssignValue(out.str(), theCommands);
-}
-
 void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
 { this->thePlotElementS.AddListOnTop(other.thePlotElementS);
   this->thePlotStrings.AddListOnTop(other.thePlotStrings);
@@ -847,7 +819,7 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
   this->lowerBounds.AddListOnTop(other.lowerBounds);
 }
 
-void CalculusFunctionPlot::AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, const Rational& inputLowerBound, const Rational& inputUpperBound)
+void CalculusFunctionPlot::AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound)
 { this->upperBounds.AddOnTop(inputUpperBound);
   this->lowerBounds.AddOnTop(inputLowerBound);
   this->thePlotElementS.AddOnTop(inputE);
@@ -872,26 +844,26 @@ std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
 { MacroRegisterFunctionWithName("CalculusFunctionPlot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
-  Rational theLowerBoundAxes(-1,2), theUpperBoundAxes=1, Rhalf(1/2);
+  double theLowerBoundAxes=-0.5, theUpperBoundAxes=1;
   for (int i=0; i<this->lowerBounds.size; i++)
   { theLowerBoundAxes=MathRoutines::Minimum(this->lowerBounds[i], theLowerBoundAxes);
     theUpperBoundAxes=MathRoutines::Maximum(this->upperBounds[i], theUpperBoundAxes);
   }
-  Rational theLowerBoundFrame=theLowerBoundAxes-Rhalf;
-  Rational theUpperBoundFrame=theUpperBoundAxes+Rhalf;
+  double theLowerBoundFrame=theLowerBoundAxes-0.5;
+  double theUpperBoundFrame=theUpperBoundAxes+0.5;
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-3dplot}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\psLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
   resultStream << "\\newcommand{\\psColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
   << "\\newcommand{\\psColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\psColorNegativeAreaUnderGraph}{orange}"
+  << "\\newcommand{\\psaxesStandard}[4]{\\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << theLowerBoundFrame.DoubleValue() << ", -5)(" << theUpperBoundFrame.DoubleValue() << ",5)\n\n";
+  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundFrame << ", -5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";
   resultStream << lineSeparator;
-  resultStream << "\\psframe*[linecolor=white](" << theLowerBoundFrame.DoubleValue() << ",-5)(" << theUpperBoundFrame.DoubleValue() << ",5)\n\n";
+  resultStream << "\\psframe*[linecolor=white](" << std::fixed << theLowerBoundFrame << ",-5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxes[ticks=none, labels=none]{<->}(0,0)(" << theLowerBoundAxes.DoubleValue() << ",-4.5)(" << theUpperBoundAxes.DoubleValue() << ",4.5)";
-  resultStream << lineSeparator << "\\psLabels{" << theUpperBoundAxes.DoubleValue() << "}{5}" << lineSeparator;
+  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{-4.5}{" << std::fixed << theUpperBoundAxes << "}{4.5}";
   for (int i=0; i<this->thePlotStringsWithHtml.size; i++)
     if (useHtml)
       resultStream << this->thePlotStringsWithHtml[i] << lineSeparator;
@@ -914,159 +886,6 @@ void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbed
       if (!(tempE==(*this)[i]))
         this->SetChilD(i, tempE);
     }
-}
-
-bool Calculator::innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerPlot2DWithBars");
-  //std::cout << input.ToString();
-  if (input.children.size<6)
-    return output.SetError("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands);
-  Expression lowerEplot=input, upperEplot=input;
-  lowerEplot.children.RemoveIndexShiftDown(2);
-  upperEplot.children.RemoveIndexShiftDown(1);
-  bool tempB=theCommands.innerPlot2D(theCommands, lowerEplot, output);
-  CalculusFunctionPlot outputPlot;
-  if (!tempB || !output.IsOfType<CalculusFunctionPlot>(&outputPlot))
-  { theCommands.Comments << "<hr>Failed to get a plot from " << lowerEplot.ToString() << ", not proceding with bar plot.";
-    return false;
-  }
-  tempB=theCommands.innerPlot2D(theCommands, upperEplot, output);
-  if (!tempB || !output.IsOfType<CalculusFunctionPlot>())
-  { theCommands.Comments << "<hr>Failed to get a plot from " << upperEplot.ToString() << ", not proceding with bar plot.";
-    return false;
-  }
-  outputPlot+=output.GetValue<CalculusFunctionPlot>();
-  const Expression& lowerFunctionE=input[1];
-  const Expression& upperFunctionE=input[2];
-  const Expression& lowerE=input[3];
-  const Expression& upperE=input[4];
-  const Expression& deltaE=input[5];
-  Rational theDeltaNoSign, theDeltaWithSign;
-  if (!deltaE.IsOfType<Rational>(&theDeltaWithSign))
-    return false;
-  theDeltaNoSign=theDeltaWithSign;
-  if (theDeltaNoSign<0)
-    theDeltaNoSign*=-1;
-  if (theDeltaNoSign==0)
-    theDeltaNoSign=1;
-  Rational upperBound, lowerBound;
-  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  Expression xValueE, xExpression, theFunValueEnonEvaluated, theFunValueFinal;
-  xExpression.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("x"), theCommands);
-  List<double> xValues;
-  List<double> fValuesLower;
-  List<double> fValuesUpper;
-  List<Rational> rValues;
-  for (Rational i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
-    for (int j=0; j<2; j++)
-    { if (theDeltaWithSign<0 && i==lowerBound)
-        continue;
-      rValues.AddOnTop(i);
-      if (theDeltaWithSign>0 && i==upperBound)
-        continue;
-      xValueE.AssignValue(i, theCommands);
-      theFunValueEnonEvaluated=(j==0) ? lowerFunctionE : upperFunctionE;
-      theFunValueEnonEvaluated.Substitute(xExpression, xValueE);
-  //    std::cout << "<br>substitution result:" << tempE2.ToString();
-      BoundVariablesSubstitution tempSub;
-      bool tempB;
-      if (!theCommands.EvaluateExpression(theFunValueEnonEvaluated, theFunValueFinal, tempSub, tempB))
-        return false;
-  //    std::cout << "and after evaluation: " << theFunValueFinal.ToString();
-      Rational finalResultRat;
-      double finalResultDouble;
-      if (!theFunValueFinal.IsOfType<Rational>(&finalResultRat))
-      { if (!theFunValueFinal.IsOfType<double>(&finalResultDouble))
-        { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
-          return false;
-        }
-      } else
-        finalResultDouble=finalResultRat.DoubleValue();
-      if (j==0)
-      { xValues.AddOnTop(i.DoubleValue());
-        fValuesLower.AddOnTop(finalResultDouble);
-      } else
-        fValuesUpper.AddOnTop(finalResultDouble);
-    }
-  std::stringstream outTex, outHtml;
-  for (int k=0; k<2; k++)
-    for (int i=0; i<xValues.size; i++)
-    { //bool includePsLine=false;
-      bool useNegativePattern=(fValuesLower[i]>fValuesUpper[i]);
-      if (k==0 && useNegativePattern)
-      { outTex << "\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
-        outHtml << "<br>\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
-      }
-      if (k==0 && !useNegativePattern)
-      { outTex << "\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
-        outHtml << "<br>\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
-      }
-      if (k>0 && useNegativePattern)
-      { outTex << "\\psline[linecolor=brown, linewidth=0.1pt]";
-        outHtml << "<br>\\psline[linecolor=brown, linewidth=0.1pt]";
-      }
-      if (k>0 && !useNegativePattern)
-      { outTex << "\\psline[linecolor=blue, linewidth=0.1pt]";
-        outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
-      }
-      outTex << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesLower[i])
-      << ")(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesUpper[i]) << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", " << MathRoutines::ReducePrecision(fValuesUpper[i]) << ")("
-      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", " << MathRoutines::ReducePrecision(fValuesLower[i]) << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesLower[i])<< ")";
-      outHtml << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesLower[i])
-      << ")(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesUpper[i]) << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", " << MathRoutines::ReducePrecision(fValuesUpper[i]) << ")("
-      << MathRoutines::ReducePrecision(xValues[i]+theDeltaWithSign.DoubleValue()) << ", " << MathRoutines::ReducePrecision(fValuesLower[i]) << ")"
-      << "(" << MathRoutines::ReducePrecision(xValues[i]) << ", " << MathRoutines::ReducePrecision(fValuesLower[i]) << ")";
-    }
-  outHtml << "<br>";
-  for (int i=0; i<rValues.size; i++)
-  { std::stringstream tempStream;
-    tempStream << "\\rput[t](" << MathRoutines::ReducePrecision(rValues[i].DoubleValue()) << ",-0.03)" << "{$";
-    if (rValues[i].IsInteger())
-      tempStream << rValues[i].ToString();
-    else
-      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}" << "{" << rValues[i].GetDenominator().ToString() << "}";
-    tempStream << "$}";
-    outHtml << tempStream.str();
-    outTex << tempStream.str();
-  }
-  outHtml << "<br>";
-  CalculusFunctionPlot thePlot;
-  thePlot.thePlotStrings.AddOnTop(outTex.str());
-  thePlot.thePlotStringsWithHtml.AddOnTop(outHtml.str());
-  thePlot.lowerBounds.AddOnTop(lowerBound);
-  thePlot.upperBounds.AddOnTop(upperBound);
-  thePlot.thePlotElementS.AddOnTop(input[1]);
-  thePlot+=outputPlot;
-  return output.AssignValue(thePlot, theCommands);
-}
-
-bool Calculator::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerPlot2D");
-  //std::cout << input.ToString();
-  if (input.children.size<4)
-    return output.SetError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
-  const Expression& lowerE=input[2];
-  const Expression& upperE=input[3];
-  Expression functionE;
-  Rational upperBound, lowerBound;
-  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
-  { std::stringstream out;
-    out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
-    return output.SetError(out.str(), theCommands);
-  }
-  CalculusFunctionPlot thePlot;
-  thePlot.AddPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
-  return output.AssignValue(thePlot, theCommands);
 }
 
 bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output)

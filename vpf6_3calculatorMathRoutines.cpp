@@ -149,7 +149,7 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   double theArgument;
   if (input.IsEqualToZero())
     return output.SetError("Logarithm of zero is undefined.", theCommands);
-  if (!input.IsRealDouble(&theArgument))
+  if (!input.EvaluatesToRealDouble(&theArgument))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue((Rational) 1, theCommands);
     return false;
@@ -173,7 +173,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(0, theCommands);
   double theArgument;
-  if (!input.IsRealDouble(&theArgument))
+  if (!input.EvaluatesToRealDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
 }
@@ -192,7 +192,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(-1, theCommands);
   double theArgument;
-  if (!input.IsRealDouble(&theArgument))
+  if (!input.EvaluatesToRealDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
 }
@@ -1037,6 +1037,220 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
   return output.AssignValue(thePlot, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotIntegralOf");
+  if (input.children.size<4)
+    return output.SetError("Plotting integral of takes at least three arguments: function, lower and upper bound. ", theCommands);
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
+  Expression functionE;
+  double upperBound, lowerBound;
+  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+  { std::stringstream out;
+    out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
+    return output.SetError(out.str(), theCommands);
+  }
+  CalculusFunctionPlot thePlot;
+  std::stringstream theShadedRegion, theShadedRegionHTML;
+  theShadedRegion << "\\pscustom*[linecolor=cyan]{"
+  << thePlot.GetPlotStringFromFunctionStringAndRanges(false, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
+  << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
+  theShadedRegionHTML << "\\pscustom*[linecolor=cyan]{"
+  << thePlot.GetPlotStringFromFunctionStringAndRanges(true, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
+  << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
+  thePlot.thePlotStrings.AddOnTop(theShadedRegion.str());
+  thePlot.thePlotStringsWithHtml.AddOnTop(theShadedRegionHTML.str());
+  thePlot.lowerBounds.AddOnTop(lowerBound);
+  thePlot.upperBounds.AddOnTop(upperBound);
+  thePlot.thePlotElementS.AddOnTop(input[1]);
+  thePlot.AddPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  return output.AssignValue(thePlot, theCommands);
+
+}
+
+bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
+  //std::cout << input.ToString();
+  if (input.children.size<4)
+    return output.SetError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
+  Expression functionE;
+  double upperBound, lowerBound;
+  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+  { std::stringstream out;
+    out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
+    return output.SetError(out.str(), theCommands);
+  }
+  CalculusFunctionPlot thePlot;
+  thePlot.AddPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  return output.AssignValue(thePlot, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerPlot2DWithBars");
+  //std::cout << input.ToString();
+  if (input.children.size<6)
+    return output.SetError("Plotting coordinates takes the following arguments: lower function, upper function, lower and upper bound, delta x. ", theCommands);
+  Expression lowerEplot=input, upperEplot=input;
+  lowerEplot.children.RemoveIndexShiftDown(2);
+  upperEplot.children.RemoveIndexShiftDown(1);
+  bool tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, lowerEplot, output);
+  CalculusFunctionPlot outputPlot;
+  if (!tempB || !output.IsOfType<CalculusFunctionPlot>(&outputPlot))
+  { theCommands.Comments << "<hr>Failed to get a plot from " << lowerEplot.ToString() << ", not proceding with bar plot.";
+    return false;
+  }
+  tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, upperEplot, output);
+  if (!tempB || !output.IsOfType<CalculusFunctionPlot>())
+  { theCommands.Comments << "<hr>Failed to get a plot from " << upperEplot.ToString() << ", not proceding with bar plot.";
+    return false;
+  }
+  outputPlot+=output.GetValue<CalculusFunctionPlot>();
+  const Expression& lowerFunctionE=input[1];
+  const Expression& upperFunctionE=input[2];
+  const Expression& lowerE=input[3];
+  const Expression& upperE=input[4];
+  const Expression& deltaE=input[5];
+  Rational theDeltaNoSign, theDeltaWithSign;
+  if (!deltaE.IsOfType<Rational>(&theDeltaWithSign))
+    return false;
+  theDeltaNoSign=theDeltaWithSign;
+  if (theDeltaNoSign<0)
+    theDeltaNoSign*=-1;
+  if (theDeltaNoSign==0)
+    theDeltaNoSign=1;
+  double upperBound, lowerBound;
+  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  Expression xValueE, xExpression, theFunValueEnonEvaluated, theFunValueFinal;
+  xExpression.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst("x"), theCommands);
+  List<double> xValues;
+  List<double> fValuesLower;
+  List<double> fValuesUpper;
+  List<Rational> rValues;
+  for (Rational i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
+    for (int j=0; j<2; j++)
+    { if (theDeltaWithSign<0 && i==lowerBound)
+        continue;
+      rValues.AddOnTop(i);
+      if (theDeltaWithSign>0 && i==upperBound)
+        continue;
+      xValueE.AssignValue(i, theCommands);
+      theFunValueEnonEvaluated=(j==0) ? lowerFunctionE : upperFunctionE;
+      theFunValueEnonEvaluated.Substitute(xExpression, xValueE);
+  //    std::cout << "<br>substitution result:" << tempE2.ToString();
+      BoundVariablesSubstitution tempSub;
+      bool tempB;
+      if (!theCommands.EvaluateExpression(theFunValueEnonEvaluated, theFunValueFinal, tempSub, tempB))
+        return false;
+  //    std::cout << "and after evaluation: " << theFunValueFinal.ToString();
+      Rational finalResultRat;
+      double finalResultDouble;
+      if (!theFunValueFinal.IsOfType<Rational>(&finalResultRat))
+      { if (!theFunValueFinal.IsOfType<double>(&finalResultDouble))
+        { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
+          return false;
+        }
+      } else
+        finalResultDouble=finalResultRat.DoubleValue();
+      if (j==0)
+      { xValues.AddOnTop(i.DoubleValue());
+        fValuesLower.AddOnTop(finalResultDouble);
+      } else
+        fValuesUpper.AddOnTop(finalResultDouble);
+    }
+  std::stringstream outTex, outHtml;
+  for (int k=0; k<2; k++)
+    for (int i=0; i<xValues.size; i++)
+    { //bool includePsLine=false;
+      bool useNegativePattern=(fValuesLower[i]>fValuesUpper[i]);
+      if (k==0 && useNegativePattern)
+      { outTex << "\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
+        outHtml << "<br>\\psline*[linecolor=\\psColorNegativeAreaUnderGraph, linewidth=0.1pt]";
+      }
+      if (k==0 && !useNegativePattern)
+      { outTex << "\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
+        outHtml << "<br>\\psline*[linecolor=\\psColorAreaUnderGraph, linewidth=0.1pt]";
+      }
+      if (k>0 && useNegativePattern)
+      { outTex << "\\psline[linecolor=brown, linewidth=0.1pt]";
+        outHtml << "<br>\\psline[linecolor=brown, linewidth=0.1pt]";
+      }
+      if (k>0 && !useNegativePattern)
+      { outTex << "\\psline[linecolor=blue, linewidth=0.1pt]";
+        outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
+      }
+      outTex << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")(" << std::fixed << xValues[i]  << ", "
+      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed
+      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed << fValuesLower[i] << ")"
+      << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")";
+      outHtml << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")(" << std::fixed << xValues[i] << ", "
+      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed
+      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed << fValuesLower[i] << ")"
+      << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")";
+    }
+  outHtml << "<br>";
+  for (int i=0; i<rValues.size; i++)
+  { std::stringstream tempStream;
+    tempStream << "\\rput[t](" << std::fixed << rValues[i].DoubleValue() << ",-0.03)" << "{$";
+    if (rValues[i].IsInteger())
+      tempStream << rValues[i].ToString();
+    else
+      tempStream << "\\frac{" << rValues[i].GetNumerator().ToString() << "}" << "{" << rValues[i].GetDenominator().ToString() << "}";
+    tempStream << "$}";
+    outHtml << tempStream.str();
+    outTex << tempStream.str();
+  }
+  outHtml << "<br>";
+  CalculusFunctionPlot thePlot;
+  thePlot.thePlotStrings.AddOnTop(outTex.str());
+  thePlot.thePlotStringsWithHtml.AddOnTop(outHtml.str());
+  thePlot.lowerBounds.AddOnTop(lowerBound);
+  thePlot.upperBounds.AddOnTop(upperBound);
+  thePlot.thePlotElementS.AddOnTop(input[1]);
+  thePlot+=outputPlot;
+  return output.AssignValue(thePlot, theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawPolarRfunctionTheta");
+  if (!input.IsListNElements(4))
+    return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
+  Expression functionE;
+  Rational upperBound, lowerBound;
+  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+    return false;
+  std::stringstream out, resultStream;
+  out << CGI::GetMathSpanPure(input[1].ToString()) << "<br>";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  std::string funString=functionE.GetValue<std::string>();
+  resultStream << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
+  resultStream << "\\end{pspicture}\\end{document}";
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
+  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotConeUsualProjection");
   if (input.children.size!=5)
@@ -1044,7 +1258,7 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
     return false;
   }
   double radius, height, distance, viewPointHeight;
-  if (!input[1].IsRealDouble(&radius) || !input[2].IsRealDouble(&height) || !input[3].IsRealDouble(&distance) || !input[4].IsRealDouble(&viewPointHeight) )
+  if (!input[1].EvaluatesToRealDouble(&radius) || !input[2].EvaluatesToRealDouble(&height) || !input[3].EvaluatesToRealDouble(&distance) || !input[4].EvaluatesToRealDouble(&viewPointHeight) )
   { theCommands.Comments << "<hr> failed to extract radius, height, distance, viewpoint height from " << input.ToString();
     return false;
   }
@@ -1197,7 +1411,7 @@ bool Calculator::innerEvaluateToDouble(Calculator& theCommands, const Expression
     std::cout << "Starting with sqrt: " << input.ToStringFull();
   if (isArithmeticOperationTwoArguments)
   { double leftD, rightD;
-    if (!input[1].IsRealDouble(&leftD) || !input[2].IsRealDouble(&rightD))
+    if (!input[1].EvaluatesToRealDouble(&leftD) || !input[2].EvaluatesToRealDouble(&rightD))
       return false;
     if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
       return output.AssignValue(leftD*rightD, theCommands);
@@ -1213,7 +1427,7 @@ bool Calculator::innerEvaluateToDouble(Calculator& theCommands, const Expression
   }
   if(input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),2))
   { double argumentD;
-    if (!input[1].IsRealDouble(&argumentD))
+    if (!input[1].EvaluatesToRealDouble(&argumentD))
       return false;
     if (argumentD<0)
       return false;

@@ -452,7 +452,7 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
-  this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta, "",
+  this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
@@ -473,7 +473,7 @@ void Calculator::initPredefinedInnerFunctions()
    "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
    ;
 
-  this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
+  this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
@@ -484,10 +484,14 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plot2D{}(\\sin{}x+cos{}x, 0, 5)")
    ;
-  this->AddOperationInnerHandler ("plot2DWithBars", this->innerPlot2DWithBars, "",
+  this->AddOperationInnerHandler ("plot2DWithBars", CalculatorFunctionsGeneral::innerPlot2DWithBars, "",
    "<b>Calculus teaching function.</b> Same as plot2D but plots two functions with bars locked between the two functions; \
    , used to illustrate approximations to definite integrals.",
    "\nA:=3/2- ((-3/4+1/4 (x))^{2});\nB:= (1/4 (x))^{2}+2;\nplot2DWithBars{}(A, B, 0, 5, 1)")
+   ;
+  this->AddOperationInnerHandler ("plotIntegralOf", CalculatorFunctionsGeneral::innerPlotIntegralOf, "",
+   "<b>Calculus teaching function.</b> Plots area locked under curve.",
+   "\nA:=3/2- ((-3/4+1/4 (x))^{2});\nplotIntegralOf{}(A, 0, 5)")
    ;
   this->AddOperationInnerHandler
   ("IsInteger", this->innerIsInteger, "",

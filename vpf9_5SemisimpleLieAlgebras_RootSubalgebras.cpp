@@ -1797,26 +1797,31 @@ bool rootSubalgebra::ComputeEssentials()
   for (int i=0; i<this->SimpleBasisK.size; i++)
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
   if (this->indexInducingSubalgebra!=-1)
-  { std::cout << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
+  { //std::cout << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
     this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
     int goodPermutation=-1;
     List<List<int> >& extensionRootPermutations=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
-      << extensionCartanSymmetrics[i].ToString();
+    { bool doDebug=(extensionDynkinTypes[i].ToString()=="A^{2}_2+A^{1}_2");
+      if (doDebug)
+        std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
+        << extensionCartanSymmetrics[i].ToString() << ", permutations: " << extensionRootPermutations[i];
       this->scalarProdMatrixOrdered.MakeZeroMatrix(this->SimpleBasisK.size);
       for (int j=0; j<this->SimpleBasisK.size; j++)
         for (int k=0; k<this->SimpleBasisK.size; k++)
           this->scalarProdMatrixOrdered(extensionRootPermutations[i][j], extensionRootPermutations[i][k])=this->scalarProdMatrixPermuted(j,k);
-      std::cout << "; my current matrix, properly permuted, is: " << this->scalarProdMatrixOrdered.ToString();
+      if (doDebug)
+        std::cout << "; my current matrix, properly permuted, is: " << this->scalarProdMatrixOrdered.ToString();
       if (this->scalarProdMatrixOrdered==extensionCartanSymmetrics[i])
       { goodPermutation=i;
-        std::cout << " ... good!";
+        if (doDebug)
+          std::cout << " ... good!";
         break;
       }
-      std::cout << " ... bad!";
+      if (doDebug)
+        std::cout << " ... bad!";
     }
     if (goodPermutation==-1)
     { //if (this->indexInducingSubalgebra!=-1)
@@ -1991,7 +1996,7 @@ void rootSubalgebras::ComputeAllReductiveRootSAsInit()
   this->validScales.SetExpectedSize(this->owneR->GetRank()*2);
   for (int i=0; i<this->owneR->GetRank(); i++)
     this->validScales.AddOnTopNoRepetition(2/this->owneR->theWeyl.CartanSymmetric(i,i));
-  std::cout << "Valid scales: " << this->validScales.ToString();
+//  std::cout << "Valid scales: " << this->validScales.ToString();
 }
 
 void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
@@ -2015,7 +2020,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       reportStream << "Exploring extensions of " << this->theSubalgebras[i].theDynkinType.ToString() << ". Possible standard parabolic extensions: ";
       for (int j=0; j<this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j++)
         reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString() << ", ";
-      std::cout << "<hr><hr>" << reportStream.str();
+      //std::cout << "<hr><hr>" << reportStream.str();
       theReport1.Report(reportStream.str());
     }
     for (int j=0; j<this->theSubalgebras[i].kModules.size; j++)
@@ -2254,7 +2259,6 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
     out << "</table><br>";
   output= out.str();
 }
-
 
 std::string rootSubalgebras::ToStringAlgebraLink(int index)
 { std::stringstream out;

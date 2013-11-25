@@ -144,8 +144,8 @@ public:
   List<int> theKComponentRanks;
   rootSubalgebras* ownEr;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
-  Matrix<Rational> scalarProdCoMatrixPermuted, scalarProdCoMatrixOrdered;
-  List<Matrix<Rational> > potentialExtensionCoCartanSymmetrics;
+  Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
+  List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
 //  int indexInOwners;

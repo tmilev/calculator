@@ -265,7 +265,7 @@ bool Serialization::innerStoreObject(Calculator& theCommands, const DynkinSimple
   std::string letterS;
   letterS=input.theLetter;
   letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
-  indexE.AssignValue(input.CartanSymmetricScale/2, theCommands);
+  indexE.AssignValue(input.CartanSymmetricInverseScale, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
   output.reset(theCommands);

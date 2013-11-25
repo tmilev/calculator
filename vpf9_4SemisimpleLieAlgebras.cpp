@@ -179,7 +179,7 @@ std::string DynkinType::ToString(FormatExpressions* theFormat)const
 std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat)const
 { FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=ambientType.theLetter;
-  tempFormat.AmbientWeylLengthFirstCoRoot=ambientType.CartanSymmetricScale;
+  tempFormat.AmbientCartanSymmetricInverseScale=ambientType.CartanSymmetricInverseScale;
   return this->ToString(&tempFormat);
 }
 
@@ -471,7 +471,7 @@ bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
 { if (input.GetRank()>this->owneR->GetRank())
     return false;
   for (int i=0; i<input.size(); i++)
-    if (!this->theOrbitHelementLengths.Contains(input[i].CartanSymmetricScale))
+    if (!this->theOrbitHelementLengths.Contains(input[i].CartanSymmetricInverseScale*2))
       return false;
   return true;
 }
@@ -672,15 +672,15 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     theSmallType=theLargerTypes[i].GetSmallestSimpleType();
     int indexNewRooT=*theRootInjections[i].LastObject();
     int indexNewRootInSmallType=indexNewRooT-theLargerTypes[i].GetRank()+theSmallType.theRank;
-    Rational desiredLengthSquared=theSmallType.CartanSymmetricScale;
-    desiredLengthSquared*=theSmallType.GetDefaultRootLengthSquared(0);
-    desiredLengthSquared/=theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
+    Rational desiredHLengthSquared=
+    theSmallType.CartanSymmetricInverseScale*theSmallType.GetDefaultRootLengthSquared(0)/
+    theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
     newCandidate.SetUpInjectionHs(baseCandidate, theLargerTypes[i], theRootInjections[i]);
     for (int j=0; j<this->theSl2s.size; j++)
     { if (theGlobalVariables!=0)
       { std::stringstream reportStreamX;
         reportStreamX << "Trying to realize the root of index " << indexNewRootInSmallType << " in simple component of type " << theSmallType.ToString();
-        if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
+        if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
         { reportStreamX << " which is no good.<br> ";
           //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
         } else
@@ -690,7 +690,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         //std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
-      if (this->theSl2s[j].LengthHsquared!=desiredLengthSquared)
+      if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
       { //std::cout << "<hr>Lengths dont match!";
         continue;
       }
@@ -1001,23 +1001,6 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
       i--;
     }
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
-}
-
-void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::AddTypeIncomplete");
-  if (theNewType.theRank<=0)
-    crash << "This is a programming error: I am given a simple Dynkin type of non-positive rank. " << crash;
-  WeylGroup tempWeyl, tempWeylnonScaled;
-  Rational two=2;
-  tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.CartanSymmetricScale);
-  tempWeylnonScaled.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank);
-  this->theWeylNonEmbeddeD+=tempWeyl;
-  this->theWeylNonEmbeddeDdefaultScale+=tempWeylnonScaled;
-
-  this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
-  this->CartanSAsByComponent.LastObject()->size=0;
-//  this->theHWeylGroupElts.SetSize(this->theHWeylGroupElts.size+1);
-//  this->theHWeylGroupElts.LastObject()->size=0;
 }
 
 bool CandidateSSSubalgebra::isGoodHnew(const Vector<Rational>& HneW, int indexHneW)const
@@ -4289,17 +4272,10 @@ void DynkinType::ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSqu
   DynkinSimpleType tempType;
   for (int i=0; i<this->size(); i++)
   { tempType=(*this)[i];
-    tempType.CartanSymmetricScale*=multiplyCoRootSquaredLengthBy;
+    tempType.CartanSymmetricInverseScale*=multiplyCoRootSquaredLengthBy;
     result.AddMonomial(tempType, this->theCoeffs[i]);
   }
   *this=result;
-}
-
-void SemisimpleSubalgebras::ScaleDynkinType(DynkinType& theType)const
-{ Rational theScale =
-  this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().CartanSymmetricScale/this->owneR->theWeyl.theDynkinType.GetSmallestSimpleType().GetRatioLongRootToFirst();
-  theScale.Invert();
-  theType.ScaleFirstCoRootSquaredLength(theScale);
 }
 
 std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
@@ -4311,8 +4287,6 @@ std::string SemisimpleSubalgebras::ToStringAlgebraLink(int ActualIndexSubalgebra
   bool makeLink= theFormat==0? false : theFormat->flagUseHtmlAndStoreToHD;
   if (this->theSubalgebraCandidates[ActualIndexSubalgebra].flagSystemProvedToHaveNoSolution)
     makeLink=false;
-  //DynkinType typeScaled=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType;
-  //this->ScaleDynkinType(typeScaled);
   std::string theTypeString=this->theSubalgebraCandidates[ActualIndexSubalgebra].theWeylNonEmbeddeD.theDynkinType.ToStringRelativeToAmbientType(this->GetSSowner().theWeyl.theDynkinType[0]);
   if (makeLink)
   { out << "<a href=\"" << this->GetDisplayFileNameSubalgebraRelative(ActualIndexSubalgebra, theFormat) << "\" style=\"text-decoration: none\">";
@@ -4336,7 +4310,7 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
   this->theWeylNonEmbeddeD.theDynkinType.GetTypesWithMults(theSimpleTypes);
   FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=this->GetAmbientWeyl().theDynkinType[0].theLetter;
-  tempFormat.AmbientWeylLengthFirstCoRoot=this->GetAmbientWeyl().theDynkinType[0].CartanSymmetricScale;
+  tempFormat.AmbientCartanSymmetricInverseScale=this->GetAmbientWeyl().theDynkinType[0].CartanSymmetricInverseScale;
   out << "<br>Elements Cartan subalgebra by components: ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { if (useLaTeX && useHtml)

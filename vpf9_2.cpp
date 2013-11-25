@@ -2361,6 +2361,10 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   { out << "%";
     return true;
   }
+  if (readAhead=="%40")
+  { out << "@";
+    return true;
+  }
   if (readAhead=="%7E")
   { out << "~";
     return true;

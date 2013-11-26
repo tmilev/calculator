@@ -5641,7 +5641,9 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 }
 
 void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
-{ for (int i=0; i<theGens.size; i++)
+{ MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGenerators");
+  std::cout << "<br>Transforming to simple basis: " << theGens.ToString();
+  for (int i=0; i<theGens.size; i++)
     if (!theGens[i].IsPositiveOrZero())
       theGens[i].Minus();
   bool reductionOccured=true;
@@ -5650,8 +5652,8 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, con
   { reductionOccured= false;
     for (int i=0; i<theGens.size; i++)
       for (int j=i+1; j<theGens.size; j++)
-      { tempRoot=(theGens[i]);
-        tempRoot-=(theGens[j]);
+      { tempRoot=theGens[i];
+        tempRoot-=theGens[j];
         if (tempRoot.IsEqualToZero())
         { theGens.RemoveIndexSwapWithLast(j);
           reductionOccured=true;
@@ -5659,14 +5661,14 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, con
         if (inputRootSystem.Contains(tempRoot))
         { if (!tempRoot.IsPositiveOrZero())
           { tempRoot.Minus();
-            theGens[j]=(tempRoot);
-          }
-          else
-            theGens[i]=(tempRoot);
+            theGens[j]=tempRoot;
+          } else
+            theGens[i]=tempRoot;
           reductionOccured=true;
         }
       }
   }
+  std::cout << "<br><br>Resulting simple basis: " << theGens.ToString();
 }
 
 template <class coefficient>

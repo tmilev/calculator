@@ -122,6 +122,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     Vectors<Rational> rootsWithoutTripleNode=currentComponent;
     rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
+    std::cout << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
     diagramWithoutTripleNode.ComputeDiagramTypeKeepInput(rootsWithoutTripleNode, theBilinearForm);
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
@@ -399,8 +400,10 @@ int DynkinDiagramRootSubalgebra::NumRootsGeneratedByDiagram()
 }
 
 int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, const Matrix<Rational>& theBilinearForm)
-{ Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
-  int numEnds=0; int result=0;
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes");
+  Vectors<Rational>& currentComponent = this->SimpleBasesConnectedComponents[indexComponent];
+  int numEnds=0;
+  int result=0;
   this->indicesThreeNodes[indexComponent] =-1;
   this->indicesEnds[indexComponent].size=0;
   for (int i=0; i<currentComponent.size; i++)

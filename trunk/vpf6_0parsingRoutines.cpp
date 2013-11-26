@@ -48,7 +48,7 @@ void Calculator::reset()
   this->flagDontDistribute=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
-  this->MaxNumCachedExpressionPerContext=100000;
+  this->MaxNumCachedExpressionPerContext=277777;
   this->theObjectContainer.reset();
   this->controlSequences.Clear();
 
@@ -605,6 +605,59 @@ bool Calculator::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
   return true;
 }
 
+bool Calculator::ReplaceXXByEEmptySequence()
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+  theElt.theData.reset(*this, 1);
+  theElt.theData.AddChildAtomOnTop(this->opSequence());
+  theElt.controlIndex=this->conExpression();
+  return this->DecreaseStackSetCharacterRangeS(1);
+}
+
+bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
+  int theBoundVar=theElt.theData.theData;
+//  std::cout << "<br>Registering bound variable index: " << theBoundVar;
+  if (this->IsNonBoundVarInContext(theBoundVar))
+  { std::stringstream out;
+    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar] << " is first used to denote a non-bound variable"
+    << " but later to denote a bound variable. This is not allowed. ";
+    theElt.errorString=out.str();
+    theElt.controlIndex=this->conError();
+    this->DecreaseStackSetCharacterRangeS(numXs);
+    this->ReplaceXXYByY();
+    return true;
+  }
+  if (!this->IsBoundVarInContext(theBoundVar))
+    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theBoundVar);
+  theElt.theData.reset(*this, 2);
+  theElt.theData.AddChildAtomOnTop(this->opBind());
+  theElt.theData.AddChildAtomOnTop(theBoundVar);
+  theElt.controlIndex=this->conExpression();
+//  std::cout << ", got to element: " << theElt.theData.ToString();
+  this->DecreaseStackSetCharacterRangeS(numXs);
+  this->ReplaceXXYByY();
+//  std::cout << ", finally got: "
+//  << (*this->CurrentSyntacticStacK).LastObject()->ToString(*this);
+  return true;
+}
+
+bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
+  int theBoundVar=theElt.theData.theData;
+//  std::cout << "<br>index of variable: " << theElt.ToString(*this);
+  if (this->IsBoundVarInContext(theBoundVar))
+  { theElt.theData.reset(*this, 2);
+    theElt.theData.AddChildAtomOnTop(this->opBind());
+    theElt.theData.AddChildAtomOnTop(theBoundVar);
+  } else
+  { theElt.theData.MakeAtom(theBoundVar, *this);
+    if (!this->IsNonBoundVarInContext(theBoundVar))
+      this->NonBoundVariablesStack.LastObject()->AddOnTop(theBoundVar);
+  }
+  theElt.controlIndex=this->conExpression();
+  return true;
+}
+
 bool Calculator::ReplaceAXbyEX()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
 //  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
@@ -833,16 +886,15 @@ bool Calculator::isSeparatorFromTheRightForDefinition(const std::string& input)
 }
 
 bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
-{ return  lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" || lookAhead==")" || lookAhead=="(" || lookAhead=="[" ||
-  lookAhead=="=" || lookAhead=="\\otimes" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" || lookAhead=="]" ||
-  lookAhead=="}" || lookAhead==":" || lookAhead=="EndProgram"
-  ;
+{ return this->AllowsTimesInPreceding(lookAhead) || lookAhead=="\\otimes";
 }
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
-{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" ||  lookAhead== "Integer" || lookAhead==")" ||
-  lookAhead=="(" || lookAhead=="[" || lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" || lookAhead=="]" ||
-  lookAhead=="}" || lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" || lookAhead=="EndProgram"
+{ return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" ||  lookAhead== "Integer"  ||
+  lookAhead=="(" || lookAhead=="[" || lookAhead=="{" ||
+  lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
+  lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" || lookAhead=="EndProgram"
   ;
 }
 
@@ -1017,6 +1069,8 @@ bool Calculator::ApplyOneRule()
   { this->registerPositionAfterDecimalPoint=0;
     return this->ReplaceAXbyEX();
   }
+  if (secondToLastS=="(" && lastS==")")
+    return this->ReplaceXXByEEmptySequence();
   if (thirdToLastS=="Integer" && secondToLastS=="." && lastS=="Integer" && this->registerPositionAfterDecimalPoint==0)
   { this->registerPositionAfterDecimalPoint=1;
     return this->ReplaceXYByY();
@@ -1079,8 +1133,6 @@ bool Calculator::ApplyOneRule()
   if (this->isSeparatorFromTheLeftForDefinition(fifthToLastS) && fourthToLastS=="Expression" && thirdToLastS==":=:" &&
       secondToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lastS))
     return this->ReplaceEOEXByEX();
-  if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
-    return this->ReplaceEOEXByEX();
   if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else
@@ -1112,7 +1164,9 @@ bool Calculator::ApplyOneRule()
   if (lastS=="sqrt")
     return this->ReplaceXByEusingO(this->opSqrt());
   //end of some synonyms
-  if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
+  if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
+    return this->ReplaceEOEXByEX();
+  if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" && (lastS=="," || lastS==")" || lastS=="}"))
     return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());

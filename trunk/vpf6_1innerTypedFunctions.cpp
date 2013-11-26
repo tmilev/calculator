@@ -984,7 +984,7 @@ bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCom
     return false;
   if (input[2].children.size!=input[1].children.size)
   { theCommands.Comments << "<hr>Attempting to add a sequence of length " << input[1].children.size-1 << "  to a sequence of length "
-    << input[2].children.size-1 << ", possible user error?";
+    << input[2].children.size-1 << ", possible user typo?";
     return false;
   }
   output.reset(theCommands);

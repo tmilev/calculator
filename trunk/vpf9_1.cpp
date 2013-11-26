@@ -102,6 +102,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     crash << crash;
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
+  std::cout << "Computing dynkin string from " << currentComponent.ToString();
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
@@ -210,6 +211,7 @@ std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const Dyn
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput");
+  std::cout << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
   for (int i=0; i<simpleBasisInput.size; i++)
@@ -407,9 +409,13 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
       if (currentComponent[i].ScalarProduct(currentComponent[j], theBilinearForm).IsNegative())
         counter++;
     if (counter>3)
+    { Matrix<Rational> theGram;
+      currentComponent.GetGramMatrix(theGram, &theBilinearForm);
       crash  << "This is a programming error: corrupt simple basis corresponding to Dynkin diagram: the Dynkin diagram should have nodes with"
       << " valency at most 3, but this diagram has node with valency " << counter << ". The current component is: "
-      << currentComponent.ToString() << ". " << crash;
+      << currentComponent.ToString() << ". The corresponding Symmetric Cartan is: "
+      << theGram.ToString() << ". " << crash;
+    }
     if (counter==3)
     { result++;
       this->indicesThreeNodes[indexComponent]=i;

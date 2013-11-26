@@ -117,7 +117,8 @@ void rootSubalgebra::ComputeAllOld()
 }
 
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
-{ this->CentralizerKmods.init(this->kModules.size);
+{ MacroRegisterFunctionWithName("rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules");
+  this->CentralizerKmods.init(this->kModules.size);
   this->CentralizerRoots.size=0;
   this->CentralizerRoots.ReservE(this->kModules.size);
   this->SimpleBasisCentralizerRoots.size=0;
@@ -133,6 +134,7 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
+  std::cout << "<hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
@@ -1832,6 +1834,8 @@ bool rootSubalgebra::ComputeEssentials()
     for (int i=0; i<this->SimpleBasisK.size; i++)
       this->SimpleBasisK[extensionRootPermutations[goodPermutation][i]]=copySimpleBasisK[i];
   }
+  if (this->SimpleBasisK.GetRankOfSpanOfElements()!=this->SimpleBasisK.size)
+    crash << "<br>simple basis vectors not linearly independent! " << crash;
   if (!this->GetAmbientWeyl().AreMaximallyDominant(this->SimpleBasisKinOrderOfGeneration, true))
   { if (this->indexInducingSubalgebra!=-1)
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaximallyDominant++;
@@ -2039,10 +2043,13 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
 
       if (!currentSA.ComputeEssentials())
         continue;
+      if (currentSA.SimpleBasisK.GetRankOfSpanOfElements()!=currentSA.SimpleBasisK.size)
+        crash << "<br>simple basis vectors not linearly independent! " << crash;
       this->theSubalgebras.AddOnTop(currentSA);
       this->theSubalgebras.LastObject()->ComputePotentialExtensions();
     }
   }
+  std::cout << "end!";
   for (int i=0; i<this->theSubalgebras.size; i++)
     this->theSubalgebras[i].ComputeAll();
   this->SortDescendingOrderBySSRank();

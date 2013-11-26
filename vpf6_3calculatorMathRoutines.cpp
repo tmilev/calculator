@@ -1000,6 +1000,49 @@ bool CalculatorFunctionsGeneral::innerLispifyFull(Calculator& theCommands, const
   return output.AssignValue(input.ToStringFull(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLastElement");
+  if (input.HasBoundVariables())
+    return false;
+//  std::cout << "<hr>calling last element with input: " << input.ToString() << ", longer printout: " << input.ToStringSemiFull();
+  if (input.IsAtom())
+  { std::stringstream out;
+    out << "Error: requesting the last element of the atom " << input.ToString();
+    return output.SetError(out.str(), theCommands);
+  }
+  std::string firstAtom;
+  if (input.children.size==2)
+    if (input[0].IsAtom(&firstAtom) )
+      if (firstAtom=="last")
+        return CalculatorFunctionsGeneral::innerLastElement(theCommands, input[1], output);
+  output=input[input.children.size-1];
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRemoveLastElement");
+  if (input.HasBoundVariables())
+    return false;
+//  std::cout << "<hr>calling remove last element with input: " << input.ToString() << ", longer printout: " << input.ToStringSemiFull();
+  if (input.IsAtom() || input.children.size==1)
+  { std::stringstream out;
+    if (input.IsAtom())
+      out << "Error: requesting to remove the last element of the atom " << input.ToString();
+    else
+      out << "Error: requesting to remove the last element of the one-element list " << input.ToString();
+    return output.SetError(out.str(), theCommands);
+  }
+  std::string firstAtom;
+  if (input.children.size==2)
+    if (input[0].IsAtom(&firstAtom) )
+      if (firstAtom=="removeLast")
+        return CalculatorFunctionsGeneral::innerRemoveLastElement(theCommands, input[1], output);
+
+  output=input;
+  output.children.RemoveLastObject();
+  return output.SetChildAtomValue(0, theCommands.opSequence());
+}
+
 bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotWedge");
   if (input.children.size!=6)

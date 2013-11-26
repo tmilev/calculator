@@ -4821,51 +4821,6 @@ bool Calculator::IsNonBoundVarInContext(int inputOp)
   return false;
 }
 
-bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
-  int theBoundVar=theElt.theData.theData;
-//  std::cout << "<br>Registering bound variable index: " << theBoundVar;
-  if (this->IsNonBoundVarInContext(theBoundVar))
-  { std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar] << " is first used to denote a non-bound variable"
-    << " but later to denote a bound variable. This is not allowed. ";
-    theElt.errorString=out.str();
-    theElt.controlIndex=this->conError();
-    this->DecreaseStackSetCharacterRangeS(numXs);
-    this->ReplaceXXYByY();
-    return true;
-  }
-  if (!this->IsBoundVarInContext(theBoundVar))
-    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theBoundVar);
-  theElt.theData.reset(*this, 2);
-  theElt.theData.AddChildAtomOnTop(this->opBind());
-  theElt.theData.AddChildAtomOnTop(theBoundVar);
-  theElt.controlIndex=this->conExpression();
-//  std::cout << ", got to element: " << theElt.theData.ToString();
-  this->DecreaseStackSetCharacterRangeS(numXs);
-  this->ReplaceXXYByY();
-//  std::cout << ", finally got: "
-//  << (*this->CurrentSyntacticStacK).LastObject()->ToString(*this);
-  return true;
-}
-
-bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
-  int theBoundVar=theElt.theData.theData;
-//  std::cout << "<br>index of variable: " << theElt.ToString(*this);
-  if (this->IsBoundVarInContext(theBoundVar))
-  { theElt.theData.reset(*this, 2);
-    theElt.theData.AddChildAtomOnTop(this->opBind());
-    theElt.theData.AddChildAtomOnTop(theBoundVar);
-  } else
-  { theElt.theData.MakeAtom(theBoundVar, *this);
-    if (!this->IsNonBoundVarInContext(theBoundVar))
-      this->NonBoundVariablesStack.LastObject()->AddOnTop(theBoundVar);
-  }
-  theElt.controlIndex=this->conExpression();
-  return true;
-}
-
 void Calculator::InitJavaScriptDisplayIndicator()
 { std::stringstream output;
   output << " <!>\n";

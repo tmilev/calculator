@@ -909,6 +909,7 @@ public:
   }
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault);
   bool ReplaceAXbyEX();
+  bool ReplaceXXByEEmptySequence();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceXEXByEcontainingOE(int inputOpIndex, int inputFormat=Expression::formatDefault);

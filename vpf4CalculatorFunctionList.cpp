@@ -1835,6 +1835,14 @@ void Calculator::initPredefinedStandardOperations()
    "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
   this->AddOperationOuterHandler
+  ("last", CalculatorFunctionsGeneral::innerLastElement, "",
+   "Returns the last element of the expression, provided the argument has no bound variables. If the expression has bound variables does nothing.",
+   "last(a,b,c); last (a)", true);
+  this->AddOperationOuterHandler
+  ("removeLast", CalculatorFunctionsGeneral::innerRemoveLastElement, "",
+   "Returns a list with the last element removed, provided the argument has no bound variables. If the expression has bound variables does nothing.",
+   "X:=(a,b,c); Y:= (removeLast X)\\cup Sequence{}(last X)-X; ", true);
+  this->AddOperationOuterHandler
   ("\\cup", this->outerUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \

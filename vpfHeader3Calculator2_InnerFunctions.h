@@ -76,6 +76,9 @@ public:
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2DWithBars(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output);

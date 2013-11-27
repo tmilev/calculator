@@ -789,7 +789,8 @@ bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input
 }
 
 bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output)
-{ MatrixTensor<Rational> outputMat;
+{ MacroRegisterFunctionWithName("Calculator::innerMatrixRationalTensorForm");
+  MatrixTensor<Rational> outputMat;
   output=input;
   if (!output.IsOfType<Matrix<Rational> >())
     if (!theCommands.innerMatrixRational(theCommands, input, output))
@@ -801,7 +802,8 @@ bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Ex
 }
 
 bool Calculator::innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ Matrix<RationalFunctionOld> outputMat;
+{ MacroRegisterFunctionWithName("Calculator::innerMatrixRationalFunction");
+  Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
   if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, Calculator::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
@@ -828,7 +830,7 @@ void CalculusFunctionPlot::AddPlotOnTop(const Expression& inputE, const std::str
 }
 
 std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
-(bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound, const Rational& upperBound)
+(bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound)
 { std::stringstream out;
   out << "\n\n%Function formula: " << functionStringCalculatorFormat << "\n\n";
   if (useHtml)
@@ -836,7 +838,7 @@ std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
   out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   if (useHtml)
     out << "<br>\n";
-  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << std::fixed << lowerBound << "}{" <<std::fixed << upperBound << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }

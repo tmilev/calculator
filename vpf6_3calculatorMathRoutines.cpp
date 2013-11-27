@@ -1124,7 +1124,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   const Expression& upperE=input[3];
   Expression functionE;
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+  if (!lowerE.EvaluatesToRealDouble(&lowerBound) || !upperE.EvaluatesToRealDouble(&upperBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -1146,8 +1146,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   Expression lowerEplot=input, upperEplot=input;
   lowerEplot.children.RemoveIndexShiftDown(2);
   upperEplot.children.RemoveIndexShiftDown(1);
-  bool tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, lowerEplot, output);
   CalculusFunctionPlot outputPlot;
+  bool tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, lowerEplot, output);
   if (!tempB || !output.IsOfType<CalculusFunctionPlot>(&outputPlot))
   { theCommands.Comments << "<hr>Failed to get a plot from " << lowerEplot.ToString() << ", not proceding with bar plot.";
     return false;
@@ -1163,8 +1163,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   const Expression& lowerE=input[3];
   const Expression& upperE=input[4];
   const Expression& deltaE=input[5];
-  Rational theDeltaNoSign, theDeltaWithSign;
-  if (!deltaE.IsOfType<Rational>(&theDeltaWithSign))
+  double theDeltaNoSign, theDeltaWithSign;
+  if (!deltaE.EvaluatesToRealDouble(&theDeltaWithSign))
     return false;
   theDeltaNoSign=theDeltaWithSign;
   if (theDeltaNoSign<0)
@@ -1172,7 +1172,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   if (theDeltaNoSign==0)
     theDeltaNoSign=1;
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+  if (!lowerE.EvaluatesToRealDouble(&lowerBound) || !upperE.EvaluatesToRealDouble(&upperBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -1181,12 +1181,26 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   List<double> xValues;
   List<double> fValuesLower;
   List<double> fValuesUpper;
+  if (theDeltaNoSign==0)
+    return output.SetError("Delta equal to zero is not allowed", theCommands);
+  if ((upperBound-lowerBound)/theDeltaNoSign>10000)
+    return output.SetError("More than 10000 intervals needed for the plot, this is not allowed.", theCommands);
   List<Rational> rValues;
-  for (Rational i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
+  Rational lowerBoundRat, upperBoundRat, deltaRat;
+  if (lowerE.IsOfType<Rational>(&lowerBoundRat) && upperE.IsOfType<Rational>(&upperBoundRat) && deltaE.IsOfType<Rational>(&deltaRat))
+  { if (upperBoundRat<lowerBoundRat)
+      MathRoutines::swap(upperBoundRat, lowerBoundRat);
+    if (deltaRat<0)
+      deltaRat*=-1;
+    if (deltaRat==0)
+      return output.SetError("Delta equal to zero is not allowed", theCommands);
+    for (Rational i=lowerBoundRat; i<=upperBoundRat; i+=deltaRat)
+      rValues.AddOnTop(i);
+  }
+  for (double i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
     for (int j=0; j<2; j++)
     { if (theDeltaWithSign<0 && i==lowerBound)
         continue;
-      rValues.AddOnTop(i);
       if (theDeltaWithSign>0 && i==upperBound)
         continue;
       xValueE.AssignValue(i, theCommands);
@@ -1198,17 +1212,13 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
       if (!theCommands.EvaluateExpression(theFunValueEnonEvaluated, theFunValueFinal, tempSub, tempB))
         return false;
   //    std::cout << "and after evaluation: " << theFunValueFinal.ToString();
-      Rational finalResultRat;
       double finalResultDouble;
-      if (!theFunValueFinal.IsOfType<Rational>(&finalResultRat))
-      { if (!theFunValueFinal.IsOfType<double>(&finalResultDouble))
-        { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
-          return false;
-        }
-      } else
-        finalResultDouble=finalResultRat.DoubleValue();
+      if (!theFunValueFinal.EvaluatesToRealDouble(&finalResultDouble))
+      { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
+        return false;
+      }
       if (j==0)
-      { xValues.AddOnTop(i.DoubleValue());
+      { xValues.AddOnTop(i);
         fValuesLower.AddOnTop(finalResultDouble);
       } else
         fValuesUpper.AddOnTop(finalResultDouble);
@@ -1235,12 +1245,12 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
         outHtml << "<br>\\psline[linecolor=blue, linewidth=0.1pt]";
       }
       outTex << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")(" << std::fixed << xValues[i]  << ", "
-      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed
-      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed << fValuesLower[i] << ")"
+      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign << ", " << std::fixed
+      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign << ", " << std::fixed << fValuesLower[i] << ")"
       << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")";
       outHtml << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")(" << std::fixed << xValues[i] << ", "
-      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed
-      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign.DoubleValue() << ", " << std::fixed << fValuesLower[i] << ")"
+      << std::fixed << fValuesUpper[i] << ")" << "(" << std::fixed << xValues[i]+theDeltaWithSign << ", " << std::fixed
+      << fValuesUpper[i] << ")(" << std::fixed << xValues[i]+theDeltaWithSign << ", " << std::fixed << fValuesLower[i] << ")"
       << "(" << std::fixed << xValues[i] << ", " << std::fixed << fValuesLower[i] << ")";
     }
   outHtml << "<br>";

@@ -501,7 +501,7 @@ class CalculusFunctionPlot
   std::string GetPlotStringAddLatexCommands(bool useHtml);
   void AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound);
   std::string GetPlotStringFromFunctionStringAndRanges
-  (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, const Rational& lowerBound, const Rational& upperBound);
+  (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
   void operator+=(const CalculusFunctionPlot& other);
   bool operator==(const CalculusFunctionPlot& other)const
   { return this->thePlotStrings==other.thePlotStrings && this->thePlotStringsWithHtml==other.thePlotStringsWithHtml &&

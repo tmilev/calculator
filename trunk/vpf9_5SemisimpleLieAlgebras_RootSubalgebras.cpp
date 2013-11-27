@@ -33,7 +33,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   ZeroRoot.MakeZero(theDimension);
   Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
-  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ToString();
+//  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ToString();
 //  tempMat=matCoxeterElt;
   this->ComputeDynkinDiagramKandCentralizer();
   ReflectionSubgroupWeylGroup tempGroup;
@@ -47,7 +47,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     lastRoot.GetCoordsInBasiS(tempGroup.simpleGenerators, lastRootInSimpleCoords);
     coxeterNumber=MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
-  std::cout << "<hr>the corresponding Coxeter number: " << coxeterNumber;
+//  std::cout << "<hr>the corresponding Coxeter number: " << coxeterNumber;
 //  for (int i=0; i<coxeterNumber-1; i++)
 //    tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
@@ -134,7 +134,7 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-  std::cout << "<hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
+//  std::cout << "<hr><hr><hr><hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
@@ -1806,7 +1806,7 @@ bool rootSubalgebra::ComputeEssentials()
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { bool doDebug=(extensionDynkinTypes[i].ToString()=="A^{2}_2+A^{1}_2");
+    { bool doDebug=(extensionDynkinTypes[i].ToString()=="A^{1}_2+2A^{1}_1");
       if (doDebug)
         std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
         << extensionCartanSymmetrics[i].ToString() << ", permutations: " << extensionRootPermutations[i];
@@ -2049,7 +2049,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       this->theSubalgebras.LastObject()->ComputePotentialExtensions();
     }
   }
-  std::cout << "end!";
+//  std::cout << "end!";
   for (int i=0; i<this->theSubalgebras.size; i++)
     this->theSubalgebras[i].ComputeAll();
   this->SortDescendingOrderBySSRank();

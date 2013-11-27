@@ -1252,8 +1252,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
     this->projectivizedChambeR.AddOnTop(tempList[i]);
 }
 
-void WeylGroup::GetWeylChamber
-(Cone& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables)
 { Matrix<Rational> tempMat;
   tempMat=this->CartanSymmetric;
   tempMat.Invert();
@@ -1263,8 +1262,7 @@ void WeylGroup::GetWeylChamber
 //  output.CreateFromNormals(tempRoots, theGlobalVariables);
 }
 
-std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
-  (GlobalVariables& theGlobalVariables)
+std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   int totalDimAffine=this->WeylLarger.GetDim()+this->WeylSmaller.GetDim();
   int smallDim=this->WeylSmaller.GetDim();

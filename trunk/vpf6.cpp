@@ -4521,15 +4521,20 @@ std::string Calculator::ToString()
   out << "<hr>";
   out << "Children expressions (" << this->theExpressionContainer.size << " total):<br>";
   int numExpressionsToDisplay=this->theExpressionContainer.size;
-  if (this->theExpressionContainer.size>2000)
-  { numExpressionsToDisplay=2000;
-    out << " <b>Diplaying first 2000 only </b><br>";
+  if (this->theExpressionContainer.size>1000)
+  { numExpressionsToDisplay=1000;
+    out << " <b>Diplaying first " << numExpressionsToDisplay << " only </b><br>";
   }
   for (int i=0; i< numExpressionsToDisplay; i++)
     out << this->theExpressionContainer[i].ToString() << ", ";
   out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size << " total):\n<br>\n";
-  for (int i=0; i<this->cachedExpressions.size; i++)
+  numExpressionsToDisplay=this->cachedExpressions.size;
+  if (numExpressionsToDisplay>1000)
+  { numExpressionsToDisplay=1000;
+    out << "<b>Displaying first " << numExpressionsToDisplay << " expressions only.</b><br>";
+  }
+  for (int i=0; i<numExpressionsToDisplay; i++)
   { out << this->cachedExpressions[i].ToString() << " -> " << this->imagesCachedExpressions[i].ToString();
     if (i!=this->cachedExpressions.size-1)
       out << "<br>";

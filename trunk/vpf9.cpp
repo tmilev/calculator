@@ -3817,14 +3817,14 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)c
 
 bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 { MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
-  std::cout << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
-  << other.ToString();
+  //std::cout << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
+  //<< other.ToString();
   if (other.IsEqualToZero())
-  { std::cout << "... it can't";
+  { //std::cout << "... it can't";
     return false;
   }
   if (this->IsEqualToZero())
-  { std::cout << "... it can";
+  { //std::cout << "... it can";
     return true;
   }
   DynkinSimpleType targetType, currentType;
@@ -3840,17 +3840,17 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
       remainderOther.SubtractMonomial(targetType, 1);
       if (currentType==targetType)
       { if (remainderThis.CanBeExtendedParabolicallyTo(remainderOther))
-        { std::cout << " it can";
+        { //std::cout << " it can";
           return true;
         }
       } else
         if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther))
-        { std::cout << " it can";
+        { //std::cout << " it can";
           return true;
         }
     }
   }
-  std::cout << "...it cant";
+  //std::cout << "...it cant";
   return false;
 }
 
@@ -4421,7 +4421,7 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
-  std::cout << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
+  //std::cout << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
   if (this->CartanSymmetricInverseScale!=other.CartanSymmetricInverseScale)
     return false;
   if (other.theRank<=this->theRank)
@@ -5642,7 +5642,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 
 void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
 { MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGenerators");
-  std::cout << "<br>Transforming to simple basis: " << theGens.ToString();
+  //std::cout << "<br>Transforming to simple basis: " << theGens.ToString();
   for (int i=0; i<theGens.size; i++)
     if (!theGens[i].IsPositiveOrZero())
       theGens[i].Minus();
@@ -5668,7 +5668,7 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, con
         }
       }
   }
-  std::cout << "<br><br>Resulting simple basis: " << theGens.ToString();
+//  std::cout << "<br><br>Resulting simple basis: " << theGens.ToString();
 }
 
 template <class coefficient>

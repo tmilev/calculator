@@ -102,7 +102,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     crash << crash;
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
-  std::cout << "Computing dynkin string from " << currentComponent.ToString();
+  //std::cout << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
@@ -122,8 +122,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     Vectors<Rational> rootsWithoutTripleNode=currentComponent;
     rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
-    std::cout << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
+//    std::cout << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
     diagramWithoutTripleNode.ComputeDiagramTypeKeepInput(rootsWithoutTripleNode, theBilinearForm);
+//    std::cout << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
     for (int i=0; i<3; i++)
@@ -132,24 +133,33 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     for(int i=0; i<3; i++)
       for(int j=i+1; j<3; j++)
         if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[i].size<diagramWithoutTripleNode.SimpleBasesConnectedComponents[j].size)
-          diagramWithoutTripleNode.SimpleBasesConnectedComponents.SwapTwoIndices(i,j);
+          diagramWithoutTripleNode.SwapDynkinStrings(i,j);
     Rational theScale=2/tripleNode.ScalarProduct(tripleNode, theBilinearForm);
     currentComponent.SetSize(0);
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size==1)
     { //<- components are sorted by length, therefore the second and third component are of length 1,
       //therefore we have type D_n
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]);//<-first long component
+      if (!tripleNode.ScalarProduct(currentComponent[0], theBilinearForm).IsEqualToZero())
+        currentComponent.ReverseOrderElements();
       currentComponent.AddOnTop(tripleNode);//<-then triple node
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1]);//<-last two vectors
       currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2]);//<-last two vectors
       outputType.MakeArbitrary('D', currentComponent.size, theScale);
     } else
     { //the second largest component has more than one element, hence we are in type E_n.
+      if (diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].size!=2)
+        crash << "This is a programming error: the dynkin diagram has two components of length larger than 2 linked to the triple node."
+        << crash;
+      if (!tripleNode.ScalarProduct(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0], theBilinearForm).IsEqualToZero())
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[1].ReverseOrderElements(); //<-the 2-root component has the first root perpendicular to the triple node
+      if (tripleNode.ScalarProduct(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0][0], theBilinearForm).IsEqualToZero())
+        diagramWithoutTripleNode.SimpleBasesConnectedComponents[0].ReverseOrderElements(); //<-the largest component has the first root non-perpendicular to the triple node
       currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-first root from 2-element component
       currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[2][0]); //<-then the small sticky part of the Dynkin diagram
-      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][0]); //<-next the second root from 2-element component
+      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[1][1]); //<-next the second root from 2-element component
       currentComponent.AddOnTop(tripleNode); //<- next the triple node
-      currentComponent.AddOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0][0]); //<-finally the longest component. Conventions, conventions...
+      currentComponent.AddListOnTop(diagramWithoutTripleNode.SimpleBasesConnectedComponents[0]); //<-finally the longest component. Conventions, conventions...
       outputType.MakeArbitrary('E', currentComponent.size, theScale);
     }
    return;
@@ -189,6 +199,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
         outputType.MakeArbitrary('C', currentComponent.size, 2/length2);
     }
   }
+//  std::cout << "<hr><hr>before swapping:" << currentComponent.ToString();
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
   for (int i=0; i<currentComponent.size; i++)
     for (int j=i+1; j<currentComponent.size; j++)
@@ -196,6 +207,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
       { currentComponent.SwapTwoIndices(i+1, j);
         break;
       }
+//  std::cout << "<br>after swapping:" << currentComponent.ToString();
   //so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter=='G' || outputType.theLetter=='C' )
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
@@ -212,7 +224,7 @@ std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const Dyn
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput");
-  std::cout << "<br>Computing diagram from " << simpleBasisInput.ToString();
+  //std::cout << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
   for (int i=0; i<simpleBasisInput.size; i++)
@@ -235,8 +247,13 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rati
     }
   }
   this->ComputeDynkinStrings(theBilinearForm);
+//  std::cout << "<br>before the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
   this->Sort();
+//  std::cout << "<br>'n after  the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
+
+//  std::cout << "...after the horrible sort, computing again...";
   this->ComputeDynkinStrings(theBilinearForm);
+//  std::cout << "...the very final complete absolute computation is done!";
 }
 
 bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2)

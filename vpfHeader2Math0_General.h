@@ -4678,6 +4678,9 @@ class DynkinSimpleType
   int theRank;
   Rational CartanSymmetricInverseScale;
   DynkinSimpleType(): theLetter('X'), theRank(-1), CartanSymmetricInverseScale(0){}
+  DynkinSimpleType(char inputChar, int inputRank, const Rational& inputScale=1)
+  : theLetter(inputChar), theRank(inputRank), CartanSymmetricInverseScale(inputScale)
+  {}
   void MakeAone()
   { this->theLetter='A';
     this->theRank=1;

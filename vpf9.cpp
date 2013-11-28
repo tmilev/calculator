@@ -4470,8 +4470,8 @@ void DynkinSimpleType::Grow(List<DynkinSimpleType>& output, List<List<int> >* ou
       currentImagesSimpleRootsCurrent[1]=2;
       currentImagesSimpleRootsCurrent[2]=3;
       currentImagesSimpleRootsCurrent[3]=4;
-      currentImagesSimpleRootsCurrent[4]=5;
-      currentImagesSimpleRootsCurrent[5]=1;
+      currentImagesSimpleRootsCurrent[4]=1;
+      currentImagesSimpleRootsCurrent[5]=5;
       outputPermutationRoots->AddOnTop(currentImagesSimpleRootsCurrent);
     }
   }

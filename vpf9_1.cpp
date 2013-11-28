@@ -556,9 +556,14 @@ bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool u
     for (int j=0; j<this->OuterAutomorphisms.size; j++)
     { theWeightsCopy.GetElement()=theWeights;
       this->OuterAutomorphisms[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
+      bool isGood=true;
       for (int k=0; k<i; k++)
         if (!(theWeightsCopy.GetElement()[k]-theWeights[k]).IsPositiveOrZero())
-          continue;
+        { isGood=false;
+          break;
+        }
+      if (!isGood)
+        continue;
       if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).isGreaterThanLexicographic(zeroWeight))
         continue;
       return false;

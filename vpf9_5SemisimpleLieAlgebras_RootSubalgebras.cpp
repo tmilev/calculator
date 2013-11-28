@@ -1798,6 +1798,7 @@ bool rootSubalgebra::ComputeEssentials()
   this->SimpleBasisKScaledToActByTwo=this->SimpleBasisK;
   for (int i=0; i<this->SimpleBasisK.size; i++)
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
+  bool doDebug=false;
   if (this->indexInducingSubalgebra!=-1)
   { //std::cout << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
     this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
@@ -1806,7 +1807,7 @@ bool rootSubalgebra::ComputeEssentials()
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { bool doDebug=(extensionDynkinTypes[i].ToString()=="A^{1}_2+2A^{1}_1");
+    { doDebug=(extensionDynkinTypes[i].ToString()=="E^{1}_6");
       if (doDebug)
         std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
         << extensionCartanSymmetrics[i].ToString() << ", permutations: " << extensionRootPermutations[i];
@@ -1827,6 +1828,8 @@ bool rootSubalgebra::ComputeEssentials()
     }
     if (goodPermutation==-1)
     { //if (this->indexInducingSubalgebra!=-1)
+      if (doDebug)
+        std::cout << "<br>rejected: bad angles!";
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedBadAngles++;
       return false;
     }
@@ -1837,8 +1840,27 @@ bool rootSubalgebra::ComputeEssentials()
   if (this->SimpleBasisK.GetRankOfSpanOfElements()!=this->SimpleBasisK.size)
     crash << "<br>simple basis vectors not linearly independent! " << crash;
   if (!this->GetAmbientWeyl().AreMaximallyDominant(this->SimpleBasisKinOrderOfGeneration, true))
-  { if (this->indexInducingSubalgebra!=-1)
+  { Vectors<Rational> tempVs=this->SimpleBasisKinOrderOfGeneration;
+    tempVs.RemoveLastObject();
+    if (doDebug)
+      std::cout << "<br>Raising " << tempVs.ToString() << " yields: ";
+    if (!this->GetAmbientWeyl().AreMaximallyDominant(tempVs, true))
+      crash << "<br>This is a programming error: first vectors " << tempVs.ToString()
+      << " are not maximally dominant. " << crash;
+    if (doDebug)
+    { this->GetAmbientWeyl().RaiseToMaximallyDominant(tempVs, true);
+      std::cout << tempVs.ToString();
+    }
+    if (this->indexInducingSubalgebra!=-1)
       this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaximallyDominant++;
+    if (doDebug)
+    { std::cout << "<br>rejected: not maximally domininant: ";
+      tempVs=this->SimpleBasisKinOrderOfGeneration;
+      std::cout << tempVs.ToString();
+      this->GetAmbientWeyl().RaiseToMaximallyDominant
+      (tempVs, true);
+      std::cout << " can be raised to: " << tempVs.ToString();
+    }
     return false;
   }
   this->theDynkinDiagram.ComputeDiagramTypeKeepInput(this->SimpleBasisK, this->GetAmbientWeyl().CartanSymmetric);

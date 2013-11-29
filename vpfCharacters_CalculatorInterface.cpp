@@ -2,7 +2,6 @@
 #include "vpfHeader2Math3_Characters.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
-#include "vpfHeader2Math7FinitelyGeneratedMatrixGroups.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
@@ -600,7 +599,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant
 template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit
 (Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
-{ this->ComputeExternalAutos();
+{ MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
+  this->ComputeOuterAutoGenerators();
   output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots[i]);
@@ -614,7 +614,8 @@ bool WeylGroup::GenerateOuterOrbit
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
   }
-  int numGens=this->GetDim()+this->OuterAutomorphisms.size;
+  List<MatrixTensor<Rational> >& outerAutos=this->theOuterAutos.GetElement().theElements;
+  int numGens=this->GetDim()+outerAutos.size;
   for (int i=0; i<output.size; i++)
   { if (outputSubset!=0)
       tempEW=outputSubset->TheObjects[i];
@@ -622,7 +623,7 @@ bool WeylGroup::GenerateOuterOrbit
     { if(j<this->GetDim())
         this->SimpleReflection(j, currentRoot);
       else
-        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
+        outerAutos[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { tempEW.reflections.AddOnTop(j);
@@ -972,10 +973,41 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
   return output.AssignValue(outputRep, theCommands);
 }
 
+bool CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup");
+  if (input.children.size!=3)
+  { theCommands.Comments << "<hr>IsOuterAuto expects 2 arguments.";
+    return false;
+  }
+  DynkinType theType;
+  if (!Serialization::innerLoadDynkinType(theCommands, input[1], theType))
+  { theCommands.Comments << "<hr>Failed to get Dynkin type from argument. " << input[1].ToString();
+    return false;
+  }
+  Matrix<Rational> theMat;
+  if (!input[2].IsOfType<Matrix<Rational> >(&theMat))
+    if (!theCommands.GetMatrix(input[2], theMat))
+    { theCommands.Comments << "<hr>Failed to get matrix from argument. " << input[2].ToString();
+      return false;
+    }
+  if (theMat.NumCols!=theMat.NumRows || theMat.NumCols!=theType.GetRank())
+  { theCommands.Comments << "<hr>Extracted Dynkin type " << theType.ToString() << " is of rank " << theType.GetRank()
+    << " but extracted linear operator has " << theMat.NumCols << " columns and " << theMat.NumRows << " rows.";
+    return false;
+  }
+  WeylGroup tempW;
+  tempW.MakeFromDynkinType(theType);
+  tempW.ComputeRho(true);
+  MatrixTensor<Rational> theOp;
+  theOp=theMat;
+  if (tempW.IsElementWeylGroupOrOuterAuto(theOp))
+    return output.AssignValue(1, theCommands);
+  return output.AssignValue(0, theCommands);
+}
+
 bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep");
-  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses
-      (theCommands, input, output))
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
     return false;

@@ -3,7 +3,6 @@
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
-#include "vpfHeader2Math7FinitelyGeneratedMatrixGroups.h"
 ProjectInformationInstance ProjectInfoVpf9_4cpp(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
@@ -897,7 +896,8 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
 template <class coefficient>
 bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
 { MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
-  this->ComputeExternalAutos();
+  this->ComputeOuterAutoGenerators();
+  List<MatrixTensor<Rational> > theOuterGens=this->theOuterAutos.GetElement().theGenerators;
   output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots[i]);
@@ -911,16 +911,16 @@ bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Ve
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
   }
-  int numGens=this->GetDim()+this->OuterAutomorphisms.size;
+  int numGens=this->GetDim()+theOuterGens.size;
   for (int i=0; i<output.size; i++)
   { if (outputSubset!=0)
       tempEW=outputSubset->TheObjects[i];
     for (int j=0; j<numGens; j++)
-    { if(j<this->GetDim())
+    { if (j<this->GetDim())
       { currentRoot=output[i];
         this->SimpleReflection(j, currentRoot);
       } else
-        this->OuterAutomorphisms[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
+        theOuterGens[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { tempEW.reflections.AddOnTop(j);
@@ -4732,6 +4732,8 @@ template <class coefficient>
 void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos)
 { bool found;
   MemorySaving<Vectors<coefficient> > theWeightsCopy;
+  if (useOuterAutos)
+    this->ComputeOuterAutos();
   for (int i=0; i<theWeights.size; i++)
     do
     { found=false;
@@ -4750,12 +4752,12 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
           found=true;
         }
       if (useOuterAutos)
-      { this->ComputeExternalAutos();
-        Vector<Rational> zeroWeight;
+      { Vector<Rational> zeroWeight;
         zeroWeight.MakeZero(this->GetDim());
-        for (int j=0; j<this->OuterAutomorphisms.size; j++)
+        HashedList<MatrixTensor<Rational> >& outerAutos=this->theOuterAutos.GetElement().theElements;
+        for (int j=0; j<outerAutos.size; j++)
         { theWeightsCopy.GetElement()=theWeights;
-          this->OuterAutomorphisms[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
+          outerAutos[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
           bool isGood=true;
           for (int k=0; k<i; k++)
             if (!(theWeightsCopy.GetElement()[k]-theWeights[k]).IsPositiveOrZero())

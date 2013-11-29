@@ -4931,16 +4931,26 @@ void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational*
   this->MakeFromDynkinType(inputType);
 }
 
-void WeylGroup::ComputeExternalAutos()
-{ if (!this->flagOuterAutosComputed)
-  { this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(this->OuterAutomorphisms);
-    for (int i=0; i<this->OuterAutomorphisms.size; i++)
-      if (this->OuterAutomorphisms[i].GetMinNumColsNumRows()!=this->GetDim() || this->OuterAutomorphisms[i].GetMinNumCols()!=this->GetDim() ||
-          this->OuterAutomorphisms[i].GetMinNumRows()!=this->GetDim() )
-      { crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
-      }
-  }
-  this->flagOuterAutosComputed=true;
+void WeylGroup::ComputeOuterAutos()
+{ if (this->flagAllOuterAutosComputed)
+    return;
+  MacroRegisterFunctionWithName("WeylGroup::ComputeOuterAutoGenerators");
+  this->ComputeOuterAutoGenerators();
+  this->theOuterAutos.GetElement().GenerateElements(0);
+  this->flagAllOuterAutosComputed=true;
+}
+
+void WeylGroup::ComputeOuterAutoGenerators()
+{ if (this->flagOuterAutosGeneratorsComputed)
+    return;
+  List<MatrixTensor<Rational> >& theGens=this->theOuterAutos.GetElement().theGenerators;
+  this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(theGens);
+  for (int i=0; i<theGens.size; i++)
+    if (theGens[i].GetMinNumColsNumRows()!=this->GetDim() || theGens[i].GetMinNumCols()!=this->GetDim() ||
+        theGens[i].GetMinNumRows()!=this->GetDim() )
+    { crash << "Bad outer automorphisms, type " << this->theDynkinType.ToString() << "." << crash;
+    }
+  this->flagOuterAutosGeneratorsComputed=true;
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)

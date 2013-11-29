@@ -4,6 +4,7 @@
 #define vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 
 #include "vpfHeader2Math0_General.h"
+
 static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(__FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. ");
 
 class coneRelation
@@ -118,9 +119,11 @@ public:
   DynkinDiagramRootSubalgebra theDynkinDiagram;
   DynkinDiagramRootSubalgebra theCentralizerDiagram;
   DynkinType theDynkinType;
+  DynkinType theCentralizerDynkinType;
   List<List<int> > coneRelationsBuffer;
   List<int> coneRelationsNumSameTypeComponentsTaken;
   List<DynkinDiagramRootSubalgebra> relationsDiagrams;
+  FinitelyGeneratedMatrixMonoid<Rational> outerSAautosExtendingToAmbientAutosGenerators;
   Vectors<Rational> genK;
   Vectors<Rational> SimpleBasisK;
   Vectors<Rational> SimpleBasisKScaledToActByTwo;
@@ -163,6 +166,7 @@ public:
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetCoxeterElement(Matrix<Rational>& output);
   void ComputePotentialExtensions();
+  void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool IsBKhighest(const Vector<Rational>& input);
@@ -211,7 +215,6 @@ public:
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
   bool ComputeEssentials();
-  void ComputeAll();
   void ComputeAllOld();
   void ComputeRootsOfK();
   void ComputeKModules();

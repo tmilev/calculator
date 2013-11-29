@@ -210,8 +210,20 @@ void Calculator::initPredefinedInnerFunctions()
    "WeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (-1, -3, -2, 0)  ); \
    \nWeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (0, -3, -4, -2)  );\
    \nWeylRaiseToMaximallyDominant{}(F_4, (0, -3, -4, -2) , (3, 6, 8, 4)  );\
+   ");  this->AddOperationInnerHandler
+  ("IsOuterAuto", CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup, "",
+   "Checks if element is outer automorphism of a root system. First argument = type. \
+   Second argument = matrix linear operator corresponding written in simple basis. ",
+   "A:=MatrixRationals\
+((1, 0, 0, 0, 0, -1),\
+(0, 0, 0, 0, 1, -2),\
+(0, 0, 1, 0, 0, -2),\
+(0, 0, 0, 1, 0, -3),\
+(0, 1, 0, 0, 0, -2),\
+(0, 0, 0, 0, 0, -1));\
+   IsOuterAuto{}(e_6,  A);\
    ");
-    this->AddOperationInnerHandler
+  this->AddOperationInnerHandler
   ("WeylOuterRaiseToMaximallyDominant", CalculatorFunctionsWeylGroup::innerWeylOuterRaiseToMaximallyDominant, "",
    "Same as WeylRaiseToMaximallyDominant but uses outer Weyl group automorphisms as well.",
    "WeylOuterRaiseToMaximallyDominant{}(D_4,  (1, 0, 0, 0), (0, 0, 0, 1)  ); \

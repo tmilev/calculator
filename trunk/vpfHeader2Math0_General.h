@@ -286,8 +286,8 @@ public:
       }
     return (*whichLetter)!=-1;
   }
-  template <class Element>
-  bool SubstitutioN(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit=1)const;
+  template <class coefficient>
+  bool SubstitutioN(const List<Polynomial<coefficient> >& TheSubstitution, Polynomial<coefficient>& output, const coefficient& theRingUnit=1)const;
   void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { for (int i=this->monBody.size-1; i>=0; i--)
@@ -486,8 +486,8 @@ class MonomialWeylAlgebra
   }
 };
 
-template <class Element>
-std::iostream& operator <<(std::iostream& output, const Polynomial<Element>& input)
+template <class coefficient>
+std::iostream& operator <<(std::iostream& output, const Polynomial<coefficient>& input)
 { output << input.ToString();
   return output;
 }
@@ -1304,8 +1304,8 @@ public:
   }
 };
 
-template <class Element>
-class PolynomialSubstitution: public List<Polynomial<Element> >
+template <class coefficient>
+class PolynomialSubstitution: public List<Polynomial<coefficient> >
 {
   public:
   //One of the main purposes of this class is to be used for carrying out substitutions.
@@ -1318,8 +1318,8 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   // like this: x_1-> x_1+x_2
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables
-  void MakeIdSubstitution(int numVars, const Element& theRingUnit=1);
-  void MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Element& theRingUnit);
+  void MakeIdSubstitution(int numVars, const coefficient& theRingUnit=1);
+  void MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit);
   //In the following function we have that:
   //the format of the linear substitution is:
   //theSub is a  whose number of rows minus 1 must equal the # number of
@@ -1327,13 +1327,13 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   //the current polynomial (this->NumVariables).
   //The first row denotes the constant term in the substitution of the respective variable!
   //An element in the x-th row and y-th column
-  //is defined as Element[x][y] !
+  //is defined as element [x][y] !
   void MakeExponentSubstitution(Matrix<LargeInt>& theSub);
-  void PrintPolys(std::string& output, Element& TheRingUnit, Element& TheRingZero);
-  void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<Element>& EndPoint);
-  void AddConstant(Element& theConst);
-  void TimesConstant(Element& r);
-  void DivideByConstant(Element& r);
+  void PrintPolys(std::string& output, coefficient& TheRingUnit, coefficient& TheRingZero);
+  void MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint);
+  void AddConstant(coefficient& theConst);
+  void TimesConstant(coefficient& r);
+  void DivideByConstant(coefficient& r);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { int result=-1;
     for (int i=0; i<this->size; i++)
@@ -1351,7 +1351,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   }
   void ComputeDebugString();
   bool operator==(const PolynomialSubstitution& right);
-  void Substitution(PolynomialSubstitution<Element>& theSub, int NumVarsTarget)
+  void Substitution(PolynomialSubstitution<coefficient>& theSub, int NumVarsTarget)
   { Polynomial<Rational>  tempP;
     for (int i=0; i<this->size; i++)
     { this->TheObjects[i].Substitution(theSub, tempP, NumVarsTarget, (Rational) 1);
@@ -1406,7 +1406,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
     for (int i=0; i<theDimension; i++)
       output+=(EpsForm.TheObjects[i]);
   }
-  void MakeLinearSubConstTermsLastRow(Matrix<Element> & theMat);
+  void MakeLinearSubConstTermsLastRow(Matrix<coefficient> & theMat);
   void MakeConstantShiftCoordinatesAreAdded(Vector<Rational> & shiftPerVariable);
   void MakeLinearSubbedVarsCorrespondToMatRows(Matrix<Rational> & theMat, Vector<Rational> & theConstants);
   void ComputeDiscreteIntegrationUpTo(int d);
@@ -1963,13 +1963,13 @@ inline void ElementMonomialAlgebra<TemplateMonomial, coefficient>::MultiplyBy
   output=bufferPoly;
 }
 
-template <class TemplateMonomial, class Element>
-bool MonomialCollection<TemplateMonomial, Element>::IsEqualToZero()const
+template <class TemplateMonomial, class coefficient>
+bool MonomialCollection<TemplateMonomial, coefficient>::IsEqualToZero()const
 { return this->size()==0;
 }
 
-template <class TemplateMonomial, class Element>
-bool MonomialCollection<TemplateMonomial, Element>::IsInteger(LargeInt* whichInteger)const
+template <class TemplateMonomial, class coefficient>
+bool MonomialCollection<TemplateMonomial, coefficient>::IsInteger(LargeInt* whichInteger)const
 { if (this->size()>1)
     return false;
   if(this->size()==0)
@@ -1983,8 +1983,8 @@ bool MonomialCollection<TemplateMonomial, Element>::IsInteger(LargeInt* whichInt
   return result;
 }
 
-template <class TemplateMonomial, class Element>
-bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int* whichInteger)const
+template <class TemplateMonomial, class coefficient>
+bool MonomialCollection<TemplateMonomial, coefficient>::IsSmallInteger(int* whichInteger)const
 { if (this->size()>1)
     return false;
   if(this->size()==0)
@@ -1998,8 +1998,8 @@ bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int* whichInt
   return result;
 }
 
-template <class Element>
-void Polynomial<Element>::MakeLinPolyFromRootLastCoordConst(const Vector<Rational>& input)
+template <class coefficient>
+void Polynomial<coefficient>::MakeLinPolyFromRootLastCoordConst(const Vector<Rational>& input)
 { this->MakeZero();
   MonomialP tempM;
   for (int i=0; i<input.size-1; i++)
@@ -2009,8 +2009,8 @@ void Polynomial<Element>::MakeLinPolyFromRootLastCoordConst(const Vector<Rationa
   this->operator+=(*input.LastObject());
 }
 
-template <class Element>
-void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rational>& r)
+template <class coefficient>
+void Polynomial<coefficient>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rational>& r)
 { this->MakeZero();
   MonomialP tempM;
   for (int i=0; i<r.size; i++)
@@ -2067,8 +2067,8 @@ void MonomialCollection<TemplateMonomial, coefficient>::operator+=(const Monomia
   }
 }
 
-template <class TemplateMonomial, class Element>
-bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
+template <class TemplateMonomial, class coefficient>
+bool MonomialCollection<TemplateMonomial, coefficient>::HasGEQMonomial(TemplateMonomial& m, int& WhichIndex)
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].IsGEQpartialOrder(m))
     { WhichIndex=i;
@@ -2225,8 +2225,8 @@ void ElementMonomialAlgebra<TemplateMonomial, coefficient>::RaiseToPower(int d, 
   MathRoutines::RaiseToPower(output, d, tempOne);
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::PrintPolys(std::string &output, Element& TheRingUnit, Element& TheRingZero)
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::PrintPolys(std::string &output, coefficient& TheRingUnit, coefficient& TheRingZero)
 { std::stringstream out;
   FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->size; i++)
@@ -2238,25 +2238,25 @@ void PolynomialSubstitution<Element>::PrintPolys(std::string &output, Element& T
   output=out.str();
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::MakeIdSubstitution(int numVars, const Element& theRingUnit)
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::MakeIdSubstitution(int numVars, const coefficient& theRingUnit)
 { this->MakeIdLikeInjectionSub(numVars, numVars, theRingUnit);
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const Element& theRingUnit)
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const coefficient& theRingUnit)
 { if(numStartingVars>numTargetVarsMustBeLargerOrEqual)
     crash << crash;
   this->SetSize(numStartingVars);
   for (int i=0; i<this->size; i++)
-  { Polynomial<Element>& currentPoly=this->TheObjects[i];
+  { Polynomial<coefficient>& currentPoly=this->TheObjects[i];
     currentPoly.MakeDegreeOne(numTargetVarsMustBeLargerOrEqual, i, theRingUnit);
   }
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::MakeExponentSubstitution(Matrix<LargeInt>& theSub)
-{ Polynomial<Element> tempP;
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::MakeExponentSubstitution(Matrix<LargeInt>& theSub)
+{ Polynomial<coefficient> tempP;
   MonomialP tempM;
   tempM.MakeOne(theSub.NumRows);
   this->size=0;
@@ -2271,11 +2271,11 @@ void PolynomialSubstitution<Element>::MakeExponentSubstitution(Matrix<LargeInt>&
   }
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<Element>& EndPoint)
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<coefficient>& EndPoint)
 { this->SetSize(numVars);
   for (int i=0; i<numVars-1; i++)
-    this->TheObjects[i].MakeDegreeOne(numVars, i, Element::TheRingUnit);
+    this->TheObjects[i].MakeDegreeOne(numVars, i, coefficient::TheRingUnit);
   this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
 
@@ -2750,8 +2750,8 @@ public:
   }
 };
 
-template <class Element>
-void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit)
+template <class coefficient>
+void MathRoutines::RaiseToPower(coefficient& theElement, int thePower, const coefficient& theRingUnit)
 { if (thePower<0)
     return;
   if (thePower==1)
@@ -2760,7 +2760,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
   { theElement=theRingUnit;
     return;
   }
-  Element squares;
+  coefficient squares;
 	squares=theElement;
 	if (thePower<4)
   { for (int i=1; i<thePower; i++)
@@ -2776,8 +2776,8 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 	}
 }
 
-template<typename Element>
-void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<Element>& output)
+template<typename coefficient>
+void Matrix<coefficient>::NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPivotPoints, Matrix<coefficient>& output)
 { int RowCounter=0;
   output.init(this->NumCols, 1);
   for (int i=0; i<this->NumCols; i++)
@@ -2790,8 +2790,8 @@ void Matrix<Element>::NonPivotPointsToEigenVectorMatrixForm(Selection& TheNonPiv
       output(i,0)=1;
 }
 
-template<typename Element>
-void Matrix<Element>::NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit, const Element& theRingZero)
+template<typename coefficient>
+void Matrix<coefficient>::NonPivotPointsToEigenVector(Selection& TheNonPivotPoints, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero)
 { int RowCounter=0;
   output.SetSize(this->NumCols);
   for (int i=0; i<this->NumCols; i++)
@@ -2938,9 +2938,9 @@ public:
   /// @endcond
 };
 
-template <class Element>
-void Matrix<Element>::GaussianEliminationEuclideanDomain
-(Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit, bool (*comparisonGEQFunction) (const Element& left, const Element& right),
+template <class coefficient>
+void Matrix<coefficient>::GaussianEliminationEuclideanDomain
+(Matrix<coefficient>* otherMatrix, const coefficient& theRingMinusUnit, const coefficient& theRingUnit, bool (*comparisonGEQFunction) (const coefficient& left, const coefficient& right),
  GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
   ProgressReport theReport(theGlobalVariables);
@@ -2948,7 +2948,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
     crash << "This is a programming error: the Carbon copy in the Gaussian elimination coincides with the matrix which we are row-reducing "
     << "(most probably this is a wrong pointer typo). " << crash;
   int col=0;
-  Element tempElt;
+  coefficient tempElt;
   int row=0;
   while(row<this->NumRows && col<this->NumCols)
   { //std::cout << "<br>****************row: " << row << " status: " << this->ToString(true, false);
@@ -2982,8 +2982,8 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
           out << "Pivotting on row of index " << row +1 << " with exploring row of index " << ExploringRow+1 << "; total rows: " << this->NumRows;
           theReport.Report(out.str());
         }
-        Element& PivotElt=this->elements[row][col];
-        Element& otherElt=this->elements[ExploringRow][col];
+        coefficient& PivotElt=this->elements[row][col];
+        coefficient& otherElt=this->elements[ExploringRow][col];
         /*if (PivotElt.IsEqualToZero())
         { crash << "This is a programming error. "
           << "Something is very wrong: I am getting 0 for a pivot element in "
@@ -3006,7 +3006,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
           this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
 //        std::cout << "<br>second while cycle end: " << this->ToString(true, false);
       }
-      Element& PivotElt = this->elements[row][col];
+      coefficient& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
       { tempElt =this->elements[i][col];
         tempElt/=PivotElt;
@@ -3296,8 +3296,8 @@ Object& MemorySaving<Object>::GetElement()
   return *(this->theValue);
 }
 
-template <class Element>
-int Matrix<Element>::FindPositiveLCMCoefficientDenominatorsTruncated()
+template <class coefficient>
+int Matrix<coefficient>::FindPositiveLCMCoefficientDenominatorsTruncated()
 { int result=1;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -3305,8 +3305,8 @@ int Matrix<Element>::FindPositiveLCMCoefficientDenominatorsTruncated()
   return result;
 }
 
-template <class Element>
-LargeIntUnsigned Matrix<Element>::FindPositiveLCMCoefficientDenominators()
+template <class coefficient>
+LargeIntUnsigned Matrix<coefficient>::FindPositiveLCMCoefficientDenominators()
 { LargeIntUnsigned result=1;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -3314,8 +3314,8 @@ LargeIntUnsigned Matrix<Element>::FindPositiveLCMCoefficientDenominators()
   return result;
 }
 
-template <class Element>
-void Matrix<Element>::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
+template <class coefficient>
+void Matrix<coefficient>::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
 { outputDen=this->FindPositiveLCMCoefficientDenominators();
   outputMat.init(this->NumRows, this->NumCols);
   Rational tempRat;
@@ -3326,8 +3326,8 @@ void Matrix<Element>::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntU
     }
 }
 
-template <class Element>
-int Matrix<Element>::FindPositiveGCDCoefficientNumeratorsTruncated()
+template <class coefficient>
+int Matrix<coefficient>::FindPositiveGCDCoefficientNumeratorsTruncated()
 { int result=1;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -3340,46 +3340,46 @@ int Matrix<Element>::FindPositiveGCDCoefficientNumeratorsTruncated()
   return result;
 }
 
-template <class Element>
-void Matrix<Element>::ScaleToIntegralForMinRationalHeightNoSignChange()
+template <class coefficient>
+void Matrix<coefficient>::ScaleToIntegralForMinRationalHeightNoSignChange()
 { Rational tempRat;
   tempRat.AssignNumeratorAndDenominator(this->FindPositiveLCMCoefficientDenominatorsTruncated(), this->FindPositiveGCDCoefficientNumeratorsTruncated());
   *this*=(tempRat);
 }
 
-template <class Element>
-Element Matrix<Element> ::GetDeterminant()
-{ Matrix<Element> tempMat=*this;
-  Element result;
+template <class coefficient>
+coefficient Matrix<coefficient> ::GetDeterminant()
+{ Matrix<coefficient> tempMat=*this;
+  coefficient result;
   tempMat.ComputeDeterminantOverwriteMatrix(result);
   return result;
 }
 
-template <class Element>
-Element Matrix<Element>::GetTrace()const
+template <class coefficient>
+coefficient Matrix<coefficient>::GetTrace()const
 { if (this->NumCols!=this->NumRows)
     crash << "This is either programming error, a mathematical error, or requires a more general definition of trace. Requesting the trace of "
     << " a non-square matrix of " << this->NumRows << " rows and " << this->NumCols << " columns is not allowed. "
     << crash;
-  Element acc = 0;
+  coefficient acc = 0;
   for(int i=0; i<this->NumCols; i++)
     acc += this->elements[i][i];
   return acc;
 }
 
-template <class Element>
-Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
-{ Matrix<Element> tempMat;
+template <class coefficient>
+Matrix<coefficient> Matrix<coefficient>::operator*(const Matrix<coefficient>& right)const
+{ Matrix<coefficient> tempMat;
   tempMat=right;
   tempMat.MultiplyOnTheLeft(*this);
   return tempMat;
 }
 
-template <class Element>
-Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
+template <class coefficient>
+Vector<coefficient> Matrix<coefficient>::operator*(const Vector<coefficient>& v) const
 { if(v.size != NumCols)
-    crash  << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size << crash;
-  Vector<Element> out;
+    crash << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size << crash;
+  Vector<coefficient> out;
   out.MakeZero(NumRows);
   for(int i=0;i<NumRows;i++)
     for(int j=0;j<NumCols;j++)
@@ -3387,8 +3387,8 @@ Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
   return out;
 }
 
-template <class Element>
-void Matrix<Element>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den)
+template <class coefficient>
+void Matrix<coefficient>::AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den)
 { this->init(theMat.NumRows, theMat.NumCols);
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
@@ -3489,9 +3489,10 @@ void Matrix<coefficient>::ComputePotentialChangeGradient
     outputChangeGradient-=1;
 }
 
-template<class Element>
-void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
-(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<Element>& tempMatA, Vector<Element>& inputVectorX, Selection& BaseVariables)
+template<class coefficient>
+void Matrix<coefficient>::GetMaxMovementAndLeavingVariableRow
+(Rational& maxMovement, int& LeavingVariableRow, int EnteringVariable, int NumTrueVariables, Matrix<coefficient>& tempMatA,
+ Vector<coefficient>& inputVectorX, Selection& BaseVariables)
 { LeavingVariableRow=-1;
   maxMovement.MakeZero();
   for(int i=0; i<tempMatA.NumRows; i++)
@@ -3508,8 +3509,8 @@ void Matrix<Element>::GetMaxMovementAndLeavingVariableRow
   }
 }
 
-template <typename Element>
-inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output)
+template <typename coefficient>
+inline void Matrix<coefficient>::ActOnMonomialAsDifferentialOperator(const MonomialP& input, Polynomial<Rational>& output)
 { if(this->NumRows!=this->NumCols)
     crash << crash;
   MonomialP tempMon;
@@ -3526,8 +3527,8 @@ inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(const MonomialP
     }
 }
 
-template <typename Element>
-void Matrix<Element>::GetZeroEigenSpaceModifyMe(List<Vector<Element> >& output)
+template <typename coefficient>
+void Matrix<coefficient>::GetZeroEigenSpaceModifyMe(List<Vector<coefficient> >& output)
 { if (this->NumRows==0)
   { output.SetSize(this->NumCols);
     for (int i=0; i<this->NumCols; i++)
@@ -3716,8 +3717,8 @@ bool MonomialTensor<coefficient, inputHashFunction>::SimplifyEqualConsecutiveGen
   return result;
 }
 
-template <typename Element>
-std::string Matrix<Element>::ToStringLatex(FormatExpressions* theFormat)const
+template <typename coefficient>
+std::string Matrix<coefficient>::ToStringLatex(FormatExpressions* theFormat)const
 { FormatExpressions formatCopy;
   if (theFormat!=0)
     formatCopy=*theFormat;
@@ -3725,8 +3726,8 @@ std::string Matrix<Element>::ToStringLatex(FormatExpressions* theFormat)const
   return this->ToString(&formatCopy);
 }
 
-template <typename Element>
-std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
+template <typename coefficient>
+std::string Matrix<coefficient>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   std::string tempS;
   bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
@@ -3891,12 +3892,12 @@ std::string MonomialCollection<TemplateMonomial, coefficient>::ToString(FormatEx
   return out.str();
 }
 
-template <typename Element>
-inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, GlobalVariables* theGlobalVariables)
+template <typename coefficient>
+inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const coefficient& scalar, GlobalVariables* theGlobalVariables)
 { ProgressReport theReport(theGlobalVariables);
   bool doProgressReport=
   theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
-  Element tempElement;
+  coefficient tempElement;
   for (int i = StartColIndex; i< this->NumCols; i++)
   { tempElement=this->elements[fromRowIndex][i];
     tempElement*=scalar;
@@ -3909,8 +3910,8 @@ inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int St
   }
 }
 
-template <typename Element>
-void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns, GlobalVariables* theGlobalVariables)
+template <typename coefficient>
+void Matrix<coefficient>::GaussianEliminationByRows(Matrix<coefficient>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns, GlobalVariables* theGlobalVariables)
 { //Checking for bees
   if (this->NumRows==0)
     crash << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
@@ -3923,7 +3924,7 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>* carbonCopyMat, 
   int tempI;
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(this->NumRows, this->NumCols);
-  Element tempElement;
+  coefficient tempElement;
   if (outputNonPivotColumns!=0)
     outputNonPivotColumns->init(this->NumCols);
   if (outputPivotColumns!=0)
@@ -4984,6 +4985,35 @@ Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetElementImage(int e
   return theMat;
 }
 
+template <class coefficient>
+class FinitelyGeneratedMatrixMonoid
+{
+  public:
+  List<MatrixTensor<coefficient> > theGenerators;
+
+  HashedList<MatrixTensor<coefficient> > theElements;
+  bool GenerateElements(int upperBoundNonPositiveMeansNoLimit, GlobalVariables* theGlobalVariables=0);
+  std::string ToString(FormatExpressions* theFormat=0)const;
+};
+
+template <class coefficient>
+bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBoundNonPositiveMeansNoLimit, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FinitelyGeneratedMatrixMonoid::GenerateElements");
+  this->theElements.Clear();
+  this->theElements.AddOnTopNoRepetition(theGenerators);
+  MatrixTensor<coefficient> currentElement;
+  for (int i=0; i<this->theElements.size; i++)
+    for (int j=0; j<this->theGenerators.size; j++)
+    { currentElement=this->theGenerators[j];
+      currentElement*=this->theElements[i];
+      this->theElements.AddOnTopNoRepetition(currentElement);
+      if (upperBoundNonPositiveMeansNoLimit>0)
+        if (this->theElements.size>upperBoundNonPositiveMeansNoLimit)
+          return false;
+    }
+  return true;
+}
+
 class WeylGroup
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
@@ -4997,7 +5027,8 @@ class WeylGroup
   Matrix<Rational> SimpleToFundamentalCoords;
   MemorySaving<Matrix<Rational> > MatrixSendsSimpleVectorsToEpsilonVectors;
   bool flagFundamentalToSimpleMatricesAreComputed;
-  bool flagOuterAutosComputed;
+  bool flagOuterAutosGeneratorsComputed;
+  bool flagAllOuterAutosComputed;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
       return;
@@ -5020,7 +5051,7 @@ public:
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
 
-  List<MatrixTensor<Rational> > OuterAutomorphisms;
+  MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
   List<List<int> > conjugacyClasses;
   List<WeylGroupRepresentation<Rational> > irreps;
   List<Vector<Rational> > characterTable;
@@ -5030,6 +5061,8 @@ public:
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init()
   { this->flagFundamentalToSimpleMatricesAreComputed=false;
+    this->flagAllOuterAutosComputed=false;
+    this->flagOuterAutosGeneratorsComputed=false;
   }
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentations(GlobalVariables* theGlobalVariables=0);
@@ -5042,7 +5075,8 @@ public:
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
-  void ComputeExternalAutos();
+  void ComputeOuterAutoGenerators();
+  void ComputeOuterAutos();
   bool CheckConsistency()const;
   bool CheckInitializationFDrepComputation()const;
   template <typename coefficient>
@@ -5105,12 +5139,12 @@ public:
     return result;
   }
   template <class coefficient>
-  coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot)
+  coefficient GetScalarProdSimpleRoot(const Vector<coefficient>& input, int indexSimpleRoot)const
   { if (indexSimpleRoot<0 || indexSimpleRoot>=this->GetDim())
       crash << "This is a programming error. Attempting to take scalar product with simple root of index " << indexSimpleRoot
       << " which is impossible, as the rank of the Weyl group is " << this->GetDim() << ". " << crash;
     coefficient result, buffer;
-    result=input[0].GetZero();//<-the value of zero is not known at compile time (example: multivariate polynomials have unknown #variables)
+    result=0;
     Rational* currentRow=this->CartanSymmetric.elements[indexSimpleRoot];
     for (int i=0; i<input.size; i++)
     { buffer=input[i];
@@ -5124,7 +5158,7 @@ public:
   template <class coefficient>
   coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords, const coefficient& theRingUnit=1);
   template <class coefficient>
-  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup* raisingElt=0);
+  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup* raisingElt=0)const;
   bool AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos);
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos);
@@ -5149,6 +5183,8 @@ public:
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
+  bool IsElementWeylGroup(const MatrixTensor<Rational>& theMat)const;
+  bool IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& theMat);
   void GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output);
   template <class coefficient>
   bool GetAlLDominantWeightsHWFDIM
@@ -5205,38 +5241,38 @@ public:
     for (int i=0; i<outputWeylElt.reflections.size; i++)
       outputWeylElt.reflections[i]=i;
   }
-  template <class Element>
-  void ActOn(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
+  template <class coefficient>
+  void ActOn(const ElementWeylGroup& theGroupElement, Vector<coefficient>& theVector)const
   { for (int i=0; i<theGroupElement.reflections.size; i++)
       this->SimpleReflection(theGroupElement.reflections[i], theVector);
   }
-  template <class Element>
-  void ActOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<Element>& theVector)const
+  template <class coefficient>
+  void ActOnRhoModified(const ElementWeylGroup& theGroupElement, Vector<coefficient>& theVector)const
   { for (int i=0; i<theGroupElement.reflections.size; i++)
       this->SimpleReflectionRhoModified(theGroupElement.reflections[i], theVector);
   }
-  template <class Element>
-  void ActOnRhoModified(int indexOfWeylElement, Vector<Element>& theVector)const
+  template <class coefficient>
+  void ActOnRhoModified(int indexOfWeylElement, Vector<coefficient>& theVector)const
   { this->ActOnRhoModified(this->theElements[indexOfWeylElement], theVector);
   }
-  template <class Element>
-  void ActOn(int indexOfWeylElement, Vector<Element>& theVector)const
+  template <class coefficient>
+  void ActOn(int indexOfWeylElement, Vector<coefficient>& theVector)const
   { this->ActOn(this->theElements[indexOfWeylElement], theVector);
   }
-  template <class Element>
-  void ActOnDual(int index,Vector<Element>& theVector, bool RhoAction, const Element& theRingZero);
+  template <class coefficient>
+  void ActOnDual(int index,Vector<coefficient>& theVector, bool RhoAction, const coefficient& theRingZero);
   //theRoot is a list of the simple coordinates of the Vector<Rational>
   //theRoot serves as both input and output
   void ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
   void ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
   void ActOnDualSpaceElementByGroupElement(int index, Vector<Rational>& theDualSpaceElement, bool RhoAction);
   void SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho);
-  template <class Element>
-  void SimpleReflection(int index, Vector<Element>& theVector)const;
-  template <class Element>
-  void SimpleReflectionRhoModified(int index, Vector<Element>& theVector)const;
-  template <class Element>
-  void SimpleReflectionMinusRhoModified(int index, Vector<Element>& theVector)const;
+  template <class coefficient>
+  void SimpleReflection(int index, Vector<coefficient>& theVector)const;
+  template <class coefficient>
+  void SimpleReflectionRhoModified(int index, Vector<coefficient>& theVector)const;
+  template <class coefficient>
+  void SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector)const;
   int GetRootReflection(int rootIndex);
   void GetGeneratorList(int g, List<int>& out)const;
   int Multiply(int g, int h) const;
@@ -5287,9 +5323,9 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
-template <class Element>
-void WeylGroup::SimpleReflectionRhoModified(int index, Vector<Element>& theVector)const
-{ Element alphaShift, tempRat;
+template <class coefficient>
+void WeylGroup::SimpleReflectionRhoModified(int index, Vector<coefficient>& theVector)const
+{ coefficient alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat=(theVector[i]);
@@ -5301,9 +5337,9 @@ void WeylGroup::SimpleReflectionRhoModified(int index, Vector<Element>& theVecto
   theVector[index]+=(alphaShift);
 }
 
-template <class Element>
-void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& theVector)const
-{ Element alphaShift, tempRat;
+template <class coefficient>
+void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<coefficient>& theVector)const
+{ coefficient alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat=theVector[i];
@@ -5316,12 +5352,12 @@ void WeylGroup::SimpleReflectionMinusRhoModified(int index, Vector<Element>& the
   theVector[index]+=(alphaShift);
 }
 
-template <class Element>
-void WeylGroup::SimpleReflection(int index, Vector<Element>& theVector)const
+template <class coefficient>
+void WeylGroup::SimpleReflection(int index, Vector<coefficient>& theVector)const
 { if (index<0 || index>=this->CartanSymmetric.NumCols)
     crash << "This is a programming error: simple reflection with respect to index " << index+1 << " in a Weyl group of rank "
     << this->GetDim() << crash;
-  Element alphaShift, tempRat;
+  coefficient alphaShift, tempRat;
   alphaShift=0;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat=theVector[i];
@@ -6872,15 +6908,15 @@ public:
 };
 
 
-template<typename Element>
-void Matrix<Element>::GetVectorFromRow(int rowIndex, Vector<Element>& output)const
+template<typename coefficient>
+void Matrix<coefficient>::GetVectorFromRow(int rowIndex, Vector<coefficient>& output)const
 { output.SetSize(this->NumCols);
   for (int i=0; i<this->NumCols; i++)
     output.TheObjects[i]=this->elements[rowIndex][i];
 }
 
-template<typename Element>
-void Matrix<Element>::GetVectorFromColumn(int colIndex, Vector<Element>& output)const
+template<typename coefficient>
+void Matrix<coefficient>::GetVectorFromColumn(int colIndex, Vector<coefficient>& output)const
 { output.SetSize(this->NumRows);
   for (int i=0; i<this->NumRows; i++)
     output[i]=this->elements[i][colIndex];
@@ -6934,11 +6970,11 @@ public:
   void initFromWeyl(WeylGroup* theWeylGroup);
 };
 
-template <class Element>
-void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne, const Element& theRingZero)
+template <class coefficient>
+void Matrix<coefficient>::ComputeDeterminantOverwriteMatrix(coefficient& output, const coefficient& theRingOne, const coefficient& theRingZero)
 { int tempI;
   output=theRingOne;
-  Element tempRat;
+  coefficient tempRat;
   if (this->NumCols!=this->NumRows)
     crash << crash;
   int dim =this->NumCols;
@@ -6965,8 +7001,8 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const E
   }
 }
 
-template<class Element>
-void Matrix<Element>::Substitution(const PolynomialSubstitution<Rational>& theSub)
+template<class coefficient>
+void Matrix<coefficient>::Substitution(const PolynomialSubstitution<Rational>& theSub)
 { for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j].Substitution(theSub);
@@ -7068,8 +7104,8 @@ std::ostream& operator<<(std::ostream& output, const MonomialCollection<Template
   return output;
 }
 
-template <class Element>
-void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Element>& theMat)
+template <class coefficient>
+void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<coefficient>& theMat)
 { this->SetSize(theMat.NumCols);
   MonomialP tempM;
   for (int i=0; i<this->size; i++)
@@ -8403,7 +8439,7 @@ void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElemen
 }
 
 template <class coefficient>
-void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt)
+void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt)const
 { if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -8435,12 +8471,12 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
 }
 
 
-template<class Element>
-bool Matrix<Element>::IsPositiveDefinite()
+template<class coefficient>
+bool Matrix<coefficient>::IsPositiveDefinite()
 { if (this->NumRows!=this->NumCols)
     crash << "This is a programming error: attempting to evaluate whether a matrix is positive definite, but the matrix is not square. " << crash;
-  Element det;
-  Matrix<Element> tempMat;
+  coefficient det;
+  Matrix<coefficient> tempMat;
   for (int i=0; i< this->NumRows; i++)
   { tempMat.init(i+1, i+1);
     for (int j=0; j<tempMat.NumCols; j++)

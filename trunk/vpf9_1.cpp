@@ -536,7 +536,7 @@ bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool u
   MemorySaving<Vectors<Rational> > theWeightsCopy;
   Vector<Rational> zeroWeight;
   if (useOuterAutos)
-  { this->ComputeExternalAutos();
+  { this->ComputeOuterAutos();
     zeroWeight.MakeZero(this->GetDim());
   }
   for (int i=0; i<theWeights.size; i++)
@@ -553,9 +553,9 @@ bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool u
       }
     if (!useOuterAutos)
       continue;
-    for (int j=0; j<this->OuterAutomorphisms.size; j++)
+    for (int j=0; j<this->theOuterAutos.GetElement().theElements.size; j++)
     { theWeightsCopy.GetElement()=theWeights;
-      this->OuterAutomorphisms[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
+      this->theOuterAutos.GetElement().theElements[j].ActOnVectorsColumn(theWeightsCopy.GetElement());
       bool isGood=true;
       for (int k=0; k<i; k++)
         if (!(theWeightsCopy.GetElement()[k]-theWeights[k]).IsPositiveOrZero())

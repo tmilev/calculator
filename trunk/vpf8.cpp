@@ -5099,10 +5099,8 @@ void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 }
 
 void WeylGroup::GetExtremeElementInOrbit
-  (Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt,
-   Vectors<Rational>& bufferEiBAsis,
-   bool findLowest, bool RhoAction, bool UseMinusRho, int* sign,
-   bool* stabilizerFound)
+(Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis,
+ bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
 { if (outputWeylElt!=0)
     outputWeylElt->reflections.size=0;
   if (sign!=0)
@@ -5145,7 +5143,8 @@ void WeylGroup::GetExtremeElementInOrbit
 
 WeylGroup::WeylGroup()
 { this->flagFundamentalToSimpleMatricesAreComputed=false;
-  this->flagOuterAutosComputed=false;
+  this->flagOuterAutosGeneratorsComputed=false;
+  this->flagAllOuterAutosComputed=false;
   this->flagDeallocated=false;
 }
 
@@ -5155,6 +5154,58 @@ Rational WeylGroup::GetLongestRootLengthSquared()
   for (int i=1; i<this->CartanSymmetric.NumRows; i++)
     result=MathRoutines::Maximum(result, this->CartanSymmetric(i,i));
   return result;
+}
+
+bool WeylGroup::IsElementWeylGroup(const MatrixTensor<Rational>& input)const
+{ MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroup");
+  Vector<Rational> theRhoImage;
+  input.ActOnVectorColumn(this->rho, theRhoImage);
+  ElementWeylGroup theElementCandidate;
+  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  Matrix<Rational> theCandidateMat, inputMat;
+  input.GetMatrix(inputMat, this->GetDim());
+  this->GetMatrixOfElement(theElementCandidate, theCandidateMat);
+  return theCandidateMat==inputMat;
+}
+
+template <class coefficient>
+std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << "Number of generators: " << this->theGenerators.size;
+  out << "<br>Number of elements: " << this->theElements.size;
+  out << "<br>The elements follow.";
+  int numEltstoDisplay=this->theElements.size;
+  if (numEltstoDisplay>100)
+  { out << "<b>Displaying only the first " << 100 << " elements.</b>";
+    numEltstoDisplay=100;
+  }
+  for (int i=0; i<numEltstoDisplay; i++)
+    out << "<br>" << this->theElements[i].ToStringMatForm(theFormat);
+  return out.str();
+}
+
+bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
+{ MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroupOrOuterAuto");
+  this->ComputeOuterAutos();
+  std::cout << this->theOuterAutos.GetElement().ToString();
+  Vector<Rational> theRhoImage;
+  input.ActOnVectorColumn(this->rho, theRhoImage);
+  ElementWeylGroup theElementCandidate;
+  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  Matrix<Rational> theCandidateMat;
+  MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
+  this->GetMatrixOfElement(theElementCandidate, theCandidateMat);
+  std::cout << "<br>input: " << input.ToStringMatForm();
+  std::cout << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
+  theCandidateMatTensorForm=theCandidateMat;
+  for (int i=0; i<this->theOuterAutos.GetElement().theElements.size; i++)
+  { theCandidateMatWithOuterAuto=this->theOuterAutos.GetElement().theElements[i];
+    theCandidateMatWithOuterAuto*=theCandidateMatTensorForm;
+    std::cout << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
+    if (theCandidateMatWithOuterAuto==input)
+      return true;
+  }
+  return false;
 }
 
 bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)

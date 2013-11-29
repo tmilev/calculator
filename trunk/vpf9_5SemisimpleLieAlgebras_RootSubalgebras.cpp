@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+
 ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
 
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational>& output)
@@ -136,6 +137,7 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
     }
 //  std::cout << "<hr><hr><hr><hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
+  this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
 }
 
 void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
@@ -1055,6 +1057,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   out << "\n<br>\nSimple basis: " << this->SimpleBasisK.ToString();
   out << "\n<br>\nSimple basis epsilon form: " << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   out << "\n<br>\nSimple basis epsilon form with respect to k: " << this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  out << "<br>Number of elements in the group: " << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
   out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]);
   out << "<br>\n simple basis centralizer: "<< this->SimpleBasisCentralizerRoots.ToString();
   out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
@@ -1747,11 +1750,6 @@ void rootSubalgebra::ComputePotentialExtensions()
     this->potentialExtensionDynkinTypes[i].GetCartanSymmetric(this->potentialExtensionCartanSymmetrics[i]);
 }
 
-void rootSubalgebra::ComputeAll()
-{ MacroRegisterFunctionWithName("rootSubalgebra::ComputeAll");
-  this->ComputeCentralizerFromKModulesAndSortKModules();
-}
-
 bool rootSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputPermutationSimpleRoots)const
 { MacroRegisterFunctionWithName("rootSubalgebras::GrowDynkinType");
   input.Grow(this->validScales, this->GetOwnerWeyl().GetDim(), output, outputPermutationSimpleRoots);
@@ -1792,6 +1790,49 @@ bool rootSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& 
   return true;
 }
 
+void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
+{ MacroRegisterFunctionWithName("rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators");
+  if (this->SimpleBasisK.size==0)
+    return;
+  List<MatrixTensor<Rational> > outerAutos;
+  this->theDynkinType.GetOuterAutosGeneratorsActOnVectorColumn(outerAutos);
+  Matrix<Rational> simpleBasisMatrixTimesCartanSymm;
+  simpleBasisMatrixTimesCartanSymm.AssignVectorsToRows(this->SimpleBasisK);
+  simpleBasisMatrixTimesCartanSymm*=this->GetAmbientWeyl().CartanSymmetric;
+  Vectors<Rational> basisOrthogonalRoots;
+  simpleBasisMatrixTimesCartanSymm.GetZeroEigenSpaceModifyMe(basisOrthogonalRoots);
+  Vectors<Rational> imagesWeightBasis, weightBasis=this->SimpleBasisK;
+  weightBasis.AddListOnTop(basisOrthogonalRoots);
+  Matrix<Rational> basisMatrixInverted, resultingOperator;
+  basisMatrixInverted.AssignVectorsToColumns(weightBasis);
+  basisMatrixInverted.Invert();
+  FinitelyGeneratedMatrixMonoid<Rational> theGens;
+  theGens.theGenerators.SetSize(outerAutos.size);
+  for (int i=0; i<outerAutos.size; i++)
+  { outerAutos[i].ActOnVectorROWSOnTheLeft(this->SimpleBasisK, imagesWeightBasis);
+    imagesWeightBasis.AddListOnTop(basisOrthogonalRoots);
+    resultingOperator.AssignVectorsToColumns(imagesWeightBasis);
+    resultingOperator*=basisMatrixInverted;
+    theGens.theGenerators[i]=resultingOperator;
+  }
+  bool doDebug=false;
+  if (this->theDynkinType.ToString()=="E^{1}_6")
+    doDebug=true;
+  theGens.GenerateElements(0);
+  if (doDebug)
+  { std::cout << "<br>Outer autos: ";
+    for (int i=0; i<theGens.theElements.size; i++)
+      std::cout << "<br>" << theGens.theElements[i].ToStringMatForm();
+  }
+  this->outerSAautosExtendingToAmbientAutosGenerators.theElements.Clear();
+  for (int i=0; i<theGens.theElements.size; i++)
+    if (this->GetAmbientWeyl().IsElementWeylGroupOrOuterAuto(theGens.theElements[i]))
+      this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(theGens.theElements[i]);
+    else
+      if (doDebug)
+        std::cout << "<br>" << theGens.theElements[i].ToStringMatForm() << " ain't no good. ";
+}
+
 bool rootSubalgebra::ComputeEssentials()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeEssentials");
   this->CheckInitialization();
@@ -1807,7 +1848,7 @@ bool rootSubalgebra::ComputeEssentials()
     List<Matrix<Rational> >& extensionCartanSymmetrics=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionCartanSymmetrics;
     List<DynkinType>& extensionDynkinTypes=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionDynkinTypes;
     for (int i=0; i<extensionRootPermutations.size && goodPermutation==-1; i++)
-    { doDebug=(extensionDynkinTypes[i].ToString()=="E^{1}_6");
+    { doDebug=(extensionDynkinTypes[i].ToString()=="2A^{1}_2");
       if (doDebug)
         std::cout << "<br>comparing with type " << extensionDynkinTypes[i].ToString() << " corresponding to matrix "
         << extensionCartanSymmetrics[i].ToString() << ", permutations: " << extensionRootPermutations[i];
@@ -1863,9 +1904,23 @@ bool rootSubalgebra::ComputeEssentials()
     }
     return false;
   }
+  if (doDebug)
+    std::cout << "<br>simple basis k: " << this->SimpleBasisK.ToString();
   this->theDynkinDiagram.ComputeDiagramTypeKeepInput(this->SimpleBasisK, this->GetAmbientWeyl().CartanSymmetric);
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   this->ComputeKModules();
+  this->ComputeCentralizerFromKModulesAndSortKModules();
+  this->ComputeOuterSAautosExtendingToAmbientAutosGenerators();
+  bool sameTypeAlreadyFound=false;
+  for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
+    if (this->ownEr->theSubalgebras[i].theDynkinDiagram==this->theDynkinDiagram &&
+        this->ownEr->theSubalgebras[i].theCentralizerDynkinType==this->theCentralizerDynkinType)
+    { sameTypeAlreadyFound=true;
+      break;
+    }
+  if (!sameTypeAlreadyFound)
+    return true;
+
   for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
     if (this->ModuleDecompoHighestWeights==this->ownEr->theSubalgebras[i].ModuleDecompoHighestWeights)
     { if (this->indexInducingSubalgebra!=-1)
@@ -2072,8 +2127,6 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
     }
   }
 //  std::cout << "end!";
-  for (int i=0; i<this->theSubalgebras.size; i++)
-    this->theSubalgebras[i].ComputeAll();
   this->SortDescendingOrderBySSRank();
   if (this->flagComputeConeCondition)
     this->ComputeKmodMultTables(this->theGlobalVariables);

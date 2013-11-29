@@ -29,6 +29,7 @@ public:
   static bool innerTensorWeylReps(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorAndDecomposeWeylReps(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeVirtualWeylRep(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

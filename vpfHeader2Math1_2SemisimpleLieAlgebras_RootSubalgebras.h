@@ -96,7 +96,8 @@ class rootSubalgebra
 public:
   int numHeirsRejectedNotMaximallyDominant;
   int numHeirsRejectedSameModuleDecompo;
-  int numHeirsRejectedBadAngles;
+  int numHeirsRejectedBadAngleS;
+  int numHeirsRejectedNotMaxWRTouterAuto;
 
   List<DynkinType> parabolicallyAllowedHeirs;
 
@@ -124,6 +125,7 @@ public:
   List<int> coneRelationsNumSameTypeComponentsTaken;
   List<DynkinDiagramRootSubalgebra> relationsDiagrams;
   FinitelyGeneratedMatrixMonoid<Rational> outerSAautosExtendingToAmbientAutosGenerators;
+  FinitelyGeneratedMatrixMonoid<Rational> outerSAautos;
   Vectors<Rational> genK;
   Vectors<Rational> SimpleBasisK;
   Vectors<Rational> SimpleBasisKScaledToActByTwo;

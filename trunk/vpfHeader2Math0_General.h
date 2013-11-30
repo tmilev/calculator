@@ -4899,10 +4899,10 @@ class WeylGroupRepresentation
     this->theElementIsComputed[elementIndex] = true;
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const
-  { return this->theCharacter.isGreaterThanLexicographic(other.theCharacter);
+  { return this->theCharacter.IsGreaterThanLexicographic(other.theCharacter);
   }
   bool operator<(const WeylGroupRepresentation<coefficient>& other)const
-  { return other.theCharacter.isGreaterThanLexicographic(this->theCharacter);
+  { return other.theCharacter.IsGreaterThanLexicographic(this->theCharacter);
   }
 };
 
@@ -6325,7 +6325,19 @@ public:
   }
   void DirectSumWith(const MatrixTensor<coefficient>& other);
   void GetVectorsSparseFromRowsIncludeZeroRows(List<VectorSparse<coefficient> >& output, int MinNumRows=-1);
-
+  bool IsID()const
+  { int theDim=this->GetMinNumColsNumRows();
+    Selection theSel;
+    theSel.init(theDim);
+    for (int i=0; i<this->size(); i++)
+    { if ((*this)[i].vIndex!=(*this)[i].dualIndex)
+        return false;
+      if (this->theCoeffs[i]!=1)
+        return false;
+      theSel.AddSelectionAppendNewIndex((*this)[i].vIndex);
+    }
+    return theSel.CardinalitySelection==theDim;
+  }
   bool IsPositiveDefinite()
   { Matrix<coefficient> other;
     this->GetMatrix(other, this->GetMinNumColsNumRows());

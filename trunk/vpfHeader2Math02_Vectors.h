@@ -380,7 +380,7 @@ public:
   inline bool operator<(const Vector<coefficient>& other)const
   { return other>*this;
   }
-  bool isGreaterThanLexicographic(const Vector<coefficient>& other)const
+  bool IsGreaterThanLexicographic(const Vector<coefficient>& other)const
   { return this->::List<coefficient>::operator>(other);
   }
   inline bool operator>(const Vector<coefficient>& other)const

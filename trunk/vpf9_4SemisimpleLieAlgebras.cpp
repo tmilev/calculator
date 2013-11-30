@@ -4766,7 +4766,7 @@ void WeylGroup::RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights,
             }
           if (!isGood)
             continue;
-          if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).isGreaterThanLexicographic(zeroWeight))
+          if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).IsGreaterThanLexicographic(zeroWeight))
             continue;
           found=true;
           theWeights=theWeightsCopy.GetElement();

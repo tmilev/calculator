@@ -564,7 +564,7 @@ bool WeylGroup::AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool u
         }
       if (!isGood)
         continue;
-      if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).isGreaterThanLexicographic(zeroWeight))
+      if (!(theWeightsCopy.GetElement()[i]-theWeights[i]).IsGreaterThanLexicographic(zeroWeight))
         continue;
       return false;
     }

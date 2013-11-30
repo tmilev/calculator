@@ -5187,7 +5187,7 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
 { MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroupOrOuterAuto");
   this->ComputeOuterAutos();
-  std::cout << this->theOuterAutos.GetElement().ToString();
+//  std::cout << this->theOuterAutos.GetElement().ToString();
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup theElementCandidate;
@@ -5195,13 +5195,13 @@ bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& inpu
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
   this->GetMatrixOfElement(theElementCandidate, theCandidateMat);
-  std::cout << "<br>input: " << input.ToStringMatForm();
-  std::cout << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
+//  std::cout << "<br>input: " << input.ToStringMatForm();
+//  std::cout << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
   theCandidateMatTensorForm=theCandidateMat;
   for (int i=0; i<this->theOuterAutos.GetElement().theElements.size; i++)
   { theCandidateMatWithOuterAuto=this->theOuterAutos.GetElement().theElements[i];
     theCandidateMatWithOuterAuto*=theCandidateMatTensorForm;
-    std::cout << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
+//    std::cout << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
     if (theCandidateMatWithOuterAuto==input)
       return true;
   }

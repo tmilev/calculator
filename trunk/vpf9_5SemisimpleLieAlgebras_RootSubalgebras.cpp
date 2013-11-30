@@ -955,7 +955,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   return result;
 }
 
-bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational> &domain, Vectors<Rational> &range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange)
+bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange)
 { Matrix<Rational> matB;
   Vectors<Rational> tempRoots;
   int theDimension= this->GetAmbientWeyl().CartanSymmetric.NumRows;
@@ -963,7 +963,7 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational> &domain, Vectors<Rational
   matB.init(theDimension, theDimension);
   for (int i=0; i<theDimension; i++)
   { for (int j=0; j<theDimension; j++)
-      matB.elements[i][j].Assign(domain[i][j]);
+      matB.elements[i][j]=(domain[i][j]);
     tempRoots[i].MakeZero(theDimension);
   }
   matB.Invert(&theGlobalVariables);
@@ -971,7 +971,7 @@ bool rootSubalgebra::IsAnIsomorphism(Vectors<Rational> &domain, Vectors<Rational
   for (int k=0; k<theDimension; k++)
     for (int i=0; i<theDimension; i++)
       for (int j=0; j<theDimension; j++)
-      { tempRat2.Assign(range[j][k]);
+      { tempRat2=(range[j][k]);
         tempRat2.MultiplyBy(matB.elements[i][j]);
         tempRoots[i][k]+=(tempRat2);
       }
@@ -1057,7 +1057,10 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   out << "\n<br>\nSimple basis: " << this->SimpleBasisK.ToString();
   out << "\n<br>\nSimple basis epsilon form: " << this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   out << "\n<br>\nSimple basis epsilon form with respect to k: " << this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
-  out << "<br>Number of elements in the group: " << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
+  out << "<br>Number of outer autos with trivial action on orthogonal complement and extending to autos of ambient algebra: "
+  << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size;
+  out << "<br>Number of outer autos with trivial action on orthogonal complement: "
+  << this->outerSAautos.theElements.size << ". ";
   out << "<br>\nC(k_{ss})_{ss}: " << this->theCentralizerDiagram.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]);
   out << "<br>\n simple basis centralizer: "<< this->SimpleBasisCentralizerRoots.ToString();
   out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
@@ -1097,8 +1100,10 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
     out << this->ToStringMultTable(useLatex, useHtml, *this) << "\n";
   }
   out << "<hr>Information about the subalgebra generation algorithm.";
-  out << "<br>Heirs rejected due to having symmetric Cartan type outside of list dictated by parabolic heirs: " << this->numHeirsRejectedBadAngles
+  out << "<br>Heirs rejected due to having symmetric Cartan type outside of list dictated by parabolic heirs: " << this->numHeirsRejectedBadAngleS
   << "<br>Heirs rejected due to not being maximally dominant: " << this->numHeirsRejectedNotMaximallyDominant
+  << "<br>Heirs rejected due to not being maximal with respect to small Dynkin diagram automorphism that extends to "
+  << " ambient automorphism: " << this->numHeirsRejectedNotMaximallyDominant
   << "<br>Heirs rejected due to having ambient Lie algebra decomposition iso to an already found subalgebra: " << this->numHeirsRejectedSameModuleDecompo;
   if (this->indexInducingSubalgebra==-1)
     out << "<br>This subalgebra is not parabolically induced by anyone";
@@ -1295,7 +1300,8 @@ void rootSubalgebra::initNoOwnerReset()
 { this->indexInducingSubalgebra=-1;
   this->numHeirsRejectedNotMaximallyDominant=0;
   this->numHeirsRejectedSameModuleDecompo=0;
-  this->numHeirsRejectedBadAngles=0;
+  this->numHeirsRejectedBadAngleS=0;
+  this->numHeirsRejectedNotMaxWRTouterAuto=0;
 }
 
 void rootSubalgebra::initForNilradicalGeneration()
@@ -1806,36 +1812,37 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
   Matrix<Rational> basisMatrixInverted, resultingOperator;
   basisMatrixInverted.AssignVectorsToColumns(weightBasis);
   basisMatrixInverted.Invert();
-  FinitelyGeneratedMatrixMonoid<Rational> theGens;
-  theGens.theGenerators.SetSize(outerAutos.size);
+  this->outerSAautos.theGenerators.SetSize(outerAutos.size);
   for (int i=0; i<outerAutos.size; i++)
   { outerAutos[i].ActOnVectorROWSOnTheLeft(this->SimpleBasisK, imagesWeightBasis);
     imagesWeightBasis.AddListOnTop(basisOrthogonalRoots);
     resultingOperator.AssignVectorsToColumns(imagesWeightBasis);
     resultingOperator*=basisMatrixInverted;
-    theGens.theGenerators[i]=resultingOperator;
+    this->outerSAautos.theGenerators[i]=resultingOperator;
   }
   bool doDebug=false;
   if (this->theDynkinType.ToString()=="E^{1}_6")
     doDebug=true;
-  theGens.GenerateElements(0);
+  this->outerSAautos.GenerateElements(0, this->ownEr->theGlobalVariables);
   if (doDebug)
   { std::cout << "<br>Outer autos: ";
-    for (int i=0; i<theGens.theElements.size; i++)
-      std::cout << "<br>" << theGens.theElements[i].ToStringMatForm();
+    for (int i=0; i<this->outerSAautos.theElements.size; i++)
+      std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm();
   }
   this->outerSAautosExtendingToAmbientAutosGenerators.theElements.Clear();
-  for (int i=0; i<theGens.theElements.size; i++)
-    if (this->GetAmbientWeyl().IsElementWeylGroupOrOuterAuto(theGens.theElements[i]))
-      this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(theGens.theElements[i]);
+  for (int i=0; i<this->outerSAautos.theElements.size; i++)
+    if (this->GetAmbientWeyl().IsElementWeylGroupOrOuterAuto(this->outerSAautos.theElements[i]))
+      this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(this->outerSAautos.theElements[i]);
     else
       if (doDebug)
-        std::cout << "<br>" << theGens.theElements[i].ToStringMatForm() << " ain't no good. ";
+        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
 }
 
 bool rootSubalgebra::ComputeEssentials()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeEssentials");
   this->CheckInitialization();
+  ProgressReport theReport(this->ownEr->theGlobalVariables);
+  std::stringstream reportStream;
   this->SimpleBasisKScaledToActByTwo=this->SimpleBasisK;
   for (int i=0; i<this->SimpleBasisK.size; i++)
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
@@ -1871,7 +1878,7 @@ bool rootSubalgebra::ComputeEssentials()
     { //if (this->indexInducingSubalgebra!=-1)
       if (doDebug)
         std::cout << "<br>rejected: bad angles!";
-      this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedBadAngles++;
+      this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedBadAngleS++;
       return false;
     }
     Vectors<Rational> copySimpleBasisK=this->SimpleBasisK;
@@ -1886,8 +1893,7 @@ bool rootSubalgebra::ComputeEssentials()
     if (doDebug)
       std::cout << "<br>Raising " << tempVs.ToString() << " yields: ";
     if (!this->GetAmbientWeyl().AreMaximallyDominant(tempVs, true))
-      crash << "<br>This is a programming error: first vectors " << tempVs.ToString()
-      << " are not maximally dominant. " << crash;
+      crash << "<br>This is a programming error: first vectors " << tempVs.ToString() << " are not maximally dominant. " << crash;
     if (doDebug)
     { this->GetAmbientWeyl().RaiseToMaximallyDominant(tempVs, true);
       std::cout << tempVs.ToString();
@@ -1898,8 +1904,7 @@ bool rootSubalgebra::ComputeEssentials()
     { std::cout << "<br>rejected: not maximally domininant: ";
       tempVs=this->SimpleBasisKinOrderOfGeneration;
       std::cout << tempVs.ToString();
-      this->GetAmbientWeyl().RaiseToMaximallyDominant
-      (tempVs, true);
+      this->GetAmbientWeyl().RaiseToMaximallyDominant(tempVs, true);
       std::cout << " can be raised to: " << tempVs.ToString();
     }
     return false;
@@ -1911,6 +1916,29 @@ bool rootSubalgebra::ComputeEssentials()
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->ComputeOuterSAautosExtendingToAmbientAutosGenerators();
+  Vectors<Rational> simpleBasisOriginalOrderCopy;
+  for (int i=0; i<this->outerSAautos.theElements.size; i++)
+    if (!this->outerSAautos.theElements[i].IsID())
+    { simpleBasisOriginalOrderCopy=this->SimpleBasisKinOrderOfGeneration;
+      this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
+      if (this->theDynkinType.ToString()=="E^{1}_6")
+        doDebug=true;
+      if (doDebug)
+        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
+        << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
+      this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
+      if (doDebug)
+        std::cout << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
+      for (int j=0; j<simpleBasisOriginalOrderCopy.size; j++)
+        if (simpleBasisOriginalOrderCopy[j]!=this->SimpleBasisKinOrderOfGeneration[j])
+        { if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j]))
+          { if (this->indexInducingSubalgebra!=-1)
+              this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto++;
+            return false;
+          } else
+            break;
+        }
+    }
   bool sameTypeAlreadyFound=false;
   for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
     if (this->ownEr->theSubalgebras[i].theDynkinDiagram==this->theDynkinDiagram &&
@@ -1920,7 +1948,6 @@ bool rootSubalgebra::ComputeEssentials()
     }
   if (!sameTypeAlreadyFound)
     return true;
-
   for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
     if (this->ModuleDecompoHighestWeights==this->ownEr->theSubalgebras[i].ModuleDecompoHighestWeights)
     { if (this->indexInducingSubalgebra!=-1)
@@ -1977,8 +2004,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
 //  Selection tempSel;
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
   slTwoSubalgebra theSl2;
-  theSl2.container=&output;
-  theSl2.owneR=&this->GetOwnerSSalg();
+  theSl2.container= &output;
+  theSl2.owneR= &this->GetOwnerSSalg();
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
 //  std::cout << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
@@ -2095,20 +2122,20 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   //std::cout << "Here I am!";
   List<DynkinType> possibleExtensions;
   DynkinType currentType;
+  std::string reportString;
   for (int i=0; i<this->theSubalgebras.size; i++)
-  { if (this->theGlobalVariables!=0)
+  { if (theGlobalVariables!=0)
     { std::stringstream reportStream;
-      reportStream << "Exploring extensions of " << this->theSubalgebras[i].theDynkinType.ToString() << ". Possible standard parabolic extensions: ";
       for (int j=0; j<this->theSubalgebras[i].potentialExtensionDynkinTypes.size; j++)
         reportStream << this->theSubalgebras[i].potentialExtensionDynkinTypes[j].ToString() << ", ";
-      //std::cout << "<hr><hr>" << reportStream.str();
-      theReport1.Report(reportStream.str());
+      reportString=reportStream.str();
     }
     for (int j=0; j<this->theSubalgebras[i].kModules.size; j++)
     { if (this->theGlobalVariables!=0)
       { std::stringstream out;
-        out << " Total found SAs: " << this->theSubalgebras.size << "Attempting extension by lowest weight vector of module "
-        << j+1 << " out of " << this->theSubalgebras[i].kModules.size;
+        out << "Exploring extensions of subalgebra " << i+1 << " out of " << this->theSubalgebras.size << ". Type current SA: "
+        << this->theSubalgebras[i].theDynkinType.ToString() << ". Possible standard parabolic extensions: "
+        << reportString << ". Exploring extension by lowest weight vector of module " << j+1 << " out of " << this->theSubalgebras[i].kModules.size;
         theReport2.Report(out.str());
       }
       currentSA.initNoOwnerReset();
@@ -2205,7 +2232,7 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
   XML::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   if (!XML::FileExists(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
-    << ". Possible explanations. 1. Programming error. 2. File permissions - can I write in that folder?"
+    << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;
   }
   output << "<html><title> Root subsystems of " << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) << "</title>";
@@ -2825,7 +2852,7 @@ void rootSubalgebras::ApplyOneGenerator(List<int>& generator, Selection& targetS
 { Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator.GetElement();
   tempSel.initNoMemoryAllocation();
   for (int i=0; i<targetSel.CardinalitySelection; i++)
-    tempSel.AddSelectionAppendNewIndex(generator.TheObjects[targetSel.elements[i]]);
+    tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   targetSel=(tempSel);
 }
 
@@ -2833,7 +2860,7 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
 { Selection& tempSel= theGlobalVariables.selApproveSelAgainstOneGenerator.GetElement();
   tempSel.initNoMemoryAllocation();
   for (int i=0; i<targetSel.CardinalitySelection; i++)
-    tempSel.AddSelectionAppendNewIndex(generator.TheObjects[targetSel.elements[i]]);
+    tempSel.AddSelectionAppendNewIndex(generator[targetSel.elements[i]]);
   for (int i=0; i<tempSel.MaxSize; i++)
   { if (targetSel.selected[i] && !tempSel.selected[i])
       return true;
@@ -2916,7 +2943,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
   std::string tempS;
   if (useLatex)
   { out << "\\begin{tabular}{";
-    for (int i=0; i< theRoots.size; i++)
+    for (int i=0; i<theRoots.size; i++)
       out << "c";
     out << "}";
   }
@@ -3024,8 +3051,7 @@ int coneRelation::RootsToScalarProductString(Vectors<Rational>& inputLeft, Vecto
       { owner.GetAmbientWeyl().RootScalarCartanRoot(inputLeft[i], inputRight[j], tempRat);
         if (!tempRat.IsEqualToZero())
         { tempS=tempRat.ToString();
-          out << "$\\langle" << letterTypeLeft << "_" << i+1 << ", "
-          << letterTypeRight << "_" << j+1 << "\\rangle=" << tempS << "$, ";
+          out << "$\\langle" << letterTypeLeft << "_" << i+1 << ", " << letterTypeRight << "_" << j+1 << "\\rangle=" << tempS << "$, ";
           numLinesLatex++;
         }
       }
@@ -3058,8 +3084,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   }
   ReflectionSubgroupWeylGroup tempSubgroup;
   tempSubgroup.AmbientWeyl=(owner.GetAmbientWeyl());
-  tempSubgroup.ComputeSubGroupFromGeneratingReflections
-  (&tempRoots, &tempSubgroup.ExternalAutomorphisms, &theGlobalVariables, 0, true);
+  tempSubgroup.ComputeSubGroupFromGeneratingReflections(&tempRoots, &tempSubgroup.ExternalAutomorphisms, &theGlobalVariables, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
   tempRoots=(tempSubgroup.RootSubsystem);
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);
@@ -3108,7 +3133,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, Vectors<Rational>& N
 void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots)
 { bool hasChanged=true;
   Vector<Rational> tempRoot;
-  while(hasChanged)
+  while (hasChanged)
   { hasChanged=false;
     for (int i=0; i<this->Betas.size; i++)
       for (int j=i+1; j<this->Betas.size; j++)
@@ -3153,7 +3178,7 @@ void coneRelation::GetSumAlphas(Vector<Rational>& output, int theDimension)
     crash << crash;
   output.MakeZero(theDimension);
   Vector<Rational> tempRoot;
-  for(int i=0; i<this->Alphas.size; i++)
+  for (int i=0; i<this->Alphas.size; i++)
   { tempRoot=(this->Alphas[i]);
     tempRoot*=(this->AlphaCoeffs.TheObjects[i]);
     output+=(tempRoot);
@@ -3182,7 +3207,7 @@ void coneRelation::SortRelation(rootSubalgebra& owner)
 
 void coneRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >& output, rootSubalgebra& owner)
 { output.SetSize(input.size);
-  for(int i=0; i<input.size; i++)
+  for (int i=0; i<input.size; i++)
   { output[i].size=0;
     for(int j=0; j<owner.theDynkinDiagram.SimpleBasesConnectedComponents.size; j++)
       if (owner.theDynkinDiagram.SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo
@@ -3224,7 +3249,7 @@ bool coneRelation::leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>
     return true;
   if (right.size>left.size)
     return false;
-  for(int i=0; i<right.size; i++)
+  for (int i=0; i<right.size; i++)
   { if (right.TheObjects[i]>left.TheObjects[i])
       return false;
     if (left.TheObjects[i]>right.TheObjects[i])
@@ -3252,7 +3277,7 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   this->Betas.ReadFromFile(input, theGlobalVariables);
   input >> this->BetaKComponents;
   input >> tempS >> this->IndexOwnerRootSubalgebra;
-  if(tempS!="Index_owner_root_SA:")
+  if (tempS!="Index_owner_root_SA:")
     crash << crash;
   this->ComputeTheDiagramAndDiagramRelAndK(owner.theSubalgebras[this->IndexOwnerRootSubalgebra]);
   this->ComputeDebugString(owner, true, true);
@@ -3307,7 +3332,7 @@ void coneRelations::ToString
     out << header;
   int oldIndex=-1;
   int lineCounter=0;
-  for(int i=0; i<this->size; i++)
+  for (int i=0; i<this->size; i++)
   { if (oldIndex!=this->TheObjects[i].IndexOwnerRootSubalgebra)
     { oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
       if (useLatex)

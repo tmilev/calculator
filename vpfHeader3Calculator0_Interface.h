@@ -5,7 +5,7 @@
 
 //the following  include contains all the c++ math routines used in the calculator.
 #include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader1General1_ListReferences.h"
@@ -27,8 +27,6 @@ class Expression
   //1. Fundamentals.
   //1.1. An atom is an expression with zero children.
   //     *******************************************
-  //     We will say informally "an atom equals (the integer) X" to mean that
-  //     the theData of the corresponding atom equals X.
   //     We will say informally "an atom equals (the keyword) X" to mean that
   //     the theData of the corresponding atom equals the integer Calculator::opX().
   //     Note that this language use is completely informal, and could be ambiguous:
@@ -39,18 +37,15 @@ class Expression
   //     should be made.
   //1.2. A list is an expression with 1 or more children whose theData entry equals
   //     0 which *MUST* be equal to Calculator::opList().
-  //1.3. An expression with 1 or more children whose is not allowed to have theData entry different
-  //     from Calculator::opList(). The system is instructed to
+  //1.3. An expression with 1 or more children is not allowed to have theData entry different
+  //     from 0=Calculator::opList(). The system is instructed to
   //     crash and burn shall such a configuration be detected.
   //2. Basic building blocks
   //2.1. A quote, or a frozen expression, is list whose first entry is an atom equal to Quote.
   //2.2. A sequence is a list whose first entry is an atom equal to Sequence.
   //2.3. A bound variable is a list with two atomic entries, the first of which
   //     equals Bind.
-  //2.4. A non-bound variable is a list with two atomic entries. The first entry equals NonBound.
-  //     The second entry equals an integer that uniquely identifies the variable.
-  //     In the current implementation, the integer is the index in the object container.
-  //2.5. An error is a list with two entries whose first entry is an atom equal to Error,
+  //2.4. An error is a list with two entries whose first entry is an atom equal to Error,
   //     and whose second entry is a string.
   //*Note that Calculator::opList() is required to equal zero for reasons of program speed.
   //This is GUARANTEED, and you MAY assume it.

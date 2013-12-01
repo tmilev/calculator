@@ -66,7 +66,7 @@ template<class coefficient>
 class ElementSumGeneralizedVermas;
 template <class coefficient>
 class charSSAlgMod;
-class ReflectionSubgroupWeylGroup;
+class SubgroupWeylGroupOLD;
 template<class coefficient>
 class ModuleSSalgebra;
 class SltwoSubalgebras;

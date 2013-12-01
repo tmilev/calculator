@@ -64,7 +64,7 @@
 #include "vpfHeader2Math0_General.h"
 //#include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
-#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfHeader3Calculator0_Interface.h"
 static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif

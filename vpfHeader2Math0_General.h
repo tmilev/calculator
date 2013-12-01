@@ -2873,7 +2873,7 @@ public:
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
 
-  MemorySaving<ReflectionSubgroupWeylGroup> subGroupActionNormalizerCentralizer;
+  MemorySaving<SubgroupWeylGroupOLD> subGroupActionNormalizerCentralizer;
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynAttemptTheTripleTrick;
 
@@ -5369,7 +5369,7 @@ void WeylGroup::SimpleReflection(int index, Vector<coefficient>& theVector)const
   theVector[index]+=alphaShift;
 }
 
-class ReflectionSubgroupWeylGroup: public HashedList<ElementWeylGroup>
+class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup>
 {
 public:
   bool truncated;
@@ -5451,7 +5451,7 @@ public:
   (const ElementWeylGroup& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const;
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
-  void operator=(const ReflectionSubgroupWeylGroup& other);
+  void operator=(const SubgroupWeylGroupOLD& other);
 };
 
 template <class coefficient>
@@ -5464,7 +5464,7 @@ bool WeylGroup::IsDominantWeight(const Vector<coefficient>& theWeight)
 }
 
 template <class coefficient>
-bool ReflectionSubgroupWeylGroup::IsDominantWeight(const Vector<coefficient>& theWeight)
+bool SubgroupWeylGroupOLD::IsDominantWeight(const Vector<coefficient>& theWeight)
 { for (int i=0; i<this->simpleGenerators.size; i++)
     if (! this->IsDominantWRTgenerator(theWeight, i))
       return false;
@@ -6116,7 +6116,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
   bool SplitOverLeviMonsEncodeHIGHESTWeight
   (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
-   ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables);
+   SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables);
   int GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const;
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
@@ -6160,9 +6160,9 @@ struct branchingData
   List<Rational> additionalMultipliers;
   List<RationalFunctionOld> theShapovalovProducts;
   List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorsLevi;
-  ReflectionSubgroupWeylGroup WeylFD;
-  ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
-  ReflectionSubgroupWeylGroup WeylFDSmall;
+  SubgroupWeylGroupOLD WeylFD;
+  SubgroupWeylGroupOLD WeylFDSmallAsSubInLarge;
+  SubgroupWeylGroupOLD WeylFDSmall;
   std::string GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple);
   template <class coefficient>
   Vector<coefficient> ProjectWeight(Vector<coefficient>& input);
@@ -7322,7 +7322,7 @@ coefficient WeylGroup::WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeight
 }
 
 template<class coefficient>
-coefficient ReflectionSubgroupWeylGroup::WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit)
+coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(const Vector<coefficient>& theWeightInSimpleCoords, const coefficient& theRingUnit)
 { coefficient Result, buffer;
   Vector<coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   Vector<Rational> rho;
@@ -7450,10 +7450,10 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
 }
 
 template <class coefficient>
-bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
+bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
 (Vector<coefficient>& highestWeightSimpleCoords, HashedList<Vector<coefficient> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM");
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM");
   std::stringstream out;
   this->ComputeRootSubsystem();
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
@@ -7522,8 +7522,8 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
 }
 
 template <class coefficient>
-void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound)
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::RaiseToDominantWeight");
+void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::RaiseToDominantWeight");
   if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -7662,7 +7662,7 @@ void charSSAlgMod<coefficient>::DrawMeAssumeCharIsOverCartan(WeylGroup& actualAm
 }
 
 template <class coefficient>
-bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, int UpperLimitNumElements)
+bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(const Vector<coefficient>& input, Vectors<coefficient>& outputOrbit, int UpperLimitNumElements)
 { HashedList<Vector<coefficient> > theOrbit;
   bool result = true;
   theOrbit.Clear();
@@ -7696,10 +7696,10 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(const Vect
 }
 
 template <class coefficient>
-bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
+bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 (const Vector<coefficient>& inputHWfundamentalCoords, HashedList<Vector<coefficient> >& outputDominantWeightsSimpleCoordS,
  List<coefficient>& outputMultsSimpleCoords, std::string& outputDetails, GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart");
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart");
   //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRootSubsystem();
   Vector<Rational> EiVect;
@@ -7820,7 +7820,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 template <class coefficient>
 bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
- ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
+ SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
   this->CheckNonZeroOwner();
   std::stringstream out;
@@ -7831,7 +7831,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
     << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
   outputWeylSub.ComputeRootSubsystem();
-  ReflectionSubgroupWeylGroup complementGroup;
+  SubgroupWeylGroupOLD complementGroup;
   Selection invertedSel;
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
@@ -7842,7 +7842,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 //  std::cout << this->ToString();
 //  std::cout << out.str();
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
-  ReflectionSubgroupWeylGroup theFDWeyl;
+  SubgroupWeylGroupOLD theFDWeyl;
   theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
   MonomialChar<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
@@ -8412,14 +8412,14 @@ void ElementSumGeneralizedVermas<coefficient>::MakeHWV(ModuleSSalgebra<coefficie
 }
 
 template <class coefficient>
-void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<coefficient>& theRoot)const
+void SubgroupWeylGroupOLD::ActByElement(int index, Vector<coefficient>& theRoot)const
 { Vector<coefficient> tempRoot;
   this->ActByElement(index, theRoot, tempRoot);
   theRoot=(tempRoot);
 }
 
 template <class coefficient>
-void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElement, const Vector<coefficient>& input, Vector<coefficient>& output)const
+void SubgroupWeylGroupOLD::ActByElement(const ElementWeylGroup& theElement, const Vector<coefficient>& input, Vector<coefficient>& output)const
 { if(&input==&output)
     crash << crash;
   int NumElts=theElement.reflections.size;
@@ -8442,7 +8442,7 @@ void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElemen
 }
 
 template<class coefficient>
-void ReflectionSubgroupWeylGroup::ActByElement(const ElementWeylGroup& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const
+void SubgroupWeylGroupOLD::ActByElement(const ElementWeylGroup& theElement, const Vectors<coefficient>& input, Vectors<coefficient>& output)const
 { if(&input==&output)
     crash << crash;
   output.SetSize(input.size);

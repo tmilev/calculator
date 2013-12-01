@@ -158,14 +158,14 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   }
 }
 
-Vector<Rational> ReflectionSubgroupWeylGroup::GetRho()
+Vector<Rational> SubgroupWeylGroupOLD::GetRho()
 { Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl.GetDim());
   result/=2;
   return result;
 }
 
-void ReflectionSubgroupWeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
+void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
@@ -231,7 +231,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     for (int j=0; j<projectedWeight.size; j++)
       theProjectionBasisChanged.elements[j][i]=projectedWeight[j];
   }
-  ReflectionSubgroupWeylGroup theSubgroup;
+  SubgroupWeylGroupOLD theSubgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=theParabolicSel;
   Matrix<Rational>  DualCartanEmbedding;
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
@@ -412,9 +412,9 @@ void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)
 { this->GetMatrixOfElement(this->theElements[theIndex], outputMatrix);
 }
 
-bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
+bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots");
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
   Vectors<Rational> selectedRoots;
   selectedRoots.ReservE(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
@@ -6023,7 +6023,7 @@ std::string ElementWeylGroup::ToString(int NumSimpleGens, FormatExpressions* the
   return out.str();
 }
 
-std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
+std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
 { std::stringstream out;
 //  std::cout << this->simpleGenerators.ToString();
   List<int> DisplayIndicesSimpleGenerators;
@@ -6079,7 +6079,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows(List
 
 }
 
-std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
+std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
 { if (this->size<1)
     return "Error, non-initialized group";
   if (this->size==1)
@@ -6120,8 +6120,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
   return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
 }
 
-void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElements)
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::ToString");
+void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ToString");
   std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
   DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);

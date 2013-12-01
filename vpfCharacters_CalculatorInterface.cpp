@@ -1,5 +1,5 @@
 #include "vpf.h"
-#include "vpfHeader2Math3_Characters.h"
+#include "vpfHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 
@@ -959,6 +959,11 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
   WeylGroupVirtualRepresentation outputRep=leftE.GetValue<WeylGroupVirtualRepresentation>();
   outputRep*=rightE.GetValue<WeylGroupVirtualRepresentation>();
   return output.AssignValue(outputRep, theCommands);
+}
+
+bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup");
 }
 
 bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands, const Expression& input, Expression& output)

@@ -15,7 +15,7 @@ ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in fun
 //- Try moving template generics into .h files.
 
 template <>
-bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
+bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
 { Vector<RationalFunctionOld> tempVect;
   RationalFunctionOld tempRF;
   tempVect=this->simpleGenerators[generatorIndex].GetVectorRational();
@@ -35,7 +35,7 @@ bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(co
 }
 
 template <>
-bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex)
+bool SubgroupWeylGroupOLD::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeight, int generatorIndex)
 { return !this->AmbientWeyl.RootScalarCartanRoot(theWeight, this->simpleGenerators[generatorIndex]).IsNegative();
 }
 
@@ -66,14 +66,14 @@ bool WeylGroup::IsDominantWRTgenerator<Rational>(const Vector<Rational>& theWeig
 { return !this->GetScalarProdSimpleRoot(theWeight, generatorIndex).IsNegative();
 }
 
-void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
+void SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { Selection tempSel;
   tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
   this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
 }
 
-bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
+bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
 (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -545,7 +545,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     return;
   }
   std::string tempS;
-//  ReflectionSubgroupWeylGroup subWeylInLarge, subWeylStandalone;
+//  SubgroupWeylGroupOLD subWeylInLarge, subWeylStandalone;
 //  charSSAlgMod<coefficient> charWRTsubalgebra;
 //  Selection LeviInSmall;
 //  this->theChaR.SplitCharOverRedSubalg
@@ -700,7 +700,7 @@ bool Calculator::fSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const 
   Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
   Vectors<RationalFunctionOld> leviEigenSpace;
   Vector<RationalFunctionOld> ih1, ih2;
-  ReflectionSubgroupWeylGroup subGroupLarge, subGroupSmall;
+  SubgroupWeylGroupOLD subGroupLarge, subGroupSmall;
   charSSAlgMod<RationalFunctionOld> tempChar;
   charSSAlgMod<RationalFunctionOld> startingChar;
   startingChar.MakeFromWeight(theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
@@ -1322,8 +1322,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   std::stringstream out;
   std::string tempS;
   inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
-  ReflectionSubgroupWeylGroup& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
-  ReflectionSubgroupWeylGroup& WeylFDSmall=inputData.WeylFDSmall;
+  SubgroupWeylGroupOLD& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
+  SubgroupWeylGroupOLD& WeylFDSmall=inputData.WeylFDSmall;
   SemisimpleLieAlgebra& theSmallAlgebra= inputData.theHmm.theDomain();
   Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
 
@@ -1522,7 +1522,7 @@ bool Calculator::fParabolicWeylGroups(Calculator& theCommands, const Expression&
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
-  ReflectionSubgroupWeylGroup theSubgroup;
+  SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
   { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, *theCommands.theGlobalVariableS, 2000);
@@ -1546,7 +1546,7 @@ bool Calculator::fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const 
   SemisimpleLieAlgebra& theSSalgebra=*theSSalgPointer;
 
   WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
-  ReflectionSubgroupWeylGroup theSubgroup;
+  SubgroupWeylGroupOLD theSubgroup;
   std::stringstream out;
   std::fstream outputFile, outputFile2;
   std::string fileName, filename2;

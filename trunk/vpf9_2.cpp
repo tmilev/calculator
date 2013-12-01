@@ -29,14 +29,14 @@ std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
-void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "generator_reflections: ";
   this->simpleGenerators.WriteToFile(output, theGlobalVariables);
   output << "\nouter_generators: ";
   this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   input >> tempS;
   this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
@@ -44,7 +44,7 @@ void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariab
   this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
-bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
+bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
 (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables,
  int UpperLimitNumElements, bool recomputeAmbientRho)
 { MemorySaving< HashedList<Vector<Rational> > > bufferOrbit;
@@ -513,7 +513,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
 //  theRootSA.init(*this);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   theRootSA.genK.MakeEiBasis(theDimension);
-  ReflectionSubgroupWeylGroup theAutos;
+  SubgroupWeylGroupOLD theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
   Matrix<Rational> mapOnRootSpaces;
   int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
@@ -683,7 +683,7 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return -1;
 }
 
-void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms)
+void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD& outputAutomorphisms)
 { this->ComputeAllOld();
   this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
 }

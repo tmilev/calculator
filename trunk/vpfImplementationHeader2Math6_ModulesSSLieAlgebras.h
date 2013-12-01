@@ -273,7 +273,7 @@ void ModuleSSalgebra<coefficient>::SplitOverLevi
   if (this->GetOwner().GetRank()!=splittingParSel.MaxSize)
     crash << "This is a programming error: semisimple rank is " << this->GetOwner().GetRank() << " but splitting parabolic selects "
     << " out of " << splittingParSel.MaxSize << " simple roots. " << crash;
-  ReflectionSubgroupWeylGroup subWeyl;
+  SubgroupWeylGroupOLD subWeyl;
   MemorySaving<charSSAlgMod<coefficient> > buffer;
   charSSAlgMod<coefficient>& charWRTsubalgebra= (outputChar==0) ? buffer.GetElement() : *outputChar;
   this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight

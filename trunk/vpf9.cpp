@@ -5046,7 +5046,7 @@ void WeylGroup::ComputeRho(bool Recompute)
   this->flagFundamentalToSimpleMatricesAreComputed=false;
 }
 
-void ReflectionSubgroupWeylGroup::operator=(const ReflectionSubgroupWeylGroup& other)
+void SubgroupWeylGroupOLD::operator=(const SubgroupWeylGroupOLD& other)
 { this->::HashedList<ElementWeylGroup>::operator=(other);
   this->simpleGenerators=(other.simpleGenerators);
   this->ExternalAutomorphisms=(other.ExternalAutomorphisms);
@@ -5055,8 +5055,8 @@ void ReflectionSubgroupWeylGroup::operator=(const ReflectionSubgroupWeylGroup& o
   this->RootsOfBorel=other.RootsOfBorel;
 }
 
-void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
-{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::ComputeRootSubsystem");
+void SubgroupWeylGroupOLD::ComputeRootSubsystem()
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ComputeRootSubsystem");
   this->RootSubsystem.Clear();
   this->RootSubsystem.AddOnTop(this->simpleGenerators);
   this->RootSubsystem.SetExpectedSize(100);

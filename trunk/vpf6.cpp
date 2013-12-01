@@ -1368,7 +1368,7 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
 //  ElementWeylGroup raisingElt;
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
-  ReflectionSubgroupWeylGroup theSub;
+  SubgroupWeylGroupOLD theSub;
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
     return output.SetError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);

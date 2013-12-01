@@ -177,12 +177,12 @@ public:
   bool AttemptTheTripleTrick(coneRelation& theRel, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
   bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
   void ExtractRelations(Matrix<Rational>& matA, Matrix<Rational>& matX, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, Vectors<Rational>& Ksingular);
-  bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
-  void GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms);
+  bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD* outputAutomorphisms, bool actOnCentralizerOnly);
+  void GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD& outputAutomorphisms);
   void MakeGeneratingSingularVectors(coneRelation& theRelation, Vectors<Rational>& nilradicalRoots);
-  bool attemptExtensionToIsomorphismNoCentralizer(Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
+  bool attemptExtensionToIsomorphismNoCentralizer(Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, int RecursionDepth, SubgroupWeylGroupOLD* outputAutomorphisms, bool GenerateAllpossibleExtensions, bool* abortKmodule, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
   static bool attemptExtensionToIsomorphism
-  (Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
+  (Vectors<Rational>& Domain, Vectors<Rational>& Range, GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD* outputAutomorphisms,
    bool actOnCentralizerOnly, rootSubalgebras& inputOwner, bool* DomainAndRangeGenerateNonIsoSAs);
   bool CheckForSmallRelations(coneRelation& theRel, Vectors<Rational>& nilradicalRoots);
   int NumRootsInNilradical();
@@ -197,7 +197,7 @@ public:
   void MakeProgressReportPossibleNilradicalComputation(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
   void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);
   bool IndexIsCompatibleWithPrevious(int startIndex, int RecursionDepth, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, GlobalVariables& theGlobalVariables);
-  bool IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
+  bool IsAnIsomorphism(Vectors<Rational>& domain, Vectors<Rational>& range, GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD* outputAutomorphisms, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange);
   bool ListHasNonSelectedIndexLowerThanGiven(int index, List<int>& tempList, Selection& tempSel);
   void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, List<List<List<int> > >& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
   void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
@@ -243,8 +243,8 @@ public:
   coneRelations theGoodRelations;
   coneRelations theMinRels;
   List<List<int> > ActionsNormalizerCentralizerNilradical;
-  List<ReflectionSubgroupWeylGroup> CentralizerOuterIsomorphisms;
-  List<ReflectionSubgroupWeylGroup> CentralizerIsomorphisms;
+  List<SubgroupWeylGroupOLD> CentralizerOuterIsomorphisms;
+  List<SubgroupWeylGroupOLD> CentralizerIsomorphisms;
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
@@ -286,7 +286,7 @@ public:
   void GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void GenerateKintersectBOuterIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void ComputeActionNormalizerOfCentralizerIntersectNilradical(Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
-  void ComputeNormalizerOfCentralizerIntersectNilradical(ReflectionSubgroupWeylGroup& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void ComputeNormalizerOfCentralizerIntersectNilradical(SubgroupWeylGroupOLD& outputSubgroup, Selection& SelectedBasisRoots, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
 
   void ComputeAllReductiveRootSAsInit();
   void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
@@ -309,7 +309,7 @@ public:
   std::string ToStringDynkinTableHTML(FormatExpressions* theFormat);
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-  void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
+  void MakeProgressReportAutomorphisms(SubgroupWeylGroupOLD& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void initOwnerMustBeNonZero();
   void initForNilradicalGeneration();
   rootSubalgebras();

@@ -43,7 +43,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
     }
 }
 
-std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
+std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
 { if (this->size<1)
     return "Error, non-initialized group";
   if (this->size==1)
@@ -91,7 +91,7 @@ bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, Eleme
   return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
 }
 
-void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
+void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
 { this->AmbientWeyl.ComputeAllElements(UpperLimit);
   Vector<Rational> image1;
   this->RepresentativesQuotientAmbientOrder.size=0;
@@ -731,7 +731,7 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
   return out.str();
 }
 
-bool ReflectionSubgroupWeylGroup::DrawContour
+bool SubgroupWeylGroupOLD::DrawContour
 (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
  int UpperBoundVertices)
 { HashedList<Vector<Rational> > theOrbit;
@@ -1060,7 +1060,7 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   return true;
 }
 
-void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output)
+void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output)
 { if (this->ExternalAutomorphisms.size>0)
     crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << crash;

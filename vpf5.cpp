@@ -2359,7 +2359,8 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
 }
 
 bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner)
-{ this->reset(owner, input.NumRows+1);
+{ MacroRegisterFunctionWithName("Expression::AssignMatrixExpressions");
+  this->reset(owner, input.NumRows+1);
   this->AddChildAtomOnTop(owner.opSequence());
   Expression currentRow;
   for (int i=0; i<input.NumRows; i++)

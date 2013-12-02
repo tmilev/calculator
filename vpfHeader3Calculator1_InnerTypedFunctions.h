@@ -39,7 +39,7 @@ public:
   static bool innerMultiplyEltZmodPorRatByEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRationalBySequence(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplySequenceByRational(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMultiplyMatrixSequenceByMatrixSequence(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixRationalOrRationalByMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyMatrixTensorOrRationalByMatrixTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAlgebraicNumberByAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
@@ -68,6 +68,7 @@ public:
   static bool innerPowerElementUEbyRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerSequenceByT(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerNChooseK(Calculator& theCommands, const Expression& input, Expression& output);
 

@@ -3,6 +3,7 @@
 #include "vpfHeader1General0_General.h"
 #include "vpfHeader2Math0_General.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implementation. ");
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
@@ -863,12 +864,6 @@ FormatExpressions::GetMonOrder<MonomialVector>()
 }
 
 template<>
-typename List<MonomialChar<RationalFunctionOld> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<MonomialChar<RationalFunctionOld> >()
-{ return 0;
-}
-
-template<>
 typename List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialWeylAlgebra>()
 { return 0;
@@ -895,12 +890,6 @@ FormatExpressions::GetMonOrder<ChevalleyGenerator>()
 template<>
 typename List<MonomialMatrix>::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialMatrix>()
-{ return 0;
-}
-
-template<>
-typename List<MonomialChar<Rational> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<MonomialChar<Rational> >()
 { return 0;
 }
 
@@ -4731,6 +4720,10 @@ void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ration
     theRoot[index]+=-1;
 }
 
+void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational>& outputMatrix)const
+{ this->GetMatrixOfElement(this->theElements[theIndex], outputMatrix);
+}
+
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
 { int tempI= this->theElements[index].reflections.size;
   for (int i=0; i<tempI; i++)
@@ -4778,6 +4771,23 @@ Vector<Rational> ElementWeylGroup::operator*(const Vector<Rational>& v) const
   return out;
 }
 
+std::string ElementWeylGroup::ToString(int NumSimpleGens, FormatExpressions* theFormat, List<int>* DisplayIndicesOfSimpleRoots)const
+{ if (this->reflections.size==0)
+    return "id";
+  std::string outerAutoLetter= "a";
+  std::stringstream out;
+  for (int i=this->reflections.size-1; i>=0; i--)
+    if (NumSimpleGens<0 || this->reflections[i]<NumSimpleGens)
+    { out << "s_{";
+      if (DisplayIndicesOfSimpleRoots==0)
+        out << this->reflections[i]+1;
+      else
+        out << (*DisplayIndicesOfSimpleRoots)[this->reflections[i]];
+      out << "}";
+    } else
+      out << outerAutoLetter << "_{" << this->reflections[i]-NumSimpleGens+1 << "}";
+  return out.str();
+}
 
 ElementWeylGroup ElementWeylGroup::Inverse() const
 { ElementWeylGroup out = *this;
@@ -4829,6 +4839,14 @@ void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
   for (int i=0; i<this->RootSystem.size; i++)
     if (this->RootSystem[i].IsPositiveOrZero())
       output.AddOnTop(this->RootSystem[i]);
+}
+
+bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right)
+{ Vector<Rational> leftImage; leftImage=this->rho;
+  Vector<Rational> rightImage; rightImage=this->rho;
+  this->ActOn(left, leftImage);
+  this->ActOn(right, rightImage);
+  return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
 }
 
 void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
@@ -5007,11 +5025,436 @@ void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>
   this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
 }
 
+void WeylGroup::GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables)
+{ Matrix<Rational> tempMat;
+  tempMat=this->CartanSymmetric;
+  tempMat.Invert();
+  Vectors<Rational> tempRoots;
+  tempRoots.AssignMatrixRows(tempMat);
+  output.CreateFromVertices(tempRoots, &theGlobalVariables);
+//  output.CreateFromNormals(tempRoots, theGlobalVariables);
+}
+
+void WeylGroup::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output)
+{ Matrix<Rational> tempMat;
+  tempMat=this->CartanSymmetric;
+  Rational tempRat;
+  for (int i=0; i<this->GetDim(); i++)
+  { tempRat=2/this->CartanSymmetric.elements[i][i];
+    tempMat.RowTimesScalar(i, tempRat);
+  }
+  tempMat.Transpose();
+  tempMat.Invert();
+  output.AssignMatrixRows(tempMat);
+}
+
+void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
+{ output.basisRationalForm=this->CartanSymmetric;
+  Vector<Rational> tempRoot;
+  for (int i=0; i<this->GetDim(); i++)
+  { tempRoot.MakeEi(this->GetDim(), i);
+    output.basisRationalForm.RowTimesScalar(i, 2/this->RootScalarCartanRoot(tempRoot, tempRoot));
+  }
+  output.basisRationalForm.Transpose();
+  output.basisRationalForm.Invert();
+//  std::cout << output.basisRationalForm.ToString(true, false);
+  output.MakeFromMat(output.basisRationalForm);
+  output.Reduce();
+}
+
+Rational WeylGroup::GetKillingDivTraceRatio()
+{ Rational result=0;
+  Rational tempRat;
+  for (int i=0; i<this->RootSystem.size; i++)
+  { tempRat=this->RootScalarCartanRoot(this->RootSystem[i], this->RootSystem[0]);
+    result+=tempRat*tempRat;
+  }
+  result/=this->RootScalarCartanRoot(this->RootSystem[0], this->RootSystem[0]);
+  return result;
+}
+
+void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
+{ this->ComputeRho(false);
+  Vector<Rational> lowest=this->rho;
+//  std::cout << "rho: " << this->rho.ToString() << "<hr>";
+  Vectors<Rational> tempRoots;
+  tempRoots.MakeEiBasis(this->GetDim());
+  this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
+  //std::stringstream out;
+  //out << outputWeylElt;
+//  out << "\n<br>";
+  //Matrix<Rational>  tempMat;
+  //this->GetMatrixOfElement(outputWeylElt, tempMat);
+  //out << tempMat.ToString(true, false);
+  //std::cout << out.str();
+  //std::cout << outputWeylElt;
+ //std::cout << this->GetMatrixOfElement(
+}
+
+void WeylGroup::GetExtremeElementInOrbit
+(Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt, Vectors<Rational>& bufferEiBAsis,
+ bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
+{ if (outputWeylElt!=0)
+    outputWeylElt->reflections.size=0;
+  if (sign!=0)
+    *sign=1;
+  if (stabilizerFound!=0)
+    *stabilizerFound=false;
+  Rational theScalarProd;
+//  static int numTimesReflectionWasApplied=0;
+
+  for (bool found = true; found; )
+  { found=false;
+    for (int i=0; i<this->GetDim(); i++)
+    { bool shouldApplyReflection=false;
+      theScalarProd=this->RootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
+      if (findLowest)
+        shouldApplyReflection=theScalarProd.IsPositive();
+      else
+        shouldApplyReflection= theScalarProd.IsNegative();
+      if (stabilizerFound!=0)
+        if (theScalarProd.IsEqualToZero())
+          *stabilizerFound=true;
+      if (shouldApplyReflection)
+      { found=true;
+        if (!RhoAction)
+          this->SimpleReflection<Rational>(i, inputOutput);
+        else if (!UseMinusRho)
+          this->SimpleReflectionRhoModified(i, inputOutput);
+        else
+          this->SimpleReflectionMinusRhoModified(i, inputOutput);
+        if (outputWeylElt!=0)
+          outputWeylElt->reflections.AddOnTop(i);
+        if (sign!=0)
+          *sign*=-1;
+//        numTimesReflectionWasApplied++;
+      }
+    }
+  }
+//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+}
+
+WeylGroup::WeylGroup()
+{ this->flagFundamentalToSimpleMatricesAreComputed=false;
+  this->flagOuterAutosGeneratorsComputed=false;
+  this->flagAllOuterAutosComputed=false;
+  this->flagDeallocated=false;
+}
+
+bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
+{ MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroupOrOuterAuto");
+  this->ComputeOuterAutos();
+//  std::cout << this->theOuterAutos.GetElement().ToString();
+  Vector<Rational> theRhoImage;
+  input.ActOnVectorColumn(this->rho, theRhoImage);
+  ElementWeylGroup theElementCandidate;
+  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  Matrix<Rational> theCandidateMat;
+  MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
+  this->GetMatrixOfElement(theElementCandidate, theCandidateMat);
+//  std::cout << "<br>input: " << input.ToStringMatForm();
+//  std::cout << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
+  theCandidateMatTensorForm=theCandidateMat;
+  for (int i=0; i<this->theOuterAutos.GetElement().theElements.size; i++)
+  { theCandidateMatWithOuterAuto=this->theOuterAutos.GetElement().theElements[i];
+    theCandidateMatWithOuterAuto*=theCandidateMatTensorForm;
+//    std::cout << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
+    if (theCandidateMatWithOuterAuto==input)
+      return true;
+  }
+  return false;
+}
+
+void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output)
+{ Vectors<Rational> basis;
+  int theDim=this->GetDim();
+  basis.MakeEiBasis(theDim);
+//  output.init(theDim, theDim);
+  for (int i=0; i<theDim; i++)
+    this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
+  output.AssignVectorsToRows(basis);
+  output.Transpose();
+}
+
+void WeylGroup::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetCoxeterPlane");
+  this->ComputeRho(true);
+  Vector<Rational> ZeroRoot;
+  int theDimension=this->GetDim();
+  if (theDimension<2)
+    return;
+  ZeroRoot.MakeZero(theDimension);
+  ElementWeylGroup tempElt;
+  this->GetCoxeterElement(tempElt);
+  Matrix<Rational>  matCoxeterElt, tempMat;
+  this->GetMatrixOfElement(tempElt, matCoxeterElt);
+//  std::cout << matCoxeterElt.ToString(true, false);
+  tempMat=matCoxeterElt;
+  int coxeterNumber=this->RootSystem.LastObject()->SumCoords().NumShort+1;
+  for (int i=0; i<coxeterNumber-1; i++)
+    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
+  CompleX<double> theEigenValue;
+  theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
+  Matrix<CompleX<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<Vector<CompleX<double> > > theEigenSpaceList;
+  eigenMat.GetZeroEigenSpace(theEigenSpaceList);
+  Vectors<CompleX<double> > theEigenSpace;
+  outputBasis1.SetSize(theDimension);
+  outputBasis2.SetSize(theDimension);
+  theEigenSpace.operator=(theEigenSpaceList);
+  DrawOperations tempDO;
+  tempDO.initDimensions(theDimension, 1);
+  tempDO.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
+  theEigenSpace.operator=(theEigenSpaceList);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      tempDO.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
+
+  if (theEigenSpace.size>0)
+  { if (coxeterNumber>2)
+      for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[0][j].Im;
+      }
+    else if (coxeterNumber==1 && theEigenSpace.size>1 )
+      for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[1][j].Re;
+      }
+    tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
+  }
+}
+
+void WeylGroup::DrawRootSystem
+(DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables, bool drawWeylChamber, Vector<Rational>* bluePoint,
+ bool LabelDynkinDiagramVertices, Vectors<Rational>* predefinedProjectionPlane)
+{ MacroRegisterFunctionWithName("WeylGroup::DrawRootSystem");
+  DrawOperations& output=outputDV.theBuffer;
+  if (wipeCanvas)
+    output.init();
+  int theDimension=this->GetDim();
+  if(theDimension==1)
+  { int color=CGI::RedGreenBlue(0, 255, 0);
+    Vector<Rational> tempRoot, tempZero;
+    tempZero.MakeZero(2);
+    tempRoot.MakeEi(2, 0);
+    for (int i=0; i<2; i++)
+    { output.drawLineBetweenTwoVectorsBuffer(tempZero, tempRoot, DrawingVariables::PenStyleNormal, color);
+      output.drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
+      tempRoot.Minus();
+    }
+    return;
+  }
+  this->ComputeRho(true);
+  Vector<Rational> ZeroRoot;
+  ZeroRoot.MakeZero(theDimension);
+  output.initDimensions(theDimension, 1);
+  output.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      output.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
+  Vector<double> tempRoot;
+  output.SelectedPlane=0;
+  Vectors<double>& theTwoPlane= output.BasisProjectionPlane[0];
+  if (predefinedProjectionPlane==0)
+    this->GetCoxeterPlane(theTwoPlane[0], theTwoPlane[1], theGlobalVariables);
+  else
+    predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
+  if(theTwoPlane.size!=2)
+    crash << crash;
+//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ToString(false, true, false);
+//  std::stringstream tempStream;
+//  tempStream << "<hr>the eigen mat:";
+//  tempStream << eigenMat;
+//  std::cout << tempStream.str();
+  Vectors<Rational> RootSystemSorted;
+  RootSystemSorted=(this->RootSystem);
+  List<double> lengths;
+  lengths.SetSize(RootSystemSorted.size);
+  for (int i=0; i<this->RootSystem.size; i++)
+  { tempRoot.SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+      tempRoot[j]=this->RootSystem[i][j].DoubleValue();
+    double Length1 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][0]);
+    double Length2 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][1]);
+    lengths[i]=FloatingPoint::sqrt(Length1*Length1+Length2*Length2);
+  }
+  for (int i=0; i<RootSystemSorted.size; i++)
+    for (int j=i; j<RootSystemSorted.size; j++)
+      if (lengths[i]<lengths[j])
+      { MathRoutines::swap(lengths[i], lengths[j]);
+        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
+      }
+  Vector<Rational> differenceRoot;
+  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
+  Rational minLength= this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+  for (int i=2; i<RootSystemSorted.size; i++)
+  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
+    if (minLength> this->RootScalarCartanRoot(differenceRoot, differenceRoot))
+      minLength=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+  }
+//  std::cout << "<hr>the min length is: " << minLength.ToString();
+  Rational tempRat;
+  if (bluePoint!=0)
+  { output.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+  }
+  if (drawWeylChamber)
+  { Cone theWeylChamber;
+    this->GetWeylChamber(theWeylChamber, theGlobalVariables);
+    FormatExpressions tempFormat;
+    theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
+  }
+  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
+  output.centerX[0]=300;
+  output.centerY[0]=300;
+  for (int i=0; i<RootSystemSorted.size; i++)
+  { int color=CGI::RedGreenBlue(0, 255, 0);
+    output.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    output.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
+    for (int j=i+1; j<RootSystemSorted.size; j++)
+    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
+      tempRat=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
+      if (minLength== tempRat)
+        output.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255));
+    }
+  }
+  Vector<Rational> tempRootRat;
+  Vectors<Rational> epsNotationSimpleBasis;
+  epsNotationSimpleBasis.MakeEiBasis(theDimension);
+  this->GetEpsilonCoords(epsNotationSimpleBasis, epsNotationSimpleBasis);
+  for (int i=0; i<theDimension; i++)
+  { tempRootRat.MakeEi(theDimension, i);
+    output.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    if (LabelDynkinDiagramVertices)
+    { Vector<Rational>& current=epsNotationSimpleBasis[i];
+      output.drawTextAtVectorBuffer(tempRootRat, current.ToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
+    }
+  }
+  for (int i=0; i<this->RootSystem.size; i++)
+  { output.labeledVectors.AddOnTop(this->RootSystem[i].GetVectorDouble());
+    output.labelsOfLabeledVectors.AddOnTop(this->RootSystem[i].ToString());
+    output.toBeHighlightedWhenLabeledVectorHovered.SetSize(output.toBeHighlightedWhenLabeledVectorHovered.size+1);
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->SetSize(0);
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop(this->RootSystem[i].GetVectorDouble());
+    output.toBeHighlightedWhenLabeledVectorHovered.LastObject()->AddOnTop((-this->RootSystem[i]).GetVectorDouble());
+  }
+  std::stringstream tempStream;
+  tempStream << this->theDynkinType.GetWeylGroupName();
+  if (this->GetDim()==2 && predefinedProjectionPlane!=0)
+  { theTwoPlane[1][0]=1;
+    theTwoPlane[1][1]=0;
+    theTwoPlane[0][0]=0;
+    theTwoPlane[0][1]=1;
+    outputDV.theBuffer.ModifyToOrthonormalNoShiftSecond(theTwoPlane[0], theTwoPlane[1]);
+  }
+  output.drawTextBuffer(0, 0, tempStream.str(), 10, CGI::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+}
+
+std::string WeylGroup::GenerateWeightSupportMethoD1
+(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+{ HashedList<Vector<Rational> > theDominantWeights;
+  double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue();
+  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
+  //int upperBoundInt = 10000;
+  Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
+  this->RaiseToDominantWeight(highestWeightTrue);
+  std::stringstream out;
+  if (highestWeightTrue!=highestWeightSimpleCoords)
+    out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
+    << "Your input in simple coordinates was: "
+    << highestWeightSimpleCoords.ToString() << ".<br> ";
+  out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
+  std::string tempS;
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
+  out << tempS << "<br>";
+  if (isTrimmed)
+    out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
+  else
+    out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
+  Vectors<Rational> tempRoots;
+  HashedList<Vector<Rational> > finalWeights;
+  int estimatedNumWeights=(int)
+  (this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue()*theDominantWeights.size);
+  estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
+  finalWeights.ReservE(estimatedNumWeights);
+  finalWeights.SetHashSizE(estimatedNumWeights);
+  Vectors<Rational> dominantWeightsNonHashed;
+  dominantWeightsNonHashed=(theDominantWeights);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 0, 10000);
+  if (finalWeights.size>=10000)
+  { out << "Did not generate all weights of the module due to RAM limits. ";
+    if (!isTrimmed)
+      out << "However, all dominant weights were computed and are drawn.";
+    out << "<br>";
+  }
+  if (!isTrimmed && finalWeights.size<10000)
+    out << "All weights were computed and are drawn. <br>";
+  outputWeightsSimpleCoords=(finalWeights);
+  return out.str();
+}
+
+bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
+{ ElementWeylGroup tempElt;
+  this->GetCoxeterElement(tempElt);
+  Matrix<Rational>  matCoxeterElt;
+  this->GetMatrixOfElement(tempElt, matCoxeterElt);
+  Vector<Rational> tempRoot=input;
+  for (int i=0; i<this->GetDim(); i++)
+    matCoxeterElt.ActOnVectorColumn(tempRoot);
+  return tempRoot==input;
+}
+
+Rational WeylGroup::GetLongestRootLengthSquared()
+{ Rational result;
+  result=this->CartanSymmetric(0,0);
+  for (int i=1; i<this->CartanSymmetric.NumRows; i++)
+    result=MathRoutines::Maximum(result, this->CartanSymmetric(i,i));
+  return result;
+}
+
+bool WeylGroup::IsElementWeylGroup(const MatrixTensor<Rational>& input)const
+{ MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroup");
+  Vector<Rational> theRhoImage;
+  input.ActOnVectorColumn(this->rho, theRhoImage);
+  ElementWeylGroup theElementCandidate;
+  this->RaiseToDominantWeight(theRhoImage, 0, 0, &theElementCandidate);
+  Matrix<Rational> theCandidateMat, inputMat;
+  input.GetMatrix(inputMat, this->GetDim());
+  this->GetMatrixOfElement(theElementCandidate, theCandidateMat);
+  return theCandidateMat==inputMat;
+}
+
 bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
 { for (int i=0; i<this->theElements.size; i++)
     if (this->IsARoot(theVectors[i]+input))
       return true;
   return false;
+}
+
+void WeylGroup::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
+{ Vector<Rational> tempRoot;
+  int theDim=this->CartanSymmetric.NumRows;
+  outputMatrix.init(theDim, theDim);
+  for (int i=0; i<theDim; i++)
+  { tempRoot.MakeEi(theDim, i);
+    this->ActOn(input, tempRoot);
+    for (int j=0; j<theDim; j++)
+      outputMatrix(j,i)=tempRoot[j];
+  }
 }
 
 int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
@@ -5053,6 +5496,258 @@ void SubgroupWeylGroupOLD::operator=(const SubgroupWeylGroupOLD& other)
   this->AmbientWeyl=(other.AmbientWeyl);
   this->RootSubsystem=other.RootSubsystem;
   this->RootsOfBorel=other.RootsOfBorel;
+}
+
+std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
+{ std::stringstream out;
+//  std::cout << this->simpleGenerators.ToString();
+  List<int> DisplayIndicesSimpleGenerators;
+  if (!useAmbientIndices)
+  { DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+    for (int i=0; i<this->simpleGenerators.size; i++)
+      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
+  }
+  out << "\\xymatrix{";
+  bool GraphWidthIsOdd=((GraphWidth%2)!=0);
+  if (!GraphWidthIsOdd)
+    GraphWidth++;
+  for (int i=0; i<Layers.size; i++)
+  { int currentRowOffset=(GraphWidth-Layers[i].size)/2;
+    int nextRowOffset=-1;
+    if (i<Layers.size-1)
+      nextRowOffset=(GraphWidth-Layers[i+1].size)/2;
+    for (int j=0; j<currentRowOffset; j++)
+      out << "&";
+    for (int j=0; j<Layers[i].size; j++)
+    { if (!useAmbientIndices)
+        out << this->TheObjects[Layers[i][j]].ToString(0, &DisplayIndicesSimpleGenerators);
+      else
+        out << this->RepresentativesQuotientAmbientOrder[Layers[i][j]].ToString();
+      int currentOffset=j+currentRowOffset;
+      if (Layers[i].size%2==0)
+        if (currentOffset>=GraphWidth/2)
+          currentOffset++;
+      for (int k=0; k<arrows[i][j].size; k++)
+      { out << " \\ar[d";
+        int indexInLayer=Layers[i+1].GetIndex(arrows[i][j][k]);
+        if(indexInLayer==-1)
+          crash << crash;
+        int nextOffset=indexInLayer+nextRowOffset;
+        if (Layers[i+1].size%2==0)
+          if (nextOffset>=GraphWidth/2)
+            nextOffset++;
+        int actualOffset=-currentOffset+nextOffset;
+        for (int l=0; l<actualOffset; l++)
+          out << "r";
+        for (int l=0; l>actualOffset; l--)
+          out << "l";
+        out << "]";
+      }
+      out << " & ";
+      if (Layers[i].size%2==0 && j==Layers[i].size/2-1)
+        out << " & ";
+    }
+    out << " \\\\\n";
+  }
+  out << "}";
+  return out.str();
+
+}
+
+std::string SubgroupWeylGroupOLD::ElementToStringBruhatGraph()
+{ if (this->size<1)
+    return "Error, non-initialized group";
+  if (this->size==1)
+    return "id";
+  List<List<List<int> > > arrows;
+  List<List<int> > Layers;
+  Vector<Rational> tempRoot;
+  Layers.ReservE(this->size);
+  int GraphWidth=1;
+  int oldLayerElementLength=-1;
+  for (int i=0; i< this->size; i++)
+  { if (this->TheObjects[i].reflections.size!=oldLayerElementLength)
+    { Layers.SetSize(Layers.size+1);
+      oldLayerElementLength=this->TheObjects[i].reflections.size;
+    }
+    Layers.LastObject()->AddOnTop(i);
+    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
+  }
+  HashedList<Vector<Rational> > orbit;
+  orbit.ReservE(this->size);
+  for (int i=0; i<this->size; i++)
+  { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
+    orbit.AddOnTop(tempRoot);
+  }
+  arrows.SetSize(Layers.size);
+  for (int i=0; i< Layers.size; i++)
+  { arrows[i].SetSize(Layers[i].size);
+    for (int j=0; j<Layers[i].size; j++)
+      for (int k=0; k<this->simpleGenerators.size; k++)
+      { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
+        int index=orbit.GetIndex(tempRoot);
+        if(index==-1)
+          crash << crash;
+        if (this->TheObjects[index].reflections.size>this->TheObjects[Layers[i][j]].reflections.size)
+          arrows[i][j].AddOnTop(index);
+      }
+  }
+  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
+}
+
+void SubgroupWeylGroupOLD::ToString(std::string& output, bool displayElements)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::ToString");
+  std::stringstream out, head, head2;
+  List<int> DisplayIndicesSimpleGenerators;
+  DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+  FormatExpressions latexFormat;
+  latexFormat.flagUseHTML=false;
+  latexFormat.flagUseLatex=true;
+  bool isGood=true;
+  for (int i=0; i<this->simpleGenerators.size; i++)
+  { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
+    if (DisplayIndicesSimpleGenerators[i]==0)
+    { isGood=false;
+      break;
+    }
+  }
+  if (!isGood)
+    for (int i=0; i<this->simpleGenerators.size; i++)
+      DisplayIndicesSimpleGenerators[i]=i+1;
+  DynkinDiagramRootSubalgebra tempDyn;
+  tempDyn.ComputeDiagramTypeKeepInput(this->simpleGenerators, this->AmbientWeyl.CartanSymmetric);
+  out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
+  << tempDyn.ToStringRelativeToAmbientType(this->AmbientWeyl.theDynkinType[0]);
+  out << "<br>Simple roots:\n<br>\n ";
+  head << "\\begin{array}{rcl}";
+  for (int i=0; i<this->simpleGenerators.size; i++)
+    head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ToString() << "\\\\";
+  head << "\\end{array}";
+  out << CGI::GetMathMouseHover(head.str());
+  if (this->ExternalAutomorphisms.size>0)
+  { out << "<br>Outer automorphisms: \n";
+    Matrix<Rational> tempMat;
+    head2 << "\\begin{array}{rcl}";
+    for (int i=0; i<this->ExternalAutomorphisms.size; i++)
+    { tempMat.AssignVectorsToRows(this->ExternalAutomorphisms[i]);
+      tempMat.Transpose();
+      head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(&latexFormat) << "\\\\";
+    }
+    head2 << "\\end{array}";
+    out << CGI::GetMathMouseHover(head2.str());
+  }
+  out << "<br>Half sum of the positive roots: " << this->GetRho().ToString();
+  out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+  { out << this->RootsOfBorel[i].ToString();
+  }
+  if (displayElements)
+  { std::stringstream body;
+    out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
+    body << "\\begin{array}{l}";
+    for (int i=0; i<this->size; i++)
+    { const ElementWeylGroup& currentElt=(*this)[i];
+      body << currentElt.ToString(this->simpleGenerators.size, 0, &DisplayIndicesSimpleGenerators) << "\\\\";
+    }
+    body << "\\end{array}";
+    out << CGI::GetMathMouseHover(body.str());
+  }
+  output=out.str();
+}
+
+bool SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots
+(WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupOLD::MakeParabolicFromSelectionSimpleRoots");
+  Vectors<Rational> selectedRoots;
+  selectedRoots.ReservE(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+  this->AmbientWeyl=inputWeyl;
+  if (this->AmbientWeyl.GetDim()!=ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize)
+    crash << "This is a programming error: parabolic selection selects out of " << ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize
+    << " elements while the weyl group is of rank " << this->AmbientWeyl.GetDim() << ". " << crash;
+  for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
+    if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
+    { selectedRoots.SetSize(selectedRoots.size+1);
+      selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
+    }
+  List<Vectors<Rational> > tempRootsCol;
+  return this->ComputeSubGroupFromGeneratingReflections(&selectedRoots, &tempRootsCol, &theGlobalVariables, UpperLimitNumElements, true);
+}
+
+std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
+{ if (this->size<1)
+    return "Error, non-initialized group";
+  if (this->size==1)
+    return "id";
+  List<List<List<int> > > arrows;
+  List<List<int> > Layers;
+  Vector<Rational> tempRoot;
+  Layers.ReservE(this->RepresentativesQuotientAmbientOrder.size);
+  int GraphWidth=1;
+  int oldLayerElementLength=-1;
+  for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
+  { if (this->RepresentativesQuotientAmbientOrder[i].reflections.size!=oldLayerElementLength)
+    { Layers.SetSize(Layers.size+1);
+      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].reflections.size;
+    }
+    Layers.LastObject()->AddOnTop(i);
+    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
+  }
+//  HashedList<Vector<Rational>> orbit;
+//  orbit.Reserve(this->RepresentativesQuotientAmbientOrder.size);
+  for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
+  { tempRoot=this->AmbientWeyl.rho;
+    this->AmbientWeyl.ActOnRootByGroupElement
+    (this->AmbientWeyl.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
+//    orbit.AddOnTop(tempRoot);
+  }
+  arrows.SetSize(Layers.size);
+  for (int i=0; i< Layers.size; i++)
+  { arrows[i].SetSize(Layers[i].size);
+    for (int j=0; j<Layers[i].size; j++)
+      for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
+        if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
+        ( this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
+          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].reflections.size==this->RepresentativesQuotientAmbientOrder[k].reflections.size-1)
+            arrows[i][j].AddOnTop(k);
+  }
+  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
+}
+
+void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
+{ this->AmbientWeyl.ComputeAllElements(UpperLimit);
+  Vector<Rational> image1;
+  this->RepresentativesQuotientAmbientOrder.size=0;
+  this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.theElements.size);
+  for (int i=0; i<this->AmbientWeyl.theElements.size; i++)
+  { image1=this->AmbientWeyl.rho;
+    this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
+    bool isGood=true;
+    for (int j=0; j<this->simpleGenerators.size; j++)
+      if (this->AmbientWeyl.RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
+      { isGood=false;
+        break;
+      }
+    if (isGood)
+      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl.theElements[i]);
+  }
+}
+
+bool SubgroupWeylGroupOLD::DrawContour
+(const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor, int UpperBoundVertices)
+{ HashedList<Vector<Rational> > theOrbit;
+  theOrbit.AddOnTop(highestWeightSimpleCoord);
+  WeylGroup& theWeyl=this->AmbientWeyl;
+  Vector<Rational> tempRoot;
+  for (int i=0; i<theOrbit.size; i++)
+    for (int j=0; j<this->simpleGenerators.size; j++)
+    { tempRoot=theOrbit[i];
+      theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
+      if (theOrbit.AddOnTopNoRepetition(tempRoot))
+        theDV.drawLineBetweenTwoVectorsBuffer(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
+      if (theOrbit.size>UpperBoundVertices)
+        return false;
+    }
+  return true;
 }
 
 void SubgroupWeylGroupOLD::ComputeRootSubsystem()

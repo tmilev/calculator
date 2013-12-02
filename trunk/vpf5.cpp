@@ -6,7 +6,8 @@
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 #include "vpfHeader2Math5_SubsetsSelections.h"
-
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Calculator built-in functions. ");
 
 //If you get a the C++ multiple definition error:

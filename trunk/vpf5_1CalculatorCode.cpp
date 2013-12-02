@@ -5,6 +5,7 @@
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
+#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Calculator built-in functions. ");
 

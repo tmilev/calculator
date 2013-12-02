@@ -3,6 +3,8 @@
 #ifndef vpfHeader1_HeaderUniversalEnveloping
 #define vpfHeader1_HeaderUniversalEnveloping
 #include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math1_LieTheoryExtras.h"
+
 static ProjectInformationInstance ProjectInfovpfHeader1_HeaderUniversalEnveloping(__FILE__, "Header, universal enveloping algebras. ");
 template<class coefficient>
 class ElementUniversalEnvelopingOrdered;

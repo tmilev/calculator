@@ -14,6 +14,7 @@
 #include "vpfJson.h"
 #include "vpfFiniteFields.h"
 #include "vpfImplementationHeader2Math7_PackedVector.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 
 class CharacterTable
@@ -285,31 +286,6 @@ void ComputeIrreps(WeylGroup& G)
     for(int j=i; j<G.characterTable.size; j++)
     { std::cout << i << "⊗" << j << ": " << M*G.GetCharacterProduct(G.characterTable[i], G.characterTable[j]) << std::endl;
     }
-}
-
-
-class WeylSubgroup: public WeylGroup
-{
-public:
-  WeylGroup *parent;
-  List<int> generatorPreimages;
-  List<int> ccPreimages;
-  List<bool> tauSignature;
-  void ComputeTauSignature();
-};
-
-template <typename weylgroup>
-void ParabolicSubgroup(weylgroup* G, const Selection sel, WeylSubgroup& out)
-{ out.init();
-  out.parent = G;
-  int d = sel.CardinalitySelection;
-  out.CartanSymmetric.init(d,d);
-  for(int ii=0; ii<d; ii++)
-    for(int jj=0; jj<d; jj++)
-      out.CartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
-  out.generatorPreimages.SetSize(d);
-  for(int i=0; i<d; i++)
-    out.generatorPreimages[i] = sel.elements[i] + 1;
 }
 
 // this is incorrect.  Do not use it.

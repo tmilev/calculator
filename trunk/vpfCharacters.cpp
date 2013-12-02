@@ -1,7 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 static ProjectInformationInstance ProjectInfoVpfCharacters(__FILE__, "Finite group characters sandbox. Work in progress by Thomas. ");
 
@@ -1019,8 +1019,6 @@ void WeylGroup::GetSignCharacter(Vector<Rational>& out)
       out[i] = -1;
   }
 }
-
-
 
 void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::StandardRepresentation");

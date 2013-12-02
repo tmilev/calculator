@@ -43,75 +43,7 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
     }
 }
 
-std::string SubgroupWeylGroupOLD::ElementToStringCosetGraph()
-{ if (this->size<1)
-    return "Error, non-initialized group";
-  if (this->size==1)
-    return "id";
-  List<List<List<int> > > arrows;
-  List<List<int> > Layers;
-  Vector<Rational> tempRoot;
-  Layers.ReservE(this->RepresentativesQuotientAmbientOrder.size);
-  int GraphWidth=1;
-  int oldLayerElementLength=-1;
-  for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
-  { if (this->RepresentativesQuotientAmbientOrder[i].reflections.size!=oldLayerElementLength)
-    { Layers.SetSize(Layers.size+1);
-      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].reflections.size;
-    }
-    Layers.LastObject()->AddOnTop(i);
-    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
-  }
-//  HashedList<Vector<Rational>> orbit;
-//  orbit.Reserve(this->RepresentativesQuotientAmbientOrder.size);
-  for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
-  { tempRoot=this->AmbientWeyl.rho;
-    this->AmbientWeyl.ActOnRootByGroupElement
-  (this->AmbientWeyl.theElements.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
-//    orbit.AddOnTop(tempRoot);
-  }
-  arrows.SetSize(Layers.size);
-  for (int i=0; i< Layers.size; i++)
-  { arrows[i].SetSize(Layers[i].size);
-    for (int j=0; j<Layers[i].size; j++)
-      for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
-        if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
-        ( this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
-          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].reflections.size==this->RepresentativesQuotientAmbientOrder[k].reflections.size-1)
-            arrows[i][j].AddOnTop(k);
-  }
-  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
-}
-
-bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right)
-{ Vector<Rational> leftImage; leftImage=this->rho;
-  Vector<Rational> rightImage; rightImage=this->rho;
-  this->ActOn(left, leftImage);
-  this->ActOn(right, rightImage);
-  return (rightImage-leftImage).IsPositiveOrZero() && !(rightImage-leftImage).IsEqualToZero();
-}
-
-void SubgroupWeylGroupOLD::FindQuotientRepresentatives(int UpperLimit)
-{ this->AmbientWeyl.ComputeAllElements(UpperLimit);
-  Vector<Rational> image1;
-  this->RepresentativesQuotientAmbientOrder.size=0;
-  this->RepresentativesQuotientAmbientOrder.ReservE(this->AmbientWeyl.theElements.size);
-  for (int i=0; i<this->AmbientWeyl.theElements.size; i++)
-  { image1=this->AmbientWeyl.rho;
-    this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
-    bool isGood=true;
-    for (int j=0; j<this->simpleGenerators.size; j++)
-      if (this->AmbientWeyl.RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
-      { isGood=false;
-        break;
-      }
-    if (isGood)
-      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl.theElements[i]);
-  }
-}
-
-bool PartFractions::ArgumentsAllowed
-  (Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
+bool PartFractions::ArgumentsAllowed(Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
 { if (theArguments.size<1)
     return false;
   Cone tempCone;
@@ -354,8 +286,7 @@ bool LittelmannPath::MinimaAreIntegral()
   return true;
 }
 
-void LittelmannPath::MakeFromWeightInSimpleCoords
-  (const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
+void LittelmannPath::MakeFromWeightInSimpleCoords(const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
 { this->owner=& theOwner;
   this->Waypoints.SetSize(2);
   this->Waypoints[0].MakeZero(theOwner.GetDim());
@@ -363,8 +294,7 @@ void LittelmannPath::MakeFromWeightInSimpleCoords
   this->Simplify();
 }
 
-std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput
-(LittelmannPath& inputStartingPath, List<int> & input)
+std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput(LittelmannPath& inputStartingPath, List<int> & input)
 { std::stringstream out;
   for (int i=input.size-1; i>=0; i--)
   { int displayIndex= input[i];
@@ -381,9 +311,7 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput
 }
 
 bool LittelmannPath::GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators,
- GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
- Selection* parabolicNonSelectedAreInLeviPart)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts, Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTop(*this);
   int theDim=this->owner->GetDim();
@@ -451,8 +379,7 @@ bool LittelmannPath::GenerateOrbit
   return result;
 }
 
-std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
-(List<int>& input)
+std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe(List<int>& input)
 { MonomialTensor<Rational> tempMon;
   tempMon=input;
   tempMon.generatorsIndices.ReverseOrderElements();
@@ -528,8 +455,8 @@ bool ElementUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperiment
 
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis
-  (List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output,
-   const coefficient& theRingUnit, const coefficient& theRingZero, GlobalVariables& theGlobalVariables)const
+(List<ElementUniversalEnveloping<coefficient> >& theBasis, Vector<coefficient>& output, const coefficient& theRingUnit, const coefficient& theRingZero,
+ GlobalVariables& theGlobalVariables)const
 { List<ElementUniversalEnveloping<coefficient> > tempBasis, tempElts;
   tempBasis=theBasis;
   tempBasis.AddOnTop(*this);
@@ -545,25 +472,25 @@ bool ElementUniversalEnveloping<coefficient>::GetCoordsInBasis
 template<class coefficient>
 template<class CoefficientTypeQuotientField>
 bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
-  (List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords,
-   List<ElementUniversalEnveloping<coefficient> >& outputTheBasis, const CoefficientTypeQuotientField& theFieldUnit,
-   const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables)
+(List<ElementUniversalEnveloping<coefficient> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords,
+ List<ElementUniversalEnveloping<coefficient> >& outputTheBasis, const CoefficientTypeQuotientField& theFieldUnit,
+ const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
     return false;
   ElementUniversalEnveloping<coefficient> outputCorrespondingMonomials;
-  outputCorrespondingMonomials.MakeZero(*theElements.TheObjects[0].owner);
+  outputCorrespondingMonomials.MakeZero(*theElements[0].owner);
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i=0; i<theElements.size; i++)
-    for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
+    for (int j=0; j<theElements[i].size; j++)
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
-  { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction.TheObjects[i];
+  { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction[i];
     currentList.MakeZero(outputCorrespondingMonomials.size, theFieldZero);
-    ElementUniversalEnveloping<coefficient>& currentElt=theElements.TheObjects[i];
+    ElementUniversalEnveloping<coefficient>& currentElt=theElements[i];
     for (int j=0; j<currentElt.size; j++)
-    { MonomialUniversalEnveloping<coefficient>& currentMon=currentElt.TheObjects[j];
-      currentList.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
+    { MonomialUniversalEnveloping<coefficient>& currentMon=currentElt[j];
+      currentList[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
     }
   }
   outputTheBasis.size=0;
@@ -584,8 +511,7 @@ bool ElementUniversalEnveloping<coefficient>::GetBasisFromSpanOfElements
 
 template<class coefficient>
 void ElementUniversalEnveloping<coefficient>::ModToMinDegreeFormFDRels
-(const Vector<Rational>& theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
- const coefficient& theRingZero)
+(const Vector<Rational>& theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { ElementUniversalEnveloping<coefficient> result, temp;
   result.MakeZero(*this->owner);
   bool Found=true;
@@ -640,9 +566,8 @@ bool ElementUniversalEnveloping<coefficient>::ApplyMinusTransposeAutoOnMe()
 
 template <class coefficient>
 bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm
-  (const ElementUniversalEnveloping<coefficient>& right, coefficient& output,
-   const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)
+(const ElementUniversalEnveloping<coefficient>& right, coefficient& output, const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+ const coefficient& theRingUnit, const coefficient& theRingZero, std::stringstream* logStream)
 { output=theRingZero;
   coefficient tempCF;
   ElementUniversalEnveloping<coefficient> MTright;
@@ -664,9 +589,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm
   { intermediateAccum=*this;
     intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
     if (logStream!=0)
-      *logStream << "intermediate after simplification: "
-      << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat)
-      << "<br>";
+      *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
     intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<coefficient>& rightMon=MTright[j];
     coefficient& rightMonCoeff=MTright.theCoeffs[j];
@@ -705,8 +628,7 @@ bool ElementUniversalEnveloping<coefficient>::HWMTAbilinearForm
 
 template <class coefficient>
 std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
-(const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
- const coefficient& theRingZero)
+(const Vector<coefficient>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
 { std::stringstream out;
   List<ElementUniversalEnveloping<coefficient> > theOrbit;
   theOrbit.ReservE(1000);
@@ -729,25 +651,6 @@ std::string ElementUniversalEnveloping<coefficient>::IsInProperSubmodule
     out << "<br>" << current.ToString(&theGlobalVariables.theDefaultFormat);
   }
   return out.str();
-}
-
-bool SubgroupWeylGroupOLD::DrawContour
-(const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
- int UpperBoundVertices)
-{ HashedList<Vector<Rational> > theOrbit;
-  theOrbit.AddOnTop(highestWeightSimpleCoord);
-  WeylGroup& theWeyl=this->AmbientWeyl;
-  Vector<Rational> tempRoot;
-  for (int i=0; i<theOrbit.size; i++)
-    for (int j=0; j<this->simpleGenerators.size; j++)
-    { tempRoot=theOrbit[i];
-      theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
-      if (theOrbit.AddOnTopNoRepetition(tempRoot))
-        theDV.drawLineBetweenTwoVectorsBuffer(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
-      if (theOrbit.size>UpperBoundVertices)
-        return false;
-    }
-  return true;
 }
 
 template <class coefficient>

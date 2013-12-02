@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
 

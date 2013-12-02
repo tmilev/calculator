@@ -1,5 +1,5 @@
 #include "vpf.h"
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
 

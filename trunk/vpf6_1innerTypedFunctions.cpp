@@ -690,6 +690,52 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceByT(Calculator& theCommands
   return theCommands.innerTranspose(theCommands, input[1], output);
 }
 
+template <class coefficient>
+bool Expression::AssignMatrix(const Matrix<coefficient>& input, Calculator& owner)
+{ MacroRegisterFunctionWithName("Expression::AssignMatrix");
+  this->reset(owner, input.NumRows+1);
+  this->AddChildAtomOnTop(owner.opSequence());
+  Expression currentRow, currentElt;
+  for (int i=0; i<input.NumRows; i++)
+  { currentRow.reset(owner);
+    currentRow.children.ReservE(input.NumCols+1);
+    currentRow.AddChildAtomOnTop(owner.opSequence());
+    for (int j=0; j<input.NumCols; j++)
+    { currentElt.AssignValue(input(i,j), owner);
+      currentRow.AddChildOnTop(currentElt);
+    }
+    currentRow.format=this->formatMatrixRow;
+    this->AddChildOnTop(currentRow);
+  }
+  this->format=this->formatMatrix;
+  return true;
+}
+
+bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  if (!input[1].IsSequenceNElementS())
+    return false;
+  Matrix<Rational> theMat;
+  if (!theCommands.GetMatrix<Rational>(input[1], theMat))
+    return false;
+  Expression inputCopy, baseRatMat, outputMatRat;
+  baseRatMat.AssignValue(theMat, theCommands);
+  inputCopy.reset(theCommands);
+  inputCopy.AddChildOnTop(input[0]);
+  inputCopy.AddChildOnTop(baseRatMat);
+  inputCopy.AddChildOnTop(input[2]);
+  if (!CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(theCommands, inputCopy, outputMatRat))
+    return false;
+  if (!outputMatRat.IsOfType<Matrix<Rational> >(&theMat))//<- probably outputMatRat is of type Error.
+  { output=outputMatRat;
+    return true;
+  }
+  return output.AssignMatrix(theMat, theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
@@ -806,7 +852,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence(Calculator& t
   return true;
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyMatrixSequenceByMatrixSequence(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
   //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))

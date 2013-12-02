@@ -147,6 +147,8 @@ class Expression
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
   bool SetChilD(int childIndexInMe, int childIndexInBoss);
   bool AssignMatrixExpressions(const Matrix<Expression>& input, Calculator& owner);
+  template<class coefficient>
+  bool AssignMatrix(const Matrix<coefficient>& input, Calculator& owner);
   bool AssignMeMyChild(int childIndex)
   { Expression tempExp=(*this)[childIndex];
     this->operator=(tempExp);

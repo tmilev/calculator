@@ -520,6 +520,30 @@ bool CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger(Calculator& theC
   return output.AssignValueWithContext(base, input[1].GetContext(), theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+    return false;
+  Matrix<Rational> base;
+  int thePower=0;
+  if(!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
+    return false;
+  if (!base.IsSquare() || base.NumCols==0)
+    return output.SetError("Exponentiating non-square matrices or matrices with zero rows is not allowed.", theCommands);
+  if (thePower<=0)
+    if (base.GetDeterminant()==0 )
+      return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  if (thePower<0)
+  { base.Invert();
+    thePower*=-1;
+  }
+  Matrix<Rational> idMat;
+  idMat.MakeIdMatrix(base.NumRows);
+  MathRoutines::RaiseToPower(base, thePower, idMat);
+  return output.AssignValue(base, theCommands);
+}
+
 bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);

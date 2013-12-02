@@ -418,8 +418,8 @@ public:
   }
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
-  template <class Element>
-  static void RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit);
+  template <class coefficient>
+  static void RaiseToPower(coefficient& theElement, int thePower, const coefficient& theRingUnit);
   template <typename coefficient>
   inline static coefficient Maximum
   (const coefficient& a, const coefficient& b)
@@ -1964,6 +1964,9 @@ public:
       << this->NumRows << " rows and " << this->NumCols << " colums. " << crash;
     }
     return this->elements[i][j];
+  }
+  bool IsSquare()const
+  { return this->NumCols==this->NumRows;
   }
   bool IsIdMatrix()const
   { if (this->NumRows!=this->NumCols || this->NumRows<=0)

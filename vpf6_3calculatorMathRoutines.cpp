@@ -1043,6 +1043,21 @@ bool CalculatorFunctionsGeneral::innerRemoveLastElement(Calculator& theCommands,
   return output.SetChildAtomValue(0, theCommands.opSequence());
 }
 
+bool CalculatorFunctionsGeneral::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerInvertMatrix");
+  Matrix<Rational> theMat;
+  std::cout << "Lispified: " << input.ToString();
+  if (!input.IsOfType<Matrix<Rational> >(&theMat))
+    if (!theCommands.GetMatriXFromArguments<Rational>(input, theMat, 0, -1, 0))
+      return output.SetError("Failed to extract matrix with rational coefficients", theCommands);
+  if (theMat.NumRows!=theMat.NumCols || theMat.NumCols<1)
+    return output.SetError("The matrix is not square", theCommands);
+  if (theMat.GetDeterminant()==0)
+    return output.SetError("Matrix determinant is zero.", theCommands);
+  theMat.Invert(theCommands.theGlobalVariableS);
+  return output.AssignValue(theMat, theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotWedge");
   if (input.children.size!=6)

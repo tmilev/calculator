@@ -1348,7 +1348,7 @@ public:
   static bool innerGenerateMultiplicativelyClosedSet(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsRational(Calculator& theCommands, const Expression& input, Expression& output);

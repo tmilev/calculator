@@ -59,6 +59,7 @@ public:
   static bool innerDivideAlgebraicNumberOrRatByAlgebraicNumberOrRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDivideRFOrPolyOrRatByRFOrPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerPowerMatRatBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerRatByRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output);

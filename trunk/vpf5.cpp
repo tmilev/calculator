@@ -1913,11 +1913,11 @@ bool Calculator::fLSPath(Calculator& theCommands, const Expression& input, Expre
   return output.AssignValue(theLSpath, theCommands);
 }
 
-bool Calculator::innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output)
-{ Matrix<Rational> mat, outputMat, tempMat;
+bool Calculator::innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerInvertMatrixVerbose");
+  Matrix<Rational> mat, outputMat, tempMat;
   if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
-    return output.SetError
-    ("Failed to extract matrix with rational coefficients", theCommands);
+    return output.SetError("Failed to extract matrix with rational coefficients", theCommands);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
     return output.SetError("The matrix is not square", theCommands);
   outputMat.MakeIdMatrix(mat.NumRows);

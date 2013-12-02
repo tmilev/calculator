@@ -861,10 +861,14 @@ void Calculator::initPredefinedInnerFunctions()
    the f_\alpha operator.",
    "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))", true, true);
   this->AddOperationInnerHandler
-  ("InvertMatrixVerbose", this->innerInvertMatrix, "",
+  ("InvertMatrixVerbose", this->innerInvertMatrixVerbose, "",
    "<b>Calculus teaching function.</b> Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
    printout of all Gaussian elimantion steps. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
+  this->AddOperationInnerHandler
+  ("InvertMatrix", CalculatorFunctionsGeneral::innerInvertMatrix, "",
+   "Inverts a matrix of rationals if invertible, in any other case generates an error. ",
+   "X:=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}");
   this->AddOperationInnerHandler
   ("Reverse", this->innerReverseOrder, "",
    "Reverses order of elements recursively. This operation will reverse products, orderes of lists, etc. \
@@ -1683,6 +1687,12 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerPolyBySmallInteger, this->opPoly(), this->opRational(),
    "Raises poly to small integer power. ",
    "x:=Polynomial{}x; y:=Polynomial{}y;(x+2y+x y+x^2+3y^2)^3",
+   true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger, this->opMatRat(), this->opRational(),
+   "Raises matrix rationals to small integer power. ",
+   "X:=MatrixRationals((0,1),(1,1)); q:=100; \nX^q; \nFibonacci{}0:=1; \nFibonacci{}1:=1; \nFibonacci{}{{n}}:if((n>0)* (IsInteger{}n)):=Fibonacci{}(n-1)+Fibonacci{}(n-2); \
+   \nMatrixRationals((Fibonacci{}(q-2), Fibonacci{}(q-1)), (Fibonacci{}q-1, Fibonacci{}q))",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger, this->opPolyOverANs(), this->opRational(),

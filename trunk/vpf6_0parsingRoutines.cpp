@@ -891,7 +891,7 @@ bool Calculator::AllowsTensorInPreceding(const std::string& lookAhead)
 
 bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
 { return lookAhead=="+" || lookAhead=="-" || lookAhead=="*" || lookAhead=="/" || lookAhead=="Expression" ||  lookAhead== "Integer"  ||
-  lookAhead=="(" || lookAhead=="[" || lookAhead=="{" ||
+  lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
   lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" || lookAhead=="EndProgram"

@@ -4,6 +4,8 @@
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
+#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");

@@ -4,7 +4,7 @@
 #define vpfJson_h_already_included
 
 #include "vpfHeader2Math01_LargeIntArithmetic.h"
-static ProjectInformationInstance vpfJson(__FILE__, "Header for incomplete and broken JSON library");
+static ProjectInformationInstance vpfJson(__FILE__, "Partial implementation of JSON, work in progress.");
 
 
 /*The best kind of misleading documentation is aspirational

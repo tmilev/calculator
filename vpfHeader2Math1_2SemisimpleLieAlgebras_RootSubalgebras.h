@@ -3,7 +3,7 @@
 #ifndef vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 #define vpfHeaderSemisimpleLieAlgebrasRootSubalgebras
 
-#include "vpfHeader2Math0_General.h"
+#include "vpfHeader2Math1_SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfSSlieAlgRootSAs(__FILE__, "Header, root and sl2 subalgebras of semisimple Lie algebras. ");
 
@@ -39,7 +39,7 @@ public:
   void FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   bool leftSortedBiggerThanOrEqualToRight(List<int>& left, List<int>& right);
   void ComputeKComponents(Vectors<Rational>& input, List<List<int> >& output, rootSubalgebra& owner);
-  void RelationOneSideToStringCoordForm(std::string& output,  List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm);
+  void RelationOneSideToStringCoordForm(std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm);
   void GetSumAlphas(Vector<Rational>& output, int theDimension);
   bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
@@ -192,7 +192,7 @@ public:
   void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
   void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
   void ComputeCentralizerFromKModulesAndSortKModules();
-  void MatrixToRelation(coneRelation& output, Matrix<Rational> & matA, Matrix<Rational> & matX, int theDimension, Vectors<Rational>& NilradicalRoots);
+  void MatrixToRelation(coneRelation& output, Matrix<Rational>& matA, Matrix<Rational>& matX, int theDimension, Vectors<Rational>& NilradicalRoots);
   void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
   void MakeProgressReportPossibleNilradicalComputation(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner);
   void MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables);

@@ -4,7 +4,7 @@
 #define vpfImplementationHeaderPackedVectorIncluded
 
 #include "vpfHeader2Math7_PackedVector.h"
-static ProjectInformationInstance ProjectInfovpfImplementationHeaderFiniteGroups(__FILE__, "Implementation header, packed vector. ");
+static ProjectInformationInstance ProjectInfovpfImplementationHeaderPackedVector(__FILE__, "Implementation header, packed vector. ");
 
 
 template <typename scalar>

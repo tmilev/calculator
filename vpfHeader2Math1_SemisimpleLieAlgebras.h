@@ -1,347 +1,381 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#ifndef vpfHeader1_4_h_already_included
-#define vpfHeader1_4_h_already_included
+#ifndef vpfHeaderSemisimpleLieAlgebrasIncluded
+#define vpfHeaderSemisimpleLieAlgebrasIncluded
 
-#include "vpfHeader2Math0_General.h"
-#include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_4(__FILE__, "Header, semisimple Lie algebras. ");
+#include "vpfHeader2Math3_FiniteGroups.h"
+static ProjectInformationInstance ProjectInfoVpfHeaderSemisimpleLieAlgebras(__FILE__, "Header, semisimple Lie algebras. ");
 
-class SemisimpleSubalgebras;
-class CandidateSSSubalgebra;
+class SemisimpleLieAlgebra
+{
+public:
+  bool flagAnErrorHasOccurredTimeToPanic;
+  WeylGroup theWeyl;
+  //format:
+  //the Chevalley constants are listed in the same order as the root system of the Weyl group
+  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
+  //the root  at the j^th position, then
+  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
+  //will be located at the ij^{th} entry in the below matrix.
+  //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
+  //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
+  //2.   [h_{\alpha},g^\beta] :=\langle\alpha,\beta\rangle g^\beta
+  //Reference: Samelson, Notes on Lie algebras, pages 46-51
+  Matrix<Rational> ChevalleyConstants;
+  Matrix<bool> Computed;
+  //The below gives a total ordering to all generators, including the elements of the Cartan
+  //the order is:  We put first the generators corresponding to the negative roots in ascending order,
+  //we put second the elements of the Cartan
+  //we put last the positive roots in ascending order.
+//  Matrix<int> theLiebracketPairingIndices;
+  Matrix<ElementSemisimpleLieAlgebra<Rational> > theLiebrackets;
+//  List<int> OppositeRootSpaces;
+  List<int> UEGeneratorOrderIncludingCartanElts;
+  bool flagDeallocated;
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const SemisimpleLieAlgebra& input)
+  { return input.theWeyl.HashFunction();
+  }
+  template <class coefficient>
+  void GetGenericElementCartan(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  { output.MakeZero();
+    ChevalleyGenerator theGen;
+    Polynomial<coefficient> theCf;
+    for (int i=0; i<this->GetRank(); i++)
+    { theGen.MakeGenerator(*this, this->GetCartanGeneratorIndex(i));
+      theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+      output.AddMonomial(theGen, theCf);
+    }
+  }
+  template <class coefficient>
+  void GetGenericElementNegativeBorelNilradical(ElementSemisimpleLieAlgebra<Polynomial<coefficient> >& output, int indexFirstVar=0)
+  { output.MakeZero();
+    ChevalleyGenerator theGen;
+    Polynomial<coefficient> theCf;
+    for (int i=0; i<this->GetNumPosRoots(); i++)
+    { theGen.MakeGenerator(*this, i);
+      theCf.MakeMonomiaL(indexFirstVar+i, 1, 1);
+      output.AddMonomial(theGen, theCf);
+    }
+  }
+  int GetOppositeGeneratorIndex(int theIndex)
+  { return this->GetNumGenerators()-theIndex-1;
+  }
+  bool IsASimpleGenerator(int generatorIndex)
+  { return
+    (generatorIndex< this->GetNumPosRoots() && generatorIndex>=this->GetNumPosRoots()-this->GetRank()) ||
+    (generatorIndex>=this->GetNumPosRoots()+this->GetRank() && generatorIndex<this->GetNumPosRoots()+this->GetRank()*2);
+  }
+  SemisimpleLieAlgebra()
+  { this->flagDeallocated=false;
+  }
+  ~SemisimpleLieAlgebra()
+  { this->flagDeallocated=true;
+  }
+  bool CheckConsistency()const;
+  template <class coefficient>
+  void GenerateLieSubalgebra(List<ElementSemisimpleLieAlgebra<coefficient> >& inputOutputGenerators);
+  void ComputeMultTable(GlobalVariables& theGlobalVariables);
+  bool IsOfSimpleType(char desiredType, int desiredRank)const
+  { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
+  }
+  template <class coefficient>
+  void GetCommonCentralizer
+  (const List<ElementSemisimpleLieAlgebra<coefficient> >& inputElementsToCentralize, List<ElementSemisimpleLieAlgebra<coefficient> >& outputCentralizingElements);
+  void GetChevalleyGeneratorAsLieBracketsSimpleGens
+  (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc, Rational& outputMultiplyLieBracketsToGetGenerator);
+  std::string ToString(FormatExpressions* inputFormat=0);
+  std::string GetStringFromChevalleyGenerator(int theIndex, FormatExpressions* thePolynomialFormat)const;
+  bool CommutatorIsNonZero(int leftIndex, int rightIndex)
+  { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
+  }
+  std::string GetLieAlgebraName()const
+  { return this->theWeyl.theDynkinType.GetLieAlgebraName();
+  }
+  void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
+  void GenerateWeightSupportMethod2(Vector<Rational>& theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  inline int GetNumGenerators()const
+  { return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;
+  }
+  inline int GetNumPosRoots()const
+  { return this->theWeyl.RootsOfBorel.size;
+  }
+  inline int GetRank()const
+  { return this->theWeyl.CartanSymmetric.NumRows;
+  }
+  void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart);
+  void OrderSetNilradicalNegativeMostReversed(Selection& parSelZeroMeansLeviPart);
+  void OrderSSalgebraForHWbfComputation();
+  void OrderSSLieAlgebraStandard();
+  int GetCartanGeneratorIndex(int simpleRootIndex)
+  { return this->theWeyl.RootsOfBorel.size+simpleRootIndex;
+  }
+  int GetGeneratorFromRoot(const Vector<Rational>& input)
+  { return this->GetGeneratorFromRootIndex(this->theWeyl.RootSystem.GetIndex(input));
+  }
+  int GetRootIndexFromDisplayIndex(int theIndex);
+  int GetGeneratorFromDisplayIndex(int theIndex)
+  { if (theIndex<0)
+      return theIndex+this->GetNumPosRoots();
+    return theIndex+this->GetNumPosRoots()+this->GetRank()-1;
+  }
+  int GetGeneratorFromRootIndex(int theIndex)const;
+  int GetDisplayIndexFromRootIndex(int theIndex)const;
+  //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
+  int GetRootIndexFromGenerator(int theIndex)const;
+  int GetCartanIndexFromGenerator(int theIndex)
+  { return theIndex+this->theWeyl.RootsOfBorel.size;
+  }
+  int GetDisplayIndexFromGenerator(int theIndex)const
+  { //std::cout << "<br>num pos roots: " <<  this->GetNumPosRoots();
+   // std::cout << " rank: "<< this->GetRank();
+    if (theIndex<this->GetNumPosRoots())
+      return theIndex-this->GetNumPosRoots();
+    if (theIndex>=this->GetNumPosRoots()+this->GetRank())
+      return theIndex+1-this->GetNumPosRoots()-this->GetRank();
+    return theIndex-this->GetNumPosRoots();
+  }
+  bool AreOrderedProperly(int leftIndex, int rightIndex);
+  bool IsGeneratorFromCartan(int theIndex)const
+  { return theIndex>=this->GetNumPosRoots() && theIndex<this->GetNumPosRoots()+this->GetRank();
+  }
+  bool AreOppositeRootSpaces(int leftIndex, int rightIndex)
+  { if(this->IsGeneratorFromCartan(leftIndex) || this->IsGeneratorFromCartan(rightIndex))
+      return false;
+    int left  = this->GetRootIndexFromGenerator(leftIndex);
+    int right=this->GetRootIndexFromGenerator(rightIndex);
+    return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
+  }
+  void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
+  void ComputeChevalleyConstants(GlobalVariables* theGlobalVariables);
+  template<class coefficient>
+  coefficient GetKillingForm(const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right);
+  template <class coefficient>
+  coefficient GetKillingFormProductWRTLevi
+  (const ElementSemisimpleLieAlgebra<coefficient>& left, const ElementSemisimpleLieAlgebra<coefficient>& right, const Selection& rootsNotInLevi);
+  template<class coefficient>
+  void LieBracket(const ElementSemisimpleLieAlgebra<coefficient>& g1, const ElementSemisimpleLieAlgebra<coefficient>& g2, ElementSemisimpleLieAlgebra<coefficient>& output);
+  //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
+  //then the below function computes n_{-\epsilon, -\zeta}
+  void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
+  void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
+  void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
+  void ExploitTheCyclicTrick(int i, int j, int k);
+  bool GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta, int& output)const;
+  Rational GetConstant(const Vector<Rational>& root1, const Vector<Rational>& root2);
+  bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
+  void ElementToStringVermaMonomials(std::string& output);
+  void ElementToStringEmbedding(std::string& output);
+  Vector<Rational> GetWeightOfGenerator(int index)
+  { if (index<this->GetNumPosRoots())
+      return this->theWeyl.RootSystem[index];
+    if (index>=this->GetRank()+this->GetNumPosRoots())
+      return this->theWeyl.RootSystem[index-this->GetRank()];
+    Vector<Rational> result;
+    result.MakeZero(this->GetRank());
+    return result;
+  }
+  //returns true if returning constant, false if returning element of h
+  bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
+  bool TestForConsistency(GlobalVariables& theGlobalVariables);
+  bool AttempTFindingHEF
+  (ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputH, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputE,
+   ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& inputOutputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+  bool AttemptExtendingEtoHEFwithHinCartan
+  (ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputH,
+   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, std::stringstream* logStream=0, GlobalVariables* theGlobalVariables=0);
+  bool AttemptExtendingHtoHEFwithHinCartan
+  (ElementSemisimpleLieAlgebra<Rational>& theH, ElementSemisimpleLieAlgebra<Rational>& outputE,
+   ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables);
+  bool AttemptExtendingHEtoHEFWRTSubalgebra
+  (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+   ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
+   PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables);
+  static void FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables);
+  void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
+  template<class coefficient>
+  void GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e);
+  void initHEFSystemFromECoeffs
+  (int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
+   int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs,
+   Matrix<Rational>& outputMatrixSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
+  void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
+  bool IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
+  void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
+  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
+  int GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
+  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
+  bool operator==(const SemisimpleLieAlgebra& other)const
+  { return this->theWeyl==other.theWeyl;
+  }
+};
 
-class NilradicalCandidate
+template <class coefficient>
+class MonomialChar
+{
+public:
+  SemisimpleLieAlgebra* owner;
+  Vector<coefficient> weightFundamentalCoordS;
+  static const bool IsEqualToZero()
+  { return false;
+  }
+  friend std::ostream& operator << (std::ostream& output, const MonomialChar<coefficient>& input)
+  { output << input.ToString();
+    return output;
+  }
+  MonomialChar():owner(0){}
+  void CheckNonZeroOwner()const
+  { if (this->owner!=0)
+      return;
+    crash << "This is a programming error: Monomial char has zero owner, which is not allowed by the current function call. " << crash;
+  }
+  void AccountSingleWeight
+  (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
+   Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const;
+  std::string TensorAndDecompose(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  inline unsigned int HashFunction()const
+  { return weightFundamentalCoordS.HashFunction();
+  }
+  static inline unsigned int HashFunction(const MonomialChar<coefficient>& input)
+  { return input.HashFunction();
+  }
+  inline bool operator==(const MonomialChar<coefficient>& other) const
+  { return this->weightFundamentalCoordS==other.weightFundamentalCoordS && this->owner==other.owner;
+  }
+  inline bool operator>(const MonomialChar<coefficient>& other) const
+  { return this->weightFundamentalCoordS>other.weightFundamentalCoordS;
+  }
+};
+
+template <class coefficient>
+class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coefficient>
 {
   public:
-  CandidateSSSubalgebra* owner;
-  std::string FKnilradicalLog;
-  bool flagNilradicalConesIntersect;
-  bool flagNilradicalConesStronglyIntersect;
-  bool flagComputedRelativelyStrongIntersections;
-  bool flagRestrictedCentralizerConditionHoldS;
-  bool flagParabolicACextendsToParabolicAC;
-
-  bool flagLinfiniteRelFound;
-  DynkinDiagramRootSubalgebra theLeviDiagramAmbienT, theLeviDiagramSmalL;
-  //0->not selected; 1->selected; 2->undecided.
-  List<int> theNilradicalSelection;
-  Vector<Rational> ConeIntersection;
-  Vector<Rational> ConeStrongIntersection;
-  Vector<Rational> ConeRelativelyStrongIntersection;
-  //  Vector<Rational> LInfiniteRelation;
-  Vector<Rational> ConeSeparatingNormal;
-  Vectors<Rational> theNilradicalWeights;
-  Vectors<Rational> theNonFKhws;
-  Vectors<Rational> theNonFKhwsStronglyTwoSided;
-
-  List<int> ownerModulesNilradicalElements;
-  List<int> ownerModulestheNonFKhwVectors;
-
-  Vectors<Rational> leviRootsAmbienT;
-  Vectors<Rational> leviRootsSmallPrimalFundCoords;
-
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectors;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKHVectorsStronglyTwoSided;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradical;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalElementOpposites;
-  Selection theNilradSubsel;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNilradicalSubset;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNonFKhwVectorsStrongRelativeToSubset;
-  Vectors<Rational> theNilradicalSubsetWeights;
-  Vectors<Rational> theNonFKhwVectorsStrongRelativeToSubsetWeights;
-
-  NilradicalCandidate():owner(0), flagRestrictedCentralizerConditionHoldS(false), flagParabolicACextendsToParabolicAC(false), flagLinfiniteRelFound(false){}
-  void reset();
-  void CheckInitialization()const;
-  bool IsStronglySingular(int moduleIndex);
-  bool IsStronglySingularRelativeToSubset(int nonFKweightIndex);
-  Vector<Rational> GetConeStrongIntersectionWeight()const;
-  Vector<Rational> GetNilradicalLinearCombi()const;
-  void GetModGeneratedByNonHWVandNilradElt
-  (int indexInNilradSubset, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputLeft,
-   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputRight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputBrackets)const
-  ;
-  bool TryFindingLInfiniteRels(GlobalVariables* theGlobalVariables);
-  void ComputeParabolicACextendsToParabolicAC(GlobalVariables* theGlobalVariables);
-//  bool IsLInfiniteRel(GlobalVariables* theGlobalVariables);
-  bool IsCommutingSelectionNilradicalElements(Selection& inputNilradSel);
-  void ProcessMe(GlobalVariables* theGlobalVariables);
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ToStringTableElementWithWeights(const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& theElts, const Vectors<Rational>& theWeights)const;
-  void ComputeTheTwoCones(GlobalVariables* theGlobalVariables);
-  void ComputeTheTwoConesRelativeToNilradicalSubset();
+  void CheckConsistency()const
+  { if (this->size()==0)
+      return;
+    const SemisimpleLieAlgebra* owner=(*this)[0].owner;
+    for (int i=1; i<this->size(); i++)
+      if ((*this)[i].owner!=owner)
+        crash << "This is a programming error: charSSAlgMod contains elements belonging to different semisimple Lie algebras. " << crash;
+  }
+  void CheckNonZeroOwner()const
+  { this->CheckConsistency();
+    if (this->GetOwner()==0)
+      crash << "This is a programming error: charSSAlgMod has no owner semisimple Lie algebra, which is not allowed at by the calling function. " << crash;
+  }
+  bool IsEqualToZero()
+  { return this->size()==0;
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const charSSAlgMod<coefficient>& input)
+  { return input.::MonomialCollection<MonomialChar<coefficient>, coefficient>::HashFunction(input);
+  }
+  void GetDual(charSSAlgMod<coefficient>& output)const;
+  void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
+  bool SplitCharOverRedSubalg(std::string* Report, charSSAlgMod& output, branchingData& inputData, GlobalVariables& theGlobalVariables);
+  bool GetDominantCharacterWRTsubalgebra
+  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails, GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights);
+  bool FreudenthalEvalMeDominantWeightsOnly
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  bool FreudenthalEvalMeFullCharacter
+  (charSSAlgMod<coefficient>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables);
+  bool DrawMeNoMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
+  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
+  }
+  bool DrawMeWithMults(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
+  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
+  }
+  void DrawMeAssumeCharIsOverCartan(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)const;
+  SemisimpleLieAlgebra* GetOwner()const
+  { if (this->size()==0)
+      crash << "This is a programming error: requesting owner semisimple Lie algebra of zero character. " << crash;
+    return (*this)[0].owner;
+  }
+  bool DrawMe(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults);
+  bool SplitOverLeviMonsEncodeHIGHESTWeight
+  (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
+   SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables);
+  int GetIndexExtremeWeightRelativeToWeyl(WeylGroup& theWeyl)const;
+  void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
+  std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
+  std::string operator*=(const charSSAlgMod& other);
+  std::string operator*=(const MonomialChar<Rational>& other);
+  void operator*=(const coefficient& other)
+  { this->::MonomialCollection<MonomialChar<coefficient>, coefficient>::operator*=(other);
+  }
 };
 
-class CandidateSSSubalgebra
+class HomomorphismSemisimpleLieAlgebra
 {
 public:
-  WeylGroup theWeylNonEmbeddeD;
-  WeylGroup theWeylNonEmbeddeDdefaultScale;
-  DynkinDiagramRootSubalgebra theCentralizerSubDiagram;
-  DynkinType theCentralizerType;
-
-  List<Vectors<Rational> > CartanSAsByComponent;
-  Vectors<Rational> theHsScaledToActByTwo;
-  Vectors<Rational> theHs;
-  Vectors<Rational> theHsInOrderOfCreation;
-  Matrix<Rational> BilinearFormSimplePrimal;
-  Matrix<Rational> BilinearFormFundPrimal;
-  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
-  Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoFundAmbientCoords;
-  Matrix<Rational> MatMultiplyFundCoordsToGetSimple;
-
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theNegGens;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > theBasis;
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > fullBasisByModules;
-  List<int> fullBasisOwnerModules;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownPosGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownNegGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> > > theUnknownCartanCentralizerBasis;
-
-//  Vector<Rational> aSolution;
-  List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
-  List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
-  charSSAlgMod<Rational> theCharNonPrimalFundCoords;
-  charSSAlgMod<Rational> thePrimalChaR;
-  Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
-  Vectors<Rational> CartanOfCentralizer;
-  List<Polynomial<AlgebraicNumber> > theSystemToSolve;
-  List<Polynomial<AlgebraicNumber> > transformedSystem;
-  SemisimpleSubalgebras* owner;
-  int indexInOwner;
-  int indexIamInducedFrom;
-  List<int> RootInjectionsFromInducer;
-  int indexInOwnersOfNonEmbeddedMe;
-  int indexHcandidateBeingGrown;
-  int indexMaxSSContainer;
-  int indexSSPartCentralizer;
-  List<int> indicesDirectSummandSuperAlgebra;
-  MemorySaving<FormatExpressions> charFormaT;
-  bool flagSystemSolved;
-  bool flagSystemProvedToHaveNoSolution;
-  bool flagSystemGroebnerBasisFound;
-  bool flagCentralizerIsWellChosen;
-  bool flagUsedInducingSubalgebraRealization;
-  int RecursionDepthCounterForNilradicalGeneration;
-  int totalNumUnknownsNoCentralizer;
-  int totalNumUnknownsWithCentralizer;
-  long long int totalArithmeticOpsToSolveSystem;
-
-  List<NilradicalCandidate> FKNilradicalCandidates;
-  int NumConeIntersections;
-  int NumCasesNoLinfiniteRelationFound;
-  int NumBadParabolics;
-  int NumCentralizerConditionFailsConeConditionHolds;
-  //The highest weight vectors are by definition cartan-centralizer-split
-  List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > HighestVectorsNonSorted;
-  List<Vector<Rational> > HighestWeightsPrimalNonSorted;
-  List<Vector<Rational> > HighestWeightsNONprimalNonSorted;
-
-  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > HighestVectors;
-  HashedList<Vector<Rational> > HighestWeightsPrimal;
-  List<Vector<Rational> > HighestWeightsNONPrimal;
-
-  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > Modules;
-  List<List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > > ModulesSl2opposite;
-  List<List<ElementSemisimpleLieAlgebra<AlgebraicNumber> > > ModulesIsotypicallyMerged;
-//  List<List<ElementSemisimpleLieAlgebra<Rational> > > ModulesSemisimpleSubalgebra;
-
-  List<Vectors<Rational> > WeightsModulesNONprimal;
-  List<Vectors<Rational> > WeightsModulesPrimal;
-  List<charSSAlgMod<Rational> > CharsPrimalModules;
-  List<charSSAlgMod<Rational> > CharsPrimalModulesMerged;
-  HashedList<Vector<Rational> > RootSystemCentralizerPrimalCoords;
-  HashedList<Vector<Rational> > RootSystemSubalgebraPrimalCoords;
-
-  List<List<List<int> > > NilradicalPairingTable;
-  List<int> subalgebraModules;
-  List<int> centralizerSubalgebraModules;
-  List<int> primalSubalgebraModules;
-  List<List<int> > OppositeModulesByStructure;
-  List<List<int> > OppositeModulesByChar;
-
-  HashedList<int, MathRoutines::IntUnsignIdentity> modulesWithZeroWeights;
-  std::string nilradicalGenerationLog;
-  Rational centralizerRank;
-
-  bool flagDeallocated;
-  CandidateSSSubalgebra();
-  ~CandidateSSSubalgebra()
-  { this->flagDeallocated=true;
+  SemisimpleLieAlgebra* domainAlg;
+  SemisimpleLieAlgebra* rangeAlg;
+  //Let rk:=Rank(Domain)
+  //format of ImagesSimpleChevalleyGenerators: the first rk elements give
+  //the images of the Chevalley generators corresponding to simple positive roots
+  //the second rk elements give the images of the Chevalley generators corresponding to simple
+  //negative roots
+  List<ElementSemisimpleLieAlgebra<Rational> > imagesSimpleChevalleyGenerators;
+  //format of ImagesAllChevalleyGenerators: the Generators are given in the same order as
+  //the one used in MonomialUniversalEnveloping
+  List<ElementSemisimpleLieAlgebra<Rational> > imagesAllChevalleyGenerators;
+  List<ElementSemisimpleLieAlgebra<Rational> > domainAllChevalleyGenerators;
+  List<ElementSemisimpleLieAlgebra<Rational> > GmodK;
+  Vectors<Rational> RestrictedRootSystem;
+  Vectors<Rational> ImagesCartanDomain;
+  SemisimpleLieAlgebra& theDomain()
+  { if (domainAlg==0)
+      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
+    return *domainAlg;
   }
-  void reset(SemisimpleSubalgebras* inputOwner=0);
-  bool CheckConsistency()const;
-  bool CheckMaximalDominance()const;
-  int GetPrimalRank()const;
-  int GetRank()const;
-  int GetSSpartCentralizerOfSSPartCentralizer()const;
-  void GetHsByType(List<List<Vectors<Rational> > >& outputHsByType, List<DynkinSimpleType>& outputTypeList)const;
-  bool HasConjugateHsTo(List<Vector<Rational> >& other)const;
-  bool IsDirectSummandOf(const CandidateSSSubalgebra& other, bool computeImmediateDirectSummandOnly);
-  void GetGenericCartanCentralizerLinearCombination(int indexCartanCentralizerGen, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
-  void GetGenericPosGenLinearCombination(int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
-  bool IsExtremeWeight(int moduleIndex, int indexInIsoComponent)const;
-  void GetGenericNegGenLinearCombination(int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
-  bool AmRegularSA()const;
-  bool CompareLeftGreaterThanRight(const Vector<Rational>& left, const Vector<Rational>& right);
-  void GetGenericLinearCombination(int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
-  void GetGenericLinearCombinationInvolvedPosGens(int theIndex, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
-  void ComputeCentralizerIsWellChosen();
-  void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
-  void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
-  bool CreateAndAddByExtendingBaseSubalgebra
-  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType, const List<int>& theRootInjection);
-  void SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newH=0, int newHorbitIndex=-1);
-  void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
-  std::string ToStringNilradicalSelection(const List<int>& theSelection);
-  void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
-  void ExtendNilradicalSelectionToMultFreeOverSSpartSubalgebra
-  (HashedList<int, MathRoutines::IntUnsignIdentity>& inputOutput, GlobalVariables* theGlobalVariables, std::stringstream* logStream);
-  bool IsPossibleNilradicalCarryOutSelectionImplications(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
-  void ExtendToModule(List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOutput, GlobalVariables* theGlobalVariables);
-  Vector<Rational> GetPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
-  Vector<Rational> GetNonPrimalWeightFirstGen(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& input)const;
-  void ComputeKsl2triples(GlobalVariables* theGlobalVariables);
-  void ComputeKsl2triplesGetOppositeEltsInOppositeModule
-  (const Vector<Rational>& theElementWeight, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& inputOppositeModule,
-   List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts);
-  void ComputeKsl2triplesGetOppositeEltsAll(const Vector<Rational>& theElementWeight, List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& outputElts);
-  bool ComputeKsl2tripleSetUpAndSolveSystem
-  (const ElementSemisimpleLieAlgebra<AlgebraicNumber>& theE, const List<ElementSemisimpleLieAlgebra<AlgebraicNumber> >& FisLinearCombiOf,
-   ElementSemisimpleLieAlgebra<AlgebraicNumber>& outputF, GlobalVariables* theGlobalVariables);
-  void ComputeCharsPrimalModules();
-  void ComputePairingTable(GlobalVariables* theGlobalVariables);
-  void ComputeSinglePair(int leftIndex, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
-  int GetNumModules()const;
-  void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
-  bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
-  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit);
-  bool CheckInitialization()const;
-  bool CheckModuleDimensions()const;
-  SemisimpleLieAlgebra& GetAmbientSS()const;
-  WeylGroup& GetAmbientWeyl()const;
-  void ComputeCartanOfCentralizer(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecompositionHWsHWVsOnly(GlobalVariables* theGlobalVariables);
-  void ComputePrimalModuleDecompositionHWVsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& inputHws);
-  void ComputePrimalModuleDecompositionHighestWeightsOnly(GlobalVariables* theGlobalVariables, HashedList<Vector<Rational> >& outputHWsCoords);
-  void ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(GlobalVariables* theGlobalVariables);
-  void GetPrimalWeightProjectionFundCoords(const Vector<Rational>& inputAmbientWeight, Vector<Rational>& output)const;
-  bool CheckGensBracketToHs();
-  void GetWeightProjectionFundCoords(const Vector<Rational>& inputAmbientweight, Vector<Rational>& output)const;
-  bool ComputeSystem(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
-  bool ComputeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
-  bool ComputeChar(bool allowBadCharacter);
-  bool AttemptToSolveSystem();
-  bool isGoodForTheTop(const Vector<Rational>& HneW)const;
-  bool isGoodHnew(const Vector<Rational>& HneW, int indexHneW)const;
-  Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
-  std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
-  std::string ToStringGenerators(FormatExpressions* theFormat=0)const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  std::string ToStringSystem(FormatExpressions* theFormat=0)const;
-  std::string ToStringCentralizer(FormatExpressions* theFormat=0)const;
-  std::string ToStringCartanSA(FormatExpressions* theFormat=0)const;
-  std::string ToStringPairingTable(FormatExpressions* theFormat=0)const;
-  std::string ToStringPairingTableLaTeX(FormatExpressions* theFormat=0)const;
-  std::string ToStringNilradicals(FormatExpressions* theFormat=0)const;
-  std::string ToStringNilradicalsSummary(FormatExpressions* theFormat=0)const;
-  std::string ToStringModuleDecompo(FormatExpressions* theFormat=0)const;
-  std::string ToStringModuleDecompoLaTeX(FormatExpressions* theFormat=0)const;
-  std::string ToStringDrawWeights(FormatExpressions* theFormat=0)const;
-  std::string ToStringDrawWeightsHelper(int indexModule, const Vector<Rational>& theWeight)const;
-//  std::string ToStringDrawWeightsVersion2(FormatExpressions* theFormat=0)const;
-  bool operator>(const CandidateSSSubalgebra& other)const ;
-
+  SemisimpleLieAlgebra& theRange()
+  { if (rangeAlg==0)
+      crash << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. " << crash;
+    return *rangeAlg;
+  }
+  HomomorphismSemisimpleLieAlgebra(): domainAlg(0), rangeAlg(0){}
+  std::string DebugString;
+  void GetWeightsGmodKInSimpleCoordsK(Vectors<Rational>& outputWeights, GlobalVariables& theGlobalVariables)
+  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK, theGlobalVariables);
+  }
+  void GetWeightsKInSimpleCoordsK(Vectors<Rational>& outputWeights, GlobalVariables& theGlobalVariables)
+  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->imagesAllChevalleyGenerators, theGlobalVariables);
+  }
+  void GetWeightsWrtKInSimpleCoordsK
+  (Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts, GlobalVariables& theGlobalVariables);
+  void ToString(std::string& output, GlobalVariables& theGlobalVariables)
+  { this->ToString(output, false, theGlobalVariables);
+  }
+  void ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
+  void MakeGinGWithId(char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables);
+  void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
+  void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
+  void ComputeDebugString(GlobalVariables& theGlobalVariables)
+  { this->ToString(this->DebugString, theGlobalVariables);
+  }
+  void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables)
+  { this->ToString(this->DebugString, useHtml, theGlobalVariables);
+  }
+  std::string ToString(GlobalVariables& theGlobalVariables)
+  { std::string tempS;
+    this->ToString(tempS, theGlobalVariables);
+    return tempS;
+  }
+  void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
+  bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
+  bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
+  void ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
+  bool ApplyHomomorphism
+  (const ElementUniversalEnveloping<RationalFunctionOld>& input, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
+  bool ApplyHomomorphism
+  (const MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables);
 };
-
-class SemisimpleSubalgebras
-{
-public:
-  GlobalVariables* theGlobalVariables;
-  SemisimpleLieAlgebra* owneR;
-  AlgebraicClosureRationals* ownerField;
-  SltwoSubalgebras theSl2s;
-  HashedListReferences<SemisimpleLieAlgebra>* theSubalgebrasNonEmbedded;
-  ListReferences<SltwoSubalgebras>* theSl2sOfSubalgebras;
-
-  List<HashedList<Vector<Rational> > > theOrbits;
-  HashedList<Rational> theOrbitHelementLengths;
-  List<HashedList<ElementWeylGroup> > theOrbitGeneratingElts;
-  List<bool> theOrbitsAreComputed;
-
-  List<CandidateSSSubalgebra> theSubalgebraCandidates;
-  int theRecursionCounter;
-  bool flagAttemptToSolveSystems;
-  bool flagComputePairingTable;
-  bool flagComputeModuleDecomposition;
-  bool flagComputeNilradicals;
-  bool flagProduceLaTeXtables;
-  bool flagAttemptToAdjustCentralizers;
-  double timeComputationStartInSeconds;
-  double timeComputationEndInSeconds;
-  signed long long int numAdditions;
-  signed long long int numMultiplications;
-  bool flagDeallocated;
-  int GetNumPossibleSAs()const;
-  std::string ToStringAlgebraLink(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  int GetDisplayIndexFromActual(int ActualIndexSubalgebra)const;
-  std::string GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  std::string GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const;
-  bool operator==(const SemisimpleSubalgebras& other)
-  { if (this->owneR==other.owneR)
-      return true;
-    if (this->owneR==0 || other.owneR==0)
-      crash << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. " << crash;
-    return *this->owneR==*other.owneR;
-  }
-  SemisimpleLieAlgebra& GetSSowner()const
-  { if (this->owneR==0)
-      crash << "This is a programming error: attempted to access non-initialized semisimple Lie subalgerbas. " << crash;
-    return *this->owneR;
-  }
-  void initHookUpPointers
-  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables);
-  void reset();
-  ~SemisimpleSubalgebras()
-  { this->flagDeallocated=true;
-  }
-  SemisimpleSubalgebras(): flagDeallocated(false)
-  { this->reset();
-  }
-  SemisimpleSubalgebras
-  (SemisimpleLieAlgebra& inputOwner, AlgebraicClosureRationals* theField, HashedListReferences<SemisimpleLieAlgebra>* inputSubalgebrasNonEmbedded,
-   ListReferences<SltwoSubalgebras>* inputSl2sOfSubalgebras, GlobalVariables* inputGlobalVariables): flagDeallocated(false)
-  { this->reset();
-    this->initHookUpPointers(inputOwner, theField, inputSubalgebrasNonEmbedded, inputSl2sOfSubalgebras, inputGlobalVariables);
-  }
-  bool CheckConsistency()const;
-  std::string ToString(FormatExpressions* theFormat=0);
-  std::string ToStringSSsumaryLaTeX(FormatExpressions* theFormat=0)const;
-  std::string ToStringSSsumaryHTML(FormatExpressions* theFormat=0)const;
-  void ComputePairingTablesAndFKFTtypes();
-  void GetCentralizerChains(List<List<int> >& outputChains);
-  const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
-  int GetIndexFullSubalgebra()const;
-  const HashedList<ElementWeylGroup>& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
-  bool RanksAndIndicesFit(const DynkinType& input)const;
-  bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
-  Vector<Rational> GetHighestWeightFundNewComponentFromRootInjection(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified);
-  void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
-  void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
-  void ComputeSl2sInitOrbitsForComputationOnDemand();
-  void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
-  void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
-  void ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0);
-};
-
 
 #endif
-

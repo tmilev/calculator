@@ -6,6 +6,8 @@
 #include "vpfHeader2Math2_AlgebraicNumbers.h"
 #include "vpfHeader2Math15_UniversalEnveloping.h"
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Math routines implementation. ");
 
@@ -34,6 +36,21 @@ void SubgroupWeylGroupOLD::WriteToFile(std::fstream& output, GlobalVariables* th
   this->simpleGenerators.WriteToFile(output, theGlobalVariables);
   output << "\nouter_generators: ";
   this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
+}
+
+Vector<Rational> SubgroupWeylGroupOLD::GetRho()
+{ Vector<Rational> result;
+  this->RootsOfBorel.sum(result, this->AmbientWeyl.GetDim());
+  result/=2;
+  return result;
+}
+
+void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
+{ Vectors<Rational> startBasis, imageBasis ;
+  startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
+  this->ActByElement(input, startBasis, imageBasis);
+  outputMatrix.AssignVectorsToRows(imageBasis);
+  outputMatrix.Transpose();
 }
 
 void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
@@ -813,6 +830,27 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
       output*=tempElt;
   }
   return true;
+}
+
+void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
+{ if(&output==&input)
+    crash << crash;
+  output.MakeZero();
+  for (int i=0; i<input.size(); i++)
+  { int currentIndex=input[i].theGeneratorIndex;
+    output+=this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
+  }
+}
+
+void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output)
+{ output.init(this->theRange().GetRank(), this->theDomain().GetRank());
+  ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
+  for (int i=0; i<this->theDomain().GetRank(); i++)
+  { domainElt.MakeHgenerator
+    (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), this->theDomain());
+    this->ApplyHomomorphism(domainElt, imageElt);
+    output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
+  }
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism

@@ -2338,28 +2338,6 @@ public:
   }
 };
 
-struct IndicatorWindowVariables
-{
-public:
-  bool Busy;
-  int NumProcessedMonomialsCurrentFraction;
-  int NumProcessedMonomialsTotal;
-  Vector<Rational> modifiedRoot;
-  bool flagRootIsModified;
-  bool Pause;
-  IndicatorWindowVariables(){this->init(); }
-  List<std::string> ProgressReportStringS;
-  void Assign(IndicatorWindowVariables& right);
-  void init()
-  { this->Busy=false;
-    this->Pause=true;
-    this->ProgressReportStringS.SetSize(0);
-    this->NumProcessedMonomialsCurrentFraction=0;
-    this->NumProcessedMonomialsTotal=0;
-    this->modifiedRoot.MakeZero(1);
-  }
-};
-
 class DrawTextOperation
 {
 public:
@@ -2810,16 +2788,16 @@ class GlobalVariables
   //I love doxygen!
   /// @cond
 private:
-  FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
 public:
+  FunctionStandardStringOutput StandardStringOutputFunction;
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   FormatExpressions theDefaultFormat;
 //progress report flags:
   bool flagGaussianEliminationProgressReport;
 
-  IndicatorWindowVariables theIndicatorVariables;
+  List<std::string> ProgressReportStringS;
   DrawingVariables theDrawingVariables;
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
@@ -2908,21 +2886,18 @@ public:
     return -1;
   }
   void operator=(const GlobalVariables& other)
-  { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
+  { this->StandardStringOutputFunction=other.StandardStringOutputFunction;
     this->theDrawingVariables=other.theDrawingVariables;
   }
   inline void DrawBufferNoIniT()
   { this->theDrawingVariables.drawBufferNoIniT();
   }
-  inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)
-  { this->FeedDataToIndicatorWindowDefault=input;
+  inline void SetStandardStringOutput(FunctionStandardStringOutput input)
+  { this->StandardStringOutputFunction=input;
   }
-  inline FeedDataToIndicatorWindow GetFeedDataToIndicatorWindowDefault()
-  { return this->FeedDataToIndicatorWindowDefault;
-  }
-  inline void FeedIndicatorWindow(IndicatorWindowVariables& input)
-  { if (this->FeedDataToIndicatorWindowDefault!=0)
-      this->FeedDataToIndicatorWindowDefault(input);
+  inline void StandardStringOutput(const std::string& input)
+  { if (this->StandardStringOutputFunction!=0)
+      this->StandardStringOutputFunction(input);
   }
   void SetCallSystem(void (*theSystemCall)(const std::string&))
   { this->callSystem=theSystemCall;
@@ -2931,9 +2906,13 @@ public:
   { if (this->callSystem!=0)
       this->callSystem(systemCommand);
   }
-  inline void MakeReport()
-  { if (this->FeedDataToIndicatorWindowDefault!=0)
-      this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
+  void MakeReport()
+  { if (this->StandardStringOutputFunction==0)
+      return;
+    std::stringstream reportStream;
+    for (int i=this->ProgressReportStringS.size-1; i>=0; i--)
+      reportStream << "\n" << this->ProgressReportStringS[i] << "\n<br>\n";
+    this->StandardStringOutput(reportStream.str());
   }
   /// @endcond
 };

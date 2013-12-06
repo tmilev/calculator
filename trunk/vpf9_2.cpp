@@ -45,7 +45,7 @@ Vector<Rational> SubgroupWeylGroupOLD::GetRho()
   return result;
 }
 
-void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup& input, Matrix<Rational>& outputMatrix)const
+void SubgroupWeylGroupOLD::GetMatrixOfElement(const ElementWeylGroup<WeylGroup>& input, Matrix<Rational>& outputMatrix)const
 { Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
@@ -62,8 +62,7 @@ void SubgroupWeylGroupOLD::ReadFromFile(std::fstream& input, GlobalVariables* th
 }
 
 bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
-(Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables,
- int UpperLimitNumElements, bool recomputeAmbientRho)
+(Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos, GlobalVariables* theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho)
 { MemorySaving< HashedList<Vector<Rational> > > bufferOrbit;
   HashedList<Vector<Rational> >& orbitRho = (theGlobalVariables==0) ? bufferOrbit.GetElement() :
   theGlobalVariables->hashedRootsComputeSubGroupFromGeneratingReflections.GetElement();
@@ -80,8 +79,8 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
     this->ExternalAutomorphisms=*inputExternalAutos;
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators, this->AmbientWeyl.RootSystem);
   this->ComputeRootSubsystem();
-  ElementWeylGroup tempEW;
-  tempEW.reflections.size=0;
+  ElementWeylGroup<WeylGroup> tempEW;
+  tempEW.generatorsLastAppliedFirst.size=0;
   Vector<Rational> tempRoot;
   tempRoot=(this->AmbientWeyl.rho);
   // rho is invariant under external graph automorphisms (!)
@@ -93,23 +92,23 @@ bool SubgroupWeylGroupOLD::ComputeSubGroupFromGeneratingReflections
   this->AddOnTop(tempEW);
   Vector<Rational> currentRoot;
   for (int i=0; i<this->size; i++)
-  { tempEW=this->TheObjects[i];
+  { tempEW=(*this)[i];
     for (int j=0; j<this->simpleGenerators.size; j++)
-    { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], orbitRho.TheObjects[i], false, currentRoot);
+    { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], orbitRho[i], false, currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.reflections.AddOnTop(j);
+        tempEW.generatorsLastAppliedFirst.AddOnTop(j);
         this->AddOnTop(tempEW);
-        tempEW.reflections.RemoveLastObject();
+        tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
-        tempEW.reflections.AddOnTop(j+this->simpleGenerators.size);
+        tempEW.generatorsLastAppliedFirst.AddOnTop(j+this->simpleGenerators.size);
         this->AddOnTop(tempEW);
-        tempEW.reflections.RemoveLastObject();
+        tempEW.generatorsLastAppliedFirst.RemoveLastObject();
       }
     }
     if (UpperLimitNumElements>0)
@@ -272,70 +271,6 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
         outputMatrixSystemToBeSolved.elements[i][lowerIndex]=currentCoeff* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
     }
 //  outputSystemToBeSolved.ComputeDebugString();
-}
-
-void WeylGroup::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational>& output)
-{ output=(inputH);
-  int indexFirstNonRegular;
-  while(!this->IsRegular(output, &indexFirstNonRegular))
-  { Vector<Rational>& theBadRoot= this->RootSystem.TheObjects[indexFirstNonRegular];
-    Rational maxMovement=0; Rational tempRat1, tempRat2, tempMaxMovement;
-    for (int i=0; i<this->RootsOfBorel.size; i++)
-    { this->RootScalarCartanRoot(theBadRoot, this->RootsOfBorel.TheObjects[i], tempRat1);
-      this->RootScalarCartanRoot(output, this->RootsOfBorel.TheObjects[i], tempRat2);
-      if ((!tempRat1.IsEqualToZero()) && (!tempRat2.IsEqualToZero()))
-      { tempMaxMovement = tempRat2/tempRat1;
-        tempMaxMovement.AssignAbsoluteValue();
-        if ((tempMaxMovement< maxMovement) || maxMovement.IsEqualToZero())
-          maxMovement = tempMaxMovement;
-      }
-    }
-    int tempInt=2;
-    if (this->RootScalarCartanRoot(theBadRoot, inputH).IsNegative())
-      tempInt=-2;
-    output+=theBadRoot*maxMovement/tempInt;
-  }
-}
-
-bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularRoot)
-{ if (indexFirstPerpendicularRoot!=0)
-    *indexFirstPerpendicularRoot=-1;
-  for (int i=0; i<this->RootSystem.size; i++)
-    if (this->RootScalarCartanRoot(input, this->RootSystem.TheObjects[i]).IsEqualToZero())
-    { if (indexFirstPerpendicularRoot!=0)
-        *indexFirstPerpendicularRoot=i;
-      return false;
-    }
-  return true;
-}
-
-Rational WeylGroup::GetSizeWeylGroupByFormula(char weylLetter, int theDim)
-{ //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
-  Rational theOutput=1;
-  if (weylLetter=='A')
-    theOutput= Rational::Factorial(theDim+1);
-  if (weylLetter=='B' || weylLetter=='C')
-    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim);
-  if (weylLetter=='D')
-    theOutput= Rational::Factorial(theDim)*Rational::TwoToTheNth(theDim-1);
-  if (weylLetter=='E')
-  { if (theDim==6)
-      theOutput= 51840;
-    if (theDim==7)
-    { theOutput=1024;
-      theOutput*=81*35;
-    }
-    if (theDim==8)
-    { theOutput=1024*16;
-      theOutput*=81*3;
-      theOutput*=25*7;
-    }
-  }
-  if (weylLetter=='F')
-    theOutput=128*9;
-  if (weylLetter=='G')
-    theOutput=12;
-  return theOutput;
 }
 
 void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, unsigned long thePenStyle, int ColorIndex)

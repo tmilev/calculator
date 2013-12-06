@@ -963,21 +963,21 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
   return true;
 }
 
-void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup>& output)
+void SubgroupWeylGroupOLD::GetGroupElementsIndexedAsAmbientGroup(List<ElementWeylGroup<WeylGroup> >& output)
 { if (this->ExternalAutomorphisms.size>0)
     crash << "This is  a programming error: a function meant for subgroups that are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
     << crash;
   output.ReservE(this->size);
   output.SetSize(0);
-  ElementWeylGroup tempElt;
+  ElementWeylGroup<WeylGroup> tempElt;
   Vector<int> indexShifts;
   indexShifts.SetSize(this->simpleGenerators.size);
   for (int i=0; i<this->simpleGenerators.size; i++)
     indexShifts[i]=this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
   for (int i=0; i<this->size; i++)
   { tempElt=(*this)[i];
-    for (int j=0; j<tempElt.reflections.size; j++)
-      tempElt.reflections[j]= indexShifts[tempElt.reflections[j]];
+    for (int j=0; j<tempElt.generatorsLastAppliedFirst.size; j++)
+      tempElt.generatorsLastAppliedFirst[j]= indexShifts[tempElt.generatorsLastAppliedFirst[j]];
     output.AddOnTop(tempElt);
   }
 }

@@ -511,7 +511,7 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  HashedListReferences<ElementWeylGroup> theWeylGroupElements;
+  HashedListReferences<ElementWeylGroup<WeylGroup>> theWeylGroupElements;
   HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupReps;
   HashedListReferences<WeylGroupVirtualRepresentation> theWeylGroupVirtualReps;
   ListReferences<WeylGroup> theWeylGroups;

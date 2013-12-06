@@ -37,10 +37,10 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
   this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   if (this->theGlobalVariables!=0)
-    if (this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS.size>0)
+    if (this->theGlobalVariables->ProgressReportStringS.size>0)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>";
-      for (int i=this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS.size-1; i>=0; i--)
-        this->theCrashReport << this->theGlobalVariables->theIndicatorVariables.ProgressReportStringS[i] << "<br>";
+      for (int i=this->theGlobalVariables->ProgressReportStringS.size-1; i>=0; i--)
+        this->theCrashReport << this->theGlobalVariables->ProgressReportStringS[i] << "<br>";
     }
   std::cout << this->theCrashReport.str();
   std::fstream theFile;
@@ -480,12 +480,6 @@ int DynkinDiagramRootSubalgebra::numberOfThreeValencyNodes(int indexComponent, c
     if(numEnds>2)
       crash << crash;
   return result;
-}
-
-void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
-{ this->ProgressReportStringS=right.ProgressReportStringS;
-  this->flagRootIsModified= right.flagRootIsModified;
-  this->modifiedRoot=right.modifiedRoot;
 }
 
 bool affineCone::SplitByAffineHyperplane(affineHyperplane<Rational>& theKillerPlane, affineCones& output)
@@ -1020,7 +1014,7 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
 }
 
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+{ if (theGlobalVariables.StandardStringOutputFunction==0)
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);
@@ -1518,7 +1512,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism(Vector<Rational>& th
     this->theTranslationS[i]-=theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
     theProjectionBasisChanged.ActOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
-    if (theSubgroup[i].reflections.size%2==0)
+    if (theSubgroup[i].generatorsLastAppliedFirst.size%2==0)
       this->theCoeffs[i]=1;
     else
       this->theCoeffs[i]=-1;

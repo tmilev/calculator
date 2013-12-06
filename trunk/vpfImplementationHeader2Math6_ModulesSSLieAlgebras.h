@@ -533,7 +533,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
   this->theGeneratingWordsNonReduced.size=0;
   this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
   this->theGeneratingWordsWeightsPlusWeightFDpart.ReservE(this->thePaths.size);
-  HashedList<ElementWeylGroup> theWeylElts;
+  HashedList<ElementWeylGroup<WeylGroup>> theWeylElts;
 //  int wordCounter=-1;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];

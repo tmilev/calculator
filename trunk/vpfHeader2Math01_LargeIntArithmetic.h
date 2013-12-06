@@ -88,7 +88,10 @@ public:
   inline void operator++(int)
   { this->AddUInt(1);
   }
-  void AssignFactorial(unsigned int x){ this->AssignFactorial(x, 0);}
+  bool IsSmallEnoughToFitInInt(int* whichInt);
+  void AssignFactorial(unsigned int x)
+  { this->AssignFactorial(x, 0);
+  }
   void AssignFactorial(unsigned int x, GlobalVariables* theGlobalVariables);
   void MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const;
   void MultiplyByUInt(unsigned int x);
@@ -156,6 +159,9 @@ public:
   inline bool operator<(const LargeIntUnsigned& other)const
   { return !this->IsGEQ(other);
   }
+  bool operator>=(const LargeIntUnsigned& other)const
+  { return this->IsGEQ(other);
+  }
   bool operator>(const LargeIntUnsigned& other)const
   { return other<*this;
   }
@@ -194,6 +200,7 @@ public:
     this->ToString(tempS);
     return tempS;
   }
+  bool IsSmallEnoughToFitInInt(int* whichInt);
   bool IsPositive()const
   { return this->sign==1 && (this->value.IsPositive());
   }
@@ -620,6 +627,12 @@ ParallelComputing::GlobalPointerCounter++;
   void Assign(const Rational& r);
   void AssignInteger(int x);
   bool IsInteger(LargeInt* whichInteger=0)const;
+  bool IsIntegerFittingInInt(int* whichInt)const
+  { LargeInt theInt;
+    if (!this->IsInteger(&theInt))
+      return false;
+    return theInt.IsSmallEnoughToFitInInt(whichInt);
+  }
   bool IsSmallInteger(int* whichInteger=0)const
   { if (this->Extended!=0)
       return false;

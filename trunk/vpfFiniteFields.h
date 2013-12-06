@@ -11,7 +11,6 @@ static ProjectInformationInstance vpfFiniteField(__FILE__, "Prime fields");
 */
 
 
-
 class f65521
 { public:
   unsigned int n;

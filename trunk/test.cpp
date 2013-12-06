@@ -119,7 +119,7 @@ void PermutationR2::GetCycleStructure(List<int>& out)
     out[this->cycles[i].size] += 1;
 }
 
-void WeylElementPermutesRootSystem(const ElementWeylGroup& g, PermutationR2& p)
+void WeylElementPermutesRootSystem(const ElementWeylGroup<WeylGroup>& g, PermutationR2& p)
 { int rss = g.owner->RootSystem.size;
   List<bool> accountedFor;
   accountedFor.SetSize(rss);
@@ -279,17 +279,18 @@ void ComputeIrreps(WeylGroup& G)
   std::cout << "need reps for chars" << charactersWithoutIrreps << std::endl;
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
+  Rational SizeG=G.GetSizeWeylGroupByFormula();
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=0; j<G.characterTable.size; j++)
-      M(j,i) = G.characterTable[j][i]*G.conjugacyClasses[i].size/G.size;
+      M(j,i) = G.characterTable[j][i]*G.conjugacyClasses[i].size/SizeG;
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=i; j<G.characterTable.size; j++)
-    { std::cout << i << "⊗" << j << ": " << M*G.GetCharacterProduct(G.characterTable[i], G.characterTable[j]) << std::endl;
+    { std::cout << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << std::endl;
     }
 }
 
 // this is incorrect.  Do not use it.
-void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, WeylSubgroup& out)
+void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWeylGroupParabolic& out)
 { out.init();
   out.parent = G;
   int d = sel.CardinalitySelection+1;
@@ -298,10 +299,10 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, WeylSubgrou
   for(int i=0; i<d-1; i++)
     out.generatorPreimages[i] = i+1;
 
-  out.CartanSymmetric.init(d,d);
+  out.SubCartanSymmetric.init(d,d);
   for(int ii=0; ii<d-1; ii++)
     for(int jj=0; jj<d-1; jj++)
-      out.CartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
+      out.SubCartanSymmetric.elements[ii][jj] = G->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
 
   // the highest root was the last one in the RootSystem
   Vector<Rational> hr = G->RootSystem[G->RootSystem.size-1];
@@ -310,31 +311,31 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, WeylSubgrou
   { Vector<Rational> v;
     G->CartanSymmetric.GetVectorFromRow(sel.elements[i],v);
     Rational x = v.ScalarEuclidean(hr);
-    out.CartanSymmetric.elements[i][d-1] = x;
-    out.CartanSymmetric.elements[d-1][i] = x;
+    out.SubCartanSymmetric.elements[i][d-1] = x;
+    out.SubCartanSymmetric.elements[d-1][i] = x;
   }
-  out.CartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,G->CartanSymmetric);
-  out.generatorPreimages[d-1] = G->GetRootReflection(G->RootSystem.size-1);
+  out.SubCartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,G->CartanSymmetric);
+  out.generatorPreimages[d-1] = G->theElements.GetIndex(G->GetRootReflection(G->RootSystem.size-1));
 }
 
-void WeylSubgroup::ComputeTauSignature()
-{ if(this->ccPreimages.size == 0)
+void SubgroupWeylGroup::ComputeTauSignature()
+{ MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
+  if(this->ccPreimages.size == 0)
   { this->ccPreimages.SetSize(this->conjugacyClasses.size);
     for(int i=0; i<this->conjugacyClasses.size; i++)
-    { ElementWeylGroup g;
-      g.owner = this->parent;
-      for(int j=0; j<this->theElements[this->conjugacyClasses[i][0]].reflections.size; j++)
-        g.reflections.AddListOnTop(this->parent->theElements[this->generatorPreimages[this->theElements[this->conjugacyClasses[i][0]].reflections[j]]].reflections);
-      g.MakeCanonical();
+    { ElementWeylGroup<WeylGroup> g;
+      g.MakeID(*this->parent);
+      const ElementWeylGroup<WeylGroup>& currentRepresentative=this->theElements[this->conjugacyClasses[i][0]];
+      for(int j=currentRepresentative.generatorsLastAppliedFirst.size-1; j>=0; j--)
+        g*=this->parent->theElements[this->generatorPreimages[currentRepresentative.generatorsLastAppliedFirst[j]]];
       int gi = this->parent->theElements.GetIndex(g);
-      for(int ci=0; ci<this->parent->conjugacyClasses.size; ci++)
-        for(int cj=0; cj<this->parent->conjugacyClasses[ci].size; cj++)
+      bool notFound=true;
+      for(int ci=0; notFound && ci<this->parent->conjugacyClasses.size; ci++)
+        for(int cj=0; notFound && cj<this->parent->conjugacyClasses[ci].size; cj++)
           if(this->parent->conjugacyClasses[ci][cj] == gi)
           { this->ccPreimages[i] = ci;
-            goto endloop;
+            notFound=false;
           }
-endloop:
-      ;
     }
   }
   Vector<Rational> Xs;
@@ -343,7 +344,7 @@ endloop:
   Xi.SetSize(this->conjugacyClasses.size);
   this->tauSignature.SetSize(this->parent->irreps.size);
   for(int i=0; i<this->parent->irreps.size; i++)
-  { Vector<Rational> Xip = this->parent->irreps[i].GetCharacter();
+  { ClassFunction<Rational> Xip = this->parent->irreps[i].GetCharacter();
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccPreimages[j]];
     if(this->GetHermitianProduct(Xs,Xi) == 0)
@@ -353,7 +354,6 @@ endloop:
   }
 }
 
-
 template <typename weylgroup>
 void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 { if(G.characterTable.size == 0)
@@ -362,7 +362,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
      Selection sel;
      sel.MakeFullSelection(G.CartanSymmetric.NumCols);
      sel.RemoveSelection(0);
-     WeylSubgroup H;
+     SubgroupWeylGroup H;
      ParabolicSubgroup(&G,sel,H);
      std::cout << G.CartanSymmetric.ToString(&consoleFormat) << std::endl;
      H.ComputeIrreducibleRepresentations();
@@ -383,7 +383,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   for(int i=0; i<G.conjugacyClasses.size; i++)
   {std::cout << "conjugacy class " << i << std::endl;
    for(int j=0; j<G.conjugacyClasses[i].size; j++)
-   {ElementWeylGroup g = G.theElements[G.conjugacyClasses[i][j]];
+   {ElementWeylGroup<WeylGroup> g = G.theElements[G.conjugacyClasses[i][j]];
      for(int k=0; k<g.size; k++)
       std::cout << g[k] << ' ';
      std::cout << std::endl;
@@ -454,7 +454,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
     if(ts[0].size > numCycles)
     { std::cout << "hr is ";
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
-//    ElementWeylGroup hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
+//    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
       List<int> hr;
       G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size-1), hr);
       for(int i=0; i<hr.size; i++)
@@ -494,7 +494,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
 /*
   for(int j=0; j<PSGs[i].ccCount; j++)
-  { CoxeterElement h = PSGs[i].GetCoxeterElement(PSGs[i].conjugacyClasses[j][0]);
+  { ElementWeylGroup<WeylGroup> h = PSGs[i].GetCoxeterElement(PSGs[i].conjugacyClasses[j][0]);
     g.reflections.SetSize(h.reflections.size);
     for(int k=0; k<h.reflections.size; k++)
       g.reflections[k] = sel.elements[h.reflections[k]];
@@ -512,8 +512,8 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
 /*
 template <typename coefficient>
-List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<CoxeterRepresentation<coefficient> > &gr)
-{  List<CoxeterRepresentation<coefficient> > out;
+List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<WeylGroupRepresentation<coefficient> > &gr)
+{  List<WeylGroupRepresentation<coefficient> > out;
    if(GetNumberOfComponents() == 1)
    { if(ct.GetIndex(character) == -1)
      { std::cout << "new irrep found, have " << ct.size << std::endl;
@@ -525,14 +525,14 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
    }
    List<Vector<coefficient> > Vb = basis;
    for(int i=0; i<ct.size; i++)
-   { if(character.IP(ct[i])!=0)
+   { if(character.InnerProduct(ct[i])!=0)
      { std::cout << "contains irrep " << i << std::endl;
        Matrix<coefficient> M = ClassFunctionMatrix(ct[i]);
        Vb = intersection(Vb,DestructiveKernel(M));
      }
    }
    if((Vb.size < basis.size) && (Vb.size > 0))
-   { CoxeterRepresentation<coefficient> V;
+   { WeylGroupRepresentation<coefficient> V;
      V.G = G;
      V.gens = gens;
      V.classFunctionMatrices = classFunctionMatrices;
@@ -571,7 +571,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
    std::cout << std::endl;
 
    for(int i=0; i<leaves.size; i++)
-   {  CoxeterRepresentation<coefficient> outeme;
+   {  WeylGroupRepresentation<coefficient> outeme;
       outeme.G = G;
       outeme.gens = gens;
       outeme.classFunctionMatrices = classFunctionMatrices;
@@ -583,8 +583,8 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
 */
 
 /*template <typename coefficient>
-List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::Decomposition() const
-{ List<CoxeterRepresentation<coefficient> > out;
+List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>::Decomposition() const
+{ List<WeylGroupRepresentation<coefficient> > out;
   if(GetNumberOfComponents() == 1)
   { out.AddOnTop(*this);
     return out;
@@ -620,7 +620,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
         List<Vector<coefficient> > right = relative_complement(spaces[j],middle);
         spaces[j] = middle;
         spaces.AddOnTop(right);
-        CoxeterRepresentation<coefficient> midr;
+        WeylGroupRepresentation<coefficient> midr;
         midr.G = G;
         midr.gens = gens;
         midr.basis = middle;
@@ -628,7 +628,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
         { is_component[j] = true;
           dim_components += middle.size;
         }
-        CoxeterRepresentation<coefficient> rightr;
+        WeylGroupRepresentation<coefficient> rightr;
         rightr.G = G;
         rightr.gens = gens;
         rightr.basis = right;
@@ -643,7 +643,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
   }
   std::cout << "spaces.size " << spaces.size << std::endl;
   for(int i=0; i<spaces.size; i++)
-  { CoxeterRepresentation<coefficient> s;
+  { WeylGroupRepresentation<coefficient> s;
     s.G = this->G;
     s.gens = this->gens;
     s.basis = spaces[i];
@@ -994,18 +994,19 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
 }
 
 template <typename coefficient>
-Vector<coefficient> ActOnGroupRing(const CoxeterGroup& G, int g, const Vector<coefficient> &v)
+Vector<coefficient> ActOnGroupRing(const WeylGroup& G, int g, const Vector<coefficient> &v)
 { Vector<coefficient> out;
-  out.MakeZero(G.N);
-  for(int i=0; i<G.N; i++)
+  out.MakeZero(G.theElements.size);
+  ElementWeylGroup<WeylGroup> theProduct;
+  for(int i=0; i<G.theElements.size; i++)
     if(v[i] != 0)
-      out[G.MultiplyElements(g,i)] = v[i];
+      out[G.MultiplyElements(g,i)]=v[i];
   return out;
 }
 
 // this function name is a lie
 template <typename coefficient>
-bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
+bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
 { // pre-initial test: V isn't empty
   if(V.size == 0)
     return false;
@@ -1016,8 +1017,8 @@ bool is_isotypic_component(CoxeterGroup &G, const List<Vector<coefficient> > &V)
   // more expensive test: character of V has unit norm
   ClassFunction<coefficient> X;
   X.G = &G;
-  X.data.SetSize(G.ccCount);
-  for(int i=0; i<G.ccCount; i++)
+  X.data.SetSize(G.conjugacyClasses.size);
+  for(int i=0; i<G.conjugacyClasses.size; i++)
   { int g = G.conjugacyClasses[i][0];
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
@@ -1329,7 +1330,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; i<W.size; i++)
+  for(int i=0; (Rational)i<W.GetSizeWeylGroupByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1731,7 +1732,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   List<Vector<Rational> > monomial;
   HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; i<W.size; i++)
+  for(int i=0; (Rational) i<W.GetSizeWeylGroupByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1920,8 +1921,8 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
       if(w <= 2)
         continue;
-      Matrix<f65521> M1 = rep65521.GetElementImage(i+1);
-      Matrix<f65521> M2 = rep65521.GetElementImage(j+1);
+      Matrix<f65521> M1 = rep65521.GetMatrixElement(i+1);
+      Matrix<f65521> M2 = rep65521.GetMatrixElement(j+1);
       Matrix<f65521> M3 = M1*M2;
       MathRoutines::RaiseToPower(M3,w,idr65521);
       if(M3.IsIdMatrix())
@@ -2005,8 +2006,8 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       int w = W.theDynkinType.GetCoxeterEdgeWeight(i,j);
       if(w <= 2)
         continue;
-      Matrix<Rational> M1 = rep.GetElementImage(i+1);
-      Matrix<Rational> M2 = rep.GetElementImage(j+1);
+      Matrix<Rational> M1 = rep.GetMatrixElement(i+1);
+      Matrix<Rational> M2 = rep.GetMatrixElement(j+1);
       Matrix<Rational> M3 = M1*M2;
       MathRoutines::RaiseToPower(M3,w,idr);
       if(M3.IsIdMatrix())
@@ -2025,7 +2026,7 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
 { WeylGroup& W = theSSlieAlg.theWeyl;
 
   GlobalVariables localGlobalVariables;
-  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+  localGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
 
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
@@ -2143,10 +2144,10 @@ int main(void)
   //  for(int i=0; i<M.NumRows; i++)
   //    for(int j=0; j<M.NumCols; j++)
   //     M2.elements[i][j].n = M.elements[i][j].GetNumerator().GetIntValueTruncated();
-    CoxeterGroup G;
+    WeylGroup G;
     G.CartanSymmetric = M;
     G.ComputeIrreducibleRepresentations();
-    CoxeterRepresentation<Rational> r = G.irreps[0]*G.irreps[1];
+    WeylGroupRepresentation<Rational> r = G.irreps[0]*G.irreps[1];
     Matrix<Rational> cfm;
     ClassFunction<Rational> cf;
     cf = G.irreps[0].GetCharacter();
@@ -2155,7 +2156,7 @@ int main(void)
   */
 
   /*
-   CoxeterGroup G;
+   WeylGroup G;
    G.MakeFrom(M);
    G.ComputeInitialCharacters();
    for(int i=0; i<G.characterTable.size; i++)
@@ -2183,16 +2184,16 @@ int main(void)
     std::cout << G.characterTable << std::endl;
   */
   /*
-    GroupRingElement<Rational> XeP;
+    ElementWeylGroup<WeylGroup>Ring<Rational> XeP;
     XeP.MakeFromClassFunction(G.characterTable[0]);
     std::cout << XeP.data << std::endl;
 
-    GroupRingElement<Rational> E;
+    ElementWeylGroup<WeylGroup>Ring<Rational> E;
     E.MakeEi(&G,0);
     std::cout << E << std::endl;
     std::cout << XeP*E << std::endl;
 
-    GroupRingElement<Rational> XstdP;
+    ElementWeylGroup<WeylGroup>Ring<Rational> XstdP;
     XstdP.MakeFromClassFunction(G.characterTable[2]);
     std::cout << XstdP << std::endl;
 
@@ -2209,12 +2210,12 @@ int main(void)
     std::cout << XstdP*E << std::endl;
     std::cout << GetMatrix(G.characterTable[2])*E.data << std::endl;
 
-    ElementMonomialAlgebra<CoxeterElement, Rational> Xstdp = FromClassFunction(G.characterTable[2]);
+    ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> Xstdp = FromClassFunction(G.characterTable[2]);
     std::cout << Xstdp << std::endl;
     std::cout << "here they are" << std::endl;
-    List<ElementMonomialAlgebra<CoxeterElement, Rational> > l;
+    List<ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> > l;
     for(int i=0; i<G.N; i++)
-    { ElementMonomialAlgebra<CoxeterElement, Rational> tmp;
+    { ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> tmp;
       tmp.AddMonomial(G.GetCoxeterElement(i),1);
       tmp *= Xstdp;
       l.AddOnTop(tmp);
@@ -2260,14 +2261,14 @@ int main(void)
 
   List<ClassFunction<Rational> > tstct;
   for(int i=0;i<G.ccCount;i++)
-    std::cout << X.IP(G.characterTable[i]) << std::endl;
+    std::cout << X.InnerProduct(G.characterTable[i]) << std::endl;
 
   Matrix<Rational> XP;
   XP = GetMatrix(G.characterTable[2]);
-  GroupRingElement<Rational> XPP;
+  ElementWeylGroup<WeylGroup>Ring<Rational> XPP;
   Vector<Rational> vv;
   XPP.MakeFromClassFunction(G.characterTable[2]);
-  GroupRingElement<Rational> vP;
+  ElementWeylGroup<WeylGroup>Ring<Rational> vP;
   for(int i=0; i<G.N; i++)
   { vv.MakeEi(G.N,i);
     vP.MakeEi(&G,i);
@@ -2597,7 +2598,7 @@ int main(void)
   */
 
   /*    std::cout << V2.GetCharacter() << std::endl;
-      CoxeterRepresentation<Rational> V2x2 = V2*V2;
+      WeylGroupRepresentation<Rational> V2x2 = V2*V2;
       std::cout << V2x2.GetCharacter() << std::endl;
       for(int i=0; i<G.rank; i++)
       { std::cout << V2x2.gens[i].ToString(&consoleFormat);
@@ -2612,7 +2613,7 @@ int main(void)
         std::cout << cfi << std::endl;
         std::cout << V2x2.ClassFunctionMatrix(cf).ToString(&consoleFormat) << std::endl;
       }
-      List<CoxeterRepresentation<Rational> > Vs;
+      List<WeylGroupRepresentation<Rational> > Vs;
       Vs = V2x2.Decomposition();
       for(int i=0; i<Vs.size; i++)
         std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
@@ -2643,12 +2644,12 @@ int main(void)
 //  G.ComputeIrreducibleRepresentations();
   /*
   List<ClassFunction<Rational> > ct;
-  List<CoxeterRepresentation<Rational> > gr;
+  List<WeylGroupRepresentation<Rational> > gr;
 
-  CoxeterRepresentation<Rational> sr = G.StandardRepresentation();
-  CoxeterRepresentation<Rational> sr2 = sr*sr;
+  WeylGroupRepresentation<Rational> sr = G.StandardRepresentation();
+  WeylGroupRepresentation<Rational> sr2 = sr*sr;
 
-  List<CoxeterRepresentation<Rational> > sr2d = sr2.Decomposition(ct,gr);
+  List<WeylGroupRepresentation<Rational> > sr2d = sr2.Decomposition(ct,gr);
 
   std::cout << "std (x) std = ";
   for(int i=0; i<sr2d.size; i++)
@@ -2668,7 +2669,7 @@ int main(void)
      { Matrix<Rational> M;
        M.MakeZeroMatrix(G.theElements.size);
        for(int i=0; i<G.theElements.size; i++)
-       { ElementWeylGroup gg;
+       { ElementWeylGroup<WeylGroup> gg;
          gg = G.theElements[g];
          gg *= G.theElements[i];
          gg.MakeCanonical();
@@ -2753,12 +2754,12 @@ int main(void)
 
 
   GlobalVariables localGlobalVariables;
-  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+  localGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
   theSSlieAlg.ComputeChevalleyConstants(&localGlobalVariables);
   WeylGroup& W=theSSlieAlg.theWeyl;
-  W.ComputeConjugacyClasses();
+  W.ComputeConjugacyClassesThomasVersion();
 
   get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);
   for(int i=0; i<W.irreps.size; i++)

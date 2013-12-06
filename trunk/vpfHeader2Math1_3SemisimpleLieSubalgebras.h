@@ -218,7 +218,7 @@ public:
   int GetNumModules()const;
   void ComputePairKweightElementAndModule(const ElementSemisimpleLieAlgebra<AlgebraicNumber>& leftKweightElt, int rightIndex, List<int>& output, GlobalVariables* theGlobalVariables);
   bool IsWeightSystemSpaceIndex(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
-  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit);
+  void AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroup>& theWE, int indexOfOrbit);
   bool CheckInitialization()const;
   bool CheckModuleDimensions()const;
   SemisimpleLieAlgebra& GetAmbientSS()const;
@@ -270,7 +270,7 @@ public:
 
   List<HashedList<Vector<Rational> > > theOrbits;
   HashedList<Rational> theOrbitHelementLengths;
-  List<HashedList<ElementWeylGroup> > theOrbitGeneratingElts;
+  List<HashedList<ElementWeylGroup<WeylGroup>> > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
 
   List<CandidateSSSubalgebra> theSubalgebraCandidates;
@@ -330,7 +330,7 @@ public:
   void GetCentralizerChains(List<List<int> >& outputChains);
   const HashedList<Vector<Rational> >& GetOrbitSl2Helement(int indexSl2);
   int GetIndexFullSubalgebra()const;
-  const HashedList<ElementWeylGroup>& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
+  const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input)const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
   Vector<Rational> GetHighestWeightFundNewComponentFromRootInjection(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified);

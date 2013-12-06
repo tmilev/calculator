@@ -21,7 +21,7 @@ public:
   static bool innerWeylGroupOrbitFundRho(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOuterAutoGeneratorsPrint(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClasses(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCoxeterElement(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMacdonaldPolys(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupIrrepsAndCharTable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupNaturalRep(Calculator& theCommands, const Expression& input, Expression& output);

@@ -160,7 +160,7 @@ int Expression::GetTypeOperation<WeylGroupRepresentation<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<ElementWeylGroup>()const
+int Expression::GetTypeOperation<ElementWeylGroup<WeylGroup> >()const
 { this->CheckInitialization();
   return this->theBoss->opWeylGroupElement();
 }
@@ -392,7 +392,7 @@ WeylGroupVirtualRepresentation
 
 template < >
 int Expression::AddObjectReturnIndex(const
-ElementWeylGroup
+ElementWeylGroup<WeylGroup>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theWeylGroupElements
@@ -557,8 +557,8 @@ WeylGroupRepresentation<Rational>& Expression::GetValueNonConst()const
 }
 
 template < >
-ElementWeylGroup& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<ElementWeylGroup>())
+ElementWeylGroup<WeylGroup>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<ElementWeylGroup<WeylGroup> >())
     crash << "This is a programming error: expression not of required type ElementWeylGroup. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroupElements.GetElement(this->GetLastChild().theData);
 }
@@ -1367,14 +1367,14 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
 //    out << "Error: failed to generate highest weight \rho-modified orbit (too large?)";
   theHWSimpCoordsFDPart=theWeyl.GetSimpleCoordinatesFromFundamental(theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart+=theWeyl.rho;
-//  ElementWeylGroup raisingElt;
+//  ElementWeylGroup<WeylGroup> raisingElt;
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   SubgroupWeylGroupOLD theSub;
   if (!theSub.MakeParabolicFromSelectionSimpleRoots(theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
     return output.SetError("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).", theCommands);
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-  List<ElementWeylGroup> theWeylElements;
+  List<ElementWeylGroup<WeylGroup> > theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   Vector<RationalFunctionOld> currentHW;
   out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
@@ -1399,7 +1399,7 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
   formatChars.fundamentalWeightLetter="\\omega";
   formatChars.flagUseLatex=true;
   for (int i=0; i<theWeylElements.size; i++)
-  { ElementWeylGroup& currentElt=theWeylElements[i];
+  { ElementWeylGroup<WeylGroup>& currentElt=theWeylElements[i];
     out << "<tr><td>" << currentElt.ToString() << "</td>";
     int indexInWeyl=theKLpolys.TheWeylGroup->theElements.GetIndex(currentElt);
     if (indexInWeyl==-1)
@@ -1414,7 +1414,7 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
         theWeyl.ActOnRhoModified(j, currentHW);
 //        currentHW-=theSub.GetRho();
         theMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
-        int sign= (currentElt.reflections.size- theWeyl.theElements[j].reflections.size)%2==0 ? 1 :-1;
+        int sign= (currentElt.generatorsLastAppliedFirst.size- theWeyl.theElements[j].generatorsLastAppliedFirst.size)%2==0 ? 1 :-1;
         currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
       }
     currentHW=theHWsimpCoords;
@@ -1423,7 +1423,7 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
     currentHW-=theSub.GetRho();
     out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega") << "</td>";
     out << "<td>" << CGI::GetMathMouseHover(currentChar.ToString(&formatChars)) << "</td>";
-    if (currentElt.reflections.size%2==1)
+    if (currentElt.generatorsLastAppliedFirst.size%2==1)
       currentChar*=-1;
     theChar+=currentChar;
     out << "</tr>";
@@ -2181,18 +2181,16 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
   out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
   out << "<br>A module basis follows.";
   out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
-  ElementWeylGroup tempWelt;
+  ElementWeylGroup<WeylGroup> tempWelt;
   int wordCounter=0;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-  { List<MonomialUniversalEnveloping<coefficient> >& currentList=
-    this->theGeneratingWordsGrouppedByWeight[i];
-    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
-    this->theGeneratingWordsIntGrouppedByWeight[i];
+  { List<MonomialUniversalEnveloping<coefficient> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=this->theGeneratingWordsIntGrouppedByWeight[i];
     for (int j=0; j<currentList.size; j++)
     { wordCounter++;
-      tempWelt.reflections.SetSize(currentListInt[j].generatorsIndices.size);
+      tempWelt.generatorsLastAppliedFirst.SetSize(currentListInt[j].generatorsIndices.size);
       for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
-        tempWelt.reflections[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+        tempWelt.generatorsLastAppliedFirst[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
       out << "<tr><td>m_{ " << wordCounter << "} </td><td>" << currentList[j].ToString(&theGlobalVariables.theDefaultFormat)
       << "  v_\\lambda</td><td>" << tempWelt.ToString() << "</td> </tr>";
     }
@@ -3630,8 +3628,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseReflectionNotation=true;
     out << theGroup.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<ElementWeylGroup>())
-  { const ElementWeylGroup& theElt=this->GetValue<ElementWeylGroup>();
+  } else if (this->IsOfType<ElementWeylGroup<WeylGroup> >())
+  { const ElementWeylGroup<WeylGroup>& theElt=this->GetValue<ElementWeylGroup<WeylGroup> >();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;

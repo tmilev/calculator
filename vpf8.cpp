@@ -2325,10 +2325,7 @@ void PartFraction::GetVectorPartitionFunction
 bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<Rational>& newIndicator, GlobalVariables& theGlobalVariables)
 { ProgressReport theReport(&theGlobalVariables);
   if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
-  { theGlobalVariables.theIndicatorVariables.modifiedRoot=(newIndicator);
     theReport.Report("Indicator modified to regular");
-  } else
-    theGlobalVariables.theIndicatorVariables.flagRootIsModified=false;
   this->ResetRelevanceIsComputed();
   if (!this->CheckForMinimalityDecompositionWithRespectToRoot(&newIndicator, theGlobalVariables))
     return false;
@@ -2337,7 +2334,6 @@ bool PartFractions::GetVectorPartitionFunction(QuasiPolynomial& output, Vector<R
 //  QuasiPolynomialOld oldOutput;
   if (PartFraction::MakingConsistencyCheck)
     PartFractions::CheckSum.MakeZero();
-  theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
   output.MakeZeroLatTiceZn(this->AmbientDimension);
   ///////////////////////////////////////////////
   //this->flagAnErrorHasOccurredTimeToPanic=true;

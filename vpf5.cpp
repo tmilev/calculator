@@ -1598,7 +1598,7 @@ bool Calculator::fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const 
     out << "<table><tr><td>Element</td><td>weight simple coords</td><td>weight fund. coords</td></tr>";
     theFormat.fundamentalWeightLetter="\\omega";
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
-    { ElementWeylGroup& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
+    { ElementWeylGroup<WeylGroup>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
       out << "<tr><td>"
       << (useJavascript ? CGI::GetMathSpanPure(current.ToString()) : current.ToString())
       << "</td>";

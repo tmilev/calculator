@@ -13,7 +13,7 @@ void InitializeGlobalObjects()
 { //std::cout << "Content-Type: text/html\n\n";
   InitializeTimer();
   crash.theGlobalVariables=&theGlobalVariables;
-  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&CGI::makeReportIndicatorFile);
+  theGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
 
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   //std::cout << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
@@ -24,7 +24,7 @@ void InitializeGlobalObjects()
   consoleFormat.flagUseLatex = false;
 }
 
-void CGI::makeReportIndicatorFile(IndicatorWindowVariables& input)
+void CGI::MakeReportIndicatorFile(const std::string& input)
 { static int counter =-1;
   counter++;
   //  if (counter%10!=0)
@@ -33,17 +33,14 @@ void CGI::makeReportIndicatorFile(IndicatorWindowVariables& input)
   XML::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
-  for (int i=input.ProgressReportStringS.size-1; i>=0; i--)
-    theFile << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
+  theFile << input;
   theFile.flush();
   theFile.close();
 }
 
-void CGI::makeStdCoutReport(IndicatorWindowVariables& input)
-{ static int counter =-1;
-  counter++;
-  std::cout << "\nLast progress string: " << *input.ProgressReportStringS.LastObject() << "\n<br>\n";
-  CGI::makeReportIndicatorFile(input);
+void CGI::MakeStdCoutReport(const std::string& input)
+{ std::cout << input;
+  CGI::MakeReportIndicatorFile(input);
 }
 
 bool ComputationComplete;

@@ -11,7 +11,7 @@ extern void static_html3(std::stringstream& output);
 int main_command_input(int argc, char **argv)
 { MacroRegisterFunctionWithName("main_command_input");
   std::stringstream theInputStream;
-  theParser.theGlobalVariableS->SetFeedDataToIndicatorWindowDefault(&CGI::makeStdCoutReport);
+  theParser.theGlobalVariableS->SetStandardStringOutput(&CGI::MakeStdCoutReport);
   for (int i=1; i<argc; i++)
   { theInputStream << argv[i];
     if (i<argc-1)

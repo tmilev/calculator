@@ -309,7 +309,7 @@ public:
 typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
-typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
+typedef void (*FunctionStandardStringOutput)(const std::string& input);
 typedef void (*drawClearScreenFunction)();
 
 class MathRoutines
@@ -1187,8 +1187,8 @@ public:
     b=b%256;
     return r*65536+g*256+b;
   }
-  static void makeStdCoutReport(IndicatorWindowVariables& input);
-  static void makeReportIndicatorFile(IndicatorWindowVariables& input);
+  static void MakeStdCoutReport(const std::string& input);
+  static void MakeReportIndicatorFile(const std::string& input);
   static void FormatCPPSourceCode(const std::string& FileName);
   static void(*functionCGIServerIgnoreUserAbort)(void);
   static void SetCGIServerIgnoreUserAbort()

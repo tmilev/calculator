@@ -162,9 +162,15 @@ void Calculator::initPredefinedInnerFunctions()
     )", true, false)
    ;
   this->AddOperationInnerHandler
-  ("MakeWeylGroupElement", CalculatorFunctionsWeylGroup::innerCoxeterElement, "",
+  ("MakeWeylGroupElement", CalculatorFunctionsWeylGroup::innerWeylGroupElement, "",
    "Needs a group name and a list of generators",
    "s_{{i}}:=MakeWeylGroupElement{}(A_2, i);\n(s_1+s_2)(2s_1+s_2)(3s_1+s_2)", true, false)
+   ;
+
+  this->AddOperationInnerHandler
+  ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup, "",
+   "Prints the tau signatures of a group. See a common article by T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
+   "WeylGroupTauSignatures{}(b_3);", true, false)
    ;
 
   this->AddOperationInnerHandler

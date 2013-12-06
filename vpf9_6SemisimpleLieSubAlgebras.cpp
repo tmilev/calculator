@@ -4,6 +4,7 @@
 #include "vpfHeader2Math5_SubsetsSelections.h"
 #include "vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 ProjectInformationInstance ProjectInfoVpfSemisimpleSubalgebras(__FILE__, "Semisimple subalgebras of the semisimple Lie algebras. ");
 
 template<>
@@ -894,49 +895,7 @@ DynkinSimpleType DynkinType::GetGreatestSimpleType()const
   return result;
 }
 
-template <class coefficient>
-bool WeylGroup::GenerateOuterOrbit(Vectors<coefficient>& theRoots, HashedList<Vector<coefficient> >& output, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
-{ MacroRegisterFunctionWithName("WeylGroup::GenerateOuterOrbit");
-  this->ComputeOuterAutoGenerators();
-  List<MatrixTensor<Rational> > theOuterGens=this->theOuterAutos.GetElement().theGenerators;
-  output.Clear();
-  for (int i=0; i<theRoots.size; i++)
-    output.AddOnTop(theRoots[i]);
-  Vector<coefficient> currentRoot;
-  ElementWeylGroup tempEW;
-  tempEW.owner=this;
-  output.SetExpectedSize(UpperLimitNumElements);
-  if (outputSubset!=0)
-  { tempEW.reflections.size=0;
-    outputSubset->SetExpectedSize(UpperLimitNumElements);
-    outputSubset->Clear();
-    outputSubset->AddOnTop(tempEW);
-  }
-  int numGens=this->GetDim()+theOuterGens.size;
-  for (int i=0; i<output.size; i++)
-  { if (outputSubset!=0)
-      tempEW=outputSubset->TheObjects[i];
-    for (int j=0; j<numGens; j++)
-    { if (j<this->GetDim())
-      { currentRoot=output[i];
-        this->SimpleReflection(j, currentRoot);
-      } else
-        theOuterGens[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
-      if (output.AddOnTopNoRepetition(currentRoot))
-        if (outputSubset!=0)
-        { tempEW.reflections.AddOnTop(j);
-          outputSubset->AddOnTop(tempEW);
-          tempEW.reflections.RemoveLastObject();
-        }
-      if (UpperLimitNumElements>0)
-        if (output.size>=UpperLimitNumElements)
-          return false;
-    }
-  }
-  return true;
-}
-
-const HashedList<ElementWeylGroup>& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
+const HashedList<ElementWeylGroup<WeylGroup> >& SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt(int indexSl2)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetOrbitSl2HelementWeylGroupElt");
   if (this->theOrbitsAreComputed[indexSl2])
     return this->theOrbitGeneratingElts[indexSl2];
@@ -990,7 +949,7 @@ SemisimpleLieAlgebra& CandidateSSSubalgebra::GetAmbientSS()const
   return this->owner->GetSSowner();
 }
 
-void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
+void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const ElementWeylGroup<WeylGroup>& theWE, int indexOfOrbit)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::AddHincomplete");
   this->CheckInitialization();
   if (this->CartanSAsByComponent.size==1)

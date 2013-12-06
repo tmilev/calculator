@@ -218,7 +218,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
     return false;
   //std::cout << "<br>Here i am!";
   //std::cout << "Multiplying: " << input[1].ToString() << " by " << input[2].ToString();
-  ElementWeylGroup leftR, rightR;
+  ElementWeylGroup<WeylGroup> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   //std::cout << "<br>leftR= " << leftR.ToString();

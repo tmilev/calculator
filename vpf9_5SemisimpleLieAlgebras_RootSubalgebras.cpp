@@ -1982,7 +1982,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   Vectors<Rational> RootsWithCharacteristic2;
   Vectors<Rational> reflectedSimpleBasisK;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
-  ElementWeylGroup raisingElt;
+  ElementWeylGroup<WeylGroup> raisingElt;
   selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
@@ -2508,7 +2508,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     //    if(tempI!=theRootSA.GetIndexKmoduleContainingRoot(tempRoot))crash << crash;
     //  }
     }
-    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
+    if (theGlobalVariables.StandardStringOutputFunction!=0)
     { std::stringstream out;
       out << "Computing action of element " << i+1 << " out of " << theSubgroup.size;
       theReport.Report(out.str());

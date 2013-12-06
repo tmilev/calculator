@@ -23,6 +23,14 @@ bool WeylGroup::CheckInitializationFDrepComputation()const
     { crash << "This is a programming error: irrep number " << i+1 << " has zero character!" << crash;
       return false;
     }
+/*  Rational sumSquares=0;
+  Rational tempRat;
+  for (int i=0; i<this->conjugacyClasses.size; i++)
+  { tempRat=this->conjugacyClasses.size/this->GetSizeWeylGroupByFormula();
+    sumSquares+=tempRat*tempRat;
+  }
+  if (sumSquares!=1)
+    crash << "This is a programming error: sumSquares equals " << sumSquares.ToString() << " when it should equal 1. " << crash;*/
   return true;
 }
 
@@ -34,8 +42,7 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
     if (this->theElementImages[i+1].NumRows==0)
       isOK=false;
     if (!isOK)
-    { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. "
-      << crash;
+    { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. " << crash;
       return false;
     }
   }
@@ -459,7 +466,8 @@ void WeylGroup::AddCharacter(const ClassFunction<Rational>& X)
 }
 
 void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables)
-{ if(this->theElements.size == 0)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
+  if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
   WeylGroupRepresentation<Rational> theStandardRep, newRep;
   this->StandardRepresentation(theStandardRep);
@@ -678,11 +686,13 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTable(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses(theCommands, input, output))
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTable");
+  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
     return true;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
+  std::cout << "And the group is: " << theGroup.ToString();
   theGroup.ComputeIrreducibleRepresentationsThomasVersion(theCommands.theGlobalVariableS);
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;

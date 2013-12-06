@@ -4915,25 +4915,25 @@ void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bo
 }
 
 void WeylGroup::GenerateRootSystem()
-{ Vector<Rational> tempRoot;
-  Vectors<Rational> startRoots;
-  HashedList<Vector<Rational> > tempHashedRootS;
-  int theDimension=this->CartanSymmetric.NumCols;
-  startRoots.MakeEiBasis(theDimension);
+{ Vectors<Rational> startRoots;
+  HashedList<Vector<Rational> > theRootsFinder;
+  startRoots.MakeEiBasis(this->GetDim());
   int estimatedNumRoots=this->theDynkinType.GetRootSystemSize();
-  this->GenerateOrbit(startRoots, false, tempHashedRootS, false, estimatedNumRoots);
+  std::cout << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
+  this->GenerateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
+  std::cout << " final roots: " << theRootsFinder.ToString() << "<hr>";
   this->RootSystem.Clear();
-  this->RootsOfBorel.size=0;
-  this->RootsOfBorel.ReservE(tempHashedRootS.size/2);
-  this->RootSystem.SetExpectedSize(tempHashedRootS.size);
-  for (int i=0; i<tempHashedRootS.size; i++)
-    if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
-      this->RootsOfBorel.AddOnTop(tempHashedRootS.TheObjects[i]);
+  this->RootSystem.SetExpectedSize(theRootsFinder.size);
+  this->RootsOfBorel.SetSize(0);
+  this->RootsOfBorel.ReservE(theRootsFinder.size/2);
+  for (int i=0; i<theRootsFinder.size; i++)
+    if (theRootsFinder[i].IsPositiveOrZero())
+      this->RootsOfBorel.AddOnTop(theRootsFinder[i]);
   this->RootsOfBorel.QuickSortAscending();
   for (int i=this->RootsOfBorel.size-1; i>=0; i--)
-    this->RootSystem.AddOnTop(-this->RootsOfBorel.TheObjects[i]);
+    this->RootSystem.AddOnTop(-this->RootsOfBorel[i]);
   for (int i=0; i<this->RootsOfBorel.size; i++)
-    this->RootSystem.AddOnTop(this->RootsOfBorel.TheObjects[i]);
+    this->RootSystem.AddOnTop(this->RootsOfBorel[i]);
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)

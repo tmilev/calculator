@@ -87,29 +87,33 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   this->conjugacyClasses.ReservE(120); //<- that should be good to go up to E8.
   //For higher number of conjugacy classes List's grow exponentially on demand, so this shouldn't be a big slow-down.
   int theRank=this->GetDim();
-  Vector<Rational> theRhoImage;
-  //this->rhoOrbit.GrandMasterConsistencyCheck();
-  //this->theElements.GrandMasterConsistencyCheck();
+  ElementWeylGroup<WeylGroup> theConjugated;
+  List<ElementWeylGroup<WeylGroup> > theGenerators;
+  theGenerators.SetSize(theRank);
+  for (int i=0; i<theRank; i++)
+    theGenerators[i].MakeSimpleReflection(i, *this);
+  std::cout << "Here be the simple gens:" << theGenerators.ToString();
   for (int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
-    { // provably unnecessary
-      Accounted[i] = true;
+    { Accounted[i] = true;
       this->conjugacyClasses.SetSize(conjugacyClasses.size+1);
-      this->conjugacyClasses.LastObject()->SetSize(0);//<-needed in case the group is being recomputed
-      this->conjugacyClasses[this->conjugacyClasses.size-1].AddOnTop(i);
-      for (int j=0; j<this->conjugacyClasses[this->conjugacyClasses.size-1].size; j++)
+      List<int>& currentClass=*this->conjugacyClasses.LastObject();
+      currentClass.SetSize(0);//<-needed in case the group is being recomputed
+      currentClass.AddOnTop(i);
+      for (int j=0; j<currentClass.size; j++)
         for (int k=0; k<theRank; k++)
-        { theRhoImage=this->rho;
-          this->SimpleReflection(k, theRhoImage);
-          this->ActOn(this->conjugacyClasses[this->conjugacyClasses.size-1][j], theRhoImage);
-          this->SimpleReflection(k, theRhoImage);
-          int accountedIndex=this->rhoOrbit.GetIndex(theRhoImage);
+        { theConjugated=theGenerators[k]*this->theElements[currentClass[j]]*theGenerators[k];
+          std::cout << "<hr>" << theGenerators[k].ToString() << " * " << this->theElements[currentClass[j]].ToString()
+          << "*" << theGenerators[k].ToString() << "=" << theConjugated.ToString() << "<hr>";
+          int accountedIndex=this->theElements.GetIndex(theConjugated);
+          if (accountedIndex==-1)
+            crash << "Programming error: failed to find element " << theConjugated.ToString() << " in list of elements" << crash;
           if(!Accounted[accountedIndex])
-          { this->conjugacyClasses[this->conjugacyClasses.size-1].AddOnTop(accountedIndex);
+          { currentClass.AddOnTop(accountedIndex);
             Accounted[accountedIndex] = true;
           }
         }
-      this->conjugacyClasses[conjugacyClasses.size-1].QuickSortAscending();
+      currentClass.QuickSortAscending();
     }
   int checkNumElts=0;
   for (int i=0; i<this->conjugacyClasses.size; i++)
@@ -118,6 +122,8 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
     << this->theElements.size << " elements" << crash;
   this->conjugacyClasses.QuickSortAscending();
+  std::cout << "conj class report: " << this->ToString();
+  this->CheckInitializationFDrepComputation();
   //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
   //for(int i=0; i<conjugacyClasses.size; i++)
   //  std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
@@ -473,12 +479,11 @@ coefficient WeylGroupRepresentation<coefficient>::GetNumberOfComponents()
 void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsThomasVersion");
   if(this->squaresFirstConjugacyClassRep.size == 0)
-  this->ComputeSquares();
-  WeylGroupRepresentation<Rational> sr;
-  this->StandardRepresentation(sr);
-  this->irreps.AddOnTop(sr);
+    this->ComputeSquares();
   this->characterTable.SetSize(0);
-  characterTable.AddOnTop(sr.GetCharacter());
+  this->irreps.SetSize(0);
+  WeylGroupRepresentation<Rational> sr;
+  this->StandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
   std::cout << sr.GetCharacter() << std::endl;
   List<WeylGroupRepresentation<Rational> > newspaces;
   newspaces.AddOnTop(sr);
@@ -615,15 +620,15 @@ UDPolynomial<coefficient> UDPolynomial<coefficient>::operator%(const UDPolynomia
 template <typename coefficient>
 bool UDPolynomial<coefficient>::operator==(const int other) const
 { if(other == 0)
-{if(data.size == 0)
-  return true;
+  { if(data.size == 0)
+      return true;
+    return false;
+  }
+  if(data.size != 1)
+    return false;
+  if(data[0] == other)
+    return true;
   return false;
-}
-if(data.size != 1)
-  return false;
-if(data[0] == other)
-  return true;
-return false;
 }
 
 template <typename coefficient>
@@ -692,8 +697,7 @@ bool space_contains(const List<Vector<coefficient> > &V, Vector<coefficient> v)
 }
 
 template<typename coefficient>
-void getunion
-(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
+void getunion(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
 { if (&output== &V || &output==&W)
   { List<Vector<coefficient> > newOutput;
     getunion(V, W, newOutput);
@@ -727,8 +731,7 @@ void getunion
 }
 
 template<typename coefficient>
-void intersection
-(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
+void intersection(const List<Vector<coefficient> > &V, const List<Vector<coefficient> > &W, List<Vector<coefficient> >& output)
 { if((V.size==0) or (W.size==0))
   { output.SetSize(0);
     return;
@@ -810,35 +813,33 @@ List<Vector<coefficient> > orthogonal_complement(const List<Vector<coefficient> 
 // we're going to guess at integers
 template <typename coefficient>
 bool pdiv(List<coefficient> &p, int a)
-{  List<coefficient> q;
-   coefficient lastround = p[0];
-   for(int i=1; i<p.size; i++)
-   {  q.AddOnTop(lastround);
-      lastround = p[i] - lastround*a;
-   }
-   if(lastround == 0)
-   {  p = q;
-      return true;
-   }
-   return false;
+{ List<coefficient> q;
+  coefficient lastround = p[0];
+  for(int i=1; i<p.size; i++)
+  { q.AddOnTop(lastround);
+    lastround = p[i] - lastround*a;
+  }
+  if(lastround == 0)
+  { p = q;
+    return true;
+  }
+  return false;
 }
 
 template <typename coefficient>
 List<int> factorpoly(List<coefficient> p, int maxfac)
-{  List<int> factors;
-   for(int i1=0; i1<maxfac; i1++)
-   {  for(int i2=1; i2>=-1; i2-=2)
-      {  int i = i1*i2;
-         while(pdiv(p,i))
-         {  if(!factors.Contains(i))
-            {  factors.AddOnTop(i);
-            }
-            if(p.size == 1)
-               return factors;
-         }
+{ List<int> factors;
+  for(int i1=0; i1<maxfac; i1++)
+    for(int i2=1; i2>=-1; i2-=2)
+    { int i = i1*i2;
+      while(pdiv(p,i))
+      { if(!factors.Contains(i))
+          factors.AddOnTop(i);
+        if(p.size == 1)
+          return factors;
       }
-   }
-   return factors;
+    }
+  return factors;
 }
 
 template <typename coefficient>
@@ -1038,14 +1039,13 @@ bool WeylGroup::VerifyChartable(bool printresults)const
 }
 
 List<List<Rational> > WeylGroup::GetTauSignatures()
-{ this->ComputeIrreducibleRepresentationsThomasVersion();
+{ MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
+  this->ComputeIrreducibleRepresentationsThomasVersion();
   ClassFunction<Rational> signRep;
   signRep.G = this;
   signRep.data.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     signRep.data[i] =this->theElements[conjugacyClasses[i][0]].Sign();
-
-
   Selection sel;
   sel.init(this->CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);

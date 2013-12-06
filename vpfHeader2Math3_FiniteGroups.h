@@ -219,7 +219,7 @@ class WeylGroupRepresentation
   void operator*=(const WeylGroupRepresentation<coefficient>& other);
   WeylGroupRepresentation<coefficient> operator*(const WeylGroupRepresentation<coefficient>& other)const
   { WeylGroupRepresentation<coefficient> result=*this;
-    result*=*this;
+    result*=other;
     return result;
   }
   bool operator==(const WeylGroupRepresentation<coefficient>& other)const

@@ -184,21 +184,25 @@ void ElementWeylGroup<templateWeylGroup>::MakeSimpleReflection(int simpleRootInd
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
-{ this->CheckInitialization();
+{ std::cout << "making " << this->ToString() << " canonical: ";
+  this->CheckInitialization();
   if (this->owner->rho.size==0)
     this->owner->ComputeRho(false);
   Vector<Rational> theVector=this->owner->rho;
   this->owner->ActOn(*this, theVector);
   int theRank=this->owner->GetDim();
   this->generatorsLastAppliedFirst.SetSize(0);
+  std::cout << theVector.ToString();
   while (theVector!=this->owner->rho)
     for (int i=0; i<theRank; i++)
       if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
       { this->owner->SimpleReflection(i, theVector);
+        std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
         this->generatorsLastAppliedFirst.AddOnTop(i);
         break;
       }
-  this->generatorsLastAppliedFirst.ReverseOrderElements();
+//  this->generatorsLastAppliedFirst.ReverseOrderElements();
+  std::cout << ", finally: " << this->ToString();
 }
 
 template <class templateWeylGroup>
@@ -411,7 +415,7 @@ void WeylGroup::SimpleReflectionRhoModified(int index, Vector<coefficient>& theV
 template <class coefficient>
 bool WeylGroup::GenerateOrbit
 (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize,
- HashedList<ElementWeylGroup<WeylGroup>>* outputSubset, int UpperLimitNumElements)
+ HashedList<ElementWeylGroup<WeylGroup> >* outputSubset, int UpperLimitNumElements)
 { output.Clear();
   for (int i=0; i<theWeights.size; i++)
     output.AddOnTopNoRepetition(theWeights[i]);
@@ -450,7 +454,8 @@ bool WeylGroup::GenerateOrbit
       //}
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
-        { currentElt.generatorsLastAppliedFirst.AddOnTop(j);
+        { currentElt.generatorsLastAppliedFirst.SetSize(1);
+          currentElt.generatorsLastAppliedFirst[0]=j;
           currentElt.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
           currentElt.MakeCanonical();
           outputSubset->AddOnTop(currentElt);
@@ -803,8 +808,8 @@ template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
 { this->ownerGroup=inputOwner;
   this->CheckInitialization();
-  this->ownerGroup->CheckInitializationFDrepComputation();
   this->theCharacter.MakeZero(*inputOwner);
+  this->ownerGroup->CheckInitializationFDrepComputation();
   this->theElementImages.SetSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
   this->classFunctionMatrices.SetSize(this->ownerGroup->conjugacyClasses.size);

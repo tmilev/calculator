@@ -19,7 +19,7 @@ bool WeylGroup::CheckInitializationFDrepComputation()const
     return false;
   }
   for (int i=0; i<this->irreps.size; i++)
-    if (this->irreps[i].theCharacter.data.IsEqualToZero())
+    if (this->irreps[i].theCharacteR.data.IsEqualToZero())
     { crash << "This is a programming error: irrep number " << i+1 << " has zero character!" << crash;
       return false;
     }
@@ -111,7 +111,8 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(G
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentation<coefficient>& other)
-{ //lazy programmers handling://////
+{ MacroRegisterFunctionWithName("WeylGroupRepresentation::operator*=");
+  //lazy programmers handling://////
   if (&other==this )
   { WeylGroupRepresentation<coefficient> otherCopy;
     otherCopy=other;
@@ -121,10 +122,12 @@ void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentat
   //////////////////////////////////
   if (this->ownerGroup!=other.ownerGroup)
     crash << "This is a programming error: attempting to multiply representations with different owner groups. " << crash;
+  if (!this->flagCharacterIsComputed || !other.flagCharacterIsComputed)
+    crash << "Attempting to multiply weyl group reps whose characters have not been computed. " << crash;
   WeylGroupRepresentation<coefficient> output;
-  output.reset(this->ownerGroup);
-  output.theCharacter=this->theCharacter;
-  output.theCharacter*=other.theCharacter;
+  output.init(*this->ownerGroup);
+  output.theCharacteR=this->theCharacteR;
+  output.theCharacteR*=other.theCharacteR;
   for(int i=0; i<output.theElementImages.size; i++)
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i])
     { output.theElementImages[i].AssignTensorProduct(this->theElementImages[i],other.theElementImages[i]);
@@ -141,11 +144,11 @@ void WeylGroupRepresentation<coefficient>::Restrict
   this->CheckAllSimpleGensAreOK();
   if (VectorSpaceBasisSubrep.size==0)
     crash << "This is a programming error: restriction of representation to a zero subspace is not allowed. " << crash;
-  output.reset(this->ownerGroup);
+  output.init(*this->ownerGroup);
   output.basis = VectorSpaceBasisSubrep;
   output.basis.GetGramMatrix(output.gramMatrixInverted, 0);
   output.gramMatrixInverted.Invert();
-  output.theCharacter=remainingCharacter;
+  output.theCharacteR=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);
   for(int i=1; i<this->ownerGroup->GetDim()+1; i++)
     if (this->theElementIsComputed[i])
@@ -298,7 +301,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   this->ownerGroup->CheckInitializationFDrepComputation();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
   if (SumOfNumComponentsSquared==0)
-    crash << "This is a programming error: a module has character " << this->theCharacter.ToString() << " of zero length, which is impossible. "
+    crash << "This is a programming error: a module has character " << this->theCharacteR.ToString() << " of zero length, which is impossible. "
     << "Here is a printout of the module. " << this->ToString() << crash;
   if(SumOfNumComponentsSquared== 1)
   { int indexMe=this->ownerGroup->irreps.GetIndex(*this);
@@ -311,13 +314,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   }
   Matrix<coefficient> splittingOperatorMatrix;
   Vectors<coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
-  ClassFunction<coefficient> remainingCharacter=this->theCharacter;
+  ClassFunction<coefficient> remainingCharacter=this->theCharacteR;
   remainingVectorSpace.MakeEiBasis(this->GetDim());
   ProgressReport Report1(theGlobalVariables), Report2(theGlobalVariables),
   Report3(theGlobalVariables), Report4(theGlobalVariables);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "<br>\nDecomposing module with character " << this->theCharacter.ToString();
+    reportStream << "<br>\nDecomposing module with character " << this->theCharacteR.ToString();
     LargeIntUnsigned largestDen, lcmDen;
     this->GetLargestDenominatorSimpleGens(lcmDen, largestDen);
     reportStream << "\n<br>\n Largest denominator is " << largestDen.ToString()
@@ -326,17 +329,17 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   }
   //chop off already known pieces:
   for(int i=0; i<this->ownerGroup->irreps.size; i++)
-  { coefficient NumIrrepsOfType=this->theCharacter.InnerProduct(this->ownerGroup->irreps[i].theCharacter);
+  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(this->ownerGroup->irreps[i].theCharacteR);
     if(NumIrrepsOfType!=0)
     { this->ownerGroup->CheckInitializationFDrepComputation();
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << this->ownerGroup->irreps[i].theCharacter.ToString()
+        reportStream << "<hr>\ncontains irrep " << this->ownerGroup->irreps[i].theCharacteR.ToString()
         << " with multiplicity " << NumIrrepsOfType << std::endl;
-        reportStream << "<hr>\nGetting class f-n matrix from character: " << this->ownerGroup->irreps[i].theCharacter;
+        reportStream << "<hr>\nGetting class f-n matrix from character: " << this->ownerGroup->irreps[i].theCharacteR;
         Report2.Report(reportStream.str());
       }
-      this->GetClassFunctionMatrix(this->ownerGroup->irreps[i].theCharacter, splittingOperatorMatrix);
+      this->GetClassFunctionMatrix(this->ownerGroup->irreps[i].theCharacteR, splittingOperatorMatrix);
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
         reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n"
@@ -347,7 +350,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
 
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
       outputIrrepMults[i]+=NumIrrepsOfType;
-      remainingCharacter-=this->ownerGroup->irreps[i].theCharacter*NumIrrepsOfType;
+      remainingCharacter-=this->ownerGroup->irreps[i].theCharacteR*NumIrrepsOfType;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
         reportStream << "<br>Intersecting kernel of class f-n matrix" << splittingMatrixKernel.ToString() << " with "
@@ -363,7 +366,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
       if (remainingCharacter.IsEqualToZero())
         if (!remainingVectorSpace.size==0)
         { std::cout << "This is a programming error: remaining char is zero but remaining space is "
-          << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacter.ToString()
+          << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacteR.ToString()
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           //crash<<crash;
         }
@@ -432,25 +435,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
 }
 
 void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p)
-{ int i = this->irreps.BSExpectedIndex(p);
-  if(i==this->irreps.size)
-  { this->irreps.AddOnTop(p);
-    this->characterTable.BSInsertDontDup(p.theCharacter);
+{ if (this->irreps.Contains(p))
+  { WeylGroupRepresentation<Rational>& currentRep=this->irreps[this->irreps.GetIndex(p)];
+    currentRep.names.AddOnTopNoRepetition(p.names);
     return;
   }
-  if(this->irreps[i].theCharacter != p.theCharacter)
-  { this->irreps.InsertAtIndexShiftElementsUp(p,i);
-    this->characterTable.BSInsertDontDup(p.theCharacter);
-    return;
-  }
-  for(int j=0; j<p.names.size; j++)
-  { bool alreadyhas = false;
-    for(int k=0; k<this->irreps[i].names.size; k++)
-      if(this->irreps[i].names[k] == p.names[j])
-        alreadyhas = true;
-    if(!alreadyhas)
-      this->irreps[i].names.AddOnTop(p.names[j]);
-  }
+  this->irreps.AddOnTop(p);
+  this->characterTable.AddOnTop(p.theCharacteR);
 }
 
 void WeylGroup::AddCharacter(const ClassFunction<Rational>& X)
@@ -479,23 +470,23 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
     { std::stringstream reportStream;
       reportStream << "Irreducible representations found so far: ";
       for (int j=0; j<this->irreps.size; j++)
-        reportStream << "\n<br>\n" << this->irreps[j].theCharacter.ToString();
-      reportStream << "<hr>\nDecomposing\n <br>\n" << theStandardRep.theCharacter.ToString()
-      << " * <br>" << this->irreps[i].theCharacter.ToString() << std::endl;
+        reportStream << "\n<br>\n" << this->irreps[j].theCharacteR.ToString();
+      reportStream << "<hr>\nDecomposing\n <br>\n" << theStandardRep.theCharacteR.ToString()
+      << " * <br>" << this->irreps[i].theCharacteR.ToString() << std::endl;
       theReport1.Report(reportStream.str());
     }
     newRep= theStandardRep;
     newRep*= this->irreps[i];
     bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep, theGlobalVariables);
     if (!tempB)
-      crash << "This is a mathematical error: failed to decompose " << newRep.theCharacter.ToString() << ". " << crash;
+      crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
   }
   this->irreps.QuickSortAscending();
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "Irrep table:";
     for (int i=0; i<this->irreps.size; i++)
-      reportStream << "\n<br>\n" << this->irreps[i].theCharacter.ToString();
+      reportStream << "\n<br>\n" << this->irreps[i].theCharacteR.ToString();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     for (int i=0; i<this->irreps.size; i++)
@@ -700,9 +691,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTable(Calculator& 
   std::stringstream out;
   out << "Character table: ";
   Matrix<Rational> charMat;
-  charMat.init(theGroup.irreps.size, theGroup.irreps.size);
+  charMat.init(theGroup.conjugacyClasses.size, theGroup.conjugacyClasses.size);
   for (int i=0; i<theGroup.irreps.size; i++)
-  { //out << "<br>" << theGroup.irreps[i].theCharacter.ToString();
+  { //out << "<br>" << theGroup.irreps[i].theCharacteR.ToString();
     charMat.AssignVectorToRowKeepOtherRowsIntactNoInit(i, theGroup.irreps[i].GetCharacter().data);
   }
   out << CGI::GetMathSpanPure(charMat.ToString(&tempFormat));

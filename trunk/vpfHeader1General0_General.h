@@ -2069,11 +2069,12 @@ public:
   void AssignVectorColumn(const Vector<coefficient>& input)
   { this->init(input.size, 1);
     for (int i=0; i<input.size; i++)
-      this->elements[i][0]=input.TheObjects[i];
+      this->elements[i][0]=input[i];
   }
   void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<coefficient>& input)
   { if(input.size!=this->NumCols || rowIndex>=this->NumRows || rowIndex<0)
-      crash << crash;
+      crash << "Error: attempting to assign vector " << input.ToString() << " (" << input.size << " coordinates) "
+      << " to row with index " << rowIndex << " in a matrix with " << this->NumRows << " rows and " << this->NumCols << " columns. " << crash;
     for (int i=0; i<this->NumCols; i++)
       this->elements[rowIndex][i]=input[i];
   }
@@ -2086,7 +2087,7 @@ public:
   void AssignVectorRow(const Vector<coefficient>& input)
   { this->init(1, input.size);
     for (int i=0; i<input.size; i++)
-      this->elements[0][i]=input.TheObjects[i];
+      this->elements[0][i]=input[i];
   }
   void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero=0);
   inline bool operator==(const Matrix<coefficient>& other)const
@@ -2225,9 +2226,8 @@ public:
   int FindPositiveLCMCoefficientDenominatorsTruncated();
   int FindPositiveGCDCoefficientNumeratorsTruncated();
   Matrix<coefficient> operator-(const Matrix<coefficient>& right)const
-  { Matrix<coefficient> tempMat;
-    tempMat.Assign(*this);
-    tempMat.Subtract(right);
+  { Matrix<coefficient> tempMat=(*this);
+    tempMat-=right;
     return tempMat;
   }
   Matrix<coefficient> operator*(const Matrix<coefficient>& right)const;

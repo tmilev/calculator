@@ -92,7 +92,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   theGenerators.SetSize(theRank);
   for (int i=0; i<theRank; i++)
     theGenerators[i].MakeSimpleReflection(i, *this);
-  std::cout << "Here be the simple gens:" << theGenerators.ToString();
+//  std::cout << "Here be the simple gens:" << theGenerators.ToString();
   for (int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
     { Accounted[i] = true;
@@ -103,8 +103,8 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
       for (int j=0; j<currentClass.size; j++)
         for (int k=0; k<theRank; k++)
         { theConjugated=theGenerators[k]*this->theElements[currentClass[j]]*theGenerators[k];
-          std::cout << "<hr>" << theGenerators[k].ToString() << " * " << this->theElements[currentClass[j]].ToString()
-          << "*" << theGenerators[k].ToString() << "=" << theConjugated.ToString() << "<hr>";
+//          std::cout << "<hr>" << theGenerators[k].ToString() << " * " << this->theElements[currentClass[j]].ToString()
+//          << "*" << theGenerators[k].ToString() << "=" << theConjugated.ToString() << "<hr>";
           int accountedIndex=this->theElements.GetIndex(theConjugated);
           if (accountedIndex==-1)
             crash << "Programming error: failed to find element " << theConjugated.ToString() << " in list of elements" << crash;
@@ -122,7 +122,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
     << this->theElements.size << " elements" << crash;
   this->conjugacyClasses.QuickSortAscending();
-  std::cout << "conj class report: " << this->ToString();
+//  std::cout << "conj class report: " << this->ToString();
   this->CheckInitializationFDrepComputation();
   //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
   //for(int i=0; i<conjugacyClasses.size; i++)
@@ -371,25 +371,24 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   List<WeylGroupRepresentation<coefficient> > out;
   List<Vector<Rational> > splittingMatrixKernel;
   if(GetNumberOfComponents() == 1)
-  { if(this->ownerGroup->characterTable.GetIndex(this->theCharacter) == -1)
+  { if(this->ownerGroup->characterTable.GetIndex(this->theCharacteR) == -1)
     { std::cout << "new irrep found, have " << this->ownerGroup->characterTable.size << std::endl;
-      this->ownerGroup->characterTable.AddOnTop(this->theCharacter);
-      this->ownerGroup->irreps.AddOnTop(*this);
+      this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
     out.AddOnTop(*this);
     return out;
   }
-  List<Vector<coefficient> > Vb = basis;
+  List<Vector<coefficient> > Vb = this->basis;
   List<Vector<coefficient> > tempVectors;
   for(int i=0; i<this->ownerGroup->characterTable.size; i++)
-    if(this->theCharacter.InnerProduct(this->ownerGroup->characterTable[i])!=0)
+    if(this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i])!=0)
     { std::cout << "contains irrep " << i << std::endl;
-      ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
+      this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb=tempVectors;
     }
-  if((Vb.size < basis.size) && (Vb.size > 0))
+  if((Vb.size < this->basis.size) && (Vb.size > 0))
   { std::cout << "calculating remaining subrep... ";
     WeylGroupRepresentation<coefficient> V;
     V.ownerGroup = this->ownerGroup;
@@ -460,13 +459,14 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
 
 template <typename coefficient>
 const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
-{ if(this->theCharacter.data.size)
-    return this->theCharacter;
-  this->theCharacter.G = this->ownerGroup;
-  this->theCharacter.data.SetSize(this->ownerGroup->conjugacyClasses.size);
+{ if(this->flagCharacterIsComputed)
+    return this->theCharacteR;
+  this->theCharacteR.G = this->ownerGroup;
+  this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasses.size);
   for(int cci=0; cci < this->ownerGroup->conjugacyClasses.size; cci++)
-    this->theCharacter.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci][0]).GetTrace();
-  return this->theCharacter;
+    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci][0]).GetTrace();
+  this->flagCharacterIsComputed=true;
+  return this->theCharacteR;
 }
 
 template <typename coefficient>
@@ -484,7 +484,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
   this->irreps.SetSize(0);
   WeylGroupRepresentation<Rational> sr;
   this->StandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
-  std::cout << sr.GetCharacter() << std::endl;
+  std::cout << "<hr>Character standard module: " << sr.GetCharacter() << std::endl;
   List<WeylGroupRepresentation<Rational> > newspaces;
   newspaces.AddOnTop(sr);
   List<WeylGroupRepresentation<Rational> > incompletely_digested;
@@ -497,9 +497,11 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
       incompletely_digested.RemoveIndexShiftDown(0);
     }
     WeylGroupRepresentation<Rational> tspace = sr * nspace;
-    tspace.theCharacter.data.size = 0;
-    std::cout << "Decomposing" << tspace.GetCharacter() << std::endl;
+    tspace.flagCharacterIsComputed=false;
+    std::cout << "<hr>Decomposing " << tspace.GetCharacter();
+    std::cout << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << std::endl;
     List<WeylGroupRepresentation<Rational> > spaces = tspace.DecomposeThomasVersion();
+    std::cout << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
 //      tspace = nspace * sr;
 //      tspace.character.data.size = 0;
 //      std::cout << "Decomposing (right tensor)" << tspace.GetCharacter() << std::endl;

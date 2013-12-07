@@ -184,7 +184,7 @@ void ElementWeylGroup<templateWeylGroup>::MakeSimpleReflection(int simpleRootInd
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
-{ std::cout << "making " << this->ToString() << " canonical: ";
+{ //std::cout << "making " << this->ToString() << " canonical: ";
   this->CheckInitialization();
   if (this->owner->rho.size==0)
     this->owner->ComputeRho(false);
@@ -192,17 +192,16 @@ void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
   this->owner->ActOn(*this, theVector);
   int theRank=this->owner->GetDim();
   this->generatorsLastAppliedFirst.SetSize(0);
-  std::cout << theVector.ToString();
+  //std::cout << theVector.ToString();
   while (theVector!=this->owner->rho)
     for (int i=0; i<theRank; i++)
       if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
       { this->owner->SimpleReflection(i, theVector);
-        std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
+        //std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
         this->generatorsLastAppliedFirst.AddOnTop(i);
         break;
       }
-//  this->generatorsLastAppliedFirst.ReverseOrderElements();
-  std::cout << ", finally: " << this->ToString();
+//  std::cout << ", finally: " << this->ToString();
 }
 
 template <class templateWeylGroup>
@@ -805,21 +804,28 @@ bool WeylGroupRepresentation<coefficient>::CheckInitialization()const
 }
 
 template <typename coefficient>
-void WeylGroupRepresentation<coefficient>::reset(WeylGroup* inputOwner)
-{ this->ownerGroup=inputOwner;
-  this->CheckInitialization();
-  this->theCharacter.MakeZero(*inputOwner);
+void WeylGroupRepresentation<coefficient>::reset()
+{ this->parent=0;
+  this->flagCharacterIsComputed=false;
+  this->ownerGroup=0;
+}
+
+template <typename coefficient>
+void WeylGroupRepresentation<coefficient>::init(WeylGroup& inputOwner)
+{ this->reset();
+  this->ownerGroup=&inputOwner;
   this->ownerGroup->CheckInitializationFDrepComputation();
   this->theElementImages.SetSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
   this->classFunctionMatrices.SetSize(this->ownerGroup->conjugacyClasses.size);
   this->classFunctionMatricesComputed.initFillInObject(this->ownerGroup->conjugacyClasses.size, false);
+  this->CheckInitialization();
 }
 
 template <typename coefficient>
 unsigned int WeylGroupRepresentation<coefficient>::HashFunction()const
 { unsigned int result= this->ownerGroup==0? 0 : this->ownerGroup->HashFunction();
-  result+=this->theCharacter.HashFunction();
+  result+=this->theCharacteR.HashFunction();
   return result;
 }
 
@@ -851,12 +857,12 @@ std::string WeylGroupRepresentation<coefficient>::GetName() const
 
 template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::operator>(const WeylGroupRepresentation<coefficient>& right)const
-{ return this->theCharacter > right.theCharacter;
+{ return this->theCharacteR > right.theCharacteR;
 }
 
 template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::operator<(const WeylGroupRepresentation<coefficient>& right)const
-{ return this->theCharacter < right.theCharacter;
+{ return this->theCharacteR < right.theCharacteR;
 }
 
 template <typename coefficient>
@@ -944,8 +950,8 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
 { if (this->ownerGroup==0)
     return "non-initialized representation";
   std::stringstream out;
-  if (this->theCharacter.data.size>0)
-    out << "Character: " << this->theCharacter.ToString(theFormat) << " of norm " << this->theCharacter.Norm();
+  if (this->flagCharacterIsComputed)
+    out << "Character: " << this->theCharacteR.ToString(theFormat) << " of norm " << this->theCharacteR.Norm();
   else
     out << "Character needs to be computed.";
   int theRank=this->ownerGroup->GetDim();

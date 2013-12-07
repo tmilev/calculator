@@ -3705,14 +3705,13 @@ void ::SelectionWithDifferentMaxMultiplicities::clearNoMaxMultiplicitiesChange()
 }
 
 void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
-{  for (int i=this->Multiplicities.size-1; i>=0; i--)
+{ for (int i=this->Multiplicities.size-1; i>=0; i--)
     if (this->Multiplicities[i]<this->MaxMultiplicities[i])
     { if (this->Multiplicities[i]==0)
         this->elements.AddOnTop(i);
       this->Multiplicities[i]++;
       return;
-    }
-    else
+    }else
     { this->Multiplicities[i]=0;
       this->elements.RemoveFirstOccurenceSwapWithLast(i);
     }
@@ -4165,8 +4164,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     { DynkinSimpleType ambientType;
       ambientType.theLetter=theFormat->AmbientWeylLetter;
       ambientType.CartanSymmetricInverseScale=theFormat->AmbientCartanSymmetricInverseScale;
-      Rational theDynkinIndex=
-      this->CartanSymmetricInverseScale/this->GetRatioLongRootToFirst()/ambientType.CartanSymmetricInverseScale*ambientType.GetRatioLongRootToFirst();
+      Rational theDynkinIndex=this->CartanSymmetricInverseScale/this->GetRatioLongRootToFirst()/ambientType.CartanSymmetricInverseScale*ambientType.GetRatioLongRootToFirst();
 /*      if (tempType.theLetter=='C')
         if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
           theDynkinIndex*=2;
@@ -4798,15 +4796,18 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
 void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::StandardRepresentation");
   this->CheckInitializationFDrepComputation();
-  output.reset(this);
+  output.init(*this);
 //  output.theElementImages.SetSize(this->theElements.size);
+  output.generators.SetSize(this->GetDim());
   for(int i=0; i<this->GetDim(); i++)
   { this->GetSimpleReflectionMatrix(i, output.theElementImages[i+1]);
     output.theElementIsComputed[i+1]=true;
+    output.generators[i]=output.theElementImages[i+1];
+    output.basis.MakeEiBasis(this->GetDim());
   }
   output.GetCharacter();
   if (!this->irreps.Contains(output))
-    this->irreps.AddOnTop(output);
+    this->AddIrreducibleRepresentation(output);
 }
 
 void WeylGroup::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
@@ -4836,11 +4837,12 @@ void WeylGroup::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inpu
 { output=(inputH);
   int indexFirstNonRegular;
   while(!this->IsRegular(output, &indexFirstNonRegular))
-  { Vector<Rational>& theBadRoot= this->RootSystem.TheObjects[indexFirstNonRegular];
-    Rational maxMovement=0; Rational tempRat1, tempRat2, tempMaxMovement;
+  { const Vector<Rational>& theBadRoot= this->RootSystem[indexFirstNonRegular];
+    Rational maxMovement=0;
+    Rational tempRat1, tempRat2, tempMaxMovement;
     for (int i=0; i<this->RootsOfBorel.size; i++)
-    { this->RootScalarCartanRoot(theBadRoot, this->RootsOfBorel.TheObjects[i], tempRat1);
-      this->RootScalarCartanRoot(output, this->RootsOfBorel.TheObjects[i], tempRat2);
+    { this->RootScalarCartanRoot(theBadRoot, this->RootsOfBorel[i], tempRat1);
+      this->RootScalarCartanRoot(output, this->RootsOfBorel[i], tempRat2);
       if ((!tempRat1.IsEqualToZero()) && (!tempRat2.IsEqualToZero()))
       { tempMaxMovement = tempRat2/tempRat1;
         tempMaxMovement.AssignAbsoluteValue();
@@ -4859,7 +4861,7 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
 { if (indexFirstPerpendicularRoot!=0)
     *indexFirstPerpendicularRoot=-1;
   for (int i=0; i<this->RootSystem.size; i++)
-    if (this->RootScalarCartanRoot(input, this->RootSystem.TheObjects[i]).IsEqualToZero())
+    if (this->RootScalarCartanRoot(input, this->RootSystem[i]).IsEqualToZero())
     { if (indexFirstPerpendicularRoot!=0)
         *indexFirstPerpendicularRoot=i;
       return false;
@@ -4919,9 +4921,9 @@ void WeylGroup::GenerateRootSystem()
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.MakeEiBasis(this->GetDim());
   int estimatedNumRoots=this->theDynkinType.GetRootSystemSize();
-  std::cout << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
+//  std::cout << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
   this->GenerateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
-  std::cout << " final roots: " << theRootsFinder.ToString() << "<hr>";
+//  std::cout << " final roots: " << theRootsFinder.ToString() << "<hr>";
   this->RootSystem.Clear();
   this->RootSystem.SetExpectedSize(theRootsFinder.size);
   this->RootsOfBorel.SetSize(0);

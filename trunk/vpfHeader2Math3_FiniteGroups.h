@@ -174,7 +174,7 @@ class WeylGroupRepresentation
   private:
   List<Matrix<coefficient> > theElementImages;
   List<bool> theElementIsComputed;
-  ClassFunction<coefficient> theCharacter;
+  ClassFunction<coefficient> theCharacteR;
   List<Matrix<coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
   List<Matrix<coefficient> > generators;
@@ -183,9 +183,12 @@ class WeylGroupRepresentation
   Vectors<coefficient> basis;
   Matrix<coefficient> gramMatrixInverted;
   public:
+  bool flagCharacterIsComputed;
   WeylGroup* ownerGroup;
   List<std::string> names;
-  WeylGroupRepresentation():parent(0), ownerGroup(0){}
+  WeylGroupRepresentation()
+  { this->reset();
+  }
   unsigned int HashFunction() const;
   bool CheckInitialization()const;
   bool CheckAllSimpleGensAreOK()const;
@@ -197,7 +200,9 @@ class WeylGroupRepresentation
   VectorSpace<coefficient> FindDecentBasis() const;
   void MultiplyBy(const WeylGroupRepresentation<coefficient>& other, WeylGroupRepresentation<coefficient>& output) const;
   void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const;
-  void reset(WeylGroup* inputOwner);
+
+  void reset();
+  void init(WeylGroup& inputOwner);
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix(ClassFunction<coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
   void ClassFunctionMatrix(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
@@ -223,7 +228,7 @@ class WeylGroupRepresentation
     return result;
   }
   bool operator==(const WeylGroupRepresentation<coefficient>& other)const
-  { return this->ownerGroup==other.ownerGroup && this->theCharacter==other.theCharacter;
+  { return this->ownerGroup==other.ownerGroup && this->theCharacteR==other.theCharacteR;
   }
   void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
   std::string GetName() const;

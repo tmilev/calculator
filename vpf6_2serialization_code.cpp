@@ -230,8 +230,7 @@ bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCo
   if (theWeylLetter=='f') theWeylLetter='F';
   if (theWeylLetter=='g') theWeylLetter='G';
   if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
-  { theCommands.Comments << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; "
-    << "error while processing " << input.ToString();
+  { theCommands.Comments << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing " << input.ToString();
     return false;
   }
   int theRank;

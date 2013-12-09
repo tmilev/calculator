@@ -4763,6 +4763,15 @@ Matrix<Rational> WeylGroup::GetMatrixStandardRep(int elementIndex)const
   return result;
 }
 
+void WeylGroup::init()
+{ this->flagFundamentalToSimpleMatricesAreComputed=false;
+  this->flagAllOuterAutosComputed=false;
+  this->flagOuterAutosGeneratorsComputed=false;
+  this->flagNumberOfElementsComputedToFitInInt=false;
+  this->flagIrrepsAreComputed=false;
+  this->flagCharTableIsComputed=false;
+}
+
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
 { int numGens= this->theElements[index].generatorsLastAppliedFirst.size;
   for (int i=numGens-1; i>=0; i--)

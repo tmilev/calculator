@@ -837,13 +837,16 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
 
 bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup");
-  DynkinType theType;
-  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
+  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
-  WeylGroup theWeyl;
-  theWeyl.MakeFromDynkinType(theType);
+  if (!output.IsOfType<WeylGroup>())
+    return false;
+  WeylGroup& theWeyl=output.GetValueNonConst<WeylGroup>();
+  if (!theWeyl.flagCharTableIsComputed)
+    theWeyl.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
   std::stringstream out;
-  out << "Weyl group type:" << theType.ToString();
+  theWeyl.GetTauSignatures(theCommands.theGlobalVariableS);
+  out << "Weyl group type:" << theWeyl.ToString();
 
   return output.AssignValue(out.str(), theCommands);
 }

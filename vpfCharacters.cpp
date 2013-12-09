@@ -1076,7 +1076,7 @@ bool WeylGroup::VerifyChartable(bool printresults)const
   return okay;
 }
 
-List<List<Rational> > WeylGroup::GetTauSignatures()
+List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeIrreducibleRepresentationsTodorsVersion();

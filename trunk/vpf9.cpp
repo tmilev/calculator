@@ -4984,11 +4984,11 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
     bool theEntireClassIsComputed=this->conjugacyClasses.size==this->ConjugacyClassCount();
     for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
     { out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClassRepresentatives[i].ToString(theFormat) << ". ";
+      out << "The class has " << this->conjugacyClassesSizes[i] << " elements. ";
       if (!theEntireClassIsComputed)
-      { out << "The class size was not computed.";
+      { out << "The class elements were not computed.";
         continue;
       }
-      out << "The class has " << this->conjugacyClasses[i].size << " elements. ";
       if (this->conjugacyClasses[i].size>10)
       { out << " The elements are too many displaying the first element only: ";
         out << this->conjugacyClasses[i][0].ToString(theFormat);
@@ -5021,10 +5021,7 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   for (int i=0; i<this->ConjugacyClassCount(); i++)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClassRepresentatives[" << i;
     for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
-      if (j==2)
-        out << "&nbsp;"; // spaces display in a web browser is non-intuitive, apparently
-      else
-        out << " "; // exactly 3 spaces by beefing up as necessary.
+      out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out << "].MakeFromReadableReflections(output, true, \"";
     for (int j=0; j<this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size; j++)
     { out << this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst[j];
@@ -5032,6 +5029,13 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
         out << ",";
     }
     out << "\");";
+  }
+  out << "\n<br>&nbsp;&nbsp;output.conjugacyClassesSizes.SetSize(" << this->ConjugacyClassCount() << ");";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClassesSizes[" << i;
+    for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
+      out << "&nbsp;"; // making sure index has width exactly 3 spaces
+    out  << "]=" << this->conjugacyClassesSizes[i] << ";";
   }
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";

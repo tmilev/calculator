@@ -68,6 +68,16 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
     for (int j=0; j<this->conjugacyClasses[i].size; j++)
       this->conjugacyClasses[i][j]=this->theElements[this->conjugacyClassesIndices[i][j]];
   }
+  this->SelectCCRepsAndRecordCCsizes();
+}
+
+void WeylGroup::SelectCCRepsAndRecordCCsizes()
+{ this->conjugacyClassRepresentatives.SetSize(this->conjugacyClasses.size);
+  this->conjugacyClassesSizes.SetSize(this->conjugacyClasses.size);
+  for (int i=0; i<this->conjugacyClasses.size; i++)
+  { this->conjugacyClassRepresentatives[i]=this->conjugacyClasses[i][0];
+    this->conjugacyClassesSizes[i]=this->conjugacyClasses[i].size;
+  }
 }
 
 void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
@@ -77,8 +87,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
     crash << "I am crashing for safety reasons (this is not a programming error). You requested to compute the conjugacy classes of a Weyl group of type "
     << this->theDynkinType.ToString() << ", which, by formula, has " << this->theDynkinType.GetSizeWeylGroupByFormula().ToString()
-    << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "."
-    << crash;
+    << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "." << crash;
   //  std::cout << "<hr>HEre be errors";
   this->ComputeAllElements(hardcodedUpperLimit+1, theGlobalVariables);
   //std::cout << "<hr>rho orbit: " <<  this->rhoOrbit.size << " total: " << this->rhoOrbit.ToString();
@@ -145,13 +154,14 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
         }
       currentClass.QuickSortAscending(0, &currentClassIndices);
     }
+  this->conjugacyClasses.QuickSortAscending(0, &this->conjugacyClassesIndices);
+  this->SelectCCRepsAndRecordCCsizes();
   int checkNumElts=0;
   for (int i=0; i<this->ConjugacyClassCount(); i++)
     checkNumElts+=this->conjugacyClasses[i].size;
   if (this->theElements.size!=checkNumElts)
     crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
     << this->theElements.size << " elements" << crash;
-  this->conjugacyClasses.QuickSortAscending(0, &this->conjugacyClassesIndices);
 //  std::cout << "conj class report: " << this->ToString();
   this->CheckInitializationFDrepComputation();
   //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->ConjugacyClassCount() << "conjugacy classes" << std::endl;

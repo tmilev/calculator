@@ -4974,24 +4974,33 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
 }
 
 std::string WeylGroup::ToString(FormatExpressions* theFormat)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("WeylGroup::ToString");
+  std::stringstream out;
   out << "<br>Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
   if (this->ConjugacyClassCount()>0)
   { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
-    for (int i=0; i<this->ConjugacyClassCount(); i++)
-    { out << "<br>Conjugacy class " << i+1 << " (" << this->conjugacyClasses[i].size << " elements total): ";
-      if (this->conjugacyClasses[i].size>10)
-      { out << " ... has too many elements, displaying the first element only: ";
-        out << this->conjugacyClasses[i][0].ToString(theFormat);
+    bool theEntireClassIsComputed=this->conjugacyClasses.size==this->ConjugacyClassCount();
+    for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
+    { out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClassRepresentatives[i].ToString(theFormat) << ". ";
+      if (!theEntireClassIsComputed)
+      { out << "The class size was not computed.";
         continue;
       }
+      out << "The class has " << this->conjugacyClasses[i].size << " elements. ";
+      if (this->conjugacyClasses[i].size>10)
+      { out << " The elements are too many displaying the first element only: ";
+        out << this->conjugacyClasses[i][0].ToString(theFormat);
+        continue;
+      } else if (this->conjugacyClasses[i].size>0)
+        out << " The elements of the class are: ";
       for (int j=0; j<this->conjugacyClasses[i].size; j++)
       { out << this->conjugacyClasses[i][j].ToString(theFormat);
         if (j!=this->conjugacyClasses[i].size-1)
           out << ", ";
       }
+      out << ". ";
     }
   }
   out << "<br>Root system(" << this->RootSystem.size << " elements):\n" << this->RootSystem.ToString() << "\n";
@@ -5006,14 +5015,26 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
-  out << "void LoadLoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
-  out << "output.ComputeRho(true);\n<br>";
-  out << "  output.conjugacyClasses.";
+  out << "bool LoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  out << "output.ComputeRho(true);";
+  out << "\n<br>&nbsp;&nbsp;output.conjugacyClassRepresentatives.SetSize(" << this->conjugacyClassRepresentatives.size << ");";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  {
-
-
+  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClassRepresentatives[" << i;
+    for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
+      if (j==2)
+        out << "&nbsp;"; // spaces display in a web browser is non-intuitive, apparently
+      else
+        out << " "; // exactly 3 spaces by beefing up as necessary.
+    out << "].MakeFromReadableReflections(output, true, \"";
+    for (int j=0; j<this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size; j++)
+    { out << this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst[j];
+      if (j!=this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size-1)
+        out << ",";
+    }
+    out << "\");";
   }
+  out << "\n<br>&nbsp;&nbsp;return true;";
+  out << "\n<br>}";
   return out.str();
 }
 

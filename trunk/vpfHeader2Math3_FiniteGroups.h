@@ -82,6 +82,7 @@ public:
       return false;
     return this->generatorsLastAppliedFirst==other.generatorsLastAppliedFirst;
   }
+  void MakeFromReadableReflections(WeylGroup& input, bool dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK, const std::string& inputReflections);
   bool operator>(const ElementWeylGroup<templateWeylGroup>& other)const;
 };
 
@@ -286,6 +287,8 @@ public:
   MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
   List<List<int> > conjugacyClassesIndices;
   List<List<ElementWeylGroup<WeylGroup> > > conjugacyClasses;
+  List<ElementWeylGroup<WeylGroup> > conjugacyClassRepresentatives;
+  List<int> conjugacyClassesSizes;
   List<ElementWeylGroup<WeylGroup> > squaresFirstConjugacyClassRep;
 
   List<WeylGroupRepresentation<Rational> > irreps;
@@ -320,7 +323,7 @@ public:
   void ComputeOuterAutoGenerators();
   void ComputeOuterAutos();
   int ConjugacyClassCount()const
-  { return this->conjugacyClasses.size;
+  { return this->conjugacyClassRepresentatives.size;
   }
   bool CheckConsistency()const;
   bool VerifyChartable(bool printresults=false)const;
@@ -334,6 +337,7 @@ public:
   int NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
   void GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound);
   Rational GetLongestRootLengthSquared();
+  void SelectCCRepsAndRecordCCsizes();
   static unsigned int HashFunction(const WeylGroup& input)
   { return input.CartanSymmetric.HashFunction();
   }

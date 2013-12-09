@@ -521,7 +521,7 @@ void Calculator::ParseFillDictionary(const std::string& input)
       { currentElement.controlIndex=this->controlSequences.GetIndex(current);
         currentElement.theData.reset(*this);
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else if (MathRoutines::isADigit(current, currentDigit))
+      } else if (MathRoutines::isADigit(current, &currentDigit))
       { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
         currentElement.controlIndex=this->conInteger();
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
@@ -945,8 +945,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     { outputExpression=result.theData;
       success=true;
 //      std::cout << "Success: " << result.theData.ToString();
-    }
-    else if (result.errorString!="")
+    } else if (result.errorString!="")
       errorLog << "Syntax error with message: " << result.errorString;
     else
     { errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";

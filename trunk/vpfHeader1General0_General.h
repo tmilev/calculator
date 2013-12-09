@@ -369,14 +369,17 @@ public:
     return result;
   }
   static int TwoToTheNth(int n);
-  static bool isADigit(const std::string& input, int& whichDigit)
+  static bool isADigit(const std::string& input, int* whichDigit=0)
   { if (input.size()!=1)
       return false;
     return MathRoutines::isADigit(input[0], whichDigit);
   }
-  static inline bool isADigit(char theChar, int& whichDigit)
-  { whichDigit=theChar-'0';
-    return whichDigit<10 && whichDigit>=0;
+  static inline bool isADigit(char theChar, int* whichDigit=0)
+  { int theDigit=theChar-'0';
+    bool result=(theDigit<10 && theDigit>=0);
+    if (result && whichDigit!=0)
+      *whichDigit=theDigit;
+    return result;
   }
   template <class theType>
   static bool GenerateVectorSpaceClosedWRTLieBracket(List<theType>& inputOutputElts, int upperDimensionBound, GlobalVariables* theGlobalVariables=0)

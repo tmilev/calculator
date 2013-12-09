@@ -52,6 +52,7 @@
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />
+		<Unit filename="vpf99_HardcodedData.cpp" />
 		<Unit filename="vpf9_1.cpp" />
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
@@ -87,6 +88,7 @@
 		<Unit filename="vpfHeader2Math6_ModulesSSLieAlgebras.h" />
 		<Unit filename="vpfHeader2Math7_PackedVector.h" />
 		<Unit filename="vpfHeader2Math8_VectorSpace.h" />
+		<Unit filename="vpfHeader2Math9_HardCodedData.h" />
 		<Unit filename="vpfHeader3Calculator0_Interface.h" />
 		<Unit filename="vpfHeader3Calculator1_InnerTypedFunctions.h" />
 		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />

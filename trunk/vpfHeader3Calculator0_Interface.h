@@ -511,7 +511,7 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  HashedListReferences<ElementWeylGroup<WeylGroup>> theWeylGroupElements;
+  HashedListReferences<ElementWeylGroup<WeylGroup> > theWeylGroupElements;
   HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupReps;
   HashedListReferences<WeylGroupVirtualRepresentation> theWeylGroupVirtualReps;
   ListReferences<WeylGroup> theWeylGroups;
@@ -1535,7 +1535,7 @@ public:
   void InitJavaScriptDisplayIndicator();
 };
 
-class Serialization
+class CalculatorSerialization
 {
 public:
   static bool innerStore(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1557,7 +1557,7 @@ public:
   static bool innerStoreObject(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);
   static bool innerStoreCandidateSA(Calculator& theCommands, const CandidateSSSubalgebra& input, Expression& output);
   static bool innerStoreObject(Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
-  { return Serialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
+  { return CalculatorSerialization::innerStoreElementSemisimpleLieAlgebraRationals(theCommands, input, output);
   }
   static bool innerStoreElementSemisimpleLieAlgebraRationals
   (Calculator& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output);
@@ -1571,6 +1571,7 @@ public:
   static bool innerLoadCandidateSA
   (Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner);
   static bool innerLoadDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
+  static bool innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStoreSemisimpleSubalgebrasFromExpression(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1582,7 +1583,7 @@ public:
   static bool innerStoreObject(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output, Expression* theContext=0, bool* isNonConst=0)
   { if (isNonConst!=0)
       *isNonConst=true;
-    return Serialization::innerStoreChevalleyGenerator(theCommands, input, output);
+    return CalculatorSerialization::innerStoreChevalleyGenerator(theCommands, input, output);
   }
   static bool innerStoreObject
   (Calculator& theCommands, const MonomialUniversalEnveloping<RationalFunctionOld>& input, Expression& output, Expression* theContext=0, bool* isNonConst=0);
@@ -1602,14 +1603,14 @@ public:
 };
 
 template <class TemplateList>
-bool Serialization::innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
+bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext)
 { output.reset(theCommands);
   output.children.ReservE(input.size+1);
   Expression tempE;
   tempE.MakeAtom(theCommands.opSequence(), theCommands);
   output.AddChildOnTop(tempE);
   for (int i=0; i<input.size; i++)
-  { if (!Serialization::innerStoreObject(theCommands, input[i], tempE, theContext))
+  { if (!CalculatorSerialization::innerStoreObject(theCommands, input[i], tempE, theContext))
       return false;
     output.AddChildOnTop(tempE);
   }
@@ -1617,16 +1618,16 @@ bool Serialization::innerStoreObject(Calculator& theCommands, const TemplateList
 }
 
 template <class TemplateMonomial, typename coefficient>
-bool Serialization::innerStoreMonCollection
+bool CalculatorSerialization::innerStoreMonCollection
 (Calculator& theCommands, const MonomialCollection<TemplateMonomial, coefficient>& input, Expression& output, Expression* theContext)
-{ MacroRegisterFunctionWithName("Serialization::SerializeMonCollection");
+{ MacroRegisterFunctionWithName("CalculatorSerialization::SerializeMonCollection");
   Expression termE, coeffE, tempE;
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
   for (int i=input.size()-1; i>=0; i--)
   { const TemplateMonomial& currentMon=input[i];
     bool isNonConst=true;
-    if (!Serialization::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
+    if (!CalculatorSerialization::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
       return false;
     }
@@ -1652,14 +1653,14 @@ bool Serialization::innerStoreMonCollection
 }
 
 template <class TemplateMonomial, typename coefficient>
-bool Serialization::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
-{ MacroRegisterFunctionWithName("Serialization::DeSerializeMonCollection");
+bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
+{ MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
   Expression currentContext, finalContext;
   finalContext.MakeEmptyContext(theCommands);
   for (int i=0; i<theSum.size(); i++)
-  { if (!Serialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
+  { if (!CalculatorSerialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
     { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
     }
@@ -1671,7 +1672,7 @@ bool Serialization::DeSerializeMonCollection(Calculator& theCommands, const Expr
   output.MakeZero();
   TemplateMonomial tempM;
   for (int i=0; i<theSum.size(); i++)
-  { if (!Serialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
+  { if (!CalculatorSerialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
     { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";
       return false;
     }
@@ -1786,8 +1787,8 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
 }
 
 template <class coefficient>
-bool Serialization::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Serialization::innerPolynomial");
+bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorSerialization::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
 //  std::cout << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
@@ -1811,7 +1812,7 @@ bool Serialization::innerPolynomial(Calculator& theCommands, const Expression& i
     theComputed.reset(theCommands, input.children.size);
     theComputed.AddChildOnTop(input[0]);
     for (int i=1; i<input.children.size; i++)
-    { if (!Serialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+    { if (!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
       { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
         isGood=false;
         break;
@@ -1820,7 +1821,7 @@ bool Serialization::innerPolynomial(Calculator& theCommands, const Expression& i
     }
   } else if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
   { isGood=true;
-    if(!Serialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
     { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       isGood=false;
     }

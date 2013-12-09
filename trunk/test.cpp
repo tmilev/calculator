@@ -171,8 +171,8 @@ void PrintCharTable(const somegroup& G, const char* filename)
   data.obj[2].key = "characters";
 
   data.obj[0].value.type = JSLIST;
-  data.obj[0].value.list.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> reprefs;
     G.GetGeneratorList(G.conjugacyClasses[i][0],reprefs);
     data.obj[0].value.list[i].type = JSLIST;
@@ -184,8 +184,8 @@ void PrintCharTable(const somegroup& G, const char* filename)
   }
 
   data.obj[1].value.type = JSLIST;
-  data.obj[1].value.list.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  data.obj[1].value.list.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { data.obj[1].value.list[i].type = JSNUM;
     data.obj[1].value.list[i].number = G.conjugacyClasses[i].size;
   }
@@ -212,7 +212,7 @@ void AddCharTable(JSData& chartable, somegroup& G)
 { std::string sizes = "sizes";
 
   // check sizes
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
     if(chartable[sizes][i].number != G.conjugacyClasses[i].size)
       std::cout << "Size mismatch in conjugacy class " << i;
   // check representatives... well, not yet.
@@ -220,8 +220,8 @@ void AddCharTable(JSData& chartable, somegroup& G)
 
   G.characterTable.SetSize(chartable["characters"].list.size);
   for(int i=0; i<chartable["characters"].list.size; i++)
-  { G.characterTable[i].SetSize(G.conjugacyClasses.size);
-    for(int j=0; j<G.conjugacyClasses.size; j++)
+  { G.characterTable[i].SetSize(G.ConjugacyClassCount());
+    for(int j=0; j<G.ConjugacyClassCount(); j++)
       G.characterTable[i][j] = chartable["characters"][i][j].number;
   }
 }
@@ -321,18 +321,17 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWey
 void SubgroupWeylGroup::ComputeTauSignature()
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
   if(this->ccPreimages.size == 0)
-  { this->ccPreimages.SetSize(this->conjugacyClasses.size);
-    for(int i=0; i<this->conjugacyClasses.size; i++)
+  { this->ccPreimages.SetSize(this->ConjugacyClassCount());
+    for(int i=0; i<this->ConjugacyClassCount(); i++)
     { ElementWeylGroup<WeylGroup> g;
       g.MakeID(*this->parent);
       const ElementWeylGroup<WeylGroup>& currentRepresentative=this->theElements[this->conjugacyClasses[i][0]];
       for(int j=currentRepresentative.generatorsLastAppliedFirst.size-1; j>=0; j--)
         g*=this->parent->theElements[this->generatorPreimages[currentRepresentative.generatorsLastAppliedFirst[j]]];
-      int gi = this->parent->theElements.GetIndex(g);
       bool notFound=true;
-      for(int ci=0; notFound && ci<this->parent->conjugacyClasses.size; ci++)
+      for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
         for(int cj=0; notFound && cj<this->parent->conjugacyClasses[ci].size; cj++)
-          if(this->parent->conjugacyClasses[ci][cj] == gi)
+          if(this->parent->conjugacyClasses[ci][cj] == g)
           { this->ccPreimages[i] = ci;
             notFound=false;
           }
@@ -341,7 +340,7 @@ void SubgroupWeylGroup::ComputeTauSignature()
   Vector<Rational> Xs;
   this->GetSignCharacter(Xs);
   Vector<Rational> Xi;
-  Xi.SetSize(this->conjugacyClasses.size);
+  Xi.SetSize(this->ConjugacyClassCount());
   this->tauSignature.SetSize(this->parent->irreps.size);
   for(int i=0; i<this->parent->irreps.size; i++)
   { ClassFunction<Rational> Xip = this->parent->irreps[i].GetCharacter();
@@ -380,7 +379,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
     for(int j=0; j<ts[i].size; j++)
       data[i][j] = ts[i][j];
   /* this prints out everything for some reason
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   {std::cout << "conjugacy class " << i << std::endl;
    for(int j=0; j<G.conjugacyClasses[i].size; j++)
    {ElementWeylGroup<WeylGroup> g = G.theElements[G.conjugacyClasses[i][j]];
@@ -393,11 +392,11 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
 // lets print out the character table
   std::cout << "\\[ \\begin{array}{";
-  for(int i=0; i<G.conjugacyClasses.size+1; i++)
+  for(int i=0; i<G.ConjugacyClassCount()+1; i++)
     std::cout << 'c';
   std::cout << "}\n";
 
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> g;
     G.GetGeneratorList(G.conjugacyClasses[i][0],g);
     std::cout << "&\\rotatebox{90}{";
@@ -407,12 +406,12 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
   }
   std::cout << "\\\\" << std::endl;
 
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
     std::cout << '&' << G.conjugacyClasses[i].size << '\t';
   std::cout << "\\\\\n\\hline\n";
 
   for(int i=0; i<G.characterTable.size; i++)
-  { for(int j=0; j<G.conjugacyClasses.size; j++)
+  { for(int j=0; j<G.ConjugacyClassCount(); j++)
       std::cout << '&' << G.characterTable[i][j] << '\t';
     std::cout << "\\\\\n";
   }
@@ -1017,8 +1016,8 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
   // more expensive test: character of V has unit norm
   ClassFunction<coefficient> X;
   X.G = &G;
-  X.data.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  X.data.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { int g = G.conjugacyClasses[i][0];
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
@@ -1255,14 +1254,11 @@ bool GetCoordsInBasisInputIsGaussianEliminated
 
 void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;
-
-
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
   theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, false);
   List<Vector<Rational> > roots;
-
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
   { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
     roots=currentRootSA.PositiveRootsK;
@@ -1272,8 +1268,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     Polynomial<Rational> p;
     Matrix<Rational> m;
     List<Polynomial<Rational> > module;
-    std::cout << "I am processing root subalgebra of type "
-              << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
+    std::cout << "I am processing root subalgebra of type " << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     module.AddOnTop(macdonaldPoly);
     int mcs=0;
     do
@@ -1289,7 +1284,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     } while(module.size > mcs);
     std::cout << "...rank is " << module.size << std::endl;
     WeylGroupRepresentation<Rational> rep;
-    rep.reset(&W);
+    rep.init(W);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     for(int i=1; i<W.GetDim()+1; i++)
@@ -1380,7 +1375,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   std::cout << "module rank is " << monomials_used.size << std::endl;
 
   WeylGroupRepresentation<Rational> rep;
-  rep.reset(&W);
+  rep.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -1861,7 +1856,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     B65521.AddVector(images65521[monomials_used[i]]);
 
   WeylGroupRepresentation<f65521> rep65521;
-  rep65521.reset(&W);
+  rep65521.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -1956,7 +1951,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     B.AddVector(images[monomials_used[i]]);
 
   WeylGroupRepresentation<Rational> rep;
-  rep.reset(&W);
+  rep.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -2770,7 +2765,7 @@ int main(void)
   //ComputeIrreps(W);
 /*UDPolynomial<Rational> p;
   Matrix<Rational> m;
-  for(int i=0; i<W.conjugacyClasses.size; i++)
+  for(int i=0; i<W.ConjugacyClassCount(); i++)
   { for(int j=0; j<W.conjugacyClasses[i].size; j++)
     { W.GetStandardRepresentationMatrix(W.conjugacyClasses[i][j],m);
       p.AssignCharPoly(m);
@@ -2795,7 +2790,7 @@ int main(void)
   */
 //   G.ComputeConjugacyClasses();
 //   std::cout << "Conjugacy class representatives" << std::endl;
-//   for(int i=0; i<G.conjugacyClasses.size; i++)
+//   for(int i=0; i<G.ConjugacyClassCount(); i++)
 //    std::cout << G.rhoOrbit[G.conjugacyClasses[i][0]] << std::endl;
   /*   List<Vector<Rational> > chars = ComputeCharacterTable(G);
      for(int i=0; i<chars.size; i++)
@@ -2807,7 +2802,7 @@ int main(void)
   G.MakeArbitrarySimple('E',8);
   G.ComputeConjugacyClasses();
   JSData out;
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
     out[i] = (double) G.conjugacyClasses[i].size;
   std::cout << out << std::endl;
   */

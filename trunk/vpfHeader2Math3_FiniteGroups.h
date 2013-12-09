@@ -82,6 +82,7 @@ public:
       return false;
     return this->generatorsLastAppliedFirst==other.generatorsLastAppliedFirst;
   }
+  bool operator>(const ElementWeylGroup<templateWeylGroup>& other)const;
 };
 
 template <class coefficient>
@@ -234,6 +235,8 @@ class WeylGroupRepresentation
   std::string GetName() const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
+  void GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output);
+  Matrix<coefficient> GetMatrixElement(const ElementWeylGroup<WeylGroup>& input);
   void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
   { this->theElementImages[elementIndex] = input;
     this->theElementIsComputed[elementIndex] = true;
@@ -281,7 +284,8 @@ public:
   Vectors<Rational> RootsOfBorel;
 
   MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
-  List<List<int> > conjugacyClasses;
+  List<List<int> > conjugacyClassesIndices;
+  List<List<ElementWeylGroup<WeylGroup> > > conjugacyClasses;
   List<ElementWeylGroup<WeylGroup> > squaresFirstConjugacyClassRep;
 
   List<WeylGroupRepresentation<Rational> > irreps;
@@ -435,7 +439,7 @@ public:
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
-  void ComputeAllElements(int UpperLimitNumElements=0);
+  void ComputeAllElements(int UpperLimitNumElements=0, GlobalVariables* theGlobalVariables=0);
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
   Rational GetSizeWeylGroupByFormula()const
@@ -452,14 +456,14 @@ public:
   template <class coefficient>
   bool GenerateOrbit
   (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0, int UpperLimitNumElements=-1);
+   HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0, int UpperLimitNumElements=-1, GlobalVariables* theGlobalVariables=0);
   template <class coefficient>
   bool GenerateOrbit
   (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
-   HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0, int UpperLimitNumElements=-1)
+   HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0, int UpperLimitNumElements=-1, GlobalVariables* theGlobalVariables=0)
   { Vectors<Rational> theWeights;
     theWeights.AddOnTop(theWeight);
-    return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements);
+    return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements, theGlobalVariables);
   }
 //  int GetNumRootsFromFormula();
   void GenerateRootSystem();
@@ -529,6 +533,11 @@ public:
   int Invert(int g) const;
   Matrix<Rational> GetMatrixStandardRep(int elementIndex)const;
   void GetMatrixStandardRep(const ElementWeylGroup<WeylGroup>& input, Matrix<Rational>& outputMatrix)const;
+  Matrix<Rational> GetMatrixStandardRep(const ElementWeylGroup<WeylGroup>& input)const
+  { Matrix<Rational> result;
+    this->GetMatrixStandardRep(input, result);
+    return result;
+  }
   void GetElementOfMatrix(Matrix<Rational>& input, ElementWeylGroup<WeylGroup> &output);
   void SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
@@ -624,6 +633,9 @@ public:
   { this->parent=0;
     this->generatorPreimages.SetSize(0);
     this->ccPreimages.SetSize(0);
+  }
+  int ConjugacyClassCount()const
+  { return this->conjugacyClasses.size;
   }
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
@@ -766,10 +778,10 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroup* GG, con
     crash << "Weyl group pointer not allowed to be zero. " << crash;
   this->MakeZero();
   ElementWeylGroup<WeylGroup> theMon;
-  for(int i=0; i<GG->conjugacyClasses.size; i++)
+  for(int i=0; i<GG->ConjugacyClassCount(); i++)
     if (l[i]!=0)
       for(int j=0; j<GG->conjugacyClasses[i].size; j++)
-        this->AddMonomial(GG->theElements[GG->conjugacyClasses[i][j]], l[i]);
+        this->AddMonomial(GG->conjugacyClasses[i][j], l[i]);
 }
 
 //Matrix<Element>
@@ -785,7 +797,7 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<coefficie
 template<typename coefficient>
 coefficient ClassFunction<coefficient>::InnerProduct(const ClassFunction<coefficient>& other) const
 { coefficient acc = 0;
-  for(int i=0;i<G->conjugacyClasses.size;i++)
+  for(int i=0;i<G->ConjugacyClassCount();i++)
     acc +=  this->data[i].GetComplexConjugate() * other[i].GetComplexConjugate() * G->conjugacyClasses[i].size;
   return acc/G->GetSizeWeylGroupByFormula();
 }
@@ -814,8 +826,8 @@ template<typename coefficient>
 ClassFunction<coefficient> ClassFunction<coefficient>::Sym2() const
 { ClassFunction<coefficient> l;
   l.G = G;
-  l.data.SetExpectedSize(G->conjugacyClasses.size);
-  for(int i=0; i<G->conjugacyClasses.size; i++)
+  l.data.SetExpectedSize(G->ConjugacyClassCount());
+  for(int i=0; i<G->ConjugacyClassCount(); i++)
     l.data.AddOnTop((this->data[i] * this->data[i] + this->data[G->squaresFirstConjugacyClassRep[i]])/2);
   return l;
 }
@@ -824,8 +836,8 @@ template<typename coefficient>
 ClassFunction<coefficient> ClassFunction<coefficient>::Alt2() const
 { ClassFunction<coefficient> l;
   l.G = G;
-  l.data.SetExpectedSize(G->conjugacyClasses.size);
-  for(int i=0; i<G->conjugacyClasses.size; i++)
+  l.data.SetExpectedSize(G->ConjugacyClassCount());
+  for(int i=0; i<G->ConjugacyClassCount(); i++)
     l.data.AddOnTop((this->data[i] * this->data[i] - this->data[G->squaresFirstConjugacyClassRep[i]])/2);
   return l;
 }
@@ -836,8 +848,8 @@ ClassFunction<coefficient> ClassFunction<coefficient>::operator+(const ClassFunc
   l.data+=other.data;
   //this is slightly faster, but way too much code:
   /*l.G=this->G;
-  l.data.SetSize(G->conjugacyClasses.size);
-  for(int i=0; i<G->conjugacyClasses.size; i++)
+  l.data.SetSize(G->ConjugacyClassCount());
+  for(int i=0; i<G->ConjugacyClassCount(); i++)
     l.data[i]=this->data[i] + other[i];*/
   return l;
 }

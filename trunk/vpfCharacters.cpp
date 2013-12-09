@@ -61,7 +61,13 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
   for(int i=0;i<this->theElements.size;i++)
     for(int j=0;j<this->GetDim();j++)
       G.AddEdge(i, this->theElements.GetIndex(this->SimpleConjugation(j, this->theElements[i])));
-  conjugacyClasses = G.DestructivelyGetConnectedComponents();
+  this->conjugacyClassesIndices= G.DestructivelyGetConnectedComponents();
+  this->conjugacyClasses.SetSize(this->conjugacyClassesIndices.size);
+  for (int i=0; i<this->conjugacyClassesIndices.size; i++)
+  { this->conjugacyClasses[i].SetSize(this->conjugacyClassesIndices[i].size);
+    for (int j=0; j<this->conjugacyClasses[i].size; j++)
+      this->conjugacyClasses[i][j]=this->theElements[this->conjugacyClassesIndices[i][j]];
+  }
 }
 
 void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
@@ -74,7 +80,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "."
     << crash;
   //  std::cout << "<hr>HEre be errors";
-  this->ComputeAllElements(hardcodedUpperLimit+1);
+  this->ComputeAllElements(hardcodedUpperLimit+1, theGlobalVariables);
   //std::cout << "<hr>rho orbit: " <<  this->rhoOrbit.size << " total: " << this->rhoOrbit.ToString();
   //std::cout << "<hr> the elements: " << this->theElements.size << " total: " << this->theElements.ToString();
   //if (this->rhoOrbit.size!=this->theElements.size)
@@ -85,6 +91,9 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
   this->conjugacyClasses.ReservE(120); //<- that should be good to go up to E8.
+  this->conjugacyClassesIndices.SetSize(0);
+  this->conjugacyClassesIndices.ReservE(120); //<- that should be good to go up to E8.
+
   //For higher number of conjugacy classes List's grow exponentially on demand, so this shouldn't be a big slow-down.
   int theRank=this->GetDim();
   ElementWeylGroup<WeylGroup> theConjugated;
@@ -93,52 +102,71 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
   for (int i=0; i<theRank; i++)
     theGenerators[i].MakeSimpleReflection(i, *this);
 //  std::cout << "Here be the simple gens:" << theGenerators.ToString();
+  ProgressReport Report1(theGlobalVariables);
+  int numElementsAccounted=1;
   for (int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
-    { Accounted[i] = true;
-      this->conjugacyClasses.SetSize(conjugacyClasses.size+1);
-      List<int>& currentClass=*this->conjugacyClasses.LastObject();
+    { numElementsAccounted++;
+      if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << "Type: " << this->theDynkinType.ToString() << ", computing conjugacy class "
+        << this->conjugacyClasses.size+1 << ", accounted " << numElementsAccounted << " elements out of " << this->theElements.size << ". ";
+        Report1.Report(reportStream.str());
+      }
+      Accounted[i] = true;
+      this->conjugacyClasses.SetSize(this->conjugacyClasses.size+1);
+      this->conjugacyClassesIndices.SetSize(this->conjugacyClassesIndices.size+1);
+      List<ElementWeylGroup<WeylGroup> >& currentClass=*this->conjugacyClasses.LastObject();
+      List<int>& currentClassIndices=*this->conjugacyClassesIndices.LastObject();
       currentClass.SetSize(0);//<-needed in case the group is being recomputed
-      currentClass.AddOnTop(i);
+      currentClass.SetExpectedSize(this->theElements.size);
+      currentClass.AddOnTop(this->theElements[i]);
+      currentClassIndices.AddOnTop(i);
       for (int j=0; j<currentClass.size; j++)
         for (int k=0; k<theRank; k++)
-        { theConjugated=theGenerators[k]*this->theElements[currentClass[j]]*theGenerators[k];
+        { theConjugated=theGenerators[k]*currentClass[j]*theGenerators[k];
 //          std::cout << "<hr>" << theGenerators[k].ToString() << " * " << this->theElements[currentClass[j]].ToString()
 //          << "*" << theGenerators[k].ToString() << "=" << theConjugated.ToString() << "<hr>";
           int accountedIndex=this->theElements.GetIndex(theConjugated);
           if (accountedIndex==-1)
             crash << "Programming error: failed to find element " << theConjugated.ToString() << " in list of elements" << crash;
           if(!Accounted[accountedIndex])
-          { currentClass.AddOnTop(accountedIndex);
+          { currentClass.AddOnTop(theConjugated);
+            currentClassIndices.AddOnTop(accountedIndex);
             Accounted[accountedIndex] = true;
+            numElementsAccounted++;
+            if (theGlobalVariables!=0 && numElementsAccounted%100 ==0)
+            { std::stringstream reportStream;
+              reportStream << "Type: " << this->theDynkinType.ToString() << ", computing conjugacy class "
+              << this->conjugacyClasses.size << ", accounted " << numElementsAccounted << " elements out of " << this->theElements.size << ". ";
+              Report1.Report(reportStream.str());
+            }
           }
         }
-      currentClass.QuickSortAscending();
+      currentClass.QuickSortAscending(0, &currentClassIndices);
     }
   int checkNumElts=0;
-  for (int i=0; i<this->conjugacyClasses.size; i++)
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
     checkNumElts+=this->conjugacyClasses[i].size;
   if (this->theElements.size!=checkNumElts)
     crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
     << this->theElements.size << " elements" << crash;
-  this->conjugacyClasses.QuickSortAscending();
+  this->conjugacyClasses.QuickSortAscending(0, &this->conjugacyClassesIndices);
 //  std::cout << "conj class report: " << this->ToString();
   this->CheckInitializationFDrepComputation();
-  //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->conjugacyClasses.size << "conjugacy classes" << std::endl;
-  //for(int i=0; i<conjugacyClasses.size; i++)
+  //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->ConjugacyClassCount() << "conjugacy classes" << std::endl;
+  //for(int i=0; i<ConjugacyClassCount(); i++)
   //  std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
 }
 
 void WeylGroup::ComputeSquares()
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  this->squaresFirstConjugacyClassRep.SetExpectedSize(this->conjugacyClasses.size);
-  this->squaresFirstConjugacyClassRep.SetSize(this->conjugacyClasses.size);
+  this->squaresFirstConjugacyClassRep.SetExpectedSize(this->ConjugacyClassCount());
+  this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
   ElementWeylGroup<WeylGroup> currentSquare;
-  for(int i=0;i<this->conjugacyClasses.size;i++)
-  { this->squaresFirstConjugacyClassRep[i]=this->theElements[this->conjugacyClasses[i][0]];
-    this->squaresFirstConjugacyClassRep[i]*=this->theElements[this->conjugacyClasses[i][0]];
-  }
+  for(int i=0;i<this->ConjugacyClassCount();i++)
+    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasses[i][0]*this->conjugacyClasses[i][0];
 }
 
 void WeylGroup::ComputeInitialCharacters()
@@ -146,20 +174,20 @@ void WeylGroup::ComputeInitialCharacters()
   if(this->squaresFirstConjugacyClassRep.size == 0)
     this->ComputeSquares();
   this->characterTable.SetSize(0);
-  this->characterTable.SetExpectedSize(this->conjugacyClasses.size);
+  this->characterTable.SetExpectedSize(this->ConjugacyClassCount());
 
   ClassFunction<Rational> Xe, Xsgn, Xstd;
   Xe.G = this;
-  Xe.data.initFillInObject(this->conjugacyClasses.size, 1);
+  Xe.data.initFillInObject(this->ConjugacyClassCount(), 1);
   Xsgn.G = this;
-  Xsgn.data.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
-    Xsgn.data[i]=this->theElements[this->conjugacyClasses[i][0]].Sign();
+  Xsgn.data.SetSize(this->ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
+    Xsgn.data[i]=this->conjugacyClasses[i][0].Sign();
   this->characterTable.AddOnTop(Xsgn);
   this->characterTable.AddOnTop(Xe);
   Xstd.G = this;
-  Xstd.data.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
+  Xstd.data.SetSize(this->ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
     Xstd.data[i]=this->GetMatrixStandardRep(this->conjugacyClasses[i][0]).GetTrace();
 //  Xstd = Xstd.ReducedWithChars();
   characterTable.AddOnTop(Xstd);
@@ -430,7 +458,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   std::cout << std::endl;
 */
   List<List<Vector<coefficient> > > es;
-  for(int cfi=this->ownerGroup->conjugacyClasses.size-1; cfi>=0; cfi--)
+  for(int cfi=this->ownerGroup->ConjugacyClassCount()-1; cfi>=0; cfi--)
   { ClassFunction<coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
@@ -462,8 +490,8 @@ const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetChara
 { if(this->flagCharacterIsComputed)
     return this->theCharacteR;
   this->theCharacteR.G = this->ownerGroup;
-  this->theCharacteR.data.SetSize(this->ownerGroup->conjugacyClasses.size);
-  for(int cci=0; cci < this->ownerGroup->conjugacyClasses.size; cci++)
+  this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
+  for(int cci=0; cci < this->ownerGroup->ConjugacyClassCount(); cci++)
     this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci][0]).GetTrace();
   this->flagCharacterIsComputed=true;
   return this->theCharacteR;
@@ -516,7 +544,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
         }
       } else
         incompletely_digested.AddOnTop(spaces[spi]);
-    if(irreps.size == this->conjugacyClasses.size)
+    if(irreps.size == this->ConjugacyClassCount())
       break;
     for(int spi=0; spi<incompletely_digested.size; spi++)
       for(int ci=0; ci<characterTable.size; ci++)
@@ -921,11 +949,11 @@ Vector<coefficient> PutInBasis(const Vector<coefficient> &v, const List<Vector<c
 }
 
 template <typename coefficient>
-ElementWeylGroupRing<coefficient> ActOnGroupRing(const WeylGroup& G, int g, const ElementWeylGroupRing<coefficient>& v)
+ElementWeylGroupRing<coefficient> ActOnGroupRing(ElementWeylGroup<WeylGroup>& theElement, const ElementWeylGroupRing<coefficient>& v)
 { ElementWeylGroupRing<coefficient> out;
   out.MakeZero();
   for(int i=0; i<v.size(); i++)
-    out.AddMonomial(v.theCoeffs[i], G.theElements[g]*v[i]);
+    out.AddMonomial(v.theCoeffs[i], theElement*v[i]);
   return out;
 }
 
@@ -942,14 +970,14 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   // more expensive test: character of V has unit Norm
   ClassFunction<coefficient> X;
   X.G = &G;
-  X.data.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
-  {  int g = G.conjugacyClasses[i][0];
+  X.data.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
+  { ElementWeylGroup<WeylGroup>& g = G.conjugacyClasses[i][0];
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
-    {  Vector<coefficient> v = ActOnGroupRing(G,g,V[j]);
-        v = PutInBasis(v,V);
-        tr += v[j];
+    { Vector<coefficient> v = ActOnGroupRing(g,V[j]);
+      v = PutInBasis(v,V);
+      tr += v[j];
     }
     X.data[i] = tr;
   }
@@ -975,11 +1003,11 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vect
     v.MakeZero(B[0].size);
     rows.AddOnTop(v);
   }
-  for(int i1 =0; i1<X.G->conjugacyClasses.size; i1++)
+  for(int i1 =0; i1<X.G->ConjugacyClassCount(); i1++)
     for(int i2=0; i2<X.G->conjugacyClasses[i1].size; i2++)
       for(int j=0; j<X.G->size(); j++)
         for(int k=0; k<B.size; k++)
-        { int l = X.G->MultiplyElements(X.G->conjugacyClasses[i1][i2],j);
+        { int l =X.G->theElements.GetIndex(X.G->conjugacyClasses[i1][i2]*X.G->theElements[j]);
           rows[k][l] = X.data[i1]*B[k][j];
         }
   Matrix<Rational> M;
@@ -994,33 +1022,31 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vect
 
 ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(const ClassFunction<Rational>& X)
 { ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> out;
-  for(int i=0; i<X.G->conjugacyClasses.size; i++)
+  for(int i=0; i<X.G->ConjugacyClassCount(); i++)
     for(int j=0; j<X.G->conjugacyClasses[i].size; j++)
-      out.AddMonomial(X.G->theElements[X.G->conjugacyClasses[i][j]],X.data[i]);
+      out.AddMonomial(X.G->conjugacyClasses[i][j],X.data[i]);
   return out;
 }
 
 
 template <typename coefficient>
 Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
-{  Matrix<coefficient> M;
-   M.MakeZeroMatrix(X.G->N);
-   for(int i1=0; i1<X.G->ccCount; i1++)
-   {  for(int i2=0; i2<X.G->ccSizes[i1]; i2++)
-      {  int i=X.G->conjugacyClasses[i1][i2];
-         for(int j=0; j<X.G->N; j++)
-         {  M.elements[X.G->MultiplyElements(i,j)][j] = X.data[i1];
-         }
-      }
-   }
-   return M;
+{ Matrix<coefficient> M;
+  M.MakeZeroMatrix(X.G->N);
+  for(int i1=0; i1<X.G->ccCount; i1++)
+    for(int i2=0; i2<X.G->ccSizes[i1]; i2++)
+    { int i=X.G->conjugacyClasses[i1][i2];
+      for(int j=0; j<X.G->N; j++)
+        M(X.G->MultiplyElements(i,j),j) = X.data[i1];
+    }
+  return M;
 }
 
 bool WeylGroup::VerifyChartable(bool printresults)const
 { bool okay = true;
   if(printresults)
     std::cout << "one" << '\n';
-  for(int i=0; i<this->conjugacyClasses.size; i++)
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
   { if(printresults)
       std::cout << this->characterTable[i].Norm() << std::endl;
     if(this->characterTable[i].Norm() != 1)
@@ -1042,12 +1068,13 @@ bool WeylGroup::VerifyChartable(bool printresults)const
 
 List<List<Rational> > WeylGroup::GetTauSignatures()
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
-  this->ComputeIrreducibleRepresentationsThomasVersion();
+//  this->ComputeIrreducibleRepresentationsThomasVersion();
+  this->ComputeIrreducibleRepresentationsTodorsVersion();
   ClassFunction<Rational> signRep;
   signRep.G = this;
   signRep.data.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-    signRep.data[i] =this->theElements[conjugacyClasses[i][0]].Sign();
+    signRep.data[i] =this->conjugacyClasses[i][0].Sign();
   Selection sel;
   sel.init(this->CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
@@ -1072,17 +1099,16 @@ List<List<Rational> > WeylGroup::GetTauSignatures()
     // as characterTable[1]
     PSGs[i].ComputeInitialCharacters();
 
-    ccBackMaps[i].SetSize(PSGs[i].conjugacyClasses.size);
-    for(int j=0; j<PSGs[i].conjugacyClasses.size; j++)
-    { ElementWeylGroup<WeylGroup> h = PSGs[i].theElements[PSGs[i].conjugacyClasses[j][0]];
+    ccBackMaps[i].SetSize(PSGs[i].ConjugacyClassCount());
+    for(int j=0; j<PSGs[i].ConjugacyClassCount(); j++)
+    { ElementWeylGroup<WeylGroup> h = PSGs[i].conjugacyClasses[j][0];
       g.generatorsLastAppliedFirst.SetSize(h.generatorsLastAppliedFirst.size);
       for(int k=0; k<h.generatorsLastAppliedFirst.size; k++)
         g.generatorsLastAppliedFirst[k] = sel.elements[h.generatorsLastAppliedFirst[k]];
-      int gi = this->theElements.GetIndex(g);
       bool notFound=true;
-      for(int k=0; notFound && k<this->conjugacyClasses.size; k++)
+      for(int k=0; notFound && k<this->ConjugacyClassCount(); k++)
         for(int l=0; notFound && l<this->conjugacyClasses[k].size; l++)
-          if(this->conjugacyClasses[k][l] == gi)
+          if(this->conjugacyClasses[k][l] == g)
           { ccBackMaps[i][j] = k;
             notFound=false;
           }

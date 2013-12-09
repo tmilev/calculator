@@ -68,6 +68,9 @@ public:
   int MultiplyElements(int g, int h) const;
   //<-multiply elements is better name than multiply (groups can be tensored/direct product multiplied.
   //MultiplyElements is unambiguous.
+  int ConjugacyClassCount()const
+  { return this->conjugacyClasses.size;
+  }
   int Invert(int g) const;
 
   void MakeArbitrarySimple(char letter, int number);
@@ -314,16 +317,16 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeConjugacyClasses()
         }
       this->conjugacyClasses.AddOnTop(theStack);
       this->conjugacyClasses.LastObject()->QuickSortAscending();
-      std::cout << this->conjugacyClasses.size << " ";
+      std::cout << this->ConjugacyClassCount() << " ";
     }
   this->conjugacyClasses.QuickSortAscending();
-  std::cout << conjugacyClasses.size << std::endl;
+  std::cout << this->ConjugacyClassCount() << std::endl;
 }
 
 template<typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeClassMap()
 { this->classMap.SetSize(this->size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
     for(int j=0; j<this->conjugacyClasses[i].size; j++)
       this->classmap[this->conjugacyClasses[i][j]] = i;
 }
@@ -331,9 +334,9 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeClassMap()
 template<typename scalar, typename templateVector>
 Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int cc)
 { if(this->classMatrices.size == 0)
-  { if(this->conjugacyClasses.size == 0)
+  { if(this->ConjugacyClassCount() == 0)
       this.ComputeConjugacyClasses();
-    this->classMatrices.SetSize(this->conjugacyClasses.size);
+    this->classMatrices.SetSize(this->ConjugacyClassCount());
   }
   if(this->classMap.size == 0)
     this->ComputeClassMap();
@@ -343,9 +346,9 @@ Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int c
 
 template<typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices()
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  for(int i=0; i<this->conjugacyClasses.size; i++)
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
   { std::cout << "//getting class matrix " << i << std::endl;
     this->GetClassMatrix(i);
   }
@@ -366,10 +369,10 @@ int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const
 
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>& out)
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  out.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
+  out.SetSize(this->ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
   { List<int> srs;
     this->GetGeneratorList(this->conjugacyClasses[i][0], srs);
     int yn = srs.size % 2;
@@ -407,18 +410,18 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 // well, so far not using any of his improvements
 template <typename somegroup>
 List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
-{ if(G.conjugacyClasses.size == 0)
+{ if(G.ConjugacyClassCount() == 0)
     G.ComputeConjugacyClasses();
   List<int> classmap;
   int sizeOfG=G.size();
   classmap.SetSize(sizeOfG);
 //  classmap.SetSize(G.theElements.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
     for(int j=0; j<G.conjugacyClasses[i].size; j++)
-      classmap[G.conjugacyClasses[i][j]] = i;
+      classmap[G.theElements.GetIndex(G.conjugacyClasses[i][j])] = i;
   Matrix<Rational> form; // so inefficient
-  form.MakeZeroMatrix(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  form.MakeZeroMatrix(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
     form.elements[i][i] = G.conjugacyClasses[i].size;
   List<VectorSpace<Rational> > spaces;
   if(G.characterTable.size > 0)
@@ -432,8 +435,8 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
     spaces.AddOnTop(allchars.OrthogonalComplement(0,&form));
   } else {
     Vector<Rational> X1;
-    X1.SetSize(G.conjugacyClasses.size);
-    for(int i=0; i<G.conjugacyClasses.size; i++)
+    X1.SetSize(G.ConjugacyClassCount());
+    for(int i=0; i<G.ConjugacyClassCount(); i++)
       X1[i] = 1;
     VectorSpace<Rational> sp1;
     sp1.AddVector(X1);
@@ -441,7 +444,7 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
     spaces.AddOnTop(sp1.OrthogonalComplement(0,&form));
   }
   bool foundEmAll=false;
-  for(int i=0; !foundEmAll && i<G.conjugacyClasses.size; i++)
+  for(int i=0; !foundEmAll && i<G.ConjugacyClassCount(); i++)
   { Matrix<Rational> M;
     std::cout << "Getting class matrix " << i << std::endl;
     M = GetClassMatrix(G,i,&classmap);
@@ -457,7 +460,7 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
         { VectorSpace<Rational> W = es[esi].OrthogonalComplement(&spaces[spi],&form);
           spaces[spi] = V;
           spaces.AddOnTop(W);
-          if(spaces.size == G.conjugacyClasses.size)
+          if(spaces.size == G.ConjugacyClassCount())
           { foundEmAll =true;
             break;
           }
@@ -504,18 +507,18 @@ Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap
 { List<int> invl;
   invl.SetSize(G.conjugacyClasses[cci].size);
   for(int i=0; i<G.conjugacyClasses[cci].size; i++)
-    invl[i] = G.Invert(G.conjugacyClasses[cci][i]);
+    invl[i] = G.Invert(G.theElements.GetIndex(G.conjugacyClasses[cci][i]));
   Matrix<int> M;
-  M.MakeZeroMatrix(G.conjugacyClasses.size);
-  for(int t=0; t<G.conjugacyClasses.size; t++)
+  M.MakeZeroMatrix(G.ConjugacyClassCount());
+  for(int t=0; t<G.ConjugacyClassCount(); t++)
     for(int xi=0; xi<invl.size; xi++)
-    { int yi = G.MultiplyElements(invl[xi],G.conjugacyClasses[t][0]);
+    { int yi = G.MultiplyElements(invl[xi],G.theElements.GetIndex(G.conjugacyClasses[t][0]));
       int ci;
       if(classmap)
         M.elements[t][(*classmap)[yi]] += 1;
       else
-        for(ci=0; ci<G.conjugacyClasses.size; ci++)
-          if(G.conjugacyClasses[ci].BSContains(yi))
+        for(ci=0; ci<G.ConjugacyClassCount(); ci++)
+          if(G.conjugacyClassesIndices[ci].BSContains(yi))
           { M.elements[t][ci] += 1;
             break;
           }
@@ -546,12 +549,12 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   H.GetSignCharacter(HXs);
 
   List<int> ccPreimages;
-  ccPreimages.SetSize(H.conjugacyClasses.size);
-  for(int i=0; i<H.conjugacyClasses.size; i++)
+  ccPreimages.SetSize(H.ConjugacyClassCount());
+  for(int i=0; i<H.ConjugacyClassCount(); i++)
   { bool notFound=true;
-    for(int ci=0; notFound && ci<G.conjugacyClasses.size; ci++)
+    for(int ci=0; notFound && ci<G.ConjugacyClassCount(); ci++)
       for(int cj=0; notFound && cj<G.conjugacyClasses[ci].size; cj++)
-        if(G.theElements[G.conjugacyClasses[ci][cj]] == H.theElements[H.conjugacyClasses[i][0]])
+        if(G.conjugacyClasses[ci][cj] == H.theElements[H.conjugacyClasses[i][0]])
         { ccPreimages[i] = ci;
           notFound=false;
         }
@@ -560,7 +563,7 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   }
   out.SetSize(G.characterTable.size);
   Vector<Rational> HXi;
-  HXi.SetSize(H.conjugacyClasses.size);
+  HXi.SetSize(H.ConjugacyClassCount());
   for(int i=0; i<G.characterTable.size; i++)
   { Vector<Rational> GXi = G.characterTable[i].data;
     for(int j=0; j<HXi.size; j++)
@@ -640,10 +643,10 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[2].key = "characters";
 
   data.obj[0].value.type = JSLIST;
-  data.obj[0].value.list.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> reprefs;
-    G.GetGeneratorList(G.conjugacyClasses[i][0],reprefs);
+    G.GetGeneratorList(G.conjugacyClassesIndices[i][0],reprefs);
     data.obj[0].value.list[i].type = JSLIST;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
@@ -653,8 +656,8 @@ void ExportCharTable(const somegroup& G, JSData &data)
   }
 
   data.obj[1].value.type = JSLIST;
-  data.obj[1].value.list.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
+  data.obj[1].value.list.SetSize(G.ConjugacyClassCount());
+  for(int i=0; i<G.ConjugacyClassCount(); i++)
   { data.obj[1].value.list[i].type = JSNUM;
     data.obj[1].value.list[i].number = G.conjugacyClasses[i].size;
   }

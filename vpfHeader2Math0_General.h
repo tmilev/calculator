@@ -414,7 +414,7 @@ public:
   bool flagUseHTML;
   bool flagUseHtmlAndStoreToHD;
   bool flagUseMathSpanPureVsMouseHover;
-//  bool flagDynkinTypeDontUsePlusAndUpperIndex;
+  bool flagDynkinTypeDontUsePlusAndExponent;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsFinal;
@@ -4766,6 +4766,12 @@ public:
     return currentType==inputType && currentRank==inputRank;
   }
   static void GetOuterAutosGeneratorsOneTypeActOnVectorColumn(List<MatrixTensor<Rational> >& output, const DynkinSimpleType& theType, int multiplicity);
+  unsigned int HashFunction()const
+  { return this->MonomialCollection<DynkinSimpleType, Rational>::HashFunction();
+  }
+  static unsigned int HashFunction(const DynkinType& input)
+  { return MonomialCollection<DynkinSimpleType, Rational>::HashFunction(input);
+  }
   void GetOuterAutosGeneratorsActOnVectorColumn(List<MatrixTensor<Rational> >& output);
   bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const;
   void GetSortedDynkinTypes(List<DynkinSimpleType>& output)const;

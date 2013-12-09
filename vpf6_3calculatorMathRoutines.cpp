@@ -124,7 +124,7 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
@@ -248,7 +248,7 @@ bool CalculatorFunctionsGeneral::innerCompositeSequenceDereference(Calculator& t
 bool CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetAlgebraicNumberFromMinPoly");
   Expression polyE;
-  if (!Serialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
+  if (!CalculatorSerialization::innerPolynomial<AlgebraicNumber>(theCommands, input, polyE) )
   { theCommands.Comments << "<hr>Failed to convert " << input.ToString() << " to polynomial. ";
     return false;
   }
@@ -892,10 +892,10 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
     return false;
   const Expression& theSmallerTypeE=input[1];
   DynkinType theSmallDynkinType;
-  if (!Serialization::innerLoadDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
+  if (!CalculatorSerialization::innerLoadDynkinType(theCommands, theSmallerTypeE, theSmallDynkinType))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[2], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[2], theSSalg))
     return output.SetError("Error extracting ambient Lie algebra.", theCommands);
   SemisimpleSubalgebras tempSas;
   tempSas.owneR=theSSalg;
@@ -972,7 +972,7 @@ bool CalculatorFunctionsGeneral::innerComputeSemisimpleSubalgebras(Calculator& t
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerComputeSemisimpleSubalgebras");
   SemisimpleLieAlgebra* ownerSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSSPointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
@@ -1441,7 +1441,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
   for (int i=0; i<theChains.size; i++)
   { out << "<br>Chain " << i+1 << ": Load{}(Serialization{}(LoadSemisimpleSubalgebras, " << theSAs.owneR->theWeyl.theDynkinType.ToString() << ", (";
     for (int j=0; j<theChains[i].size; j++)
-    { Serialization::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
+    { CalculatorSerialization::innerStoreCandidateSA(theCommands, theSAs.theSubalgebraCandidates[theChains[i][j]], currentChainE);
       out << currentChainE.ToString();
       if (j!=theChains[i].size-1)
         out << ", ";
@@ -1517,7 +1517,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
   if (!input.IsListNElements(3))
     return false;
   DynkinType smallType, targetType;
-  if (!Serialization::DeSerializeMonCollection(theCommands, input[1], smallType) || !Serialization::DeSerializeMonCollection(theCommands, input[2], targetType))
+  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input[1], smallType) || !CalculatorSerialization::DeSerializeMonCollection(theCommands, input[2], targetType))
   { theCommands.Comments << "Failed to convert arguments of " << input.ToString() << " to two DynkinType's.";
     return false;
   }
@@ -1527,7 +1527,7 @@ bool CalculatorFunctionsGeneral::innerCanBeExtendedParabolicallyTo(Calculator& t
 bool CalculatorFunctionsGeneral::innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerGetSymmetricCartan");
   DynkinType theType;
-  if (!Serialization::DeSerializeMonCollection(theCommands, input, theType))
+  if (!CalculatorSerialization::DeSerializeMonCollection(theCommands, input, theType))
   { theCommands.Comments << "Failed to convert " << input.ToString() << " to DynkinType.";
     return false;
   }
@@ -1548,10 +1548,10 @@ bool Calculator::innerEmbedSSalgInSSalg(Calculator& theCommands, const Expressio
   const Expression& ElargeSA=input[2];
 
   SemisimpleLieAlgebra* theSmallSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, EsmallSA, theSmallSapointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra* thelargeSapointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, ElargeSA, thelargeSapointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
   std::stringstream out;

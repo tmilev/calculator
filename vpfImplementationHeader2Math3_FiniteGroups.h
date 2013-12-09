@@ -82,9 +82,9 @@ void FiniteGroup<element>::ComputeConjugacyClasses()
 
 template <typename element>
 void FiniteGroup<element>::GetSignCharacter(Vector<Rational>& Xs)
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  Xs.SetSize(this->conjugacyClasses.size);
+  Xs.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<Xs.size; i++)
   { int yn = this->lengths[conjugacyClasses[i][0]] % 2;
     if(yn == 0)
@@ -163,10 +163,17 @@ std::string ElementWeylGroup<templateWeylGroup>::ToString(int NumSimpleGens, For
 template <class templateWeylGroup>
 unsigned int ElementWeylGroup<templateWeylGroup>::HashFunction() const
 { int top = MathRoutines::Minimum(this->generatorsLastAppliedFirst.size, ::SomeRandomPrimesSize);
-  unsigned int result = this->owner==0 ? 0 : this->owner->HashFunction();
+  unsigned int result =0;
   for (int i=0; i<top; i++)
     result+=this->generatorsLastAppliedFirst[i]*::SomeRandomPrimes[i];
   return result;
+}
+
+template <class templateWeylGroup>
+bool ElementWeylGroup<templateWeylGroup>::operator>(const ElementWeylGroup<templateWeylGroup>& other)const
+{ if (this->owner!=other.owner)
+    crash << "Comparing elements of different weyl groups. " << crash;
+  return this->generatorsLastAppliedFirst>other.generatorsLastAppliedFirst;
 }
 
 template <class templateWeylGroup>
@@ -267,9 +274,9 @@ bool Subgroup<somegroup, elementSomeGroup>::ComputeAllElements(int MaxElements, 
 
 template <typename somegroup, class elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::GetSignCharacter(Vector<Rational>& Xs)
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  Xs.SetSize(this->conjugacyClasses.size);
+  Xs.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<Xs.size; i++)
   { int yn = this->theElements[conjugacyClasses[i][0]].generatorsLastAppliedFirst.size % 2;
     if(yn == 0)
@@ -414,7 +421,7 @@ void WeylGroup::SimpleReflectionRhoModified(int index, Vector<coefficient>& theV
 template <class coefficient>
 bool WeylGroup::GenerateOrbit
 (Vectors<coefficient>& theWeights, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize,
- HashedList<ElementWeylGroup<WeylGroup> >* outputSubset, int UpperLimitNumElements)
+ HashedList<ElementWeylGroup<WeylGroup> >* outputSubset, int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
 { output.Clear();
   for (int i=0; i<theWeights.size; i++)
     output.AddOnTopNoRepetition(theWeights[i]);
@@ -436,21 +443,22 @@ bool WeylGroup::GenerateOrbit
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }
+  ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<output.size; i++)
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
     { currentRoot=output[i];
-      //if (this->flagAnErrorHasOcurredTimeToPanic)
-      //{ currentRoot.ComputeDebugString();
-      //}
+      if (theGlobalVariables!=0 && i%100==0)
+      { std::stringstream reportStream;
+        reportStream << "So far found " << i+1 << " elements in the orbit(s) of the starting weight(s) " <<
+        theWeights.ToString() << ". ";
+        theReport.Report(reportStream.str());
+      }
       if (!RhoAction)
         this->SimpleReflection(j, currentRoot);
       else if (!UseMinusRho)
         this->SimpleReflectionRhoModified(j, currentRoot);
       else
         this->SimpleReflectionMinusRhoModified(j, currentRoot);
-      //if (this->flagAnErrorHasOcurredTimeToPanic)
-      //{ currentRoot.ComputeDebugString();
-      //}
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { currentElt.generatorsLastAppliedFirst.SetSize(1);
@@ -817,8 +825,8 @@ void WeylGroupRepresentation<coefficient>::init(WeylGroup& inputOwner)
   this->ownerGroup->CheckInitializationFDrepComputation();
   this->theElementImages.SetSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
-  this->classFunctionMatrices.SetSize(this->ownerGroup->conjugacyClasses.size);
-  this->classFunctionMatricesComputed.initFillInObject(this->ownerGroup->conjugacyClasses.size, false);
+  this->classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
+  this->classFunctionMatricesComputed.initFillInObject(this->ownerGroup->ConjugacyClassCount(), false);
   this->CheckInitialization();
 }
 
@@ -831,17 +839,29 @@ unsigned int WeylGroupRepresentation<coefficient>::HashFunction()const
 
 template <typename coefficient>
 Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetMatrixElement(int groupElementIndex)
-{ this->CheckInitialization();
-  this->ownerGroup->CheckInitializationFDrepComputation();
-  Matrix<coefficient>& theMat=this->theElementImages[groupElementIndex];
+{ Matrix<coefficient>& theMat=this->theElementImages[groupElementIndex];
   if (this->theElementIsComputed[groupElementIndex])
     return theMat;
   const ElementWeylGroup<WeylGroup>& theElt=this->ownerGroup->theElements[groupElementIndex];
   this->theElementIsComputed[groupElementIndex]=true;
-  theMat.MakeIdMatrix(this->GetDim());
-  for (int i=0; i<theElt.generatorsLastAppliedFirst.size; i++)
-    theMat.MultiplyOnTheRight(this->theElementImages[theElt.generatorsLastAppliedFirst[i]+1]);
+  this->GetMatrixElement(theElt, theMat);
   return theMat;
+}
+
+template <typename coefficient>
+Matrix<coefficient> WeylGroupRepresentation<coefficient>::GetMatrixElement(const ElementWeylGroup<WeylGroup>& input)
+{ Matrix<coefficient> result;
+  this->GetMatrixElement(input, result);
+  return result;
+}
+
+template <typename coefficient>
+void WeylGroupRepresentation<coefficient>::GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output)
+{ this->CheckInitialization();
+  this->ownerGroup->CheckInitializationFDrepComputation();
+  output.MakeIdMatrix(this->GetDim());
+  for (int i=0; i<input.generatorsLastAppliedFirst.size; i++)
+    output.MultiplyOnTheRight(this->theElementImages[input.generatorsLastAppliedFirst[i]+1]);
 }
 
 template <typename coefficient>
@@ -871,7 +891,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
 { this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputMat.MakeZeroMatrix(this->GetDim());
-  int numClasses=this->ownerGroup->conjugacyClasses.size;
+  int numClasses=this->ownerGroup->ConjugacyClassCount();
   ProgressReport theReport(theGlobalVariables);
   for(int cci=0; cci<numClasses; cci++)
   { if(inputChar[cci] == 0)
@@ -881,19 +901,19 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
       // classFunctionMatrices does not have to be initialized.
       bool useParent=false;
       if (this->parent!=0)
-        useParent=(this->parent->classFunctionMatrices.size == this->ownerGroup->conjugacyClasses.size) && (this->parent->classFunctionMatricesComputed[cci]);
+        useParent=(this->parent->classFunctionMatrices.size == this->ownerGroup->ConjugacyClassCount()) && (this->parent->classFunctionMatricesComputed[cci]);
       if(useParent)
         Matrix<coefficient>::MatrixInBasis(this->parent->classFunctionMatrices[cci], this->classFunctionMatrices[cci], this->basis, this->gramMatrixInverted);
       else
-      { List<int>& currentConjugacyClass=this->ownerGroup->conjugacyClasses[cci];
+      { List<int>& currentConjugacyClassIndices=this->ownerGroup->conjugacyClassesIndices[cci];
         this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
-        for (int i=0; i<currentConjugacyClass.size; i++)
-        { if (!this->theElementIsComputed[currentConjugacyClass[i]])
+        for (int i=0; i<currentConjugacyClassIndices.size; i++)
+        { if (!this->theElementIsComputed[currentConjugacyClassIndices[i]])
             this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
-          this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClass[i]];
+          this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClassIndices[i]];
           if (theGlobalVariables!=0)
           { std::stringstream reportstream;
-            reportstream << " Computing conjugacy class " << currentConjugacyClass[i]+1 << " (total num classes is " << numClasses << ").";
+            reportstream << " Computing conjugacy class " << currentConjugacyClassIndices[i]+1 << " (total num classes is " << numClasses << ").";
             theReport.Report(reportstream.str());
           }
         }
@@ -917,7 +937,7 @@ void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
 (ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
 { outputMat.MakeZeroMatrix(this->generators[0].NumRows);
   if(classFunctionMatrices.size == 0)
-    classFunctionMatrices.SetSize(this->ownerGroup->conjugacyClasses.size);
+    classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
   for(int cci=0; cci<this->ownerGroup->ConjugacyClassCount(); cci++)
   { if(inputCF[cci] == 0)
       continue;
@@ -1303,7 +1323,7 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
 template <typename coefficient>
 void ClassFunction<coefficient>::MakeZero(WeylGroup& inputWeyl)
 { this->G=&inputWeyl;
-  this->data.MakeZero(this->G->conjugacyClasses.size);
+  this->data.MakeZero(this->G->ConjugacyClassCount());
 }
 
 template <typename coefficient>

@@ -46,11 +46,11 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints macdonald polynomials from a semisimple type. ",
    "printMacdonaldPolys{}(B_3)", true);
   this->AddOperationInnerHandler
-  ("Polynomial", Serialization::innerPolynomial<Rational>, "",
+  ("Polynomial", CalculatorSerialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
   this->AddOperationInnerHandler
-  ("PolynomialAlgebraicNumbers", Serialization::innerPolynomial<AlgebraicNumber>, "",
+  ("PolynomialAlgebraicNumbers", CalculatorSerialization::innerPolynomial<AlgebraicNumber>, "",
    "Creates a polynomial expression with algebraic number coefficients. ",
    "PolynomialAlgebraicNumbers{}((x+\\sqrt{2})^2 (\\sqrt{3}x-\\sqrt{5}));");
   this->AddOperationInnerHandler
@@ -174,14 +174,24 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClasses", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasses, "",
-   "For a Weyl group of rank 4 or less, computes the conjugacy classes of a Weyl group.",
-   "WeylGroupConjugacyClasses{}(A_2);", true, false)
+  ("WeylGroupConjugacyClassesComputeFromScratch", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch, "",
+   "<b>Work in progress.</b> For rank <=6, computes the conjugacy classes of a Weyl group from scratch. ",
+   "WeylGroupConjugacyClassesComputeFromScratch{}(A_2);", true, true)
    ;
   this->AddOperationInnerHandler
-  ("WeylGroupIrrepsAndCharTable", CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTable, "",
-   "Computes the irreducible representations and the character table of a Weyl group.",
-   "WeylGroupIrrepsAndCharTable{}(b_3);", true, false)
+  ("WeylGroupConjugacyClasses", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS, "",
+   "Loads the conjugacy classes of a Weyl group (hard-coded), or computes them if rank<=6. ",
+   "WeylGroupConjugacyClasses{}(f_4);", true, true)
+   ;
+  this->AddOperationInnerHandler
+  ("WeylGroupCharTable", CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable, "",
+   "Loads the character table of a Weyl group. The character tables are hard-coded.",
+   "WeylGroupCharTable{}(b_3);", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("WeylGroupIrrepsAndCharTableComputeFromScratch", CalculatorFunctionsWeylGroup::innerWeylGroupIrrepsAndCharTableComputeFromScratch, "",
+   "<b>Work in progress. Please do not use. </b> Computes from scratch the irreducible representations and the character table of a Weyl group.",
+   "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);", true, true)
    ;
     this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords",  CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple, "",
@@ -315,7 +325,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("Store", Serialization::innerStore, "",
+  ("Store", CalculatorSerialization::innerStore, "",
    "Attempts to convert a built-in data type to an expression tree which \
    evaluates to the same value as the \
    built-in type, and prepends the tree with the Serialization atom. \
@@ -326,7 +336,7 @@ void Calculator::initPredefinedInnerFunctions()
    ", true, false)
    ;
   this->AddOperationInnerHandler
-  ("Load", Serialization::innerLoad, "",
+  ("Load", CalculatorSerialization::innerLoad, "",
    "The operation opposite to serialization. ",
    "X:=SemisimpleLieAlgebra{}(A_1+A_2);\
    \nY:=Store{}( X);\
@@ -530,7 +540,7 @@ void Calculator::initPredefinedInnerFunctions()
    debugging purposes. First argument =dimension, second argument=grading leve. ",
    "PrintNonNegativeVectorsLevel{}(4, 5);PrintNonNegativeVectorsLevel{}(4, 0); ");
   this->AddOperationInnerHandler
-  ("SemisimpleLieAlgebra", Serialization::innerSSLieAlgebra, "",
+  ("SemisimpleLieAlgebra", CalculatorSerialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. The semisimple Lie algebra is given via its Dynkin type. A simple Dynkin type is given by\
     type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
     the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (n+1)) with symmetric Cartan matrix scale equal to 1/2.\
@@ -1044,13 +1054,13 @@ void Calculator::initPredefinedInnerFunctions()
    " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
-  ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
+  ("LoadSemisimpleSubalgebras", CalculatorSerialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads a semisimpleSubalgebra from expression. ",
    "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, false)
    ;
   this->AddOperationInnerHandler
-  ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
+  ("LoadSltwoSubalgebra", CalculatorSerialization::innerLoadSltwoSubalgebra, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads an sl(2) subalgebra from expression. ",
    "Load{}Serialization{}(LoadSltwoSubalgebra, 2 (Serialization{}(getChevalleyGenerator, (B)_{3}, -3))\\\\\
@@ -1061,7 +1071,7 @@ void Calculator::initPredefinedInnerFunctions()
     +10/3 (Serialization{}(getChevalleyGenerator, (B)_{3}, 2)))", true, true)
    ;
   this->AddOperationInnerHandler
-  ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",
+  ("LoadSlTwoSubalgebras", CalculatorSerialization::innerLoadSltwoSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
    "Load{}(Store {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true, true)

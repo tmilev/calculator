@@ -947,6 +947,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseHtmlAndStoreToHD=false;
   this->flagIncludeMutableInformation=true;
   this->flagUseMathSpanPureVsMouseHover=false;
+  this->flagDynkinTypeDontUsePlusAndExponent=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -4152,6 +4153,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
   bool includeNonTechnicalNames=theFormat==0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
+  bool usePlusesAndExponents= theFormat==0? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
   if (!includeNonTechnicalNames && !includeTechnicalNames)
     includeTechnicalNames=true;
   bool hasAmbient=false;
@@ -4159,29 +4161,33 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     hasAmbient=(theFormat->AmbientWeylLetter!='X');
   if (includeTechnicalNames)
   { if (!hasAmbient)
-      out << theLetter << "^{" << this->CartanSymmetricInverseScale.ToString() << "}";
+    { out << theLetter;
+      if (usePlusesAndExponents)
+        out << "^{";
+      out << this->CartanSymmetricInverseScale.ToString();
+      if (usePlusesAndExponents)
+        out << "}";
+    }
     else
     { DynkinSimpleType ambientType;
       ambientType.theLetter=theFormat->AmbientWeylLetter;
       ambientType.CartanSymmetricInverseScale=theFormat->AmbientCartanSymmetricInverseScale;
       Rational theDynkinIndex=this->CartanSymmetricInverseScale/this->GetRatioLongRootToFirst()/ambientType.CartanSymmetricInverseScale*ambientType.GetRatioLongRootToFirst();
-/*      if (tempType.theLetter=='C')
-        if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
-          theDynkinIndex*=2;
-      if (tempType.theLetter=='G')
-        if (this->theLetter=='A' || this->theLetter=='B' || this->theLetter=='D' || this->theLetter=='E' || this->theLetter=='F')
-          theDynkinIndex*=3;*/
-      //Rational theRatio;
-      //if (!theRatioSquared.GetSquareRootIfRational(theRatio))
-      //{ crash << "This is a programming error: wrong ambient dynkin type. The ratio of long roots is: "
-      //  << theRatio.ToString() << crash;
-      //}
       out << theLetter;
-//      if (theDynkinIndex!=1)
-      out << "^{" << theDynkinIndex.ToString() << "}";
+      if (usePlusesAndExponents)
+        out << "^{" ;
+      out << theDynkinIndex.ToString();
+      if (usePlusesAndExponents)
+        out << "}";
     }
     if (this->theRank>=10)
-      out << "_{" << this->theRank << "}";
+    { out << "_";
+      if (usePlusesAndExponents)
+        out << "{";
+      out << this->theRank;
+      if (usePlusesAndExponents)
+        out << "}";
+    }
     else
       out << "_" << this->theRank;
 //    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
@@ -4767,11 +4773,11 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
 }
 
 void WeylGroup::GetSignCharacter(Vector<Rational>& out)
-{ if(this->conjugacyClasses.size == 0)
+{ if(this->ConjugacyClassCount() == 0)
     this->ComputeConjugacyClasses();
-  out.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
-  { int yn = this->theElements[this->conjugacyClasses[i][0]].generatorsLastAppliedFirst.size % 2;
+  out.SetSize(this->ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
+  { int yn = this->conjugacyClasses[i][0].generatorsLastAppliedFirst.size % 2;
     if(yn == 0)
       out[i] = 1;
     else
@@ -4972,17 +4978,17 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   out << "<br>Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
-  if (this->conjugacyClasses.size>0)
-  { out << "<br>" << this->conjugacyClasses.size << " conjugacy classes total.\n";
-    for (int i=0; i<this->conjugacyClasses.size; i++)
+  if (this->ConjugacyClassCount()>0)
+  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
+    for (int i=0; i<this->ConjugacyClassCount(); i++)
     { out << "<br>Conjugacy class " << i+1 << " (" << this->conjugacyClasses[i].size << " elements total): ";
       if (this->conjugacyClasses[i].size>10)
       { out << " ... has too many elements, displaying the first element only: ";
-        out << this->theElements[this->conjugacyClasses[i][0]].ToString(theFormat);
+        out << this->conjugacyClasses[i][0].ToString(theFormat);
         continue;
       }
       for (int j=0; j<this->conjugacyClasses[i].size; j++)
-      { out << this->theElements[this->conjugacyClasses[i][j]].ToString(theFormat);
+      { out << this->conjugacyClasses[i][j].ToString(theFormat);
         if (j!=this->conjugacyClasses[i].size-1)
           out << ", ";
       }
@@ -4996,6 +5002,18 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   else
     out << "... too many, not displaying. ";
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
+  out << "<hr>Here a c++ input code for the conjugacy class table";
+  out << "<br>";
+  FormatExpressions theFormatNoDynkinTypePlusesExponents;
+  theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
+  out << "void LoadLoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
+  out << "output.ComputeRho(true);\n<br>";
+  out << "  output.conjugacyClasses.";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  {
+
+
+  }
   return out.str();
 }
 
@@ -5579,13 +5597,13 @@ int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rationa
   return result;
 }
 
-void WeylGroup::ComputeAllElements(int UpperLimitNumElements)
+void WeylGroup::ComputeAllElements(int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
 { this->ComputeRho(true);
 //  this->ComputeDebugString();
   Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(this->rho);
   this->theElements.Clear();
-  this->GenerateOrbit<Rational>(this->rho, false, this->rhoOrbit, true, -1, &this->theElements, UpperLimitNumElements);
+  this->GenerateOrbit<Rational>(this->rho, false, this->rhoOrbit, true, -1, &this->theElements, UpperLimitNumElements, theGlobalVariables);
   this->flagNumberOfElementsComputedToFitInInt=true;
   this->sizePrivate = this->theElements.size; // compatible with group types that don't have a theElements member
 }

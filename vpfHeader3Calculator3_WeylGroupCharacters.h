@@ -20,10 +20,14 @@ public:
   static bool innerWeylGroupOrbitOuterSimple(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitFundRho(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOuterAutoGeneratorsPrint(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerWeylGroupConjugacyClasses(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupConjugacyClasseS(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupConjugacyClassesLoad(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupConjugacyClassesComputeFromScratch(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMacdonaldPolys(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerWeylGroupIrrepsAndCharTable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupLoadOrComputeCharTable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupIrrepsAndCharTableComputeFromScratch(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupNaturalRep(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDecomposeWeylRep(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTensorWeylReps(Calculator& theCommands, const Expression& input, Expression& output);

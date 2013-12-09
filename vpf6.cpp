@@ -1303,7 +1303,7 @@ bool Calculator::GetTypeHighestWeightParabolic
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   const Expression& leftE=input[1];
   const Expression& middleE=input[2];
-  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
   { std::stringstream tempStream;
@@ -1478,12 +1478,12 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCom
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, theSSalgebra))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, Serialization::innerPolynomial<Rational>))
+  if (!theCommands.GetVectoR(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorSerialization::innerPolynomial<Rational>))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -2332,7 +2332,7 @@ bool Calculator::innerSplitGenericGenVermaTensorFD(Calculator& theCommands, cons
   const Expression& genVemaWeightNode=input[3];
   const Expression& fdWeightNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, leftE, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, theSSalgebra))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
@@ -2591,7 +2591,7 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
@@ -2622,7 +2622,7 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   SemisimpleLieAlgebra* theSSalg=0;
 //  std::cout << "<br>before calling inner ss: " << input.ToString();
 //  std::cout.flush();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSalg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
     crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
@@ -2654,7 +2654,7 @@ bool Calculator::fKLcoeffs(Calculator& theCommands, const Expression& input, Exp
 { MacroRegisterFunctionWithName("Calculator::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, theSSalgebra))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, theSSalgebra))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
@@ -2679,7 +2679,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
 { MacroRegisterFunctionWithName("Calculator::innerPrintSSLieAlgebra");
   SemisimpleLieAlgebra *tempSSpointer=0;
   input.CheckInitialization();
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, tempSSpointer))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, tempSSpointer))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
@@ -4899,7 +4899,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, c
       truncatedInput.children.RemoveLastObject();
   }
   if (!theCommands.GetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, Serialization::innerPolynomial<Rational>))
+      (theCommands, truncatedInput, output, theHWs[0], theParSel, theContext, theSSalgebra, CalculatorSerialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
     return true;

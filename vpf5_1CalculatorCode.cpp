@@ -225,7 +225,7 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
   Expression theContext(theCommands);
 //  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
 //  std::cout << "<br>Input lispified: " << input.Lispify();
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorSerialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
 //  std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
@@ -240,7 +240,7 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 
 bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext)
 { Expression theContextStart(*this);
-  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, Serialization::innerPolynomial<Rational>))
+  if (!this->GetVectorFromFunctionArguments(input, output, &theContextStart, 0, CalculatorSerialization::innerPolynomial<Rational>))
     return false;
   if (output.size<2)
     return false;
@@ -459,7 +459,7 @@ bool Calculator::innerPrintSSsubalgebras
   SemisimpleLieAlgebra* ownerSSPointer=0;
   bool isAlreadySubalgebrasObject=input.IsOfType<SemisimpleSubalgebras>();
   if (!isAlreadySubalgebrasObject)
-  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input, ownerSSPointer))
+  { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSSPointer))
       return output.SetError("Error extracting Lie algebra.", theCommands);
     if (ownerSSPointer->GetRank()>6)
     { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
@@ -530,7 +530,7 @@ bool Calculator::innerPrintSSsubalgebras
     << "</title><script src=\"../../jsmath/easy/load.js\"></script><body>" << theSSsubalgebras.ToString(&theFormat)
     << "<hr><hr>Calculator input for loading subalgebras directly without recomputation.\n<br>\n";
     Expression theSSE;
-    Serialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
+    CalculatorSerialization::innerStoreSemisimpleSubalgebras(theCommands, theSSsubalgebras, theSSE);
     theFileFastLoad << "Load{}" << theSSE.ToString();
     theFileFastLoad << "</body></html>";
     theFileSlowLoad << "</body></html>";
@@ -552,10 +552,10 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   if (input.children.size!=3)
     return output.SetError("Function takes 2 arguments - type and an element of the Lie algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theErational;
-  if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
+  if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[2], theErational, *ownerSS))
     return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
   ElementSemisimpleLieAlgebra<AlgebraicNumber> theF, theH, theE;
   theE=theErational;
@@ -576,13 +576,13 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
   if (input.children.size<3)
     return output.SetError("Function ad common eigenspaces needs at least 2 arguments - type and at least one element of the algebra.", theCommands);
   SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], ownerSS))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   List<ElementSemisimpleLieAlgebra<Rational> > theOperators, outputElts;
   theOperators.ReservE(input.children.size-2);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   for (int i=2; i<input.children.size; i++)
-  { if (!Serialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
+  { if (!CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs(theCommands, input[i], tempElt, *ownerSS))
       return output.SetError("Failed to extract element of semisimple Lie algebra. ", theCommands);
     theOperators.AddOnTop(tempElt);
   }
@@ -625,10 +625,10 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     if (!MathRoutines::IsPrime(theMod))
       return output.SetError("Error: modulo not prime. ", theCommands);
   }
-  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, Serialization::innerPolynomial<Rational>))
+  if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >(output, inputVector, &theContext, -1, CalculatorSerialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theCommands.GetVector<Polynomial<Rational> >
-  //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
+  //(output, inputVector, &theContext, -1, CalculatorSerialization::innerPolynomial);
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   FormatExpressions theFormat;
@@ -748,7 +748,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 { MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
   Expression theContext;
-  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, Serialization::innerPolynomial<Rational>))
+  if (!theCommands.GetMatrix(input, matPol, &theContext, -1, CalculatorSerialization::innerPolynomial<Rational>))
   { theCommands.Comments << "<hr>Failed to convert the input to matrix of polynomials. ";
     return false;
   }
@@ -1073,10 +1073,10 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
   if (input.IsListNElementsStartingWithAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
-  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial<Rational>))
+  { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
       return output.SetError("Failed to extract list of polynomials. ", theCommands);
   } else
-    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, Serialization::innerPolynomial<Rational>))
+    if (!theCommands.GetVectoR(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
       return output.SetError("Failed to extract list of polynomials. ", theCommands);
   Vector<Polynomial<AlgebraicNumber> > thePolysAlgebraic;
   thePolysAlgebraic=thePolysRational;
@@ -1179,7 +1179,7 @@ bool Calculator::innerRootSubsystem(Calculator& theCommands, const Expression& i
   if (input.children.size<3)
     return false;
   SemisimpleLieAlgebra* theSSlieAlg=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(Serialization::innerSSLieAlgebra, input[1], theSSlieAlg))
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSlieAlg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   int theRank=theSSlieAlg->GetRank();
   Vector<Rational> currentRoot;

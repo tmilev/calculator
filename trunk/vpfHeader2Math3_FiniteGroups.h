@@ -275,6 +275,8 @@ class WeylGroup
   bool flagNumberOfElementsComputedToFitInInt;
   int sizePrivate;
 public:
+  bool flagIrrepsAreComputed;
+  bool flagCharTableIsComputed;
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   Matrix<Rational> CoCartanSymmetric;
@@ -297,17 +299,12 @@ public:
   static bool flagAnErrorHasOcurredTimeToPanic;
   bool flagDeallocated;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
-  void init()
-  { this->flagFundamentalToSimpleMatricesAreComputed=false;
-    this->flagAllOuterAutosComputed=false;
-    this->flagOuterAutosGeneratorsComputed=false;
-    this->flagNumberOfElementsComputedToFitInInt=false;
-  }
+  void init();
   int size()const;
   void ComputeSquares();
   void ComputeInitialCharacters();
   void ComputeConjugacyClassesThomasVersion();
-  List<List<Rational> > GetTauSignatures();
+  List<List<Rational> > GetTauSignatures(GlobalVariables* theGlobalVariables=0);
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);

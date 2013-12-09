@@ -784,9 +784,12 @@ int ListLight<Object>::SizeWithoutObjects()const
 
 template <class Object>
 std::ostream& operator<<(std::ostream& output, const List<Object>& theList)
-{ output << "size: " << theList.size << "\n";
+{ output << theList.size << " elements: \n";
   for (int i=0; i<theList.size; i++)
-    output << theList[i] << " ";
+  { output << theList[i];
+    if (i!=theList.size-1)
+      output << ", ";
+  }
   return output;
 }
 

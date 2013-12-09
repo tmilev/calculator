@@ -69,6 +69,7 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
       this->conjugacyClasses[i][j]=this->theElements[this->conjugacyClassesIndices[i][j]];
   }
   this->SelectCCRepsAndRecordCCsizes();
+  this->flagConjugacyClassesAreComputed=true;
 }
 
 void WeylGroup::SelectCCRepsAndRecordCCsizes()
@@ -156,6 +157,7 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
     }
   this->conjugacyClasses.QuickSortAscending(0, &this->conjugacyClassesIndices);
   this->SelectCCRepsAndRecordCCsizes();
+  this->flagConjugacyClassesAreComputed=true;
   int checkNumElts=0;
   for (int i=0; i<this->ConjugacyClassCount(); i++)
     checkNumElts+=this->conjugacyClasses[i].size;
@@ -170,7 +172,8 @@ void WeylGroup::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
 }
 
 void WeylGroup::ComputeSquares()
-{ if(this->ConjugacyClassCount() == 0)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
+  if(!this->flagConjugacyClassesAreComputed)
     this->ComputeConjugacyClasses();
   this->squaresFirstConjugacyClassRep.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
@@ -179,22 +182,29 @@ void WeylGroup::ComputeSquares()
     this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasses[i][0]*this->conjugacyClasses[i][0];
 }
 
-void WeylGroup::ComputeInitialCharacters()
+void WeylGroup::ComputeInitialIrreps()
 { MacroRegisterFunctionWithName("WeylGroup::ComputeInitialCharacters");
   if(this->squaresFirstConjugacyClassRep.size == 0)
     this->ComputeSquares();
+  this->irreps.SetSize(0);
   this->characterTable.SetSize(0);
   this->characterTable.SetExpectedSize(this->ConjugacyClassCount());
-
+  this->irreps.SetExpectedSize(this->ConjugacyClassCount());
+  WeylGroupRepresentation<Rational> trivialRep, signRep, standardRep;
+  this->GetStandardRepresentation(standardRep);
+  signRep.init(*this);
+  standardRep.init(*this);
+  trivialRep.basis.MakeEiBasis(1);
   ClassFunction<Rational> Xe, Xsgn, Xstd;
+
   Xe.G = this;
   Xe.data.initFillInObject(this->ConjugacyClassCount(), 1);
   Xsgn.G = this;
   Xsgn.data.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     Xsgn.data[i]=this->conjugacyClasses[i][0].Sign();
-  this->characterTable.AddOnTop(Xsgn);
   this->characterTable.AddOnTop(Xe);
+  this->characterTable.AddOnTop(Xsgn);
   Xstd.G = this;
   Xstd.data.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
@@ -521,7 +531,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
   this->characterTable.SetSize(0);
   this->irreps.SetSize(0);
   WeylGroupRepresentation<Rational> sr;
-  this->StandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
+  this->GetStandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
   std::cout << "<hr>Character standard module: " << sr.GetCharacter() << std::endl;
   List<WeylGroupRepresentation<Rational> > newspaces;
   newspaces.AddOnTop(sr);
@@ -576,6 +586,8 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
         }
   }
   this->irreps.QuickSortAscending(0, &this->characterTable);
+  this->flagCharTableIsComputed=true;
+  this->flagIrrepsAreComputed=true;
   for(int i=0; i<this->characterTable.size; i++)
   { std::cout << this->characterTable[i] << '\n';
     for(int j=0; j<this->irreps[i].generators.size; j++)
@@ -1079,7 +1091,8 @@ bool WeylGroup::VerifyChartable(bool printresults)const
 List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
-  this->ComputeIrreducibleRepresentationsTodorsVersion();
+  if (!this->flagCharTableIsComputed)
+    this->ComputeIrreducibleRepresentationsTodorsVersion();
   ClassFunction<Rational> signRep;
   signRep.G = this;
   signRep.data.SetSize(this->ConjugacyClassCount());
@@ -1089,29 +1102,29 @@ List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVari
   sel.init(this->CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
 
-  List<WeylGroup> PSGs;
-  PSGs.SetSize(numCycles-2);
+  List<WeylGroup> ParabolicSubgroups;
+  ParabolicSubgroups.SetSize(numCycles-2);
   List<List<int> > ccBackMaps;
-  ccBackMaps.SetSize(PSGs.size);
+  ccBackMaps.SetSize(ParabolicSubgroups.size);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
 
-  for (int i=0; i<PSGs.size; i++)
+  for (int i=0; i<ParabolicSubgroups.size; i++)
   { sel.incrementSelection();
-    std::cout << "\n" << sel.ToString() << "\n";
     int d = sel.CardinalitySelection;
-    PSGs[i].CartanSymmetric.init(d,d);
+    ParabolicSubgroups[i].CartanSymmetric.init(d,d);
     for(int ii=0; ii<d; ii++)
       for(int jj=0; jj<d; jj++)
-        PSGs[i].CartanSymmetric.elements[ii][jj] = this->CartanSymmetric.elements[sel.elements[ii]][sel.elements[jj]];
-    std::cout << PSGs[i].CartanSymmetric.ToString();
+        ParabolicSubgroups[i].CartanSymmetric(ii,jj) = this->CartanSymmetric(sel.elements[ii], sel.elements[jj]);
+    std::cout << "<hr>Group cartan symmetric: " << ParabolicSubgroups[i].CartanSymmetric.ToString();
+    std::cout << "<br>Selected simple roots: " << sel.ToString() << "\n";
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    PSGs[i].ComputeInitialCharacters();
+    ParabolicSubgroups[i].ComputeInitialIrreps();
 
-    ccBackMaps[i].SetSize(PSGs[i].ConjugacyClassCount());
-    for(int j=0; j<PSGs[i].ConjugacyClassCount(); j++)
-    { ElementWeylGroup<WeylGroup> h = PSGs[i].conjugacyClasses[j][0];
+    ccBackMaps[i].SetSize(ParabolicSubgroups[i].ConjugacyClassCount());
+    for(int j=0; j<ParabolicSubgroups[i].ConjugacyClassCount(); j++)
+    { ElementWeylGroup<WeylGroup> h = ParabolicSubgroups[i].conjugacyClasses[j][0];
       g.generatorsLastAppliedFirst.SetSize(h.generatorsLastAppliedFirst.size);
       for(int k=0; k<h.generatorsLastAppliedFirst.size; k++)
         g.generatorsLastAppliedFirst[k] = sel.elements[h.generatorsLastAppliedFirst[k]];
@@ -1123,30 +1136,31 @@ List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVari
             notFound=false;
           }
     }
-    std::cout << ccBackMaps[i] << std::endl;
+    std::cout << "Conjugacy classes back maps: " << ccBackMaps[i] << std::endl;
   }
-  List<List<Rational> > tauSignatures;
-  tauSignatures.SetSize(this->ConjugacyClassCount());
+  List<List<Rational> > signRepMultiplicity;
+  signRepMultiplicity.SetSize(this->ConjugacyClassCount());
   ClassFunction<Rational> Xi; // this will be scribbled on over and over
   Xi.data.SetSize(this->ConjugacyClassCount()); // too big, but only allocated once
+  std::cout << this->ToString();
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-  { tauSignatures[i].SetSize(numCycles);
-    tauSignatures[i][0] = true;
-    for(int j=0; j<PSGs.size; j++)
-    { for(int k=0; k<PSGs[j].ConjugacyClassCount(); k++)
+  { signRepMultiplicity[i].SetSize(numCycles);
+    signRepMultiplicity[i][0] = true;
+    for(int j=0; j<ParabolicSubgroups.size; j++)
+    { for(int k=0; k<ParabolicSubgroups[j].ConjugacyClassCount(); k++)
         Xi.data[k] = this->characterTable[i].data[ccBackMaps[j][k]];
-      Rational x = PSGs[j].characterTable[1].InnerProduct(Xi);
+      Rational x = ParabolicSubgroups[j].characterTable[1].InnerProduct(Xi);
       if(x == 0)
-        tauSignatures[i][j+1] = false;
+        signRepMultiplicity[i][j+1] = false;
       else
-        tauSignatures[i][j+1] = true;
+        signRepMultiplicity[i][j+1] = true;
     }
     if(signRep.InnerProduct(this->characterTable[i]) == 0)
-      tauSignatures[i][numCycles-1] = false;
+      signRepMultiplicity[i][numCycles-1] = false;
     else
-      tauSignatures[i][numCycles-1] = true;
+      signRepMultiplicity[i][numCycles-1] = true;
 
-    std::cout << tauSignatures[i] << std::endl;
+    std::cout << signRepMultiplicity[i] << std::endl;
   }
-  return tauSignatures;
+  return signRepMultiplicity;
 }

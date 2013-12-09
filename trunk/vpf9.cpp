@@ -61,7 +61,6 @@ int PartFractions::flagMaxNumStringOutputLines=500;
 bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 //bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool PartFractions::flagMakingProgressReport=true;
-bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
 
@@ -4716,10 +4715,6 @@ void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool 
     tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
     alphaShift+=(tempRat);
   }
-  if (this->flagAnErrorHasOcurredTimeToPanic)
-  { std::string tempS;
-    tempS=alphaShift.ToString();
-  }
   alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
   if (RhoAction)
   { if(UseMinusRho)
@@ -4727,7 +4722,7 @@ void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool 
     else
       alphaShift.AddInteger(-1);
   }
-  theRoot.TheObjects[index]+=(alphaShift);
+  theRoot[index]+=(alphaShift);
 }
 
 void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
@@ -4770,6 +4765,7 @@ void WeylGroup::init()
   this->flagNumberOfElementsComputedToFitInInt=false;
   this->flagIrrepsAreComputed=false;
   this->flagCharTableIsComputed=false;
+  this->flagConjugacyClassesAreComputed=false;
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4808,8 +4804,8 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
   }
 }
 
-void WeylGroup::StandardRepresentation(WeylGroupRepresentation<Rational>& output)
-{ MacroRegisterFunctionWithName("WeylGroup::StandardRepresentation");
+void WeylGroup::GetStandardRepresentation(WeylGroupRepresentation<Rational>& output)
+{ MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
   this->CheckInitializationFDrepComputation();
   output.init(*this);
 //  output.theElementImages.SetSize(this->theElements.size);
@@ -5020,7 +5016,16 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   else
     out << "... too many, not displaying. ";
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
-  out << "<hr>Here a c++ input code for the conjugacy class table";
+  if (this->flagCharTableIsComputed)
+  { out << "<br>Character table: ";
+     Matrix<Rational> charTableMatForm;
+    charTableMatForm.init(this->ConjugacyClassCount(), this->ConjugacyClassCount());
+    for (int i=0; i<this->irreps.size; i++)
+      charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
+    out << charTableMatForm.ToString();
+  }
+
+  out << "<hr>Here is the c++ input code for the conjugacy class table.";
   out << "<br>";
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;

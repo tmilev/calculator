@@ -277,6 +277,7 @@ class WeylGroup
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
+  bool flagConjugacyClassesAreComputed;
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   Matrix<Rational> CoCartanSymmetric;
@@ -295,14 +296,12 @@ public:
 
   List<WeylGroupRepresentation<Rational> > irreps;
   List<ClassFunction<Rational> > characterTable;
-
-  static bool flagAnErrorHasOcurredTimeToPanic;
   bool flagDeallocated;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init();
   int size()const;
   void ComputeSquares();
-  void ComputeInitialCharacters();
+  void ComputeInitialIrreps();
   void ComputeConjugacyClassesThomasVersion();
   List<List<Rational> > GetTauSignatures(GlobalVariables* theGlobalVariables=0);
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
@@ -326,7 +325,9 @@ public:
   bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
   void GetSignCharacter(Vector<Rational>& out);
-  void StandardRepresentation(WeylGroupRepresentation<Rational>& output);
+  void GetStandardRepresentation(WeylGroupRepresentation<Rational>& output);
+  void GetSignRepresentation(WeylGroupRepresentation<Rational>& output);
+  void GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational>& inputHWsimpleCoords, GlobalVariables& theGlobalVariables);

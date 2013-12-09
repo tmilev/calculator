@@ -461,7 +461,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
   if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
   WeylGroupRepresentation<Rational> theStandardRep, newRep;
-  this->StandardRepresentation(theStandardRep);
+  this->GetStandardRepresentation(theStandardRep);
   int NumClasses=this->ConjugacyClassCount();
   Vector<Rational> decompositionNewRep;
   ProgressReport theReport1(theGlobalVariables);
@@ -493,6 +493,8 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
       reportStream << "<hr>irrep " << i+1 << "<br>" << this->irreps[i].ToString(&tempFormat);
     theReport1.Report(reportStream.str());
   }
+  this->flagCharTableIsComputed=true;
+  this->flagIrrepsAreComputed=true;
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter)
@@ -845,8 +847,8 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   if (!theWeyl.flagCharTableIsComputed)
     theWeyl.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
   std::stringstream out;
-  theWeyl.GetTauSignatures(theCommands.theGlobalVariableS);
-  out << "Weyl group type:" << theWeyl.ToString();
+  List<List<Rational> > theTauSigs= theWeyl.GetTauSignatures(theCommands.theGlobalVariableS);
+  out << "Tau sigs:" << theTauSigs.ToString();
 
   return output.AssignValue(out.str(), theCommands);
 }
@@ -906,7 +908,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupNaturalRep(Calculator& theComma
   theGroup.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
 //  std::cout << theGroup.ToString();
   WeylGroupRepresentation<Rational> tempRep;
-  theGroup.StandardRepresentation(tempRep);
+  theGroup.GetStandardRepresentation(tempRep);
   return output.AssignValue(tempRep, theCommands);
 }
 

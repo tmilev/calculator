@@ -123,7 +123,7 @@ int main(int argc, char **argv)
   //  civilizedInput="printSemisimpleSubalgebrasRecompute a_3";
   //civilizedInput="printRootSubalgebras(a_2)";
   //  civilizedInput="WeylGroupConjugacyClasses f_4";
-  civilizedInput="WeylGroupTauSignatures{}(a_2);";
+  //civilizedInput="WeylGroupTauSignatures{}(a_2);";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

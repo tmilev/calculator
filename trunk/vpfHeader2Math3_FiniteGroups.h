@@ -174,12 +174,12 @@ template <class coefficient>
 class WeylGroupRepresentation
 {
   private:
-  List<Matrix<coefficient> > theElementImages;
+  List<Matrix<coefficient> > theElementImageS;
   List<bool> theElementIsComputed;
   ClassFunction<coefficient> theCharacteR;
   List<Matrix<coefficient> > classFunctionMatrices;
   List<bool> classFunctionMatricesComputed;
-  List<Matrix<coefficient> > generators;
+  List<Matrix<coefficient> > generatorS;
   friend class WeylGroup;
   WeylGroupRepresentation* parent;
   Vectors<coefficient> basis;
@@ -208,11 +208,7 @@ class WeylGroupRepresentation
   void CheckRepIsMultiplicativelyClosed();
   void GetClassFunctionMatrix(ClassFunction<coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
   void ClassFunctionMatrix(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
-  int GetDim()const
-  { if (this->theElementImages.size==1)
-      return this->theElementImages[0].NumRows;
-    return this->theElementImages[1].NumRows;
-  }
+  int GetDim()const;
   void Restrict
   (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
    GlobalVariables* theGlobalVariables=0);
@@ -239,7 +235,7 @@ class WeylGroupRepresentation
   void GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output);
   Matrix<coefficient> GetMatrixElement(const ElementWeylGroup<WeylGroup>& input);
   void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
-  { this->theElementImages[elementIndex] = input;
+  { this->theElementImageS[elementIndex] = input;
     this->theElementIsComputed[elementIndex] = true;
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const;

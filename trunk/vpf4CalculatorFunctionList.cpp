@@ -543,7 +543,7 @@ void Calculator::initPredefinedInnerFunctions()
   ("SemisimpleLieAlgebra", CalculatorSerialization::innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. The semisimple Lie algebra is given via its Dynkin type. A simple Dynkin type is given by\
     type letter with upper index equal to the inverse of the scale of the symmetric Cartan matrix and lower index equal to \
-    the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (n+1)) with symmetric Cartan matrix scale equal to 1/2.\
+    the rank of the subalgebra. For example A^2_3 stands for type A_3 (sl (4)) with symmetric Cartan matrix scale equal to 1/2.\
     If the upper index is omitted, it is implied to be 1.<hr>\
     We define the symmetric Cartan matrix as the matrix whose (i,j)^{th} enry is the scalar product of the i^{th} and j^{th} roots. \
     We assume the roots to be ordered in the order implied by the (non-symmetric) Cartan matrices on page 59 in Huphreys, \

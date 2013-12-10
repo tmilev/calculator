@@ -200,9 +200,9 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
 
 void Calculator::GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat)
 { std::stringstream outMainPath, outMainDisplayPath;
-  outMainPath << this->PhysicalPathOutputFolder << theType.ToString() << "/";
+  outMainPath << this->PhysicalPathOutputFolder << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   outputFolderPhysical=outMainPath.str();
-  outMainDisplayPath << this->DisplayPathOutputFolder << theType.ToString() << "/";
+  outMainDisplayPath << this->DisplayPathOutputFolder <<  CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   outputFolderDisplay=outMainDisplayPath.str();
   outputFormat.flagUseHTML=true;
   outputFormat.flagUseLatex=false;

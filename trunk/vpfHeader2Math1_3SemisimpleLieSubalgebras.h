@@ -333,7 +333,9 @@ public:
   const HashedList<ElementWeylGroup<WeylGroup> >& GetOrbitSl2HelementWeylGroupElt(int indexSl2);
   bool RanksAndIndicesFit(const DynkinType& input)const;
   bool GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const;
-  Vector<Rational> GetHighestWeightFundNewComponentFromRootInjection(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified);
+  Vector<Rational>
+  GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
+  (const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot, CandidateSSSubalgebra& theSSSubalgebraToBeModified);
   void RegisterPossibleCandidate(CandidateSSSubalgebra& theCandidate);
   void HookUpCentralizers(bool allowNonPolynomialSystemFailure);
   void ComputeSl2sInitOrbitsForComputationOnDemand();

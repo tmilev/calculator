@@ -117,14 +117,15 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  //  civilizedInput="printSemisimpleSubalgebrasNoCentralizers d_5";
-  //  civilizedInput="f:=e^{-2x};d/dx (f);";
-  //  civilizedInput="EmbedSemisimpleInSemisimple{}(A^{4}_1+2A^{2}_1, D_5);";
-  //  civilizedInput="printSemisimpleSubalgebrasRecompute a_3";
+//  civilizedInput="printSemisimpleSubalgebras A^10_1";
+  //civilizedInput="printSemisimpleSubalgebrasNoCentralizers d_5";
+  //civilizedInput="f:=e^{-2x};d/dx (f);";
+  //civilizedInput="EmbedSemisimpleInSemisimple{}(A^{4}_1+2A^{2}_1, D_5);";
+  //civilizedInput="printSemisimpleSubalgebrasRecompute a_3";
   //civilizedInput="printRootSubalgebras(a_2)";
-  //  civilizedInput="WeylGroupConjugacyClasses f_4";
+  //civilizedInput="WeylGroupConjugacyClasses f_4";
   //civilizedInput="WeylGroupTauSignatures{}(a_2);";
-  civilizedInput="WeylGroupIrrepsAndCharTableComputeFromScratch b_3";
+  //civilizedInput="printSemisimpleSubalgebras a_2";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

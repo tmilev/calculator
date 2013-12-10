@@ -191,6 +191,16 @@ int CGI::numDottedLines=0;
 int CGI::shiftY=-200;
 int CGI::scale=100;
 
+std::string CGI::CleanUpForFileNameUse(const std::string& inputString)
+{ std::stringstream out;
+  for (int i=0; i<(signed) inputString.size(); i++)
+    if (inputString[i]=='/')
+      out << "_div_";
+    else
+      out << inputString[i];
+  return out.str();
+}
+
 void CGI::clearDollarSigns(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
@@ -822,6 +832,31 @@ std::string Rational::ToString(FormatExpressions* notUsed)const
     if (tempS!="1")
       out << "/" << tempS;
   }
+  return out.str();
+}
+
+std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed)const
+{ std::stringstream out;
+  if (this->Extended==0)
+  { if (this->NumShort<0)
+      out << "-";
+    int numShortAbsoluteValue=this->NumShort<0 ?- this->NumShort: this->NumShort;
+    if (this->DenShort==1)
+      out << numShortAbsoluteValue;
+    else
+      out << numShortAbsoluteValue << "_div_" << this->DenShort;
+    return out.str();
+  }
+  std::string tempS;
+  LargeInt numAbsVal=this->Extended->num;
+  if (numAbsVal<0)
+  { out << "-";
+    numAbsVal.sign=1;
+  }
+  if (this->Extended->den.IsEqualToOne())
+    out << numAbsVal.ToString();
+  else
+    out << numAbsVal.ToString() << "_div_" << this->Extended->den.ToString();
   return out.str();
 }
 
@@ -4166,8 +4201,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
       out << this->CartanSymmetricInverseScale.ToString();
       if (usePlusesAndExponents)
         out << "}";
-    }
-    else
+    } else
     { DynkinSimpleType ambientType;
       ambientType.theLetter=theFormat->AmbientWeylLetter;
       ambientType.CartanSymmetricInverseScale=theFormat->AmbientCartanSymmetricInverseScale;

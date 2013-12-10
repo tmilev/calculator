@@ -1181,6 +1181,7 @@ public:
   static std::string GetHtmlButton(const std::string& buttonID, const std::string& theScript, const std::string& buttonText);
   static std::string GetHtmlSpanHidableStartsHiddeN(const std::string& input);
   static std::string clearSlashes(const std::string& theString);
+  static std::string CleanUpForFileNameUse(const std::string& inputString);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames);

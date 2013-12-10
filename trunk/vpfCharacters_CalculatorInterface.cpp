@@ -39,15 +39,10 @@ template <typename coefficient>
 bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
 { this->CheckInitialization();
   for (int i=0; i<this->ownerGroup->GetDim(); i++)
-  { bool isOK=this->theElementIsComputed[i+1];
     if (this->generatorS[i].NumRows==0)
-      isOK=false;
-    if (!isOK)
     { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. " << crash;
       return false;
     }
-  }
-
   return true;
 }
 
@@ -83,14 +78,14 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(G
   int theRank=this->ownerGroup->GetDim();
   currentElt.MakeID(*this->ownerGroup);
   ElementsExplored.AddOnTop(currentElt);
+  List<ElementWeylGroup<WeylGroup> > theGens;
+  theGens.SetSize(theRank);
   for (int i=0; i<theRank; i++)
-  { currentElt.MakeSimpleReflection(i, *this->ownerGroup);
-    ElementsExplored.AddOnTop(currentElt);
-  }
+    theGens[i].MakeSimpleReflection(i, *this->ownerGroup);
   for (int i=0; i<ElementsExplored.size; i++)
   { int indexParentElement=this->ownerGroup->theElements.GetIndex(ElementsExplored[i]);
     for (int j=0; j<theRank; j++)
-    { currentElt=ElementsExplored[j+1]* ElementsExplored[i];
+    { currentElt=theGens[j]* ElementsExplored[i];
       if (!ElementsExplored.Contains(currentElt))
       { int indexCurrentElt=this->ownerGroup->theElements.GetIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt]=true;
@@ -177,43 +172,6 @@ void WeylGroupRepresentation<coefficient>::Restrict
     }
   */
   output.CheckAllSimpleGensAreOK();
-  LargeIntUnsigned l,d;
-  output.GetLargestDenominatorSimpleGens(l,d);
-  while(d < 10)
-    return;
-/*
-  List<HashedList<VectorSpace<Rational> > > spaces;
-  for(int i=0; i<ownerGroup->theElements.size; i++)
-  { output.GetElementImage(i);
-    List<VectorSpace<Rational> > spsi = GetRationalSpecialSpaces(this->theElementImages[i]);
-    for(int j=0; j<spsi.size; j++)
-    { if(spaces.size < spsi[j].rank-1)
-        spaces.SetSize(spsi[j].rank);
-      spaces[spsi[j].rank-1].AddOnTop(spsi[j]);
-    }
-    if(spaces[0].size >= VectorSpaceBasisSubrep.size)
-      goto have_enough_1spaces;
-  }
-  for(int ri=1; ri<spaces.size; ri++)
-  { for(int i=0; i<spaces[ri].size-1; i++)
-    { for(int j=i+1; j<spaces[ri].size; j++)
-      { VectorSpace<coefficient> k = spaces[ri][i].Intersection(spaces[ri][j]);
-        spaces[k.rank-1].AddOnTop(k);
-        if(spaces[0].size >= VectorSpaceBasisSubrep.size)
-          goto have_enough_1spaces;
-      }
-    }
-  }
-
-  have_enough_1spaces: // if not, we crash in two lines from here
-  Vectors<Rational> newbasis;
-  for(int i=0; i<VectorSpaceBasisSubrep.size; i++)
-   newbasis.AddOnTop(spaces[0][i].GetBasisVector(0));
-  this->Restrict(newbasis, remainingCharacter, output, theGlobalVariables);
-  */
-
-//  std::cout << "<hr>The restriction result: " << output.ToString();
-//  this->CheckRepIsMultiplicativelyClosed();
 }
 
 template <class coefficient>
@@ -460,11 +418,12 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
-  WeylGroupRepresentation<Rational> theStandardRep, newRep;
   this->ComputeInitialIrreps();
+  WeylGroupRepresentation<Rational> theStandardRep, newRep;
   int NumClasses=this->ConjugacyClassCount();
   Vector<Rational> decompositionNewRep;
   ProgressReport theReport1(theGlobalVariables);
+  this->GetStandardRepresentation(theStandardRep);
   for (int i=0; i<this->irreps.size && this->irreps.size!=NumClasses; i++)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStream;

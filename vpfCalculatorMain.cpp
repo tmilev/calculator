@@ -124,6 +124,7 @@ int main(int argc, char **argv)
   //civilizedInput="printRootSubalgebras(a_2)";
   //  civilizedInput="WeylGroupConjugacyClasses f_4";
   //civilizedInput="WeylGroupTauSignatures{}(a_2);";
+  civilizedInput="WeylGroupIrrepsAndCharTableComputeFromScratch b_3";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

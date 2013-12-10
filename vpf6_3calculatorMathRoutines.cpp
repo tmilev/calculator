@@ -905,8 +905,8 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
   if (!tempSas.RanksAndIndicesFit(theSmallDynkinType))
     return output.SetError("Error: type "+theSmallDynkinType.ToString()+" does not fit inside "+theSSalg->theWeyl.theDynkinType.ToString(), theCommands);
   List<DynkinType> largerTypes;
-  List<List<int> > theRootInjections;
-  if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &theRootInjections))
+  List<List<int> > imagesSimpleRoots;
+  if (!tempSas.GrowDynkinType(theSmallDynkinType, largerTypes, &imagesSimpleRoots))
     return output.SetError("Error: growing type "+theSmallDynkinType.ToString()+" inside "+theSSalg->theWeyl.theDynkinType.ToString() + " failed. ", theCommands);
   std::stringstream out;
   out << "Inside " << theSSalg->theWeyl.theDynkinType.ToString() << ", input type " << theSmallDynkinType.ToString();
@@ -919,13 +919,13 @@ bool CalculatorFunctionsGeneral::innerGrowDynkinType(Calculator& theCommands, co
     for(int i=0; i<largerTypes.size; i++)
     { out << "<tr><td>" << largerTypes[i].ToString() << "</td>";
       out << "<td>";
-      for (int j=0; j<theRootInjections[i].size; j++)
-      { out << "r_" << j+1 << " -> " << "r_" << theRootInjections[i][j]+1;
-        if (j!=theRootInjections[i].size)
+      for (int j=0; j<imagesSimpleRoots[i].size; j++)
+      { out << "r_" << j+1 << " -> " << "r_" << imagesSimpleRoots[i][j]+1;
+        if (j!=imagesSimpleRoots[i].size)
           out << ", ";
       }
       out << "</td><td>";
-      out << CGI::GetMathSpanPure(tempSas.GetHighestWeightFundNewComponentFromRootInjection(largerTypes[i], theRootInjections[i], tempCandidate).ToStringLetterFormat("\\omega"));
+      out << CGI::GetMathSpanPure(tempSas.GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(largerTypes[i], imagesSimpleRoots[i], tempCandidate).ToStringLetterFormat("\\omega"));
       out << "</td></tr>";
     }
     out << "</table>";

@@ -474,8 +474,8 @@ bool Calculator::innerPrintSSsubalgebras
   std::string physicalFolder, displayFolder;
   FormatExpressions theFormat;
   theCommands.GetOutputFolders(ownerSS.theWeyl.theDynkinType, physicalFolder, displayFolder, theFormat);
-  std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
-  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + ownerSS.theWeyl.theDynkinType.ToString() + ".html";
+  std::string theTitlePageFileNameNoPath= "SemisimpleSubalgebras_" + CGI::CleanUpForFileNameUse(ownerSS.theWeyl.theDynkinType.ToString()) + ".html";
+  std::string theTitlePageFileNameNoPathFastLoad= "SemisimpleSubalgebras_FastLoad_" + CGI::CleanUpForFileNameUse(ownerSS.theWeyl.theDynkinType.ToString()) + ".html";
   std::string theTitlePageFileNameSlowLoad= physicalFolder+theTitlePageFileNameNoPath;
   std::string theTitlePageFileNameFastLoad= physicalFolder+theTitlePageFileNameNoPathFastLoad;
   out << "<br>Output file: <a href= \"" << displayFolder << theTitlePageFileNameNoPath << "\"> " << theTitlePageFileNameNoPath << "</a>";

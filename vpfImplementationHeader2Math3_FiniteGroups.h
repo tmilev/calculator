@@ -340,18 +340,16 @@ bool WeylGroup::GenerateOuterOrbit
   for (int i=0; i<theWeights.size; i++)
     output.AddOnTop(theWeights[i]);
   Vector<coefficient> currentRoot;
-  ElementWeylGroup<WeylGroup> tempEW;
+  ElementWeylGroup<WeylGroup> currentElt;
   output.SetExpectedSize(UpperLimitNumElements);
   if (outputSubset!=0)
-  { tempEW.MakeID(*this);
+  { currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(UpperLimitNumElements);
     outputSubset->Clear();
-    outputSubset->AddOnTop(tempEW);
+    outputSubset->AddOnTop(currentElt);
   }
   int numGens=this->GetDim()+theOuterGens.size;
   for (int i=0; i<output.size; i++)
-  { if (outputSubset!=0)
-      tempEW=outputSubset->TheObjects[i];
     for (int j=0; j<numGens; j++)
     { if (j<this->GetDim())
       { currentRoot=output[i];
@@ -360,15 +358,15 @@ bool WeylGroup::GenerateOuterOrbit
         theOuterGens[j-this->GetDim()].ActOnVectorColumn(output[i], currentRoot);
       if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
-        { tempEW.generatorsLastAppliedFirst.SetSize(0);
-          tempEW.generatorsLastAppliedFirst.AddOnTop(j);
-          tempEW.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
+        { currentElt.MakeID(*this);
+          currentElt.generatorsLastAppliedFirst.AddOnTop(j);
+          currentElt.generatorsLastAppliedFirst.AddListOnTop((*outputSubset)[i].generatorsLastAppliedFirst);
+          outputSubset->AddOnTop(currentElt);
         }
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)
           return false;
     }
-  }
   return true;
 }
 

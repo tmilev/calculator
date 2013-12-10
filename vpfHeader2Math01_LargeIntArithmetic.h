@@ -683,6 +683,7 @@ ParallelComputing::GlobalPointerCounter++;
   }
   std::string ToString(FormatExpressions* notUsed=0)const;
   std::string ToStringFrac(FormatExpressions* notUsed=0)const;
+  std::string ToStringForFileOperations(FormatExpressions* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;
   bool IsEven()const

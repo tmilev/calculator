@@ -139,35 +139,35 @@ int SemisimpleSubalgebras::GetDisplayIndexFromActual(int ActualIndexSubalgebra)c
 std::string SemisimpleSubalgebras::GetPhysicalFileNameSubalgebra(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
-  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetPhysicalFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathPhysicalOutputFolder);
-  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
+  out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraAbsolute(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
-  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameSubalgebraRelative(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << "./";
-  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
+  out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << ".html";
   return out.str();
 }
 
 std::string SemisimpleSubalgebras::GetDisplayFileNameFKFTNilradicals(int ActualIndexSubalgebra, FormatExpressions* theFormat)const
 { std::stringstream out;
   out << (theFormat==0 ? "./" : theFormat->PathDisplayOutputFolder);
-  out << this->owneR->theWeyl.theDynkinType.ToString() << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
+  out << CGI::CleanUpForFileNameUse(this->owneR->theWeyl.theDynkinType.ToString()) << "_subalgebra_" << this->GetDisplayIndexFromActual(ActualIndexSubalgebra) << "_FKFTnilradicals.html";
   return out.str();
 }
 
@@ -267,8 +267,7 @@ std::string SemisimpleSubalgebras::ToStringSSsumaryLaTeX(FormatExpressions* theF
       continue;
     typeCentralizer.MakeZero();
     if (currentSA.indexMaxSSContainer!=-1)
-      typeCentralizer=
-      this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType - currentSA.theWeylNonEmbeddeD.theDynkinType;
+      typeCentralizer=this->theSubalgebraCandidates[currentSA.indexMaxSSContainer].theWeylNonEmbeddeD.theDynkinType - currentSA.theWeylNonEmbeddeD.theDynkinType;
     out << "& $ ";
     if(!typeCentralizer.IsEqualToZero())
     { out << typeCentralizer.ToString();
@@ -484,9 +483,9 @@ bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinT
   return input.Grow(theLengths, this->owneR->GetRank(), output, outputImagesSimpleRoots);
 }
 
-Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRootInjection
-(const DynkinType& input, const List<int>& theRootInjection, CandidateSSSubalgebra& theSSSubalgebraToBeModified)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRootInjection");
+Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot
+(const DynkinType& input, const List<int>& imagesOldSimpleRootsAndNewRoot, CandidateSSSubalgebra& theSSSubalgebraToBeModified)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot");
   Vector<Rational> result;
   if (input.IsEqualToZero())
   { result.MakeZero(0);
@@ -495,16 +494,16 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromRoot
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.MakeFromDynkinType(input);
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeRho(true);
-  int newIndex=*theRootInjection.LastObject();
+  int newIndex=*imagesOldSimpleRootsAndNewRoot.LastObject();
   int newRank=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.GetDim();
   newSimpleRoot.MakeEi(newRank, newIndex);
   Vectors<Rational> simpleBasisOld;
   simpleBasisOld.SetSize(newRank-1);
-  if (theRootInjection.size!=newRank-1)
-    crash << "This is a programming error: the root injection must have " << newRank-1 << " elements but it has " << theRootInjection.size << " elements instead. "
+  if (imagesOldSimpleRootsAndNewRoot.size!=newRank)
+    crash << "This is a programming error: the root images must be " << newRank << " but there are " << imagesOldSimpleRootsAndNewRoot.size << " elements instead. "
     << "The type is " << input.ToString() << ". " << crash;
-  for (int i=0; i<theRootInjection.size; i++)
-    simpleBasisOld[i].MakeEi(newRank, theRootInjection[i]);
+  for (int i=0; i<newRank-1; i++)
+    simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
 //  std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
   result.SetSize(newRank-1);
@@ -615,7 +614,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   List<DynkinType> theLargerTypes;
   List<List<int> > theRootInjections;
   this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-  //std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
+  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
@@ -647,11 +646,11 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
       << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      //std::cout << "<hr>" << reportStream.str();
+      std::cout << "<hr>" << reportStream.str();
       theReport2.Report(reportStream.str());
     }
     if (baseRank!=0)
-    { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromRootInjection(theLargerTypes[i], theRootInjections[i], newCandidate);
+    { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(theLargerTypes[i], theRootInjections[i], newCandidate);
       //std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
       //<< " base candidate is: " << baseCandidate.ToString();
 

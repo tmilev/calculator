@@ -40,7 +40,7 @@ bool WeylGroupRepresentation<coefficient>::CheckAllSimpleGensAreOK()const
 { this->CheckInitialization();
   for (int i=0; i<this->ownerGroup->GetDim(); i++)
   { bool isOK=this->theElementIsComputed[i+1];
-    if (this->theElementImages[i+1].NumRows==0)
+    if (this->generatorS[i].NumRows==0)
       isOK=false;
     if (!isOK)
     { crash << "This is a programming error: working with a representation in which the action of the simple generators is not computed. " << crash;
@@ -78,7 +78,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(G
   this->ownerGroup->CheckInitializationFDrepComputation();
   HashedList<ElementWeylGroup<WeylGroup> > ElementsExplored;
   ElementsExplored.SetExpectedSize(this->ownerGroup->theElements.size);
-  this->theElementImages[0].MakeIdMatrix(this->GetDim());
+  this->theElementImageS[0].MakeIdMatrix(this->GetDim());
   ElementWeylGroup<WeylGroup> currentElt;
   int theRank=this->ownerGroup->GetDim();
   currentElt.MakeID(*this->ownerGroup);
@@ -94,7 +94,7 @@ void WeylGroupRepresentation<coefficient>::ComputeAllGeneratorImagesFromSimple(G
       if (!ElementsExplored.Contains(currentElt))
       { int indexCurrentElt=this->ownerGroup->theElements.GetIndex(currentElt);
         this->theElementIsComputed[indexCurrentElt]=true;
-        this->theElementImages[indexParentElement].MultiplyOnTheLeft(this->theElementImages[j+1], this->theElementImages[indexCurrentElt]);
+        this->theElementImageS[indexParentElement].MultiplyOnTheLeft(this->generatorS[j], this->theElementImageS[indexCurrentElt]);
         ElementsExplored.AddOnTop(currentElt);
       }
     }
@@ -129,9 +129,11 @@ void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentat
   output.init(*this->ownerGroup);
   output.theCharacteR=this->theCharacteR;
   output.theCharacteR*=other.theCharacteR;
-  for(int i=0; i<output.theElementImages.size; i++)
+  for (int i=0; i<output.generatorS.size; i++)
+    output.generatorS[i].AssignTensorProduct(this->generatorS[i], other.generatorS[i]);
+  for(int i=0; i<output.theElementImageS.size; i++)
     if (this->theElementIsComputed[i] && other.theElementIsComputed[i])
-    { output.theElementImages[i].AssignTensorProduct(this->theElementImages[i],other.theElementImages[i]);
+    { output.theElementImageS[i].AssignTensorProduct(this->theElementImageS[i],other.theElementImageS[i]);
       output.theElementIsComputed[i]=true;
     }
   *this=output;
@@ -151,16 +153,14 @@ void WeylGroupRepresentation<coefficient>::Restrict
   output.gramMatrixInverted.Invert();
   output.theCharacteR=remainingCharacter;
   ProgressReport theReport(theGlobalVariables);
-  for(int i=1; i<this->ownerGroup->GetDim()+1; i++)
-    if (this->theElementIsComputed[i])
-    { output.theElementIsComputed[i]=true;
-      if (theGlobalVariables!=0)
-      { std::stringstream reportStream;
-        reportStream << "Restricting the action of generator of index " << i;
-        theReport.Report(reportStream.str());
-      }
-      Matrix<coefficient>::MatrixInBasis(this->theElementImages[i], output.theElementImages[i], output.basis, output.gramMatrixInverted);
+  for(int i=0; i<this->generatorS.size; i++)
+  { if (theGlobalVariables!=0)
+    { std::stringstream reportStream;
+      reportStream << "Restricting the action of generator of index " << i;
+      theReport.Report(reportStream.str());
     }
+    Matrix<coefficient>::MatrixInBasis(this->generatorS[i], output.generatorS[i], output.basis, output.gramMatrixInverted);
+  }
   /*
   for (int i=0; i<this->classFunctionMatrices.size; i++)
     if (this->classFunctionMatricesComputed[i])
@@ -272,7 +272,7 @@ void WeylGroupRepresentation<coefficient>::SpreadVector(const Vector<coefficient
   for (int i=0; i<outputBasisGeneratedSpace.size; i++)
     for (int j=0; j<theRank; j++)
     { tempV=outputBasisGeneratedSpace[i];
-      this->theElementImages[j+1].ActOnVectorColumn(tempV);
+      this->theElementImageS[j+1].ActOnVectorColumn(tempV);
       if (!outputBasisGeneratedSpace.LinSpanContainsVector(tempV))
         outputBasisGeneratedSpace.AddOnTop(tempV);
     }
@@ -283,16 +283,13 @@ void WeylGroupRepresentation<coefficient>::GetLargestDenominatorSimpleGens(Large
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::GetLargestDenominatorSimpleGens");
   outputLCM=1;
   outputDen=1;
-  for(int gi=1; gi<this->ownerGroup->GetDim()+1; gi++)
-    if (!this->theElementIsComputed[gi])
-      crash << "This is a programming error: the simple generator has not been computed, but is being used. " << crash;
-    else
-      for(int mi=0; mi<this->theElementImages[gi].NumRows; mi++)
-        for(int mj=0; mj<this->theElementImages[gi].NumCols; mj++)
-        { if(this->theElementImages[gi](mi,mj).GetDenominator() > outputDen)
-            outputDen = this->theElementImages[gi](mi,mj).GetDenominator();
-          outputLCM=LargeIntUnsigned::lcm(outputLCM, this->theElementImages[gi](mi,mj).GetDenominator());
-        }
+  for(int gi=0; gi<this->generatorS.size; gi++)
+    for(int mi=0; mi<this->generatorS[gi].NumRows; mi++)
+      for(int mj=0; mj<this->generatorS[gi].NumCols; mj++)
+      { if(this->generatorS[gi](mi,mj).GetDenominator() > outputDen)
+          outputDen = this->generatorS[gi](mi,mj).GetDenominator();
+        outputLCM=LargeIntUnsigned::lcm(outputLCM, this->generatorS[gi](mi,mj).GetDenominator());
+      }
 }
 
 template <class coefficient>
@@ -415,10 +412,10 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   Vector<coefficient> startingVector, tempV, average;
   startingVector.MakeEi(this->GetDim(), 0);
   average.MakeZero(this->GetDim());
-  for (int i=0; i<this->theElementImages.size; i++)
+  for (int i=0; i<this->theElementImageS.size; i++)
   { if (!this->theElementIsComputed[i])
       crash << "<hr>This is a programming error: an internal check failed. " << crash;
-    this->theElementImages[i].ActOnVectorColumn(startingVector, tempV);
+    this->theElementImageS[i].ActOnVectorColumn(startingVector, tempV);
     average+=tempV;
   }
   std::cout << "<br>Current char: " << this->GetCharacter().ToString();
@@ -435,7 +432,10 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
 }
 
 void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p)
-{ if (this->irreps.Contains(p))
+{ std::cout << "Checking if " << p.theCharacteR.ToString() << " belongs to ";
+  for (int i=0; i<this->irreps.size; i++)
+    std::cout << this->irreps[i].theCharacteR.ToString();
+  if (this->irreps.Contains(p))
   { WeylGroupRepresentation<Rational>& currentRep=this->irreps[this->irreps.GetIndex(p)];
     currentRep.names.AddOnTopNoRepetition(p.names);
     return;
@@ -461,7 +461,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
   if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
   WeylGroupRepresentation<Rational> theStandardRep, newRep;
-  this->GetStandardRepresentation(theStandardRep);
+  this->ComputeInitialIrreps();
   int NumClasses=this->ConjugacyClassCount();
   Vector<Rational> decompositionNewRep;
   ProgressReport theReport1(theGlobalVariables);

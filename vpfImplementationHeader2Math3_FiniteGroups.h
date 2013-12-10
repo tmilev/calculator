@@ -823,7 +823,8 @@ void WeylGroupRepresentation<coefficient>::init(WeylGroup& inputOwner)
 { this->reset();
   this->ownerGroup=&inputOwner;
   this->ownerGroup->CheckInitializationFDrepComputation();
-  this->theElementImages.SetSize(this->ownerGroup->theElements.size);
+  this->generatorS.SetSize(this->ownerGroup->GetDim());
+  this->theElementImageS.SetSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
   this->classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
   this->classFunctionMatricesComputed.initFillInObject(this->ownerGroup->ConjugacyClassCount(), false);
@@ -839,7 +840,7 @@ unsigned int WeylGroupRepresentation<coefficient>::HashFunction()const
 
 template <typename coefficient>
 Matrix<coefficient>& WeylGroupRepresentation<coefficient>::GetMatrixElement(int groupElementIndex)
-{ Matrix<coefficient>& theMat=this->theElementImages[groupElementIndex];
+{ Matrix<coefficient>& theMat=this->theElementImageS[groupElementIndex];
   if (this->theElementIsComputed[groupElementIndex])
     return theMat;
   const ElementWeylGroup<WeylGroup>& theElt=this->ownerGroup->theElements[groupElementIndex];
@@ -856,12 +857,17 @@ Matrix<coefficient> WeylGroupRepresentation<coefficient>::GetMatrixElement(const
 }
 
 template <typename coefficient>
+int WeylGroupRepresentation<coefficient>::GetDim()const
+{ return this->generatorS[0].NumRows;
+}
+
+template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output)
 { this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   output.MakeIdMatrix(this->GetDim());
   for (int i=0; i<input.generatorsLastAppliedFirst.size; i++)
-    output.MultiplyOnTheRight(this->theElementImages[input.generatorsLastAppliedFirst[i]+1]);
+    output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i]]);
 }
 
 template <typename coefficient>
@@ -910,7 +916,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
         for (int i=0; i<currentConjugacyClassIndices.size; i++)
         { if (!this->theElementIsComputed[currentConjugacyClassIndices[i]])
             this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
-          this->classFunctionMatrices[cci]+=this->theElementImages[currentConjugacyClassIndices[i]];
+          this->classFunctionMatrices[cci]+=this->theElementImageS[currentConjugacyClassIndices[i]];
           if (theGlobalVariables!=0)
           { std::stringstream reportstream;
             reportstream << " Computing conjugacy class " << currentConjugacyClassIndices[i]+1 << " (total num classes is " << numClasses << ").";
@@ -935,16 +941,17 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
 (ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
-{ outputMat.MakeZeroMatrix(this->generators[0].NumRows);
+{ int theDim=this->generatorS[0].NumRows;
+  outputMat.MakeZeroMatrix(theDim);
   if(classFunctionMatrices.size == 0)
     classFunctionMatrices.SetSize(this->ownerGroup->ConjugacyClassCount());
   for(int cci=0; cci<this->ownerGroup->ConjugacyClassCount(); cci++)
   { if(inputCF[cci] == 0)
       continue;
     if(classFunctionMatrices[cci].NumCols == 0)
-    { std::cout << "Generating class function matrix " << cci << " with dimension " << this->generators[0].NumCols
+    { std::cout << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
       << "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << std::endl;
-      classFunctionMatrices[cci].MakeZeroMatrix(this->generators[0].NumCols);
+      classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].NumCols);
       for(int icci=0; icci<this->ownerGroup->conjugacyClasses[cci].size; icci++)
       { //Matrix<coefficient> Mi;
         //Mi.MakeIdMatrix(this->generators[0].NumCols);
@@ -980,14 +987,14 @@ std::string WeylGroupRepresentation<coefficient>::ToString(FormatExpressions* th
   out << "\n<br>\n LCM denominators simple generators: " << theLCM.ToString() << ", largest denominator: " << theDen.ToString();
   out << "\n<br>\nThe simple generators (" << theRank << " total):<br> ";
   std::stringstream forYourCopyConvenience;
-  for (int i=1; i<theRank+1; i++)
-    if (this->theElementIsComputed[i])
+  for (int i=0; i<theRank; i++)
+    if (i<this->generatorS.size)
     { std::stringstream tempStream;
-      tempStream << "s_" << i << ":=MatrixRationals{}" << this->theElementImages[i].ToString(theFormat) << "; \\\\\n";
+      tempStream << "s_" << i+1 << ":=MatrixRationals{}" << this->generatorS[i].ToString(theFormat) << "; \\\\\n";
       forYourCopyConvenience << tempStream.str();
       out << CGI::GetMathSpanPure("\\begin{array}{l}"+ tempStream.str()+"\\end{array}", 3000);
     } else
-      out << "Element s_{" << i << "} not computed ";
+      out << "Simple generator " << i+1 << "} not computed ";
   out << "<br>For your copy convenience: <br>" << forYourCopyConvenience.str();
   return out.str();
 }

@@ -191,26 +191,12 @@ void WeylGroup::ComputeInitialIrreps()
   this->characterTable.SetExpectedSize(this->ConjugacyClassCount());
   this->irreps.SetExpectedSize(this->ConjugacyClassCount());
   WeylGroupRepresentation<Rational> trivialRep, signRep, standardRep;
+  this->GetTrivialRepresentation(trivialRep);
+  this->GetSignRepresentation(signRep);
   this->GetStandardRepresentation(standardRep);
-  signRep.init(*this);
-  standardRep.init(*this);
-  trivialRep.basis.MakeEiBasis(1);
-  ClassFunction<Rational> Xe, Xsgn, Xstd;
-
-  Xe.G = this;
-  Xe.data.initFillInObject(this->ConjugacyClassCount(), 1);
-  Xsgn.G = this;
-  Xsgn.data.SetSize(this->ConjugacyClassCount());
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-    Xsgn.data[i]=this->conjugacyClasses[i][0].Sign();
-  this->characterTable.AddOnTop(Xe);
-  this->characterTable.AddOnTop(Xsgn);
-  Xstd.G = this;
-  Xstd.data.SetSize(this->ConjugacyClassCount());
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-    Xstd.data[i]=this->GetMatrixStandardRep(this->conjugacyClasses[i][0]).GetTrace();
-//  Xstd = Xstd.ReducedWithChars();
-  characterTable.AddOnTop(Xstd);
+  this->AddIrreducibleRepresentation(trivialRep);
+  this->AddIrreducibleRepresentation(signRep);
+  this->AddIrreducibleRepresentation(standardRep);
 }
 
 // This is dumb, but i couldnt figure out what else to do
@@ -367,10 +353,10 @@ WeylGroupRepresentation<coefficient> WeylGroupRepresentation<coefficient>::Reduc
       GM.elements[i][j] = this->basis[i].ScalarEuclidean(this->basis[j]);
   GM.Invert();
   WeylGroupRepresentation<coefficient> out;
-  out.generators.SetSize(generators.size);
-  for(int i=0; i<this->generators.size; i++)
-//     MatrixInBasisFast(out.generators[i], this->generators[i], BM);
-    MatrixInBasis(out.generators[i],this->generators[i],this->basis,GM);
+  out.generatorS.SetSize(this->generatorS.size);
+  for(int i=0; i<this->generatorS.size; i++)
+//     MatrixInBasisFast(out.generatorS[i], this->generatorS[i], BM);
+    MatrixInBasis(out.generatorS[i],this->generatorS[i],this->basis,GM);
 
    out.ownerGroup = ownerGroup;
    out.basis.MakeEiBasis(d);
@@ -440,7 +426,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   { std::cout << "calculating remaining subrep... ";
     WeylGroupRepresentation<coefficient> V;
     V.ownerGroup = this->ownerGroup;
-    V.generators = this->generators;
+    V.generatorS = this->generatorS;
     V.basis = Vb;
     V = V.Reduced();
     std::cout << "done" << std::endl;
@@ -498,7 +484,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   for(int i=0; i<es.size; i++)
   { WeylGroupRepresentation<coefficient> outeme;
     outeme.ownerGroup =this->ownerGroup;
-    outeme.generators = this->generators;
+    outeme.generatorS = this->generatorS;
     outeme.basis = es[i];
     out.AddOnTop(outeme.Reduced());
   }
@@ -512,7 +498,7 @@ const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetChara
   this->theCharacteR.G = this->ownerGroup;
   this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
   for(int cci=0; cci < this->ownerGroup->ConjugacyClassCount(); cci++)
-    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci][0]).GetTrace();
+    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClassRepresentatives[cci]).GetTrace();
   this->flagCharacterIsComputed=true;
   return this->theCharacteR;
 }
@@ -590,8 +576,8 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
   this->flagIrrepsAreComputed=true;
   for(int i=0; i<this->characterTable.size; i++)
   { std::cout << this->characterTable[i] << '\n';
-    for(int j=0; j<this->irreps[i].generators.size; j++)
-      std::cout << this->irreps[i].generators[j].ToString() << '\n';
+    for(int j=0; j<this->irreps[i].generatorS.size; j++)
+      std::cout << this->irreps[i].generatorS[j].ToString() << '\n';
   }
   for(int i=0; i<this->characterTable.size; i++)
   { std::cout << this->characterTable[i] << '\n';

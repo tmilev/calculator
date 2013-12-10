@@ -4796,29 +4796,43 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
     this->ComputeConjugacyClasses();
   out.SetSize(this->conjugacyClasses.size);
   for(int i=0; i<this->conjugacyClasses.size; i++)
-  { int yn = this->theElements[this->conjugacyClasses[i][0]].generatorsLastAppliedFirst.size % 2;
-    if(yn == 0)
-      out[i] = 1;
-    else
-      out[i] = -1;
+    out[i] = this->theElements[this->conjugacyClasses[i][0]].Sign();
+}
+
+void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output)
+{ MacroRegisterFunctionWithName("WeylGroup::GetTrivialRepresentation");
+  this->CheckInitializationFDrepComputation();
+  output.init(*this);
+  output.basis.MakeEiBasis(1);
+  for(int i=0; i<this->GetDim(); i++)
+    output.generatorS[i].MakeIdMatrix(1);
+  output.GetCharacter();
+}
+
+void WeylGroup::GetSignRepresentation(WeylGroupRepresentation<Rational>& output)
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignRepresentation");
+  this->CheckInitializationFDrepComputation();
+  output.init(*this);
+  output.basis.MakeEiBasis(1);
+  ElementWeylGroup<WeylGroup> currentElt;
+  for(int i=0; i<this->GetDim(); i++)
+  { currentElt.MakeSimpleReflection(i, *this);
+    output.generatorS[i].MakeIdMatrix(1);
+    output.generatorS[i]*=currentElt.Sign();
   }
+  output.GetCharacter();
 }
 
 void WeylGroup::GetStandardRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
   this->CheckInitializationFDrepComputation();
   output.init(*this);
-//  output.theElementImages.SetSize(this->theElements.size);
-  output.generators.SetSize(this->GetDim());
+  output.basis.MakeEiBasis(this->GetDim());
   for(int i=0; i<this->GetDim(); i++)
-  { this->GetSimpleReflectionMatrix(i, output.theElementImages[i+1]);
-    output.theElementIsComputed[i+1]=true;
-    output.generators[i]=output.theElementImages[i+1];
-    output.basis.MakeEiBasis(this->GetDim());
-  }
+    this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
+  std::cout << output.ToString();
   output.GetCharacter();
-  if (!this->irreps.Contains(output))
-    this->AddIrreducibleRepresentation(output);
+  std::cout << "The char: " << output.theCharacteR.ToString();
 }
 
 void WeylGroup::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
@@ -5018,8 +5032,8 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
   if (this->flagCharTableIsComputed)
   { out << "<br>Character table: ";
-     Matrix<Rational> charTableMatForm;
-    charTableMatForm.init(this->ConjugacyClassCount(), this->ConjugacyClassCount());
+    Matrix<Rational> charTableMatForm;
+    charTableMatForm.init(this->irreps.size, this->ConjugacyClassCount());
     for (int i=0; i<this->irreps.size; i++)
       charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
     out << charTableMatForm.ToString();

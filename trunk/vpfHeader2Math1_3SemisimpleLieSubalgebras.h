@@ -270,7 +270,7 @@ public:
 
   List<HashedList<Vector<Rational> > > theOrbits;
   HashedList<Rational> theOrbitHelementLengths;
-  List<HashedList<ElementWeylGroup<WeylGroup>> > theOrbitGeneratingElts;
+  List<HashedList<ElementWeylGroup<WeylGroup> > > theOrbitGeneratingElts;
   List<bool> theOrbitsAreComputed;
 
   List<CandidateSSSubalgebra> theSubalgebraCandidates;

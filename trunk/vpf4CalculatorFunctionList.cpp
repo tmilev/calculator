@@ -14,7 +14,7 @@ void Calculator::initPredefinedInnerFunctions()
    "crash(0)");
   this->AddOperationInnerHandler
   ("Lispify", CalculatorFunctionsGeneral::innerLispify, "",
-   "Shows the internal tree structure of an expression, without completely unfolding the tree structure of object that are a single mathematical\
+   "Shows the internal tree structure of an expression, without completely unfolding the tree structure of expressions that represent a single mathematical\
    entity.",
    "Lispify( e^x)");
 

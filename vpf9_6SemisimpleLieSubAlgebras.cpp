@@ -479,7 +479,9 @@ bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
 bool SemisimpleSubalgebras::GrowDynkinType(const DynkinType& input, List<DynkinType>& output, List<List<int> >* outputImagesSimpleRoots)const
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::GrowDynkinType");
   HashedList<Rational> theLengths;
-  theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths);
+  theLengths.SetExpectedSize(this->theOrbitHelementLengths.size);
+  for (int i=0; i<this->theOrbitHelementLengths.size; i++)
+    theLengths.AddOnTopNoRepetition(this->theOrbitHelementLengths[i]/2);
   return input.Grow(theLengths, this->owneR->GetRank(), output, outputImagesSimpleRoots);
 }
 
@@ -504,7 +506,8 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
     << "The type is " << input.ToString() << ". " << crash;
   for (int i=0; i<newRank-1; i++)
     simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
-//  std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
+  if (input.ToString()=="A^{1}_2")
+    std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
   theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
   result.SetSize(newRank-1);
   for (int i=0; i<simpleBasisOld.size; i++)
@@ -663,7 +666,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         { std::stringstream reportStream;
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
           << " cannot be realized: no appropriate module.";
-          //std::cout << "<hr>" << reportStream.str();
+          std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
         continue;
@@ -672,26 +675,26 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     theSmallType=theLargerTypes[i].GetSmallestSimpleType();
     int indexNewRooT=*theRootInjections[i].LastObject();
     int indexNewRootInSmallType=indexNewRooT-theLargerTypes[i].GetRank()+theSmallType.theRank;
-    Rational desiredHLengthSquared=
-    theSmallType.CartanSymmetricInverseScale*theSmallType.GetDefaultRootLengthSquared(0)/
+    Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2*theSmallType.GetDefaultRootLengthSquared(0)/
     theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
     newCandidate.SetUpInjectionHs(baseCandidate, theLargerTypes[i], theRootInjections[i]);
     for (int j=0; j<this->theSl2s.size; j++)
     { if (theGlobalVariables!=0)
       { std::stringstream reportStreamX;
-        reportStreamX << "Trying to realize the root of index " << indexNewRootInSmallType << " in simple component of type " << theSmallType.ToString();
+        reportStreamX << "Trying to realize via orbit number " << j+1 << " the latest root (index "
+        << indexNewRootInSmallType << ") of the candidate simple component  " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-        { reportStreamX << " which is no good.<br> ";
-          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
+        { reportStreamX << " The h element generating the orbit does not have the required length.<br> ";
+          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
         } else
-        { reportStreamX << " which is all nice and dandy.<br>";
-          //std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
+        { reportStreamX << " The h element of the orbit has the required length. <br>";
+          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
         }
-        //std::cout << "<br>" << reportStreamX.str();
+        std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
       if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-      { //std::cout << "<hr>Lengths dont match!";
+      { std::cout << "<hr>Lengths dont match!";
         continue;
       }
       theHCandidatesRescaled.SetSize(0);
@@ -730,12 +733,12 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       }
       if (theHCandidatesRescaled.size==0)
       { std::stringstream out2;
-        out2 << "Sl(2) orbit " << j+1 << ": no extension " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
+        out2 << "Sl(2) orbit " << j+1 << ": extension of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
         << " to " << theLargerTypes[i].ToString()  << " not possible because there were no h candidates.";
         theReport2.Report(out2.str());
-        //std::cout << "<hr>" << out2.str();
+        std::cout << "<hr>" << out2.str();
       }
-      //std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
+      std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
       for (int k=0; k<theHCandidatesRescaled.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;

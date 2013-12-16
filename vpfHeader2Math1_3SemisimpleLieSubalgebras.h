@@ -237,7 +237,7 @@ public:
   bool ComputeChar(bool allowBadCharacter);
   bool AttemptToSolveSystem();
   bool isGoodForTheTop(const Vector<Rational>& HneW)const;
-  bool isGoodHnew(const Vector<Rational>& HneW, int indexHneW)const;
+  bool IsGoodHnew(const Vector<Rational>& HneW, const List<int>& theRootInjections)const;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;

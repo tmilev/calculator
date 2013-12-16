@@ -684,19 +684,17 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         reportStreamX << "Trying to realize via orbit number " << j+1 << " the latest root (index "
         << indexNewRootInSmallType << ") of the candidate simple component  " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-        { reportStreamX << " The h element generating the orbit does not have the required length.<br> ";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " no good, ";
-        } else
-        { reportStreamX << " The h element of the orbit has the required length. <br>";
-          std::cout << " index " << j+1 << " out of " << this->theSl2s.size << " = GOOD, ";
-        }
+          reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString()
+          << " of length " << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
+          << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
+        else
+          std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString()
+          << " generating orbit number " << j+1 << " out of " << this->theSl2s.size << " has the required length. ";
         std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
       if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-      { std::cout << "<hr>Lengths dont match!";
         continue;
-      }
       theHCandidatesRescaled.SetSize(0);
       if (baseRank!=0)
       { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
@@ -705,7 +703,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         { Hrescaled=currentOrbit[k];
           Hrescaled*=theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
           Hrescaled/=2;
-          if (newCandidate.isGoodHnew(Hrescaled, indexNewRooT))
+          if (newCandidate.IsGoodHnew(Hrescaled, theRootInjections[i]))
           { if (theGlobalVariables!=0)
             { std::stringstream out2;
               out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
@@ -734,11 +732,11 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       if (theHCandidatesRescaled.size==0)
       { std::stringstream out2;
         out2 << "Sl(2) orbit " << j+1 << ": extension of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
-        << " to " << theLargerTypes[i].ToString()  << " not possible because there were no h candidates.";
+        << " to " << theLargerTypes[i].ToString() << " not possible because there were no h candidates.";
         theReport2.Report(out2.str());
         std::cout << "<hr>" << out2.str();
       }
-      std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << "candidates. ";
+      std::cout << "<hr>Testing a total of " << theHCandidatesRescaled.size << " candidates. ";
       for (int k=0; k<theHCandidatesRescaled.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
@@ -965,10 +963,12 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
 }
 
-bool CandidateSSSubalgebra::isGoodHnew(const Vector<Rational>& HneW, int indexHneW)const
+bool CandidateSSSubalgebra::IsGoodHnew(const Vector<Rational>& HneW, const List<int>& theRootInjections)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodHnew");
   //Check if input weight is maximally dominant:
+  std::cout << "<br>Checking whether " << HneW.ToString() << " is a good new vector. ";
   Rational theScalarProd;
+  int indexHneW=*theRootInjections.LastObject();
   for  (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
   { Vector<Rational>& currentPosRoot=this->GetAmbientWeyl().RootsOfBorel[i];
     bool canBeRaisingReflection=true;
@@ -986,7 +986,10 @@ bool CandidateSSSubalgebra::isGoodHnew(const Vector<Rational>& HneW, int indexHn
     }
     if (canBeRaisingReflection)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HneW)<0)
+      { std::cout << "<br>" << HneW.ToString() << " is not a good vector because it has negative scalar product with "
+        << currentPosRoot.ToString() << ". ";
         return false;
+      }
   }
   int counter=-1;
   for (int k=0; k<this->CartanSAsByComponent.size; k++)

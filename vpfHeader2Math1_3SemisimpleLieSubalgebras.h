@@ -83,7 +83,7 @@ public:
   List<Vectors<Rational> > CartanSAsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
-  Vectors<Rational> theHsInOrderOfCreation;
+  Vectors<Rational> theHsScaledToActByTwoInOrderOfCreation;
   Matrix<Rational> BilinearFormSimplePrimal;
   Matrix<Rational> BilinearFormFundPrimal;
   Matrix<Rational> InducedEmbeddingPrimalFundCoordsIntoSimpleAmbientCoords;
@@ -192,9 +192,10 @@ public:
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
   bool CreateAndAddByExtendingBaseSubalgebra
-  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, const DynkinType& theNewType, const List<int>& theRootInjection);
+  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)
+  ;
   void SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newH=0);
+  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newHScaledToActByTwo=0);
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);
@@ -236,8 +237,7 @@ public:
   bool ComputeSystemPart2(bool AttemptToChooseCentalizer, bool allowNonPolynomialSystemFailure);
   bool ComputeChar(bool allowBadCharacter);
   bool AttemptToSolveSystem();
-  bool isGoodForTheTop(const Vector<Rational>& HneW)const;
-  bool IsGoodHnew(const Vector<Rational>& HneW, const List<int>& theRootInjections)const;
+  bool IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const;
   Rational GetScalarSA(const Vector<Rational>& primalWeightLeft, const Vector<Rational>& primalWeightRight)const;
   std::string ToStringTypeAndHs(FormatExpressions* theFormat=0)const;
   std::string ToStringGenerators(FormatExpressions* theFormat=0)const;

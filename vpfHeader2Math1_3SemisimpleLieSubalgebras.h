@@ -192,9 +192,9 @@ public:
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
   void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
   bool CreateAndAddByExtendingBaseSubalgebra
-  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType, const List<int>& theRootInjection);
+  (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, const DynkinType& theNewType, const List<int>& theRootInjection);
   void SetUpInjectionHs
-  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newH=0, int newHorbitIndex=-1);
+  (const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newH=0);
   void EnumerateAllNilradicals(GlobalVariables* theGlobalVariables);
   std::string ToStringNilradicalSelection(const List<int>& theSelection);
   void EnumerateNilradicalsRecursively(List<int>& theSelection, GlobalVariables* theGlobalVariables, std::stringstream* logStream=0);

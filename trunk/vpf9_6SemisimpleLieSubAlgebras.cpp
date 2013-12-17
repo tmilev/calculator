@@ -716,7 +716,6 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       if (baseRank!=0)
       { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
         theHCandidatesScaledToActByTwo.ReservE(currentOrbit.size);
-        std::cout << "The rescaling factor is " << (theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType)/2).ToString();
         for (int k=0; k<currentOrbit.size; k++)
         { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], theRootInjections[i]))
           { if (theGlobalVariables!=0)
@@ -748,7 +747,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         theReport2.Report(out2.str());
         std::cout << "<hr>" << out2.str();
       }
-      std::cout << "<hr>Testing a total of " << theHCandidatesScaledToActByTwo.size << " candidates. ";
+      std::cout << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
       for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
@@ -978,7 +977,8 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
 bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodHnew");
   //Check if input weight is maximally dominant:
-  std::cout << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector. ";
+  std::cout << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
+  << " already created vectors to be respected... ";
   Rational theScalarProd;
   int indexHneW=*theRootInjections.LastObject();
   for  (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
@@ -998,7 +998,7 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
     }
     if (canBeRaisingReflection)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HNewActingByTwo)<0)
-      { std::cout << "<br>" << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
+      { std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
         << currentPosRoot.ToString() << ". ";
         return false;
       }
@@ -1008,13 +1008,14 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
       theScalarProd= this->GetAmbientWeyl().RootScalarCartanRoot(HNewActingByTwo, this->theHsScaledToActByTwo[i]);
     else
       theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(HNewActingByTwo, HNewActingByTwo);
-    if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i))
+    if (theScalarProd!=this->theWeylNonEmbeddeD.CoCartanSymmetric(indexHneW, i))
     { std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
       << (i==indexHneW ? HNewActingByTwo.ToString() : this->theHsScaledToActByTwo[i].ToString()) << " instead of the desired "
-      << this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString();
+      << this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString() << ". <br>";
       return false;
     }
   }
+  std::cout << " YES, it is.";
   return true;
 }
 

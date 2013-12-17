@@ -518,8 +518,7 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
 }
 
 void CandidateSSSubalgebra::SetUpInjectionHs
-(const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection,
- Vector<Rational>* newH, int newHorbitIndex)
+(const CandidateSSSubalgebra& baseSubalgebra, const DynkinType& theNewType, const List<int>& theRootInjection, Vector<Rational>* newH)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::SetUpInjectionHs");
   this->reset(baseSubalgebra.owner);
   this->theWeylNonEmbeddeD.MakeFromDynkinType(theNewType);
@@ -534,11 +533,11 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   int newIndexInNewComponent=0;
   if (newComponent.theRank==1)
   { this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
-    this->CartanSAsByComponent.LastObject()->SetSize(0);
+    this->CartanSAsByComponent.LastObject()->SetSize(1);
     if (newH!=0)
-    { this->CartanSAsByComponent.LastObject()->SetSize(1);
       (*this->CartanSAsByComponent.LastObject())[0]=*newH;
-    }
+    else
+      (*this->CartanSAsByComponent.LastObject())[0].SetSize(0);
   } else
   { Vectors<Rational>& oldComponentHs=*baseSubalgebra.CartanSAsByComponent.LastObject();
     Vectors<Rational>& currentHs=*this->CartanSAsByComponent.LastObject();
@@ -552,12 +551,13 @@ void CandidateSSSubalgebra::SetUpInjectionHs
     else
       currentHs[newIndexInNewComponent].SetSize(0);
   }
+  this->theHs.AssignListList(this->CartanSAsByComponent);
 }
 
 bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
-(const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, int newHorbitIndex, const DynkinType& theNewType, const List<int>& theRootInjection)
+(const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newH, const DynkinType& theNewType, const List<int>& theRootInjection)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra");
-  this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newH, newHorbitIndex);
+  this->SetUpInjectionHs(baseSubalgebra, theNewType, theRootInjection, &newH);
   this->owner->RegisterPossibleCandidate(*this);
   if (!baseSubalgebra.theWeylNonEmbeddeD.theDynkinType.IsEqualToZero() && baseSubalgebra.indexInOwner==-1)
     crash << "This is a programming error: attempting to induce a subalgebra from a non-registered base subalgebra. " << crash;
@@ -721,7 +721,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         }
       } else
       { Hrescaled=this->theSl2s[j].theH.GetCartanPart();
-        Hrescaled*=theSmallType.GetDefaultRootLengthSquared(indexNewRooT);
+        Hrescaled*=theSmallType.GetDefaultRootLengthSquared(0);
         Hrescaled/=2;
         theHCandidatesRescaled.AddOnTop(Hrescaled);
         if (theGlobalVariables!=0)
@@ -745,13 +745,13 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
           theReport2.Report(out2.str());
           //std::cout << "<br>" << out2.str();
         }
-        if(newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], j, theLargerTypes[i], theRootInjections[i]))
+        if (newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesRescaled[k], theLargerTypes[i], theRootInjections[i]))
         { if (theGlobalVariables!=0)
           { std::stringstream reportStream;
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesRescaled.size << "). ";
-            //std::cout << reportStream.str();
+            std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
@@ -978,7 +978,7 @@ bool CandidateSSSubalgebra::IsGoodHnew(const Vector<Rational>& HneW, const List<
         canBeRaisingReflection=false;
       if (theScalarProd<0)
         crash << "This is a programming error. While trying to realize type " << this->theWeylNonEmbeddeD.theDynkinType.ToString()
-        <<  ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
+        << ", the candidate h elements of the semisimple subalgebra are supposed to be maximally dominant, "
         << "however the scalar product of the positive root " << currentPosRoot.ToString() << " with the subalgebra root "
         << this->theHsInOrderOfCreation[l].ToString() << " is negative, while the very same positive root has had zero scalar products with all "
         << " preceding roots. Hnew equals: " << HneW.ToString() << " Here are all preceding roots: "
@@ -991,17 +991,18 @@ bool CandidateSSSubalgebra::IsGoodHnew(const Vector<Rational>& HneW, const List<
         return false;
       }
   }
-  int counter=-1;
-  for (int k=0; k<this->CartanSAsByComponent.size; k++)
-    for (int l=0; l<this->CartanSAsByComponent[k].size; l++)
-    { counter++;
-      if (counter!=indexHneW)
-        theScalarProd= this->GetAmbientWeyl().RootScalarCartanRoot(HneW, this->CartanSAsByComponent[k][l]);
-      else
-        theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(HneW, HneW);
-      if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, counter))
-        return false;
+  for (int i=0; i<this->theHs.size; i++)
+  { if (i!=indexHneW)
+      theScalarProd= this->GetAmbientWeyl().RootScalarCartanRoot(HneW, this->theHs[i]);
+    else
+      theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(HneW, HneW);
+    if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i))
+    { std::cout << HneW.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
+      << (i==indexHneW ? HneW.ToString() : this->theHs[i].ToString()) << " instead of the desired "
+      << this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString();
+      return false;
     }
+  }
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
     if (this->CartanSAsByComponent[i].Contains(HneW))
       crash << "This is a programming error: I am told that " << HneW.ToString() << " is an OK weight to extend the weight subsystem, "
@@ -1014,8 +1015,6 @@ bool CandidateSSSubalgebra::IsGoodHnew(const Vector<Rational>& HneW, const List<
   //  crash << crash;
   return true;
 }
-
-
 
 bool CandidateSSSubalgebra::isGoodForTheTop(const Vector<Rational>& HneW)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodForTheTop");
@@ -1187,6 +1186,8 @@ bool CandidateSSSubalgebra::ComputeSystemPart2(bool AttemptToChooseCentalizer, b
     if (!tempB || rankCentralizer<0 || rankCentralizer>this->GetAmbientWeyl().GetDim())
     { if (allowNonPolynomialSystemFailure)
         return false;
+      if (!tempB)
+        crash << "Error: rankCentralizer is not a small integer. ";
       crash << "This is a programming error: rankCentralizer not computed, or not computed correctly, when it should be. "
       << " Currently rankCentalizer is supposed to be " << rankCentralizer << ". Here is a detailed printout of the candidate subalgebra. "
       << this->ToString() << crash;
@@ -4383,7 +4384,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
       << centralizerType.ToString();
       theReport1.Report(reportStream.str());
     }
-  //    std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
+      std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
@@ -4391,7 +4392,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
         << centralizerType.ToString() << crash;
   }
-  //  std::cout << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
+    std::cout << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size);
   if (this->indexMaxSSContainer!=-1 && this->flagCentralizerIsWellChosen)
     for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)

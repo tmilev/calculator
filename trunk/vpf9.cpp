@@ -4165,17 +4165,21 @@ Rational DynkinType::GetSizeWeylGroupByFormula()const
 }
 
 Rational DynkinSimpleType::GetLongRootLengthSquared()const
+{ return this->GetDefaultLongRootLengthSquared()/this->CartanSymmetricInverseScale;
+}
+
+Rational DynkinSimpleType::GetDefaultLongRootLengthSquared()const
 { switch (this->theLetter)
   { case 'A':
     case 'B':
     case 'D':
     case 'E':
     case 'F':
-      return 2/this->CartanSymmetricInverseScale;
+      return 2;
     case 'G':
-      return 6/this->CartanSymmetricInverseScale;
+      return 6;
     case 'C':
-      return 4/this->CartanSymmetricInverseScale;
+      return 4;
     default:
       break;
   }
@@ -4205,7 +4209,9 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     { DynkinSimpleType ambientType;
       ambientType.theLetter=theFormat->AmbientWeylLetter;
       ambientType.CartanSymmetricInverseScale=theFormat->AmbientCartanSymmetricInverseScale;
-      Rational theDynkinIndex=this->CartanSymmetricInverseScale/this->GetRatioLongRootToFirst()/ambientType.CartanSymmetricInverseScale*ambientType.GetRatioLongRootToFirst();
+      Rational theDynkinIndex= ambientType.GetLongRootLengthSquared()/this->GetLongRootLengthSquared();
+//      (this->CartanSymmetricInverseScale/this->GetDefaultLongRootLengthSquared())/
+//      (ambientType.CartanSymmetricInverseScale/ambientType.GetDefaultLongRootLengthSquared());
       out << theLetter;
       if (usePlusesAndExponents)
         out << "^{" ;
@@ -4223,7 +4229,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     }
     else
       out << "_" << this->theRank;
-//    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
+    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
   if (includeNonTechnicalNames)
     if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')

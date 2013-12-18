@@ -236,8 +236,8 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
     theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
   }
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoMainFile << outSltwoPath.str() << "sl2s_new.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s_new.html";
+  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
+  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
   outRootHtmlFileName << outMainPatH << "rootSubalgebras.html";
   outRootHtmlDisplayName << outMainDisplayPatH << "rootSubalgebras.html";
   bool mustRecompute=false;

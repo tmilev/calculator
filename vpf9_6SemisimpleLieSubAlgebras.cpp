@@ -1375,9 +1375,9 @@ void CandidateSSSubalgebra::ComputeRatioKillingsByComponent()
       result+=theLinearCombi[k];
     }
     this->GetAmbientSS().GetAd(theAdMat, currentElt);
+    theAdMat*=theAdMat;
     this->RatioKillingsByComponent[i]=theAdMat.GetTrace();
-    this->RatioKillingsByComponent[i]=result;
-    //this->RatioKillingsByComponent[i]/=result;
+    this->RatioKillingsByComponent[i]/=result;
   }
 }
 
@@ -1463,7 +1463,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
     this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
   this->ComputeCharsPrimalModules();
-  this->ComputeRatioKillingsByComponent();
+ // this->ComputeRatioKillingsByComponent();
 }
 
 void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
@@ -4259,10 +4259,6 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
         out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
     } else
       out << theSimpleTypes[i].ToString(&tempFormat) << ":";
-    if (i<this->RatioKillingsByComponent.size)
-      out << ", ratio: " << this->RatioKillingsByComponent[i].ToString();
-    else
-      out << "(ratio unknown)";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString() << ": "
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);

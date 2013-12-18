@@ -563,6 +563,17 @@ public:
   void AddMonomial(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
   { this->CleanupMonIndex(this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
   }
+  void GetMinMonomial(TemplateMonomial& outputMon, coefficient& outputCF)const
+  { if (this->IsEqualToZero())
+      crash << "This is a programming error: calling GetMinMon on a zero monomial collection is forbidden. " << crash;
+    outputMon=(*this)[0];
+    outputCF=this->theCoeffs[0];
+    for (int i=1; i<this->size(); i++)
+      if (outputMon>(*this)[i])
+      { outputMon=(*this)[i];
+        outputCF=this->theCoeffs[i];
+      }
+  }
   inline bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
       if (this->theCoeffs[theIndex]==0)
@@ -604,6 +615,10 @@ public:
     MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(listCopy, 0, seedMonomials);
     return listCopy.size==startSpanSize;
   }
+  template <class MonomialCollectionTemplate>
+  static bool LinSpanContainsGetFirstLinearCombination
+  (const List<MonomialCollectionTemplate>& theList, const MonomialCollectionTemplate& input, Vector<coefficient>& outputFirstLinearCombination,
+   HashedList<TemplateMonomial>* seedMonomials=0);
   bool HasRationalCoeffs(MonomialCollection<TemplateMonomial, Rational>* outputConversionToRationals=0)
   { Rational tempRat;
     Rational* theCF=0;
@@ -2076,6 +2091,34 @@ bool MonomialCollection<TemplateMonomial, coefficient>::HasGEQMonomial(TemplateM
     }
   WhichIndex=-1;
   return false;
+}
+
+template <class TemplateMonomial, class coefficient>
+template <class MonomialCollectionTemplate>
+bool MonomialCollection<TemplateMonomial, coefficient>::LinSpanContainsGetFirstLinearCombination
+(const List<MonomialCollectionTemplate>& theList, const MonomialCollectionTemplate& input, Vector<coefficient>& outputFirstLinearCombination,
+ HashedList<TemplateMonomial>* seedMonomials)
+{ List<MonomialCollectionTemplate> listCopy=theList;
+  Matrix<coefficient> theRowOperations;
+  theRowOperations.MakeIdMatrix(theList.size);
+  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows(listCopy, 0, seedMonomials, &theRowOperations);
+  MonomialCollectionTemplate remainderFromInput=input;
+  TemplateMonomial currentMon;
+  coefficient CFminMon, CFinRemainder;
+  outputFirstLinearCombination.MakeZero(listCopy.size);
+  for (int i=0; i<listCopy.size; i++)
+  { if (listCopy[i].IsEqualToZero())
+      break;
+    listCopy[i].GetMinMonomial(currentMon, CFminMon);
+    CFinRemainder=remainderFromInput.GetMonomialCoefficient(currentMon);
+    outputFirstLinearCombination[i]=CFinRemainder;
+    outputFirstLinearCombination[i]/=CFminMon;
+    remainderFromInput-=listCopy[i]*outputFirstLinearCombination[i];
+  }
+  if (!remainderFromInput.IsEqualToZero())
+    return false;
+  theRowOperations.ActMultiplyVectorRowOnTheRight(outputFirstLinearCombination);
+  return true;
 }
 
 template <class TemplateMonomial, class coefficient>

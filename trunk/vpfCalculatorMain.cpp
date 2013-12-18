@@ -117,6 +117,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
+//  civilizedInput="printSemisimpleSubalgebrasRecompute a_2";
 //  civilizedInput="printSemisimpleSubalgebras A^10_1";
   //civilizedInput="printSemisimpleSubalgebrasNoCentralizers d_5";
   //civilizedInput="f:=e^{-2x};d/dx (f);";

@@ -1354,6 +1354,33 @@ bool CandidateSSSubalgebra::CheckModuleDimensions()const
   return true;
 }
 
+void CandidateSSSubalgebra::ComputeRatioKillingsByComponent()
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeRatioKillingsByComponent");
+  ElementSemisimpleLieAlgebra<AlgebraicNumber> currentElt, adActionElt, adadActionElt;
+  Vector<AlgebraicNumber> theLinearCombi;
+  this->RatioKillingsByComponent.SetSize(this->CartanSAsByComponent.size);
+  Matrix<AlgebraicNumber> theAdMat;
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+  { currentElt.MakeHgenerator(this->CartanSAsByComponent[i][0], this->GetAmbientSS());
+    AlgebraicNumber result=0;
+    for (int k=0; k<this->theBasis.size; k++)
+    { this->GetAmbientSS().LieBracket(currentElt, this->theBasis[k], adActionElt);
+      this->GetAmbientSS().LieBracket(currentElt, adActionElt, adadActionElt);
+
+      bool tempB=currentElt.LinSpanContainsGetFirstLinearCombination(this->theBasis, adadActionElt, theLinearCombi);
+      std::cout << "<hr>" << this->theBasis.ToString() << " contains in linspan " << adadActionElt.ToString() << " as linear combi "
+      << theLinearCombi.ToString();
+      if (!tempB)
+        crash << "Programming error: Candidate subalgebra not closed under Lie bracket. " << crash;
+      result+=theLinearCombi[k];
+    }
+    this->GetAmbientSS().GetAd(theAdMat, currentElt);
+    this->RatioKillingsByComponent[i]=theAdMat.GetTrace();
+    this->RatioKillingsByComponent[i]=result;
+    //this->RatioKillingsByComponent[i]/=result;
+  }
+}
+
 void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputePrimalModuleDecomposition");
   for (int i=0; i<this->Modules.size; i++)
@@ -1436,6 +1463,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecomposition(GlobalVariables* th
   for (int i=0; i<this->theCentralizerSubDiagram.SimpleComponentTypes.size; i++)
     this->theCentralizerType+=this->theCentralizerSubDiagram.SimpleComponentTypes[i];
   this->ComputeCharsPrimalModules();
+  this->ComputeRatioKillingsByComponent();
 }
 
 void CandidateSSSubalgebra::reset(SemisimpleSubalgebras* inputOwner)
@@ -4231,6 +4259,10 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
         out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
     } else
       out << theSimpleTypes[i].ToString(&tempFormat) << ":";
+    if (i<this->RatioKillingsByComponent.size)
+      out << ", ratio: " << this->RatioKillingsByComponent[i].ToString();
+    else
+      out << "(ratio unknown)";
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
     { out << this->CartanSAsByComponent[i][j].ToString() << ": "
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->CartanSAsByComponent[i][j],this->CartanSAsByComponent[i][j]);

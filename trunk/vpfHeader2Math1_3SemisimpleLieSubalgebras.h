@@ -81,6 +81,7 @@ public:
   DynkinType theCentralizerType;
 
   List<Vectors<Rational> > CartanSAsByComponent;
+  List<AlgebraicNumber> RatioKillingsByComponent;
   Vectors<Rational> theHsScaledToActByTwo;
   Vectors<Rational> theHs;
   Vectors<Rational> theHsScaledToActByTwoInOrderOfCreation;
@@ -190,6 +191,7 @@ public:
   void GetGenericLinearCombinationInvolvedPosGens(int theIndex, ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& output);
   void ComputeCentralizerIsWellChosen();
   void AdjustCentralizerAndRecompute(bool allowNonPolynomialSystemFailure);
+  void ComputeRatioKillingsByComponent();
   void AddToSystem(const ElementSemisimpleLieAlgebra<Polynomial<AlgebraicNumber> >& elementThatMustVanish);
   bool CreateAndAddByExtendingBaseSubalgebra
   (const CandidateSSSubalgebra& baseSubalgebra, Vector<Rational>& newHrescaledToActByTwo, const DynkinType& theNewType, const List<int>& theRootInjection)

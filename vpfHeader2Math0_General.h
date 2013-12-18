@@ -4725,10 +4725,11 @@ class DynkinSimpleType
   void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex)const;
   Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
+  Rational GetDefaultLongRootLengthSquared()const;
   Rational GetLongRootLengthSquared()const;
-
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
+
   bool CanBeExtendedParabolicallyTo(const DynkinSimpleType& otherType)const;
   bool HasEasySubalgebras()const;
   Rational GetRatioLongRootToFirst()const

@@ -494,10 +494,11 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
     return result;
   }
   Vector<Rational> newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords;
-  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.MakeFromDynkinType(input);
-  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeRho(true);
+  WeylGroup& theWeyl=theSSSubalgebraToBeModified.theWeylNonEmbeddeD;
+  theWeyl.MakeFromDynkinType(input);
+  theWeyl.ComputeRho(true);
   int newIndex=*imagesOldSimpleRootsAndNewRoot.LastObject();
-  int newRank=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.GetDim();
+  int newRank=theWeyl.GetDim();
   newSimpleRoot.MakeEi(newRank, newIndex);
   Vectors<Rational> simpleBasisOld;
   simpleBasisOld.SetSize(newRank-1);
@@ -506,14 +507,17 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
     << "The type is " << input.ToString() << ". " << crash;
   for (int i=0; i<newRank-1; i++)
     simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
-  if (input.ToString()=="A^{1}_2")
+  if (input.ToString()=="G^{3/2}_2")
     std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
-  theSSSubalgebraToBeModified.theWeylNonEmbeddeD.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
+  theWeyl.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
+  if (input.ToString()=="G^{3/2}_2")
+    std::cout << "<br>highest weight in component of : " << newSimpleRoot.ToString() << ": " << highestRootInSimpleRootModuleSimpleCoords.ToString();
   result.SetSize(newRank-1);
+  if (input.ToString()=="G^{3/2}_2")
+    std::cout << "<br>Symmetric cartan is: " << theWeyl.CartanSymmetric.ToString();
   for (int i=0; i<simpleBasisOld.size; i++)
-    result[i]=theSSSubalgebraToBeModified.theWeylNonEmbeddeD.RootScalarCartanRoot
-    (highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i])*2/
-    theSSSubalgebraToBeModified.theWeylNonEmbeddeD.RootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
+    result[i]=theWeyl.RootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i])*2/
+    theWeyl.RootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);
   return result;
 }
 
@@ -534,7 +538,6 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   int newIndexInNewComponent=0;
   if (!newComponent.IsEqualToZero())
     newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
-
   Vector<Rational> NewH;
   if (newHScaledToActByTwo!=0)
   { NewH= *newHScaledToActByTwo;
@@ -568,7 +571,6 @@ void CandidateSSSubalgebra::SetUpInjectionHs
     { counter++;
       this->theHsScaledToActByTwo[counter]=(this->theHs[counter]/theTypes[i].GetDefaultRootLengthSquared(j))*2;
     }
-
   this->theHs.AssignListList(this->CartanSAsByComponent);
 }
 
@@ -671,9 +673,8 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     }
     if (baseRank!=0)
     { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(theLargerTypes[i], theRootInjections[i], newCandidate);
-      //std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-      //<< " base candidate is: " << baseCandidate.ToString();
-
+      std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+      << " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
       indicesModulesNewComponentExtensionMod.SetSize(0);
       for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
         if (baseCandidate.HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
@@ -682,7 +683,8 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       { if (theGlobalVariables!=0)
         { std::stringstream reportStream;
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
-          << " cannot be realized: no appropriate module.";
+          << " cannot be realized: no appropriate module: desired weight of h element is: " << weightHElementWeAreLookingFor.ToString()
+          << " but the highest weights of the base candidate are: " << baseCandidate.HighestWeightsNONPrimal.ToString();
           std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
@@ -698,15 +700,15 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     for (int j=0; j<this->theSl2s.size; j++)
     { if (theGlobalVariables!=0)
       { std::stringstream reportStreamX;
-        reportStreamX << "Trying to realize via orbit number " << j+1 << " the latest root (index "
-        << indexNewRootInSmallType << ") of the candidate simple component  " << theSmallType.ToString();
+        reportStreamX << "Trying to realize via orbit number " << j+1 << " the latest root (index " << indexNewRootInSmallType
+        << ") of the candidate simple component  " << theSmallType.ToString();
         if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-          reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString()
-          << " of length " << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
+          reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
+          << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
           << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
         else
-          std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString()
-          << " generating orbit number " << j+1 << " out of " << this->theSl2s.size << " has the required length. ";
+          std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
+          << j+1 << " out of " << this->theSl2s.size << " has the required length. ";
         std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
@@ -751,8 +753,8 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
       for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
-          out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
-          << theLargerTypes[i].ToString() << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ".";
+          out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString()
+          << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ".";
           theReport2.Report(out2.str());
           //std::cout << "<br>" << out2.str();
         }
@@ -4236,6 +4238,22 @@ std::string CandidateSSSubalgebra::ToStringCartanSA(FormatExpressions* theFormat
         out << ", ";
     }
   }
+  out << "<br>Elements Cartan subalgebra scaled to act by 2: ";
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+  { if (useLaTeX && useHtml)
+    { if (useMouseHover)
+        out << CGI::GetMathMouseHover(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+      else
+        out << CGI::GetMathSpanPure(theSimpleTypes[i].ToString(&tempFormat), 1000) << ": ";
+    } else
+      out << theSimpleTypes[i].ToString(&tempFormat) << ":";
+    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+    { Vector<Rational> rescaledH=this->CartanSAsByComponent[i][j]*2/theSimpleTypes[i].GetDefaultRootLengthSquared(j);
+      out << rescaledH.ToString() << ": " << this->GetAmbientWeyl().RootScalarCartanRoot(rescaledH,rescaledH).ToString();
+      if (j!=this->CartanSAsByComponent[i].size-1 || i!=this->CartanSAsByComponent.size-1)
+        out << ", ";
+    }
+  }
   return out.str();
 }
 
@@ -4515,13 +4533,10 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     << "\"> Detailed information on isotypical nilradicals. </a><hr>";
   }
   out << this->ToStringGenerators(theFormat);
-  out << "<br>Scalar products basis of Cartan subalgebra (Cartan symmetric co-matrix): ";
   FormatExpressions tempFormat;
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=false;
-  FormatExpressions charFormatNonConst;
-  if (!this->charFormaT.IsZeroPointer())
-    charFormatNonConst= this->charFormaT.GetElementConst();
+  out << "<br>Cartan symmetric matrix: ";
   if (useLaTeX && useHtml)
   { if (useMouseHover)
       out << CGI::GetMathMouseHover(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
@@ -4529,6 +4544,18 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
       out << CGI::GetMathSpanPure(this->theWeylNonEmbeddeD.CartanSymmetric.ToString(&tempFormat));
   } else
     out << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
+  out << "<br>Scalar products of elements of Cartan subalgebra scaled to act by 2 (Cartan symmetric co-matrix): ";
+  if (useLaTeX && useHtml)
+  { if (useMouseHover)
+      out << CGI::GetMathMouseHover(this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString(&tempFormat));
+    else
+      out << CGI::GetMathSpanPure(this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString(&tempFormat));
+  } else
+    out << this->theWeylNonEmbeddeD.CoCartanSymmetric.ToString(theFormat);
+
+  FormatExpressions charFormatNonConst;
+  if (!this->charFormaT.IsZeroPointer())
+    charFormatNonConst= this->charFormaT.GetElementConst();
   out << "<br>Decomposition of ambient Lie algebra: ";
   if (useLaTeX)
   { if (useMouseHover)

@@ -371,7 +371,7 @@ bool WeylGroup::GenerateOuterOrbit
 }
 
 template <class coefficient>
-void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup<WeylGroup>* raisingElt)const
+void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup<WeylGroup>* raisingElt)
 { if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -379,7 +379,7 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
   coefficient theScalarProd;
   int theDim=this->GetDim();
   if (raisingElt!=0)
-    raisingElt->generatorsLastAppliedFirst.SetSize(0);
+    raisingElt->MakeID(*this);
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<theDim; i++)
@@ -392,12 +392,16 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
         if (sign!=0)
           *sign*=-1;
         if (raisingElt!=0)
-          raisingElt->generatorsLastAppliedFirst.AddOnTop(i);
+          raisingElt->generatorsLastAppliedFirst.AddOnTop(i);//warning order of raising element is reversed, must reverse back
       }
       if (stabilizerFound!=0)
         if (theScalarProd.IsEqualToZero())
           *stabilizerFound=true;
     }
+  }
+  if (raisingElt!=0)
+  { raisingElt->generatorsLastAppliedFirst.ReverseOrderElements();
+    raisingElt->MakeCanonical();
   }
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }

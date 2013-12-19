@@ -5651,7 +5651,7 @@ Rational WeylGroup::GetLongestRootLengthSquared()
   return result;
 }
 
-bool WeylGroup::IsElementWeylGroup(const MatrixTensor<Rational>& input)const
+bool WeylGroup::IsElementWeylGroup(const MatrixTensor<Rational>& input)
 { MacroRegisterFunctionWithName("WeylGroup::IsElementWeylGroup");
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->rho, theRhoImage);

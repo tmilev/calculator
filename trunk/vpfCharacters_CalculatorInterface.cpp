@@ -6,6 +6,12 @@
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
+template<>
+typename List<ClassFunction<Rational> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<ClassFunction<Rational> >()
+{ return 0;
+}
+
 bool WeylGroup::CheckConsistency()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of WeylGroup. " << crash;
@@ -180,11 +186,11 @@ coefficient WeylGroupRepresentation<coefficient>::GetNumberOfComponents()
 }
 
 template <class coefficient>
-bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersion(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
+bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersion(WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersion");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
-  outputIrrepMults.MakeZero(this->ownerGroup->ConjugacyClassCount());
+  outputIrrepMults.MakeZero();
   return this->DecomposeTodorsVersionRecursive(outputIrrepMults, theGlobalVariables);
 }
 
@@ -251,8 +257,8 @@ void WeylGroupRepresentation<coefficient>::GetLargestDenominatorSimpleGens(Large
 }
 
 template <class coefficient>
-bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName(" WeylGroupRepresentation::DecomposeTodorsVersionRecursive");
+bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroupRepresentation::DecomposeTodorsVersionRecursive");
   this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   coefficient SumOfNumComponentsSquared=this->GetNumberOfComponents();
@@ -262,10 +268,10 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   if(SumOfNumComponentsSquared== 1)
   { int indexMe=this->ownerGroup->irreps.GetIndex(*this);
     if(indexMe== -1)
-    { this->ownerGroup->irreps.AddOnTop(*this);
+    { this->ownerGroup->AddIrreducibleRepresentation(*this);
       indexMe=this->ownerGroup->irreps.size-1;
     }
-    outputIrrepMults[indexMe]+=1;
+    outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[indexMe], 1);
     return true;
   }
   Matrix<coefficient> splittingOperatorMatrix;
@@ -284,27 +290,26 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
   }
   //chop off already known pieces:
   for(int i=0; i<this->ownerGroup->irreps.size; i++)
-  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(this->ownerGroup->irreps[i].theCharacteR);
+  { coefficient NumIrrepsOfType=this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i]);
     if(NumIrrepsOfType!=0)
     { this->ownerGroup->CheckInitializationFDrepComputation();
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "<hr>\ncontains irrep " << this->ownerGroup->irreps[i].theCharacteR.ToString()
-        << " with multiplicity " << NumIrrepsOfType << std::endl;
+        reportStream << "<hr>\ncontains irrep " << this->ownerGroup->irreps[i].theCharacteR.ToString() << " with multiplicity "
+        << NumIrrepsOfType << std::endl;
         reportStream << "<hr>\nGetting class f-n matrix from character: " << this->ownerGroup->irreps[i].theCharacteR;
         Report2.Report(reportStream.str());
       }
       this->GetClassFunctionMatrix(this->ownerGroup->irreps[i].theCharacteR, splittingOperatorMatrix);
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
-        reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n"
-        << " computing its zero eigenspace... ";
+        reportStream << "<br>class f-n matrix: " << splittingOperatorMatrix.ToString() << "\n <br>\n" << " computing its zero eigenspace... ";
         Report3.Report(reportStream.str());
       }
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
 
       remainingVectorSpace.IntersectTwoLinSpaces(splittingMatrixKernel, remainingVectorSpace, tempSpace);
-      outputIrrepMults[i]+=NumIrrepsOfType;
+      outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[i],NumIrrepsOfType);
       remainingCharacter-=this->ownerGroup->irreps[i].theCharacteR*NumIrrepsOfType;
       if (theGlobalVariables!=0)
       { std::stringstream reportStream;
@@ -320,9 +325,8 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(Vecto
       }
       if (remainingCharacter.IsEqualToZero())
         if (!remainingVectorSpace.size==0)
-        { std::cout << "This is a programming error: remaining char is zero but remaining space is "
-          << remainingVectorSpace.ToString() << ". Starting char: " << this->theCharacteR.ToString()
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        { std::cout << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
+          << ". Starting char: " << this->theCharacteR.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           //crash<<crash;
         }
     }
@@ -419,28 +423,27 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
   if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
   this->ComputeInitialIrreps();
-  WeylGroupRepresentation<Rational> theStandardRep, newRep;
+  WeylGroupRepresentation<Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
-  Vector<Rational> decompositionNewRep;
+  WeylGroupVirtualRepresentation<Rational> decompositionNewRep;
   ProgressReport theReport1(theGlobalVariables);
-  this->GetStandardRepresentation(theStandardRep);
+  int indexFirstPredefinedRep=1; //<-this should be the index of the sign rep.
+  int indexLastPredefinedrep=2; //<-this should be the index of the standard rep.
   for (int i=0; i<this->irreps.size && this->irreps.size!=NumClasses; i++)
-  { if (theGlobalVariables!=0)
-    { std::stringstream reportStream;
-      reportStream << "Irreducible representations found so far: ";
-      for (int j=0; j<this->irreps.size; j++)
-        reportStream << "\n<br>\n" << this->irreps[j].theCharacteR.ToString();
-      reportStream << "<hr>\nDecomposing\n <br>\n" << theStandardRep.theCharacteR.ToString()
-      << " * <br>" << this->irreps[i].theCharacteR.ToString() << std::endl;
-      theReport1.Report(reportStream.str());
+    for (int j=indexFirstPredefinedRep; j<=indexLastPredefinedrep; j++)
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << this->irreps.size << " irreducible representations found so far. ";
+        reportStream << "<br>Decomposing " << this->irreps[j].theCharacteR.ToString() << " * " << this->irreps[i].theCharacteR.ToString() << std::endl;
+        theReport1.Report(reportStream.str());
+      }
+      newRep= this->irreps[j];//we are initializing by the sign or natural rep.
+      newRep*= this->irreps[i];
+      bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep, theGlobalVariables);
+      if (!tempB)
+        crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
     }
-    newRep= theStandardRep;
-    newRep*= this->irreps[i];
-    bool tempB=newRep.DecomposeTodorsVersion(decompositionNewRep, theGlobalVariables);
-    if (!tempB)
-      crash << "This is a mathematical error: failed to decompose " << newRep.theCharacteR.ToString() << ". " << crash;
-  }
-  this->irreps.QuickSortAscending();
+  this->irreps.QuickSortAscending(0, &this->characterTable);
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
     reportStream << "Irrep table:";
@@ -787,12 +790,12 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if (!leftE.IsOfType<WeylGroupVirtualRepresentation>())
+  if (!leftE.IsOfType<WeylGroupVirtualRepresentation<Rational> >())
     return false;
-  if (!rightE.IsOfType<WeylGroupVirtualRepresentation>())
+  if (!rightE.IsOfType<WeylGroupVirtualRepresentation<Rational> >())
     return false;
-  WeylGroupVirtualRepresentation outputRep=leftE.GetValue<WeylGroupVirtualRepresentation>();
-  outputRep*=rightE.GetValue<WeylGroupVirtualRepresentation>();
+  WeylGroupVirtualRepresentation<Rational> outputRep=leftE.GetValue<WeylGroupVirtualRepresentation<Rational> >();
+  outputRep*=rightE.GetValue<WeylGroupVirtualRepresentation<Rational> >();
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -818,9 +821,8 @@ bool CalculatorFunctionsWeylGroup::innerDecomposeWeylRep(Calculator& theCommands
     return false;
 //  theRep.Decomposition(theCFs, outputReps);
   WeylGroupRepresentation<Rational>& inputRep =input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
-  WeylGroupVirtualRepresentation outputRep;
-  outputRep.ownerGroup=inputRep.ownerGroup;
-  inputRep.DecomposeTodorsVersion(outputRep.coefficientsIrreps, theCommands.theGlobalVariableS);
+  WeylGroupVirtualRepresentation<Rational> outputRep;
+  inputRep.DecomposeTodorsVersion(outputRep, theCommands.theGlobalVariableS);
   return output.AssignValue(outputRep, theCommands);
 }
 
@@ -1103,21 +1105,14 @@ bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands,
   return true;
 }
 
-void WeylGroupVirtualRepresentation::operator+=(const WeylGroupVirtualRepresentation& other)
-{ if (this->ownerGroup!=other.ownerGroup)
-    crash << "This is a programming error: adding virtual representations of different groups. " << crash;
-  this->coefficientsIrreps+=other.coefficientsIrreps;
-}
-
-void WeylGroupVirtualRepresentation::operator*=(const WeylGroupVirtualRepresentation& other)
+template <class coefficient>
+void WeylGroupVirtualRepresentation<coefficient>::operator*=(const WeylGroupVirtualRepresentation<coefficient>& other)
 { MacroRegisterFunctionWithName("WeylGroupVirtualRepresentation::operator*=");
-  if (this->ownerGroup!=other.ownerGroup)
-    crash << "This is a programming error: adding virtual representations of different groups. " << crash;
-  WeylGroupVirtualRepresentation output;
+  crash << "not implemented yet" << crash;
+/*  WeylGroupVirtualRepresentation<coefficient> output, currentContribution;
   output.ownerGroup=this->ownerGroup;
   output.coefficientsIrreps.MakeZero(this->coefficientsIrreps.size);
   WeylGroupRepresentation<Rational> tempRep;
-  Vector<Rational> currentContribution;
   for (int i=0; i<this->coefficientsIrreps.size; i++)
     for (int j=0; j<other.coefficientsIrreps.size; j++)
     { Rational theCoeff= this->coefficientsIrreps[i]*other.coefficientsIrreps[j];
@@ -1128,41 +1123,20 @@ void WeylGroupVirtualRepresentation::operator*=(const WeylGroupVirtualRepresenta
       tempRep.DecomposeTodorsVersion(currentContribution, 0);
       output.coefficientsIrreps+=currentContribution*theCoeff;
     }
-  *this=output;
+  *this=output;*/
 }
 
-std::string WeylGroupVirtualRepresentation::ToString(FormatExpressions* theFormat)const
-{ if (this->ownerGroup==0)
-    return "(not initialized)";
-  std::stringstream out;
-  bool found=false;
-  std::string tempS;
-  for (int i=0; i<this->coefficientsIrreps.size; i++)
-    if (this->coefficientsIrreps[i]!=0)
-    { if (found)
-        if (this->coefficientsIrreps[i]>0)
-          out << "+";
-      found=true;
-      tempS=this->coefficientsIrreps[i].ToString();
-      if(tempS=="-1")
-        tempS="-";
-      if (tempS=="1")
-        tempS="";
-      out << tempS << "V_{" << this->ownerGroup->irreps[i].GetCharacter().ToString() << "}";
-    }
-  return out.str();
-}
-
-void WeylGroupVirtualRepresentation::AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables)
-{ WeylGroupRepresentation<Rational> otherCopy;
-  this->ownerGroup=other.ownerGroup;
+template <class coefficient>
+void WeylGroupVirtualRepresentation<coefficient>::AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables)
+{ crash << " not implemented " << crash;
+  WeylGroupRepresentation<Rational> otherCopy;
   otherCopy=other;
-  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, theGlobalVariables);
+//  otherCopy.DecomposeTodorsVersion(this->coefficientsIrreps, theGlobalVariables);
 }
 
 bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep");
-  if (input.IsOfType<WeylGroupVirtualRepresentation>())
+  if (input.IsOfType<WeylGroupVirtualRepresentation<Rational> >())
   { output=input;
     return true;
   }
@@ -1171,7 +1145,7 @@ bool CalculatorFunctionsWeylGroup::innerMakeVirtualWeylRep(Calculator& theComman
   WeylGroupRepresentation<Rational>& inputRep=input.GetValueNonConst<WeylGroupRepresentation<Rational> >();
   if (inputRep.ownerGroup->irreps.size<inputRep.ownerGroup->ConjugacyClassCount())
     inputRep.ownerGroup->ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
-  WeylGroupVirtualRepresentation outputRep;
+  WeylGroupVirtualRepresentation<Rational> outputRep;
   outputRep.AssignWeylGroupRep(inputRep);
   return output.AssignValue(outputRep, theCommands);
 }

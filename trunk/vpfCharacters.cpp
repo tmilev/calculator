@@ -1121,6 +1121,8 @@ List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVari
           { ccBackMaps[i][j] = k;
             notFound=false;
           }
+      if (notFound)
+        crash << "Programming error: conjugacyclass not found. " << crash;
     }
     std::cout << "Conjugacy classes back maps: " << ccBackMaps[i] << std::endl;
   }

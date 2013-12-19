@@ -171,6 +171,9 @@ public:
 };
 
 template <class coefficient>
+class WeylGroupVirtualRepresentation;
+
+template <class coefficient>
 class WeylGroupRepresentation
 {
   private:
@@ -212,8 +215,12 @@ class WeylGroupRepresentation
   void Restrict
   (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
    GlobalVariables* theGlobalVariables=0);
-  bool DecomposeTodorsVersionRecursive(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
-  bool DecomposeTodorsVersion(Vector<Rational>& outputIrrepMults, GlobalVariables* theGlobalVariables=0);
+  bool DecomposeTodorsVersionRecursive
+  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  ;
+  bool DecomposeTodorsVersion
+  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  ;
   List<WeylGroupRepresentation<coefficient> > DecomposeThomasVersion();
 
   WeylGroupRepresentation<coefficient> Reduced() const;
@@ -240,6 +247,20 @@ class WeylGroupRepresentation
   }
   bool operator>(const WeylGroupRepresentation<coefficient>& other)const;
   bool operator<(const WeylGroupRepresentation<coefficient>& other)const;
+};
+
+template <class coefficient>
+class WeylGroupVirtualRepresentation : public MonomialCollection<ClassFunction<coefficient>, Rational>
+{
+public:
+  void operator*=(const WeylGroupVirtualRepresentation<coefficient>& other);
+  void AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables=0);
+  inline static unsigned int HashFunction(const WeylGroupVirtualRepresentation<coefficient>& input)
+  { return input.HashFunction();
+  }
+  inline unsigned int HashFunction()const
+  { return this->::MonomialCollection<ClassFunction<coefficient>, Rational>::HashFunction();
+  }
 };
 
 class WeylGroup
@@ -579,31 +600,6 @@ public:
   int operator()(int i, int j) const;
   bool operator==(const WeylGroup& other)const;
   void operator+=(const WeylGroup& other);
-};
-
-class WeylGroupVirtualRepresentation
-{
-  public:
-  WeylGroup* ownerGroup;
-  Vector<Rational> coefficientsIrreps;
-  WeylGroupVirtualRepresentation():ownerGroup(0){}
-  std::string ToString(FormatExpressions* theFormat)const;
-  void AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& input, GlobalVariables* theGlobalVariables=0);
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  static unsigned int HashFunction(const WeylGroupVirtualRepresentation& input)
-  { unsigned int result=0;
-    if (input.ownerGroup!=0)
-      result+=input.ownerGroup->HashFunction();
-    result+=input.coefficientsIrreps.HashFunction();
-    return result;
-  }
-  void operator+=(const WeylGroupVirtualRepresentation& other);
-  void operator*=(const WeylGroupVirtualRepresentation& other);
-  bool operator==(const WeylGroupVirtualRepresentation& other)const
-  { return this->ownerGroup==other.ownerGroup &&this->coefficientsIrreps==other.coefficientsIrreps;
-  }
 };
 
 template <typename coefficient>

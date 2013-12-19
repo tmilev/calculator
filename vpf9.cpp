@@ -4229,7 +4229,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
     }
     else
       out << "_" << this->theRank;
-    out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
+    //out << "[" << this->theLetter << "^{" << this->CartanSymmetricInverseScale << "}_" << this->theRank << "]";
   }
   if (includeNonTechnicalNames)
     if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')

@@ -306,7 +306,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   }
   out << "<b>Please note that the code generating the tables is experimental. While the code performs a number of self-test routines, "
   << " it is possible that there still exist programming bugs. We will remove this message as soon as we are confident in the accuracy of all tables.  "
-  << " If you see any errors in the tables, we wĵould be very grateful if you email us with a simple explanation of the issue!</b><br>";
+  << " If you see any errors in the tables, we would be very grateful if you email us with a simple explanation of the issue!</b><br>";
   candidatesNotRealizedNotProvenImpossible=  this->theSubalgebraCandidates.size-candidatesRealized- candidatesProvenImpossible;
   if (!writingToHD)
   { out << candidatesRealized << " subalgebras realized.";
@@ -637,7 +637,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   List<DynkinType> theLargerTypes;
   List<List<int> > theRootInjections;
   this->GrowDynkinType(baseCandidate.theWeylNonEmbeddeD.theDynkinType, theLargerTypes, &theRootInjections);
-  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
+//  std::cout << "<hr>Candidate extensions: " << theLargerTypes.ToString();
   CandidateSSSubalgebra newCandidate;
   newCandidate.owner=this;
   Vector<Rational> weightHElementWeAreLookingFor;
@@ -668,13 +668,13 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
     { std::stringstream reportStream;
       reportStream << " Exploring extension " << i+1 << " out of " << theLargerTypes.size << ". We are trying to extend "
       << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString() << ". ";
-      std::cout << "<hr>" << reportStream.str();
+      //std::cout << "<hr>" << reportStream.str();
       theReport2.Report(reportStream.str());
     }
     if (baseRank!=0)
     { weightHElementWeAreLookingFor=this->GetHighestWeightFundNewComponentFromImagesOldSimpleRootsAndNewRoot(theLargerTypes[i], theRootInjections[i], newCandidate);
-      std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
-      << " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
+      //std::cout << "<hr>Weight h element we are looking for: " << weightHElementWeAreLookingFor.ToString()
+      //<< " base candidate type is: " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString();
       indicesModulesNewComponentExtensionMod.SetSize(0);
       for (int j=0; j<baseCandidate.HighestWeightsNONPrimal.size; j++)
         if (baseCandidate.HighestWeightsNONPrimal[j]==weightHElementWeAreLookingFor)
@@ -685,7 +685,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
           reportStream << " Extension " << i+1 << " out of " << theLargerTypes.size << ", type  " << theLargerTypes[i].ToString()
           << " cannot be realized: no appropriate module: desired weight of h element is: " << weightHElementWeAreLookingFor.ToString()
           << " but the highest weights of the base candidate are: " << baseCandidate.HighestWeightsNONPrimal.ToString();
-          std::cout << "<hr>" << reportStream.str();
+          //std::cout << "<hr>" << reportStream.str();
           theReport2.Report(reportStream.str());
         }
         continue;
@@ -706,10 +706,10 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
           reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
           << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
           << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
-        else
-          std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
-          << j+1 << " out of " << this->theSl2s.size << " has the required length. ";
-        std::cout << "<br>" << reportStreamX.str();
+        //else
+          //std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
+          //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
+        //std::cout << "<br>" << reportStreamX.str();
         theReport3.Report(reportStreamX.str());
       }
       if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
@@ -747,9 +747,9 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         out2 << "Sl(2) orbit " << j+1 << ": extension of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
         << " to " << theLargerTypes[i].ToString() << " not possible because there were no h candidates.";
         theReport2.Report(out2.str());
-        std::cout << "<hr>" << out2.str();
+        //std::cout << "<hr>" << out2.str();
       }
-      std::cout << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
+      //std::cout << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
       for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
       { if (theGlobalVariables!=0)
         { std::stringstream out2;
@@ -764,7 +764,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
             reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
             << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
             << ", h candidate " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << "). ";
-            std::cout << reportStream.str();
+            //std::cout << reportStream.str();
             theReport3.Report(reportStream.str());
           }
           this->ExtendCandidatesRecursive(newCandidate, targetType);
@@ -979,8 +979,8 @@ void CandidateSSSubalgebra::AddHincomplete(const Vector<Rational>& theH, const E
 bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewActingByTwo, const List<int>& theRootInjections)const
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::isGoodHnew");
   //Check if input weight is maximally dominant:
-  std::cout << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
-  << " already created vectors to be respected... ";
+//  std::cout << "<br>Checking whether " << HNewActingByTwo.ToString() << " is a good new vector... " << this->theHsScaledToActByTwoInOrderOfCreation.size
+//  << " already created vectors to be respected... ";
   Rational theScalarProd;
   int indexHneW=*theRootInjections.LastObject();
   for  (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
@@ -1000,8 +1000,8 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
     }
     if (canBeRaisingReflection)
       if (this->GetAmbientWeyl().RootScalarCartanRoot(currentPosRoot, HNewActingByTwo)<0)
-      { std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
-        << currentPosRoot.ToString() << ". ";
+      { //std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has negative scalar product with "
+        //<< currentPosRoot.ToString() << ". ";
         return false;
       }
   }
@@ -1011,13 +1011,13 @@ bool CandidateSSSubalgebra::IsGoodHnewActingByTwo(const Vector<Rational>& HNewAc
     else
       theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot(HNewActingByTwo, HNewActingByTwo);
     if (theScalarProd!=this->theWeylNonEmbeddeD.CoCartanSymmetric(indexHneW, i))
-    { std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
-      << (i==indexHneW ? HNewActingByTwo.ToString() : this->theHsScaledToActByTwo[i].ToString()) << " instead of the desired "
-      << this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString() << ". <br>";
+    { //std::cout << HNewActingByTwo.ToString() << " is not a good vector because it has scalar product " << theScalarProd.ToString() << " with "
+      //<< (i==indexHneW ? HNewActingByTwo.ToString() : this->theHsScaledToActByTwo[i].ToString()) << " instead of the desired "
+      //<< this->theWeylNonEmbeddeD.CartanSymmetric(indexHneW, i).ToString() << ". <br>";
       return false;
     }
   }
-  std::cout << " YES, it is.";
+//  std::cout << " YES, it is.";
   return true;
 }
 
@@ -4372,7 +4372,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
       << centralizerType.ToString();
       theReport1.Report(reportStream.str());
     }
-      std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
+    //std::cout << "<br>centralizerType: " << centralizerType.ToString() ;
     this->centralizerRank-=centralizerType.GetRootSystemSize();
     if (this->RootSystemCentralizerPrimalCoords.size>0)
       if (centralizerType!=this->theCentralizerType)
@@ -4380,7 +4380,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
         << this->theCentralizerType.ToString() << " but looking at subalgerba containing the current one I got centralizer type "
         << centralizerType.ToString() << crash;
   }
-    std::cout << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
+  //std::cout << "<br>centralizer rank: " << this->centralizerRank << ", cartan centralizer size: " << this->CartanOfCentralizer.size;
   this->flagCentralizerIsWellChosen=(this->centralizerRank==this->CartanOfCentralizer.size);
   if (this->indexMaxSSContainer!=-1 && this->flagCentralizerIsWellChosen)
     for (int i=0; i<this->owner->theSubalgebraCandidates.size; i++)

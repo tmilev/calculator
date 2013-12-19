@@ -959,7 +959,10 @@ public:
   //comparison function
   template <class otherType=Object>
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0, List<otherType>* carbonCopy=0)
-  { if (this->size==0)
+  { if (carbonCopy!=0)
+      if (carbonCopy->size!=this->size)
+        crash << "Programming error: requesting to quick with carbon copy, but the carbon copy has a different number of elements." << crash;
+    if (this->size==0)
       return;
     if (theOrder==0)
       this->QuickSortAscendingNoOrder(0, this->size-1, carbonCopy);

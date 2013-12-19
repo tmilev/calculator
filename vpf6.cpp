@@ -166,7 +166,7 @@ int Expression::GetTypeOperation<ElementWeylGroup<WeylGroup> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<WeylGroupVirtualRepresentation>()const
+int Expression::GetTypeOperation<WeylGroupVirtualRepresentation<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opWeylGroupVirtualRep();
 }
@@ -383,7 +383,7 @@ WeylGroupRepresentation<Rational>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-WeylGroupVirtualRepresentation
+WeylGroupVirtualRepresentation<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theWeylGroupVirtualReps
@@ -564,8 +564,8 @@ ElementWeylGroup<WeylGroup>& Expression::GetValueNonConst()const
 }
 
 template < >
-WeylGroupVirtualRepresentation& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<WeylGroupVirtualRepresentation>())
+WeylGroupVirtualRepresentation<Rational>& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<WeylGroupVirtualRepresentation<Rational> >())
     crash << "This is a programming error: expression not of required type WeylGroupVirtualRepresentation. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.theWeylGroupVirtualReps.GetElement(this->GetLastChild().theData);
 }
@@ -3642,8 +3642,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     contextFormat.GetElement().flagUseReflectionNotation=true;
     out << theElt.ToString(&contextFormat.GetElement());
     result=true;
-  } else if (this->IsOfType<WeylGroupVirtualRepresentation>())
-  { const WeylGroupVirtualRepresentation& theElt=this->GetValue<WeylGroupVirtualRepresentation>();
+  } else if (this->IsOfType<WeylGroupVirtualRepresentation<Rational> >())
+  { const WeylGroupVirtualRepresentation<Rational>& theElt=this->GetValue<WeylGroupVirtualRepresentation<Rational> >();
     contextFormat.GetElement().flagUseLatex=true;
     contextFormat.GetElement().flagUseHTML=false;
     contextFormat.GetElement().flagUseReflectionNotation=true;

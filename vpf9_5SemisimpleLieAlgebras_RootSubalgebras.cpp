@@ -2129,9 +2129,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     return;
   Selection selectionRootsWithZeroCharacteristic;
   Selection simpleRootsChar2;
-  Vectors<Rational> RootsWithCharacteristic2;
+  Vectors<Rational> rootsScalarProduct2HnonRaised;
   Vectors<Rational> reflectedSimpleBasisK;
-  RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
+  rootsScalarProduct2HnonRaised.ReservE(this->PositiveRootsK.size);
   ElementWeylGroup<WeylGroup> raisingElt;
   selectionRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
@@ -2164,7 +2164,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
     int theSlack=0;
-    RootsWithCharacteristic2.size=0;
+    rootsScalarProduct2HnonRaised.size=0;
     simpleRootsChar2=selectionRootsWithZeroCharacteristic;
     simpleRootsChar2.InvertSelection();
     Vector<Rational> simpleRootsChar2Vect;
@@ -2172,7 +2172,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     for (int j=0; j<relativeRootSystem.size; j++)
       if (simpleRootsChar2Vect.ScalarEuclidean(relativeRootSystem[j])==1)
       { theSlack++;
-        RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK[j]);
+        rootsScalarProduct2HnonRaised.AddOnTop(this->PositiveRootsK[j]);
       }
     int theDynkinEpsilon =diagramZeroCharRoots.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
@@ -2194,8 +2194,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     characteristicH.MakeZero(theLieAlgebra.GetRank());
     for(int j=0; j<theRelativeDimension; j++)
       characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
+    for (int i=0; i<rootsScalarProduct2HnonRaised.size; i++)
+      if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, rootsScalarProduct2HnonRaised[i])!=2)
+        crash << "Programming error, bad scalar product before raising!" << crash;
+
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-    bool ereBeProbs=(characteristicH  .ToString()=="(6, 10, 14, 8)");
+    bool ereBeProbs=(characteristicH.ToString()=="(6, 10, 14, 8)");
     ////////////////////
     reflectedSimpleBasisK=this->SimpleBasisK;
     if (ereBeProbs)
@@ -2207,9 +2211,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     if (ereBeProbs)
       std::cout << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
 
-    theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
+    theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
+    for (int i=0; i<theSl2.RootsWithScalar2WithH.size; i++)
+      if (this->GetAmbientWeyl().RootScalarCartanRoot(characteristicH, theSl2.RootsWithScalar2WithH[i])!=2)
+        crash << "Programming error, bad scalar product after raising!" << crash;
 
     theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
     theSl2.theE.MakeZero();

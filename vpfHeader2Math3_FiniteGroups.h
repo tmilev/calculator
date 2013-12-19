@@ -393,7 +393,7 @@ public:
   template <class coefficient>
   coefficient WeylDimFormulaFundamentalCoords(Vector<coefficient>& weightFundCoords, const coefficient& theRingUnit=1);
   template <class coefficient>
-  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup<WeylGroup>* raisingElt=0)const;
+  void RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign=0, bool* stabilizerFound=0, ElementWeylGroup<WeylGroup>* raisingElt=0);
   bool AreMaximallyDominant(List<Vector<Rational> >& theWeights, bool useOuterAutos);
   template <class coefficient>
   void RaiseToMaximallyDominant(List<Vector<coefficient> >& theWeights, bool useOuterAutos);
@@ -420,7 +420,7 @@ public:
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup<WeylGroup>& left, ElementWeylGroup<WeylGroup>& right);
-  bool IsElementWeylGroup(const MatrixTensor<Rational>& theMat)const;
+  bool IsElementWeylGroup(const MatrixTensor<Rational>& theMat);
   bool IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& theMat);
   void GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational>& output);
   template <class coefficient>

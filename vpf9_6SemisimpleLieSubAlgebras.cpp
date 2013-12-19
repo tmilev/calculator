@@ -306,14 +306,14 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
   }
   out << "<b>Please note that the code generating the tables is experimental. While the code performs a number of self-test routines, "
   << " it is possible that there still exist programming bugs. We will remove this message as soon as we are confident in the accuracy of all tables.  "
-  << " If you see any errors in the tables, we would be very grateful if you email us with a simple explanation of the issue!</b><br>";
+  << " If you see any errors in the tables, we wĵould be very grateful if you email us with a simple explanation of the issue!</b><br>";
   candidatesNotRealizedNotProvenImpossible=  this->theSubalgebraCandidates.size-candidatesRealized- candidatesProvenImpossible;
   if (!writingToHD)
   { out << candidatesRealized << " subalgebras realized.";
     out << "<br>Up to linear equivalence, there are " << this->theSubalgebraCandidates.size << " = " << candidatesRealized << " realized + "
     << candidatesProvenImpossible << " proven impossible + " << candidatesNotRealizedNotProvenImpossible << " neither realized nor proven impossible. \n<hr>\n ";
   } else
-  { out << "Up to linear equivalence, there are total " << candidatesRealized << " semisimple subalgebras";
+  { out << "Up to linear equivalence, there are total " << candidatesRealized << " semisimple subalgebras (including the full subalgebra)";
     if (candidatesNotRealizedNotProvenImpossible!=0)
       out << " and "  << candidatesNotRealizedNotProvenImpossible << " semisimple subalgebra candidate(s) which were not realized (but not proven impossible)";
     out << ". ";

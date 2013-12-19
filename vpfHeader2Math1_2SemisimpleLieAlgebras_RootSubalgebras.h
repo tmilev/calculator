@@ -377,7 +377,7 @@ public:
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
-  void ElementToHtml(std::string& filePath);
+  void ToHTML(std::string& filePath);
   void ElementToHtmlCreateFormulaOutputReference
   (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)const;
   bool operator==(const slTwoSubalgebra& right)const;
@@ -446,7 +446,7 @@ public:
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
-  void ElementToHtml(FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
+  void ToHTML(FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
   std::string ElementToStringNoGenerators(FormatExpressions* theFormat=0);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string ToString(FormatExpressions* theFormat=0);

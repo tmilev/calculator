@@ -189,7 +189,7 @@ public:
   bool AttemptExtendingHtoHEFwithHinCartan
   (ElementSemisimpleLieAlgebra<Rational>& theH, ElementSemisimpleLieAlgebra<Rational>& outputE,
    ElementSemisimpleLieAlgebra<Rational>& outputF, GlobalVariables* theGlobalVariables);
-  bool AttemptExtendingHEtoHEFWRTSubalgebra
+  bool AttemptExtendingHFtoHEFWRTSubalgebra
   (Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
    ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
    PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables);

@@ -257,7 +257,7 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
-    theSl2s.ElementToHtml(&theFormat, theCommands.theGlobalVariableS);
+    theSl2s.ToHTML(&theFormat, theCommands.theGlobalVariableS);
   } else
     out << "The table is precomputed and served from the hard disk. <br>";
 //  out << "The full file name: " << outSltwoFileDisplayName.str();

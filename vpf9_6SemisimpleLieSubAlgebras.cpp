@@ -2810,7 +2810,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)const
   { out << "\nContaining regular semisimple subalgebra number " << i+1 << ": ";
     rootSubalgebra& currentSA= this->container->theRootSAs.theSubalgebras[this->IndicesContainingRootSAs[i]];
     if (useHtml)
-    { out << "<a href=\"" << htmlPathServer << "../rootHtml_rootSA" << this->IndicesContainingRootSAs[i] << ".html\">";
+    { out << "<a href=\"" << htmlPathServer << "../rootSubalgebra_" << this->IndicesContainingRootSAs[i]+1 << ".html\">";
       tempS=currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
     }
     out << tempS;
@@ -2914,7 +2914,7 @@ bool slTwoSubalgebra::ModuleDecompositionFitsInto
   return true;
 }
 
-void slTwoSubalgebra::ElementToHtml(std::string& filePath)
+void slTwoSubalgebra::ToHTML(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
@@ -3224,17 +3224,16 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   if (this->BadHCharacteristics.size>0)
   { bool allbadAreGoodInTheirBadness=true;
     for (int i=0; i<this->BadHCharacteristics.size; i++)
-    { bool isGoodInItsbaddness=false;
+    { bool isGoodInItsbadness=false;
       for (int j=0; j<this->size; j++)
         if (this->BadHCharacteristics[i]==(*this)[j].theH.GetCartanPart())
-        { isGoodInItsbaddness=true;
+        { isGoodInItsbadness=true;
           break;
         }
-      if (!isGoodInItsbaddness)
+      if (!isGoodInItsbadness)
       { allbadAreGoodInTheirBadness=false;
         out << "<b>Bad characteristic: " << this->BadHCharacteristics[i] << "</b>";
-      }
-      else
+      } else
       { out2 << "<br><b>It turns out that in the current case of Cartan element h = " << this->BadHCharacteristics[i] << " we have that, for a certain P, "
         << " e(P, P_0) equals 0, but I failed to realize the corresponding sl(2) as a subalgebra of that P. However, it turns out that h "
         << " is indeed an S-subalgebra of a smaller root subalgebra P'.</b>";
@@ -3277,14 +3276,14 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesMinimalContainingRootSA[j]];
-      out << "<a href=\"" << displayPath << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j] << ".html\">"
+      out << "<a href=\"" << displayPath << "rootSubalgebra_" << theSl2.IndicesMinimalContainingRootSA[j]+1 << ".html\">"
       << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.theSubalgebras[theSl2.IndicesContainingRootSAs[j]];
-      out << "<a href=\"" <<  displayPath << "rootHtml_rootSA" << theSl2.IndicesContainingRootSAs[j] << ".html\">"
+      out << "<a href=\"" <<  displayPath << "rootSubalgebra_" << theSl2.IndicesContainingRootSAs[j]+1 << ".html\">"
       << currentSA.theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</a>" << ";  ";
     }
     if (useHtml)
@@ -3315,8 +3314,8 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void SltwoSubalgebras::ElementToHtml(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SltwoSubalgebras::ElementToHtml");
+void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("SltwoSubalgebras::ToHTML");
   std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
   std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->PathDisplayOutputFolder;
   std::string physicalPathSl2s= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder+"sl2s/";

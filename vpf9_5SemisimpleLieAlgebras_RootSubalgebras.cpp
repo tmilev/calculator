@@ -1971,6 +1971,156 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(Glob
       this->theSubalgebras[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
+bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
+(Vectors<Rational>& RootsWithCharacteristic2, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+ ElementSemisimpleLieAlgebra<Rational>& outputE, ElementSemisimpleLieAlgebra<Rational>& outputF, Matrix<Rational>& outputMatrixSystemToBeSolved,
+ PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra");
+  if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
+    return false;
+  Vectors<Rational> rootsInPlay;
+  rootsInPlay.size=0;
+  int theRelativeDimension = simpleBasisSA.size;
+//  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
+  if(theRelativeDimension!=theZeroCharacteristics.MaxSize)
+    crash << crash;
+  Vector<Rational> tempRoot, tempRoot2;
+  //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+... a_kg^\alpha_k, and
+  // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
+  //where the first \alpha's are ordered as in rootsInPlay.
+  //Those are ordered as follows. First come the simple roots of characteristic 2,
+  //and the last \alpha's are the members of SelectedExtraPositiveRoots
+  //(i.e. root equal to the sum of one simple root
+  // of characteristic 2 with a simple roots of characteristic 0).
+  // Then the first k variables of the polynomials below will be a_0, ..., a_k., and
+  // the last k variables will be the b_i's
+  // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2}, where
+  // l/2 is the index of the root
+  // of SelectedExtraPositiveRoots, if l is even, and to the
+  // coefficient of  g^{-\alpha_{(l+1)/2}} otherwise
+  for (int i=0; i<theRelativeDimension; i++)
+    if (!theZeroCharacteristics.selected[i])
+      rootsInPlay.AddOnTop(simpleBasisSA[i]);
+  Vectors<Rational> SelectedExtraPositiveRoots;
+  for (int i=0; i<RootsWithCharacteristic2.size; i++)
+    if (!simpleBasisSA.Contains(RootsWithCharacteristic2[i]))
+      SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
+  int numRootsChar2 = rootsInPlay.size;
+  rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
+  bool ereBeProbs=(h.ToString()=="(6, 10, 14, 8)");
+  if (ereBeProbs)
+    std::cout << "<hr>The roots in play are: " << rootsInPlay.ToString();
+
+  int halfNumberVariables = rootsInPlay.size;
+  int numberVariables = halfNumberVariables*2;
+  MonomialP tempM;
+  tempM.MakeOne(numberVariables);
+  Matrix<Rational> coeffsF;
+  coeffsF.init(1, halfNumberVariables);
+  for (int i=0; i<numRootsChar2; i++)
+    coeffsF.elements[0][i]=i+1; //(i%2==0)? 1: 2;
+  for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
+    coeffsF.elements[0][i]=i+1;
+  this->initHEFSystemFromECoeffs
+  (theRelativeDimension, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
+   h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
+  Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
+  tempMat=(outputMatrixSystemToBeSolved);
+  tempMatColumn=(outputSystemColumnVector);
+  outputF.MakeZero();
+  outputE.MakeZero();
+//  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
+  ChevalleyGenerator tempGen;
+  if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
+  { for (int i=0; i<rootsInPlay.size; i++)
+    { tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(-rootsInPlay[i]));
+      outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
+      tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(rootsInPlay[i]));
+      outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
+    }
+    return true;
+  }
+  return false;
+}
+
+void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
+(int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA, Vectors<Rational>& SelectedExtraPositiveRoots,
+ int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
+ Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved)
+{ Vector<Rational> tempRoot;
+  MonomialP tempM;
+  Rational tempRat;
+  HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
+  RootSpacesThatNeedToBeKilled.SetExpectedSize(this->theWeyl.RootSystem.size);
+//  IndicesEquationsByRootSpace.Reserve(this->theWeyl.RootSystem.size);
+  outputSystemToBeSolved.size=0;
+  outputMatrixSystemToBeSolved.init(0, numberVariables);
+  //outputSystemToBeSolved.ComputeDebugString();
+  for (int i=0; i<rootsInPlay.size; i++)
+    for (int j=0; j<rootsInPlay.size; j++)
+    { tempRoot= rootsInPlay[i]-rootsInPlay[j];
+      if (this->theWeyl.IsARoot(tempRoot))
+      { int indexEquation= RootSpacesThatNeedToBeKilled.GetIndex(tempRoot);
+        if (indexEquation==-1)
+        { RootSpacesThatNeedToBeKilled.AddOnTop(tempRoot);
+          indexEquation=outputSystemToBeSolved.size;
+//          IndicesEquationsByRootSpace.AddOnTop(indexEquation);
+          outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size+1);
+          outputSystemToBeSolved.LastObject()->MakeZero();
+        }
+        tempM.MakeOne(numberVariables);
+        tempM[i]=1;
+        tempM[j+halfNumberVariables]=1;
+        Rational tempCoeff= this->GetConstant(rootsInPlay[i], -rootsInPlay[j]);
+        outputSystemToBeSolved[indexEquation].AddMonomial(tempM, tempCoeff);
+        //outputSystemToBeSolved.ComputeDebugString();
+      }
+    }
+  int oldSize=outputSystemToBeSolved.size;
+  outputSystemToBeSolved.SetSize(oldSize+this->theWeyl.CartanSymmetric.NumRows);
+  for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
+    outputSystemToBeSolved[i].MakeZero();
+  //outputSystemToBeSolved.ComputeDebugString();
+//  ElementSemisimpleLieAlgebra g1, g2;
+  for (int i=0; i<rootsInPlay.size; i++)
+  { if(rootsInPlay.size!=halfNumberVariables)
+      crash << crash;
+    this->GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
+    for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
+    { tempM.MakeOne(numberVariables);
+      tempM[i]=1;
+      tempM[i+halfNumberVariables]=1;
+      outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);
+    }
+  }
+  for (int i=0; i<this->theWeyl.CartanSymmetric.NumRows; i++)
+    outputSystemToBeSolved[i+oldSize].AddConstant(targetH[i]*(-1));
+  outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
+  outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
+  outputMatrixSystemToBeSolved.NullifyAll();
+  outputSystemColumnVector.NullifyAll();
+  for (int i=0; i<outputSystemToBeSolved.size; i++)
+    for (int j=0; j<outputSystemToBeSolved[i].size(); j++)
+    { int lowerIndex=-1; int higherIndex=-1;
+      Polynomial<Rational>& currentPoly= outputSystemToBeSolved[i];
+      Rational& currentCoeff=currentPoly.theCoeffs[j];
+      for (int k=0; k<numberVariables; k++)
+        if (currentPoly[j](k)==1)
+        { if (k<halfNumberVariables)
+            lowerIndex=k;
+          else
+          { higherIndex=k;
+            break;
+          }
+        }
+      if (lowerIndex==-1)
+        outputSystemColumnVector.elements[i][0]= currentCoeff*(-1);
+      else
+        outputMatrixSystemToBeSolved.elements[i][lowerIndex]=currentCoeff* inputFCoeffs.elements[0][higherIndex-halfNumberVariables];
+    }
+//  outputSystemToBeSolved.ComputeDebugString();
+}
+
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
@@ -1988,7 +2138,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
     for (int j=0; j<theRelativeDimension; j++)
-      InvertedRelativeKillingForm.elements[k][j]=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
+      InvertedRelativeKillingForm(k,j)=this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
   int numCycles= MathRoutines::TwoToTheNth(selectionRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport(&theGlobalVariables);
@@ -2045,11 +2195,18 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     for(int j=0; j<theRelativeDimension; j++)
       characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
+    bool ereBeProbs=(characteristicH  .ToString()=="(6, 10, 14, 8)");
     ////////////////////
     reflectedSimpleBasisK=this->SimpleBasisK;
+    if (ereBeProbs)
+      std::cout << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+      << ", acting on: " << reflectedSimpleBasisK.ToString();
     for (int k=0; k<reflectedSimpleBasisK.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     ////////////////////
+    if (ereBeProbs)
+      std::cout << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
+
     theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k]);
@@ -2059,7 +2216,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     theSl2.theF.MakeZero();
     //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //    std::cout << "<br>accounting " << characteristicH.ToString();
-    if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
+    if(theLieAlgebra.AttemptExtendingHFtoHEFWRTSubalgebra
        (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
         theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
     { int indexIsoSl2;
@@ -2074,16 +2231,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
       }
     } else
     { output.BadHCharacteristics.AddOnTop(characteristicH);
-/*      std::cout << "<br>obtained bad characteristic "
-      << characteristicH.ToString() << ". The zero diagram is "
-      << tempDiagram.ElementToStrinG()
-      << "; the Dynkin epsilon is " << theDynkinEpsilon
-      << "= the num roots generated by diagram " << tempDiagram.NumRootsGeneratedByDiagram()
-      << " + the relative dimension " << theRelativeDimension
-      << " - the slack " << theSlack
-      << "<br>The relative root system is: "
-      << relativeRootSystem.ToString();
-      std::cout << "<br> I was exploring " << this->ToString();*/
+      DynkinType tempType;
+      diagramZeroCharRoots.GetDynkinType(tempType);
+      std::cout << "<br>obtained bad characteristic " << characteristicH.ToString() << ". The zero char root diagram is "
+      << tempType.ToString() << "; the Dynkin epsilon is " << theDynkinEpsilon << "= the num roots generated by diagram "
+      << diagramZeroCharRoots.NumRootsGeneratedByDiagram() << " + the relative dimension " << theRelativeDimension
+      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.ToString();
+      std::cout << "<br> I was exploring " << this->ToString();
     }
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;

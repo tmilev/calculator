@@ -2199,17 +2199,17 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
         crash << "Programming error, bad scalar product before raising!" << crash;
 
     this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
-    bool ereBeProbs=(characteristicH.ToString()=="(6, 10, 14, 8)");
+    //bool ereBeProbs=(characteristicH.ToString()=="(6, 10, 14, 8)");
     ////////////////////
     reflectedSimpleBasisK=this->SimpleBasisK;
-    if (ereBeProbs)
-      std::cout << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
-      << ", acting on: " << reflectedSimpleBasisK.ToString();
+    //if (ereBeProbs)
+    //std::cout << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+    //<< ", acting on: " << reflectedSimpleBasisK.ToString();
     for (int k=0; k<reflectedSimpleBasisK.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     ////////////////////
-    if (ereBeProbs)
-      std::cout << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
+    //if (ereBeProbs)
+    //  std::cout << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
 
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)

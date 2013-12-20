@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  civilizedInput="WeylGroupTauSignatures{}(b_3)";
+//  civilizedInput="WeylGroupTauSignatures{}(b_3)";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

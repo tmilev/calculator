@@ -182,8 +182,10 @@ void WeylGroup::ComputeSquares()
     this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasses[i][0]*this->conjugacyClasses[i][0];
 }
 
-void WeylGroup::ComputeInitialIrreps()
+void WeylGroup::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeInitialCharacters");
+  if (!this->flagConjugacyClassesAreComputed)
+    this->ComputeConjugacyClasses(theGlobalVariables);
   if(this->squaresFirstConjugacyClassRep.size == 0)
     this->ComputeSquares();
   this->irreps.SetSize(0);
@@ -1074,7 +1076,7 @@ bool WeylGroup::VerifyChartable(bool printresults)const
   return okay;
 }
 
-List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVariables)
+void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecomposition, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   if (!this->flagCharTableIsComputed)
@@ -1087,30 +1089,33 @@ List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVari
   Selection sel;
   sel.init(this->CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
-
-  List<WeylGroup> ParabolicSubgroups;
-  ParabolicSubgroups.SetSize(numCycles-2);
+  outputDecomposition.SetSize(numCycles);
   List<List<int> > ccBackMaps;
-  ccBackMaps.SetSize(ParabolicSubgroups.size);
+  ccBackMaps.SetSize(outputDecomposition.size);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
-
-  for (int i=0; i<ParabolicSubgroups.size; i++)
-  { sel.incrementSelection();
+  for (int i=0; i<outputDecomposition.size; i++)
+  { WeylGroup& currentParabolic=outputDecomposition[i].theWeylSubgroup;
+    sel.incrementSelection();
     int d = sel.CardinalitySelection;
-    ParabolicSubgroups[i].CartanSymmetric.init(d,d);
+    currentParabolic.CartanSymmetric.init(d,d);
     for(int ii=0; ii<d; ii++)
       for(int jj=0; jj<d; jj++)
-        ParabolicSubgroups[i].CartanSymmetric(ii,jj) = this->CartanSymmetric(sel.elements[ii], sel.elements[jj]);
-    std::cout << "<hr>Group cartan symmetric: " << ParabolicSubgroups[i].CartanSymmetric.ToString();
+        currentParabolic.CartanSymmetric(ii,jj) = this->CartanSymmetric(sel.elements[ii], sel.elements[jj]);
+    currentParabolic.ComputeCoCartanSymmetricFromCartanSymmetric();
+    std::cout << "<hr>Group cartan symmetric: " << currentParabolic.CartanSymmetric.ToString();
     std::cout << "<br>Selected simple roots: " << sel.ToString() << "\n";
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    ParabolicSubgroups[i].ComputeInitialIrreps();
-
-    ccBackMaps[i].SetSize(ParabolicSubgroups[i].ConjugacyClassCount());
-    for(int j=0; j<ParabolicSubgroups[i].ConjugacyClassCount(); j++)
-    { ElementWeylGroup<WeylGroup> h = ParabolicSubgroups[i].conjugacyClasses[j][0];
+    if (i==outputDecomposition.size-1)
+    { currentParabolic.conjugacyClassRepresentatives=this->conjugacyClassRepresentatives;
+      currentParabolic.conjugacyClassesSizes=this->conjugacyClassesSizes;
+      currentParabolic.flagConjugacyClassesAreComputed=true;
+    }
+    currentParabolic.ComputeInitialIrreps(theGlobalVariables);
+    ccBackMaps[i].SetSize(currentParabolic.ConjugacyClassCount());
+    for(int j=0; j<currentParabolic.ConjugacyClassCount(); j++)
+    { ElementWeylGroup<WeylGroup> h = currentParabolic.conjugacyClassRepresentatives[j];
       g.generatorsLastAppliedFirst.SetSize(h.generatorsLastAppliedFirst.size);
       for(int k=0; k<h.generatorsLastAppliedFirst.size; k++)
         g.generatorsLastAppliedFirst[k] = sel.elements[h.generatorsLastAppliedFirst[k]];
@@ -1126,29 +1131,16 @@ List<List<Rational> > WeylGroup::GetTauSignatures(GlobalVariables* theGlobalVari
     }
     std::cout << "Conjugacy classes back maps: " << ccBackMaps[i] << std::endl;
   }
-  List<List<Rational> > signRepMultiplicity;
-  signRepMultiplicity.SetSize(this->ConjugacyClassCount());
   ClassFunction<Rational> Xi; // this will be scribbled on over and over
   Xi.data.SetSize(this->ConjugacyClassCount()); // too big, but only allocated once
   std::cout << this->ToString();
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-  { signRepMultiplicity[i].SetSize(numCycles);
-    signRepMultiplicity[i][0] = true;
-    for(int j=0; j<ParabolicSubgroups.size; j++)
-    { for(int k=0; k<ParabolicSubgroups[j].ConjugacyClassCount(); k++)
+  for(int j=0; j<outputDecomposition.size; j++)
+  { outputDecomposition[j].SignRepMultiplicity.SetSize(this->ConjugacyClassCount());
+    WeylGroup& currentParabolic=outputDecomposition[j].theWeylSubgroup;
+    for (int i=0; i<this->ConjugacyClassCount(); i++)
+    { for(int k=0; k<currentParabolic.ConjugacyClassCount(); k++)
         Xi.data[k] = this->characterTable[i].data[ccBackMaps[j][k]];
-      Rational x = ParabolicSubgroups[j].characterTable[1].InnerProduct(Xi);
-      if(x == 0)
-        signRepMultiplicity[i][j+1] = false;
-      else
-        signRepMultiplicity[i][j+1] = true;
+      outputDecomposition[j].SignRepMultiplicity[i]= currentParabolic.characterTable[1].InnerProduct(Xi);
     }
-    if(signRep.InnerProduct(this->characterTable[i]) == 0)
-      signRepMultiplicity[i][numCycles-1] = false;
-    else
-      signRepMultiplicity[i][numCycles-1] = true;
-
-    std::cout << signRepMultiplicity[i] << std::endl;
   }
-  return signRepMultiplicity;
 }

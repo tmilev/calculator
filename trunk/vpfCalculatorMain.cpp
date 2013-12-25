@@ -33,39 +33,38 @@ int main_command_input(int argc, char **argv)
 int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
   InitializeGlobalObjects();
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
+  onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
 	std::cout << "Content-Type: text/html\n\n";
 
 //	std::cout <<  "<br>" << (int) &theGlobalVariables.callSystem ;
-
   ParallelComputing::cgiLimitRAMuseNumPointersInList=100000000;
-  theGlobalVariables.inputDisplayPath="trunk/";
+  onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
-  { getPath(argv[0], theGlobalVariables.inputPatH);
+  { getPath(argv[0], onePredefinedCopyOfGlobalVariables.inputPatH);
   //    std::cout << "input path: " << inputPatH << "\n\n";
     bool found=false;
-    for (int j=theGlobalVariables.inputPatH.size()-2; j>=0; j--)
-    { if (theGlobalVariables.inputPatH[j]=='/')
+    for (int j=onePredefinedCopyOfGlobalVariables.inputPatH.size()-2; j>=0; j--)
+    { if (onePredefinedCopyOfGlobalVariables.inputPatH[j]=='/')
       { if (found)
           break;
-        theGlobalVariables.inputDisplayPath="";
+        onePredefinedCopyOfGlobalVariables.inputDisplayPath="";
         found=true;
       }
       if (found)
-        theGlobalVariables.inputDisplayPath.push_back(theGlobalVariables.inputPatH[j]);
+        onePredefinedCopyOfGlobalVariables.inputDisplayPath.push_back(onePredefinedCopyOfGlobalVariables.inputPatH[j]);
     }
     if (found)
-      for (unsigned j=0; j<theGlobalVariables.inputDisplayPath.size()/2; j++)
-        MathRoutines::swap(theGlobalVariables.inputDisplayPath[j], theGlobalVariables.inputDisplayPath[theGlobalVariables.inputDisplayPath.size()-1-j]);
+      for (unsigned j=0; j<onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()/2; j++)
+        MathRoutines::swap(onePredefinedCopyOfGlobalVariables.inputDisplayPath[j], onePredefinedCopyOfGlobalVariables.inputDisplayPath[onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()-1-j]);
   //    std::cout << "<br>input display path: " << inputDisplayPath;
-    std::string::size_type foundExperimental=theGlobalVariables.inputDisplayPath.find("experimental");
+    std::string::size_type foundExperimental=onePredefinedCopyOfGlobalVariables.inputDisplayPath.find("experimental");
     if (foundExperimental!=std::string::npos)
       std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
 
   }
   std::string tempS;
   //  std::cout << "input path: " << inputDisplayPath << "\n\n";
-  theParser.init(theGlobalVariables);
+  theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1)
     return main_command_input(argc, argv);
   else

@@ -13,7 +13,7 @@
 
 static ProjectInformationInstance projectInfoInstanceCalculatorGlobalAndSystemHeader(__FILE__, "Global objects and system calls header");
 
-extern GlobalVariables theGlobalVariables;
+extern GlobalVariables onePredefinedCopyOfGlobalVariables;
 extern FormatExpressions consoleFormat;
 extern Calculator theParser;
 extern std::string IPAdressCaller;

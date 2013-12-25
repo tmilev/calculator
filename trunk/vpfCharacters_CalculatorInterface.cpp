@@ -422,7 +422,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* 
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->theElements.size == 0)
     this->ComputeConjugacyClasses(theGlobalVariables);
-  this->ComputeInitialIrreps();
+  this->ComputeInitialIrreps(theGlobalVariables);
   WeylGroupRepresentation<Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
   WeylGroupVirtualRepresentation<Rational> decompositionNewRep;
@@ -809,9 +809,24 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   if (!theWeyl.flagCharTableIsComputed)
     theWeyl.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
   std::stringstream out;
-  List<List<Rational> > theTauSigs= theWeyl.GetTauSignatures(theCommands.theGlobalVariableS);
-  out << "Tau sigs:" << theTauSigs.ToString();
-
+  List<DecompositionOverSubgroup> tauSigData;
+  theWeyl.GetTauSignatures(tauSigData, theCommands.theGlobalVariableS);
+  out << "<table border=\"1\">";
+  Selection parSel;
+  parSel.init(theWeyl.GetDim());
+  out << "<tr><td>Irreps</td>";
+  do
+  { out << "<td>" << parSel.ToString()<< "</td>";
+  } while (parSel.IncrementReturnFalseIfBackToBeginning());
+  out << "</tr>";
+  for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
+  { out << "<tr>";
+    out << "<td>" << theWeyl.conjugacyClassRepresentatives[i].ToString() << "</td>";
+    for (int j=0; j<tauSigData.size; j++)
+      out << "<td>" << tauSigData[j].SignRepMultiplicity[i].ToString() << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
   return output.AssignValue(out.str(), theCommands);
 }
 

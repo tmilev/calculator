@@ -263,6 +263,9 @@ public:
   }
 };
 
+class DecompositionOverSubgroup; //this class works for parabolic subgroups at the moment only
+//feel free to modify to work over arbitrary groups
+
 class WeylGroup
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
@@ -318,9 +321,9 @@ public:
   void init();
   int size()const;
   void ComputeSquares();
-  void ComputeInitialIrreps();
+  void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  List<List<Rational> > GetTauSignatures(GlobalVariables* theGlobalVariables=0);
+  void GetTauSignatures(List<DecompositionOverSubgroup>& outputDecomposition, GlobalVariables* theGlobalVariables=0);
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);
@@ -600,6 +603,14 @@ public:
   int operator()(int i, int j) const;
   bool operator==(const WeylGroup& other)const;
   void operator+=(const WeylGroup& other);
+};
+
+class DecompositionOverSubgroup
+{
+public:
+  DecompositionOverSubgroup(){}
+  List<Rational> SignRepMultiplicity;
+  WeylGroup theWeylSubgroup;
 };
 
 template <typename coefficient>

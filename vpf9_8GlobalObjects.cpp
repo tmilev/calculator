@@ -5,21 +5,21 @@
 ProjectInformationInstance projectInfoInstanceCalculatorGlobal(__FILE__, "Global objects");
 
 
-GlobalVariables theGlobalVariables;
+GlobalVariables onePredefinedCopyOfGlobalVariables;
 Calculator theParser;
 FormatExpressions consoleFormat;
 
 void InitializeGlobalObjects()
 { //std::cout << "Content-Type: text/html\n\n";
   InitializeTimer();
-  crash.theGlobalVariables=&theGlobalVariables;
-  theGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
+  onePredefinedCopyOfGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
+  onePredefinedCopyOfGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
+  onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+  onePredefinedCopyOfGlobalVariables.SetCallSystem(&CallSystemWrapper);
 
-  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
+  crash.theGlobalVariables=&onePredefinedCopyOfGlobalVariables;
   //std::cout << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
-  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   consoleFormat.flagUseHTML = false;
   consoleFormat.flagUseLatex = false;
 }

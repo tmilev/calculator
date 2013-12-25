@@ -16,6 +16,7 @@
 #include "vpfImplementationHeader2Math7_PackedVector.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
+GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
 
 class CharacterTable
 {
@@ -1257,7 +1258,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, false);
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(onePredefinedCopyOfGlobalVariables, true, false);
   List<Vector<Rational> > roots;
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
   { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
@@ -1303,7 +1304,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     std::cout << "has character ";
     std::cout << rep.GetCharacter() << std::endl;
     W.AddIrreducibleRepresentation(rep);
-    std::cout << "elapsed seconds: " << theGlobalVariables.GetElapsedSeconds() << std::endl;
+    std::cout << "elapsed seconds: " << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds() << std::endl;
   }
 }
 
@@ -1723,7 +1724,7 @@ int pointis(int d, int n)
 
 
 WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ std::cout << "starting with roots " << roots << " at time " <<   theGlobalVariables.GetElapsedSeconds() << std::endl;
+{ std::cout << "starting with roots " << roots << " at time " << onePredefinedCopyOfGlobalVariables.GetElapsedSeconds() << std::endl;
   List<Vector<Rational> > monomial;
   HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;

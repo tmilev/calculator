@@ -179,7 +179,7 @@ void WeylGroup::ComputeSquares()
   this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
   ElementWeylGroup<WeylGroup> currentSquare;
   for(int i=0;i<this->ConjugacyClassCount();i++)
-    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasses[i][0]*this->conjugacyClasses[i][0];
+    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClassRepresentatives[i]*this->conjugacyClassRepresentatives[i];
 }
 
 void WeylGroup::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
@@ -1087,16 +1087,15 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     signRep.data[i] =this->conjugacyClasses[i][0].Sign();
   Selection sel;
-  sel.init(this->CartanSymmetric.NumCols);
+  sel.init(this->GetDim());
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
   outputDecomposition.SetSize(numCycles);
   List<List<int> > ccBackMaps;
   ccBackMaps.SetSize(outputDecomposition.size);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
-  for (int i=0; i<outputDecomposition.size; i++)
+  for (int i=0; i<outputDecomposition.size; i++, sel.incrementSelection())
   { WeylGroup& currentParabolic=outputDecomposition[i].theWeylSubgroup;
-    sel.incrementSelection();
     int d = sel.CardinalitySelection;
     currentParabolic.CartanSymmetric.init(d,d);
     for(int ii=0; ii<d; ii++)
@@ -1110,6 +1109,7 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
     if (i==outputDecomposition.size-1)
     { currentParabolic.conjugacyClassRepresentatives=this->conjugacyClassRepresentatives;
       currentParabolic.conjugacyClassesSizes=this->conjugacyClassesSizes;
+      currentParabolic.sizePrivate=this->size();
       currentParabolic.flagConjugacyClassesAreComputed=true;
     }
     currentParabolic.ComputeInitialIrreps(theGlobalVariables);
@@ -1137,10 +1137,11 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
   for(int j=0; j<outputDecomposition.size; j++)
   { outputDecomposition[j].SignRepMultiplicity.SetSize(this->ConjugacyClassCount());
     WeylGroup& currentParabolic=outputDecomposition[j].theWeylSubgroup;
+    int indexSignRep= (j==0 ) ? 0 : 1;
     for (int i=0; i<this->ConjugacyClassCount(); i++)
     { for(int k=0; k<currentParabolic.ConjugacyClassCount(); k++)
         Xi.data[k] = this->characterTable[i].data[ccBackMaps[j][k]];
-      outputDecomposition[j].SignRepMultiplicity[i]= currentParabolic.characterTable[1].InnerProduct(Xi);
+      outputDecomposition[j].SignRepMultiplicity[i]= currentParabolic.characterTable[indexSignRep].InnerProduct(Xi);
     }
   }
 }

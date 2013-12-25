@@ -4841,7 +4841,7 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
 
 void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::GetTrivialRepresentation");
-  this->CheckInitializationFDrepComputation();
+  this->CheckInitializationConjugacyClasses();
   output.init(*this);
   output.basis.MakeEiBasis(1);
   for(int i=0; i<this->GetDim(); i++)
@@ -4851,7 +4851,7 @@ void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& outp
 
 void WeylGroup::GetSignRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignRepresentation");
-  this->CheckInitializationFDrepComputation();
+  this->CheckInitializationConjugacyClasses();
   output.init(*this);
   output.basis.MakeEiBasis(1);
   ElementWeylGroup<WeylGroup> currentElt;
@@ -4865,7 +4865,7 @@ void WeylGroup::GetSignRepresentation(WeylGroupRepresentation<Rational>& output)
 
 void WeylGroup::GetStandardRepresentation(WeylGroupRepresentation<Rational>& output)
 { MacroRegisterFunctionWithName("WeylGroup::GetStandardRepresentation");
-  this->CheckInitializationFDrepComputation();
+  this->CheckInitializationConjugacyClasses();
   output.init(*this);
   output.basis.MakeEiBasis(this->GetDim());
   for(int i=0; i<this->GetDim(); i++)

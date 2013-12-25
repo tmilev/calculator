@@ -20,8 +20,21 @@ bool WeylGroup::CheckConsistency()const
 }
 
 bool WeylGroup::CheckInitializationFDrepComputation()const
-{ if (this->ConjugacyClassCount()==0 || this->theElements.size==0)
-  { crash << "This is a programming error: requesting to compute character hermitian product in a group whose conjugacy classes and/or elements have not been computed. "
+{ if (this->theElements.size==0)
+  { crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
+    << "conjugacy classes and/or elements have not been computed. The group reports to have "
+    << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
+    << crash;
+    return false;
+  }
+  return this->CheckInitializationConjugacyClasses();
+}
+
+bool WeylGroup::CheckInitializationConjugacyClasses()const
+{ if (this->ConjugacyClassCount()==0)
+  { crash << "This is a programming error: requesting to compute character hermitian product in a group whose "
+    << "conjugacy classes and/or elements have not been computed. The group reports to have "
+    << this->ConjugacyClassCount() << " conjugacy classes and " << this->theElements.size << " elements. "
     << crash;
     return false;
   }

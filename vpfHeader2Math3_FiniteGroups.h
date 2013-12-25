@@ -344,6 +344,7 @@ public:
   bool CheckConsistency()const;
   bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
+  bool CheckInitializationConjugacyClasses()const;
   void GetSignCharacter(Vector<Rational>& out);
   void GetStandardRepresentation(WeylGroupRepresentation<Rational>& output);
   void GetSignRepresentation(WeylGroupRepresentation<Rational>& output);
@@ -460,7 +461,9 @@ public:
   (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables);
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output);
-  inline int GetDim()const{return this->CartanSymmetric.NumRows;}
+  inline int GetDim()const
+  { return this->CartanSymmetric.NumRows;
+  }
   void ComputeAllElements(int UpperLimitNumElements=0, GlobalVariables* theGlobalVariables=0);
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
@@ -803,7 +806,7 @@ template<typename coefficient>
 coefficient ClassFunction<coefficient>::InnerProduct(const ClassFunction<coefficient>& other) const
 { coefficient acc = 0;
   for(int i=0;i<G->ConjugacyClassCount();i++)
-    acc +=  this->data[i].GetComplexConjugate() * other[i].GetComplexConjugate() * G->conjugacyClasses[i].size;
+    acc +=  this->data[i].GetComplexConjugate() * other[i].GetComplexConjugate() * G->conjugacyClassesSizes[i];
   return acc/G->GetSizeWeylGroupByFormula();
 }
 

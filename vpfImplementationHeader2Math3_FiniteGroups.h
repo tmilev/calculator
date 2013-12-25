@@ -429,7 +429,6 @@ bool WeylGroup::GenerateOrbit
     output.AddOnTopNoRepetition(theWeights[i]);
   Vector<coefficient> currentRoot;
   ElementWeylGroup<WeylGroup> currentElt;
-  currentElt.owner=this;
   if (expectedOrbitSize<=0)
     if (!this->theDynkinType.GetSizeWeylGroupByFormula().IsSmallInteger(&expectedOrbitSize))
       expectedOrbitSize=-1;
@@ -440,7 +439,7 @@ bool WeylGroup::GenerateOrbit
   if (outputSubset!=0)
   { if (UpperLimitNumElements>0)
       expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
-    currentElt.generatorsLastAppliedFirst.SetSize(0);
+    currentElt.MakeID(*this);
     outputSubset->SetExpectedSize(expectedOrbitSize);
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
@@ -824,7 +823,7 @@ template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::init(WeylGroup& inputOwner)
 { this->reset();
   this->ownerGroup=&inputOwner;
-  this->ownerGroup->CheckInitializationFDrepComputation();
+  this->ownerGroup->CheckInitializationConjugacyClasses();
   this->generatorS.SetSize(this->ownerGroup->GetDim());
   this->theElementImageS.SetSize(this->ownerGroup->theElements.size);
   this->theElementIsComputed.initFillInObject(this->ownerGroup->theElements.size, false);
@@ -860,13 +859,19 @@ Matrix<coefficient> WeylGroupRepresentation<coefficient>::GetMatrixElement(const
 
 template <typename coefficient>
 int WeylGroupRepresentation<coefficient>::GetDim()const
-{ return this->generatorS[0].NumRows;
+{ if (this->ownerGroup->GetDim()==0)
+    return 1;
+  return this->generatorS[0].NumRows;
 }
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output)
 { this->CheckInitialization();
-  this->ownerGroup->CheckInitializationFDrepComputation();
+  if (this->ownerGroup->GetDim()==0) //here be trivial weyl group
+  { output.MakeIdMatrix(1);
+    return;
+  }
+  this->ownerGroup->CheckInitializationConjugacyClasses();
   output.MakeIdMatrix(this->GetDim());
   for (int i=0; i<input.generatorsLastAppliedFirst.size; i++)
     output.MultiplyOnTheRight(this->generatorS[input.generatorsLastAppliedFirst[i]]);

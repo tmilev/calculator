@@ -4092,24 +4092,11 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   }
 }
 
-void DynkinSimpleType::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output)
-{ MacroRegisterFunctionWithName("DynkinType::GetCoCartanSymmetric");
-  if (&input==&output)
-  { Matrix<Rational> inputCopy=input;
-    DynkinSimpleType::GetCoCartanSymmetric(inputCopy, output);
-    return;
-  }
-  output.init(input.NumRows, input.NumCols);
-  for (int i=0; i<input.NumRows; i++)
-    for (int j=0; j<input.NumCols; j++)
-      output(i,j)= input(i,j)*4/(input(i,i)*input(j,j));
-}
-
 void DynkinType::GetCoCartanSymmetric(Matrix<Rational>& output)const
 { MacroRegisterFunctionWithName("DynkinType::GetCartanSymmetric");
   Matrix<Rational> curCartan;
   this->GetCartanSymmetric(curCartan);
-  DynkinSimpleType::GetCoCartanSymmetric(curCartan, output);
+  WeylGroup::GetCoCartanSymmetric(curCartan, output);
 }
 
 void DynkinType::GetCartanSymmetricDefaultLengthKeepComponentOrder(Matrix<Rational>& output)const
@@ -4647,7 +4634,7 @@ void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
 void DynkinSimpleType::GetCoCartanSymmetric(Matrix<Rational>& output)const
 { Matrix<Rational> currentCartan;
   this->GetCartanSymmetric(currentCartan);
-  this->GetCoCartanSymmetric(currentCartan, output);
+  WeylGroup::GetCoCartanSymmetric(currentCartan, output);
 }
 
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
@@ -4870,9 +4857,9 @@ void WeylGroup::GetStandardRepresentation(WeylGroupRepresentation<Rational>& out
   output.basis.MakeEiBasis(this->GetDim());
   for(int i=0; i<this->GetDim(); i++)
     this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
-  std::cout << output.ToString();
+//  std::cout << output.ToString();
   output.GetCharacter();
-  std::cout << "The char: " << output.theCharacteR.ToString();
+//  std::cout << "The char: " << output.theCharacteR.ToString();
 }
 
 void WeylGroup::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
@@ -4979,6 +4966,19 @@ void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bo
 { const ElementWeylGroup<WeylGroup>& currentElt=this->theElements[index];
   for (int i=currentElt.generatorsLastAppliedFirst.size-1; i>=0; i--)
     this->SimpleReflectionRoot(currentElt.generatorsLastAppliedFirst[i], theRoot, RhoAction, UseMinusRho);
+}
+
+void WeylGroup::GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output)
+{ MacroRegisterFunctionWithName("DynkinType::GetCoCartanSymmetric");
+  if (&input==&output)
+  { Matrix<Rational> inputCopy=input;
+    WeylGroup::GetCoCartanSymmetric(inputCopy, output);
+    return;
+  }
+  output.init(input.NumRows, input.NumCols);
+  for (int i=0; i<input.NumRows; i++)
+    for (int j=0; j<input.NumCols; j++)
+      output(i,j)= input(i,j)*4/(input(i,i)*input(j,j));
 }
 
 void WeylGroup::GenerateRootSystem()
@@ -5148,7 +5148,18 @@ void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRan
 }
 
 void WeylGroup::ComputeCoCartanSymmetricFromCartanSymmetric()
-{ DynkinSimpleType::GetCoCartanSymmetric(this->CartanSymmetric, this->CoCartanSymmetric);
+{ this->GetCoCartanSymmetric(this->CartanSymmetric, this->CoCartanSymmetric);
+}
+
+void WeylGroup::MakeMeFromMyCartanSymmetric()
+{ this->init();
+  this->GenerateRootSystem();
+  DynkinDiagramRootSubalgebra theDynkinTypeComputer;
+  Vectors<Rational> simpleBasis;
+  simpleBasis.MakeEiBasis(this->CartanSymmetric.NumRows);
+  theDynkinTypeComputer.ComputeDiagramTypeModifyInputRelative(simpleBasis, this->RootSystem, this->CartanSymmetric);
+  theDynkinTypeComputer.GetDynkinType(this->theDynkinType);
+  this->ComputeCoCartanSymmetricFromCartanSymmetric();
 }
 
 void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)

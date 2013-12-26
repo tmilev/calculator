@@ -320,6 +320,7 @@ public:
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init();
   int size()const;
+  static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void ComputeSquares();
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
@@ -334,6 +335,7 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
+  void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
   void ComputeOuterAutoGenerators();

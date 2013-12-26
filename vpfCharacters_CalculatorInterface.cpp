@@ -407,9 +407,9 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylG
 }
 
 void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p)
-{ std::cout << "Checking if " << p.theCharacteR.ToString() << " belongs to ";
-  for (int i=0; i<this->irreps.size; i++)
-    std::cout << this->irreps[i].theCharacteR.ToString();
+{ //std::cout << "Checking if " << p.theCharacteR.ToString() << " belongs to ";
+  //for (int i=0; i<this->irreps.size; i++)
+  //  std::cout << this->irreps[i].theCharacteR.ToString();
   if (this->irreps.Contains(p))
   { WeylGroupRepresentation<Rational>& currentRep=this->irreps[this->irreps.GetIndex(p)];
     currentRep.names.AddOnTopNoRepetition(p.names);
@@ -825,12 +825,19 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   List<DecompositionOverSubgroup> tauSigData;
   theWeyl.GetTauSignatures(tauSigData, theCommands.theGlobalVariableS);
   out << "<table border=\"1\">";
-  Selection parSel;
-  parSel.init(theWeyl.GetDim());
-  out << "<tr><td>Irreps</td>";
+  Selection parSelrootsAreInLevi, parSelrootsAreOuttaLevi;
+  parSelrootsAreInLevi.init(theWeyl.GetDim());
+  out << "<tr><td></td>";
   do
-  { out << "<td>" << parSel.ToString()<< "</td>";
-  } while (parSel.IncrementReturnFalseIfBackToBeginning());
+  { parSelrootsAreOuttaLevi=parSelrootsAreInLevi;
+    parSelrootsAreOuttaLevi.InvertSelection();
+    out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
+  } while (parSelrootsAreInLevi.IncrementReturnFalseIfBackToBeginning());
+  out << "</tr>";
+  out << "<tr><td>Irreps</td>";
+  for (int i=0; i<tauSigData.size; i++)
+  { out << "<td>" << tauSigData[i].theWeylSubgroup.theDynkinType.ToString() << "</td>";
+  }
   out << "</tr>";
   for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
   { out << "<tr>";

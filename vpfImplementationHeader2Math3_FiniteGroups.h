@@ -956,8 +956,8 @@ void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
   { if(inputCF[cci] == 0)
       continue;
     if(classFunctionMatrices[cci].NumCols == 0)
-    { std::cout << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
-      << "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << std::endl;
+    { //std::cout << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
+      //<< "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << std::endl;
       classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].NumCols);
       for(int icci=0; icci<this->ownerGroup->conjugacyClasses[cci].size; icci++)
       { //Matrix<coefficient> Mi;

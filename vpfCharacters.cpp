@@ -1101,7 +1101,7 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
     for(int ii=0; ii<d; ii++)
       for(int jj=0; jj<d; jj++)
         currentParabolic.CartanSymmetric(ii,jj) = this->CartanSymmetric(sel.elements[ii], sel.elements[jj]);
-    currentParabolic.ComputeCoCartanSymmetricFromCartanSymmetric();
+    currentParabolic.MakeMeFromMyCartanSymmetric();
     std::cout << "<hr>Group cartan symmetric: " << currentParabolic.CartanSymmetric.ToString();
     std::cout << "<br>Selected simple roots: " << sel.ToString() << "\n";
     // ComputeInitialCharacters gets the character of the sign representation
@@ -1112,7 +1112,9 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
       currentParabolic.sizePrivate=this->size();
       currentParabolic.flagConjugacyClassesAreComputed=true;
     }
+    //std::cout << "<hr>before compute initial irreps";
     currentParabolic.ComputeInitialIrreps(theGlobalVariables);
+    //std::cout << "<hr>after compute initial irreps";
     ccBackMaps[i].SetSize(currentParabolic.ConjugacyClassCount());
     for(int j=0; j<currentParabolic.ConjugacyClassCount(); j++)
     { ElementWeylGroup<WeylGroup> h = currentParabolic.conjugacyClassRepresentatives[j];
@@ -1133,7 +1135,7 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
   }
   ClassFunction<Rational> Xi; // this will be scribbled on over and over
   Xi.data.SetSize(this->ConjugacyClassCount()); // too big, but only allocated once
-  std::cout << this->ToString();
+  //std::cout << this->ToString();
   for(int j=0; j<outputDecomposition.size; j++)
   { outputDecomposition[j].SignRepMultiplicity.SetSize(this->ConjugacyClassCount());
     WeylGroup& currentParabolic=outputDecomposition[j].theWeylSubgroup;

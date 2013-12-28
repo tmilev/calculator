@@ -554,7 +554,7 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   { bool notFound=true;
     for(int ci=0; notFound && ci<G.ConjugacyClassCount(); ci++)
       for(int cj=0; notFound && cj<G.conjugacyClasses[ci].size; cj++)
-        if(G.conjugacyClasses[ci][cj] == H.theElements[H.conjugacyClasses[i][0]])
+        if(G.conjugacyClasses[ci][cj] == H.theElements[H.conjugacyClassesIndices[i][0]])
         { ccPreimages[i] = ci;
           notFound=false;
         }

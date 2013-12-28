@@ -1038,7 +1038,6 @@ ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(
   return out;
 }
 
-
 template <typename coefficient>
 Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
 { Matrix<coefficient> M;
@@ -1050,6 +1049,13 @@ Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
         M(X.G->MultiplyElements(i,j),j) = X.data[i1];
     }
   return M;
+}
+
+void SubgroupWeylGroupParabolic::ComputeDynkinType()
+{ WeylGroup tempGroup;
+  tempGroup.CartanSymmetric=this->SubCartanSymmetric;
+  tempGroup.MakeMeFromMyCartanSymmetric();
+  this->theDynkinType=tempGroup.theDynkinType;
 }
 
 bool WeylGroup::VerifyChartable(bool printresults)const
@@ -1076,7 +1082,120 @@ bool WeylGroup::VerifyChartable(bool printresults)const
   return okay;
 }
 
-void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecomposition, GlobalVariables* theGlobalVariables)
+void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
+  if(!this->flagConjugacyClassesAreComputed)
+  { this->ComputeConjugacyClasses(theGlobalVariables);
+    this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
+    for(int i=0; i<this->ConjugacyClassCount(); i++)
+    { bool notFound=true;
+      ElementWeylGroup<WeylGroup>& g=this->conjugacyClassRepresentatives[i];
+      for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
+        for(int cj=0; notFound && cj<this->parent->conjugacyClassesIndices[ci].size; cj++)
+          if(this->parent->theElements[this->conjugacyClassesIndices[ci][cj]] == g)
+          { this->ccRepresentativesPreimages[i] = ci;
+            notFound=false;
+          }
+      if (notFound)
+        crash << "Programming error: couldn't find preimage of a conjugacy class representative. "
+        << crash;
+    }
+  }
+  Vector<Rational> Xs;
+  this->GetSignCharacter(Xs);
+  Vector<Rational> Xi;
+  Xi.SetSize(this->ConjugacyClassCount());
+  this->tauSignature.SetSize(this->parent->ConjugacyClassCount());
+  for(int i=0; i<this->parent->ConjugacyClassCount(); i++)
+  { ClassFunction<Rational> Xip = this->parent->irreps[i].GetCharacter();
+    for(int j=0; j<Xi.size; j++)
+      Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
+    this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
+  }
+}
+
+void SubgroupWeylGroupParabolic::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupParabolic::ComputeConjugacyClasses");
+  if (this->generatingSimpleRoots.CardinalitySelection==this->generatingSimpleRoots.MaxSize
+      && this->parent->flagConjugacyClassesAreComputed)
+  { this->conjugacyClassRepresentatives=this->parent->conjugacyClassRepresentatives;
+    this->conjugacyClassesSizes=this->parent->conjugacyClassesSizes;
+    this->theElements=this->parent->theElements;
+    this->flagConjugacyClassesAreComputed=true;
+  } else
+    this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeConjugacyClasses(theGlobalVariables);
+}
+
+template <typename weylgroup>
+void SubgroupWeylGroupParabolic::MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots)
+{ MacroRegisterFunctionWithName("SubgroupWeylGroupParabolic::MakeParabolicSubgroup");
+  this->init();
+  this->parent = &G;
+  this->generatingSimpleRoots=inputGeneratingSimpleRoots;
+  int d = this->generatingSimpleRoots.CardinalitySelection;
+  this->SubCartanSymmetric.init(d,d);
+  for(int ii=0; ii<d; ii++)
+    for(int jj=0; jj<d; jj++)
+      this->SubCartanSymmetric(ii,jj) = G.CartanSymmetric(this->generatingSimpleRoots.elements[ii],generatingSimpleRoots.elements[jj]);
+  this->ComputeDynkinType();
+  this->generatorPreimages.SetSize(d);
+  this->generators.SetSize(d);
+  ElementWeylGroup<WeylGroup> currentSimpleReflection;
+  for(int i=0; i<d; i++)
+  { currentSimpleReflection.MakeSimpleReflection(this->generatingSimpleRoots.elements[i], G);
+    this->generatorPreimages[i]=G.theElements.GetIndex(currentSimpleReflection);
+    this->generators[i]=currentSimpleReflection;
+  }
+}
+
+template <typename somegroup, class elementSomeGroup>
+std::string Subgroup<somegroup, elementSomeGroup>::ToString(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("Subgroup::ToString");
+  std::stringstream out;
+  out << "<br>Size: " << this->size() << "\n";
+//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  if (this->ConjugacyClassCount()>0)
+  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
+    bool theEntireClassIsComputed=this->conjugacyClassesIndices.size==this->ConjugacyClassCount();
+    for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
+    { out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClassRepresentatives[i].ToString(theFormat) << ". ";
+      out << "The class has " << this->conjugacyClassesSizes[i] << " elements. ";
+      if (!theEntireClassIsComputed)
+      { out << "The class elements were not computed.";
+        continue;
+      }
+      if (this->conjugacyClassesIndices[i].size>10)
+      { out << " The elements are too many, displaying the first element only: ";
+        out << this->theElements[this->conjugacyClassesIndices[i][0]].ToString(theFormat);
+        continue;
+      } else if (this->conjugacyClassesIndices[i].size>0)
+        out << " The elements of the class are: ";
+      for (int j=0; j<this->conjugacyClassesIndices[i].size; j++)
+      { out << this->theElements[this->conjugacyClassesIndices[i][j]].ToString(theFormat);
+        if (j!=this->conjugacyClassesIndices[i].size-1)
+          out << ", ";
+      }
+      out << ". ";
+    }
+  }
+  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
+  if (this->theElements.size<=100)
+    for (int i=0; i<this->theElements.size; i++)
+      out << i << ". " << this->theElements[i].ToString() << "\n";
+  else
+    out << "... too many, not displaying. ";
+/*  if (this->flagCharTableIsComputed)
+  { out << "<br>Character table: ";
+    Matrix<Rational> charTableMatForm;
+    charTableMatForm.init(this->irreps.size, this->ConjugacyClassCount());
+    for (int i=0; i<this->irreps.size; i++)
+      charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
+    out << charTableMatForm.ToString();
+  }*/
+  return out.str();
+}
+
+void WeylGroup::GetTauSignatures(List<SubgroupWeylGroupParabolic>& outputSubgroups, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   if (!this->flagCharTableIsComputed)
@@ -1089,61 +1208,22 @@ void WeylGroup::GetTauSignatures(List<DecompositionOverSubgroup>& outputDecompos
   Selection sel;
   sel.init(this->GetDim());
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
-  outputDecomposition.SetSize(numCycles);
+  outputSubgroups.SetSize(numCycles);
   List<List<int> > ccBackMaps;
-  ccBackMaps.SetSize(outputDecomposition.size);
+  ccBackMaps.SetSize(outputSubgroups.size);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
-  for (int i=0; i<outputDecomposition.size; i++, sel.incrementSelection())
-  { WeylGroup& currentParabolic=outputDecomposition[i].theWeylSubgroup;
-    int d = sel.CardinalitySelection;
-    currentParabolic.CartanSymmetric.init(d,d);
-    for(int ii=0; ii<d; ii++)
-      for(int jj=0; jj<d; jj++)
-        currentParabolic.CartanSymmetric(ii,jj) = this->CartanSymmetric(sel.elements[ii], sel.elements[jj]);
-    currentParabolic.MakeMeFromMyCartanSymmetric();
-    std::cout << "<hr>Group cartan symmetric: " << currentParabolic.CartanSymmetric.ToString();
-    std::cout << "<br>Selected simple roots: " << sel.ToString() << "\n";
+  for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
+  { SubgroupWeylGroupParabolic& currentParabolic=outputSubgroups[i];
+    currentParabolic.MakeParabolicSubgroup(*this, sel);
+    currentParabolic.ComputeConjugacyClasses(theGlobalVariables);
+    currentParabolic.ComputeConjugacyClassesRepresentativesPreimages();
+    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    if (i==outputDecomposition.size-1)
-    { currentParabolic.conjugacyClassRepresentatives=this->conjugacyClassRepresentatives;
-      currentParabolic.conjugacyClassesSizes=this->conjugacyClassesSizes;
-      currentParabolic.sizePrivate=this->size();
-      currentParabolic.flagConjugacyClassesAreComputed=true;
-    }
     //std::cout << "<hr>before compute initial irreps";
-    currentParabolic.ComputeInitialIrreps(theGlobalVariables);
-    //std::cout << "<hr>after compute initial irreps";
-    ccBackMaps[i].SetSize(currentParabolic.ConjugacyClassCount());
-    for(int j=0; j<currentParabolic.ConjugacyClassCount(); j++)
-    { ElementWeylGroup<WeylGroup> h = currentParabolic.conjugacyClassRepresentatives[j];
-      g.generatorsLastAppliedFirst.SetSize(h.generatorsLastAppliedFirst.size);
-      for(int k=0; k<h.generatorsLastAppliedFirst.size; k++)
-        g.generatorsLastAppliedFirst[k] = sel.elements[h.generatorsLastAppliedFirst[k]];
-      bool notFound=true;
-      for(int k=0; notFound && k<this->ConjugacyClassCount(); k++)
-        for(int l=0; notFound && l<this->conjugacyClasses[k].size; l++)
-          if(this->conjugacyClasses[k][l] == g)
-          { ccBackMaps[i][j] = k;
-            notFound=false;
-          }
-      if (notFound)
-        crash << "Programming error: conjugacyclass not found. " << crash;
-    }
-    std::cout << "Conjugacy classes back maps: " << ccBackMaps[i] << std::endl;
   }
-  ClassFunction<Rational> Xi; // this will be scribbled on over and over
-  Xi.data.SetSize(this->ConjugacyClassCount()); // too big, but only allocated once
-  //std::cout << this->ToString();
-  for(int j=0; j<outputDecomposition.size; j++)
-  { outputDecomposition[j].SignRepMultiplicity.SetSize(this->ConjugacyClassCount());
-    WeylGroup& currentParabolic=outputDecomposition[j].theWeylSubgroup;
-    int indexSignRep= (j==0 ) ? 0 : 1;
-    for (int i=0; i<this->ConjugacyClassCount(); i++)
-    { for(int k=0; k<currentParabolic.ConjugacyClassCount(); k++)
-        Xi.data[k] = this->characterTable[i].data[ccBackMaps[j][k]];
-      outputDecomposition[j].SignRepMultiplicity[i]= currentParabolic.characterTable[indexSignRep].InnerProduct(Xi);
-    }
+  for(int j=0; j<outputSubgroups.size; j++)
+  { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }
 }

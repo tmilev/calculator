@@ -319,41 +319,6 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWey
   out.generatorPreimages[d-1] = G->theElements.GetIndex(G->GetRootReflection(G->RootSystem.size-1));
 }
 
-void SubgroupWeylGroup::ComputeTauSignature()
-{ MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  if(this->ccPreimages.size == 0)
-  { this->ccPreimages.SetSize(this->ConjugacyClassCount());
-    for(int i=0; i<this->ConjugacyClassCount(); i++)
-    { ElementWeylGroup<WeylGroup> g;
-      g.MakeID(*this->parent);
-      const ElementWeylGroup<WeylGroup>& currentRepresentative=this->theElements[this->conjugacyClasses[i][0]];
-      for(int j=currentRepresentative.generatorsLastAppliedFirst.size-1; j>=0; j--)
-        g*=this->parent->theElements[this->generatorPreimages[currentRepresentative.generatorsLastAppliedFirst[j]]];
-      bool notFound=true;
-      for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
-        for(int cj=0; notFound && cj<this->parent->conjugacyClasses[ci].size; cj++)
-          if(this->parent->conjugacyClasses[ci][cj] == g)
-          { this->ccPreimages[i] = ci;
-            notFound=false;
-          }
-    }
-  }
-  Vector<Rational> Xs;
-  this->GetSignCharacter(Xs);
-  Vector<Rational> Xi;
-  Xi.SetSize(this->ConjugacyClassCount());
-  this->tauSignature.SetSize(this->parent->irreps.size);
-  for(int i=0; i<this->parent->irreps.size; i++)
-  { ClassFunction<Rational> Xip = this->parent->irreps[i].GetCharacter();
-    for(int j=0; j<Xi.size; j++)
-      Xi[j] = Xip[this->ccPreimages[j]];
-    if(this->GetHermitianProduct(Xs,Xi) == 0)
-      this->tauSignature[i] = false;
-    else
-      this->tauSignature[i] = true;
-  }
-}
-
 template <typename weylgroup>
 void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 { if(G.characterTable.size == 0)

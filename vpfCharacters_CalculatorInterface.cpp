@@ -822,8 +822,8 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   if (!theWeyl.flagCharTableIsComputed)
     theWeyl.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
   std::stringstream out;
-  List<DecompositionOverSubgroup> tauSigData;
-  theWeyl.GetTauSignatures(tauSigData, theCommands.theGlobalVariableS);
+  List<SubgroupWeylGroupParabolic> parabolicSubgroups;
+  theWeyl.GetTauSignatures(parabolicSubgroups, theCommands.theGlobalVariableS);
   out << "<table border=\"1\">";
   Selection parSelrootsAreInLevi, parSelrootsAreOuttaLevi;
   parSelrootsAreInLevi.init(theWeyl.GetDim());
@@ -835,15 +835,15 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfBackToBeginning());
   out << "</tr>";
   out << "<tr><td>Irreps</td>";
-  for (int i=0; i<tauSigData.size; i++)
-  { out << "<td>" << tauSigData[i].theWeylSubgroup.theDynkinType.ToString() << "</td>";
+  for (int i=0; i<parabolicSubgroups.size; i++)
+  { out << "<td>" << parabolicSubgroups[i].theDynkinType.ToString() << "</td>";
   }
   out << "</tr>";
   for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
   { out << "<tr>";
     out << "<td>" << theWeyl.conjugacyClassRepresentatives[i].ToString() << "</td>";
-    for (int j=0; j<tauSigData.size; j++)
-      out << "<td>" << tauSigData[j].SignRepMultiplicity[i].ToString() << "</td>";
+    for (int j=0; j<parabolicSubgroups.size; j++)
+      out << "<td>" << parabolicSubgroups[j].tauSignature[i].ToString() << "</td>";
     out << "</tr>";
   }
   out << "</table>";

@@ -263,8 +263,7 @@ public:
   }
 };
 
-class DecompositionOverSubgroup; //this class works for parabolic subgroups at the moment only
-//feel free to modify to work over arbitrary groups
+class SubgroupWeylGroupParabolic;
 
 class WeylGroup
 {
@@ -282,7 +281,7 @@ class WeylGroup
   bool flagOuterAutosGeneratorsComputed;
   bool flagAllOuterAutosComputed;
   inline void ComputeFundamentalToSimpleMatrices()
-  { if (flagFundamentalToSimpleMatricesAreComputed)
+  { if (this->flagFundamentalToSimpleMatricesAreComputed)
       return;
     Vectors<Rational> fundamentalBasis;
     this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
@@ -324,7 +323,7 @@ public:
   void ComputeSquares();
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  void GetTauSignatures(List<DecompositionOverSubgroup>& outputDecomposition, GlobalVariables* theGlobalVariables=0);
+  void GetTauSignatures(List<SubgroupWeylGroupParabolic>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
   void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);
@@ -610,14 +609,6 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
-class DecompositionOverSubgroup
-{
-public:
-  DecompositionOverSubgroup(){}
-  List<Rational> SignRepMultiplicity;
-  WeylGroup theWeylSubgroup;
-};
-
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
 
@@ -629,39 +620,35 @@ public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
 
-  List<int> ccPreimages;
+  List<elementSomeGroup> conjugacyClassRepresentatives;
+  List<int> conjugacyClassesSizes; // <-in case we cant compute conjugacyClases directly.
+  List<int> ccRepresentativesPreimages;
   List<int> generatorPreimages;
-  List<int> conjugacyClassSizes; //needed in case we can't compute the sizes of the conjugacy classes but know them from somewhere (say, from GAP).
-  List<List<int> > conjugacyClasses;
-  //  List<int> lengths; // sure why not <- let's add only when needed.
+  List<List<int> > conjugacyClassesIndices;
+  bool flagConjugacyClassesAreComputed;
 
-  // this used to have a maximum value.  but then after a while examining a crash
-  // I realized that it's a subgroup of a finite group that was already in memory.
   Subgroup();
   bool CheckInitialization();
-  void init()
-  { this->parent=0;
-    this->generatorPreimages.SetSize(0);
-    this->ccPreimages.SetSize(0);
-  }
-  int ConjugacyClassCount()const
-  { return this->conjugacyClasses.size;
-  }
+  void init();
+  int ConjugacyClassCount()const;
+  int size()const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
   void CleanUpGenerators();
-  void ComputeConjugacyClasses();
+  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables);
+  void ComputeConjugacyClassesRepresentatives();
+  void ComputeConjugacyClassesRepresentativesPreimages();
   void GetSignCharacter(Vector<Rational>& out);
-  Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
+  template <typename coefficient>
+  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
 };
 
 class SubgroupWeylGroup: public Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >
 {
 public:
-  List<bool> tauSignature;
-  template <typename coefficient>
-  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
-  void ComputeTauSignature();
+  List<Rational> tauSignature;
+  void ComputeTauSignature(GlobalVariables* theGlobalVariables);
   void GetSignCharacter(Vector<Rational>& out);
 };
 
@@ -669,10 +656,13 @@ class SubgroupWeylGroupParabolic : public SubgroupWeylGroup
 {
   public:
   Matrix<Rational> SubCartanSymmetric;
+  DynkinType theDynkinType;
+  Selection generatingSimpleRoots;
   template <typename weylgroup>
-  void MakeParabolicSubgroup(weylgroup* G, const Selection sel);
+  void MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots);
+  void ComputeDynkinType();
+  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables);
 };
-
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroup> >
 {

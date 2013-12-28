@@ -102,24 +102,6 @@ Rational FiniteGroup<element>::GetHermitianProduct(const Vector<Rational>& X1, c
   return acc / this->theElements.size;
 }
 
-template <typename weylgroup>
-void SubgroupWeylGroupParabolic::MakeParabolicSubgroup(weylgroup* G, const Selection sel)
-{ MacroRegisterFunctionWithName("SubgroupWeylGroupParabolic::MakeParabolicSubgroup");
-  this->init();
-  this->parent = G;
-  int d = sel.CardinalitySelection;
-  this->SubCartanSymmetric.init(d,d);
-  for(int ii=0; ii<d; ii++)
-    for(int jj=0; jj<d; jj++)
-      this->SubCartanSymmetric(ii,jj) = G->CartanSymmetric(sel.elements[ii],sel.elements[jj]);
-  this->generatorPreimages.SetSize(d);
-  ElementWeylGroup<WeylGroup> currentSimpleReflection;
-  for(int i=0; i<d; i++)
-  { currentSimpleReflection.MakeSimpleReflection(sel.elements[i], *G);
-    this->generatorPreimages[i]=G->theElements.GetIndex(currentSimpleReflection);
-  }
-}
-
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::operator*=(const ElementWeylGroup<WeylGroup>& other)
 { if (this->owner!=other.owner)
@@ -274,38 +256,96 @@ bool Subgroup<somegroup, elementSomeGroup>::ComputeAllElements(int MaxElements, 
 
 template <typename somegroup, class elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::GetSignCharacter(Vector<Rational>& Xs)
-{ if(this->ConjugacyClassCount() == 0)
-    this->ComputeConjugacyClasses();
+{ if(!this->flagConjugacyClassesAreComputed)
+    this->ComputeConjugacyClasses(0);
   Xs.SetSize(this->ConjugacyClassCount());
-  for(int i=0; i<Xs.size; i++)
-  { int yn = this->theElements[conjugacyClasses[i][0]].generatorsLastAppliedFirst.size % 2;
-    if(yn == 0)
-      Xs[i] = 1;
-    else
-      Xs[i] = -1;
-  }
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
+    Xs[i]=this->conjugacyClassRepresentatives[i].Sign();
+}
+
+template <typename somegroup, class elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::init()
+{ this->parent=0;
+  this->generatorPreimages.SetSize(0);
+  this->generators.SetSize(0);
+  this->ccRepresentativesPreimages.SetSize(0);
+  this->conjugacyClassesIndices.SetSize(0);
+  this->theElements.Clear();
+  this->flagConjugacyClassesAreComputed=false;
 }
 
 template <typename somegroup, class elementSomeGroup>
 Subgroup<somegroup, elementSomeGroup>::Subgroup()
-{ this->parent=0;
+{ this->init();
 }
 
 template <typename somegroup, class elementSomeGroup>
-Rational Subgroup<somegroup, elementSomeGroup>::GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const
-{ Rational acc = 0;
+template <typename coefficient>
+coefficient Subgroup<somegroup, elementSomeGroup>::GetHermitianProduct
+(const Vector<coefficient>& X1, const Vector<coefficient>& X2) const
+{ coefficient acc = 0;
   for(int i=0; i<X1.size; i++)
-    acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasses[i].size;
-  return acc / this->theElements.size;
+  { acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClassesSizes[i];
+    if (this->conjugacyClassesSizes[i]==0)
+      crash << "Error: conjugacy class size is zero." << crash;
+  }
+  return acc / this->size();
 }
 
 template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClasses()
+int Subgroup<somegroup, elementSomeGroup>::size()const
+{ return this->theElements.size;
+}
+
+template <typename somegroup, class elementSomeGroup>
+int Subgroup<somegroup, elementSomeGroup>::ConjugacyClassCount()const
+{ return this->conjugacyClassRepresentatives.size;
+}
+
+template <typename somegroup, class elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentatives()
+{ this->conjugacyClassesSizes.SetSize(this->conjugacyClassesIndices.size);
+  this->conjugacyClassRepresentatives.SetSize(this->conjugacyClassesIndices.size);
+  for (int i=0; i<this->conjugacyClassesIndices.size; i++)
+  { this->conjugacyClassRepresentatives[i]=this->theElements[this->conjugacyClassesIndices[i][0]];
+    this->conjugacyClassesSizes[i]=this->conjugacyClassesIndices[i].size;
+  }
+}
+
+template <typename somegroup, class elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentativesPreimages()
+{ MacroRegisterFunctionWithName("Subgroup::ComputeConjugacyClassesRepresentativesPreimages");
+  this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
+  { bool notFound=true;
+    ElementWeylGroup<WeylGroup>& g=this->conjugacyClassRepresentatives[i];
+    for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
+      for(int cj=0; notFound && cj<this->parent->conjugacyClasses[ci].size; cj++)
+        if(this->parent->theElements[this->parent->conjugacyClassesIndices[ci][cj]] == g)
+        { this->ccRepresentativesPreimages[i] = ci;
+          notFound=false;
+        }
+    if (notFound)
+      crash << "Programming error: couldn't find preimage of a conjugacy class representative. "
+      << crash;
+  }
+  if (this->ccRepresentativesPreimages.size!=this->ConjugacyClassCount())
+    crash << "Bad representative preimages." << crash;
+  if (this->conjugacyClassesSizes.size!=this->ConjugacyClassCount())
+    crash << "Bad conjugacy class sizes." << crash;
+//  for (int i=0; i<this->ConjugacyClassCount(); i++)
+//    if (this->conjugacyClasses[i].size!=this->conjugacyClassesSizes[i])
+//      crash << "Bad conjugacy class sizes. " << crash;
+}
+
+template <typename somegroup, class elementSomeGroup>
+void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Subgroup::ComputeConjugacyClasses");
+  this->ComputeAllElements(-1, theGlobalVariables);
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
-  this->conjugacyClasses.SetSize(0);
-  this->conjugacyClasses.ReservE(120);
+  this->conjugacyClassesIndices.SetSize(0);
+  this->conjugacyClassesIndices.ReservE(120);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->theElements.size);
   List<ElementWeylGroup<somegroup> > inversesOfGenerators;
@@ -324,10 +364,12 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClasses()
           theStack.AddOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex]=true;
         }
-      this->conjugacyClasses.AddOnTop(theStack);
-      this->conjugacyClasses.LastObject()->QuickSortAscending();
+      this->conjugacyClassesIndices.AddOnTop(theStack);
+      this->conjugacyClassesIndices.LastObject()->QuickSortAscending();
     }
-  this->conjugacyClasses.QuickSortAscending();
+  this->conjugacyClassesIndices.QuickSortAscending();
+  this->ComputeConjugacyClassesRepresentatives();
+  this->flagConjugacyClassesAreComputed=true;
 }
 
 template <class coefficient>
@@ -680,15 +722,6 @@ bool WeylGroup::FreudenthalEval
   }
 //  std::cout << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   return true;
-}
-
-template <typename coefficient>
-coefficient SubgroupWeylGroup::GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const
-{ coefficient result = 0;
-  for(int i=0; i<this->conjugacyClasses.size; i++)
-    result +=leftCharacter[i].GetComplexConjugate() * rightCharacter[i].GetComplexConjugate() * this->conjugacyClasses[i].size;
-  result/=this->theElements.size;
-  return result;
 }
 
 template<class coefficient>

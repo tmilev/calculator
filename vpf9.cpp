@@ -4805,11 +4805,11 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
 }
 
 void WeylGroup::GetSignCharacter(Vector<Rational>& out)
-{ if(this->ConjugacyClassCount() == 0)
+{ if(!this->flagConjugacyClassesAreComputed)
     this->ComputeConjugacyClasses();
   out.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-  { int yn = this->conjugacyClasses[i][0].generatorsLastAppliedFirst.size % 2;
+  { int yn = this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size % 2;
     if(yn == 0)
       out[i] = 1;
     else
@@ -4819,11 +4819,11 @@ void WeylGroup::GetSignCharacter(Vector<Rational>& out)
 
 void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
 { MacroRegisterFunctionWithName("SubgroupWeylGroupParabolic::GetSignCharacter");
-  if(this->conjugacyClasses.size == 0)
-    this->ComputeConjugacyClasses();
-  out.SetSize(this->conjugacyClasses.size);
-  for(int i=0; i<this->conjugacyClasses.size; i++)
-    out[i] = this->theElements[this->conjugacyClasses[i][0]].Sign();
+  if(!this->flagConjugacyClassesAreComputed)
+    this->ComputeConjugacyClasses(0);
+  out.SetSize(ConjugacyClassCount());
+  for(int i=0; i<this->ConjugacyClassCount(); i++)
+    out[i] = this->conjugacyClassRepresentatives[i].Sign();
 }
 
 void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output)

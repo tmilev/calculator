@@ -4827,7 +4827,7 @@ bool CandidateSSSubalgebra::IsDirectSummandOf(const CandidateSSSubalgebra& other
       if (this->HasConjugateHsTo(conjugationCandidates))
         return true;
     }
-  while (selectedTypes.IncrementReturnFalseIfBackToBeginning());
+  while (selectedTypes.IncrementReturnFalseIfPastLast());
   return false;
 }
 

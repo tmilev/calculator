@@ -12,7 +12,7 @@ class SelectionOneItem
   int MaxMultiplicity;
   int SelectedMult;
   SelectionOneItem():MaxMultiplicity(0), SelectedMult(-1){}
-  bool IncrementReturnFalseIfBackToBeginning()
+  bool IncrementReturnFalseIfPastLast()
   { if (this->MaxMultiplicity==0)
       return false;
     this->SelectedMult++;
@@ -44,9 +44,9 @@ class Incrementable
       result*=this->theElements[i].GetNumTotalCombinations();
     return result;
   }
-  bool IncrementReturnFalseIfBackToBeginning()
+  bool IncrementReturnFalseIfPastLast()
   { for (int i=this->theElements.size-1; i>=0; i--)
-      if (this->theElements[i].IncrementReturnFalseIfBackToBeginning())
+      if (this->theElements[i].IncrementReturnFalseIfPastLast())
         return true;
     return false;
   }
@@ -99,7 +99,7 @@ public:
   std::string ToString()const
   { return this->theSelection.ToString();
   }
-  bool IncrementReturnFalseIfBackToBeginning()
+  bool IncrementReturnFalseIfPastLast()
   { this->theSelection.incrementSelectionFixedCardinality(this->DesiredSubsetSize);
     for (int i=0; i<this->DesiredSubsetSize; i++)
       if (!this->theSelection.selected[i])
@@ -126,7 +126,7 @@ class SelectionPositiveIntegers
     for (int i=1; i<this->theInts.size; i++)
       this->theInts[i]=0;
   }
-  bool IncrementReturnFalseIfBackToBeginning()
+  bool IncrementReturnFalseIfPastLast()
   { for (int i=this->theInts.size-2; i>=0; i--)
       if (this->theInts[i]>0)
       { this->theInts[i]--;

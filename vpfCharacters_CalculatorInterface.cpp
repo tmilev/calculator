@@ -282,7 +282,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylG
   { int indexMe=this->ownerGroup->irreps.GetIndex(*this);
     if(indexMe== -1)
     { this->ownerGroup->AddIrreducibleRepresentation(*this);
-      indexMe=this->ownerGroup->irreps.size-1;
+      indexMe=this->ownerGroup->irreps.GetIndex(*this);
     }
     outputIrrepMults.AddMonomial(this->ownerGroup->characterTable[indexMe], 1);
     return true;
@@ -434,7 +434,7 @@ void WeylGroup::AddCharacter(const ClassFunction<Rational>& X)
 void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->theElements.size == 0)
-    this->ComputeConjugacyClasses(theGlobalVariables);
+    this->ComputeCC(theGlobalVariables);
   this->ComputeInitialIrreps(theGlobalVariables);
   WeylGroupRepresentation<Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
@@ -652,9 +652,18 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupLoadOrComputeCharTable");
-  if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(theCommands, input, output))
+  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
-
+  WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
+  if (theGroup.GetDim()>8)
+  { theCommands.Comments << "Computing character table disabled for rank>=8, modify file " << __FILE__
+    << " line "  << __LINE__ << " to change that. ";
+    return false;
+  }
+  std::stringstream reportStream;
+  theGroup.ComputeOrLoadCharacterTable(theCommands.theGlobalVariableS, &reportStream);
+  theCommands.Comments << reportStream.str();
+  return output.AssignValue(theGroup, theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& theCommands, const Expression& input, Expression& output)
@@ -662,13 +671,15 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
-  if (!HardCodedData::LoadConjugacyClassesWeylGroup(theGroup))
-  { theCommands.Comments << "Conjugacy classes of Dynkin type " << theGroup.theDynkinType.ToString() << " not hard-coded. ";
-    if (!CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch(theCommands, input, output))
-      return false;
-  } else
-    theCommands.Comments << "Conjugacy classes of Dynkin type " << theGroup.theDynkinType.ToString() << " are hard-coded, loading from memory. ";
-  return true;
+  if (theGroup.GetDim()>8)
+  { theCommands.Comments << "Conjugacy classes computation disabled for rank >8, edit "
+    << "file " << __FILE__ << " line " << __LINE__ << " to change that.";
+    return false;
+  }
+  std::stringstream out;
+  theGroup.ComputeOrLoadConjugacyClasses(theCommands.theGlobalVariableS, &out);
+  theCommands.Comments << out.str();
+  return output.AssignValue(theGroup, theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch(Calculator& theCommands, const Expression& input, Expression& output)
@@ -682,7 +693,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScra
     return false;
   }
   double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theGroup.ComputeConjugacyClasses(theCommands.theGlobalVariableS);
+  theGroup.ComputeCC(theCommands.theGlobalVariableS);
   //std::stringstream out;
   theCommands.Comments << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
   << " second(s). ";
@@ -819,29 +830,27 @@ bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& 
   if (!output.IsOfType<WeylGroup>())
     return false;
   WeylGroup& theWeyl=output.GetValueNonConst<WeylGroup>();
-  if (!theWeyl.flagCharTableIsComputed)
-    theWeyl.ComputeIrreducibleRepresentationsTodorsVersion(theCommands.theGlobalVariableS);
   std::stringstream out;
-  List<SubgroupWeylGroupParabolic> parabolicSubgroups;
+  List<SubgroupRootReflections> parabolicSubgroups;
   theWeyl.GetTauSignatures(parabolicSubgroups, theCommands.theGlobalVariableS);
-  out << "<table border=\"1\">";
+  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
   Selection parSelrootsAreInLevi, parSelrootsAreOuttaLevi;
   parSelrootsAreInLevi.init(theWeyl.GetDim());
-  out << "<tr><td></td>";
+  out << "<tr><td>Irreducible representation characters</td>";
   do
   { parSelrootsAreOuttaLevi=parSelrootsAreInLevi;
     parSelrootsAreOuttaLevi.InvertSelection();
     out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
-  } while (parSelrootsAreInLevi.IncrementReturnFalseIfBackToBeginning());
+  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
   out << "</tr>";
-  out << "<tr><td>Irreps</td>";
+  out << "<tr><td></td>";
   for (int i=0; i<parabolicSubgroups.size; i++)
   { out << "<td>" << parabolicSubgroups[i].theDynkinType.ToString() << "</td>";
   }
   out << "</tr>";
   for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
   { out << "<tr>";
-    out << "<td>" << theWeyl.conjugacyClassRepresentatives[i].ToString() << "</td>";
+    out << "<td>" << theWeyl.characterTable[i].ToString() << "</td>";
     for (int j=0; j<parabolicSubgroups.size; j++)
       out << "<td>" << parabolicSubgroups[j].tauSignature[i].ToString() << "</td>";
     out << "</tr>";

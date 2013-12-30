@@ -291,7 +291,7 @@ void ComputeIrreps(WeylGroup& G)
 }
 
 // this is incorrect.  Do not use it.
-void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWeylGroupParabolic& out)
+void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRootReflections& out)
 { out.init();
   out.parent = G;
   int d = sel.CardinalitySelection+1;
@@ -2397,7 +2397,7 @@ int main(void)
   /*
       std::cout << v << G.DecomposeTodorsVector(v) << G.ComposeTodorsVector(G.DecomposeTodorsVector(v)) << std::endl;
 
-      G.ComputeConjugacyClasses();
+      G.ComputeCC();
       std::cout << G.conjugacyClasses << std::endl;
       std::cout << G.ccSizes << std::endl;
       G.ComputeSquares();
@@ -2754,7 +2754,7 @@ int main(void)
      PrettyPrintTauSignatures(G,ts);
      ts.writefile("c7ts");
   */
-//   G.ComputeConjugacyClasses();
+//   G.ComputeCC();
 //   std::cout << "Conjugacy class representatives" << std::endl;
 //   for(int i=0; i<G.ConjugacyClassCount(); i++)
 //    std::cout << G.rhoOrbit[G.conjugacyClasses[i][0]] << std::endl;
@@ -2766,7 +2766,7 @@ int main(void)
 /*
   AnotherWeylGroup<f211,PackedVector<f211> > G;
   G.MakeArbitrarySimple('E',8);
-  G.ComputeConjugacyClasses();
+  G.ComputeCC();
   JSData out;
   for(int i=0; i<G.ConjugacyClassCount(); i++)
     out[i] = (double) G.conjugacyClasses[i].size;

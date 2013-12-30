@@ -76,7 +76,7 @@ public:
   void MakeArbitrarySimple(char letter, int number);
   void ComputeRho();
   void ComputeAllElements();
-  void ComputeConjugacyClasses();
+  void ComputeCC();
   void ComputeClassMap();
   Matrix<Rational>& GetClassMatrix(int cc);
   void ComputeClassMatrices(); // O(W.size)
@@ -288,7 +288,7 @@ void AnotherWeylGroup<scalar, templateVector>::ComputeAllElements()
 }
 
 template <typename scalar, typename templateVector>
-void AnotherWeylGroup<scalar, templateVector>::ComputeConjugacyClasses()
+void AnotherWeylGroup<scalar, templateVector>::ComputeCC()
 { std::cout << "Getting conjugacy classes...";
   if(this->rhoOrbit.size == 0)
     this->ComputeAllElements();
@@ -335,7 +335,7 @@ template<typename scalar, typename templateVector>
 Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int cc)
 { if(this->classMatrices.size == 0)
   { if(this->ConjugacyClassCount() == 0)
-      this.ComputeConjugacyClasses();
+      this.ComputeCC();
     this->classMatrices.SetSize(this->ConjugacyClassCount());
   }
   if(this->classMap.size == 0)
@@ -347,7 +347,7 @@ Matrix<Rational>& AnotherWeylGroup<scalar, templateVector>::GetClassMatrix(int c
 template<typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::ComputeClassMatrices()
 { if(this->ConjugacyClassCount() == 0)
-    this->ComputeConjugacyClasses();
+    this->ComputeCC();
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { std::cout << "//getting class matrix " << i << std::endl;
     this->GetClassMatrix(i);
@@ -370,7 +370,7 @@ int AnotherWeylGroup<scalar, templateVector>::GetRootReflection(int i) const
 template <typename scalar, typename templateVector>
 void AnotherWeylGroup<scalar, templateVector>::GetSignCharacter(Vector<Rational>& out)
 { if(this->ConjugacyClassCount() == 0)
-    this->ComputeConjugacyClasses();
+    this->ComputeCC();
   out.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { List<int> srs;
@@ -411,7 +411,7 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 template <typename somegroup>
 List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.ConjugacyClassCount() == 0)
-    G.ComputeConjugacyClasses();
+    G.ComputeCC();
   List<int> classmap;
   int sizeOfG=G.size();
   classmap.SetSize(sizeOfG);

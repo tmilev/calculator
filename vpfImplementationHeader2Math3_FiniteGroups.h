@@ -52,7 +52,7 @@ bool FiniteGroup<element>::MakeFrom(const List<element>& generators, int MaxElem
 }
 
 template <typename element>
-void FiniteGroup<element>::ComputeConjugacyClasses()
+void FiniteGroup<element>::ComputeCC()
 { List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
   this->conjugacyClasses.SetSize(0);
@@ -83,7 +83,7 @@ void FiniteGroup<element>::ComputeConjugacyClasses()
 template <typename element>
 void FiniteGroup<element>::GetSignCharacter(Vector<Rational>& Xs)
 { if(this->ConjugacyClassCount() == 0)
-    this->ComputeConjugacyClasses();
+    this->ComputeCC();
   Xs.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<Xs.size; i++)
   { int yn = this->lengths[conjugacyClasses[i][0]] % 2;
@@ -257,7 +257,7 @@ bool Subgroup<somegroup, elementSomeGroup>::ComputeAllElements(int MaxElements, 
 template <typename somegroup, class elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::GetSignCharacter(Vector<Rational>& Xs)
 { if(!this->flagConjugacyClassesAreComputed)
-    this->ComputeConjugacyClasses(0);
+    this->ComputeCC(0);
   Xs.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     Xs[i]=this->conjugacyClassRepresentatives[i].Sign();
@@ -303,7 +303,7 @@ int Subgroup<somegroup, elementSomeGroup>::ConjugacyClassCount()const
 }
 
 template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentatives()
+void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesFromCC()
 { this->conjugacyClassesSizes.SetSize(this->conjugacyClassesIndices.size);
   this->conjugacyClassRepresentatives.SetSize(this->conjugacyClassesIndices.size);
   for (int i=0; i<this->conjugacyClassesIndices.size; i++)
@@ -313,8 +313,8 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentativ
 }
 
 template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentativesPreimages()
-{ MacroRegisterFunctionWithName("Subgroup::ComputeConjugacyClassesRepresentativesPreimages");
+void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages()
+{ MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
   this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { bool notFound=true;
@@ -339,8 +339,8 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClassesRepresentativ
 }
 
 template <typename somegroup, class elementSomeGroup>
-void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClasses(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("Subgroup::ComputeConjugacyClasses");
+void Subgroup<somegroup, elementSomeGroup>::ComputeCC(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("Subgroup::ComputeCC");
   this->ComputeAllElements(-1, theGlobalVariables);
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
@@ -368,7 +368,7 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeConjugacyClasses(GlobalVariab
       this->conjugacyClassesIndices.LastObject()->QuickSortAscending();
     }
   this->conjugacyClassesIndices.QuickSortAscending();
-  this->ComputeConjugacyClassesRepresentatives();
+  this->ComputeCCRepresentativesFromCC();
   this->flagConjugacyClassesAreComputed=true;
 }
 

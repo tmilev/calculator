@@ -31,33 +31,39 @@ void Rational::AssignString(const std::string& input)
 { this->MakeZero();
   if (input=="0")
     return;
-  bool inputIsNegative=false;
-  int positionInTempS=0;
-  if (input[0]=='-')
-  { positionInTempS++;
-    inputIsNegative=true;
+  int sign=1;
+  int ReaderDigit=-1;
+  Rational readerDen=1;
+  int positionInString=0;
+  for (; positionInString<(signed)input.size(); positionInString++)
+  { if (input[positionInString]=='-')
+    { sign=-1;
+      positionInString++;
+      break;
+    }
+    if (MathRoutines::isADigit(input[positionInString]))
+      break;
   }
-  std::string buffer;
-  buffer.reserve(input.size());
-  LargeIntUnsigned reader;
-  bool readingNumerator=true;
-  for (unsigned i=positionInTempS; i<input.length(); i++)
-  { char a= input[i];
-    if (a=='/')
-    { readingNumerator=false;
-      reader.AssignString(buffer);
-      this->operator=(reader);
-      buffer="";
-    } else
-      buffer.push_back(input[i]);
+  for (; positionInString<(signed)input.size(); positionInString++)
+  { if (MathRoutines::isADigit(input[positionInString], &ReaderDigit))
+    { *this*=10;
+      *this+=ReaderDigit;
+    }
+    if (input[positionInString]=='/')
+    { positionInString++;
+      readerDen=0;
+      break;
+    }
   }
-  reader.AssignString(buffer);
-  if (readingNumerator)
-    this->operator=(reader);
-  else
-    this->operator/=(reader);
-  if (inputIsNegative)
-    this->Minus();
+  for (; positionInString<(signed)input.size(); positionInString++)
+    if (MathRoutines::isADigit(input[positionInString], &ReaderDigit))
+    { readerDen*=10;
+      readerDen+=ReaderDigit;
+    }
+  if (readerDen==0)
+    crash << "Programming error: Rational::AssignString encountered a zero denominator. " << crash;
+  *this/=readerDen;
+  *this*=sign;
 }
 
 void Selection::operator=(const Vector<Rational>& other)

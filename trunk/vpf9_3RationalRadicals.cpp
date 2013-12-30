@@ -40,7 +40,7 @@ void AlgebraicClosureRationals::GetMultiplicativeOperatorFromRadicalSelection(co
     resultVectorSel.ComputeIndicesFromSelection();
     tempM.MakeEij(this->GetIndexFromRadicalSelection(resultVectorSel), this->GetIndexFromRadicalSelection(vectorActedOnSel));
     outputOp.AddMonomial(tempM, theCoeff);
-  } while (vectorActedOnSel.IncrementReturnFalseIfBackToBeginning());
+  } while (vectorActedOnSel.IncrementReturnFalseIfPastLast());
 }
 
 void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
@@ -57,7 +57,7 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
       out << "\\sqrt{" << theRad.ToString() << "}";
     }
     this->DisplayNamesBasisElements[this->GetIndexFromRadicalSelection(theSel)]=out.str();
-  } while (theSel.IncrementReturnFalseIfBackToBeginning());
+  } while (theSel.IncrementReturnFalseIfPastLast());
 }
 
 int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& theSel)
@@ -134,12 +134,12 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
       }
 //        std::cout << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
     currentInjection.AddMonomial(MonomialMatrix(this->GetIndexFromRadicalSelection(largerFieldSel), this->GetIndexFromRadicalSelection(smallerFieldSel)), 1);
-  }while (smallerFieldSel.IncrementReturnFalseIfBackToBeginning());
+  }while (smallerFieldSel.IncrementReturnFalseIfPastLast());
   this->theQuadraticRadicals=radicalsNew;
   largerFieldSel.init(radicalsNew.size);
   do
     this->GetMultiplicativeOperatorFromRadicalSelection(largerFieldSel, this->theBasisMultiplicative[this->GetIndexFromRadicalSelection(largerFieldSel)]);
-  while(largerFieldSel.IncrementReturnFalseIfBackToBeginning());
+  while(largerFieldSel.IncrementReturnFalseIfPastLast());
 //  std::cout << "<hr>Computing display strings";
   this->RegisterNewBasis(currentInjection);
   this->ComputeDisplayStringsFromRadicals();
@@ -170,7 +170,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
 //  int counter =0;
   this->GeneratingElemenT.owner=this;
   this->GeneratingElemenT.basisIndex=this->theBasesAdditive.size-1;
-  for (theSel.IncrementReturnFalseIfBackToBeginning(); ; theSel.IncrementReturnFalseIfBackToBeginning())
+  for (theSel.IncrementReturnFalseIfPastLast(); ; theSel.IncrementReturnFalseIfPastLast())
   { this->GeneratingElemenT.theElT.MakeZero();
     for (int i=0; i<theSel.theInts.size; i++)
     { MonomialVector tempV;

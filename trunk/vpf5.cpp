@@ -2217,8 +2217,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       << " but it is not. " << crash;
     *this=interPoly;
     return true;
-  } while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
-  while (signSel.IncrementReturnFalseIfBackToBeginning());
+  } while (theDivisorSel.IncrementReturnFalseIfPastLast());
+  while (signSel.IncrementReturnFalseIfPastLast());
   output=*this;
   this->MakeOne(1);
   return true;
@@ -2349,7 +2349,7 @@ bool Calculator::innerPrintZnEnumeration(Calculator& theCommands, const Expressi
   std::stringstream out2, out;
   LargeIntUnsigned gradeLarge=(unsigned) grade;
   int counter=0;
-  for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading()==gradeLarge; theSel.IncrementReturnFalseIfBackToBeginning())
+  for (theSel.SetFirstInGradeLevel(gradeLarge); theSel.GetGrading()==gradeLarge; theSel.IncrementReturnFalseIfPastLast())
   { out2 << theSel.ToString() << "<br>";
     counter++;
   }

@@ -2375,7 +2375,7 @@ public:
   }
   std::string ToString()const;
   void incrementSelection();
-  bool IncrementReturnFalseIfBackToBeginning()
+  bool IncrementReturnFalseIfPastLast()
   { this->incrementSelection();
     if (this->CardinalitySelection==0)
       return false;
@@ -2450,7 +2450,7 @@ public:
   int NumSelectionsTotal()
   { return MathRoutines::KToTheNth(MaxMultiplicity, this->Multiplicities.size);
   }
-  bool IncrementReturnFalseIfBackToBeginning();
+  bool IncrementReturnFalseIfPastLast();
   void IncrementSubset();
   void IncrementSubsetFixedCardinality(int Cardinality);
   bool HasMultiplicitiesZeroAndOneOnly();

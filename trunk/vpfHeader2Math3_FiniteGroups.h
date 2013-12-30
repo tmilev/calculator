@@ -26,7 +26,7 @@ public:
 
   List<int> generators;
   List<List<int> > conjugacyClasses;
-  void ComputeConjugacyClasses();
+  void ComputeCC();
   void GetSignCharacter(Vector<Rational>& out);
   Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
 };
@@ -52,6 +52,7 @@ public:
   int Sign()const
   { return this->generatorsLastAppliedFirst.size %2 ==0 ? 1 : -1;
   }
+  static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, ElementWeylGroup& inputOutputConjugated);
   void MakeCanonical();
   void MakeID(templateWeylGroup& inputWeyl);
   void ToString(std::string& output)
@@ -263,7 +264,7 @@ public:
   }
 };
 
-class SubgroupWeylGroupParabolic;
+class SubgroupRootReflections;
 
 class WeylGroup
 {
@@ -293,6 +294,8 @@ class WeylGroup
   }
   bool flagNumberOfElementsComputedToFitInInt;
   int sizePrivate;
+  bool LoadConjugacyClassesWeylGroup();
+  bool LoadCharTableWeylGroup();
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
@@ -323,8 +326,12 @@ public:
   void ComputeSquares();
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  void GetTauSignatures(List<SubgroupWeylGroupParabolic>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables=0);
+  void GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void ComputeCC(GlobalVariables* theGlobalVariables=0);
+
+  void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
+  void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
+
   void ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
@@ -332,6 +339,8 @@ public:
   void AddCharacter(const ClassFunction<Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToString(FormatExpressions* theFormat=0);
+  std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat=0);
+  std::string ToStringCppCharTable(FormatExpressions* theFormat=0);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeMeFromMyCartanSymmetric();
@@ -342,6 +351,7 @@ public:
   int ConjugacyClassCount()const
   { return this->conjugacyClassRepresentatives.size;
   }
+  bool AreConjugate(const ElementWeylGroup<WeylGroup>& left, const ElementWeylGroup<WeylGroup>& right);
   bool CheckConsistency()const;
   bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
@@ -609,6 +619,46 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
+//This class iterates over all elements of the orbit of a single element
+//using the generators of the group.
+//The element can be an element of the group, representation, etc.
+//(note that the group elements can be interpretted as elements of
+//the group ring representation).
+template <class elementGroup, class elementRepresentation>
+class OrbitIterator
+{
+public:
+  typedef void (*GroupAction)(const elementGroup& actingElement, elementRepresentation& inputOutput);
+private:
+  HashedList<elementRepresentation> privateLayer1, privateLayer2, privateLayer3;
+  elementRepresentation bufferRepresentationElement;
+public:
+  HashedList<elementRepresentation>* previousLayer;
+  HashedList<elementRepresentation>* currentLayer;
+  HashedList<elementRepresentation>* nextLayer;
+  OrbitIterator::GroupAction theGroupAction;
+  List<elementGroup> theGroupGeneratingElements;
+  int indexCurrentElement;
+  OrbitIterator()
+  { this->reset();
+  }
+  void reset()
+  { this->previousLayer=&this->privateLayer1;
+    this->currentLayer=&this->privateLayer2;
+    this->nextLayer=&this->privateLayer3;
+    this->theGroupAction=0;
+    this->indexCurrentElement=-1;
+  }
+  const elementRepresentation& GetCurrentElement();
+  bool IncrementReturnFalseIfPastLast();
+  void init
+  (const List<elementGroup>& inputGenerators, const elementRepresentation& inputElement, OrbitIterator::GroupAction inputGroupAction);
+};
+
+class OrbitIteratorWeylGroup: public OrbitIterator<ElementWeylGroup<WeylGroup>, ElementWeylGroup<WeylGroup> >
+{
+};
+
 template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
 
@@ -636,9 +686,9 @@ public:
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
   void CleanUpGenerators();
-  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables);
-  void ComputeConjugacyClassesRepresentatives();
-  void ComputeConjugacyClassesRepresentativesPreimages();
+  void ComputeCC(GlobalVariables* theGlobalVariables);
+  void ComputeCCRepresentativesFromCC();
+  void ComputeCCRepresentativesPreimages();
   void GetSignCharacter(Vector<Rational>& out);
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
@@ -652,7 +702,7 @@ public:
   void GetSignCharacter(Vector<Rational>& out);
 };
 
-class SubgroupWeylGroupParabolic : public SubgroupWeylGroup
+class SubgroupRootReflections : public SubgroupWeylGroup
 {
   public:
   Matrix<Rational> SubCartanSymmetric;
@@ -661,7 +711,7 @@ class SubgroupWeylGroupParabolic : public SubgroupWeylGroup
   template <typename weylgroup>
   void MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots);
   void ComputeDynkinType();
-  void ComputeConjugacyClasses(GlobalVariables* theGlobalVariables);
+  void ComputeCC(GlobalVariables* theGlobalVariables);
 };
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroup> >

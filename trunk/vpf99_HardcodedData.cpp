@@ -1,12 +1,6 @@
-#include "vpfHeader2Math9_HardCodedData.h"
 #include "vpfHeader2Math3_FiniteGroups.h"
 
 static ProjectInformationInstance ProjectInfoVpfHardCodedLoader(__FILE__, "Hard-coded data loading");
-
-void HardCodedData::LoadConjugacyClassesWeylGroupNoFail(WeylGroup& inputOutput)
-{ if (!HardCodedData::LoadConjugacyClassesWeylGroup(inputOutput))
-    crash << "Function LoadConjugacyClassesWeylGroupNoFail not allowed to fail. Input: " << inputOutput.theDynkinType.ToString() << crash;
-}
 
 template<class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
@@ -37,6 +31,37 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
   }
   if (!dontMakeCanonical_SET_TRUE_ON_YOUR_OWN_RISK)
     this->MakeCanonical();
+}
+
+void WeylGroup::ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables, std::stringstream* reportStream)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
+  if (this->flagCharTableIsComputed)
+    return;
+  this->ComputeOrLoadConjugacyClasses(theGlobalVariables, reportStream);
+  if (this->LoadCharTableWeylGroup())
+  { if (reportStream!=0)
+      *reportStream << "The character table of " << this->theDynkinType.ToString()
+      << " is precomputed (hard-coded in c++), loading directly. ";
+    this->flagCharTableIsComputed=true;
+    return;
+  }
+  this->ComputeIrreducibleRepresentationsTodorsVersion(theGlobalVariables);
+  this->flagCharTableIsComputed=true;
+}
+
+void WeylGroup::ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables, std::stringstream* reportStream)
+{ MacroRegisterFunctionWithName("WeylGroup::ComputeOrLoadCharacterTable");
+  if (this->flagConjugacyClassesAreComputed)
+    return;
+  if (this->LoadConjugacyClassesWeylGroup())
+  { if (reportStream!=0)
+      *reportStream << "The conjugacy classes of " << this->theDynkinType.ToString()
+      << " are precomputed (hard-coded in c++), loading directly. ";
+    this->flagConjugacyClassesAreComputed=true;
+    return;
+  }
+  this->ComputeCC(theGlobalVariables);
+  this->flagConjugacyClassesAreComputed=true;
 }
 
 bool LoadConjugacyClassesE1_6(WeylGroup& output)
@@ -153,14 +178,68 @@ bool LoadConjugacyClassesF1_4(WeylGroup& output)
   return true;
 }
 
-bool HardCodedData::LoadConjugacyClassesWeylGroup(WeylGroup& inputOutput)
-{ if (inputOutput.theDynkinType.ToString()=="F^{1}_4")
-    return LoadConjugacyClassesF1_4(inputOutput);
-  if (inputOutput.theDynkinType.ToString()=="E^{1}_6")
-    return LoadConjugacyClassesE1_6(inputOutput);
+bool LoadCharTableF1_4(WeylGroup& output)
+{ output.characterTable.SetExpectedSize(1152); output.characterTable.SetSize(0);
+  ClassFunction<Rational> currentCF;
+  currentCF.G=&output;
+  currentCF.data.AssignString("(1  , 1  , -1 , -1 , -1 , -1 , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , -1 , -1 , -1 , -1 , -1 , -1 , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , -1 , 1  , 1  , -1 , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , -1 , -1 , -1 , -1 , 1  , 1  , 1  , -1 , -1 , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , 1  , -1 , -1 , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , -1 , -1 , -1 , 1  , -1 , -1 , -1 , 1  , 1  , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 2  , -2 , 0  , 0  , -2 , 2  , -1 , -1 , 2  , 2  , -1 , -1 , 2  , 0  , 0  , 0  , -2 , 0  , 0  , 0  , 1  , 1  , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 2  , 0  , -2 , -2 , 0  , 2  , -1 , -1 , 2  , -1 , 2  , 2  , -1 , 0  , 0  , 0  , 0  , -2 , 1  , 1  , 0  , 0  , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 2  , 0  , 2  , 2  , 0  , 2  , -1 , -1 , 2  , -1 , 2  , 2  , -1 , 0  , 0  , 0  , 0  , 2  , -1 , -1 , 0  , 0  , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 2  , 2  , 0  , 0  , 2  , 2  , -1 , -1 , 2  , 2  , -1 , -1 , 2  , 0  , 0  , 0  , 2  , 0  , 0  , 0  , -1 , -1 , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(4  , -4 , -2 , -2 , 2  , 2  , 0  , 2  , -2 , 0  , 1  , 1  , -1 , -1 , 2  , -2 , 0  , 0  , 0  , -1 , 1  , 1  , -1 , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(4  , -4 , -2 , 2  , -2 , 2  , 0  , 2  , -2 , 0  , 1  , 1  , -1 , -1 , -2 , 2  , 0  , 0  , 0  , 1  , -1 , 1  , -1 , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(4  , -4 , 2  , -2 , 2  , -2 , 0  , 2  , -2 , 0  , 1  , 1  , -1 , -1 , -2 , 2  , 0  , 0  , 0  , -1 , 1  , -1 , 1  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(4  , -4 , 2  , 2  , -2 , -2 , 0  , 2  , -2 , 0  , 1  , 1  , -1 , -1 , 2  , -2 , 0  , 0  , 0  , 1  , -1 , -1 , 1  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(4  , 4  , 0  , 0  , 0  , 0  , 4  , 1  , 1  , 4  , -2 , -2 , -2 , -2 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(6  , 6  , 0  , 0  , 0  , 0  , 2  , 3  , 3  , -2 , 0  , 0  , 0  , 0  , -2 , -2 , 2  , 0  , 0  , 0  , 0  , 0  , 0  , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(6  , 6  , 0  , 0  , 0  , 0  , 2  , 3  , 3  , -2 , 0  , 0  , 0  , 0  , 2  , 2  , -2 , 0  , 0  , 0  , 0  , 0  , 0  , -1 , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(8  , -8 , -4 , 0  , 0  , 4  , 0  , -2 , 2  , 0  , 2  , -1 , 1  , -2 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , -1 , 1  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(8  , -8 , 0  , -4 , 4  , 0  , 0  , -2 , 2  , 0  , -1 , 2  , -2 , 1  , 0  , 0  , 0  , 0  , 0  , 1  , -1 , 0  , 0  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(8  , -8 , 0  , 4  , -4 , 0  , 0  , -2 , 2  , 0  , -1 , 2  , -2 , 1  , 0  , 0  , 0  , 0  , 0  , -1 , 1  , 0  , 0  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(8  , -8 , 4  , 0  , 0  , -4 , 0  , -2 , 2  , 0  , 2  , -1 , 1  , -2 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1  , -1 , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(9  , 9  , -3 , -3 , -3 , -3 , -3 , 0  , 0  , 1  , 0  , 0  , 0  , 0  , 1  , 1  , 1  , 1  , 1  , 0  , 0  , 0  , 0  , 0  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(9  , 9  , -3 , 3  , 3  , -3 , -3 , 0  , 0  , 1  , 0  , 0  , 0  , 0  , -1 , -1 , -1 , 1  , -1 , 0  , 0  , 0  , 0  , 0  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(9  , 9  , 3  , -3 , -3 , 3  , -3 , 0  , 0  , 1  , 0  , 0  , 0  , 0  , -1 , -1 , -1 , -1 , 1  , 0  , 0  , 0  , 0  , 0  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(9  , 9  , 3  , 3  , 3  , 3  , -3 , 0  , 0  , 1  , 0  , 0  , 0  , 0  , 1  , 1  , 1  , -1 , -1 , 0  , 0  , 0  , 0  , 0  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(12 , 12 , 0  , 0  , 0  , 0  , 4  , -3 , -3 , -4 , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 1  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(16 , -16, 0  , 0  , 0  , 0  , 0  , 2  , -2 , 0  , -2 , -2 , 2  , 2  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  return true;
+}
+
+bool LoadCharTableB1_3(WeylGroup& output)
+{ output.characterTable.SetExpectedSize(48); output.characterTable.SetSize(0);
+  ClassFunction<Rational> currentCF;
+  currentCF.G=&output;
+  currentCF.data.AssignString("(1  , -1 , -1 , 1  , -1 , 1  , 1  , -1 , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , -1 , -1 , 1  , 1  , -1 , -1 , 1  , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , 1  , 1  , -1 , -1 , -1 , -1 , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , -2 , -2 , 2  , 0  , 0  , 0  , 0  , -1 , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 2  , 2  , 2  , 0  , 0  , 0  , 0  , -1 , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(3  , -3 , 1  , -1 , -1 , 1  , -1 , 1  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(3  , -3 , 1  , -1 , 1  , -1 , 1  , -1 , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(3  , 3  , -1 , -1 , -1 , -1 , 1  , 1  , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(3  , 3  , -1 , -1 , 1  , 1  , -1 , -1 , 0  , 0  )"); output.characterTable.AddOnTop(currentCF);
+  return true;
+}
+
+bool WeylGroup::LoadConjugacyClassesWeylGroup()
+{ if (this->theDynkinType.ToString()=="F^{1}_4")
+    return LoadConjugacyClassesF1_4(*this);
+  if (this->theDynkinType.ToString()=="E^{1}_6")
+    return LoadConjugacyClassesE1_6(*this);
 
   return false;
 }
 
-
-
+bool WeylGroup::LoadCharTableWeylGroup()
+{ if (this->theDynkinType.ToString()=="B^{1}_3")
+    return LoadCharTableB1_3(*this);
+  if (this->theDynkinType.ToString()=="F^{1}_4")
+    return LoadCharTableF1_4(*this);
+  return false;
+}

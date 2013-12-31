@@ -996,6 +996,7 @@ public:
   void AssignFloor()const
   {}
   void AssignMinPoly(const Matrix<coefficient>& input);
+  void AssignCharPoly(const Matrix<coefficient>& input);
   void AssignMonomialWithExponent(Vector<Rational>& r, const coefficient& theCoeff=1)
   { MonomialP tempM=r;
     this->MakeZero(r.size);

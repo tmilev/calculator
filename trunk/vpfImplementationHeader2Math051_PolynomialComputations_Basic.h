@@ -421,9 +421,33 @@ void Polynomial<coefficient>::TimesInteger(int a)
   this->TimesRational(r);
 }
 
+
+template <class coefficient>
+void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
+{ MacroRegisterFunctionWithName("Polynomial::AssignCharPoly");
+  if (input.NumCols!=input.NumRows)
+    crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
+  int n = input.NumCols;
+  this->MakeConst(1);
+  this->data.SetSize(n+1);
+  this->data[0] = 1;
+  Matrix<coefficient> acc;
+  acc = input;
+  coefficient currenCF;
+  for(int i=1; i<n; i++)
+  { currenCF=-acc.GetTrace()/i;
+    this->AddMonomial(MonomialP(i), currenCF);
+    for(int j=0; j<n; j++)
+      acc(j,j) += currenCF;
+    acc.MultiplyOnTheLeft(input);
+  }
+  this->AddMonomial(MonomialP(n), -acc.GetTrace()/n);
+}
+
 template <class coefficient>
 void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
-{ if (input.NumCols!=input.NumRows)
+{ MacroRegisterFunctionWithName("Polynomial::AssignMinPoly");
+  if (input.NumCols!=input.NumRows)
     crash << "Programming error: requesting the minimimal polynomial of a non-square matrix. " << crash;
   int theDim = input.NumCols;
   this->MakeOne(1);

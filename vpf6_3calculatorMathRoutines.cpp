@@ -1000,6 +1000,16 @@ bool CalculatorFunctionsGeneral::innerLispifyFull(Calculator& theCommands, const
   return output.AssignValue(input.ToStringFull(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrace");
+  if (input.IsOfType<Matrix<Rational> >())
+  { if (!input.GetValue<Matrix<Rational> >().IsSquare())
+      return output.SetError("Error: attempting to get trace of non-square matrix.", theCommands);
+    return output.AssignValue(input.GetValue<Matrix<Rational> >().GetTrace(), theCommands);
+  }
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLastElement");
   if (input.HasBoundVariables())

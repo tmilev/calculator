@@ -2,7 +2,6 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfHeader2Math4_Graph.h"
 #include "vpfHeader3Calculator3_WeylGroupCharacters.h"
-#include "vpfHeader2Math9_HardCodedData.h"
 
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 

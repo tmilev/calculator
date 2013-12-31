@@ -886,6 +886,10 @@ void Calculator::initPredefinedInnerFunctions()
    "Inverts a matrix of rationals if invertible, in any other case generates an error. ",
    "X:=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); InvertMatrix X- X^{-1}");
   this->AddOperationInnerHandler
+  ("Trace", CalculatorFunctionsGeneral::innerTrace, "",
+   "Gets trace of a square matrix. ",
+   "X:=MatrixRationals((1,2,1), (1,0,1), (-1,1,0)); Trace X");
+  this->AddOperationInnerHandler
   ("Reverse", this->innerReverseOrder, "",
    "Reverses order of elements recursively. This operation will reverse products, orderes of lists, etc. \
     More precisely, the command leaves the fist child in the internal representation of the object in place\

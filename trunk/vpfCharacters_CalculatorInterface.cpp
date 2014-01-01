@@ -1076,26 +1076,6 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
   return output.AssignValue(theElt, theCommands);
 }
 
-bool Calculator::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerMinPolyMatrix");
-  if (!theCommands.innerMatrixRational(theCommands, input, output))
-    return false;
-  Matrix<Rational> theMat;
-  if (!output.IsOfType<Matrix<Rational> >(&theMat))
-  { theCommands.Comments << "<hr> Successfully called innerMatrixRational onto input " << input.ToString()
-    << " to get " << output.ToString() << " but the return type was not a matrix of rationals. ";
-    return true;
-  }
-  if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
-    return output.SetError("Error: matrix is not square!", theCommands);
-  FormatExpressions tempF;
-  tempF.polyAlphabeT.SetSize(1);
-  tempF.polyAlphabeT[0]="q";
-  Polynomial<Rational> theMinPoly;
-  theMinPoly.AssignMinPoly(theMat);
-  return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
-}
-
 bool Calculator::innerGenerateMultiplicativelyClosedSet(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerGenerateMultiplicativelyClosedSet");
   if (input.children.size<=2)

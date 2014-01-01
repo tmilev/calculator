@@ -298,9 +298,14 @@ void Calculator::initPredefinedInnerFunctions()
    "MakeVirtualWeylGroupRepresentation{}(WeylGroupNaturalRep{}(B_3))", true, false)
    ;
   this->AddOperationInnerHandler
-  ("MinPoly", this->innerMinPolyMatrix, "",
-   "Computes the  minimal polynomial of a matrix, provided that the matrix is not too large.",
+  ("MinPoly", CalculatorFunctionsGeneral::innerMinPolyMatrix, "",
+   "Computes the minimal polynomial of a matrix, provided that the matrix is not too large.",
    "A:=MatrixRationals{}((0,1), (-1,0)); p:=MinPoly{}A", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("CharPoly", CalculatorFunctionsGeneral::innerCharPolyMatrix, "",
+   "Computes the characteristic polynomial of a matrix (=det(A-q*Id)), provided that the matrix is not too large.",
+   "A:=\\begin{array}{cc}2 & 3& 5\\\\ 7& 11& 13\\\\ 17&19 &23 \\end{array}; p:=MinPoly{}A", true, false)
    ;
   this->AddOperationInnerHandler
   ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
@@ -1594,12 +1599,18 @@ void Calculator::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence, this->opRational(), this->opSequence(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opRational(), this->opSequence(),
    "Carries out multiplication between a rational number on left \
    and sequence on the right. Corresponds to multiplying a vector by a scalar \
    (however please note a sequence does not necessarily consist of elements of a ring, so the latter \
     interpretation might not be applicable).",
    "v_{1}:=(1, 2, 3);\nv_{2}:=(1, 3, 2);\nv_{3}:=(3, 1, 1);\nv_{4}:=(-2, 2, 2);\n1/2v_{1}+1/2v_{2}+7/8v_{3}+13/16v_{4}"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence, this->opPoly(), this->opSequence(),
+   "Carries out multiplication between a rational number on left \
+   and sequence on the right.",
+   "x:=Polynomial{}x; v:=x*(1, 2, 3);"
    , true);
     this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix,

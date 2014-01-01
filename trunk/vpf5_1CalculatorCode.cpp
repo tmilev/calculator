@@ -712,7 +712,7 @@ bool Calculator::innerDeterminant(Calculator& theCommands, const Expression& inp
   Matrix<Rational> matRat;
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
-  if (theCommands.GetMatrix(input, matRat, 0, 0, 0))
+  if (theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0))
   { if (matRat.NumRows==matRat.NumCols)
     { if (matRat.NumRows>100)
       { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
@@ -725,7 +725,7 @@ bool Calculator::innerDeterminant(Calculator& theCommands, const Expression& inp
     } else
       return output.SetError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
-  if (!theCommands.GetMatrix(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
   { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
@@ -739,7 +739,7 @@ bool Calculator::innerDeterminant(Calculator& theCommands, const Expression& inp
       << __FILE__ << ", line " << __LINE__ << ". ";
       return false;
     }
-    return output.AssignValue(matRF.GetDeterminant(), theCommands);
+    return output.AssignValueWithContext(matRF.GetDeterminant(), theContext, theCommands);
   } else
     return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
 }

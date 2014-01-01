@@ -189,6 +189,18 @@ private:
   //to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
+  MonomialP(int letterIndex)
+  { this->monBody.initFillInObject(letterIndex+1, 0);
+    this->monBody[letterIndex]=1;
+  }
+  MonomialP(int letterIndex, int power)
+  { this->monBody.initFillInObject(letterIndex+1, 0);
+    this->monBody[letterIndex]=power;
+  }
+  MonomialP(const MonomialP& other)
+  { *this=other;
+  }
+  MonomialP(){}
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
     return output;
@@ -811,6 +823,13 @@ public:
   void MakeOne()
   { this->MakeConst(1);
   }
+  inline void operator+=(const int& other)
+  { TemplateMonomial tempM;
+    coefficient theCF=other;
+    tempM.MakeOne();
+    this->AddMonomial(tempM, theCF);
+  }
+
   inline void operator+=(const coefficient& other)
   { TemplateMonomial tempM;
     tempM.MakeOne();

@@ -432,7 +432,7 @@ void Polynomial<coefficient>::AssignCharPoly(const Matrix<coefficient>& input)
   coefficient currenCF;
   for(int i=1; i<n; i++)
   { currenCF=-acc.GetTrace()/i;
-    this->AddMonomial(MonomialP(i), currenCF);
+    this->AddMonomial(MonomialP(0, i), currenCF);
     for(int j=0; j<n; j++)
       acc(j,j) += currenCF;
     acc.MultiplyOnTheLeft(input);

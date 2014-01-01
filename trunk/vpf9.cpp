@@ -5068,6 +5068,14 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
 
 bool WeylGroup::AreConjugate(const ElementWeylGroup<WeylGroup>& left, const ElementWeylGroup<WeylGroup>& right)
 { MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
+  Matrix<Rational> leftMat, rightMat;
+  this->GetMatrixStandardRep(left, leftMat);
+  this->GetMatrixStandardRep(right, rightMat);
+  Polynomial<Rational> leftCharPoly, rightCharPoly;
+  leftCharPoly.AssignCharPoly(leftMat);
+  rightCharPoly.AssignCharPoly(rightMat);
+  if (leftCharPoly!=rightCharPoly)
+    return false;
   OrbitIteratorWeylGroup theIterator;
   List<ElementWeylGroup<WeylGroup> > simpleGenerators;
   simpleGenerators.SetSize(this->GetDim());

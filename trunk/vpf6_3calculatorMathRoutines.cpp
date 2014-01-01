@@ -1036,7 +1036,7 @@ bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, co
   tempF.polyAlphabeT.SetSize(1);
   tempF.polyAlphabeT[0]="q";
   Polynomial<Rational> theCharPoly;
-  theCharPoly.AssignMinPoly(theMat);
+  theCharPoly.AssignCharPoly(theMat);
   return output.AssignValue(theCharPoly.ToString(&tempF), theCommands);
 }
 

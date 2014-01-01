@@ -3188,6 +3188,15 @@ bool Expression::MakeXOdotsOX(Calculator& owner, int theOp, const List<Expressio
   return true;
 }
 
+bool Expression::MakeIdMatrixExpressions(int theDim, Calculator& inputBoss)
+{ Matrix<Expression> theMat;
+  Expression oneE, zeroE;
+  oneE.AssignValue(1, inputBoss);
+  zeroE.AssignValue(0, inputBoss);
+  theMat.MakeIdMatrix(theDim, oneE, zeroE);
+  return this->AssignMatrixExpressions(theMat, inputBoss);
+}
+
 bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum)
 { MacroRegisterFunctionWithName("Expression::MakeSum");
   Expression oneE; //used to record the constant term
@@ -3401,6 +3410,50 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
     output.MakeXOX(theCommands, theCommands.opPlus(), input[1], tempE);
   }
   return true;
+}
+
+void Expression::operator+=(const Expression& other)
+{ if (this->theBoss==0 && other.theBoss==0)
+  { this->theData+=other.theData;
+    if (this->theData!=1 && this->theData!=0)
+      crash << "Attempting to add non-initialized expressions" << crash;
+    return;
+  }
+  if (other.theBoss==0)
+  { Expression otherCopy;
+    otherCopy.AssignValue(other.theData, *this->theBoss);
+    (*this)+=otherCopy;
+    return;
+  }
+  if (this->theBoss==0)
+    this->AssignValue(this->theData, *other.theBoss);
+  if (this->theBoss!=other.theBoss)
+    crash << "Error: adding expressions with different owners. " << crash;
+  Expression resultE;
+  resultE.MakeXOX(*this->theBoss, this->theBoss->opPlus(), *this, other);
+  *this=resultE;
+}
+
+void Expression::operator*=(const Expression& other)
+{ if (this->theBoss==0 && other.theBoss==0)
+  { this->theData*=other.theData;
+    if (this->theData!=1 && this->theData!=0)
+      crash << "Attempting to add non-initialized expressions" << crash;
+    return;
+  }
+  if (other.theBoss==0)
+  { Expression otherCopy;
+    otherCopy.AssignValue(other.theData, *this->theBoss);
+    (*this)*=otherCopy;
+    return;
+  }
+  if (this->theBoss==0)
+    this->AssignValue(this->theData, *other.theBoss);
+  if (this->theBoss!=other.theBoss)
+    crash << "Error: adding expressions with different owners. " << crash;
+  Expression resultE;
+  resultE.MakeXOX(*this->theBoss, this->theBoss->opTimes(), *this, other);
+  *this=resultE;
 }
 
 bool Expression::operator==(const Expression& other)const
@@ -4260,6 +4313,11 @@ bool Expression::HasNonEmptyContext()const
 { if (!this->HasContext())
     return false;
   return !this->GetContext().IsListNElementsStartingWithAtom(this->theBoss->opContexT(), 1);
+}
+
+bool Expression::IsBuiltInScalar()const
+{ return this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >()
+  || this->IsOfType<RationalFunctionOld>();
 }
 
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const

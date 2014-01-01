@@ -72,6 +72,8 @@ public:
   static bool innerCanBeExtendedParabolicallyTo(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetSymmetricCartan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTrace(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output);

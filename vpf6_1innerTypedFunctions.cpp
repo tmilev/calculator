@@ -718,22 +718,44 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
     return false;
   if (!input[1].IsSequenceNElementS())
     return false;
-  Matrix<Rational> theMat;
-  if (!theCommands.GetMatrix<Rational>(input[1], theMat))
-    return false;
-  Expression inputCopy, baseRatMat, outputMatRat;
-  baseRatMat.AssignValue(theMat, theCommands);
-  inputCopy.reset(theCommands);
-  inputCopy.AddChildOnTop(input[0]);
-  inputCopy.AddChildOnTop(baseRatMat);
-  inputCopy.AddChildOnTop(input[2]);
-  if (!CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(theCommands, inputCopy, outputMatRat))
-    return false;
-  if (!outputMatRat.IsOfType<Matrix<Rational> >(&theMat))//<- probably outputMatRat is of type Error.
-  { output=outputMatRat;
-    return true;
+  Matrix<Rational> theMatRat;
+  std::cout << "raising " << input[1].ToString() << " to " << input[2].ToString();
+  if (theCommands.GetMatrix<Rational>(input[1], theMatRat))
+  { Expression inputCopy, baseRatMat, outputMatRat;
+    baseRatMat.AssignValue(theMatRat, theCommands);
+    inputCopy.reset(theCommands);
+    inputCopy.AddChildOnTop(input[0]);
+    inputCopy.AddChildOnTop(baseRatMat);
+    inputCopy.AddChildOnTop(input[2]);
+    if (!CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(theCommands, inputCopy, outputMatRat))
+      return false;
+    if (!outputMatRat.IsOfType<Matrix<Rational> >(&theMatRat))//<- probably outputMatRat is of type Error.
+    { output=outputMatRat;
+      return true;
+    }
+    return output.AssignMatrix(theMatRat, theCommands);
   }
-  return output.AssignMatrix(theMat, theCommands);
+  int thePower=0;
+  if (!input[2].IsSmallInteger(&thePower))
+    return false;
+  if (thePower<=0)
+    return false;
+  Matrix<Expression> theMat;
+  if (!theCommands.GetMatrixExpressions(input[1], theMat))
+    return false;
+  if (!theMat.IsSquare())
+    return output.SetError("Attempting to raise non-square matrix to power", theCommands);
+  if (theMat.NumRows>10)
+  { theCommands.Comments << "I've been instructed not to exponentiate non-ratinoal matrices of dimension >10. ";
+    return false;
+  }
+  Matrix<Expression> idMatE;
+  Expression oneE, zeroE;
+  oneE.AssignValue(1, theCommands);
+  zeroE.AssignValue(0, theCommands);
+  idMatE.MakeIdMatrix(theMat.NumRows, oneE, zeroE);
+  MathRoutines::RaiseToPower(theMat, thePower, idMatE);
+  return output.AssignMatrixExpressions(theMat, theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output)
@@ -830,13 +852,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
   return output.AssignValue(leftC, theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
   //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
   //std::cout << "<br>trouble be double!";
-  if (!input[1].IsOfType<Rational>())
+  if (!input[1].IsBuiltInScalar())
     return false;
   //std::cout << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
@@ -1032,14 +1054,14 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(Calculator
   return output.AssignValue(result, theCommands);
 }
 
-bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByRational(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
   //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
   Expression tempE=input;
   tempE.children.SwapTwoIndices(1,2);
-  return CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence(theCommands, tempE, output);
+  return CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(theCommands, tempE, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output)

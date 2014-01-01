@@ -2375,8 +2375,18 @@ bool Expression::AssignMatrixExpressions(const Matrix<Expression>& input, Calcul
   return true;
 }
 
+bool Calculator::GetMatrixExpressionsFromArguments(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
+{ MacroRegisterFunctionWithName("Calculator::GetMatrixExpressionsFromArguments");
+  if (!input.IsLisT())
+    return false;
+  Expression inputModified=input;
+  inputModified.SetChildAtomValue(0, this->opSequence());
+  return this->GetMatrixExpressions(inputModified, output, desiredNumRows, desiredNumCols);
+}
+
 bool Calculator::GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows, int desiredNumCols)
-{ if (!input.IsSequenceNElementS())
+{ MacroRegisterFunctionWithName("Calculator::GetMatrixExpressions");
+  if (!input.IsSequenceNElementS())
   { output.init(1,1);
     output(0,0)=input;
     return true;

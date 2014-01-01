@@ -191,6 +191,7 @@ class Expression
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
 
+  bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
@@ -288,6 +289,7 @@ class Expression
   }
   bool IsEqualToZero()const;
   bool IsEqualToOne()const;
+  bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);
   bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum);
@@ -349,6 +351,10 @@ class Expression
   Expression() :flagDeallocated(false)
   { this->reset();
   }
+  Expression(int x) :flagDeallocated(false)
+  { this->reset();
+    this->theData=x;
+  }
   const Expression& GetLastChild()const
   { return (*this)[this->children.size-1];
   }
@@ -380,6 +386,8 @@ class Expression
   bool AreEqualExcludingChildren(const Expression& other) const
   { return this->theBoss==other.theBoss && this->theData==other.theData && this->children.size==other.children.size;
   }
+  void operator+=(const Expression& other);
+  void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
   bool operator==(const std::string& other)const;
@@ -914,6 +922,7 @@ public:
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt();
   bool GetMatrixExpressions(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
+  bool GetMatrixExpressionsFromArguments(const Expression& input, Matrix<Expression>& output, int desiredNumRows=-1, int desiredNumCols=-1);
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
   bool ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
@@ -1476,7 +1485,6 @@ public:
   static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerRootSAsAndSltwos(theCommands, input, output, true);
   }
-  static bool innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCharacterSSLieAlgFD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebras
   (Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,

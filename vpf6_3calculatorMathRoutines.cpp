@@ -1000,14 +1000,70 @@ bool CalculatorFunctionsGeneral::innerLispifyFull(Calculator& theCommands, const
   return output.AssignValue(input.ToStringFull(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerMinPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerMinPolyMatrix");
+  if (!output.IsOfType<Matrix<Rational> >())
+    if (!theCommands.innerMatrixRational(theCommands, input, output))
+      return false;
+  Matrix<Rational> theMat;
+  if (!output.IsOfType<Matrix<Rational> >(&theMat))
+  { theCommands.Comments << "<hr>Minimal poly computation: could not convert " << input.ToString() << " to rational matrix.";
+    return true;
+  }
+  if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
+    return output.SetError("Error: matrix is not square!", theCommands);
+  FormatExpressions tempF;
+  tempF.polyAlphabeT.SetSize(1);
+  tempF.polyAlphabeT[0]="q";
+  Polynomial<Rational> theMinPoly;
+  theMinPoly.AssignMinPoly(theMat);
+  return output.AssignValue(theMinPoly.ToString(&tempF), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Calculator::innerMinPolyMatrix");
+  if (!output.IsOfType<Matrix<Rational> >())
+    if (!theCommands.innerMatrixRational(theCommands, input, output))
+      return false;
+  Matrix<Rational> theMat;
+  if (!output.IsOfType<Matrix<Rational> >(&theMat))
+  { theCommands.Comments << "<hr>Characteristic poly computation: could not convert " << input.ToString() << " to rational matrix.";
+    return true;
+  }
+  if (theMat.NumRows!=theMat.NumCols || theMat.NumRows<=0)
+    return output.SetError("Error: matrix is not square!", theCommands);
+  FormatExpressions tempF;
+  tempF.polyAlphabeT.SetSize(1);
+  tempF.polyAlphabeT[0]="q";
+  Polynomial<Rational> theCharPoly;
+  theCharPoly.AssignMinPoly(theMat);
+  return output.AssignValue(theCharPoly.ToString(&tempF), theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerTrace(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTrace");
+//  std::cout << "<hr>getting matrix from: " << input.ToString();
   if (input.IsOfType<Matrix<Rational> >())
   { if (!input.GetValue<Matrix<Rational> >().IsSquare())
       return output.SetError("Error: attempting to get trace of non-square matrix.", theCommands);
     return output.AssignValue(input.GetValue<Matrix<Rational> >().GetTrace(), theCommands);
   }
-  return false;
+  if (input.IsOfType<Matrix<RationalFunctionOld> >())
+  { if (!input.GetValue<Matrix<RationalFunctionOld> >().IsSquare())
+      return output.SetError("Error: attempting to get trace of non-square matrix.", theCommands);
+    return output.AssignValue(input.GetValue<Matrix<RationalFunctionOld> >().GetTrace(), theCommands);
+  }
+  Matrix<Expression> theMat;
+  if (!theCommands.GetMatrixExpressionsFromArguments(input, theMat))
+    return false;
+  if (!theMat.IsSquare())
+    return output.SetError("Error: attempting to get trace of non-square matrix.", theCommands);
+  if (theMat.NumRows==1)
+  { theCommands.Comments << "Requesting trace of 1x1 matrix: possible interpretation of a scalar as a 1x1 matrix. Trace not taken";
+    return false;
+  }
+  output=theMat.GetTrace();
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerLastElement(Calculator& theCommands, const Expression& input, Expression& output)

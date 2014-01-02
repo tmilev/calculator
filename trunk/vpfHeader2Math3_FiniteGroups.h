@@ -10,25 +10,61 @@
 
 static ProjectInformationInstance ProjectInfoVpfFiniteGroups(__FILE__, "Header file, finite groups. Work in progress.");
 
+template <typename somegroup, class elementSomeGroup>
+class Subgroup;
+
 template <typename ElementEuclideanDomain>
 struct DivisionResult
 { ElementEuclideanDomain quotient;
   ElementEuclideanDomain remainder;
 };
 
-template <typename element>
+template <typename elementSomeGroup>
 class FiniteGroup
 {
+  LargeInt sizePrivate;
 public:
-  List<element> theElements;
-  List<int> lengths; // sure why not
-  bool MakeFrom(const List<element>& generators, int MaxElements=60000);
+  List<elementSomeGroup> generators;
+  HashedList<elementSomeGroup> theElements;
 
-  List<int> generators;
-  List<List<int> > conjugacyClasses;
-  void ComputeCC();
-  void GetSignCharacter(Vector<Rational>& out);
-  Rational GetHermitianProduct(const Vector<Rational>& X1, const Vector<Rational>& X2) const;
+  List<elementSomeGroup> conjugacyClassRepresentatives;
+  HashedList<Polynomial<Rational> > CCRepsCharPolys;
+  //<-The character polynomials in the ``standard representation''.
+  //The ``standard representation'' is specified by the elementSomeGroup class.
+  //It is up to the user of the FiniteGroup template to define which representation is
+  //``standard'' - this is not a serious restriction as one can always choose the trivial representation.
+  List<int> conjugacyClassesSizes; // <-in case we cant compute conjugacyClases directly.
+  List<List<int> > conjugacyClassesIndices;
+  bool flagConjugacyClassRepresentativesComputed;
+  bool flagConjugacyClassesAreComputed;
+  bool flagAllElementsAreComputed;
+  bool flagCharPolysAreComputed;
+
+  FiniteGroup()
+  { this->init();
+  }
+  bool CheckInitialization()const;
+  void init();
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  int ConjugacyClassCount()const;
+  LargeInt size()const;
+  bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
+
+  void CleanUpGenerators();
+
+  bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
+  void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesAndRepresentativesFromCC();
+
+  void ComputeCCRepresentatives(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesFromCCRepresentatives(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables)
+  { this->ComputeCCRepresentatives(theGlobalVariables);
+    this->ComputeCCSizesFromCCRepresentatives(theGlobalVariables);
+  }
+  void GetSignCharacter(Vector<Rational>& outputCharacter);
+  template <typename coefficient>
+  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
 };
 
 template <class templateWeylGroup>
@@ -42,7 +78,7 @@ public:
   List<int> generatorsLastAppliedFirst;
   ElementWeylGroup():owner(0)
   {}
-  bool CheckInitialization()
+  bool CheckInitialization()const
   { if (this->owner==0)
     { crash << "This is a programming error: non-initialized element Weyl group. " << crash;
       return false;
@@ -55,6 +91,8 @@ public:
   static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, ElementWeylGroup& inputOutputConjugated);
   void MakeCanonical();
   void MakeID(templateWeylGroup& inputWeyl);
+  void MakeID(const ElementWeylGroup& initializeFrom);
+
   void ToString(std::string& output)
   { output=this->ToString();
   }
@@ -78,6 +116,8 @@ public:
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup<WeylGroup> Inverse() const;
   void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
+  bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right)const;
+  void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output)const;
   bool operator==(const ElementWeylGroup<WeylGroup>& other)const
   { if (this->owner!=other.owner)
       return false;
@@ -266,7 +306,7 @@ public:
 
 class SubgroupRootReflections;
 
-class WeylGroup
+class WeylGroup : public FiniteGroup<ElementWeylGroup<WeylGroup> >
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
 //  void UpdateIntBuffer()
@@ -292,14 +332,12 @@ class WeylGroup
     this->SimpleToFundamentalCoords.Invert();
     this->flagFundamentalToSimpleMatricesAreComputed=true;
   }
-  bool flagNumberOfElementsComputedToFitInInt;
-  int sizePrivate;
   bool LoadConjugacyClassesWeylGroup();
   bool LoadCharTableWeylGroup();
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
-  bool flagConjugacyClassesAreComputed;
+
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   Matrix<Rational> CoCartanSymmetric;
@@ -321,13 +359,11 @@ public:
   bool flagDeallocated;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init();
-  int size()const;
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
-  void ComputeSquares();
+  void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
   void GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void ComputeCC(GlobalVariables* theGlobalVariables=0);
 
   void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
   void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
@@ -343,6 +379,7 @@ public:
   std::string ToStringCppCharTable(FormatExpressions* theFormat=0);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
+  void MakeFinalSteps();
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
@@ -351,7 +388,6 @@ public:
   int ConjugacyClassCount()const
   { return this->conjugacyClassRepresentatives.size;
   }
-  bool AreConjugate(const ElementWeylGroup<WeylGroup>& left, const ElementWeylGroup<WeylGroup>& right);
   bool CheckConsistency()const;
   bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
@@ -367,7 +403,6 @@ public:
   int NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input);
   void GetHighestWeightsAllRepsDimLessThanOrEqualTo(List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound);
   Rational GetLongestRootLengthSquared();
-  void SelectCCRepsAndRecordCCsizes();
   static unsigned int HashFunction(const WeylGroup& input)
   { return input.CartanSymmetric.HashFunction();
   }
@@ -475,7 +510,6 @@ public:
   inline int GetDim()const
   { return this->CartanSymmetric.NumRows;
   }
-  void ComputeAllElements(int UpperLimitNumElements=0, GlobalVariables* theGlobalVariables=0);
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
   Rational GetSizeWeylGroupByFormula()const
@@ -663,35 +697,21 @@ template <typename coefficient>
 std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
 
 template <typename somegroup, class elementSomeGroup>
-class Subgroup
+class Subgroup : public FiniteGroup<elementSomeGroup>
 {
 public:
   somegroup *parent;
-  List<elementSomeGroup> generators;
-  HashedList<elementSomeGroup> theElements;
-
-  List<elementSomeGroup> conjugacyClassRepresentatives;
-  List<int> conjugacyClassesSizes; // <-in case we cant compute conjugacyClases directly.
   List<int> ccRepresentativesPreimages;
   List<int> generatorPreimages;
-  List<List<int> > conjugacyClassesIndices;
-  bool flagConjugacyClassesAreComputed;
-
   Subgroup();
   bool CheckInitialization();
   void init();
-  int ConjugacyClassCount()const;
-  int size()const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
-  bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
-  void CleanUpGenerators();
-  void ComputeCC(GlobalVariables* theGlobalVariables);
-  void ComputeCCRepresentativesFromCC();
-  void ComputeCCRepresentativesPreimages();
-  void GetSignCharacter(Vector<Rational>& out);
-  template <typename coefficient>
-  coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
+  void ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
+  { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
+    this->ComputeCCRepresentativesPreimages(theGlobalVariables);
+  }
 };
 
 class SubgroupWeylGroup: public Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >
@@ -704,14 +724,14 @@ public:
 
 class SubgroupRootReflections : public SubgroupWeylGroup
 {
-  public:
+public:
   Matrix<Rational> SubCartanSymmetric;
   DynkinType theDynkinType;
   Selection generatingSimpleRoots;
   template <typename weylgroup>
   void MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots);
   void ComputeDynkinType();
-  void ComputeCC(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables);
 };
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroup> >

@@ -60,7 +60,7 @@ void WeylGroup::ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariable
     this->flagConjugacyClassesAreComputed=true;
     return;
   }
-  this->ComputeCC(theGlobalVariables);
+  this->ComputeCCfromAllElements(theGlobalVariables);
   this->flagConjugacyClassesAreComputed=true;
 }
 

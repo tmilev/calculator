@@ -178,6 +178,10 @@ class LargeInt
     tempI*=right;
     return tempI;
   }
+  friend bool operator<(int left, const LargeInt& right)
+  { LargeInt leftCopy=left;
+    return right>leftCopy;
+  }
   friend LargeInt operator*(const LargeInt& left, const LargeIntUnsigned& right)
   { LargeInt tempI;
     tempI=right;

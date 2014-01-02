@@ -4769,16 +4769,6 @@ void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Ration
     theRoot[index]+=-1;
 }
 
-int WeylGroup::size()const
-{ if (this->flagNumberOfElementsComputedToFitInInt)
-    return this->sizePrivate;
-  int result=-1;
-  if (!this->GetSizeWeylGroupByFormula().IsIntegerFittingInInt(&result))
-    crash << "This is a programming error: caller of WeylGroup::size() expects an output that fits in the built-in int data type "
-    << "but that is not the case (the group is larger than that). " << crash;
-  return result;
-}
-
 Matrix<Rational> WeylGroup::GetMatrixStandardRep(int elementIndex)const
 { Matrix<Rational> result;
   this->GetMatrixStandardRep(this->theElements[elementIndex], result);
@@ -4789,10 +4779,9 @@ void WeylGroup::init()
 { this->flagFundamentalToSimpleMatricesAreComputed=false;
   this->flagAllOuterAutosComputed=false;
   this->flagOuterAutosGeneratorsComputed=false;
-  this->flagNumberOfElementsComputedToFitInInt=false;
   this->flagIrrepsAreComputed=false;
   this->flagCharTableIsComputed=false;
-  this->flagConjugacyClassesAreComputed=false;
+  this->::FiniteGroup<ElementWeylGroup<WeylGroup> >::init();
 }
 
 void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<Rational>& output, bool RhoAction, bool UseMinusRho)
@@ -4806,7 +4795,7 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
 
 void WeylGroup::GetSignCharacter(Vector<Rational>& out)
 { if(!this->flagConjugacyClassesAreComputed)
-    this->ComputeCC();
+    this->ComputeCCRepresentatives(0);
   out.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { int yn = this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size % 2;
@@ -4819,8 +4808,8 @@ void WeylGroup::GetSignCharacter(Vector<Rational>& out)
 
 void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::GetSignCharacter");
-  if(!this->flagConjugacyClassesAreComputed)
-    this->ComputeCC(0);
+  if(!this->flagConjugacyClassRepresentativesComputed)
+    this->ComputeCCRepresentatives(0);
   out.SetSize(ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     out[i] = this->conjugacyClassRepresentatives[i].Sign();
@@ -5004,91 +4993,6 @@ void WeylGroup::GenerateRootSystem()
     this->RootSystem.AddOnTop(this->RootsOfBorel[i]);
 }
 
-template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::Conjugate(const ElementWeylGroup& elementWeConjugateBy, ElementWeylGroup& inputOutputConjugated)
-{ if (elementWeConjugateBy.owner!=inputOutputConjugated.owner)
-    crash << "Attempting to multiply elements belonging to different Weyl groups." << crash;
-  if (&elementWeConjugateBy==&inputOutputConjugated)
-  { ElementWeylGroup copyElt=elementWeConjugateBy;
-    ElementWeylGroup<templateWeylGroup>::Conjugate(copyElt, inputOutputConjugated);
-    return;
-  }
-  List<int> copyStartingIndices=inputOutputConjugated.generatorsLastAppliedFirst;
-  inputOutputConjugated.generatorsLastAppliedFirst.ReservE(inputOutputConjugated.generatorsLastAppliedFirst.size+2*elementWeConjugateBy.generatorsLastAppliedFirst.size);
-  inputOutputConjugated.generatorsLastAppliedFirst=elementWeConjugateBy.generatorsLastAppliedFirst;
-  inputOutputConjugated.generatorsLastAppliedFirst.AddListOnTop(copyStartingIndices);
-  for (int i=elementWeConjugateBy.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    inputOutputConjugated.generatorsLastAppliedFirst.AddOnTop(elementWeConjugateBy.generatorsLastAppliedFirst[i]);
-  inputOutputConjugated.MakeCanonical();
-}
-
-template <class elementGroup, class elementRepresentation>
-void OrbitIterator<elementGroup, elementRepresentation>::init
-  (const List<elementGroup>& inputGenerators, const elementRepresentation& inputElement, OrbitIterator::GroupAction inputGroupAction)
-{ this->reset();
-  this->theGroupGeneratingElements=inputGenerators;
-  this->theGroupAction=inputGroupAction;
-  this->currentLayer->Clear();
-  this->currentLayer->AddOnTop(inputElement);
-  this->indexCurrentElement=0;
-  this->previousLayer->Clear();
-  this->nextLayer->Clear();
-}
-
-template <class elementGroup, class elementRepresentation>
-const elementRepresentation& OrbitIterator<elementGroup, elementRepresentation>::GetCurrentElement()
-{ return (*this->currentLayer)[this->indexCurrentElement];
-}
-
-template <class elementGroup, class elementRepresentation>
-bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfPastLast()
-{ MacroRegisterFunctionWithName("OrbitIterator::IncrementReturnFalseIfPastLast");
-  if (this->theGroupGeneratingElements.size==0)
-    return false;
-  for (int i=0; i<this->theGroupGeneratingElements.size; i++)
-  { this->bufferRepresentationElement=(*this->currentLayer)[this->indexCurrentElement];
-    this->theGroupAction(this->theGroupGeneratingElements[i], this->bufferRepresentationElement);
-    if (!this->previousLayer->Contains(this->bufferRepresentationElement) &&
-        !this->currentLayer->Contains(this->bufferRepresentationElement))
-      this->nextLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
-  }
-  this->indexCurrentElement++;
-  if (this->indexCurrentElement<this->currentLayer->size)
-    return true;
-  if (this->nextLayer->size==0)
-    return false;
-  HashedList<elementRepresentation>* layerPtr=this->previousLayer;
-  this->previousLayer=this->currentLayer;
-  this->currentLayer=this->nextLayer;
-  this->nextLayer=layerPtr;
-  this->nextLayer->Clear();
-  this->indexCurrentElement=0;
-  return true;
-}
-
-bool WeylGroup::AreConjugate(const ElementWeylGroup<WeylGroup>& left, const ElementWeylGroup<WeylGroup>& right)
-{ MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
-  Matrix<Rational> leftMat, rightMat;
-  this->GetMatrixStandardRep(left, leftMat);
-  this->GetMatrixStandardRep(right, rightMat);
-  Polynomial<Rational> leftCharPoly, rightCharPoly;
-  leftCharPoly.AssignCharPoly(leftMat);
-  rightCharPoly.AssignCharPoly(rightMat);
-  if (leftCharPoly!=rightCharPoly)
-    return false;
-  OrbitIteratorWeylGroup theIterator;
-  List<ElementWeylGroup<WeylGroup> > simpleGenerators;
-  simpleGenerators.SetSize(this->GetDim());
-  for (int i=0; i<this->GetDim(); i++)
-    simpleGenerators[i].MakeSimpleReflection(i, *this);
-  theIterator.init(simpleGenerators, left, ElementWeylGroup<WeylGroup>::Conjugate);
-  do
-  { if (theIterator.GetCurrentElement()==right)
-      return true;
-  } while (theIterator.IncrementReturnFalseIfPastLast());
-  return false;
-}
-
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
 { for (int i=this->theElements[index].generatorsLastAppliedFirst.size-1; i>=0; i--)
     this->SimpleReflectionRootAlg(this->theElements[index].generatorsLastAppliedFirst[i], theRoot, RhoAction);
@@ -5128,7 +5032,7 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
   FormatExpressions theFormatNoDynkinTypePlusesExponents;
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
   out << "bool LoadCharTable" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
-  out << " output.characterTable.SetExpectedSize(" << this->size() << "); output.characterTable.SetSize(0);";
+  out << " output.characterTable.SetExpectedSize(" << this->size().ToString() << "); output.characterTable.SetSize(0);";
   out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G=&output;";
   for (int i=0; i<this->characterTable.size; i++)
@@ -5287,6 +5191,17 @@ void WeylGroup::MakeMeFromMyCartanSymmetric()
   simpleBasis.MakeEiBasis(this->CartanSymmetric.NumRows);
   theDynkinTypeComputer.ComputeDiagramTypeModifyInputRelative(simpleBasis, this->RootSystem, this->CartanSymmetric);
   theDynkinTypeComputer.GetDynkinType(this->theDynkinType);
+  this->MakeFinalSteps();
+}
+
+void WeylGroup::MakeFinalSteps()
+{ this->generators.SetSize(this->GetDim());
+  if (this->GetDim()==0)
+  { this->generators.SetSize(1);
+    this->generators[0].MakeID(*this);
+  }
+  for (int i=0; i<this->GetDim(); i++)
+    this->generators[i].MakeSimpleReflection(i, *this);
   this->ComputeCoCartanSymmetricFromCartanSymmetric();
 }
 
@@ -5294,14 +5209,14 @@ void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
 { this->init();
   this->theDynkinType=inputType;
   this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
-  this->ComputeCoCartanSymmetricFromCartanSymmetric();
+  this->MakeFinalSteps();
 }
 
 void WeylGroup::MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType)
 { this->init();
   this->theDynkinType=inputType;
   this->theDynkinType.GetCartanSymmetricDefaultLengthKeepComponentOrder(this->CartanSymmetric);
-  this->ComputeCoCartanSymmetricFromCartanSymmetric();
+  this->MakeFinalSteps();
 }
 
 void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
@@ -5498,11 +5413,7 @@ void WeylGroup::GetExtremeElementInOrbit
 }
 
 WeylGroup::WeylGroup()
-{ this->flagFundamentalToSimpleMatricesAreComputed=false;
-  this->flagOuterAutosGeneratorsComputed=false;
-  this->flagAllOuterAutosComputed=false;
-  this->flagDeallocated=false;
-  this->flagNumberOfElementsComputedToFitInInt=false;
+{ this->init();
 }
 
 bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
@@ -5827,17 +5738,6 @@ int WeylGroup::NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rationa
     if (!Vector<Rational>::ScalarProduct(theVectors[i], input, this->CartanSymmetric).IsEqualToZero())
       result++;
   return result;
-}
-
-void WeylGroup::ComputeAllElements(int UpperLimitNumElements, GlobalVariables* theGlobalVariables)
-{ this->ComputeRho(true);
-//  this->ComputeDebugString();
-  Vectors<Rational> tempRoots;
-  tempRoots.AddOnTop(this->rho);
-  this->theElements.Clear();
-  this->GenerateOrbit<Rational>(this->rho, false, this->rhoOrbit, true, -1, &this->theElements, UpperLimitNumElements, theGlobalVariables);
-  this->flagNumberOfElementsComputedToFitInInt=true;
-  this->sizePrivate = this->theElements.size; // compatible with group types that don't have a theElements member
 }
 
 void WeylGroup::ComputeRho(bool Recompute)

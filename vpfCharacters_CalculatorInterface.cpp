@@ -433,7 +433,7 @@ void WeylGroup::AddCharacter(const ClassFunction<Rational>& X)
 void WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsTodorsVersion");
   if(this->theElements.size == 0)
-    this->ComputeCC(theGlobalVariables);
+    this->ComputeCCfromAllElements(theGlobalVariables);
   this->ComputeInitialIrreps(theGlobalVariables);
   WeylGroupRepresentation<Rational> newRep;
   int NumClasses=this->ConjugacyClassCount();
@@ -692,7 +692,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScra
     return false;
   }
   double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theGroup.ComputeCC(theCommands.theGlobalVariableS);
+  theGroup.ComputeCCfromAllElements(theCommands.theGlobalVariableS);
   //std::stringstream out;
   theCommands.Comments << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
   << " second(s). ";

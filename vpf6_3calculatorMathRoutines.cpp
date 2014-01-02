@@ -3,6 +3,7 @@
 #include "vpf.h"
 #include "vpfHeader3Calculator2_InnerFunctions.h"
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
+#include "vpfImplementationHeader2Math051_PolynomialComputations_Basic.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");

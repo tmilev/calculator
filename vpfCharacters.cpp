@@ -68,113 +68,14 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
     for (int j=0; j<this->conjugacyClasses[i].size; j++)
       this->conjugacyClasses[i][j]=this->theElements[this->conjugacyClassesIndices[i][j]];
   }
-  this->SelectCCRepsAndRecordCCsizes();
+  this->ComputeCCSizesAndRepresentativesFromCC();
   this->flagConjugacyClassesAreComputed=true;
 }
 
-void WeylGroup::SelectCCRepsAndRecordCCsizes()
-{ this->conjugacyClassRepresentatives.SetSize(this->conjugacyClasses.size);
-  this->conjugacyClassesSizes.SetSize(this->conjugacyClasses.size);
-  for (int i=0; i<this->conjugacyClasses.size; i++)
-  { this->conjugacyClassRepresentatives[i]=this->conjugacyClasses[i][0];
-    this->conjugacyClassesSizes[i]=this->conjugacyClasses[i].size;
-  }
-}
-
-void WeylGroup::ComputeCC(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::ComputeCC");
-  this->CheckConsistency();
-  const int hardcodedUpperLimit=6000000;
-  if (this->theDynkinType.GetSizeWeylGroupByFormula()>hardcodedUpperLimit)
-    crash << "I am crashing for safety reasons (this is not a programming error). You requested to compute the conjugacy classes of a Weyl group of type "
-    << this->theDynkinType.ToString() << ", which, by formula, has " << this->theDynkinType.GetSizeWeylGroupByFormula().ToString()
-    << " elements, but I have a hard-coded safety limit of " << hardcodedUpperLimit << "." << crash;
-  //  std::cout << "<hr>HEre be errors";
-  this->ComputeAllElements(hardcodedUpperLimit+1, theGlobalVariables);
-  //std::cout << "<hr>rho orbit: " <<  this->rhoOrbit.size << " total: " << this->rhoOrbit.ToString();
-  //std::cout << "<hr> the elements: " << this->theElements.size << " total: " << this->theElements.ToString();
-  //if (this->rhoOrbit.size!=this->theElements.size)
-  //{
-  //}
-  List<bool> Accounted;
-  //std::cout << "ComputeCC: group has " << this->theElements.size << " elements." << std::endl;
-  Accounted.initFillInObject(this->theElements.size, false);
-  this->conjugacyClasses.SetSize(0);
-  this->conjugacyClasses.ReservE(120); //<- that should be good to go up to E8.
-  this->conjugacyClassesIndices.SetSize(0);
-  this->conjugacyClassesIndices.ReservE(120); //<- that should be good to go up to E8.
-
-  //For higher number of conjugacy classes List's grow exponentially on demand, so this shouldn't be a big slow-down.
-  int theRank=this->GetDim();
-  ElementWeylGroup<WeylGroup> theConjugated;
-  List<ElementWeylGroup<WeylGroup> > theGenerators;
-  theGenerators.SetSize(theRank);
-  for (int i=0; i<theRank; i++)
-    theGenerators[i].MakeSimpleReflection(i, *this);
-//  std::cout << "Here be the simple gens:" << theGenerators.ToString();
-  ProgressReport Report1(theGlobalVariables);
-  int numElementsAccounted=1;
-  for (int i=0; i<this->theElements.size; i++)
-    if (!Accounted[i])
-    { numElementsAccounted++;
-      if (theGlobalVariables!=0)
-      { std::stringstream reportStream;
-        reportStream << "Type: " << this->theDynkinType.ToString() << ", computing conjugacy class "
-        << this->conjugacyClasses.size+1 << ", accounted " << numElementsAccounted << " elements out of " << this->theElements.size << ". ";
-        Report1.Report(reportStream.str());
-      }
-      Accounted[i] = true;
-      this->conjugacyClasses.SetSize(this->conjugacyClasses.size+1);
-      this->conjugacyClassesIndices.SetSize(this->conjugacyClassesIndices.size+1);
-      List<ElementWeylGroup<WeylGroup> >& currentClass=*this->conjugacyClasses.LastObject();
-      List<int>& currentClassIndices=*this->conjugacyClassesIndices.LastObject();
-      currentClass.SetSize(0);//<-needed in case the group is being recomputed
-      currentClass.SetExpectedSize(this->theElements.size);
-      currentClass.AddOnTop(this->theElements[i]);
-      currentClassIndices.AddOnTop(i);
-      for (int j=0; j<currentClass.size; j++)
-        for (int k=0; k<theRank; k++)
-        { theConjugated=theGenerators[k]*currentClass[j]*theGenerators[k];
-//          std::cout << "<hr>" << theGenerators[k].ToString() << " * " << this->theElements[currentClass[j]].ToString()
-//          << "*" << theGenerators[k].ToString() << "=" << theConjugated.ToString() << "<hr>";
-          int accountedIndex=this->theElements.GetIndex(theConjugated);
-          if (accountedIndex==-1)
-            crash << "Programming error: failed to find element " << theConjugated.ToString() << " in list of elements" << crash;
-          if(!Accounted[accountedIndex])
-          { currentClass.AddOnTop(theConjugated);
-            currentClassIndices.AddOnTop(accountedIndex);
-            Accounted[accountedIndex] = true;
-            numElementsAccounted++;
-            if (theGlobalVariables!=0 && numElementsAccounted%100 ==0)
-            { std::stringstream reportStream;
-              reportStream << "Type: " << this->theDynkinType.ToString() << ", computing conjugacy class "
-              << this->conjugacyClasses.size << ", accounted " << numElementsAccounted << " elements out of " << this->theElements.size << ". ";
-              Report1.Report(reportStream.str());
-            }
-          }
-        }
-      currentClass.QuickSortAscending(0, &currentClassIndices);
-    }
-  this->conjugacyClasses.QuickSortAscending(0, &this->conjugacyClassesIndices);
-  this->SelectCCRepsAndRecordCCsizes();
-  this->flagConjugacyClassesAreComputed=true;
-  int checkNumElts=0;
-  for (int i=0; i<this->ConjugacyClassCount(); i++)
-    checkNumElts+=this->conjugacyClasses[i].size;
-  if (this->theElements.size!=checkNumElts)
-    crash << "This is a programming error: there are total of " << checkNumElts << " elements in the various conjugacy classes while the group has "
-    << this->theElements.size << " elements" << crash;
-//  std::cout << "conj class report: " << this->ToString();
-  this->CheckInitializationFDrepComputation();
-  //std::cout << "weyl group of type " << this->theDynkinType.ToString() << " has " << this->ConjugacyClassCount() << "conjugacy classes" << std::endl;
-  //for(int i=0; i<ConjugacyClassCount(); i++)
-  //  std::cout << i << " " << conjugacyClasses[i].size << " " << conjugacyClasses[i] << std::endl;
-}
-
-void WeylGroup::ComputeSquares()
+void WeylGroup::ComputeSquares(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
   if(!this->flagConjugacyClassesAreComputed)
-    this->ComputeCC();
+    this->ComputeCCfromAllElements(theGlobalVariables);
   this->squaresFirstConjugacyClassRep.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
   ElementWeylGroup<WeylGroup> currentSquare;
@@ -185,9 +86,9 @@ void WeylGroup::ComputeSquares()
 void WeylGroup::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeInitialCharacters");
   if (!this->flagConjugacyClassesAreComputed)
-    this->ComputeCC(theGlobalVariables);
+    this->ComputeCCfromAllElements(theGlobalVariables);
   if(this->squaresFirstConjugacyClassRep.size == 0)
-    this->ComputeSquares();
+    this->ComputeSquares(theGlobalVariables);
   this->irreps.SetSize(0);
   this->characterTable.SetSize(0);
   this->characterTable.SetExpectedSize(this->ConjugacyClassCount());
@@ -515,7 +416,7 @@ coefficient WeylGroupRepresentation<coefficient>::GetNumberOfComponents()
 void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeIrreducibleRepresentationsThomasVersion");
   if(this->squaresFirstConjugacyClassRep.size == 0)
-    this->ComputeSquares();
+    this->ComputeSquares(theGlobalVariables);
   this->characterTable.SetSize(0);
   this->irreps.SetSize(0);
   WeylGroupRepresentation<Rational> sr;
@@ -1084,26 +985,14 @@ bool WeylGroup::VerifyChartable(bool printresults)const
 
 void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  if(!this->flagConjugacyClassesAreComputed)
-  { this->ComputeCC(theGlobalVariables);
-    this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
-    for(int i=0; i<this->ConjugacyClassCount(); i++)
-    { ElementWeylGroup<WeylGroup>& g=this->conjugacyClassRepresentatives[i];
-      this->ccRepresentativesPreimages[i]=-1;
-      for(int ci=0; ci<this->parent->ConjugacyClassCount(); ci++)
-        if (this->parent->AreConjugate(g, this->parent->conjugacyClassRepresentatives[ci] ))
-        { this->ccRepresentativesPreimages[i] = ci;
-          break;
-        }
-      if (this->ccRepresentativesPreimages[i]==-1)
-        crash << "Programming error: couldn't find preimage of a conjugacy class representative. "
-        << crash;
-    }
+  if(!this->flagConjugacyClassRepresentativesComputed)
+  { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
+    this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
-  std::cout << "<hr>Computing in group with " << this->size() << " elements. ";
+  std::cout << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
   this->tauSignature.SetSize(this->parent->ConjugacyClassCount());
   for(int i=0; i<this->parent->ConjugacyClassCount(); i++)
   { ClassFunction<Rational> Xip = this->parent->characterTable[i];
@@ -1115,16 +1004,17 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
   }
 }
 
-void SubgroupRootReflections::ComputeCC(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCC");
-  if (this->generatingSimpleRoots.CardinalitySelection==this->generatingSimpleRoots.MaxSize
-      && this->parent->flagConjugacyClassesAreComputed)
+void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
+  if (this->theDynkinType==this->parent->theDynkinType && this->parent->flagConjugacyClassRepresentativesComputed)
   { this->conjugacyClassRepresentatives=this->parent->conjugacyClassRepresentatives;
     this->conjugacyClassesSizes=this->parent->conjugacyClassesSizes;
-    this->theElements=this->parent->theElements;
-    this->flagConjugacyClassesAreComputed=true;
+    this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClassRepresentatives.size);
+    for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
+      this->ccRepresentativesPreimages[i]=i;
+    this->flagConjugacyClassRepresentativesComputed=true;
   } else
-    this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCC(theGlobalVariables);
+    this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
 }
 
 template <typename weylgroup>
@@ -1149,11 +1039,25 @@ void SubgroupRootReflections::MakeParabolicSubgroup(weylgroup& G, const Selectio
   }
 }
 
-template <typename somegroup, class elementSomeGroup>
-std::string Subgroup<somegroup, elementSomeGroup>::ToString(FormatExpressions* theFormat)const
+template <class elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right)
+{ MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
+  if (left.HasDifferentConjugacyInvariantsFrom(right))
+    return false;
+  OrbitIteratorWeylGroup theIterator;
+  theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::Conjugate);
+  do
+  { if (theIterator.GetCurrentElement()==right)
+      return true;
+  } while (theIterator.IncrementReturnFalseIfPastLast());
+  return false;
+}
+
+template <class elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("Subgroup::ToString");
   std::stringstream out;
-  out << "<br>Size: " << this->size() << "\n";
+  out << "<br>Size: " << this->size().ToString() << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   if (this->ConjugacyClassCount()>0)
   { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
@@ -1212,8 +1116,7 @@ void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups,
   for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
   { SubgroupRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
-    currentParabolic.ComputeCC(theGlobalVariables);
-    currentParabolic.ComputeCCRepresentativesPreimages();
+    currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
     std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]

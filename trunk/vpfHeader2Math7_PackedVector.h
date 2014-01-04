@@ -418,12 +418,12 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
   classmap.SetSize(sizeOfG);
 //  classmap.SetSize(G.theElements.size);
   for(int i=0; i<G.ConjugacyClassCount(); i++)
-    for(int j=0; j<G.conjugacyClasses[i].size; j++)
-      classmap[G.theElements.GetIndex(G.conjugacyClasses[i][j])] = i;
+    for(int j=0; j<G.conjugacyClasseS[i].size; j++)
+      classmap[G.theElements.GetIndex(G.conjugacyClasseS[i].theElements[j])] = i;
   Matrix<Rational> form; // so inefficient
   form.MakeZeroMatrix(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
-    form.elements[i][i] = G.conjugacyClasses[i].size;
+    form.elements[i][i] = G.conjugacyClasseS[i].size;
   List<VectorSpace<Rational> > spaces;
   if(G.characterTable.size > 0)
   { VectorSpace<Rational> allchars;
@@ -506,20 +506,22 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
 template <typename somegroup>
 Matrix<Rational> GetClassMatrix(const somegroup &G, int cci, List<int>* classmap = 0)
 { List<int> invl;
-  invl.SetSize(G.conjugacyClasses[cci].size);
-  for(int i=0; i<G.conjugacyClasses[cci].size; i++)
-    invl[i] = G.Invert(G.theElements.GetIndex(G.conjugacyClasses[cci][i]));
+  int classSize=-1;
+  G.conjugacyClasseS[cci].size.IsSmallEnoughToFitInInt(&classSize);
+  invl.SetSize(classSize);
+  for(int i=0; i<G.conjugacyClasseS[cci].size; i++)
+    invl[i] = G.Invert(G.theElements.GetIndex(G.conjugacyClasseS[cci].theElements[i]));
   Matrix<int> M;
   M.MakeZeroMatrix(G.ConjugacyClassCount());
   for(int t=0; t<G.ConjugacyClassCount(); t++)
     for(int xi=0; xi<invl.size; xi++)
-    { int yi = G.MultiplyElements(invl[xi],G.theElements.GetIndex(G.conjugacyClasses[t][0]));
+    { int yi = G.MultiplyElements(invl[xi],G.theElements.GetIndex(G.conjugacyClasseS[t].representative));
       int ci;
       if(classmap)
         M.elements[t][(*classmap)[yi]] += 1;
       else
         for(ci=0; ci<G.ConjugacyClassCount(); ci++)
-          if(G.conjugacyClassesIndices[ci].BSContains(yi))
+          if(G.conjugacyClasseS[ci].indicesEltsInOwner.BSContains(yi))
           { M.elements[t][ci] += 1;
             break;
           }
@@ -554,8 +556,8 @@ void GetTauSignaturesFromSubgroup(templateWeylGroup& G, const List<ElementWeylGr
   for(int i=0; i<H.ConjugacyClassCount(); i++)
   { bool notFound=true;
     for(int ci=0; notFound && ci<G.ConjugacyClassCount(); ci++)
-      for(int cj=0; notFound && cj<G.conjugacyClasses[ci].size; cj++)
-        if(G.conjugacyClasses[ci][cj] == H.theElements[H.conjugacyClassesIndices[i][0]])
+      for(int cj=0; notFound && cj<G.conjugacyClasseS[ci].size; cj++)
+        if(G.conjugacyClasseS[ci].theElements[cj] == H.conjugacyClasseS[i].representative)
         { ccPreimages[i] = ci;
           notFound=false;
         }
@@ -647,7 +649,7 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[0].value.list.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
   { List<int> reprefs;
-    G.GetGeneratorList(G.conjugacyClassesIndices[i][0],reprefs);
+    G.GetGeneratorList(G.conjugacyClasseS[i].indicesEltsInOwner[0],reprefs);
     data.obj[0].value.list[i].type = JSLIST;
     data.obj[0].value.list[i].list.SetSize(reprefs.size);
     for(int j=0; j<reprefs.size; j++)
@@ -660,7 +662,7 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[1].value.list.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
   { data.obj[1].value.list[i].type = JSNUM;
-    data.obj[1].value.list[i].number = G.conjugacyClasses[i].size;
+    data.obj[1].value.list[i].number = ((Rational) G.conjugacyClasseS[i].size).DoubleValue();
   }
 
   data.obj[2].value.type = JSLIST;

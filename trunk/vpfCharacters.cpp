@@ -61,31 +61,23 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
   for(int i=0;i<this->theElements.size;i++)
     for(int j=0;j<this->GetDim();j++)
       G.AddEdge(i, this->theElements.GetIndex(this->SimpleConjugation(j, this->theElements[i])));
-  this->conjugacyClassesIndices= G.DestructivelyGetConnectedComponents();
-  this->conjugacyClasses.SetSize(this->conjugacyClassesIndices.size);
-  for (int i=0; i<this->conjugacyClassesIndices.size; i++)
-  { this->conjugacyClasses[i].SetSize(this->conjugacyClassesIndices[i].size);
-    for (int j=0; j<this->conjugacyClasses[i].size; j++)
-      this->conjugacyClasses[i][j]=this->theElements[this->conjugacyClassesIndices[i][j]];
-  }
-  this->ComputeCCSizesAndRepresentativesFromCC();
-  this->flagConjugacyClassesAreComputed=true;
+  this->ComputeCCfromCCindicesInAllElements(G.DestructivelyGetConnectedComponents());
 }
 
 void WeylGroup::ComputeSquares(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeSquares");
-  if(!this->flagConjugacyClassesAreComputed)
+  if(!this->flagCCsComputed)
     this->ComputeCCfromAllElements(theGlobalVariables);
   this->squaresFirstConjugacyClassRep.SetExpectedSize(this->ConjugacyClassCount());
   this->squaresFirstConjugacyClassRep.SetSize(this->ConjugacyClassCount());
   ElementWeylGroup<WeylGroup> currentSquare;
   for(int i=0;i<this->ConjugacyClassCount();i++)
-    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClassRepresentatives[i]*this->conjugacyClassRepresentatives[i];
+    this->squaresFirstConjugacyClassRep[i]=this->conjugacyClasseS[i].representative*this->conjugacyClasseS[i].representative;
 }
 
 void WeylGroup::ComputeInitialIrreps(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::ComputeInitialCharacters");
-  if (!this->flagConjugacyClassesAreComputed)
+  if (!this->flagCCsComputed)
     this->ComputeCCfromAllElements(theGlobalVariables);
   if(this->squaresFirstConjugacyClassRep.size == 0)
     this->ComputeSquares(theGlobalVariables);
@@ -401,7 +393,7 @@ const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetChara
   this->theCharacteR.G = this->ownerGroup;
   this->theCharacteR.data.SetSize(this->ownerGroup->ConjugacyClassCount());
   for(int cci=0; cci < this->ownerGroup->ConjugacyClassCount(); cci++)
-    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClassRepresentatives[cci]).GetTrace();
+    this->theCharacteR.data[cci] = this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].representative).GetTrace();
   this->flagCharacterIsComputed=true;
   return this->theCharacteR;
 }
@@ -883,7 +875,7 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   X.G = &G;
   X.data.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
-  { ElementWeylGroup<WeylGroup>& g = G.conjugacyClasses[i][0];
+  { ElementWeylGroup<WeylGroup>& g = G.conjugacyClasseS[i].representative;
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
     { Vector<coefficient> v = ActOnGroupRing(g,V[j]);
@@ -915,10 +907,11 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vect
     rows.AddOnTop(v);
   }
   for(int i1 =0; i1<X.G->ConjugacyClassCount(); i1++)
-    for(int i2=0; i2<X.G->conjugacyClasses[i1].size; i2++)
+    for(int i2=0; i2<X.G->conjugacyClasseS[i1].size; i2++)
       for(int j=0; j<X.G->size(); j++)
         for(int k=0; k<B.size; k++)
-        { int l =X.G->theElements.GetIndex(X.G->conjugacyClasses[i1][i2]*X.G->theElements[j]);
+        { int l =X.G->theElements.GetIndex
+          (X.G->conjugacyClasseS[i1].theElements[i2]*X.G->theElements[j]);
           rows[k][l] = X.data[i1]*B[k][j];
         }
   Matrix<Rational> M;
@@ -934,8 +927,8 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vect
 ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(const ClassFunction<Rational>& X)
 { ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> out;
   for(int i=0; i<X.G->ConjugacyClassCount(); i++)
-    for(int j=0; j<X.G->conjugacyClasses[i].size; j++)
-      out.AddMonomial(X.G->conjugacyClasses[i][j],X.data[i]);
+    for(int j=0; j<X.G->conjugacyClasseS[i].size; j++)
+      out.AddMonomial(X.G->conjugacyClasseS[i].theElements[j],X.data[i]);
   return out;
 }
 
@@ -985,7 +978,7 @@ bool WeylGroup::VerifyChartable(bool printresults)const
 
 void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  if(!this->flagConjugacyClassRepresentativesComputed)
+  if(!this->flagCCRepresentativesComputed)
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
@@ -1006,13 +999,17 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
 
 void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages");
-  if (this->theDynkinType==this->parent->theDynkinType && this->parent->flagConjugacyClassRepresentativesComputed)
-  { this->conjugacyClassRepresentatives=this->parent->conjugacyClassRepresentatives;
-    this->conjugacyClassesSizes=this->parent->conjugacyClassesSizes;
-    this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClassRepresentatives.size);
+  if (this->theDynkinType==this->parent->theDynkinType && this->parent->flagCCRepresentativesComputed)
+  { this->conjugacyClasseS.SetSize(this->parent->conjugacyClasseS.size);
+    for (int i=0; i<this->conjugacyClasseS.size; i++)
+    { this->conjugacyClasseS[i].flagRepresentativeComputed=true;
+      this->conjugacyClasseS[i].representative=this->parent->conjugacyClasseS[i].representative;
+      this->conjugacyClasseS[i].size=this->parent->conjugacyClasseS[i].size;
+    }
+    this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClasseS.size);
     for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
       this->ccRepresentativesPreimages[i]=i;
-    this->flagConjugacyClassRepresentativesComputed=true;
+    this->flagCCRepresentativesComputed=true;
   } else
     this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
 }
@@ -1055,48 +1052,55 @@ bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, c
 
 template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat)const
-{ MacroRegisterFunctionWithName("Subgroup::ToString");
+{ std::stringstream out;
+  out << this->ToStringElements(theFormat);
+  out << this->ToStringConjugacyClasses(theFormat);
+  return out.str();
+}
+
+template <class elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("FiniteGroup::ToStringElements");
   std::stringstream out;
-  out << "<br>Size: " << this->size().ToString() << "\n";
-//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
-  if (this->ConjugacyClassCount()>0)
-  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
-    bool theEntireClassIsComputed=this->conjugacyClassesIndices.size==this->ConjugacyClassCount();
-    for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
-    { out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClassRepresentatives[i].ToString(theFormat) << ". ";
-      out << "The class has " << this->conjugacyClassesSizes[i] << " elements. ";
-      if (!theEntireClassIsComputed)
-      { out << "The class elements were not computed.";
-        continue;
-      }
-      if (this->conjugacyClassesIndices[i].size>10)
-      { out << " The elements are too many, displaying the first element only: ";
-        out << this->theElements[this->conjugacyClassesIndices[i][0]].ToString(theFormat);
-        continue;
-      } else if (this->conjugacyClassesIndices[i].size>0)
-        out << " The elements of the class are: ";
-      for (int j=0; j<this->conjugacyClassesIndices[i].size; j++)
-      { out << this->theElements[this->conjugacyClassesIndices[i][j]].ToString(theFormat);
-        if (j!=this->conjugacyClassesIndices[i].size-1)
-          out << ", ";
-      }
-      out << ". ";
-    }
-  }
   out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
   if (this->theElements.size<=100)
     for (int i=0; i<this->theElements.size; i++)
       out << i << ". " << this->theElements[i].ToString() << "\n";
   else
     out << "... too many, not displaying. ";
-/*  if (this->flagCharTableIsComputed)
-  { out << "<br>Character table: ";
-    Matrix<Rational> charTableMatForm;
-    charTableMatForm.init(this->irreps.size, this->ConjugacyClassCount());
-    for (int i=0; i<this->irreps.size; i++)
-      charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
-    out << charTableMatForm.ToString();
-  }*/
+  return out.str();
+}
+
+template <class elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
+  std::stringstream out;
+  out << "<br>Size: " << this->size().ToString() << "\n";
+//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  if (this->ConjugacyClassCount()>0)
+  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
+    for (int i=0; i<this->conjugacyClasseS.size; i++)
+    { if (this->conjugacyClasseS[i].flagRepresentativeComputed)
+        out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
+      out << "The class has " << this->conjugacyClasseS[i].size.ToString() << " elements. ";
+      if (!this->conjugacyClasseS[i].flagElementsComputed)
+      { out << "The class elements were not computed.";
+        continue;
+      }
+      out << " The elements of the class are: ";
+      int numEltsToDisplay=this->conjugacyClasseS[i].theElements.size;
+      if (this->conjugacyClasseS[i].theElements.size>10)
+      { out << " too many, displaying the first 10 elements only: ";
+        numEltsToDisplay=10;
+      }
+      for (int j=0; j<numEltsToDisplay; j++)
+      { out << this->conjugacyClasseS[i].theElements[j].ToString(theFormat);
+        if (j!=numEltsToDisplay-1)
+          out << ", ";
+      }
+      out << ". ";
+    }
+  }
   return out.str();
 }
 

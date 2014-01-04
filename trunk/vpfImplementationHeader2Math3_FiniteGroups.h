@@ -25,6 +25,7 @@ std::string FinitelyGeneratedMatrixMonoid<coefficient>::ToString(FormatExpressio
 template <typename elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Subgroup::ComputeAllElements");
+  this->InitGenerators();
   if (this->generators.size==0)
     crash << "Groups with zero generators are not allowed: if you wanted to create a trivial group, "
     << " trivial groups are assumed to have a generator (the identity). " << crash;
@@ -59,21 +60,23 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVa
 }
 
 template <class templateWeylGroup>
-void ElementWeylGroup<templateWeylGroup>::Conjugate(const ElementWeylGroup& elementWeConjugateBy, ElementWeylGroup& inputOutputConjugated)
-{ if (elementWeConjugateBy.owner!=inputOutputConjugated.owner)
+void ElementWeylGroup<templateWeylGroup>::Conjugate
+(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output)
+{ if (elementWeConjugateBy.owner!=inputToBeConjugated.owner)
     crash << "Attempting to multiply elements belonging to different Weyl groups." << crash;
-  if (&elementWeConjugateBy==&inputOutputConjugated)
-  { ElementWeylGroup copyElt=elementWeConjugateBy;
-    ElementWeylGroup<templateWeylGroup>::Conjugate(copyElt, inputOutputConjugated);
+  if (&elementWeConjugateBy==&output || &inputToBeConjugated==&output)
+  { ElementWeylGroup copyActingElt=elementWeConjugateBy;
+    ElementWeylGroup copyToBeConjugated=inputToBeConjugated;
+    ElementWeylGroup<templateWeylGroup>::Conjugate(copyActingElt, copyToBeConjugated, output);
     return;
   }
-  List<int> copyStartingIndices=inputOutputConjugated.generatorsLastAppliedFirst;
-  inputOutputConjugated.generatorsLastAppliedFirst.ReservE(inputOutputConjugated.generatorsLastAppliedFirst.size+2*elementWeConjugateBy.generatorsLastAppliedFirst.size);
-  inputOutputConjugated.generatorsLastAppliedFirst=elementWeConjugateBy.generatorsLastAppliedFirst;
-  inputOutputConjugated.generatorsLastAppliedFirst.AddListOnTop(copyStartingIndices);
+  output.owner=elementWeConjugateBy.owner;
+  output.generatorsLastAppliedFirst.ReservE(elementWeConjugateBy.generatorsLastAppliedFirst.size*2+inputToBeConjugated.generatorsLastAppliedFirst.size);
+  output.generatorsLastAppliedFirst=elementWeConjugateBy.generatorsLastAppliedFirst;
+  output.generatorsLastAppliedFirst.AddListOnTop(inputToBeConjugated.generatorsLastAppliedFirst);
   for (int i=elementWeConjugateBy.generatorsLastAppliedFirst.size-1; i>=0; i--)
-    inputOutputConjugated.generatorsLastAppliedFirst.AddOnTop(elementWeConjugateBy.generatorsLastAppliedFirst[i]);
-  inputOutputConjugated.MakeCanonical();
+    output.generatorsLastAppliedFirst.AddOnTop(elementWeConjugateBy.generatorsLastAppliedFirst[i]);
+  output.MakeCanonical();
 }
 
 template <class templateWeylGroup>
@@ -226,8 +229,9 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
   if (this->theGroupGeneratingElements.size==0)
     return false;
   for (int i=0; i<this->theGroupGeneratingElements.size; i++)
-  { this->bufferRepresentationElement=(*this->currentLayer)[this->indexCurrentElement];
-    this->theGroupAction(this->theGroupGeneratingElements[i], this->bufferRepresentationElement);
+  { this->theGroupAction
+    (this->theGroupGeneratingElements[i], (*this->currentLayer)[this->indexCurrentElement],
+     this->bufferRepresentationElement);
     if (!this->previousLayer->Contains(this->bufferRepresentationElement) &&
         !this->currentLayer->Contains(this->bufferRepresentationElement))
       this->nextLayer->AddOnTopNoRepetition(this->bufferRepresentationElement);
@@ -249,11 +253,11 @@ bool OrbitIterator<elementGroup, elementRepresentation>::IncrementReturnFalseIfP
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::init()
 { this->generators.SetSize(0);
-  this->conjugacyClassesIndices.SetSize(0);
+  this->conjugacyClasseS.SetSize(0);
   this->theElements.Clear();
-  this->flagConjugacyClassesAreComputed=false;
   this->flagAllElementsAreComputed=false;
-  this->flagConjugacyClassRepresentativesComputed=false;
+  this->flagCCsComputed=false;
+  this->flagCCRepresentativesComputed=false;
   this->flagCharPolysAreComputed=false;
   this->sizePrivate=0;
 }
@@ -281,11 +285,11 @@ bool Subgroup<somegroup, elementSomeGroup>::CheckInitialization()
 
 template <class elementSomeGroup>
 void FiniteGroup<elementSomeGroup>::GetSignCharacter(Vector<Rational>& outputCharacter)
-{ if(!this->flagConjugacyClassesAreComputed)
+{ if(!this->flagCCsComputed)
     this->ComputeCCSizesAndRepresentatives(0);
   outputCharacter.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-    outputCharacter[i]=this->conjugacyClassRepresentatives[i].Sign();
+    outputCharacter[i]=this->conjugacyClasseS[i].representative.Sign();
 }
 
 template <typename somegroup, class elementSomeGroup>
@@ -307,8 +311,8 @@ coefficient FiniteGroup<elementSomeGroup>::GetHermitianProduct
 (const Vector<coefficient>& X1, const Vector<coefficient>& X2) const
 { coefficient acc = 0;
   for(int i=0; i<X1.size; i++)
-  { acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClassesSizes[i];
-    if (this->conjugacyClassesSizes[i]==0)
+  { acc += X1[i].GetComplexConjugate() * X2[i] * this->conjugacyClasseS[i].size;
+    if (this->conjugacyClasseS[i].size==0)
       crash << "Error: conjugacy class size is zero." << crash;
   }
   return acc / this->size();
@@ -323,19 +327,9 @@ LargeInt FiniteGroup<elementSomeGroup>::size()const
 
 template <class elementSomeGroup>
 int FiniteGroup<elementSomeGroup>::ConjugacyClassCount()const
-{ if (!this->flagConjugacyClassesAreComputed)
+{ if (!this->flagCCRepresentativesComputed)
     crash << "Requesting conjugacy class count but conjugacy class representatives are not computed." << crash;
-  return this->conjugacyClassRepresentatives.size;
-}
-
-template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentativesFromCC()
-{ this->conjugacyClassesSizes.SetSize(this->conjugacyClassesIndices.size);
-  this->conjugacyClassRepresentatives.SetSize(this->conjugacyClassesIndices.size);
-  for (int i=0; i<this->conjugacyClassesIndices.size; i++)
-  { this->conjugacyClassRepresentatives[i]=this->theElements[this->conjugacyClassesIndices[i][0]];
-    this->conjugacyClassesSizes[i]=this->conjugacyClassesIndices[i].size;
-  }
+  return this->conjugacyClasseS.size;
 }
 
 template <typename somegroup, class elementSomeGroup>
@@ -344,9 +338,9 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(Gl
   this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { bool notFound=true;
-    ElementWeylGroup<WeylGroup>& g=this->conjugacyClassRepresentatives[i];
+    ElementWeylGroup<WeylGroup>& g=this->conjugacyClasseS[i].representative;
     for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
-      if(this->parent->AreConjugate(g, this->parent->conjugacyClassRepresentatives[ci]))
+      if(this->parent->AreConjugate(g, this->parent->conjugacyClasseS[ci].representative))
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
       }
@@ -354,75 +348,108 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(Gl
       crash << "Programming error: couldn't find preimage of a conjugacy class representative. "
       << crash;
   }
-  if (this->ccRepresentativesPreimages.size!=this->ConjugacyClassCount())
-    crash << "Bad representative preimages." << crash;
-  if (this->conjugacyClassesSizes.size!=this->ConjugacyClassCount())
-    crash << "Bad conjugacy class sizes." << crash;
-//  for (int i=0; i<this->ConjugacyClassCount(); i++)
-//    if (this->conjugacyClasses[i].size!=this->conjugacyClassesSizes[i])
-//      crash << "Bad conjugacy class sizes. " << crash;
 }
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::CheckInitialization()const
-{ if (this->generators.size==0)
+{ this->CheckConsistency();
+  if (this->generators.size==0)
     crash << "Error: group has 0 generators, which is not allowed. If you want to use the trivial "
     << "group, you are still supposed to put the identity element in the group generators. " << crash;
   return true;
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizesFromCCRepresentatives(GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeCCSizeFromRepresentative
+(ConjugacyClass& inputOutputClass, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
-  this->conjugacyClassesSizes.SetSize(this->ConjugacyClassCount());
-  for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
-  { theOrbitIterator.init(this->generators, this->conjugacyClassRepresentatives[i], elementSomeGroup::Conjugate);
-    this->conjugacyClassesSizes[i]=1;
-    while (theOrbitIterator.IncrementReturnFalseIfPastLast())
-      this->conjugacyClassesSizes[i]++;
-  }
+  theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::Conjugate);
+  inputOutputClass.size=1;
+  while (theOrbitIterator.IncrementReturnFalseIfPastLast())
+    inputOutputClass.size++;
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCRepresentatives");
-  if (this->flagConjugacyClassRepresentativesComputed)
-    return;
-  this->CheckInitialization();
-  this->CCRepsCharPolys.Clear();
-  this->conjugacyClassRepresentatives.SetSize(0);
-  elementSomeGroup currentElement;
-  currentElement.MakeID(this->generators[0]);
-  Polynomial<Rational> currentCharPoly;
-  currentElement.GetCharacteristicPolyStandardRepresentation(currentCharPoly);
-  this->conjugacyClassRepresentatives.AddOnTop(currentElement);
-  this->CCRepsCharPolys.AddOnTop(currentCharPoly);
+bool FiniteGroup<elementSomeGroup>::RegisterCCclass
+(const elementSomeGroup& theRepresentative, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::RegisterCCclass");
+  ConjugacyClass theClass;
+  theClass.representative=theRepresentative;
+  Polynomial<Rational> theCharPoly;
+  theClass.representative.GetCharacteristicPolyStandardRepresentation(theCharPoly);
+  if (this->CCsStandardRepCharPolys.Contains(theCharPoly))
+    for (int k=0; k<this->conjugacyClasseS.size; k++)
+      if (theCharPoly==this->CCsStandardRepCharPolys[k])
+        if (this->AreConjugate(theClass.representative, this->conjugacyClasseS[k].representative))
+          return false;
+  this->ComputeCCSizeFromRepresentative(theClass, theGlobalVariables);
+  this->conjugacyClasseS.AddOnTop(theClass);
+  this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
+  this->sizePrivate+=theClass.size;
+  return true;
+}
+
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeCCRepresentativesPart1(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCPart1");
+  //this method "hops" from conjugacy class representative to conjugacy representative
+  //by multiplying the representatives by the generators. This procedure is not guaranteed
+  //to generate all conjugacy classes: for example, when done on B2, this procedure generates
+  // the representatives:
+  //id
+  //s_1 (long root reflection)
+  //s_2 (short root reflection)
+  //s_1s_2
+  // but fails to generate s_1s_2s_1s_2 (=-id): s_1s_2s_1s_2 is not obtainable from the other
+  //representatives by action of the generators.
+  elementSomeGroup currentElt;
+  currentElt.MakeID(this->generators[0]);
+  this->RegisterCCclass(currentElt, theGlobalVariables);
   ProgressReport theReport(theGlobalVariables);
-  for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
+  for (int i=0; i<this->conjugacyClasseS.size; i++)
     for (int j=0; j<this->generators.size; j++)
-    { currentElement=this->conjugacyClassRepresentatives[i];
-      currentElement*=this->generators[j];
-      currentElement.GetCharacteristicPolyStandardRepresentation(currentCharPoly);
-      bool shouldAdd=true;
-      if (this->CCRepsCharPolys.Contains(currentCharPoly))
-        for (int k=0; k<this->conjugacyClassRepresentatives.size; k++)
-          if (currentCharPoly==this->CCRepsCharPolys[k])
-            if (this->AreConjugate(currentElement, this->conjugacyClassRepresentatives[k]))
-            { shouldAdd=false;
-              break;
-            }
-      if (shouldAdd)
-      { this->conjugacyClassRepresentatives.AddOnTop(currentElement);
-        this->CCRepsCharPolys.AddOnTop(currentCharPoly);
-        if (theGlobalVariables!=0)
-        { std::stringstream reportStream;
-          reportStream << "Exploring conjugacy class " << i+1 << " out of " << this->conjugacyClassRepresentatives.size << " conjugacy class representatives found so far. ";
-          theReport.Report(reportStream.str());
-        }
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        reportStream << "Exploring conjugacy class " << i+1
+        << " out of " << this->conjugacyClasseS.size
+        << " generator " << j+1 << " out of " << this->generators.size;
+        theReport.Report(reportStream.str());
       }
+      this->RegisterCCclass(this->conjugacyClasseS[i].representative*this->generators[j], theGlobalVariables);
     }
-  this->flagConjugacyClassRepresentativesComputed=true;
+}
+
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesAndRepresentatives");
+  if (this->flagCCRepresentativesComputed)
+    return;
+  this->InitGenerators();
+  this->CheckInitialization();
+  this->CCsStandardRepCharPolys.Clear();
+  this->conjugacyClasseS.SetSize(0);
+  this->sizePrivate=0;
+  this->ComputeCCRepresentativesPart1(theGlobalVariables);
+  this->flagCCRepresentativesComputed=true;
+}
+
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCfromCCindicesInAllElements");
+  this->conjugacyClasseS.SetSize(ccIndices.size);
+  for (int i=0; i<ccIndices.size; i++)
+  { this->conjugacyClasseS[i].size= ccIndices[i].size;
+    this->conjugacyClasseS[i].indicesEltsInOwner=ccIndices[i];
+    this->conjugacyClasseS[i].theElements.SetSize(ccIndices[i].size);
+    for (int j=0; j<ccIndices[i].size; j++)
+      this->conjugacyClasseS[i].theElements[j]=this->theElements[ccIndices[i][j]];
+    this->conjugacyClasseS[i].representative=this->theElements[ccIndices[i][0]];
+    this->conjugacyClasseS[i].flagRepresentativeComputed=true;
+    this->conjugacyClasseS[i].flagElementsComputed=true;
+  }
+  this->flagCCsComputed=true;
+  this->flagCCRepresentativesComputed=true;
 }
 
 template <class elementSomeGroup>
@@ -431,8 +458,6 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
   this->ComputeAllElements(-1, theGlobalVariables);
   List<bool> Accounted;
   Accounted.initFillInObject(this->theElements.size, false);
-  this->conjugacyClassesIndices.SetSize(0);
-  this->conjugacyClassesIndices.ReservE(120);
   HashedList<int, MathRoutines::IntUnsignIdentity> theStack;
   theStack.SetExpectedSize(this->theElements.size);
   List<elementSomeGroup> inversesOfGenerators;
@@ -440,6 +465,8 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
   for(int i=0; i<this->generators.size; i++)
     inversesOfGenerators[i] = this->generators[i].Inverse();
   elementSomeGroup currentElement;
+  List<List<int> > ccIndices;
+  ccIndices.ReservE(120);
   for(int i=0; i<this->theElements.size; i++)
     if (!Accounted[i])
     { theStack.Clear();
@@ -451,12 +478,11 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromAllElements(GlobalVariables* th
           theStack.AddOnTopNoRepetition(accountedIndex);
           Accounted[accountedIndex]=true;
         }
-      this->conjugacyClassesIndices.AddOnTop(theStack);
-      this->conjugacyClassesIndices.LastObject()->QuickSortAscending();
+      ccIndices.AddOnTop(theStack);
+      ccIndices.LastObject()->QuickSortAscending();
     }
-  this->conjugacyClassesIndices.QuickSortAscending();
-  this->ComputeCCSizesAndRepresentativesFromCC();
-  this->flagConjugacyClassesAreComputed=true;
+  ccIndices.QuickSortAscending();
+  this->ComputeCCfromCCindicesInAllElements(ccIndices);
 }
 
 template <class coefficient>
@@ -1038,15 +1064,16 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
       if(useParent)
         Matrix<coefficient>::MatrixInBasis(this->parent->classFunctionMatrices[cci], this->classFunctionMatrices[cci], this->basis, this->gramMatrixInverted);
       else
-      { List<int>& currentConjugacyClassIndices=this->ownerGroup->conjugacyClassesIndices[cci];
+      { WeylGroup::ConjugacyClass& currentCC=this->ownerGroup->conjugacyClasseS[cci];
         this->classFunctionMatrices[cci].MakeZeroMatrix(this->GetDim());
-        for (int i=0; i<currentConjugacyClassIndices.size; i++)
-        { if (!this->theElementIsComputed[currentConjugacyClassIndices[i]])
+        for (int i=0; i<currentCC.theElements.size; i++)
+        { if (!this->theElementIsComputed[currentCC.indicesEltsInOwner[i]])
             this->ComputeAllGeneratorImagesFromSimple(theGlobalVariables);
-          this->classFunctionMatrices[cci]+=this->theElementImageS[currentConjugacyClassIndices[i]];
+          this->classFunctionMatrices[cci]+=this->theElementImageS[currentCC.indicesEltsInOwner[i]];
           if (theGlobalVariables!=0)
           { std::stringstream reportstream;
-            reportstream << " Computing conjugacy class " << currentConjugacyClassIndices[i]+1 << " (total num classes is " << numClasses << ").";
+            reportstream << " Computing conjugacy class " << currentCC.indicesEltsInOwner[i]+1
+            << " (total num classes is " << numClasses << ").";
             theReport.Report(reportstream.str());
           }
         }
@@ -1079,10 +1106,10 @@ void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
     { //std::cout << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
       //<< "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << std::endl;
       classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].NumCols);
-      for(int icci=0; icci<this->ownerGroup->conjugacyClasses[cci].size; icci++)
+      for(int icci=0; icci<this->ownerGroup->conjugacyClasseS[cci].size; icci++)
       { //Matrix<coefficient> Mi;
         //Mi.MakeIdMatrix(this->generators[0].NumCols);
-        this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasses[cci][icci]);
+        this->classFunctionMatrices[cci] += this->GetMatrixElement(this->ownerGroup->conjugacyClasseS[cci].theElements[icci]);
         //for(int gi=g.reflections.size-1; ; gi--)
         //{  if(gi < 0)
         //      break;

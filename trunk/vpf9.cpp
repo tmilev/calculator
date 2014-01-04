@@ -4794,25 +4794,20 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane<
 }
 
 void WeylGroup::GetSignCharacter(Vector<Rational>& out)
-{ if(!this->flagConjugacyClassesAreComputed)
-    this->ComputeCCRepresentatives(0);
+{ if(!this->flagCCRepresentativesComputed)
+    this->ComputeCCSizesAndRepresentatives(0);
   out.SetSize(this->ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-  { int yn = this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size % 2;
-    if(yn == 0)
-      out[i] = 1;
-    else
-      out[i] = -1;
-  }
+    out[i]= this->conjugacyClasseS[i].representative.Sign();
 }
 
 void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::GetSignCharacter");
-  if(!this->flagConjugacyClassRepresentativesComputed)
-    this->ComputeCCRepresentatives(0);
+  if(!this->flagCCRepresentativesComputed)
+    this->ComputeCCSizesAndRepresentatives(0);
   out.SetSize(ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
-    out[i] = this->conjugacyClassRepresentatives[i].Sign();
+    out[i] = this->conjugacyClasseS[i].representative.Sign();
   std::cout << "<br>Sign character is: " << out.ToString();
 }
 
@@ -5057,8 +5052,8 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
 
 std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
-  if (!this->flagConjugacyClassesAreComputed)
-    return "<br>Conjugacy classes not computed.";
+  if (!this->flagCCsComputed || !this->flagCCRepresentativesComputed)
+    return "";
   std::stringstream out;
   out << "<hr>Here is the c++ input code for the conjugacy class table.";
   out << "<br>";
@@ -5066,25 +5061,25 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
   out << "bool LoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << "output.ComputeRho(true);";
-  out << "\n<br>&nbsp;&nbsp;output.conjugacyClassRepresentatives.SetSize(" << this->conjugacyClassRepresentatives.size << ");";
+  out << "WeylGroup::ConjugacyClass emptyClass;";
+  out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initFillInObject(" << this->conjugacyClasseS.size << ");";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClassRepresentatives[" << i;
+  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
     for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
-    out << "].MakeFromReadableReflections(output, true, \"";
-    for (int j=0; j<this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size; j++)
-    { out << this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst[j];
-      if (j!=this->conjugacyClassRepresentatives[i].generatorsLastAppliedFirst.size-1)
+    out << "].representative.MakeFromReadableReflections(output, true, \"";
+    for (int j=0; j<this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j++)
+    { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j];
+      if (j!=this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size-1)
         out << ",";
     }
     out << "\");";
   }
-  out << "\n<br>&nbsp;&nbsp;output.conjugacyClassesSizes.SetSize(" << this->ConjugacyClassCount() << ");";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClassesSizes[" << i;
+  { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
     for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
-    out  << "]=" << this->conjugacyClassesSizes[i] << ";";
+    out  << "].size=" << this->conjugacyClasseS[i].size.ToString() << ";";
   }
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
@@ -5097,37 +5092,7 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
   out << "<br>Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
-  if (this->ConjugacyClassCount()>0)
-  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
-    bool theEntireClassIsComputed=this->conjugacyClasses.size==this->ConjugacyClassCount();
-    for (int i=0; i<this->conjugacyClassRepresentatives.size; i++)
-    { out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClassRepresentatives[i].ToString(theFormat) << ". ";
-      out << "The class has " << this->conjugacyClassesSizes[i] << " elements. ";
-      if (!theEntireClassIsComputed)
-      { out << "The class elements were not computed.";
-        continue;
-      }
-      if (this->conjugacyClasses[i].size>10)
-      { out << " The elements are too many displaying the first element only: ";
-        out << this->conjugacyClasses[i][0].ToString(theFormat);
-        continue;
-      } else if (this->conjugacyClasses[i].size>0)
-        out << " The elements of the class are: ";
-      for (int j=0; j<this->conjugacyClasses[i].size; j++)
-      { out << this->conjugacyClasses[i][j].ToString(theFormat);
-        if (j!=this->conjugacyClasses[i].size-1)
-          out << ", ";
-      }
-      out << ". ";
-    }
-  }
   out << "<br>Root system(" << this->RootSystem.size << " elements):\n" << this->RootSystem.ToString() << "\n";
-  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
-  if (this->theElements.size<=100)
-    for (int i=0; i<this->theElements.size; i++)
-      out << i << ". " << this->theElements[i].ToString() << "\n";
-  else
-    out << "... too many, not displaying. ";
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
   if (this->flagCharTableIsComputed)
   { out << "<br>Character table: ";
@@ -5137,6 +5102,8 @@ std::string WeylGroup::ToString(FormatExpressions* theFormat)
       charTableMatForm.AssignVectorToRowKeepOtherRowsIntactNoInit(i, this->irreps[i].theCharacteR.data);
     out << charTableMatForm.ToString();
   }
+  out << this->ToStringConjugacyClasses(theFormat);
+  out << this->ToStringElements(theFormat);
   out << this->ToStringCppConjugacyClasses(theFormat);
   out << this->ToStringCppCharTable(theFormat);
   return out.str();
@@ -5195,6 +5162,10 @@ void WeylGroup::MakeMeFromMyCartanSymmetric()
 }
 
 void WeylGroup::MakeFinalSteps()
+{ this->ComputeCoCartanSymmetricFromCartanSymmetric();
+}
+
+void WeylGroup::InitGenerators()
 { this->generators.SetSize(this->GetDim());
   if (this->GetDim()==0)
   { this->generators.SetSize(1);
@@ -5202,7 +5173,6 @@ void WeylGroup::MakeFinalSteps()
   }
   for (int i=0; i<this->GetDim(); i++)
     this->generators[i].MakeSimpleReflection(i, *this);
-  this->ComputeCoCartanSymmetricFromCartanSymmetric();
 }
 
 void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)

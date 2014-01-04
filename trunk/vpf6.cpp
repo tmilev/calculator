@@ -179,8 +179,9 @@ int Expression::AddObjectReturnIndex(const
 SemisimpleSubalgebras
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theSSsubalgebras
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  if (!this->theBoss->theObjectContainer.theSSsubalgebras.Contains(inputValue))
+    crash << "Semisimple subalgebras must be allocated directly in the object container. " << crash;
+  return this->theBoss->theObjectContainer.theSSsubalgebras.GetIndex(inputValue);
 }
 
 template < >
@@ -269,8 +270,9 @@ int Expression::AddObjectReturnIndex(const
 SemisimpleLieAlgebra
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theLieAlgebras
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  if (!this->theBoss->theObjectContainer.theLieAlgebras.Contains(inputValue))
+    crash << "Semisimple Lie algebra must be allocated directly in the object container. " << crash;
+  return this->theBoss->theObjectContainer.theLieAlgebras.GetIndex(inputValue);
 }
 
 template < >
@@ -368,8 +370,9 @@ int Expression::AddObjectReturnIndex(const
 WeylGroup
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theWeylGroups
-  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+  if (!this->theBoss->theObjectContainer.theWeylGroups.Contains(inputValue))
+    crash << "Weyl group must be allocated directly in the object container. " << crash;
+  return this->theBoss->theObjectContainer.theWeylGroups.GetIndex(inputValue);
 }
 
 template < >

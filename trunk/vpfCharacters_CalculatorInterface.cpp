@@ -14,6 +14,8 @@ FormatExpressions::GetMonOrder<ClassFunction<Rational> >()
 bool WeylGroup::CheckConsistency()const
 { if (this->flagDeallocated)
     crash << "This is a programming error: use after free of WeylGroup. " << crash;
+  for (int i=0; i<this->generators.size; i++)
+    this->generators[i].CheckConsistency();
   this->RootsOfBorel.CheckConsistency();
   return true;
 }
@@ -681,8 +683,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS(Calculator& th
   return output.AssignValue(theGroup, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch");
+bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements");
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
@@ -695,6 +697,29 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScra
   theGroup.ComputeCCfromAllElements(theCommands.theGlobalVariableS);
   //std::stringstream out;
   theCommands.Comments << "<hr> Computed conjugacy classes of " << theGroup.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
+  << " second(s). ";
+  return output.AssignValue(theGroup, theCommands);
+}
+
+bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives");
+  if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
+    return false;
+  WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
+  theGroup.CheckConsistency();
+  if (theGroup.GetDim()>6)
+  { theCommands.Comments << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
+    << "not to compute when the rank is larger than 6. ";
+    return false;
+  }
+  theGroup.CheckConsistency();
+  double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theGroup.CheckConsistency();
+//  theGroup.ComputeCCRepresentatives(theCommands.theGlobalVariableS);
+  theGroup.ComputeCCSizesAndRepresentatives(theCommands.theGlobalVariableS);
+  //std::stringstream out;
+  theCommands.Comments << "<hr> Computed conjugacy classes representatives of "
+  << theGroup.theDynkinType.ToString() << " in " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeStart1
   << " second(s). ";
   return output.AssignValue(theGroup, theCommands);
 }

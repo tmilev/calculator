@@ -286,6 +286,9 @@ public:
     }
     this->value*=other;
   }
+  inline void operator++(int)
+  { *this+=1;
+  }
   inline void operator*=(int x)
   { this->MultiplyByInt(x);
   }
@@ -383,18 +386,19 @@ public:
   LargeInt(): sign(1){}
 };
 
-class LargeRationalExtended
-{
-public:
-  LargeInt num;
-  LargeIntUnsigned den;
-};
-
 Rational operator-(const Rational& argument);
 Rational operator/(int left, const Rational& right);
 
 class Rational
-{ friend Rational operator-(const Rational& argument);
+{
+private:
+  struct LargeRationalExtended
+  {
+  public:
+    LargeInt num;
+    LargeIntUnsigned den;
+  };
+  friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
   friend std::ostream& operator << (std::ostream& output, const Rational& theRat)
   { output << theRat.ToString();

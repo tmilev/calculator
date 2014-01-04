@@ -26,26 +26,50 @@ class FiniteGroup
 public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
-
-  List<elementSomeGroup> conjugacyClassRepresentatives;
-  HashedList<Polynomial<Rational> > CCRepsCharPolys;
+  struct ConjugacyClass
+  {
+  public:
+    ConjugacyClass()
+    { this->flagRepresentativeComputed=false;
+      this->flagElementsComputed=false;
+    }
+    LargeInt size;
+    List<int> indicesEltsInOwner;
+    List<elementSomeGroup> theElements;
+    elementSomeGroup representative;
+    bool flagRepresentativeComputed;
+    bool flagElementsComputed;
+  };
+  List<ConjugacyClass> conjugacyClasseS;
+  HashedList<Polynomial<Rational> > CCsStandardRepCharPolys;
   //<-The character polynomials in the ``standard representation''.
   //The ``standard representation'' is specified by the elementSomeGroup class.
   //It is up to the user of the FiniteGroup template to define which representation is
   //``standard'' - this is not a serious restriction as one can always choose the trivial representation.
-  List<int> conjugacyClassesSizes; // <-in case we cant compute conjugacyClases directly.
-  List<List<int> > conjugacyClassesIndices;
-  bool flagConjugacyClassRepresentativesComputed;
-  bool flagConjugacyClassesAreComputed;
+  bool flagCCsComputed;
+  bool flagCCRepresentativesComputed;
   bool flagAllElementsAreComputed;
   bool flagCharPolysAreComputed;
 
-  FiniteGroup()
+  bool flagDeallocated;
+  FiniteGroup(): flagDeallocated(false)
   { this->init();
+  }
+  virtual ~FiniteGroup()
+  { this->flagDeallocated=true;
+  }
+  virtual void InitGenerators()
+  {}
+  bool CheckConsistency()const
+  { if (this->flagDeallocated)
+      crash << "This is a programming error: use after free of Finite group. " << crash;
+    return true;
   }
   bool CheckInitialization()const;
   void init();
   std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringElements(FormatExpressions* theFormat=0)const;
+  std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
   int ConjugacyClassCount()const;
   LargeInt size()const;
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
@@ -54,14 +78,16 @@ public:
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
   void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesAndRepresentativesFromCC();
+  void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
-  void ComputeCCRepresentatives(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesFromCCRepresentatives(GlobalVariables* theGlobalVariables);
-  void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables)
-  { this->ComputeCCRepresentatives(theGlobalVariables);
-    this->ComputeCCSizesFromCCRepresentatives(theGlobalVariables);
-  }
+  void ComputeCCSizeFromRepresentative
+(ConjugacyClass& inputOutputClass, GlobalVariables* theGlobalVariables)
+;
+  bool RegisterCCclass
+(const elementSomeGroup& theRepresentative, GlobalVariables* theGlobalVariables)
+ ;
+  void ComputeCCRepresentativesPart1(GlobalVariables* theGlobalVariables);
+  void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
   coefficient GetHermitianProduct(const Vector<coefficient>& leftCharacter, const Vector<coefficient>& rightCharacter)const;
@@ -76,19 +102,39 @@ class ElementWeylGroup
 public:
   templateWeylGroup* owner;
   List<int> generatorsLastAppliedFirst;
-  ElementWeylGroup():owner(0)
-  {}
+  bool flagDeallocated;
+  ElementWeylGroup(const ElementWeylGroup& other)
+  { this->flagDeallocated=false;
+    this->operator=(other);
+  }
+  ElementWeylGroup():owner(0), flagDeallocated(false)
+  {
+  }
+  ~ElementWeylGroup()
+  { this->flagDeallocated=true;
+  }
+  void operator=(const ElementWeylGroup& other)
+  { this->owner=other.owner;
+    this->generatorsLastAppliedFirst=other.generatorsLastAppliedFirst;
+  }
+  bool CheckConsistency()const
+  { if (this->flagDeallocated)
+      crash << "Programming error: use after free of class ElementWeylGroup" << crash;
+    return true;
+  }
   bool CheckInitialization()const
-  { if (this->owner==0)
+  { this->CheckConsistency();
+    if (this->owner==0)
     { crash << "This is a programming error: non-initialized element Weyl group. " << crash;
       return false;
     }
+    this->owner->CheckConsistency();
     return true;
   }
   int Sign()const
   { return this->generatorsLastAppliedFirst.size %2 ==0 ? 1 : -1;
   }
-  static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, ElementWeylGroup& inputOutputConjugated);
+  static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output);
   void MakeCanonical();
   void MakeID(templateWeylGroup& inputWeyl);
   void MakeID(const ElementWeylGroup& initializeFrom);
@@ -341,22 +387,16 @@ public:
   DynkinType theDynkinType;
   Matrix<Rational> CartanSymmetric;
   Matrix<Rational> CoCartanSymmetric;
-  HashedList<ElementWeylGroup<WeylGroup> > theElements;
   Vector<Rational> rho;
   HashedList<Vector<Rational> > rhoOrbit;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
 
   MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
-  List<List<int> > conjugacyClassesIndices;
-  List<List<ElementWeylGroup<WeylGroup> > > conjugacyClasses;
-  List<ElementWeylGroup<WeylGroup> > conjugacyClassRepresentatives;
-  List<int> conjugacyClassesSizes;
   List<ElementWeylGroup<WeylGroup> > squaresFirstConjugacyClassRep;
 
   List<WeylGroupRepresentation<Rational> > irreps;
   List<ClassFunction<Rational> > characterTable;
-  bool flagDeallocated;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init();
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
@@ -380,14 +420,12 @@ public:
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFinalSteps();
+  void InitGenerators();
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
   void ComputeOuterAutoGenerators();
   void ComputeOuterAutos();
-  int ConjugacyClassCount()const
-  { return this->conjugacyClassRepresentatives.size;
-  }
   bool CheckConsistency()const;
   bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
@@ -662,7 +700,7 @@ template <class elementGroup, class elementRepresentation>
 class OrbitIterator
 {
 public:
-  typedef void (*GroupAction)(const elementGroup& actingElement, elementRepresentation& inputOutput);
+  typedef void (*GroupAction)(const elementGroup& actingElement, const elementRepresentation& inputElementActedUpon, elementRepresentation& output);
 private:
   HashedList<elementRepresentation> privateLayer1, privateLayer2, privateLayer3;
   elementRepresentation bufferRepresentationElement;
@@ -850,8 +888,8 @@ void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(WeylGroup* GG, con
   ElementWeylGroup<WeylGroup> theMon;
   for(int i=0; i<GG->ConjugacyClassCount(); i++)
     if (l[i]!=0)
-      for(int j=0; j<GG->conjugacyClasses[i].size; j++)
-        this->AddMonomial(GG->conjugacyClasses[i][j], l[i]);
+      for(int j=0; j<GG->conjugacyClasseS.size; j++)
+        this->AddMonomial(GG->conjugacyClasseS[i].theElements[j], l[i]);
 }
 
 //Matrix<Element>
@@ -861,15 +899,12 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<coefficie
   return out;
 }
 
-//---------------------------------------------------------------------------Characters --------------------------------
-//--------------------------------Characters----------------------------
+//---------------------------------------------------------------------------Finite group characters --------------------------------
+//--------------------------------Finite group characters----------------------------
 
 template<typename coefficient>
 coefficient ClassFunction<coefficient>::InnerProduct(const ClassFunction<coefficient>& other) const
-{ coefficient acc = 0;
-  for(int i=0;i<G->ConjugacyClassCount();i++)
-    acc +=  this->data[i].GetComplexConjugate() * other[i].GetComplexConjugate() * G->conjugacyClassesSizes[i];
-  return acc/G->GetSizeWeylGroupByFormula();
+{ return this->G->GetHermitianProduct(this->data, other.data);
 }
 
 template<typename coefficient>

@@ -283,7 +283,7 @@ void ComputeIrreps(WeylGroup& G)
   Rational SizeG=G.GetSizeWeylGroupByFormula();
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=0; j<G.characterTable.size; j++)
-      M(j,i) = G.characterTable[j][i]*G.conjugacyClasses[i].size/SizeG;
+      M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=i; j<G.characterTable.size; j++)
     { std::cout << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << std::endl;
@@ -984,7 +984,7 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
   X.G = &G;
   X.data.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
-  { int g = G.conjugacyClasses[i][0];
+  { int g = G.conjugacyClasseS[i].representative;
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
     { Vector<coefficient> v = ActOnGroupRing(G,g,V[j]);

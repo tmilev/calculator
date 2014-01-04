@@ -174,9 +174,14 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("WeylGroupConjugacyClassesComputeFromScratch", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesComputeFromScratch, "",
-   "<b>Work in progress.</b> For rank <=6, computes the conjugacy classes of a Weyl group from scratch. ",
-   "WeylGroupConjugacyClassesComputeFromScratch{}(A_2);", true, true)
+  ("WeylGroupConjugacyClassesFromAllElements", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements, "",
+   "For small ranks, computes the conjugacy classes of a Weyl group by enumerating all elements of the group. ",
+   "WeylGroupConjugacyClassesFromAllElements{}(A_2);", true, true)
+   ;
+  this->AddOperationInnerHandler
+  ("WeylGroupConjugacyClassesRepresentatives", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives, "",
+   "Computes a representatvie in each conjugacy classes of a Weyl group by comparing conjugacy classes invariants and by enumerating conjugacy class orbits. ",
+   "WeylGroupConjugacyClassesRepresentatives{}(A_2);", true, true)
    ;
   this->AddOperationInnerHandler
   ("WeylGroupConjugacyClasses", CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClasseS, "",

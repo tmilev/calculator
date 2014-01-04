@@ -22,7 +22,8 @@ public:
   static bool innerWeylGroupOuterAutoGeneratorsPrint(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClasseS(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupConjugacyClassesLoad(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerWeylGroupConjugacyClassesComputeFromScratch(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupConjugacyClassesFromAllElements(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylGroupConjugacyClassesRepresentatives(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMacdonaldPolys(Calculator& theCommands, const Expression& input, Expression& output);

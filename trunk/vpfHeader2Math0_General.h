@@ -1907,9 +1907,8 @@ template <class TemplateMonomial, class coefficient>
 inline bool MonomialCollection<TemplateMonomial, coefficient>::operator==(int x)const
 { if (x==0)
     return this->size()==0;
-  std::cout << "This is either a programming error, or an unforeseen use of operator==. If the second is the case, an audit/careful "
-  << "proofreading of the code calling this function is needed; I am crashing just in case. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  crash << "This is either a programming error, or an unforeseen use of operator==. If the second is the case, an audit/careful "
+  << "proofreading of the code calling this function is needed; I am crashing just in case. " << crash;
   return false;
 }
 
@@ -4211,7 +4210,7 @@ public:
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const PartFraction& input)
-  { output << " Not implemented, please fix. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  { crash << " Not implemented, please fix. " << crash;
     return output;
   }
   static const bool IsEqualToZero(){return false;}

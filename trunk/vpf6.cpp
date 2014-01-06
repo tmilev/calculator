@@ -812,7 +812,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     << "Contexts are reserved for built-in data types. " << crash;
   if (!inputOutputMinContext.IsContext())
   { this->theBoss->Comments << "<br>Warning: non-initialized input context in Expression::SetContextAtLeastEqualTo. Stack trace: "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << Crasher::GetStackTraceEtcErrorMessage();
     inputOutputMinContext.MakeEmptyContext(*this->theBoss);
   }
 //  std::cout << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
@@ -5102,7 +5102,7 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
   for (int i=0; i<inputOutputEs.size; i++)
   { if (!inputOutputEs[i].IsBuiltInType())
     { this->Comments << "<hr>Possible programming error: calling ConvertExpressionsToCommonContext on expressions without context. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      << Crasher::GetStackTraceEtcErrorMessage();
       return false;
     }
     if (!commonContext.ContextMergeContexts(commonContext, inputOutputEs[i].GetContext(), commonContext))

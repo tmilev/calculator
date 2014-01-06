@@ -78,7 +78,7 @@ public:
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
   int ConjugacyClassCount()const;
   LargeInt size()const;
-  virtual LargeInt GetGroupSizeByFormula()const=0;
+  virtual LargeInt GetGroupSizeByFormula()const=0; //non-positive result means no formula is known.
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
@@ -758,6 +758,9 @@ public:
   Subgroup();
   bool CheckInitialization();
   void init();
+  LargeInt GetGroupSizeByFormula()const
+  { return -1;
+  }
   void initFromGroupAndGenerators(somegroup& inputGroup, const List<elementSomeGroup>& inputGenerators);
   void ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables);
   void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables)

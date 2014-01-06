@@ -42,7 +42,11 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVa
       if (theGlobalVariables!=0)
         if (this->theElements.size%100==0)
         { std::stringstream reportStream;
-          reportStream << "Generated " << this->theElements.size << "elements so far";
+          LargeInt sizeByFla=this->GetGroupSizeByFormula();
+          reportStream << "So far, generated " << this->theElements.size << " elements";
+          if (sizeByFla>0)
+            reportStream << " out of " << sizeByFla.ToString();
+          reportStream << ".";
           theReport.Report(reportStream.str());
         }
       if (MaxElements>0)
@@ -51,7 +55,7 @@ bool FiniteGroup<elementSomeGroup>::ComputeAllElements(int MaxElements, GlobalVa
     }
   if (theGlobalVariables!=0)
   { std::stringstream reportStream;
-    reportStream << "Generated subgroup with " << this->theElements.size << " elements. ";
+    reportStream << "Generated group with a total of " << this->theElements.size << " elements. ";
     theReport.Report(reportStream.str());
   }
   this->sizePrivate=this->theElements.size;
@@ -178,14 +182,57 @@ void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
 template <class templateWeylGroup>
 bool ElementWeylGroup<templateWeylGroup>::HasDifferentConjugacyInvariantsFrom
 (const ElementWeylGroup<templateWeylGroup>& right)const
-{ if ((this->generatorsLastAppliedFirst.size%2 )!=(right.generatorsLastAppliedFirst.size%2))
+{ MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
+  if ((this->generatorsLastAppliedFirst.size%2 )!=(right.generatorsLastAppliedFirst.size%2))
     return true;
-  MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
+  if (*this==right) //just in case
+    return false;
   this->CheckInitialization();
   Polynomial<Rational> leftCharPoly, rightCharPoly;
   this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
   right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
-  return leftCharPoly!=rightCharPoly;
+  if(leftCharPoly!=rightCharPoly)
+    return true;
+  VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
+  this->GetCycleStructure(leftCycleStructure);
+  right.GetCycleStructure(rightCycleStructure);
+  if (leftCycleStructure!=rightCycleStructure)
+    return false;
+  return false;
+}
+
+template <class templateWeylGroup>
+std::string ElementWeylGroup<templateWeylGroup>::ToStringInvariants(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  VectorSparse<Rational> theCycleStructure;
+  this->GetCycleStructure(theCycleStructure);
+  FormatExpressions cycleLetterFormat;
+  cycleLetterFormat.polyDefaultLetter="c";
+  std::stringstream out;
+  out << "Cycle structure: " << theCycleStructure.ToString(&cycleLetterFormat);
+  return out.str();
+}
+
+template <class templateWeylGroup>
+void ElementWeylGroup<templateWeylGroup>::GetCycleStructure
+(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult)const
+{ MacroRegisterFunctionWithName("ElementWeylGroup::GetCycleStructure");
+  this->CheckInitialization();
+  outputIndexIsCycleSizeCoordinateIsCycleMult.MakeZero();
+  List<bool> Explored;
+  HashedList<Vector<Rational> >& theRootSystem=this->owner->RootSystem;
+  Explored.initFillInObject(theRootSystem.size, false);
+  Vector<Rational> currentRoot;
+  for (int i=0; i<Explored.size; i++)
+    if (!Explored[i])
+    { int currentCycleSize=1;
+      currentRoot=theRootSystem[i];
+      for (this->owner->ActOn(*this, currentRoot); currentRoot!=theRootSystem[i]; this->owner->ActOn(*this, currentRoot))
+      { currentCycleSize++;
+        Explored[theRootSystem.GetIndex(currentRoot)]=true;
+      }
+      outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize), 1);
+    }
 }
 
 template <class templateWeylGroup>
@@ -259,6 +306,7 @@ void FiniteGroup<elementSomeGroup>::init()
   this->flagCCsComputed=false;
   this->flagCCRepresentativesComputed=false;
   this->flagCharPolysAreComputed=false;
+  this->flagGeneratorsConjugacyClassesComputed=false;
   this->sizePrivate=0;
 }
 
@@ -360,30 +408,63 @@ bool FiniteGroup<elementSomeGroup>::CheckInitialization()const
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCSizeFromRepresentative
-(ConjugacyClass& inputOutputClass, GlobalVariables* theGlobalVariables)
+void FiniteGroup<elementSomeGroup>::ComputeGeneratorsConjugacyClasses
+  (GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeGeneratorsConjugacyClasses");
+  if (this->flagGeneratorsConjugacyClassesComputed)
+    return;
+  this->unionGeneratorsCC.Clear();
+  this->unionGeneratorsCC.AddOnTopNoRepetition(this->generators);
+  elementSomeGroup currentElt;
+  for (int i=0; i<this->unionGeneratorsCC.size; i++)
+    for (int j=0; j<this->generators.size; j++)
+    { elementSomeGroup::Conjugate(this->generators[j], this->unionGeneratorsCC[i], currentElt);
+      this->unionGeneratorsCC.AddOnTopNoRepetition(currentElt);
+    }
+  this->flagGeneratorsConjugacyClassesComputed=true;
+}
+
+template <class elementSomeGroup>
+void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
+(ConjugacyClass& inputOutputClass, bool storeCC, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("FiniteGroup::ComputeCCSizesFromCCRepresentatives");
   OrbitIterator<elementSomeGroup, elementSomeGroup> theOrbitIterator;
   theOrbitIterator.init(this->generators, inputOutputClass.representative, elementSomeGroup::Conjugate);
   inputOutputClass.size=1;
+  if (storeCC)
+  { inputOutputClass.theElements.SetSize(0);
+    inputOutputClass.theElements.AddOnTop(inputOutputClass.representative);
+  }
   while (theOrbitIterator.IncrementReturnFalseIfPastLast())
-    inputOutputClass.size++;
+  { inputOutputClass.size++;
+    if (storeCC)
+      inputOutputClass.theElements.AddOnTop(theOrbitIterator.GetCurrentElement());
+  }
 }
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::RegisterCCclass
-(const elementSomeGroup& theRepresentative, GlobalVariables* theGlobalVariables)
+(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("FiniteGroup::RegisterCCclass");
   ConjugacyClass theClass;
   theClass.representative=theRepresentative;
   Polynomial<Rational> theCharPoly;
   theClass.representative.GetCharacteristicPolyStandardRepresentation(theCharPoly);
   if (this->CCsStandardRepCharPolys.Contains(theCharPoly))
-    for (int k=0; k<this->conjugacyClasseS.size; k++)
-      if (theCharPoly==this->CCsStandardRepCharPolys[k])
-        if (this->AreConjugate(theClass.representative, this->conjugacyClasseS[k].representative))
+  { const List<int>& indicesPossibleConjugates=
+    this->CCsStandardRepCharPolys.GetHashArray(this->CCsStandardRepCharPolys.GetHash(theCharPoly));
+    for (int i=0; i<indicesPossibleConjugates.size; i++)
+    { elementSomeGroup& otherRepresentative=this->conjugacyClasseS[indicesPossibleConjugates[i]].representative;
+      if (!dontAddIfSameInvariants)
+      { if (this->AreConjugate(theClass.representative, otherRepresentative))
           return false;
-  this->ComputeCCSizeFromRepresentative(theClass, theGlobalVariables);
+      } else
+        if (!theClass.representative.HasDifferentConjugacyInvariantsFrom(otherRepresentative))
+          return false;
+    }
+  }
+  theClass.flagRepresentativeComputed=true;
+  this->ComputeCCSizeOrCCFromRepresentative(theClass, false, theGlobalVariables);
   this->conjugacyClasseS.AddOnTop(theClass);
   this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
   this->sizePrivate+=theClass.size;
@@ -391,33 +472,52 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass
 }
 
 template <class elementSomeGroup>
-void FiniteGroup<elementSomeGroup>::ComputeCCRepresentativesPart1(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCPart1");
-  //this method "hops" from conjugacy class representative to conjugacy representative
-  //by multiplying the representatives by the generators. This procedure is not guaranteed
-  //to generate all conjugacy classes: for example, when done on B2, this procedure generates
-  // the representatives:
-  //id
-  //s_1 (long root reflection)
-  //s_2 (short root reflection)
-  //s_1s_2
-  // but fails to generate s_1s_2s_1s_2 (=-id): s_1s_2s_1s_2 is not obtainable from the other
-  //representatives by action of the generators.
-  elementSomeGroup currentElt;
-  currentElt.MakeID(this->generators[0]);
-  this->RegisterCCclass(currentElt, theGlobalVariables);
+bool FiniteGroup<elementSomeGroup>::ComputeCCRepresentatives
+(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::ComputeCCRepresentatives");
+  //This algorithm is effective if the sum of the sizes of the conjugacy classes
+  //of the generators is small.
+  //The algorithm "hops" from conjugacy class representative to conjugacy representative
+  //by multiplying the representatives by the each element of each conjugacy class of the generators.
+  //We prove this algorithm is guaranteed to generate all conjugacy classes.
+  //Let g be a generator, H a conjugacy class, and h \in H an arbitrary element of H.
+  //Suppose gH intersects a conjugacy class F. We claim there exists a generator g and an
+  //element x such that x g x^{-1} h\in F. Indeed, as gH intersects F, g x^{-1} h x\in F for some
+  //element x, and therefore x g x^{-1} h =x(g x^{-1} h x) x^{-1}\in F, which proves our claim.
+  //The preceding considerations show that
+  //a representative of each conjugacy class containing an element from g H can be obtained
+  //by applying the entire conjugacy class of g onto an arbitrary representative of H.
+  //As we are using the conjugacy classes of a set of generators, this shows that the following
+  //algorithm will generate a representative of each conjugacy class.
+
+  //First we compute the generator's conjugacy classes:
+  this->ComputeGeneratorsConjugacyClasses(theGlobalVariables);
+
   ProgressReport theReport(theGlobalVariables);
-  for (int i=0; i<this->conjugacyClasseS.size; i++)
-    for (int j=0; j<this->generators.size; j++)
-    { if (theGlobalVariables!=0)
-      { std::stringstream reportStream;
-        reportStream << "Exploring conjugacy class " << i+1
-        << " out of " << this->conjugacyClasseS.size
-        << " generator " << j+1 << " out of " << this->generators.size;
-        theReport.Report(reportStream.str());
+  elementSomeGroup currentElement;
+  LargeInt groupSizeByFla=this->GetGroupSizeByFormula();
+  this->flagCharPolysAreComputed=true;
+  for (int phase=0; phase<2; phase++)//In phase 0 we try to add a new conjugacy class only if
+    //the class has a new character polynomial. In phase 1 we try every single conjugacy class,
+    //in case there are two non-conjugate elements with the same char poly.
+    for (int i=0; i<this->conjugacyClasseS.size; i++)
+      for (int j=0; j<this->unionGeneratorsCC.size; j++)
+      { if (theGlobalVariables!=0)
+        { std::stringstream reportStream;
+          reportStream << "Exploring conjugacy class " << i+1
+          << " out of " << this->conjugacyClasseS.size
+          << " generator " << j+1 << " out of " << this->unionGeneratorsCC.size;
+          theReport.Report(reportStream.str());
+        }
+        currentElement=this->conjugacyClasseS[i].representative*this->unionGeneratorsCC[j];
+        this->RegisterCCclass(currentElement,(phase==0), theGlobalVariables);
+        if (this->sizePrivate==groupSizeByFla)
+          return true;
       }
-      this->RegisterCCclass(this->conjugacyClasseS[i].representative*this->generators[j], theGlobalVariables);
-    }
+  if (groupSizeByFla>0)
+    if (this->sizePrivate!=groupSizeByFla)
+      crash << "Something went very wrong: number of elements generated is not equal to group size by formula. " << crash;
+  return true;
 }
 
 template <class elementSomeGroup>
@@ -430,7 +530,11 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizesAndRepresentatives(GlobalVaria
   this->CCsStandardRepCharPolys.Clear();
   this->conjugacyClasseS.SetSize(0);
   this->sizePrivate=0;
-  this->ComputeCCRepresentativesPart1(theGlobalVariables);
+
+  elementSomeGroup currentElt;
+  currentElt.MakeID(this->generators[0]);
+  this->RegisterCCclass(currentElt, false, theGlobalVariables);
+  this->ComputeCCRepresentatives(theGlobalVariables);
   this->flagCCRepresentativesComputed=true;
 }
 
@@ -585,7 +689,7 @@ bool WeylGroup::GenerateOrbit
   Vector<coefficient> currentRoot;
   ElementWeylGroup<WeylGroup> currentElt;
   if (expectedOrbitSize<=0)
-    if (!this->theDynkinType.GetSizeWeylGroupByFormula().IsSmallInteger(&expectedOrbitSize))
+    if (!this->GetGroupSizeByFormula().IsSmallEnoughToFitInInt(&expectedOrbitSize))
       expectedOrbitSize=-1;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;

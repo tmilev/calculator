@@ -26,6 +26,7 @@ class FiniteGroup
 public:
   List<elementSomeGroup> generators;
   HashedList<elementSomeGroup> theElements;
+  HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass
   {
   public:
@@ -50,6 +51,7 @@ public:
   bool flagCCRepresentativesComputed;
   bool flagAllElementsAreComputed;
   bool flagCharPolysAreComputed;
+  bool flagGeneratorsConjugacyClassesComputed;
 
   bool flagDeallocated;
   FiniteGroup(): flagDeallocated(false)
@@ -66,27 +68,34 @@ public:
     return true;
   }
   bool CheckInitialization()const;
+  void SetSize(const LargeInt& inputSize)
+  { this->sizePrivate=inputSize;
+  }
   void init();
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringElements(FormatExpressions* theFormat=0)const;
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
   int ConjugacyClassCount()const;
   LargeInt size()const;
+  virtual LargeInt GetGroupSizeByFormula()const=0;
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
-
-  void CleanUpGenerators();
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
   void ComputeCCfromAllElements(GlobalVariables* theGlobalVariables);
   void ComputeCCfromCCindicesInAllElements(const List<List<int> >& ccIndices);
 
-  void ComputeCCSizeFromRepresentative
-(ConjugacyClass& inputOutputClass, GlobalVariables* theGlobalVariables)
+  void ComputeCCSizeOrCCFromRepresentative
+(ConjugacyClass& inputOutputClass, bool storeCC, GlobalVariables* theGlobalVariables)
 ;
   bool RegisterCCclass
-(const elementSomeGroup& theRepresentative, GlobalVariables* theGlobalVariables)
+(const elementSomeGroup& theRepresentative, bool dontAddIfSameInvariants, GlobalVariables* theGlobalVariables)
  ;
-  void ComputeCCRepresentativesPart1(GlobalVariables* theGlobalVariables);
+  bool ComputeCCRepresentatives
+  (GlobalVariables* theGlobalVariables)
+  ;
+  void ComputeGeneratorsConjugacyClasses
+  (GlobalVariables* theGlobalVariables)
+  ;
   void ComputeCCSizesAndRepresentatives(GlobalVariables* theGlobalVariables);
   void GetSignCharacter(Vector<Rational>& outputCharacter);
   template <typename coefficient>
@@ -142,6 +151,7 @@ public:
   void ToString(std::string& output)
   { output=this->ToString();
   }
+  std::string ToStringInvariants(FormatExpressions* theFormat)const;
   std::string ToString(FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)const
   { return this->ToString(-1, theFormat, DisplayIndicesOfSimpleRoots);
   }
@@ -159,6 +169,7 @@ public:
   static inline bool IsEqualToZero()
   { return false;
   }
+  void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult)const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup<WeylGroup> Inverse() const;
   void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
@@ -550,10 +561,10 @@ public:
   }
   void ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output);
   void ComputeRootsOfBorel(Vectors<Rational>& output);
-  Rational GetSizeWeylGroupByFormula()const
-  { return this->theDynkinType.GetSizeWeylGroupByFormula();
+  LargeInt GetGroupSizeByFormula()const
+  { return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
-  static Rational GetSizeWeylGroupByFormula(char weylLetter, int theDim);
+  static LargeInt GetGroupSizeByFormula(char weylLetter, int theDim);
   bool IsARoot(const Vector<Rational>& input)const
   { return this->RootSystem.Contains(input);
   }
@@ -766,8 +777,11 @@ public:
   Matrix<Rational> SubCartanSymmetric;
   DynkinType theDynkinType;
   Selection generatingSimpleRoots;
-  template <typename weylgroup>
-  void MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots);
+  void InitGenerators();
+  void MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots);
+  LargeInt GetGroupSizeByFormula()const
+  { return this->theDynkinType.GetWeylGroupSizeByFormula();
+  }
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables);
 };

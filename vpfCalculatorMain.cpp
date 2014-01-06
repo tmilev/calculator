@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	std::cout << "Content-Type: text/html\n\n";
 
 //	std::cout <<  "<br>" << (int) &theGlobalVariables.callSystem ;
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=100000000;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
   { getPath(argv[0], onePredefinedCopyOfGlobalVariables.inputPatH);
@@ -120,6 +120,8 @@ int main(int argc, char **argv)
 //  civilizedInput="WeylGroupTauSignatures{}(f_4);";
 //  civilizedInput="WeylGroupConjugacyClassesRepresentatives{}a_2";
 //  civilizedInput="WeylGroupConjugacyClasses b_2";
+//  civilizedInput="WeylGroupConjugacyClassesRepresentatives a_2";
+//  civilizedInput="WeylGroupTauSignatures{}(b_3);";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

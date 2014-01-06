@@ -1005,7 +1005,9 @@ void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVaria
     { this->conjugacyClasseS[i].flagRepresentativeComputed=true;
       this->conjugacyClasseS[i].representative=this->parent->conjugacyClasseS[i].representative;
       this->conjugacyClasseS[i].size=this->parent->conjugacyClasseS[i].size;
+      this->conjugacyClasseS[i].flagElementsComputed=false;
     }
+    this->SetSize(this->parent->size());
     this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClasseS.size);
     for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
       this->ccRepresentativesPreimages[i]=i;
@@ -1014,8 +1016,25 @@ void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVaria
     this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
 }
 
-template <typename weylgroup>
-void SubgroupRootReflections::MakeParabolicSubgroup(weylgroup& G, const Selection& inputGeneratingSimpleRoots)
+void SubgroupRootReflections::InitGenerators()
+{ MacroRegisterFunctionWithName("SubgroupRootReflections::InitGenerators");
+  if (this->theDynkinType.GetRank()==0)
+  { this->generators.SetSize(1);
+    this->generators[0].MakeID(*this->parent);
+    return;
+  }
+  int d=this->SubCartanSymmetric.NumRows;
+  this->generatorPreimages.SetSize(d);
+  this->generators.SetSize(d);
+  ElementWeylGroup<WeylGroup> currentSimpleReflection;
+  for(int i=0; i<d; i++)
+  { currentSimpleReflection.MakeSimpleReflection(this->generatingSimpleRoots.elements[i], *this->parent);
+    this->generatorPreimages[i]=this->parent->theElements.GetIndex(currentSimpleReflection);
+    this->generators[i]=currentSimpleReflection;
+  }
+}
+
+void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots)
 { MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
   this->init();
   this->parent = &G;
@@ -1026,14 +1045,6 @@ void SubgroupRootReflections::MakeParabolicSubgroup(weylgroup& G, const Selectio
     for(int jj=0; jj<d; jj++)
       this->SubCartanSymmetric(ii,jj) = G.CartanSymmetric(this->generatingSimpleRoots.elements[ii],generatingSimpleRoots.elements[jj]);
   this->ComputeDynkinType();
-  this->generatorPreimages.SetSize(d);
-  this->generators.SetSize(d);
-  ElementWeylGroup<WeylGroup> currentSimpleReflection;
-  for(int i=0; i<d; i++)
-  { currentSimpleReflection.MakeSimpleReflection(this->generatingSimpleRoots.elements[i], G);
-    this->generatorPreimages[i]=G.theElements.GetIndex(currentSimpleReflection);
-    this->generators[i]=currentSimpleReflection;
-  }
 }
 
 template <class elementSomeGroup>
@@ -1061,6 +1072,8 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
 template <class elementSomeGroup>
 std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* theFormat)const
 { MacroRegisterFunctionWithName("FiniteGroup::ToStringElements");
+  if (!this->flagAllElementsAreComputed)
+    return "";
   std::stringstream out;
   out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
   if (this->theElements.size<=100)
@@ -1076,17 +1089,41 @@ std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpres
 { MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
   std::stringstream out;
   out << "<br>Size: " << this->size().ToString() << "\n";
-//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  FormatExpressions charPolyFormat;
+  charPolyFormat.polyAlphabeT.SetSize(1);
+  charPolyFormat.polyAlphabeT[0]="q";
+  //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   if (this->ConjugacyClassCount()>0)
   { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
     for (int i=0; i<this->conjugacyClasseS.size; i++)
-    { if (this->conjugacyClasseS[i].flagRepresentativeComputed)
-        out << "<br>Conjugacy class " << i+1 << " is represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
-      out << "The class has " << this->conjugacyClasseS[i].size.ToString() << " elements. ";
+    { out << "<hr>Conjugacy class " << i+1 << ": ";
+      if (this->conjugacyClasseS[i].flagRepresentativeComputed)
+      { out << " represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
+        out << this->conjugacyClasseS[i].representative.ToStringInvariants(theFormat);
+      } else
+        out << " representative not computed. ";
+      out << "Class size: " << this->conjugacyClasseS[i].size.ToString() << ".\n<br>\n";
+      if (this->flagCharPolysAreComputed)
+        if (i<this->CCsStandardRepCharPolys.size)
+        { out << "Characteristic poly standard representation: "
+          << this->CCsStandardRepCharPolys[i].ToString(&charPolyFormat);
+          const List<int>& currentHashList=
+          this->CCsStandardRepCharPolys.GetHashArray
+          (this->CCsStandardRepCharPolys.GetHash(this->CCsStandardRepCharPolys[i]));
+          int numClassesSameCharPoly=0;
+          for (int j=0; j<currentHashList.size; j++)
+            if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
+              numClassesSameCharPoly++;
+          if (numClassesSameCharPoly>1)
+          { out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
+            << " conjugacy classes, numbers: ";
+            for (int j=0; j<currentHashList.size; j++)
+              if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
+                out << currentHashList[j]+1 << (j==currentHashList.size-1 ? "" : ", ");
+          }
+        }
       if (!this->conjugacyClasseS[i].flagElementsComputed)
-      { out << "The class elements were not computed.";
         continue;
-      }
       out << " The elements of the class are: ";
       int numEltsToDisplay=this->conjugacyClasseS[i].theElements.size;
       if (this->conjugacyClasseS[i].theElements.size>10)

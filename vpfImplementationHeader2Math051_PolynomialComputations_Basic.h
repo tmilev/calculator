@@ -29,7 +29,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
           continue;
         }
         std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
-        << "which is not a small integer: it is " << this->monBody[i] << " instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        << "which is not a small integer: it is " << this->monBody[i] << " instead. " << Crasher::GetStackTraceEtcErrorMessage();
         return false;
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();

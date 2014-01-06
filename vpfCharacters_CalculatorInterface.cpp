@@ -333,15 +333,13 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylG
       }
       remainingVectorSpace=tempSpace;
       if(remainingCharacter[0]!=remainingVectorSpace.size)
-      { std::cout << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0]
-        << " but remaining vector space has dim " << remainingVectorSpace.size;
-        //crash<<crash;
+      { crash << "<br>This is a programming error: remaining char " << remainingCharacter.ToString() << " indicates dimension " << remainingCharacter[0].ToString()
+        << " but remaining vector space has dim " << remainingVectorSpace.size << crash;
       }
       if (remainingCharacter.IsEqualToZero())
         if (!remainingVectorSpace.size==0)
-        { std::cout << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
-          << ". Starting char: " << this->theCharacteR.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          //crash<<crash;
+        { crash << "This is a programming error: remaining char is zero but remaining space is " << remainingVectorSpace.ToString()
+          << ". Starting char: " << this->theCharacteR.ToString() << crash;
         }
     }
   }

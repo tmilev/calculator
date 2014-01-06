@@ -35,7 +35,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     this->theCrashReport << ". ";
   if (this->userInputStringIfAvailable!="")
     this->theCrashReport << " The user input that caused the crash was: <hr> " << this->userInputStringIfAvailable << "<hr>";
-  this->theCrashReport << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  this->theCrashReport << Crasher::GetStackTraceEtcErrorMessage();
   if (this->theGlobalVariables!=0)
     if (this->theGlobalVariables->ProgressReportStringS.size>0)
     { this->theCrashReport << "<hr>In addition, I have an account of the computation progress report strings, attached below.<hr>";
@@ -59,6 +59,15 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   theFile.close();
   assert(false);
   return *this;
+}
+
+std::string Crasher::GetStackTraceEtcErrorMessage()
+{ std::stringstream out;
+  out << "A partial stack trace follows (function calls not explicitly logged not included).";
+  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr>";
+  out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
+  out << "</table>";
+  return out.str();
 }
 
 template<>

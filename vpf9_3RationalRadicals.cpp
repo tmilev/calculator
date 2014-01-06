@@ -111,7 +111,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   if (radicalsNew.size>16)
   { std::cout << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current implementation of algberaic extensions of the rationals. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << Crasher::GetStackTraceEtcErrorMessage();
     return (false);
   }
   this->theBasisMultiplicative.SetSize(MathRoutines::TwoToTheNth(radicalsNew.size));
@@ -294,7 +294,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
   }
   if (input.basisIndex<0 || input.basisIndex>=this->theBasesAdditive.size)
   { std::cout << "This is a programming error: element has basis index " << input.basisIndex << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << Crasher::GetStackTraceEtcErrorMessage();
   }
   if (input.basisIndex==this->theBasesAdditive.size-1)
   { output=input.theElT;

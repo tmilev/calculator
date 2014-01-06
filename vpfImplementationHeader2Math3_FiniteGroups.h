@@ -183,21 +183,25 @@ template <class templateWeylGroup>
 bool ElementWeylGroup<templateWeylGroup>::HasDifferentConjugacyInvariantsFrom
 (const ElementWeylGroup<templateWeylGroup>& right)const
 { MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
+  //std::cout << "<br>Comparing invariants of " << this->ToString() << " and " << right.ToString();
   if ((this->generatorsLastAppliedFirst.size%2 )!=(right.generatorsLastAppliedFirst.size%2))
     return true;
   if (*this==right) //just in case
     return false;
   this->CheckInitialization();
+  //std::cout << " the sign is the same... ";
   Polynomial<Rational> leftCharPoly, rightCharPoly;
   this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
   right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
   if(leftCharPoly!=rightCharPoly)
     return true;
+  //std::cout << " the char polys are the same... ";
   VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
   this->GetCycleStructure(leftCycleStructure);
   right.GetCycleStructure(rightCycleStructure);
   if (leftCycleStructure!=rightCycleStructure)
-    return false;
+    return true;
+  //std::cout << " the cycle structures are the same... the elements are POSSIBLY conjugate.";
   return false;
 }
 
@@ -209,7 +213,7 @@ std::string ElementWeylGroup<templateWeylGroup>::ToStringInvariants(FormatExpres
   FormatExpressions cycleLetterFormat;
   cycleLetterFormat.polyDefaultLetter="c";
   std::stringstream out;
-  out << "Cycle structure: " << theCycleStructure.ToString(&cycleLetterFormat);
+  out << "Cycle structure: " << theCycleStructure.ToString(&cycleLetterFormat) << ". ";
   return out.str();
 }
 
@@ -384,18 +388,94 @@ template <typename somegroup, class elementSomeGroup>
 void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("Subgroup::ComputeCCRepresentativesPreimages");
   this->ccRepresentativesPreimages.SetSize(this->ConjugacyClassCount());
+  if (this->generators.size==0)
+    crash << "At this computation the group must have initialized generators. " << crash;
+  if (this->parent->generators.size==0)
+    crash << "Parent group must have initialized generators. " << crash;
   for(int i=0; i<this->ConjugacyClassCount(); i++)
   { bool notFound=true;
-    ElementWeylGroup<WeylGroup>& g=this->conjugacyClasseS[i].representative;
+    elementSomeGroup& g=this->conjugacyClasseS[i].representative;
     for(int ci=0; notFound && ci<this->parent->ConjugacyClassCount(); ci++)
       if(this->parent->AreConjugate(g, this->parent->conjugacyClasseS[ci].representative))
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
       }
     if (notFound)
-      crash << "Programming error: couldn't find preimage of a conjugacy class representative. "
-      << crash;
+      crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative "
+      << g.ToString() << crash;
   }
+}
+
+template <class elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("FiniteGroup::ToStringElements");
+  if (!this->flagAllElementsAreComputed)
+    return "";
+  std::stringstream out;
+  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
+  if (this->theElements.size<=100)
+    for (int i=0; i<this->theElements.size; i++)
+      out << i << ". " << this->theElements[i].ToString() << "\n";
+  else
+    out << "... too many, not displaying. ";
+  return out.str();
+}
+
+template <class elementSomeGroup>
+std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
+  std::stringstream out;
+  out << "<br>Size: " << this->size().ToString() << "\n";
+  FormatExpressions charPolyFormat;
+  charPolyFormat.polyAlphabeT.SetSize(1);
+  charPolyFormat.polyAlphabeT[0]="q";
+  //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  if (this->ConjugacyClassCount()>0)
+  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
+    for (int i=0; i<this->conjugacyClasseS.size; i++)
+    { out << "<hr>Conjugacy class " << i+1 << ": ";
+      if (this->conjugacyClasseS[i].flagRepresentativeComputed)
+      { out << " represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
+        out << this->conjugacyClasseS[i].representative.ToStringInvariants(theFormat);
+      } else
+        out << " representative not computed. ";
+      out << "Class size: " << this->conjugacyClasseS[i].size.ToString() << ".\n<br>\n";
+      if (this->flagCharPolysAreComputed)
+        if (i<this->CCsStandardRepCharPolys.size)
+        { out << "Characteristic poly standard representation: "
+          << this->CCsStandardRepCharPolys[i].ToString(&charPolyFormat);
+          const List<int>& currentHashList=
+          this->CCsStandardRepCharPolys.GetHashArray
+          (this->CCsStandardRepCharPolys.GetHash(this->CCsStandardRepCharPolys[i]));
+          int numClassesSameCharPoly=0;
+          for (int j=0; j<currentHashList.size; j++)
+            if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
+              numClassesSameCharPoly++;
+          if (numClassesSameCharPoly>1)
+          { out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
+            << " conjugacy classes, numbers: ";
+            for (int j=0; j<currentHashList.size; j++)
+              if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
+                out << currentHashList[j]+1 << (j==currentHashList.size-1 ? "" : ", ");
+          }
+        }
+      if (!this->conjugacyClasseS[i].flagElementsComputed)
+        continue;
+      out << " The elements of the class are: ";
+      int numEltsToDisplay=this->conjugacyClasseS[i].theElements.size;
+      if (this->conjugacyClasseS[i].theElements.size>10)
+      { out << " too many, displaying the first 10 elements only: ";
+        numEltsToDisplay=10;
+      }
+      for (int j=0; j<numEltsToDisplay; j++)
+      { out << this->conjugacyClasseS[i].theElements[j].ToString(theFormat);
+        if (j!=numEltsToDisplay-1)
+          out << ", ";
+      }
+      out << ". ";
+    }
+  }
+  return out.str();
 }
 
 template <class elementSomeGroup>

@@ -985,15 +985,15 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
-  std::cout << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
+//  std::cout << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
   this->tauSignature.SetSize(this->parent->ConjugacyClassCount());
   for(int i=0; i<this->parent->ConjugacyClassCount(); i++)
   { ClassFunction<Rational> Xip = this->parent->characterTable[i];
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
-    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
-    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+//    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
+//    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
   }
 }
 
@@ -1007,7 +1007,7 @@ void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVaria
       this->conjugacyClasseS[i].size=this->parent->conjugacyClasseS[i].size;
       this->conjugacyClasseS[i].flagElementsComputed=false;
     }
-    this->SetSize(this->parent->size());
+    this->sizePrivate=this->parent->size();
     this->ccRepresentativesPreimages.SetSize(this->parent->conjugacyClasseS.size);
     for (int i=0; i<this->ccRepresentativesPreimages.size; i++)
       this->ccRepresentativesPreimages[i]=i;
@@ -1045,17 +1045,25 @@ void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selectio
     for(int jj=0; jj<d; jj++)
       this->SubCartanSymmetric(ii,jj) = G.CartanSymmetric(this->generatingSimpleRoots.elements[ii],generatingSimpleRoots.elements[jj]);
   this->ComputeDynkinType();
+  this->InitGenerators();
 }
 
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right)
 { MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
+//  std::cout << "<hr><hr>Computing whether " << left.ToString() << " is conjugate to "
+//  << right.ToString();
   if (left.HasDifferentConjugacyInvariantsFrom(right))
     return false;
+//  std::cout << "<br>Invariants are the same, computing orbit.";
   OrbitIteratorWeylGroup theIterator;
   theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::Conjugate);
+  if (this->generators.size==0)
+    crash << "generators not allowed to be 0. " << crash;
   do
-  { if (theIterator.GetCurrentElement()==right)
+  { //if (left.ToString()=="s_{4}")
+    //  std::cout << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
+    if (theIterator.GetCurrentElement()==right)
       return true;
   } while (theIterator.IncrementReturnFalseIfPastLast());
   return false;
@@ -1066,78 +1074,6 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
 { std::stringstream out;
   out << this->ToStringElements(theFormat);
   out << this->ToStringConjugacyClasses(theFormat);
-  return out.str();
-}
-
-template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToStringElements(FormatExpressions* theFormat)const
-{ MacroRegisterFunctionWithName("FiniteGroup::ToStringElements");
-  if (!this->flagAllElementsAreComputed)
-    return "";
-  std::stringstream out;
-  out << "<br>Elements of the group(" << this->theElements.size << " total):\n ";
-  if (this->theElements.size<=100)
-    for (int i=0; i<this->theElements.size; i++)
-      out << i << ". " << this->theElements[i].ToString() << "\n";
-  else
-    out << "... too many, not displaying. ";
-  return out.str();
-}
-
-template <class elementSomeGroup>
-std::string FiniteGroup<elementSomeGroup>::ToStringConjugacyClasses(FormatExpressions* theFormat)const
-{ MacroRegisterFunctionWithName("Subgroup::ToStringConjugacyClasses");
-  std::stringstream out;
-  out << "<br>Size: " << this->size().ToString() << "\n";
-  FormatExpressions charPolyFormat;
-  charPolyFormat.polyAlphabeT.SetSize(1);
-  charPolyFormat.polyAlphabeT[0]="q";
-  //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
-  if (this->ConjugacyClassCount()>0)
-  { out << "<br>" << this->ConjugacyClassCount() << " conjugacy classes total.\n";
-    for (int i=0; i<this->conjugacyClasseS.size; i++)
-    { out << "<hr>Conjugacy class " << i+1 << ": ";
-      if (this->conjugacyClasseS[i].flagRepresentativeComputed)
-      { out << " represented by " << this->conjugacyClasseS[i].representative.ToString(theFormat) << ". ";
-        out << this->conjugacyClasseS[i].representative.ToStringInvariants(theFormat);
-      } else
-        out << " representative not computed. ";
-      out << "Class size: " << this->conjugacyClasseS[i].size.ToString() << ".\n<br>\n";
-      if (this->flagCharPolysAreComputed)
-        if (i<this->CCsStandardRepCharPolys.size)
-        { out << "Characteristic poly standard representation: "
-          << this->CCsStandardRepCharPolys[i].ToString(&charPolyFormat);
-          const List<int>& currentHashList=
-          this->CCsStandardRepCharPolys.GetHashArray
-          (this->CCsStandardRepCharPolys.GetHash(this->CCsStandardRepCharPolys[i]));
-          int numClassesSameCharPoly=0;
-          for (int j=0; j<currentHashList.size; j++)
-            if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
-              numClassesSameCharPoly++;
-          if (numClassesSameCharPoly>1)
-          { out << " The characteristic polynomial is the same as that of " << numClassesSameCharPoly
-            << " conjugacy classes, numbers: ";
-            for (int j=0; j<currentHashList.size; j++)
-              if (this->CCsStandardRepCharPolys[currentHashList[j]]==this->CCsStandardRepCharPolys[i])
-                out << currentHashList[j]+1 << (j==currentHashList.size-1 ? "" : ", ");
-          }
-        }
-      if (!this->conjugacyClasseS[i].flagElementsComputed)
-        continue;
-      out << " The elements of the class are: ";
-      int numEltsToDisplay=this->conjugacyClasseS[i].theElements.size;
-      if (this->conjugacyClasseS[i].theElements.size>10)
-      { out << " too many, displaying the first 10 elements only: ";
-        numEltsToDisplay=10;
-      }
-      for (int j=0; j<numEltsToDisplay; j++)
-      { out << this->conjugacyClasseS[i].theElements[j].ToString(theFormat);
-        if (j!=numEltsToDisplay-1)
-          out << ", ";
-      }
-      out << ". ";
-    }
-  }
   return out.str();
 }
 
@@ -1154,11 +1090,12 @@ void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups,
   outputSubgroups.SetSize(numCycles);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
+//  std::cout << "<hr>Meself is: " << this->ToString();
   for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
   { SubgroupRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
     currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
-    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
+//    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
     //std::cout << "<hr>before compute initial irreps";

@@ -2430,7 +2430,7 @@ void LargeInt::AssignString(const std::string& input)
   for (unsigned int i=startingIndex; i<input.size(); i++)
   { int x=input[i]-'0';
     if (x<0 || x>9)
-      return;
+      crash << "LargeInt::AssignString is not allowed to fail." << crash;
     if (i>startingIndex)
       this->value*=10;
     this->value+=(unsigned) x;

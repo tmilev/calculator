@@ -5052,7 +5052,7 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
 
 std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringCppConjugacyClasses");
-  if (!this->flagCCsComputed || !this->flagCCRepresentativesComputed)
+  if (!this->flagCCRepresentativesComputed)
     return "";
   std::stringstream out;
   out << "<hr>Here is the c++ input code for the conjugacy class table.";
@@ -5070,7 +5070,7 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out << "].representative.MakeFromReadableReflections(output, true, \"";
     for (int j=0; j<this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j++)
-    { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j];
+    { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j]+1;
       if (j!=this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size-1)
         out << ",";
     }

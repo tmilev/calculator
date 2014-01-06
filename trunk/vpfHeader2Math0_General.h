@@ -4844,7 +4844,7 @@ public:
   void GetDynkinTypeWithDefaultScales(DynkinType& output)const;
   DynkinSimpleType GetGreatestSimpleType()const;
   DynkinSimpleType GetSmallestSimpleType()const;
-  Rational GetSizeWeylGroupByFormula()const;
+  LargeInt GetWeylGroupSizeByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringRelativeToAmbientType(const DynkinSimpleType& ambientType, FormatExpressions* theFormat=0)const;
   void ScaleFirstCoRootSquaredLength(const Rational& multiplyCoRootSquaredLengthBy);

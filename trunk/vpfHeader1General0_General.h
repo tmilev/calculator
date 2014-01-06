@@ -275,11 +275,11 @@ class ControllerStartsRunning: public Controller
 class ParallelComputing
 {
 public:
-  static int GlobalPointerCounter;
-  static int PointerCounterPeakRamUse;
+  static long long GlobalPointerCounter;
+  static long long PointerCounterPeakRamUse;
   static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
 #ifdef CGIversionLimitRAMuse
-  static int cgiLimitRAMuseNumPointersInList;
+  static long long cgiLimitRAMuseNumPointersInList;
   static bool flagUngracefulExitInitiated;
   inline static void CheckPointerCounters()
   { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
@@ -1313,6 +1313,9 @@ public:
   { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTop(theList[i]);
+  }
+  const List<int>& GetHashArray(int hashIndex)const
+  { return this->TheHashedArrays[hashIndex];
   }
   void GrandMasterConsistencyCheck()const
   { for (int i=0; i<this->TheHashedArrays.size; i++)

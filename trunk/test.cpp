@@ -280,7 +280,7 @@ void ComputeIrreps(WeylGroup& G)
   std::cout << "need reps for chars" << charactersWithoutIrreps << std::endl;
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
-  Rational SizeG=G.GetSizeWeylGroupByFormula();
+  Rational SizeG=G.GetGroupSizeByFormula();
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=0; j<G.characterTable.size; j++)
       M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
@@ -1291,7 +1291,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational)i<W.GetSizeWeylGroupByFormula(); i++)
+  for(int i=0; (Rational)i<W.GetGroupSizeByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1693,7 +1693,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   List<Vector<Rational> > monomial;
   HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational) i<W.GetSizeWeylGroupByFormula(); i++)
+  for(int i=0; (Rational) i<W.GetGroupSizeByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)

@@ -9,14 +9,14 @@ ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Math routines implement
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
 #ifdef CGIversionLimitRAMuse
-int ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
+long long ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
 #endif
 
 ControllerStartsRunning ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly;
 bool ParallelComputing::flagUngracefulExitInitiated=false;
 
-int ParallelComputing::GlobalPointerCounter=0;
-int ParallelComputing::PointerCounterPeakRamUse=0;
+long long ParallelComputing::GlobalPointerCounter=0;
+long long ParallelComputing::PointerCounterPeakRamUse=0;
 
 void (*CGI::functionCGIServerIgnoreUserAbort) (void)=0;
 
@@ -4140,13 +4140,13 @@ int DynkinType::GetCoxeterEdgeWeight(int v, int w)
   return -1;
 }
 
-Rational DynkinType::GetSizeWeylGroupByFormula()const
-{ Rational result=1;
-  Rational tempRat;
+LargeInt DynkinType::GetWeylGroupSizeByFormula()const
+{ LargeInt result=1;
+  LargeInt tempLI;
   for (int i=0; i<this->size(); i++)
-  { tempRat=WeylGroup::GetSizeWeylGroupByFormula((*this)[i].theLetter, (*this)[i].theRank);
-    tempRat.RaiseToPower(this->GetMult(i));
-    result*=tempRat;
+  { tempLI=WeylGroup::GetGroupSizeByFormula((*this)[i].theLetter, (*this)[i].theRank);
+    tempLI.RaiseToPower(this->GetMult(i));
+    result*=tempLI;
   }
   return result;
 }
@@ -4906,9 +4906,9 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
   return true;
 }
 
-Rational WeylGroup::GetSizeWeylGroupByFormula(char weylLetter, int theDim)
+LargeInt WeylGroup::GetGroupSizeByFormula(char weylLetter, int theDim)
 { //Humphreys, Introduction to Lie algebras and representation theory(1980), page 66, Table 1
-  Rational theOutput=1;
+  LargeInt theOutput=1;
   if (weylLetter=='A')
     theOutput= Rational::Factorial(theDim+1);
   if (weylLetter=='B' || weylLetter=='C')
@@ -5612,7 +5612,7 @@ void WeylGroup::DrawRootSystem
 std::string WeylGroup::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
-  double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue();
+  double upperBoundDouble=100000/((Rational)this->GetGroupSizeByFormula()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
@@ -5633,7 +5633,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int)
-  (this->theDynkinType.GetSizeWeylGroupByFormula().DoubleValue()*theDominantWeights.size);
+  ( ((Rational)this->GetGroupSizeByFormula()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);

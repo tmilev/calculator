@@ -47,7 +47,7 @@ bool WeylGroup::CheckInitializationConjugacyClasses()const
 /*  Rational sumSquares=0;
   Rational tempRat;
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { tempRat=this->ConjugacyClassCount()/this->GetSizeWeylGroupByFormula();
+  { tempRat=this->ConjugacyClassCount()/this->GetGroupSizeByFormula();
     sumSquares+=tempRat*tempRat;
   }
   if (sumSquares!=1)
@@ -688,9 +688,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesFromAllElements
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
-  if (theGroup.GetDim()>6)
+  if (theGroup.GetDim()>7)
   { theCommands.Comments << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
-    << "not to compute when the rank is larger than 6. ";
+    << "not to compute when the rank is larger than 7. ";
     return false;
   }
   double timeStart1=theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -707,9 +707,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupConjugacyClassesRepresentatives
     return false;
   WeylGroup& theGroup=output.GetValueNonConst<WeylGroup>();
   theGroup.CheckConsistency();
-  if (theGroup.GetDim()>6)
+  if (theGroup.GetDim()>8)
   { theCommands.Comments << "<hr>Loaded Dynkin type " << theGroup.theDynkinType.ToString() << " of rank " << theGroup.GetDim() << " but I've been told "
-    << "not to compute when the rank is larger than 6. ";
+    << "not to compute when the rank is larger than 8. ";
     return false;
   }
   theGroup.CheckConsistency();

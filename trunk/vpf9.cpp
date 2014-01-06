@@ -4808,7 +4808,7 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
   out.SetSize(ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     out[i] = this->conjugacyClasseS[i].representative.Sign();
-  std::cout << "<br>Sign character is: " << out.ToString();
+//  std::cout << "<br>Sign character is: " << out.ToString();
 }
 
 void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output)
@@ -5061,8 +5061,9 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
   out << "bool LoadConjugacyClasses" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << "output.ComputeRho(true);";
-  out << "WeylGroup::ConjugacyClass emptyClass;";
-  out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initFillInObject(" << this->conjugacyClasseS.size << ");";
+  out << "\n<br>&nbsp;&nbsp;WeylGroup::ConjugacyClass emptyClass;";
+  out << "\n<br>&nbsp;&nbsp;emptyClass.flagRepresentativeComputed=true;";
+  out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS.initFillInObject(" << this->conjugacyClasseS.size << ", emptyClass);";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
     for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
@@ -5081,6 +5082,7 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out  << "].size=" << this->conjugacyClasseS[i].size.ToString() << ";";
   }
+  out << "\n<br>&nbsp;&nbsp;output.LoadConjugacyClassesHelper();";
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
   return out.str();

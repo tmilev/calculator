@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
 //  civilizedInput="WeylGroupTauSignatures{}(b_3)";
-//  civilizedInput="WeylGroupTauSignatures{}(f_4);";
+  civilizedInput="WeylGroupTauSignatures{}(f_4);";
 //  civilizedInput="WeylGroupConjugacyClassesRepresentatives{}a_2";
 //  civilizedInput="WeylGroupConjugacyClasses b_2";
 //  civilizedInput="WeylGroupConjugacyClassesRepresentatives a_2";

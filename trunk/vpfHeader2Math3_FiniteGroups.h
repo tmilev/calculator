@@ -22,6 +22,7 @@ struct DivisionResult
 template <typename elementSomeGroup>
 class FiniteGroup
 {
+protected:
   LargeInt sizePrivate;
 public:
   List<elementSomeGroup> generators;
@@ -68,7 +69,7 @@ public:
     return true;
   }
   bool CheckInitialization()const;
-  void SetSize(const LargeInt& inputSize)
+  void SetSizE(const LargeInt& inputSize)
   { this->sizePrivate=inputSize;
   }
   void init();
@@ -389,8 +390,8 @@ class WeylGroup : public FiniteGroup<ElementWeylGroup<WeylGroup> >
     this->SimpleToFundamentalCoords.Invert();
     this->flagFundamentalToSimpleMatricesAreComputed=true;
   }
-  bool LoadConjugacyClassesWeylGroup();
-  bool LoadCharTableWeylGroup();
+  bool LoadConjugacyClasses();
+  bool LoadCharTable();
 public:
   bool flagIrrepsAreComputed;
   bool flagCharTableIsComputed;
@@ -415,6 +416,8 @@ public:
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
   void GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+
+  bool LoadConjugacyClassesHelper();
 
   void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
   void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);

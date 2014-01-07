@@ -409,7 +409,7 @@ List<VectorSpace<coefficient> > GetEigenspaces(const Matrix<coefficient> &M)
 // As in Schneider, 1990
 // well, so far not using any of his improvements
 template <typename somegroup>
-List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
+List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ComputeCharacterTable(somegroup &G)
 { if(G.ConjugacyClassCount() == 0)
     G.ComputeCCfromAllElements(0);
   List<int> classmap;
@@ -474,7 +474,7 @@ List<ClassFunction<Rational> > ComputeCharacterTable(somegroup &G)
         nchars += 1;
     std::cout << "Have " << nchars << " chars" << std::endl;
   }
-  List<ClassFunction<Rational> > chars;
+  List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > chars;
   chars.SetSize(spaces.size);
   for(int i=0; i<spaces.size; i++)
   { chars[i].data = spaces[i].GetCanonicalBasisVector(0);

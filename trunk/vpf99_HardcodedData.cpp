@@ -1,4 +1,4 @@
-#include "vpfHeader2Math3_FiniteGroups.h"
+#include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 static ProjectInformationInstance ProjectInfoVpfHardCodedLoader(__FILE__, "Hard-coded data loading");
 
@@ -113,7 +113,7 @@ bool LoadConjugacyClassesF1_4(WeylGroup& output)
 
 bool LoadCharTableF1_4(WeylGroup& output)
 { output.characterTable.SetExpectedSize(1152); output.characterTable.SetSize(0);
-  ClassFunction<Rational> currentCF;
+  ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroup> >, Rational> currentCF;
   currentCF.G=&output;
   currentCF.data.AssignString("(1  , 1  , -1 , -1 , -1 , -1 , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , -1 , -1 , -1 , -1 , -1 , -1 , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
   currentCF.data.AssignString("(1  , 1  , -1 , 1  , 1  , -1 , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , -1 , -1 , -1 , -1 , 1  , 1  , 1  , -1 , -1 , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
@@ -148,31 +148,31 @@ bool LoadConjugacyClassesE1_6(WeylGroup& output)
   WeylGroup::ConjugacyClass emptyClass;
   emptyClass.flagRepresentativeComputed=true;
   output.conjugacyClasseS.initFillInObject(25, emptyClass);
-  output.conjugacyClasseS[0  ].representative.MakeFromReadableReflections(output, true, "   ");
-  output.conjugacyClasseS[1  ].representative.MakeFromReadableReflections(output, true, "3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
-  output.conjugacyClasseS[2  ].representative.MakeFromReadableReflections(output, true, "1, 4 ");
-  output.conjugacyClasseS[3  ].representative.MakeFromReadableReflections(output, true, "1, 3, 1, 4, 3, 1, 2, 4, 5, 4, 3, 1, 2, 4, 3, 5, 6, 5, 4, 3, 2, 4, 5, 6");
-  output.conjugacyClasseS[4  ].representative.MakeFromReadableReflections(output, true, "1, 3 ");
-  output.conjugacyClasseS[5  ].representative.MakeFromReadableReflections(output, true, "1, 3, 5, 6  ");
-  output.conjugacyClasseS[6  ].representative.MakeFromReadableReflections(output, true, "3, 4, 3, 2, 4, 5  ");
-  output.conjugacyClasseS[7  ].representative.MakeFromReadableReflections(output, true, "1, 4, 3, 6 ");
-  output.conjugacyClasseS[8  ].representative.MakeFromReadableReflections(output, true, "1, 4, 3, 2  ");
-  output.conjugacyClasseS[9  ].representative.MakeFromReadableReflections(output, true, "1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ");
-  output.conjugacyClasseS[10 ].representative.MakeFromReadableReflections(output, true, "3, 4, 2, 5  ");
-  output.conjugacyClasseS[11 ].representative.MakeFromReadableReflections(output, true, "1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ");
-  output.conjugacyClasseS[12 ].representative.MakeFromReadableReflections(output, true, "1, 3, 2, 5 ");
-  output.conjugacyClasseS[13 ].representative.MakeFromReadableReflections(output, true, "1, 3, 4, 3, 2, 4, 5, 6  ");
-  output.conjugacyClasseS[14 ].representative.MakeFromReadableReflections(output, true, "1, 4, 6, 2, 3, 5 ");
-  output.conjugacyClasseS[15 ].representative.MakeFromReadableReflections(output, true, "1 ");
-  output.conjugacyClasseS[16 ].representative.MakeFromReadableReflections(output, true, "1, 4, 6  ");
-  output.conjugacyClasseS[17 ].representative.MakeFromReadableReflections(output, true, "1, 3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
-  output.conjugacyClasseS[18 ].representative.MakeFromReadableReflections(output, true, "1, 4, 3  ");
-  output.conjugacyClasseS[19 ].representative.MakeFromReadableReflections(output, true, "1, 3, 2  ");
-  output.conjugacyClasseS[20 ].representative.MakeFromReadableReflections(output, true, "1, 3, 2, 5, 6  ");
-  output.conjugacyClasseS[21 ].representative.MakeFromReadableReflections(output, true, "1, 4, 6, 3, 5  ");
-  output.conjugacyClasseS[22 ].representative.MakeFromReadableReflections(output, true, "1, 3, 4, 2, 5  ");
-  output.conjugacyClasseS[23 ].representative.MakeFromReadableReflections(output, true, "1, 4, 3, 2, 6  ");
-  output.conjugacyClasseS[24 ].representative.MakeFromReadableReflections(output, true, "1, 4, 2, 5, 4, 2, 3 ");
+  output.conjugacyClasseS[0  ].representative.MakeFromReadableReflections(output, false, "   ");
+  output.conjugacyClasseS[1  ].representative.MakeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
+  output.conjugacyClasseS[2  ].representative.MakeFromReadableReflections(output, false, "1, 4 ");
+  output.conjugacyClasseS[3  ].representative.MakeFromReadableReflections(output, false, "1, 3, 1, 4, 3, 1, 2, 4, 5, 4, 3, 1, 2, 4, 3, 5, 6, 5, 4, 3, 2, 4, 5, 6");
+  output.conjugacyClasseS[4  ].representative.MakeFromReadableReflections(output, false, "1, 3 ");
+  output.conjugacyClasseS[5  ].representative.MakeFromReadableReflections(output, false, "1, 3, 5, 6  ");
+  output.conjugacyClasseS[6  ].representative.MakeFromReadableReflections(output, false, "3, 4, 3, 2, 4, 5  ");
+  output.conjugacyClasseS[7  ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 6 ");
+  output.conjugacyClasseS[8  ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 2  ");
+  output.conjugacyClasseS[9  ].representative.MakeFromReadableReflections(output, false, "1, 2, 3, 1, 5, 4, 6, 5, 4, 2, 3, 4 ");
+  output.conjugacyClasseS[10 ].representative.MakeFromReadableReflections(output, false, "3, 4, 2, 5  ");
+  output.conjugacyClasseS[11 ].representative.MakeFromReadableReflections(output, false, "1, 2, 3, 4, 2, 3, 4, 6, 5, 4, 2, 3, 4, 5 ");
+  output.conjugacyClasseS[12 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2, 5 ");
+  output.conjugacyClasseS[13 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 5, 6  ");
+  output.conjugacyClasseS[14 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6, 2, 3, 5 ");
+  output.conjugacyClasseS[15 ].representative.MakeFromReadableReflections(output, false, "1 ");
+  output.conjugacyClasseS[16 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6  ");
+  output.conjugacyClasseS[17 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 3, 2, 4, 3, 5, 4, 3, 2, 4, 5 ");
+  output.conjugacyClasseS[18 ].representative.MakeFromReadableReflections(output, false, "1, 4, 3  ");
+  output.conjugacyClasseS[19 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2  ");
+  output.conjugacyClasseS[20 ].representative.MakeFromReadableReflections(output, false, "1, 3, 2, 5, 6  ");
+  output.conjugacyClasseS[21 ].representative.MakeFromReadableReflections(output, false, "1, 4, 6, 3, 5  ");
+  output.conjugacyClasseS[22 ].representative.MakeFromReadableReflections(output, false, "1, 3, 4, 2, 5  ");
+  output.conjugacyClasseS[23 ].representative.MakeFromReadableReflections(output, false, "1, 4, 3, 2, 6  ");
+  output.conjugacyClasseS[24 ].representative.MakeFromReadableReflections(output, false, "1, 4, 2, 5, 4, 2, 3 ");
   output.conjugacyClasseS[0  ].size=1   ;
   output.conjugacyClasseS[1  ].size=45  ;
   output.conjugacyClasseS[2  ].size=270 ;
@@ -204,7 +204,7 @@ bool LoadConjugacyClassesE1_6(WeylGroup& output)
 
 bool LoadCharTableE1_6(WeylGroup& output)
 { output.characterTable.SetExpectedSize(48); output.characterTable.SetSize(0);
-  ClassFunction<Rational> currentCF;
+  ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroup> >, Rational> currentCF;
   currentCF.G=&output;
   currentCF.data.AssignString("(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1              )"); output.characterTable.AddOnTop(currentCF);
   currentCF.data.AssignString("(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1    )"); output.characterTable.AddOnTop(currentCF);
@@ -243,6 +243,7 @@ bool WeylGroup::LoadConjugacyClassesHelper()
   this->flagCCRepresentativesComputed=true;
   this->flagCCsComputed=false;
   this->InitGenerators();
+  this->CheckConjugacyClassRepsMatchCCsizes(0);
   return true;
 }
 

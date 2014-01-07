@@ -399,8 +399,8 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(Gl
       if(this->parent->AreConjugate(g, this->parent->conjugacyClasseS[ci].representative))
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
-      } else
-        std::cout << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
+      } //else
+        //std::cout << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
     if (notFound)
       crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative "
       << g.ToString() << crash;
@@ -516,11 +516,58 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
   { inputOutputClass.theElements.SetSize(0);
     inputOutputClass.theElements.AddOnTop(inputOutputClass.representative);
   }
+//  std::cout << "<br> Generating orbit: <br>Element 1: " << theOrbitIterator.GetCurrentElement().ToString();
+//  Vector<Rational> randomVector, tempV;
+//  randomVector.AssignString("(23,29,31,37,41,43)");
+//  HashedList<Vector<Rational> > orbitRV;
+//  tempV=randomVector;
+//  theOrbitIterator.GetCurrentElement().ActOn(tempV);
+//  orbitRV.AddOnTop(tempV);
   while (theOrbitIterator.IncrementReturnFalseIfPastLast())
   { inputOutputClass.size++;
+//    std::cout << "<br>Element " << inputOutputClass.size.ToString() << ": "
+//    << theOrbitIterator.GetCurrentElement().ToString();
+//    tempV=randomVector;
+//    theOrbitIterator.GetCurrentElement().ActOn(tempV);
+//    if (orbitRV.Contains(tempV))
+//    {
+//      crash << "Element " << theOrbitIterator.GetCurrentElement().ToString()
+//      << " is bad, has same action on " << randomVector.ToString() << " as " <<
+//      inputOutputClass.theElements[orbitRV.GetIndex(tempV)].ToString() << crash
+//      ;
+//    }
+//    orbitRV.AddOnTop(tempV);
     if (storeCC)
+    { if (inputOutputClass.theElements.Contains(theOrbitIterator.GetCurrentElement()))
+        crash << " !element " << theOrbitIterator.GetCurrentElement().ToString()
+        << " already contained !" << crash;
       inputOutputClass.theElements.AddOnTop(theOrbitIterator.GetCurrentElement());
+    }
   }
+}
+
+template <class elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::CheckConjugacyClassRepsMatchCCsizes(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::CheckConjugacyClassRepsMatchCCsizes");
+  LargeInt computedSize=0;
+  for (int i=0; i<this->conjugacyClasseS.size; i++)
+  { LargeInt oldCCsize=this->conjugacyClasseS[i].size;
+    this->ComputeCCSizeOrCCFromRepresentative
+    (this->conjugacyClasseS[i], true, theGlobalVariables);
+    if (oldCCsize!=this->conjugacyClasseS[i].size)
+      crash << "The precomputed size " << oldCCsize.ToString() << " of the class represented by " << this->conjugacyClasseS[i].representative.ToString()
+      << " doesn't match actual class size which is: " << this->conjugacyClasseS[i].size.ToString()
+      << crash;
+    computedSize+=oldCCsize;
+  }
+  if (computedSize!=this->sizePrivate)
+    crash << "Computed size " << computedSize.ToString() << " is different from recorded size "
+    << sizePrivate.ToString() << crash;
+  if (this->GetGroupSizeByFormula()>0)
+    if (computedSize!=this->GetGroupSizeByFormula())
+      crash << "Computed size is different from size dicated by formula which is: "
+      << this->GetGroupSizeByFormula().ToString() << crash;
+  return true;
 }
 
 template <class elementSomeGroup>
@@ -1231,7 +1278,7 @@ bool WeylGroupRepresentation<coefficient>::operator<(const WeylGroupRepresentati
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
-(ClassFunction<coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
+(ClassFunction<WeylGroup::WeylGroupBase, coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
 { this->CheckInitialization();
   this->ownerGroup->CheckInitializationFDrepComputation();
   outputMat.MakeZeroMatrix(this->GetDim());
@@ -1279,7 +1326,7 @@ void WeylGroupRepresentation<coefficient>::GetClassFunctionMatrix
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
-(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
+(ClassFunction<WeylGroup::WeylGroupBase, coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables)
 { int theDim=this->generatorS[0].NumRows;
   outputMat.MakeZeroMatrix(theDim);
   if(classFunctionMatrices.size == 0)
@@ -1666,19 +1713,19 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
   return true;
 }
 
-template <typename coefficient>
-void ClassFunction<coefficient>::MakeZero(WeylGroup& inputWeyl)
+template<class someFiniteGroup, typename coefficient>
+void ClassFunction<someFiniteGroup, coefficient>::MakeZero(someFiniteGroup& inputWeyl)
 { this->G=&inputWeyl;
   this->data.MakeZero(this->G->ConjugacyClassCount());
 }
 
-template <typename coefficient>
-coefficient& ClassFunction<coefficient>::operator[](int i) const
+template<class someFiniteGroup, typename coefficient>
+coefficient& ClassFunction<someFiniteGroup, coefficient>::operator[](int i) const
 { return this->data[i];
 }
 
-template <typename coefficient>
-std::string ClassFunction<coefficient>::ToString(FormatExpressions* theFormat) const
+template<class someFiniteGroup, typename coefficient>
+std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressions* theFormat) const
 { if (this->G==0)
     return "(not initialized)";
   std::stringstream out;
@@ -1694,34 +1741,34 @@ std::string ClassFunction<coefficient>::ToString(FormatExpressions* theFormat) c
   return out.str();
 }
 
-template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X)
+template<class someFiniteGroup, typename coefficient>
+std::ostream& operator<<(std::ostream& out, const ClassFunction<someFiniteGroup, coefficient> X)
 { out << X.ToString();
   return out;
 }
 
- //   static unsigned int HashFunction(const Character& input);
-template <typename coefficient>
-unsigned int ClassFunction<coefficient>::HashFunction(const ClassFunction<coefficient>& input)
+template<class someFiniteGroup, typename coefficient>
+unsigned int ClassFunction<someFiniteGroup, coefficient>::HashFunction(const ClassFunction<someFiniteGroup, coefficient>& input)
 {
   unsigned int acc;
   int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
-  for(int i=0; i<N; i++){
+  for(int i=0; i<N; i++)
     acc = input.data[i].HashFunction()*SomeRandomPrimes[i];
-  }
   return acc;
 }
 
-// this should probably check if G is the same, but idk how to make that happen
-template <typename coefficient>
-bool ClassFunction<coefficient>::operator==(const ClassFunction<coefficient>& other)const
-{ if(this->data == other.data)
+template<class someFiniteGroup, typename coefficient>
+bool ClassFunction<someFiniteGroup, coefficient>::operator==(const ClassFunction<someFiniteGroup, coefficient>& other)const
+{ if (this->G!=other.G)
+    return false; //we allow comparison of class functions belonging to different groups
+  //(this should be handy for the calculator interface, an user may have more than 1 group in play).
+  if(this->data == other.data)
     return true;
   return false;
 }
 
-template <typename coefficient>
-bool ClassFunction<coefficient>::operator>(const ClassFunction<coefficient>& right) const
+template<class someFiniteGroup, typename coefficient>
+bool ClassFunction<someFiniteGroup, coefficient>::operator>(const ClassFunction<someFiniteGroup, coefficient>& right) const
 { for(int i=0; i<this->data.size; i++)
     if(!(this->data[i] == right.data[i]))
       return this->data[i] > right.data[i];

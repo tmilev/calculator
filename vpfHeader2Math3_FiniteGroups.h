@@ -19,6 +19,64 @@ struct DivisionResult
   ElementEuclideanDomain remainder;
 };
 
+template<class someFiniteGroup, typename coefficient>
+class ClassFunction
+{
+public:
+  someFiniteGroup *G;
+  Vector<coefficient> data;
+  ClassFunction():G(0){} //the syntax :G(0) initializes the pointer G with 0.
+  //Although there may be a minor speed penalty
+  //(such a speed penalty is system dependent and possibly
+  //even hardware dependent),
+  //it is worth it to initialize all pointers with 0.
+  void MakeZero(someFiniteGroup& inputWeyl);
+  bool IsEqualToZero()const
+  { return this->data.IsEqualToZero();
+  }
+  coefficient InnerProduct(const ClassFunction &other) const;
+  coefficient Norm() const;
+  ClassFunction operator*(const ClassFunction &other) const;
+  ClassFunction Sym2() const;
+  ClassFunction Alt2() const;
+  ClassFunction operator+(const ClassFunction &other) const;
+  ClassFunction operator-(const ClassFunction &other) const;
+  ClassFunction ReducedWithChars(const List<ClassFunction> chars = 0);
+  coefficient& operator[](int i) const;
+  std::string ToString(FormatExpressions* theFormat=0) const;
+  static unsigned int HashFunction(const ClassFunction& input);
+  inline unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  void operator*=(const coefficient& inputCF)
+  { this->data*=inputCF;
+  }
+  ClassFunction operator*(const coefficient& inputCF)const
+  { ClassFunction result=*this;
+    result.data*=inputCF;
+    return result;
+  }
+  void operator+=(const ClassFunction& right)
+  { this->data+=right.data;
+  }
+  void operator-=(const ClassFunction& right)
+  { this->data-=right.data;
+  }
+  void operator*=(const ClassFunction& right);
+  bool operator==(const ClassFunction& other) const;
+  bool operator!=(const ClassFunction& other) const
+  { return ! (*this==other);
+  }
+  bool operator>(const ClassFunction& right) const;
+  bool operator<(const ClassFunction& right) const
+  { if (*this==right || *this>right)
+      return false;
+    return true;
+  }
+};
+
+//assumptions on the FiniteGroup:
+//1. The finite group has a small number of conjugacy classes. Z/10000000Z is not OK
 template <typename elementSomeGroup>
 class FiniteGroup
 {
@@ -44,6 +102,8 @@ public:
   };
   List<ConjugacyClass> conjugacyClasseS;
   HashedList<Polynomial<Rational> > CCsStandardRepCharPolys;
+  List<ClassFunction<FiniteGroup<elementSomeGroup>, Rational> > characterTable;
+
   //<-The character polynomials in the ``standard representation''.
   //The ``standard representation'' is specified by the elementSomeGroup class.
   //It is up to the user of the FiniteGroup template to define which representation is
@@ -69,6 +129,7 @@ public:
     return true;
   }
   bool CheckInitialization()const;
+  bool CheckConjugacyClassRepsMatchCCsizes(GlobalVariables* theGlobalVariables);
   void SetSizE(const LargeInt& inputSize)
   { this->sizePrivate=inputSize;
   }
@@ -78,7 +139,9 @@ public:
   std::string ToStringConjugacyClasses(FormatExpressions* theFormat=0)const;
   int ConjugacyClassCount()const;
   LargeInt size()const;
-  virtual LargeInt GetGroupSizeByFormula()const=0; //non-positive result means no formula is known.
+  virtual LargeInt GetGroupSizeByFormula()const
+  { return -1;
+  } //non-positive result means no formula is known.
   bool AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right);
 
   bool ComputeAllElements(int MaxElements=-1, GlobalVariables* theGlobalVariables=0);
@@ -126,6 +189,9 @@ public:
   void operator=(const ElementWeylGroup& other)
   { this->owner=other.owner;
     this->generatorsLastAppliedFirst=other.generatorsLastAppliedFirst;
+  }
+  void ActOn(Vector<Rational>& inputOutput)const
+  { this->owner->ActOn(*this, inputOutput);
   }
   bool CheckConsistency()const
   { if (this->flagDeallocated)
@@ -213,154 +279,11 @@ bool FinitelyGeneratedMatrixMonoid<coefficient>::GenerateElements(int upperBound
   return true;
 }
 
-template<typename coefficient>
-class ClassFunction
-{
-public:
-  WeylGroup *G;
-  Vector<coefficient> data;
-  ClassFunction():G(0){} //the syntax :G(0) initializes the pointer G with 0.
-  //Although there may be a minor speed penalty
-  //(such a speed penalty is system dependent and possibly
-  //even hardware dependent),
-  //it is worth it to initialize all pointers with 0.
-  void MakeZero(WeylGroup& inputWeyl);
-  bool IsEqualToZero()const
-  { return this->data.IsEqualToZero();
-  }
-  coefficient InnerProduct(const ClassFunction &other) const;
-  coefficient Norm() const;
-  ClassFunction<coefficient> operator*(const ClassFunction<coefficient> &other) const;
-  ClassFunction<coefficient> Sym2() const;
-  ClassFunction<coefficient> Alt2() const;
-  ClassFunction<coefficient> operator+(const ClassFunction<coefficient> &other) const;
-  ClassFunction<coefficient> operator-(const ClassFunction<coefficient> &other) const;
-  ClassFunction<coefficient> ReducedWithChars(const List<ClassFunction<coefficient> > chars = 0);
-  coefficient& operator[](int i) const;
-  std::string ToString(FormatExpressions* theFormat=0) const;
-  static unsigned int HashFunction(const ClassFunction<coefficient>& input);
-  inline unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  void operator*=(const coefficient& inputCF)
-  { this->data*=inputCF;
-  }
-  ClassFunction<coefficient> operator*(const coefficient& inputCF)const
-  { ClassFunction<coefficient> result=*this;
-    result.data*=inputCF;
-    return result;
-  }
-  void operator+=(const ClassFunction<coefficient>& right)
-  { this->data+=right.data;
-  }
-  void operator-=(const ClassFunction<coefficient>& right)
-  { this->data-=right.data;
-  }
-  void operator*=(const ClassFunction<coefficient>& right);
-  bool operator==(const ClassFunction<coefficient>& other) const;
-  bool operator!=(const ClassFunction<coefficient>& other) const
-  { return ! (*this==other);
-  }
-  bool operator>(const ClassFunction<coefficient>& right) const;
-  bool operator<(const ClassFunction<coefficient>& right) const
-  { if (*this==right || *this>right)
-      return false;
-    return true;
-  }
-};
-
 template <class coefficient>
 class WeylGroupVirtualRepresentation;
 
 template <class coefficient>
-class WeylGroupRepresentation
-{
-  private:
-  List<Matrix<coefficient> > theElementImageS;
-  List<bool> theElementIsComputed;
-  ClassFunction<coefficient> theCharacteR;
-  List<Matrix<coefficient> > classFunctionMatrices;
-  List<bool> classFunctionMatricesComputed;
-  List<Matrix<coefficient> > generatorS;
-  friend class WeylGroup;
-  WeylGroupRepresentation* parent;
-  Vectors<coefficient> basis;
-  Matrix<coefficient> gramMatrixInverted;
-  public:
-  bool flagCharacterIsComputed;
-  WeylGroup* ownerGroup;
-  List<std::string> names;
-  WeylGroupRepresentation()
-  { this->reset();
-  }
-  unsigned int HashFunction() const;
-  bool CheckInitialization()const;
-  bool CheckAllSimpleGensAreOK()const;
-  static unsigned int HashFunction(const WeylGroupRepresentation<coefficient>& input)
-  { return input.HashFunction();
-  }
-  void ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables=0);
-  const ClassFunction<coefficient>& GetCharacter();
-  VectorSpace<coefficient> FindDecentBasis() const;
-  void MultiplyBy(const WeylGroupRepresentation<coefficient>& other, WeylGroupRepresentation<coefficient>& output) const;
-  void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const;
-
-  void reset();
-  void init(WeylGroup& inputOwner);
-  void CheckRepIsMultiplicativelyClosed();
-  void GetClassFunctionMatrix(ClassFunction<coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
-  void ClassFunctionMatrix(ClassFunction<coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
-  int GetDim()const;
-  void Restrict
-  (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
-   GlobalVariables* theGlobalVariables=0);
-  bool DecomposeTodorsVersionRecursive
-  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
-  ;
-  bool DecomposeTodorsVersion
-  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
-  ;
-  List<WeylGroupRepresentation<coefficient> > DecomposeThomasVersion();
-
-  WeylGroupRepresentation<coefficient> Reduced() const;
-
-  coefficient GetNumberOfComponents();
-  void operator*=(const WeylGroupRepresentation<coefficient>& other);
-  WeylGroupRepresentation<coefficient> operator*(const WeylGroupRepresentation<coefficient>& other)const
-  { WeylGroupRepresentation<coefficient> result=*this;
-    result*=other;
-    return result;
-  }
-  bool operator==(const WeylGroupRepresentation<coefficient>& other)const
-  { return this->ownerGroup==other.ownerGroup && this->theCharacteR==other.theCharacteR;
-  }
-  void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
-  std::string GetName() const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
-  Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
-  void GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output);
-  Matrix<coefficient> GetMatrixElement(const ElementWeylGroup<WeylGroup>& input);
-  void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
-  { this->theElementImageS[elementIndex] = input;
-    this->theElementIsComputed[elementIndex] = true;
-  }
-  bool operator>(const WeylGroupRepresentation<coefficient>& other)const;
-  bool operator<(const WeylGroupRepresentation<coefficient>& other)const;
-};
-
-template <class coefficient>
-class WeylGroupVirtualRepresentation : public MonomialCollection<ClassFunction<coefficient>, Rational>
-{
-public:
-  void operator*=(const WeylGroupVirtualRepresentation<coefficient>& other);
-  void AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables=0);
-  inline static unsigned int HashFunction(const WeylGroupVirtualRepresentation<coefficient>& input)
-  { return input.HashFunction();
-  }
-  inline unsigned int HashFunction()const
-  { return this->::MonomialCollection<ClassFunction<coefficient>, Rational>::HashFunction();
-  }
-};
+class WeylGroupRepresentation;
 
 class SubgroupRootReflections;
 
@@ -408,8 +331,9 @@ public:
   List<ElementWeylGroup<WeylGroup> > squaresFirstConjugacyClassRep;
 
   List<WeylGroupRepresentation<Rational> > irreps;
-  List<ClassFunction<Rational> > characterTable;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
+
+  typedef FiniteGroup<ElementWeylGroup<WeylGroup> > WeylGroupBase;
   void init();
   static void GetCoCartanSymmetric(const Matrix<Rational>& input, Matrix<Rational>& output);
   void ComputeSquares(GlobalVariables* theGlobalVariables);
@@ -426,7 +350,7 @@ public:
   void ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* theGlobalVariables=0);
   void ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSimpleBasisK, const Vector<Rational>& inputRoot, Vector<Rational>& output, bool lookingForHighest);
   void AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p);
-  void AddCharacter(const ClassFunction<Rational>& X);
+  void AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat=0);
@@ -705,6 +629,97 @@ public:
   void operator+=(const WeylGroup& other);
 };
 
+template <class coefficient>
+class WeylGroupRepresentation
+{
+  private:
+  List<Matrix<coefficient> > theElementImageS;
+  List<bool> theElementIsComputed;
+  ClassFunction<WeylGroup::WeylGroupBase, coefficient> theCharacteR;
+  List<Matrix<coefficient> > classFunctionMatrices;
+  List<bool> classFunctionMatricesComputed;
+  List<Matrix<coefficient> > generatorS;
+  friend class WeylGroup;
+  WeylGroupRepresentation* parent;
+  Vectors<coefficient> basis;
+  Matrix<coefficient> gramMatrixInverted;
+  public:
+  bool flagCharacterIsComputed;
+  WeylGroup* ownerGroup;
+  List<std::string> names;
+
+  WeylGroupRepresentation()
+  { this->reset();
+  }
+  unsigned int HashFunction() const;
+  bool CheckInitialization()const;
+  bool CheckAllSimpleGensAreOK()const;
+  static unsigned int HashFunction(const WeylGroupRepresentation<coefficient>& input)
+  { return input.HashFunction();
+  }
+  void ComputeAllGeneratorImagesFromSimple(GlobalVariables* theGlobalVariables=0);
+  const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& GetCharacter();
+  VectorSpace<coefficient> FindDecentBasis() const;
+  void MultiplyBy(const WeylGroupRepresentation<coefficient>& other, WeylGroupRepresentation<coefficient>& output) const;
+  void GetLargestDenominatorSimpleGens(LargeIntUnsigned& outputLCM, LargeIntUnsigned& outputDen)const;
+
+  void reset();
+  void init(WeylGroup& inputOwner);
+  void CheckRepIsMultiplicativelyClosed();
+  void GetClassFunctionMatrix(ClassFunction<WeylGroup::WeylGroupBase, coefficient>& inputChar, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
+  void ClassFunctionMatrix(ClassFunction<WeylGroup::WeylGroupBase, coefficient>& inputCF, Matrix<coefficient>& outputMat, GlobalVariables* theGlobalVariables=0);
+  int GetDim()const;
+  void Restrict
+  (const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<WeylGroup::WeylGroupBase, Rational>& remainingCharacter, WeylGroupRepresentation<coefficient>& output,
+   GlobalVariables* theGlobalVariables=0);
+  bool DecomposeTodorsVersionRecursive
+  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  ;
+  bool DecomposeTodorsVersion
+  (WeylGroupVirtualRepresentation<coefficient>& outputIrrepMults, GlobalVariables* theGlobalVariables=0)
+  ;
+  List<WeylGroupRepresentation<coefficient> > DecomposeThomasVersion();
+
+  WeylGroupRepresentation<coefficient> Reduced() const;
+
+  coefficient GetNumberOfComponents();
+  void operator*=(const WeylGroupRepresentation<coefficient>& other);
+  WeylGroupRepresentation<coefficient> operator*(const WeylGroupRepresentation<coefficient>& other)const
+  { WeylGroupRepresentation<coefficient> result=*this;
+    result*=other;
+    return result;
+  }
+  bool operator==(const WeylGroupRepresentation<coefficient>& other)const
+  { return this->ownerGroup==other.ownerGroup && this->theCharacteR==other.theCharacteR;
+  }
+  void SpreadVector(const Vector<coefficient>& input, Vectors<coefficient>& outputBasisGeneratedSpace);
+  std::string GetName() const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  Matrix<coefficient>& GetMatrixElement(int groupElementIndex);
+  void GetMatrixElement(const ElementWeylGroup<WeylGroup>& input, Matrix<coefficient>& output);
+  Matrix<coefficient> GetMatrixElement(const ElementWeylGroup<WeylGroup>& input);
+  void SetElementImage(int elementIndex, const Matrix<coefficient>& input)
+  { this->theElementImageS[elementIndex] = input;
+    this->theElementIsComputed[elementIndex] = true;
+  }
+  bool operator>(const WeylGroupRepresentation<coefficient>& other)const;
+  bool operator<(const WeylGroupRepresentation<coefficient>& other)const;
+};
+
+template <class coefficient>
+class WeylGroupVirtualRepresentation : public MonomialCollection<ClassFunction<WeylGroup::WeylGroupBase, coefficient>, Rational>
+{
+public:
+  void operator*=(const WeylGroupVirtualRepresentation<coefficient>& other);
+  void AssignWeylGroupRep(const WeylGroupRepresentation<Rational>& other, GlobalVariables* theGlobalVariables=0);
+  inline static unsigned int HashFunction(const WeylGroupVirtualRepresentation<coefficient>& input)
+  { return input.HashFunction();
+  }
+  inline unsigned int HashFunction()const
+  { return this->::MonomialCollection<ClassFunction<WeylGroup::WeylGroupBase, coefficient>, Rational>::HashFunction();
+  }
+};
+
 //This class iterates over all elements of the orbit of a single element
 //using the generators of the group.
 //The element can be an element of the group, representation, etc.
@@ -746,7 +761,7 @@ class OrbitIteratorWeylGroup: public OrbitIterator<ElementWeylGroup<WeylGroup>, 
 };
 
 template <typename coefficient>
-std::ostream& operator<<(std::ostream& out, const ClassFunction<coefficient> X);
+std::ostream& operator<<(std::ostream& out, const ClassFunction<WeylGroup, coefficient> X);
 
 template <typename somegroup, class elementSomeGroup>
 class Subgroup : public FiniteGroup<elementSomeGroup>
@@ -881,7 +896,7 @@ class ElementWeylGroupRing : public ElementMonomialAlgebra<ElementWeylGroup<Weyl
 public:
   void MakeEi(WeylGroup* G, int i);
   void MakeFromClassFunction(WeylGroup* G, const List<coefficient>& l);
-  void MakeFromClassFunction(const ClassFunction<coefficient>& l);
+  void MakeFromClassFunction(const ClassFunction<WeylGroup, coefficient>& l);
 };
 
 template <typename coefficient>
@@ -895,7 +910,7 @@ void ElementWeylGroupRing<coefficient>::MakeEi(WeylGroup *GG, int i)
 }
 
 template <typename coefficient>
-void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(const ClassFunction<coefficient>& l)
+void ElementWeylGroupRing<coefficient>::MakeFromClassFunction(const ClassFunction<WeylGroup, coefficient>& l)
 { MakeFromClassFunction(l.G,l.data);
 }
 
@@ -922,34 +937,34 @@ std::ostream& operator<<(std::ostream& out, const ElementWeylGroupRing<coefficie
 //---------------------------------------------------------------------------Finite group characters --------------------------------
 //--------------------------------Finite group characters----------------------------
 
-template<typename coefficient>
-coefficient ClassFunction<coefficient>::InnerProduct(const ClassFunction<coefficient>& other) const
+template<class someFiniteGroup, typename coefficient>
+coefficient ClassFunction<someFiniteGroup, coefficient>::InnerProduct(const ClassFunction<someFiniteGroup, coefficient>& other) const
 { return this->G->GetHermitianProduct(this->data, other.data);
 }
 
-template<typename coefficient>
-coefficient ClassFunction<coefficient>::Norm() const
+template<class someFiniteGroup, typename coefficient>
+coefficient ClassFunction<someFiniteGroup, coefficient>::Norm() const
 { return this->InnerProduct(*this);
 }
 
-template<typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::operator*(const ClassFunction<coefficient>& other) const
-{ ClassFunction<coefficient> result=*this;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator*(const ClassFunction<someFiniteGroup, coefficient>& other) const
+{ ClassFunction<someFiniteGroup, coefficient> result=*this;
   result*=other;
   return result;
 }
 
-template<typename coefficient>
-void ClassFunction<coefficient>::operator*=(const ClassFunction<coefficient>& right)
+template<class someFiniteGroup, typename coefficient>
+void ClassFunction<someFiniteGroup, coefficient>::operator*=(const ClassFunction<someFiniteGroup, coefficient>& right)
 { if (this->G!=right.G)
     crash << "Attempting to multiply class functions belonging to different groups.";
   for(int i=0; i<this->data.size; i++)
     this->data[i]*=right[i];
 }
 
-template<typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::Sym2() const
-{ ClassFunction<coefficient> l;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::Sym2() const
+{ ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
   for(int i=0; i<G->ConjugacyClassCount(); i++)
@@ -957,9 +972,9 @@ ClassFunction<coefficient> ClassFunction<coefficient>::Sym2() const
   return l;
 }
 
-template<typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::Alt2() const
-{ ClassFunction<coefficient> l;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::Alt2() const
+{ ClassFunction<someFiniteGroup, coefficient> l;
   l.G = G;
   l.data.SetExpectedSize(G->ConjugacyClassCount());
   for(int i=0; i<G->ConjugacyClassCount(); i++)
@@ -967,9 +982,9 @@ ClassFunction<coefficient> ClassFunction<coefficient>::Alt2() const
   return l;
 }
 
-template<typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::operator+(const ClassFunction<coefficient>& other) const
-{ ClassFunction<coefficient> l=*this;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator+(const ClassFunction<someFiniteGroup, coefficient>& other) const
+{ ClassFunction<someFiniteGroup, coefficient> l=*this;
   l.data+=other.data;
   //this is slightly faster, but way too much code:
   /*l.G=this->G;
@@ -979,9 +994,9 @@ ClassFunction<coefficient> ClassFunction<coefficient>::operator+(const ClassFunc
   return l;
 }
 
-template<typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::operator-(const ClassFunction &other) const
-{ ClassFunction<coefficient> l=*this;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::operator-(const ClassFunction &other) const
+{ ClassFunction<someFiniteGroup, coefficient> l=*this;
   l.data+=other.data;
   //this is slightly faster, but way too much code:
   /*l.G = G;
@@ -992,12 +1007,12 @@ ClassFunction<coefficient> ClassFunction<coefficient>::operator-(const ClassFunc
   return l;
 }
 
-template <typename coefficient>
-ClassFunction<coefficient> ClassFunction<coefficient>::ReducedWithChars(const List<ClassFunction<coefficient> > cchars)
-{ ClassFunction<coefficient> X = *this;
+template<class someFiniteGroup, typename coefficient>
+ClassFunction<someFiniteGroup, coefficient> ClassFunction<someFiniteGroup, coefficient>::ReducedWithChars(const List<ClassFunction<someFiniteGroup, coefficient> > cchars)
+{ ClassFunction<someFiniteGroup, coefficient> X = *this;
   if(X.Norm() == 0)
     return X;
-  List<ClassFunction<coefficient> > chars;
+  List<ClassFunction<someFiniteGroup, coefficient> > chars;
   if(cchars == 0)
     chars = this->G->characterTable;
   else

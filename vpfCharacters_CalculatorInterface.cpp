@@ -6,8 +6,8 @@
 static ProjectInformationInstance ProjectInfoVpfCharactersCalculatorInterfaceCPP(__FILE__, "Weyl group calculator interface. Work in progress by Thomas & Todor. ");
 
 template<>
-typename List<ClassFunction<Rational> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<ClassFunction<Rational> >()
+typename List<ClassFunction<WeylGroup::WeylGroupBase, Rational> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<ClassFunction<WeylGroup::WeylGroupBase, Rational> >()
 { return 0;
 }
 
@@ -156,7 +156,7 @@ void WeylGroupRepresentation<coefficient>::operator*=(const WeylGroupRepresentat
 
 template <typename coefficient>
 void WeylGroupRepresentation<coefficient>::Restrict
-(const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<Rational>& remainingCharacter,
+(const Vectors<coefficient>& VectorSpaceBasisSubrep, const ClassFunction<WeylGroup::WeylGroupBase, Rational>& remainingCharacter,
  WeylGroupRepresentation<coefficient>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroupRepresentation::Restrict");
   this->CheckAllSimpleGensAreOK();
@@ -290,7 +290,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylG
   }
   Matrix<coefficient> splittingOperatorMatrix;
   Vectors<coefficient> splittingMatrixKernel, remainingVectorSpace, tempSpace;
-  ClassFunction<coefficient> remainingCharacter=this->theCharacteR;
+  ClassFunction<WeylGroup::WeylGroupBase, coefficient> remainingCharacter=this->theCharacteR;
   remainingVectorSpace.MakeEiBasis(this->GetDim());
   ProgressReport Report1(theGlobalVariables), Report2(theGlobalVariables),
   Report3(theGlobalVariables), Report4(theGlobalVariables);
@@ -354,7 +354,7 @@ bool WeylGroupRepresentation<coefficient>::DecomposeTodorsVersionRecursive(WeylG
   if(remainingVectorSpace.size == 0)
     return true;
   int NumClasses=this->ownerGroup->ConjugacyClassCount();
-  ClassFunction<coefficient> virtualChar;
+  ClassFunction<WeylGroup::WeylGroupBase, coefficient> virtualChar;
   List<Vectors<coefficient> > theSubRepsBasis;
   for(int cfi=NumClasses-1; cfi>=0; cfi--)
   { virtualChar.MakeZero(*this->ownerGroup);
@@ -418,7 +418,7 @@ void WeylGroup::AddIrreducibleRepresentation(const WeylGroupRepresentation<Ratio
   this->characterTable.AddOnTop(p.theCharacteR);
 }
 
-void WeylGroup::AddCharacter(const ClassFunction<Rational>& X)
+void WeylGroup::AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X)
 { int i = this->characterTable.BSExpectedIndex(X);
   if(i==this->characterTable.size){
     this->characterTable.AddOnTop(X);

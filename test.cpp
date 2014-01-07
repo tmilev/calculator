@@ -477,7 +477,7 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
 
 /*
 template <typename coefficient>
-List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>::Decomposition(List<ClassFunction<coefficient> >& ct, List<WeylGroupRepresentation<coefficient> > &gr)
+List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>::Decomposition(List<ClassFunction<WeylGroup::WeylGroupBase, coefficient> >& ct, List<WeylGroupRepresentation<coefficient> > &gr)
 {  List<WeylGroupRepresentation<coefficient> > out;
    if(GetNumberOfComponents() == 1)
    { if(ct.GetIndex(character) == -1)
@@ -511,7 +511,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
    SpaceTree<Rational> st;
    st.space = basis;
    for(int cfi=0; cfi<G->ccCount; cfi++)
-   {  ClassFunction<coefficient> cf;
+   {  ClassFunction<WeylGroup::WeylGroupBase, coefficient> cf;
       cf.G = G;
       cf.MakeZero();
       cf[cfi] = 1;
@@ -562,7 +562,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   for(int cfi=0; cfi<G->ccCount; cfi++)
   { if(dim_components == basis.size)
       break;
-    ClassFunction<coefficient> cf;
+    ClassFunction<WeylGroup::WeylGroupBase, coefficient> cf;
     cf.G = G;
     cf.MakeZero();
     cf[cfi] = 1;
@@ -980,7 +980,7 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit norm
-  ClassFunction<coefficient> X;
+  ClassFunction<WeylGroup::WeylGroupBase, coefficient> X;
   X.G = &G;
   X.data.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
@@ -1011,7 +1011,7 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
 
 
 template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
+Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -2110,7 +2110,7 @@ int main(void)
     G.ComputeIrreducibleRepresentations();
     WeylGroupRepresentation<Rational> r = G.irreps[0]*G.irreps[1];
     Matrix<Rational> cfm;
-    ClassFunction<Rational> cf;
+    ClassFunction<WeylGroup::WeylGroupBase, Rational> cf;
     cf = G.irreps[0].GetCharacter();
     r.ClassFunctionMatrix(cf,cfm);
     std::cout << cfm.ToString(&consoleFormat) << std::endl;
@@ -2134,7 +2134,7 @@ int main(void)
 
     G.characterTable.size = 0;
     for(int i=0; i<10; i++){
-      ClassFunction<Rational> X;
+      ClassFunction<WeylGroup::WeylGroupBase, Rational> X;
       X.G = &G;
       for(int j=0; j<10; j++){
         X.data.AddOnTop(chartable[i][j]);
@@ -2215,12 +2215,12 @@ int main(void)
   std::cout << powers2.GetRank() << std::endl;
   std::cout << powers.GetRank() << std::endl;
 
-  ClassFunction<Rational> X;
+  ClassFunction<WeylGroup::WeylGroupBase, Rational> X;
   X.G = &G;
   X.data = powers[5];
   std::cout << X << std::endl;
 
-  List<ClassFunction<Rational> > tstct;
+  List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > tstct;
   for(int i=0;i<G.ccCount;i++)
     std::cout << X.InnerProduct(G.characterTable[i]) << std::endl;
 
@@ -2358,7 +2358,7 @@ int main(void)
     M = GetMatrix(G.characterTable[2]);
     B = DestructiveColumnSpace(M);
     spaces.AddOnTop(B);
-    List<ClassFunction<Rational> > Xs;
+    List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > Xs;
     Xs.AddOnTop(G.characterTable[2]);
     std::cout << spaces << std::endl;
     { int i=1;
@@ -2465,7 +2465,7 @@ int main(void)
       Rational one = 1;
       Rational zero = 0;
       for(int ci=0; ci<G.ccCount; ci++)
-      { ClassFunction<Rational> X;
+      { ClassFunction<WeylGroup::WeylGroupBase, Rational> X;
         X.G = &G;
         for(int ii=0; ii<G.ccCount; ii++)
         { if(ii==ci)
@@ -2476,13 +2476,13 @@ int main(void)
 
       }
       */
-  /*    ClassFunction<Rational> Xs = G.characterTable[2];
-      ClassFunction<Rational> Xcs = G.characterTable[1]*G.characterTable[2];
-      List<List<ClassFunction<Rational> > > chars;
-      List<ClassFunction<Rational> > charsi;
+  /*    ClassFunction<WeylGroup::WeylGroupBase, Rational> Xs = G.characterTable[2];
+      ClassFunction<WeylGroup::WeylGroupBase, Rational> Xcs = G.characterTable[1]*G.characterTable[2];
+      List<List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > > chars;
+      List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > charsi;
       charsi.AddOnTop(G.characterTable[0]);
       chars.AddOnTop(charsi);
-      HashedList<ClassFunction<Rational> > usedchars;
+      HashedList<ClassFunction<WeylGroup::WeylGroupBase, Rational> > usedchars;
       int ci = 0;
       int cj = 0;
       while(true)
@@ -2538,7 +2538,7 @@ int main(void)
         } else
         { ci=cj+1;
           cj=0;
-          List<ClassFunction<Rational> > cil;
+          List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > cil;
           cil.AddOnTop(chars[ci-1][0]*Xs);
           chars.AddOnTop(cil);
         }
@@ -2567,7 +2567,7 @@ int main(void)
       }
       std::cout << "class function matrices" << std::endl;
       for(int cfi=0; cfi<G.ccCount; cfi++)
-      { ClassFunction<Rational> cf;
+      { ClassFunction<WeylGroup::WeylGroupBase, Rational> cf;
         cf.G = &G;
         cf.MakeZero();
         cf[cfi] = 1;
@@ -2604,7 +2604,7 @@ int main(void)
     std::cout << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << ", ";*/
 //  G.ComputeIrreducibleRepresentations();
   /*
-  List<ClassFunction<Rational> > ct;
+  List<ClassFunction<WeylGroup::WeylGroupBase, Rational> > ct;
   List<WeylGroupRepresentation<Rational> > gr;
 
   WeylGroupRepresentation<Rational> sr = G.StandardRepresentation();

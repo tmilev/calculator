@@ -360,7 +360,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
 */
   List<List<Vector<coefficient> > > es;
   for(int cfi=this->ownerGroup->ConjugacyClassCount()-1; cfi>=0; cfi--)
-  { ClassFunction<coefficient> cf;
+  { ClassFunction<WeylGroup::WeylGroupBase, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
     std::cout << "getting matrix " << cf << std::endl;
@@ -387,7 +387,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
 }
 
 template <typename coefficient>
-const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
+const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& WeylGroupRepresentation<coefficient>::GetCharacter()
 { if(this->flagCharacterIsComputed)
     return this->theCharacteR;
   this->theCharacteR.G = this->ownerGroup;
@@ -400,7 +400,7 @@ const ClassFunction<coefficient>& WeylGroupRepresentation<coefficient>::GetChara
 
 template <typename coefficient>
 coefficient WeylGroupRepresentation<coefficient>::GetNumberOfComponents()
-{ ClassFunction<coefficient> X;
+{ ClassFunction<WeylGroup::WeylGroupBase, coefficient> X;
   X = GetCharacter();
   return X.Norm();
 }
@@ -871,7 +871,7 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit Norm
-  ClassFunction<coefficient> X;
+  ClassFunction<WeylGroup::WeylGroupBase, coefficient> X;
   X.G = &G;
   X.data.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
@@ -899,7 +899,7 @@ bool is_isotypic_component(WeylGroup& G, const List<Vector<coefficient> >& V)
   return true;
 }
 
-Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vector<Rational> >& B)
+Matrix<Rational> MatrixInBasis(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X, const List<Vector<Rational> >& B)
 { List<Vector<Rational> > rows;
   for(int i=0; i<B.size; i++)
   { Vector<Rational> v;
@@ -924,7 +924,7 @@ Matrix<Rational> MatrixInBasis(const ClassFunction<Rational>& X, const List<Vect
   return M;
 }
 
-ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(const ClassFunction<Rational>& X)
+ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X)
 { ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> out;
   for(int i=0; i<X.G->ConjugacyClassCount(); i++)
     for(int j=0; j<X.G->conjugacyClasseS[i].size; j++)
@@ -933,7 +933,7 @@ ElementMonomialAlgebra<ElementWeylGroup<WeylGroup>, Rational> FromClassFunction(
 }
 
 template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
+Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup::WeylGroupBase, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -982,18 +982,21 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
   { this->ComputeCCSizesAndRepresentatives(theGlobalVariables);
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
+  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
 //  std::cout << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
   this->tauSignature.SetSize(this->parent->ConjugacyClassCount());
   for(int i=0; i<this->parent->ConjugacyClassCount(); i++)
-  { ClassFunction<Rational> Xip = this->parent->characterTable[i];
+  { ClassFunction<WeylGroup::WeylGroupBase, Rational> Xip = this->parent->characterTable[i];
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
-//    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
-//    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
+    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+    if (!this->tauSignature[i].IsSmallInteger())
+      crash << " Tau signature is not integral, impossible! " << crash ;
   }
 }
 
@@ -1081,7 +1084,7 @@ void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups,
 { MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
-  ClassFunction<Rational> signRep;
+  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
   signRep.G = this;
   this->GetSignCharacter(signRep.data);
   Selection sel;
@@ -1100,6 +1103,7 @@ void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups,
     // as characterTable[1]
     //std::cout << "<hr>before compute initial irreps";
   }
+  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
   { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }

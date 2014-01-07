@@ -5019,7 +5019,7 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
   theFormatNoDynkinTypePlusesExponents.flagDynkinTypeDontUsePlusAndExponent=true;
   out << "bool LoadCharTable" << this->theDynkinType.ToString(&theFormatNoDynkinTypePlusesExponents) << "(WeylGroup& output)\n<br>{ ";
   out << " output.characterTable.SetExpectedSize(" << this->size().ToString() << "); output.characterTable.SetSize(0);";
-  out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;Rational&gt; currentCF;";
+  out << "\n<br>&nbsp;&nbsp;ClassFunction&lt;FiniteGroup&lt;ElementWeylGroup&lt;WeylGroup&gt; &gt;, Rational&gt; currentCF;";
   out << "\n<br>&nbsp;&nbsp;currentCF.G=&output;";
   for (int i=0; i<this->characterTable.size; i++)
   { out << "\n<br>&nbsp;&nbsp;currentCF.data.AssignString(\"";
@@ -5059,7 +5059,7 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
   { out << "\n<br>&nbsp;&nbsp;output.conjugacyClasseS[" << i;
     for (int j=((Rational)i).ToString().size(); j<3; j++) //<-if the index i is smaller than 100, make sure it takes
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
-    out << "].representative.MakeFromReadableReflections(output, true, \"";
+    out << "].representative.MakeFromReadableReflections(output, false, \"";
     for (int j=0; j<this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size; j++)
     { out << this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst[j]+1;
       if (j!=this->conjugacyClasseS[i].representative.generatorsLastAppliedFirst.size-1)

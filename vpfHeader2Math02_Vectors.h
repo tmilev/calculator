@@ -910,28 +910,17 @@ class Vectors: public List<Vector<coefficient> >
 
 template <class coefficient>
 bool Vector<coefficient>::AssignString(const std::string& input)
-{ unsigned int startIndex=0;
-  for (; startIndex<input.size(); startIndex++)
-    if (input[startIndex]=='(')
-      break;
-  startIndex++;
+{ MacroRegisterFunctionWithName("Vector::AssignString");
   this->SetSize(0);
-  Rational tempRat;
-  std::string tempS;
-  tempS.resize(input.size());
-  tempS="";
-  for (; startIndex<input.size(); startIndex++)
-  { if (input[startIndex]==')' || input[startIndex]==',')
-    { tempRat.AssignString(tempS);
-      tempS="";
-      this->AddOnTop(tempRat);
-    } else
-    { //tempS.resize(tempS.size()+1);WeylDimFormula
-      //tempS[tempS.size()-1]=input[startIndex];
-      tempS.push_back(input[startIndex]);
+  int currentDigit=-1;
+  for (int i=0; i< (signed) input.size(); i++)
+  { char previous= (i==0) ? '(' : input[i-1];
+    if (MathRoutines::isADigit(input[i], &currentDigit))
+    { if (!MathRoutines::isADigit(previous))
+        this->AddOnTop( (coefficient) 0);
+      *this->LastObject() *=10;
+      *this->LastObject()+=currentDigit;
     }
-    if (input[startIndex]==')')
-      break;
   }
   return true;
 }

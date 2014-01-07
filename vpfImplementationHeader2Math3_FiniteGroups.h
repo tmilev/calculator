@@ -399,7 +399,8 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(Gl
       if(this->parent->AreConjugate(g, this->parent->conjugacyClasseS[ci].representative))
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
-      }
+      } else
+        std::cout << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
     if (notFound)
       crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative "
       << g.ToString() << crash;

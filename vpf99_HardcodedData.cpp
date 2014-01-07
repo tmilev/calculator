@@ -9,7 +9,7 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromReadableReflections
   Vector<Rational> theReflections;
   theReflections.AssignString(inputReflections);
   this->generatorsLastAppliedFirst.SetSize(theReflections.size);
-  std::cout << "<br>Read reflection from " << inputReflections << " to get: " << theReflections.ToString();
+//  std::cout << "<br>Read reflection from " << inputReflections << " to get: " << theReflections.ToString();
   for (int i=0; i<theReflections.size; i++)
   { if (!theReflections[i].IsSmallInteger(&this->generatorsLastAppliedFirst[i]))
       crash << "Bad reflection list." << crash;

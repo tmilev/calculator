@@ -130,6 +130,7 @@ public:
   }
   bool CheckInitialization()const;
   bool CheckConjugacyClassRepsMatchCCsizes(GlobalVariables* theGlobalVariables);
+  bool CheckOrthogonalityCharTable(GlobalVariables* theGlobalVariables);
   void SetSizE(const LargeInt& inputSize)
   { this->sizePrivate=inputSize;
   }
@@ -365,7 +366,6 @@ public:
   void ComputeOuterAutoGenerators();
   void ComputeOuterAutos();
   bool CheckConsistency()const;
-  bool VerifyChartable(bool printresults=false)const;
   bool CheckInitializationFDrepComputation()const;
   bool CheckInitializationConjugacyClasses()const;
   void GetSignCharacter(Vector<Rational>& out);

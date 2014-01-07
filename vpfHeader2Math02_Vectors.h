@@ -913,14 +913,18 @@ bool Vector<coefficient>::AssignString(const std::string& input)
 { MacroRegisterFunctionWithName("Vector::AssignString");
   this->SetSize(0);
   int currentDigit=-1;
+  int sign=1;
   for (int i=0; i< (signed) input.size(); i++)
   { char previous= (i==0) ? '(' : input[i-1];
     if (MathRoutines::isADigit(input[i], &currentDigit))
     { if (!MathRoutines::isADigit(previous))
         this->AddOnTop( (coefficient) 0);
       *this->LastObject() *=10;
-      *this->LastObject()+=currentDigit;
-    }
+      *this->LastObject()+=currentDigit*sign;
+    } else if (input[i]=='-')
+      sign=-1;
+    else if (input[i]==',')
+      sign=1;
   }
   return true;
 }

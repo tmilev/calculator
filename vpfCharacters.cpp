@@ -952,28 +952,25 @@ void SubgroupRootReflections::ComputeDynkinType()
   this->theDynkinType=tempGroup.theDynkinType;
 }
 
-bool WeylGroup::VerifyChartable(bool printresults)const
-{ bool okay = true;
-  if(printresults)
-    std::cout << "one" << '\n';
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-  { if(printresults)
-      std::cout << this->characterTable[i].Norm() << std::endl;
-    if(this->characterTable[i].Norm() != 1)
-      okay = false;
-  }
-  if(printresults)
-    std::cout << "zero" << '\n';
-  for(int i=0; i<this->ConjugacyClassCount(); i++)
-    for(int j=0; j<this->ConjugacyClassCount(); j++)
-    { if(j==i)
-        continue;
-      if(this->characterTable[i].InnerProduct(this->characterTable[j]) != 0)
-        okay = false;
-      if(printresults)
-        std::cout << this->characterTable[i].InnerProduct(this->characterTable[j]) << std::endl;
+template <class elementSomeGroup>
+bool FiniteGroup<elementSomeGroup>::CheckOrthogonalityCharTable(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("FiniteGroup::CheckOrthogonalityCharTable");
+  for (int i=0; i<this->characterTable.size; i++)
+    for (int j=i; j<this->characterTable.size; j++)
+    { ClassFunction<FiniteGroup, Rational>& leftChar= this->characterTable[i];
+      ClassFunction<FiniteGroup, Rational>& rightChar= this->characterTable[j];
+      Rational theScalarProd= this->GetHermitianProduct(leftChar.data, rightChar.data);
+      if (j!=i)
+        if (theScalarProd!=0)
+          crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not orthogonal to char number "
+          << j+1 << " = " << rightChar.ToString() << ". <br>The entire char table is: "
+          << this->characterTable.ToString() << crash;
+      if (j==i)
+        if (theScalarProd!=1)
+          crash << "Error: the character table is not orthonormal: char number " << i+1 << " = " << leftChar.ToString() << " is not of norm 1. "
+          << "<br>The entire char table is: " << this->characterTable.ToString() << crash;
     }
-  return okay;
+  return true;
 }
 
 void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
@@ -983,6 +980,7 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
   this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->parent->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
@@ -993,8 +991,8 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
-    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
-    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+//    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
+//    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
     if (!this->tauSignature[i].IsSmallInteger())
       crash << " Tau signature is not integral, impossible! " << crash ;
   }
@@ -1016,7 +1014,13 @@ void SubgroupRootReflections::ComputeCCSizesRepresentativesPreimages(GlobalVaria
       this->ccRepresentativesPreimages[i]=i;
     this->flagCCRepresentativesComputed=true;
   } else
-    this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
+  { if (this->theDynkinType.GetRank()<=6)
+      this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCfromAllElements(theGlobalVariables);
+    else
+      this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCSizesAndRepresentatives(theGlobalVariables);
+
+    this->::Subgroup<WeylGroup, ElementWeylGroup<WeylGroup> >::ComputeCCRepresentativesPreimages(theGlobalVariables);
+  }
 }
 
 void SubgroupRootReflections::InitGenerators()

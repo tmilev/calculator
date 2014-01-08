@@ -4718,9 +4718,13 @@ void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpace
 }
 
 ElementWeylGroup<WeylGroup> WeylGroup::GetRootReflection(int rootIndex)
-{ Rational x = this->RootSystem[rootIndex].ScalarProduct(this->rho,this->CartanSymmetric)/this->RootSystem[rootIndex].ScalarProduct(this->RootSystem[rootIndex],this->CartanSymmetric) *(-2);
-  Vector<Rational> rhoImage = this->rho + this->RootSystem[rootIndex]*x;
-  return this->theElements[this->rhoOrbit.GetIndexIMustContainTheObject(rhoImage)];
+{ if (!this->rho.size==0)
+    this->ComputeRho(true);
+  Vector<Rational> rhoImage;
+  this->ReflectBetaWRTAlpha(this->RootSystem[rootIndex], this->rho, false, rhoImage);
+  ElementWeylGroup<WeylGroup> result;
+  result.MakeFromRhoImage(rhoImage, *this);
+  return result;
 }
 
 void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)

@@ -1112,7 +1112,19 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
 
 void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
-
+  rootSubalgebras theRootSAs;
+  SemisimpleLieAlgebra theSSlieAlg;
+  theSSlieAlg.theWeyl=*this;
+//  theSSlieAlg.ComputeChevalleyConstants(theGlobalVariables);
+  theRootSAs.theGlobalVariables=theGlobalVariables;
+  theRootSAs.owneR=&theSSlieAlg;
+  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism
+  ();
+  List<Vectors<Rational> > theRootSAsBases;
+  theRootSAsBases.SetExpectedSize(theRootSAs.theSubalgebras.size);
+  for (int i=theRootSAs.theSubalgebras.size-1; i>=0; i--)
+    theRootSAsBases.AddOnTop(theRootSAs.theSubalgebras[i].SimpleBasisK);
+  this->GetSignSignatureRootSubgroups(outputSubgroups, theRootSAsBases, theGlobalVariables);
 }
 
 void WeylGroup::GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)

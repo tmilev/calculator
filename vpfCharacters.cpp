@@ -1110,8 +1110,13 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
   return out.str();
 }
 
-void WeylGroup::GetParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::GetParabolicSignSignature");
+void WeylGroup::GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureAllRootSubsystems");
+
+}
+
+void WeylGroup::GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
   ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
@@ -1139,11 +1144,11 @@ void WeylGroup::GetParabolicSignSignature(List<SubgroupRootReflections>& outputS
   }
 }
 
-void WeylGroup::GetRootSubsystemsSignSignature
+void WeylGroup::GetSignSignatureRootSubgroups
   (List<SubgroupRootReflections>& outputSubgroups,
    const List<Vectors<Rational> >& rootsGeneratingReflections,
    GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::GetRootSubsystemsSignSignature");
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureRootSubgroups");
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
   ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
   signRep.G = this;

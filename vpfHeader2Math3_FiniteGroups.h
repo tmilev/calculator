@@ -342,10 +342,9 @@ public:
   void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  void GetParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetExtendedParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetAllRootSubsystemsSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetRootSubsystemsSignSignature
+  void GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetSignSignatureRootSubgroups
   (List<SubgroupRootReflections>& outputSubgroups,
    const List<Vectors<Rational> >& rootsGeneratingReflections,
    GlobalVariables* theGlobalVariables=0)

@@ -35,7 +35,7 @@ public:
   static bool innerTensorAndDecomposeWeylReps(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeVirtualWeylRep(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIsOuterAutoWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintTauSignaturesWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintRootSubsystemsSignSignatures(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

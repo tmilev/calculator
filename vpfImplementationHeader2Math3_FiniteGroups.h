@@ -151,10 +151,34 @@ void ElementWeylGroup<templateWeylGroup>::MakeID(const ElementWeylGroup& initial
 }
 
 template <class templateWeylGroup>
+void ElementWeylGroup<templateWeylGroup>::MakeRootReflection
+(const Vector<Rational>& mustBeRoot, WeylGroup& inputWeyl)
+{ *this=inputWeyl.GetRootReflection(inputWeyl.RootSystem.GetIndexIMustContainTheObject(mustBeRoot));
+}
+
+template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl)
 { this->owner=&inputWeyl;
   this->generatorsLastAppliedFirst.SetSize(1);
   this->generatorsLastAppliedFirst[0]=simpleRootIndex;
+}
+
+template <class templateWeylGroup>
+void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroup& inputWeyl)
+{ this->owner=&inputWeyl;
+  int theRank=this->owner->GetDim();
+  this->generatorsLastAppliedFirst.SetSize(0);
+  //std::cout << theVector.ToString();
+  Vector<Rational> theVector=inputRhoImage;
+  while (theVector!=this->owner->rho)
+    for (int i=0; i<theRank; i++)
+      if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
+      { this->owner->SimpleReflection(i, theVector);
+        //std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
+        this->generatorsLastAppliedFirst.AddOnTop(i);
+        break;
+      }
+//  std::cout << ", finally: " << this->ToString();
 }
 
 template <class templateWeylGroup>
@@ -165,18 +189,7 @@ void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
     this->owner->ComputeRho(false);
   Vector<Rational> theVector=this->owner->rho;
   this->owner->ActOn(*this, theVector);
-  int theRank=this->owner->GetDim();
-  this->generatorsLastAppliedFirst.SetSize(0);
-  //std::cout << theVector.ToString();
-  while (theVector!=this->owner->rho)
-    for (int i=0; i<theRank; i++)
-      if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
-      { this->owner->SimpleReflection(i, theVector);
-        //std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
-        this->generatorsLastAppliedFirst.AddOnTop(i);
-        break;
-      }
-//  std::cout << ", finally: " << this->ToString();
+  this->MakeFromRhoImage(theVector, *this->owner);
 }
 
 template <class templateWeylGroup>

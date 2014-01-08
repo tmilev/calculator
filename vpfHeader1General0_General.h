@@ -954,7 +954,7 @@ public:
   { return this->QuickSortAscendingCustomRecursive(0, this->size-1, theCompareror, carbonCopy);
   }
   //The below function is required to preserve the order of elements given by theSelection.elements.
-  void SubSelection(Selection& theSelection, List<Object>& output);
+  void SubSelection(const Selection& theSelection, List<Object>& output);
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   template <class otherType=Object>
@@ -1452,7 +1452,7 @@ public:
   { int result=this->GetIndex(o);
     if (result==-1)
     { crash.theCrashReport << "This is a programming error: the programmer has requested the index of object " << o
-      << " with a function that does not allow failure. However, the container array does not contain his object. ";
+      << " with a function that does not allow failure. However, the container array does not contain this object. ";
       crash << crash;
     }
     return result;

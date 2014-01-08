@@ -845,16 +845,20 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
   return output.AssignValue(outputRep, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup");
+bool CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures");
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
     return false;
   WeylGroup& theWeyl=output.GetValueNonConst<WeylGroup>();
+  if (theWeyl.GetDim()>6)
+  { theCommands.Comments << "<hr>Computing sign signatures restricted up to rank 6.";
+    return false;
+  }
   std::stringstream out;
   List<SubgroupRootReflections> parabolicSubgroups;
-  theWeyl.GetTauSignatures(parabolicSubgroups, theCommands.theGlobalVariableS);
+  theWeyl.GetParabolicSignSignature(parabolicSubgroups, theCommands.theGlobalVariableS);
   out << "<table style=\"white-space: nowrap;\" border=\"1\">";
   Selection parSelrootsAreInLevi, parSelrootsAreOuttaLevi;
   parSelrootsAreInLevi.init(theWeyl.GetDim());

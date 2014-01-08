@@ -980,7 +980,7 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
     this->ComputeCCRepresentativesPreimages(theGlobalVariables);
   }
   this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
-  this->parent->CheckOrthogonalityCharTable(theGlobalVariables);
+//  this->parent->CheckOrthogonalityCharTable(theGlobalVariables);
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
@@ -1033,11 +1033,11 @@ void SubgroupRootReflections::InitGenerators()
   int d=this->SubCartanSymmetric.NumRows;
   this->generatorPreimages.SetSize(d);
   this->generators.SetSize(d);
-  ElementWeylGroup<WeylGroup> currentSimpleReflection;
+  ElementWeylGroup<WeylGroup> currentReflection;
   for(int i=0; i<d; i++)
-  { currentSimpleReflection.MakeSimpleReflection(this->generatingSimpleRoots.elements[i], *this->parent);
-    this->generatorPreimages[i]=this->parent->theElements.GetIndex(currentSimpleReflection);
-    this->generators[i]=currentSimpleReflection;
+  { currentReflection.MakeRootReflection(this->generatingSimpleRoots[i], *this->parent);
+    this->generatorPreimages[i]=this->parent->theElements.GetIndex(currentReflection);
+    this->generators[i]=currentReflection;
   }
 }
 
@@ -1045,13 +1045,39 @@ void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selectio
 { MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
   this->init();
   this->parent = &G;
-  this->generatingSimpleRoots=inputGeneratingSimpleRoots;
-  int d = this->generatingSimpleRoots.CardinalitySelection;
+  Vectors<Rational> EiBasis;
+  EiBasis.MakeEiBasis(G.GetDim());
+  EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
+  int d = inputGeneratingSimpleRoots.CardinalitySelection;
   this->SubCartanSymmetric.init(d,d);
   for(int ii=0; ii<d; ii++)
     for(int jj=0; jj<d; jj++)
-      this->SubCartanSymmetric(ii,jj) = G.CartanSymmetric(this->generatingSimpleRoots.elements[ii],generatingSimpleRoots.elements[jj]);
+      this->SubCartanSymmetric(ii,jj) =
+      G.RootScalarCartanRoot(this->generatingSimpleRoots[ii],this->generatingSimpleRoots[jj]);
   this->ComputeDynkinType();
+  this->InitGenerators();
+}
+
+void SubgroupRootReflections::MakeFromRoots
+(WeylGroup& G, const Vectors<Rational>& inputRootReflections)
+{ MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
+  this->init();
+  this->parent = &G;
+  this->generatingSimpleRoots=inputRootReflections;
+  DynkinDiagramRootSubalgebra theDiagram;
+  theDiagram.ComputeDiagramTypeModifyInput
+  (this->generatingSimpleRoots, G);
+  int d = this->generatingSimpleRoots.size;
+  this->SubCartanSymmetric.init(d,d);
+  for(int ii=0; ii<d; ii++)
+    for(int jj=0; jj<d; jj++)
+      this->SubCartanSymmetric(ii,jj) = G.RootScalarCartanRoot
+      (this->generatingSimpleRoots[ii],generatingSimpleRoots[jj]);
+  this->ComputeDynkinType();
+  DynkinType verificationType;
+  theDiagram.GetDynkinType(verificationType);
+  if (this->theDynkinType!=verificationType)
+    crash << "Two different comptuations of the Dynkin type a set of roots did not coincide. " << crash;
   this->InitGenerators();
 }
 
@@ -1084,8 +1110,8 @@ std::string FiniteGroup<elementSomeGroup>::ToString(FormatExpressions* theFormat
   return out.str();
 }
 
-void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::GetTauSignatures");
+void WeylGroup::GetParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetParabolicSignSignature");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
   ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
@@ -1108,6 +1134,35 @@ void WeylGroup::GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups,
     //std::cout << "<hr>before compute initial irreps";
   }
   this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  for(int j=0; j<outputSubgroups.size; j++)
+  { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
+  }
+}
+
+void WeylGroup::GetRootSubsystemsSignSignature
+  (List<SubgroupRootReflections>& outputSubgroups,
+   const List<Vectors<Rational> >& rootsGeneratingReflections,
+   GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetRootSubsystemsSignSignature");
+  this->ComputeOrLoadCharacterTable(theGlobalVariables);
+  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
+  signRep.G = this;
+  this->GetSignCharacter(signRep.data);
+  outputSubgroups.SetSize(rootsGeneratingReflections.size);
+  ElementWeylGroup<WeylGroup> g;
+  g.owner = this;
+//  std::cout << "<hr>Meself is: " << this->ToString();
+  for (int i=0; i<outputSubgroups.size; i++)
+  { SubgroupRootReflections& currentParabolic=outputSubgroups[i];
+    currentParabolic.MakeFromRoots(*this, rootsGeneratingReflections[i]);
+    currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
+//    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
+    // ComputeInitialCharacters gets the character of the sign representation
+    // as characterTable[1]
+    //std::cout << "<hr>before compute initial irreps";
+  }
+  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  this->CheckOrthogonalityCharTable(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
   { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }

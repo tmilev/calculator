@@ -3629,7 +3629,7 @@ std::string Vectors<coefficient>::ToString(FormatExpressions* theFormat)const
 }
 
 template <class Object>
-void List<Object>::SubSelection(Selection& theSelection, List<Object>& output)
+void List<Object>::SubSelection(const Selection& theSelection, List<Object>& output)
 { if (&output==this)
   { List<Object> thisCopy=*this;
     thisCopy.SubSelection(theSelection, output);

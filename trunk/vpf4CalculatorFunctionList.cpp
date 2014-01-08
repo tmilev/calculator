@@ -168,7 +168,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerPrintTauSignaturesWeylGroup, "",
+  ("WeylGroupTauSignatures", CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures, "",
    "Prints the tau signatures of a Weyl group. See a common article by T. Folz-Donahue, S. Jackson, T. Milev, A. Noel. ",
    "WeylGroupTauSignatures{}(b_3);", true, false)
    ;

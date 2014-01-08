@@ -212,6 +212,9 @@ public:
   { return this->generatorsLastAppliedFirst.size %2 ==0 ? 1 : -1;
   }
   static void Conjugate(const ElementWeylGroup& elementWeConjugateBy, const ElementWeylGroup& inputToBeConjugated, ElementWeylGroup& output);
+  void MakeFromRhoImage(const Vector<Rational>& inputRhoImage, WeylGroup& inputWeyl);
+  void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
+  void MakeRootReflection(const Vector<Rational>& mustBeRoot, WeylGroup& inputWeyl);
   void MakeCanonical();
   void MakeID(templateWeylGroup& inputWeyl);
   void MakeID(const ElementWeylGroup& initializeFrom);
@@ -240,7 +243,6 @@ public:
   void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult)const;
   Vector<Rational> operator*(const Vector<Rational>& v) const;
   ElementWeylGroup<WeylGroup> Inverse() const;
-  void MakeSimpleReflection(int simpleRootIndex, WeylGroup& inputWeyl);
   bool HasDifferentConjugacyInvariantsFrom(const ElementWeylGroup<templateWeylGroup>& right)const;
   void GetCharacteristicPolyStandardRepresentation(Polynomial<Rational>& output)const;
   bool operator==(const ElementWeylGroup<WeylGroup>& other)const
@@ -340,7 +342,14 @@ public:
   void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  void GetTauSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetExtendedParabolicSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetAllRootSubsystemsSignSignature(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetRootSubsystemsSignSignature
+  (List<SubgroupRootReflections>& outputSubgroups,
+   const List<Vectors<Rational> >& rootsGeneratingReflections,
+   GlobalVariables* theGlobalVariables=0)
+   ;
 
   bool LoadConjugacyClassesHelper();
 
@@ -797,9 +806,10 @@ class SubgroupRootReflections : public SubgroupWeylGroup
 public:
   Matrix<Rational> SubCartanSymmetric;
   DynkinType theDynkinType;
-  Selection generatingSimpleRoots;
+  Vectors<Rational> generatingSimpleRoots;
   void InitGenerators();
   void MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots);
+  void MakeFromRoots(WeylGroup& G, const Vectors<Rational>& inputRootReflections);
   LargeInt GetGroupSizeByFormula()const
   { return this->theDynkinType.GetWeylGroupSizeByFormula();
   }

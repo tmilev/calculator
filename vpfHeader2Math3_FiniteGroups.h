@@ -332,7 +332,8 @@ public:
 
   MemorySaving<FinitelyGeneratedMatrixMonoid<Rational> > theOuterAutos;
   List<ElementWeylGroup<WeylGroup> > squaresFirstConjugacyClassRep;
-
+  List<std::string> ccCarterLabels;
+  List<std::string> irrepsCarterLabels;
   List<WeylGroupRepresentation<Rational> > irreps;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
 

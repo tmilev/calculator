@@ -1046,6 +1046,7 @@ void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selectio
   this->init();
   this->parent = &G;
   this->flagIsParabolic=true;
+  this->simpleRootsInLeviParabolic=inputGeneratingSimpleRoots;
   Vectors<Rational> EiBasis;
   EiBasis.MakeEiBasis(G.GetDim());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
@@ -1165,7 +1166,7 @@ void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>
   signRep.G = this;
   this->GetSignCharacter(signRep.data);
   Selection parSelrootsAreInLevi;
-  parSelrootsAreInLevi.init(this->GetDim());
+  parSelrootsAreInLevi.init(this->GetDim()+1);
   Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
   extendedBasis.MakeEiBasis(this->GetDim());
   extendedBasis.AddOnTop(this->RootSystem[0]);
@@ -1178,6 +1179,7 @@ void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>
     { theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
       theSG.flagIsExtendedParabolic=true;
       theSG.simpleRootsInLeviParabolic=parSelrootsAreInLevi;
+      outputSubgroups.AddOnTop(theSG);
     }
   } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
   for (int i=0; i<outputSubgroups.size; i++)

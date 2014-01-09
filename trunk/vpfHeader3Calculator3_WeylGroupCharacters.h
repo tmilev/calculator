@@ -10,11 +10,11 @@ public:
   static bool innerWeylOrbit(Calculator& theCommands, const Expression& input, Expression& output, bool useFundCoords, bool useRho);
   static bool innerWeylRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output, bool useOuter);
   static bool innerWeylOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output)
- { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, true);
- }
+  { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, true);
+  }
   static bool innerWeylNoOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output)
- { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
- }
+  { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
+  }
   static bool innerWeylGroupOrbitFund(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitSimple(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitOuterSimple(Calculator& theCommands, const Expression& input, Expression& output);

@@ -852,27 +852,58 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   std::stringstream out;
   out << "<table style=\"white-space: nowrap;\" border=\"1\">";
   Selection parSelrootsAreOuttaLevi;
-  out << "<tr><td>Irreducible representation characters</td>";
+  out << "<tr><td>Irrep Label</td><td>Irreducible representation characters</td>";
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
     { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
       parSelrootsAreOuttaLevi.InvertSelection();
-      out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
+      out << "<td>" << parSelrootsAreOuttaLevi.ToString() << "</td>";
     }
-    out << "</tr><tr><td></td>";
+    out << "</tr><tr><td></td><td></td>";
   }
   for (int i=0; i<inputSubgroups.size; i++)
     out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
   out << "</tr>";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
   { out << "<tr>";
+    if (i<this->irrepsCarterLabels.size)
+      out << "<td>" << this->irrepsCarterLabels[i] << "</td>";
+    else
+      out << "<td></td>";
     out << "<td>" << this->characterTable[i].ToString() << "</td>";
     for (int j=0; j<inputSubgroups.size; j++)
       out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
     out << "</tr>";
   }
   out << "</table>";
-
+  out << "<br>A version of the table in ready for LaTeX consumption form follows.<br>";
+  out << "\\documentclass{article}\\begin{document}\n<br>\n";
+  out << "\\begin{tabular}{";
+  for (int i=0; i<this->ConjugacyClassCount()+2; i++)
+    out << "c";
+  out << "}\n<br>\n";
+  out << "Irrep Label & Irrep character";
+  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
+  { for (int i=0; i<inputSubgroups.size; i++)
+    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
+      parSelrootsAreOuttaLevi.InvertSelection();
+      out << "&" << parSelrootsAreOuttaLevi.ToString();
+    }
+    out << "\\\\\n<br>\n&&";
+  }
+  for (int i=0; i<inputSubgroups.size; i++)
+    out << "&" << inputSubgroups[i].theDynkinType.ToString();
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "\\\\\n<br>\n";
+    if (i<this->irrepsCarterLabels.size)
+      out << this->irrepsCarterLabels[i];
+    out << this->characterTable[i].ToString() << "&";
+    for (int j=0; j<inputSubgroups.size; j++)
+      out << "&" << inputSubgroups[j].tauSignature[i].ToString();
+    out << "\\\\\n<br>\n";
+  }
+  out << "\\end{tabular}\n<br>\n";
+  out << "\\end{document}";
   return out.str();
 }
 

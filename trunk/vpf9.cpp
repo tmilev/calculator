@@ -5040,6 +5040,9 @@ std::string WeylGroup::ToStringCppCharTable(FormatExpressions* theFormat)
     out << ")";
     out << "\"); output.characterTable.AddOnTop(currentCF);";
   }
+  out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.SetSize(0);";
+  for (int i=0; i<this->irrepsCarterLabels.size; i++)
+    out << "\n<br>&nbsp;&nbsp;output.irrepsCarterLabels.AddOnTop(\"" << this->irrepsCarterLabels[i] << "\");";
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";
   return out.str();
@@ -5077,6 +5080,9 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
       out << "&nbsp;"; // making sure index has width exactly 3 spaces
     out  << "].size=" << this->conjugacyClasseS[i].size.ToString() << ";";
   }
+  out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.SetSize(0);";
+  for (int i=0; i<this->ccCarterLabels.size; i++)
+    out << "\n<br>&nbsp;&nbsp;output.ccCarterLabels.AddOnTop(\"" << this->ccCarterLabels[i] << "\");";
   out << "\n<br>&nbsp;&nbsp;output.LoadConjugacyClassesHelper();";
   out << "\n<br>&nbsp;&nbsp;return true;";
   out << "\n<br>}";

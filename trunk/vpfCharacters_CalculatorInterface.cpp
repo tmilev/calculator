@@ -845,8 +845,39 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
   return output.AssignValue(outputRep, theCommands);
 }
 
-bool CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures");
+std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRootReflections>& inputSubgroups)
+{ MacroRegisterFunctionWithName("WeylGroup::ToStringSignSignatureRootSubsystem");
+  if (inputSubgroups.size==0)
+    return "";
+  std::stringstream out;
+  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
+  Selection parSelrootsAreOuttaLevi;
+  out << "<tr><td>Irreducible representation characters</td>";
+  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
+  { for (int i=0; i<inputSubgroups.size; i++)
+    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
+      parSelrootsAreOuttaLevi.InvertSelection();
+      out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
+    }
+    out << "</tr><tr><td></td>";
+  }
+  for (int i=0; i<inputSubgroups.size; i++)
+    out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
+  out << "</tr>";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "<tr>";
+    out << "<td>" << this->characterTable[i].ToString() << "</td>";
+    for (int j=0; j<inputSubgroups.size; j++)
+      out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+
+  return out.str();
+}
+
+bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems");
   if (!CalculatorSerialization::innerLoadWeylGroup(theCommands, input, output))
     return false;
   if (!output.IsOfType<WeylGroup>())
@@ -857,85 +888,13 @@ bool CalculatorFunctionsWeylGroup::innerPrintRootSubsystemsSignSignatures(Calcul
     return false;
   }
   std::stringstream out;
-  List<SubgroupRootReflections> parabolicSubgroupS;
+  List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups;
   theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
-  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
-  Selection parSelrootsAreInLevi, parSelrootsAreOuttaLevi;
-  parSelrootsAreInLevi.init(theWeyl.GetDim());
-  out << "<tr><td>Irreducible representation characters</td>";
-  do
-  { parSelrootsAreOuttaLevi=parSelrootsAreInLevi;
-    parSelrootsAreOuttaLevi.InvertSelection();
-    out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
-  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
-  out << "</tr>";
-  out << "<tr><td></td>";
-  for (int i=0; i<parabolicSubgroupS.size; i++)
-  { out << "<td>" << parabolicSubgroupS[i].theDynkinType.ToString() << "</td>";
-  }
-  out << "</tr>";
-  for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
-  { out << "<tr>";
-    out << "<td>" << theWeyl.characterTable[i].ToString() << "</td>";
-    for (int j=0; j<parabolicSubgroupS.size; j++)
-      out << "<td>" << parabolicSubgroupS[j].tauSignature[i].ToString() << "</td>";
-    out << "</tr>";
-  }
-  out << "</table>";
-//////////////////////////////////////////////////
-  List<SubgroupRootReflections> ExtendedParabolicSubgroups;
-  parSelrootsAreInLevi.init(theWeyl.GetDim()+1);
-  ExtendedParabolicSubgroups.SetSize(MathRoutines::TwoToTheNth(theWeyl.GetDim()+1));
-  Vectors<Rational> extendedBasis;
-  Vectors<Rational> currentBasisExtendedParabolic;
-  List<Vectors<Rational> > basesRootSubGroups;
-  extendedBasis.MakeEiBasis(theWeyl.GetDim());
-  extendedBasis.AddOnTop(*theWeyl.RootSystem.LastObject());
-  List<Vectors<Rational> > basesExtendedParabolic;
-  do
-  { extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
-    if (currentBasisExtendedParabolic.GetRankOfSpanOfElements()==currentBasisExtendedParabolic.size)
-      basesRootSubGroups.AddOnTop(currentBasisExtendedParabolic);
-  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
-  theWeyl.GetSignSignatureRootSubgroups
-  (ExtendedParabolicSubgroups, basesRootSubGroups, theCommands.theGlobalVariableS);
-  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
-  out << "<tr><td>Irreducible representation characters</td>";
-  do
-  { parSelrootsAreOuttaLevi=parSelrootsAreInLevi;
-    parSelrootsAreOuttaLevi.InvertSelection();
-    out << "<td>" << parSelrootsAreOuttaLevi.ToString()<< "</td>";
-  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
-  out << "</tr>";
-  out << "<tr><td></td>";
-  for (int i=0; i<ExtendedParabolicSubgroups.size; i++)
-  { out << "<td>" << ExtendedParabolicSubgroups[i].theDynkinType.ToString() << "</td>";
-  }
-  out << "</tr>";
-  for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
-  { out << "<tr>";
-    out << "<td>" << theWeyl.characterTable[i].ToString() << "</td>";
-    for (int j=0; j<ExtendedParabolicSubgroups.size; j++)
-      out << "<td>" << ExtendedParabolicSubgroups[j].tauSignature[i].ToString() << "</td>";
-    out << "</tr>";
-  }
-  out << "</table>";
-  List<SubgroupRootReflections> allRootSubgroups;
+  theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
   theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
-  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
-  out << "<tr><td>Irreducible representation characters</td>";
-  for (int i=0; i<allRootSubgroups.size; i++)
-  { out << "<td>" << allRootSubgroups[i].theDynkinType.ToString() << "</td>";
-  }
-  out << "</tr>";
-  for (int i=0; i<theWeyl.ConjugacyClassCount(); i++)
-  { out << "<tr>";
-    out << "<td>" << theWeyl.characterTable[i].ToString() << "</td>";
-    for (int j=0; j<allRootSubgroups.size; j++)
-      out << "<td>" << allRootSubgroups[j].tauSignature[i].ToString() << "</td>";
-    out << "</tr>";
-  }
-  out << "</table>";
+  out << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(parabolicSubgroupS)
+  << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(extendedParabolicSubgroups)
+  << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(allRootSubgroups);
   return output.AssignValue(out.str(), theCommands);
 }
 

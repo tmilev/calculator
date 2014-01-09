@@ -1045,6 +1045,7 @@ void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selectio
 { MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
   this->init();
   this->parent = &G;
+  this->flagIsParabolic=true;
   Vectors<Rational> EiBasis;
   EiBasis.MakeEiBasis(G.GetDim());
   EiBasis.SubSelection(inputGeneratingSimpleRoots, this->generatingSimpleRoots);
@@ -1060,7 +1061,7 @@ void SubgroupRootReflections::MakeParabolicSubgroup(WeylGroup& G, const Selectio
 
 void SubgroupRootReflections::MakeFromRoots
 (WeylGroup& G, const Vectors<Rational>& inputRootReflections)
-{ MacroRegisterFunctionWithName("SubgroupRootReflections::MakeParabolicSubgroup");
+{ MacroRegisterFunctionWithName("SubgroupRootReflections::MakeFromRoots");
   this->init();
   this->parent = &G;
   this->generatingSimpleRoots=inputRootReflections;
@@ -1154,6 +1155,36 @@ void WeylGroup::GetSignSignatureParabolics(List<SubgroupRootReflections>& output
   for(int j=0; j<outputSubgroups.size; j++)
   { outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
   }
+}
+
+void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureParabolics");
+//  this->ComputeIrreducibleRepresentationsThomasVersion();
+  this->ComputeOrLoadCharacterTable(theGlobalVariables);
+  ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;
+  signRep.G = this;
+  this->GetSignCharacter(signRep.data);
+  Selection parSelrootsAreInLevi;
+  parSelrootsAreInLevi.init(this->GetDim());
+  Vectors<Rational> extendedBasis, currentBasisExtendedParabolic;
+  extendedBasis.MakeEiBasis(this->GetDim());
+  extendedBasis.AddOnTop(this->RootSystem[0]);
+  outputSubgroups.SetExpectedSize(MathRoutines::TwoToTheNth(this->GetDim()));
+  outputSubgroups.SetSize(0);
+  SubgroupRootReflections theSG;
+  do
+  { extendedBasis.SubSelection(parSelrootsAreInLevi, currentBasisExtendedParabolic);
+    if (currentBasisExtendedParabolic.GetRankOfSpanOfElements()==currentBasisExtendedParabolic.size)
+    { theSG.MakeFromRoots(*this, currentBasisExtendedParabolic);
+      theSG.flagIsExtendedParabolic=true;
+      theSG.simpleRootsInLeviParabolic=parSelrootsAreInLevi;
+    }
+  } while (parSelrootsAreInLevi.IncrementReturnFalseIfPastLast());
+  for (int i=0; i<outputSubgroups.size; i++)
+    outputSubgroups[i].ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
+  this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
+  for(int j=0; j<outputSubgroups.size; j++)
+    outputSubgroups[j].ComputeTauSignature(theGlobalVariables);
 }
 
 void WeylGroup::GetSignSignatureRootSubgroups

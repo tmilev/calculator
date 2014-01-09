@@ -342,7 +342,10 @@ public:
   void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
+  std::string ToStringSignSignatureRootSubsystem
+  (const List<SubgroupRootReflections>& inputSubgroups);
   void GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
+  void GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
   void GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
   void GetSignSignatureRootSubgroups
   (List<SubgroupRootReflections>& outputSubgroups,
@@ -806,6 +809,9 @@ public:
   Matrix<Rational> SubCartanSymmetric;
   DynkinType theDynkinType;
   Vectors<Rational> generatingSimpleRoots;
+  bool flagIsParabolic;
+  bool flagIsExtendedParabolic;
+  Selection simpleRootsInLeviParabolic;
   void InitGenerators();
   void MakeParabolicSubgroup(WeylGroup& G, const Selection& inputGeneratingSimpleRoots);
   void MakeFromRoots(WeylGroup& G, const Vectors<Rational>& inputRootReflections);
@@ -814,6 +820,10 @@ public:
   }
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables);
+  SubgroupRootReflections()
+  { this->flagIsParabolic=false;
+    this->flagIsExtendedParabolic=false;
+  }
 };
 
 class SubgroupWeylGroupOLD: public HashedList<ElementWeylGroup<WeylGroup> >

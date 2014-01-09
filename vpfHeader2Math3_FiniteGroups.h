@@ -343,6 +343,7 @@ public:
   void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
+  std::string ToStringIrrepLabel(int irrepIndex);
   std::string ToStringSignSignatureRootSubsystem
   (const List<SubgroupRootReflections>& inputSubgroups);
   void GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);

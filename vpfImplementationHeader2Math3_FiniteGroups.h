@@ -1748,9 +1748,12 @@ std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressi
     if(i<this->data.size-1)
       out << ", ";
   }
-  out << ")[";
-  out << this->Norm();
-  out << "]";
+  out << ")";
+  if (this->Norm().ToString()!="1")
+  { out << "]";
+    out << this->Norm();
+    out << "]";
+  }
   return out.str();
 }
 

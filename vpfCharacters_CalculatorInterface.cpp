@@ -845,6 +845,14 @@ bool CalculatorFunctionsWeylGroup::innerTensorAndDecomposeWeylReps(Calculator& t
   return output.AssignValue(outputRep, theCommands);
 }
 
+std::string WeylGroup::ToStringIrrepLabel(int indexIrrep)
+{ if (indexIrrep<this->irrepsCarterLabels.size)
+    return this->irrepsCarterLabels[indexIrrep];
+  std::stringstream out;
+  out << "\\phi_{" << indexIrrep+1 << "}";
+  return out.str();
+}
+
 std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRootReflections>& inputSubgroups)
 { MacroRegisterFunctionWithName("WeylGroup::ToStringSignSignatureRootSubsystem");
   if (inputSubgroups.size==0)
@@ -877,32 +885,42 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   }
   out << "</table>";
   out << "<br>A version of the table in ready for LaTeX consumption form follows.<br>";
-  out << "\\documentclass{article}\\begin{document}\n<br>\n";
-  out << "\\begin{tabular}{";
-  for (int i=0; i<this->ConjugacyClassCount()+2; i++)
+  out << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\n<br>\n";
+  out << "\\begin{longtable}{cc}\n<br>\n Irrep label & Character\\\\\n<br>\n";
+  for (int i=0; i<this->characterTable.size; i++)
+    out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->characterTable[i].ToString() << "$\\\\\n<br>\n";
+  out << "\\end{longtable}\n<br>\n";
+  out << "\\begin{longtable}{ccc}";
+  out << "Representative & Class size & Root subsystem label\\\\\n<br>\n";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "$" << this->conjugacyClasseS[i].representative.ToString() << "$&$ " << this->conjugacyClasseS[i].size.ToString() << "$";
+    if (i<this->ccCarterLabels.size)
+      out << "&$" << this->ccCarterLabels[i] << "$";
+    out << "\\\\\n<br>\n";
+  }
+  out << "\\end{longtable}";
+  out << "\\begin{longtable}{";
+  for (int i=0; i<this->ConjugacyClassCount()+1; i++)
     out << "c";
   out << "}\n<br>\n";
-  out << "Irrep Label & Irrep character";
+  out << "Irrep Label";
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
     { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
       parSelrootsAreOuttaLevi.InvertSelection();
-      out << "&" << parSelrootsAreOuttaLevi.ToString();
+      out << "&{\\tiny" << parSelrootsAreOuttaLevi.ToString() << "}";
     }
-    out << "\\\\\n<br>\n&&";
+    out << "\\\\\n<br>\n";
   }
   for (int i=0; i<inputSubgroups.size; i++)
-    out << "&" << inputSubgroups[i].theDynkinType.ToString();
+    out << "& $" << inputSubgroups[i].theDynkinType.ToString() << "$";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "\\\\\n<br>\n";
-    if (i<this->irrepsCarterLabels.size)
-      out << this->irrepsCarterLabels[i];
-    out << this->characterTable[i].ToString() << "&";
+  { out << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
     for (int j=0; j<inputSubgroups.size; j++)
       out << "&" << inputSubgroups[j].tauSignature[i].ToString();
     out << "\\\\\n<br>\n";
   }
-  out << "\\end{tabular}\n<br>\n";
+  out << "\\end{longtable}\n<br>\n";
   out << "\\end{document}";
   return out.str();
 }

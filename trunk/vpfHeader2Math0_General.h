@@ -436,6 +436,7 @@ public:
   bool flagIncludeLieAlgebraTypes;
   bool flagUseReflectionNotation;
   bool flagCandidateSubalgebraShortReportOnly;
+  bool flagSupressDynkinIndexOne;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>

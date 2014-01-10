@@ -869,8 +869,16 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     }
     out << "</tr><tr><td></td><td></td>";
   }
-  for (int i=0; i<inputSubgroups.size; i++)
-    out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
+  FormatExpressions formatSupressUpperIndexOne;
+  formatSupressUpperIndexOne.flagSupressDynkinIndexOne=true;
+  DynkinSimpleType simpleType;
+  if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
+    for (int i=0; i<inputSubgroups.size; i++)
+      out << "<td>" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne)
+      << "</td>";
+  else
+    for (int i=0; i<inputSubgroups.size; i++)
+      out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
   out << "</tr>";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
   { out << "<tr>";
@@ -898,8 +906,40 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
       out << "&$" << this->ccCarterLabels[i] << "$";
     out << "\\\\\n<br>\n";
   }
-  out << "\\end{longtable}";
+  out << "\\end{longtable}\n<br>\n";
+  out << "\\begin{longtable}{cc}Parabolic & root selection\\\\\n<br>\n";
+  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
+  { for (int i=0; i<inputSubgroups.size; i++)
+    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
+      parSelrootsAreOuttaLevi.InvertSelection();
+      out << "$L_{" << i+1 << "}$&" << parSelrootsAreOuttaLevi.ToString()<< "\\\\\n<br>\n";
+    }
+  }
+  out << "\\end{longtable}\n<br>\n";
   out << "\\begin{longtable}{";
+  for (int i=0; i<this->ConjugacyClassCount()+1; i++)
+    out << "c";
+  out << "}\n<br>\n";
+  out << "Irrep Label";
+  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
+  { for (int i=0; i<inputSubgroups.size; i++)
+      out << "&$L_{" << i+1 << "}$";
+    out << "\\\\\n<br>\n";
+  }
+  if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
+    for (int i=0; i<inputSubgroups.size; i++)
+      out << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
+  else
+    for (int i=0; i<inputSubgroups.size; i++)
+      out << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
+    for (int j=0; j<inputSubgroups.size; j++)
+      out << "&" << inputSubgroups[j].tauSignature[i].ToString();
+    out << "\\\\\n<br>\n";
+  }
+  out << "\\end{longtable}\n<br>\n";
+/*  out << "\\begin{longtable}{";
   for (int i=0; i<this->ConjugacyClassCount()+1; i++)
     out << "c";
   out << "}\n<br>\n";
@@ -917,10 +957,10 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   for (int i=0; i<this->ConjugacyClassCount(); i++)
   { out << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
     for (int j=0; j<inputSubgroups.size; j++)
-      out << "&" << inputSubgroups[j].tauSignature[i].ToString();
+      out << "&" << (inputSubgroups[j].tauSignature[i]==0 ? "1" :"0");
     out << "\\\\\n<br>\n";
   }
-  out << "\\end{longtable}\n<br>\n";
+  out << "\\end{longtable}\n<br>\n";*/
   out << "\\end{document}";
   return out.str();
 }

@@ -181,6 +181,8 @@ std::string DynkinType::ToStringRelativeToAmbientType(const DynkinSimpleType& am
 { FormatExpressions tempFormat;
   tempFormat.AmbientWeylLetter=ambientType.theLetter;
   tempFormat.AmbientCartanSymmetricInverseScale=ambientType.CartanSymmetricInverseScale;
+  if (theFormat!=0)
+    tempFormat.flagSupressDynkinIndexOne=theFormat->flagSupressDynkinIndexOne;
   return this->ToString(&tempFormat);
 }
 

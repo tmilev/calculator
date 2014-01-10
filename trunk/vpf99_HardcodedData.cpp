@@ -196,6 +196,54 @@ bool LoadCharTableF1_4(WeylGroup& output)
   return true;
 }
 
+bool LoadConjugacyClassesG1_2(WeylGroup& output)
+{ output.ComputeRho(true);
+  WeylGroup::ConjugacyClass emptyClass;
+  emptyClass.flagRepresentativeComputed=true;
+  output.conjugacyClasseS.initFillInObject(6, emptyClass);
+  output.conjugacyClasseS[0  ].representative.MakeFromReadableReflections(output, false, "");
+  output.conjugacyClasseS[1  ].representative.MakeFromReadableReflections(output, false, "1");
+  output.conjugacyClasseS[2  ].representative.MakeFromReadableReflections(output, false, "2");
+  output.conjugacyClasseS[3  ].representative.MakeFromReadableReflections(output, false, "2,1");
+  output.conjugacyClasseS[4  ].representative.MakeFromReadableReflections(output, false, "2,1,2,1");
+  output.conjugacyClasseS[5  ].representative.MakeFromReadableReflections(output, false, "1,2,1,2,1,2");
+  output.conjugacyClasseS[0  ].size=1;
+  output.conjugacyClasseS[1  ].size=3;
+  output.conjugacyClasseS[2  ].size=3;
+  output.conjugacyClasseS[3  ].size=2;
+  output.conjugacyClasseS[4  ].size=2;
+  output.conjugacyClasseS[5  ].size=1;
+  output.ccCarterLabels.SetSize(0);
+  output.ccCarterLabels.AddOnTop("0");
+  output.ccCarterLabels.AddOnTop("A^{3}_1");
+  output.ccCarterLabels.AddOnTop("A_1");
+  output.ccCarterLabels.AddOnTop("G_2");
+  output.ccCarterLabels.AddOnTop("A_2");
+  output.ccCarterLabels.AddOnTop("A^{3}_1+A_1");
+  output.LoadConjugacyClassesHelper();
+  return true;
+}
+
+bool LoadCharTableG1_2(WeylGroup& output)
+{ output.characterTable.SetExpectedSize(12); output.characterTable.SetSize(0);
+  ClassFunction<FiniteGroup<ElementWeylGroup<WeylGroup> >, Rational> currentCF;
+  currentCF.G=&output;
+  currentCF.data.AssignString("(1  , -1 , -1 , 1  , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , -1 , 1  , -1 , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , -1 , -1 , 1  , -1 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(1  , 1  , 1  , 1  , 1  , 1  )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 0  , 0  , 1  , -1 , -2 )"); output.characterTable.AddOnTop(currentCF);
+  currentCF.data.AssignString("(2  , 0  , 0  , -1 , -1 , 2  )"); output.characterTable.AddOnTop(currentCF);
+  output.irrepsCarterLabels.SetSize(0);
+  output.irrepsCarterLabels.AddOnTop("\\phi_{1,6}  ");
+  output.irrepsCarterLabels.AddOnTop("\\phi_{1,3}''");
+  output.irrepsCarterLabels.AddOnTop("\\phi_{1,3}' ");
+  output.irrepsCarterLabels.AddOnTop("\\phi_{1,0}  ");
+  output.irrepsCarterLabels.AddOnTop("\\phi_{2,1}  ");
+  output.irrepsCarterLabels.AddOnTop("\\phi_{2,2}  ");
+  return true;
+}
+
 bool LoadConjugacyClassesE1_6(WeylGroup& output)
 { output.ComputeRho(true);
   WeylGroup::ConjugacyClass emptyClass;
@@ -228,7 +276,7 @@ bool LoadConjugacyClassesE1_6(WeylGroup& output)
   output.conjugacyClasseS[24 ].representative.MakeFromReadableReflections(output, false, "1, 4, 2, 5, 4, 2, 3 ");
 
   output.ccCarterLabels.SetSize(0);
-  output.ccCarterLabels.AddOnTop(" "        );
+  output.ccCarterLabels.AddOnTop("0"        );
   output.ccCarterLabels.AddOnTop("4A_1"     );
   output.ccCarterLabels.AddOnTop("2A_1"     );
   output.ccCarterLabels.AddOnTop("3A_2"     );
@@ -355,7 +403,9 @@ bool WeylGroup::LoadConjugacyClassesHelper()
 }
 
 bool WeylGroup::LoadConjugacyClasses()
-{ if (this->theDynkinType.ToString()=="F^{1}_4")
+{ if (this->theDynkinType.ToString()=="G^{1}_2")
+    return LoadConjugacyClassesG1_2(*this);
+  if (this->theDynkinType.ToString()=="F^{1}_4")
     return LoadConjugacyClassesF1_4(*this);
   if (this->theDynkinType.ToString()=="E^{1}_6")
     return LoadConjugacyClassesE1_6(*this);
@@ -364,7 +414,9 @@ bool WeylGroup::LoadConjugacyClasses()
 }
 
 bool WeylGroup::LoadCharTable()
-{ if (this->theDynkinType.ToString()=="F^{1}_4")
+{ if (this->theDynkinType.ToString()=="G^{1}_2")
+    return LoadCharTableG1_2(*this);
+  if (this->theDynkinType.ToString()=="F^{1}_4")
     return LoadCharTableF1_4(*this);
   if (this->theDynkinType.ToString()=="E^{1}_6")
     return LoadCharTableE1_6(*this);

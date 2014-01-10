@@ -973,6 +973,7 @@ FormatExpressions::FormatExpressions()
   this->flagIncludeMutableInformation=true;
   this->flagUseMathSpanPureVsMouseHover=false;
   this->flagDynkinTypeDontUsePlusAndExponent=false;
+  this->flagSupressDynkinIndexOne=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -4170,6 +4171,7 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
   bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
   bool includeNonTechnicalNames=theFormat==0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
   bool usePlusesAndExponents= theFormat==0? true: !theFormat->flagDynkinTypeDontUsePlusAndExponent;
+  bool supressDynkinIndexOne= theFormat==0 ? false : theFormat->flagSupressDynkinIndexOne;
   if (!includeNonTechnicalNames && !includeTechnicalNames)
     includeTechnicalNames=true;
   bool hasAmbient=false;
@@ -4178,11 +4180,13 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
   if (includeTechnicalNames)
   { if (!hasAmbient)
     { out << theLetter;
-      if (usePlusesAndExponents)
-        out << "^{";
-      out << this->CartanSymmetricInverseScale.ToString();
-      if (usePlusesAndExponents)
-        out << "}";
+      if (!supressDynkinIndexOne || this->CartanSymmetricInverseScale!=1)
+      { if (usePlusesAndExponents)
+          out << "^{";
+        out << this->CartanSymmetricInverseScale.ToString();
+        if (usePlusesAndExponents)
+          out << "}";
+      }
     } else
     { DynkinSimpleType ambientType;
       ambientType.theLetter=theFormat->AmbientWeylLetter;
@@ -4191,11 +4195,13 @@ std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 //      (this->CartanSymmetricInverseScale/this->GetDefaultLongRootLengthSquared())/
 //      (ambientType.CartanSymmetricInverseScale/ambientType.GetDefaultLongRootLengthSquared());
       out << theLetter;
-      if (usePlusesAndExponents)
-        out << "^{" ;
-      out << theDynkinIndex.ToString();
-      if (usePlusesAndExponents)
-        out << "}";
+      if (!supressDynkinIndexOne || theDynkinIndex!=1)
+      { if (usePlusesAndExponents)
+          out << "^{" ;
+        out << theDynkinIndex.ToString();
+        if (usePlusesAndExponents)
+          out << "}";
+      }
     }
     if (this->theRank>=10)
     { out << "_";

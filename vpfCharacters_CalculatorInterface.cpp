@@ -893,7 +893,9 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   }
   out << "</table>";
   out << "<br>A version of the table in ready for LaTeX consumption form follows.<br>";
-  out << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\n<br>\n";
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{pdflscape}"
+  << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}"
+  << " \\begin{document}\\begin{landscape}\\tiny\n<br>\n";
   out << "\\begin{longtable}{cc}\n<br>\n Irrep label & Character\\\\\n<br>\n";
   for (int i=0; i<this->characterTable.size; i++)
     out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->characterTable[i].ToString() << "$\\\\\n<br>\n";
@@ -907,38 +909,59 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     out << "\\\\\n<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";
-  out << "\\begin{longtable}{cc}Parabolic & root selection\\\\\n<br>\n";
+
+  std::stringstream mainTableStream, mainTableHeaderStream;
+  mainTableStream << "Irrep Label";
+  int numParabolicClasses=0, numNonParabolicPseudoParabolic=0, numNonPseudoParabolic=0;
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
-    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
-      parSelrootsAreOuttaLevi.InvertSelection();
-      out << "$L_{" << i+1 << "}$&" << parSelrootsAreOuttaLevi.ToString()<< "\\\\\n<br>\n";
+    { SubgroupRootReflections& currentSG=inputSubgroups[i];
+      if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
+      { mainTableStream << "&-";
+        numNonPseudoParabolic++;
+        continue;
+      }
+      Selection invertedSel;
+      invertedSel=currentSG.simpleRootsInLeviParabolic;
+      invertedSel.InvertSelection();
+      if (currentSG.flagIsParabolic)
+      { //mainTableStream << "&$\\mathfrak{p}_{" << invertedSel.ToString() << "}$";
+        numParabolicClasses++;
+        mainTableStream << "&$\\mathfrak{p}_{" << numParabolicClasses << "}$";
+      }
+      if (currentSG.flagIsExtendedParabolic)
+      { //mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << invertedSel.ToString() << "}$";
+        numNonParabolicPseudoParabolic++;
+        mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << numNonParabolicPseudoParabolic << "}$";
+      }
     }
+    mainTableStream << "\\\\\n<br>\n";
   }
-  out << "\\end{longtable}\n<br>\n";
-  out << "\\begin{longtable}{";
+  mainTableHeaderStream << "\\begin{longtable}{";
   for (int i=0; i<this->ConjugacyClassCount()+1; i++)
-    out << "c";
-  out << "}\n<br>\n";
-  out << "Irrep Label";
-  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
-  { for (int i=0; i<inputSubgroups.size; i++)
-      out << "&$L_{" << i+1 << "}$";
-    out << "\\\\\n<br>\n";
+  { mainTableHeaderStream << "c";
+    if (i==numParabolicClasses)
+      mainTableHeaderStream << "|";
+    if (i==numParabolicClasses+numNonParabolicPseudoParabolic)
+      mainTableHeaderStream << "|";
   }
+  mainTableHeaderStream << "}\n<br>\n";
   if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
     for (int i=0; i<inputSubgroups.size; i++)
-      out << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
+      mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
   else
     for (int i=0; i<inputSubgroups.size; i++)
-      out << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
+      mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
+  { mainTableStream << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
     for (int j=0; j<inputSubgroups.size; j++)
-      out << "&" << inputSubgroups[j].tauSignature[i].ToString();
-    out << "\\\\\n<br>\n";
+      mainTableStream << "&" << inputSubgroups[j].tauSignature[i].ToString();
+    mainTableStream << "\\\\\n<br>\n";
   }
-  out << "\\end{longtable}\n<br>\n";
+  mainTableStream << "\\end{longtable}\n<br>\n";
+  out << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic << " pseudo-parabolic subgroup classes that "
+  << " are not parabolic, and " << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n";
+  out << mainTableHeaderStream.str() << mainTableStream.str();
 /*  out << "\\begin{longtable}{";
   for (int i=0; i<this->ConjugacyClassCount()+1; i++)
     out << "c";
@@ -961,7 +984,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     out << "\\\\\n<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";*/
-  out << "\\end{document}";
+  out << "\\end{landscape}\\end{document}";
   return out.str();
 }
 
@@ -977,13 +1000,34 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
     return false;
   }
   std::stringstream out;
-  List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups;
+  List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
   theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
   theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
   theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
-  out << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(parabolicSubgroupS)
-  << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(extendedParabolicSubgroups)
-  << "<hr>" << theWeyl.ToStringSignSignatureRootSubsystem(allRootSubgroups);
+  List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
+  finalSubGroups.ReservE(allRootSubgroups.size);
+  Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
+  for (int j=0; j<3; j++)
+  { List<SubgroupRootReflections>* currentSGs=0;
+    if (j==0)
+      currentSGs=&parabolicSubgroupS;
+    if (j==1)
+      currentSGs=&extendedParabolicSubgroups;
+    if (j==2)
+      currentSGs=&allRootSubgroups;
+    for (int i=0; i<currentSGs->size; i++)
+    { currentTauSig.Object1=(*currentSGs)[i].theDynkinType.ToString();
+      currentTauSig.Object2=(*currentSGs)[i].tauSignature;
+      if (!tauSigPairs.Contains(currentTauSig))
+      { tauSigPairs.AddOnTop(currentTauSig);
+        finalSubGroups.AddOnTop((*currentSGs)[i]);
+      }
+    }
+  }
+  out << "<hr>";
+  if (finalSubGroups.size!=allRootSubgroups.size)
+    out << "<b>There are root subsystems with same tau signature!" << "</b><hr>";
+  out << theWeyl.ToStringSignSignatureRootSubsystem(finalSubGroups);
   return output.AssignValue(out.str(), theCommands);
 }
 

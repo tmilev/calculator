@@ -99,6 +99,9 @@ public:
     elementSomeGroup representative;
     bool flagRepresentativeComputed;
     bool flagElementsComputed;
+    bool operator>(const ConjugacyClass& other)const
+    { return this->representative>other.representative;
+    }
   };
   List<ConjugacyClass> conjugacyClasseS;
   HashedList<Polynomial<Rational> > CCsStandardRepCharPolys;

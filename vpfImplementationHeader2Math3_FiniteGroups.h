@@ -609,6 +609,7 @@ bool FiniteGroup<elementSomeGroup>::RegisterCCclass
   this->conjugacyClasseS.AddOnTop(theClass);
   this->CCsStandardRepCharPolys.AddOnTop(theCharPoly);
   this->sizePrivate+=theClass.size;
+  this->conjugacyClasseS.QuickSortAscending();
   return true;
 }
 
@@ -695,6 +696,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCfromCCindicesInAllElements(const Li
   }
   this->flagCCsComputed=true;
   this->flagCCRepresentativesComputed=true;
+  this->conjugacyClasseS.QuickSortAscending();
 }
 
 template <class elementSomeGroup>

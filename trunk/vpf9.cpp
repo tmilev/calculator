@@ -192,6 +192,15 @@ std::string CGI::CleanUpForFileNameUse(const std::string& inputString)
   return out.str();
 }
 
+std::string CGI::CleanUpForLaTeXLabelUse(const std::string& inputString)
+{ std::stringstream out;
+  for (int i=0; i<(signed) inputString.size(); i++)
+    if (inputString[i]!='/' && inputString[i]!='^' && inputString[i]!='_' && inputString[i]!='{'
+        && inputString[i]!='}')
+      out << inputString[i];
+  return out.str();
+}
+
 void CGI::clearDollarSigns(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)

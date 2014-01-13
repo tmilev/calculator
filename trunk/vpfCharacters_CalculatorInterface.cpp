@@ -858,57 +858,10 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   if (inputSubgroups.size==0)
     return "";
   std::stringstream out;
-  out << "<table style=\"white-space: nowrap;\" border=\"1\">";
-  Selection parSelrootsAreOuttaLevi;
-  out << "<tr><td>Irrep Label</td><td>Irreducible representation characters</td>";
-  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
-  { for (int i=0; i<inputSubgroups.size; i++)
-    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
-      parSelrootsAreOuttaLevi.InvertSelection();
-      out << "<td>" << parSelrootsAreOuttaLevi.ToString() << "</td>";
-    }
-    out << "</tr><tr><td></td><td></td>";
-  }
+
   FormatExpressions formatSupressUpperIndexOne;
   formatSupressUpperIndexOne.flagSupressDynkinIndexOne=true;
   DynkinSimpleType simpleType;
-  if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
-    for (int i=0; i<inputSubgroups.size; i++)
-      out << "<td>" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne)
-      << "</td>";
-  else
-    for (int i=0; i<inputSubgroups.size; i++)
-      out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
-  out << "</tr>";
-  for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "<tr>";
-    if (i<this->irrepsCarterLabels.size)
-      out << "<td>" << this->irrepsCarterLabels[i] << "</td>";
-    else
-      out << "<td></td>";
-    out << "<td>" << this->characterTable[i].ToString() << "</td>";
-    for (int j=0; j<inputSubgroups.size; j++)
-      out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
-    out << "</tr>";
-  }
-  out << "</table>";
-  out << "<br>A version of the table in ready for LaTeX consumption form follows.<br>";
-  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{pdflscape}"
-  << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}"
-  << " \\begin{document}\\begin{landscape}\\tiny\n<br>\n";
-  out << "\\begin{longtable}{cc}\n<br>\n Irrep label & Character\\\\\n<br>\n";
-  for (int i=0; i<this->characterTable.size; i++)
-    out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->characterTable[i].ToString() << "$\\\\\n<br>\n";
-  out << "\\end{longtable}\n<br>\n";
-  out << "\\begin{longtable}{ccc}";
-  out << "Representative & Class size & Root subsystem label\\\\\n<br>\n";
-  for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "$" << this->conjugacyClasseS[i].representative.ToString() << "$&$ " << this->conjugacyClasseS[i].size.ToString() << "$";
-    if (i<this->ccCarterLabels.size)
-      out << "&$" << this->ccCarterLabels[i] << "$";
-    out << "\\\\\n<br>\n";
-  }
-  out << "\\end{longtable}\n<br>\n";
 
   std::stringstream mainTableStream, mainTableHeaderStream;
   mainTableStream << "Irrep Label";
@@ -937,15 +890,21 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     }
     mainTableStream << "\\\\\n<br>\n";
   }
-  mainTableHeaderStream << "\\begin{longtable}{";
-  for (int i=0; i<this->ConjugacyClassCount()+1; i++)
-  { mainTableHeaderStream << "c";
+  mainTableHeaderStream << "\\begin{longtable}{c|";
+  for (int i=0; i<inputSubgroups.size; i++)
+  { mainTableHeaderStream << "p{0.275cm}";
     if (i==numParabolicClasses)
       mainTableHeaderStream << "|";
     if (i==numParabolicClasses+numNonParabolicPseudoParabolic)
       mainTableHeaderStream << "|";
   }
-  mainTableHeaderStream << "}\n<br>\n";
+  mainTableHeaderStream << "}\n<br>\n" << "\\caption{\\label{tableSignSignatureTable"
+  << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
+  << "}Multiplicity of the sign representation over the classes of root subgroups. "
+  << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
+  << " pseudo-parabolic subgroup classes that are not parabolic, and "
+  << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n"
+  << "}\\\\ ";
   if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
     for (int i=0; i<inputSubgroups.size; i++)
       mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
@@ -953,14 +912,91 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     for (int i=0; i<inputSubgroups.size; i++)
       mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { mainTableStream << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
+  { mainTableStream << "\\\\";
+    if (i==0)
+      mainTableStream << "\\hline";
+    mainTableStream << "\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
     for (int j=0; j<inputSubgroups.size; j++)
       mainTableStream << "&" << inputSubgroups[j].tauSignature[i].ToString();
     mainTableStream << "\\\\\n<br>\n";
   }
   mainTableStream << "\\end{longtable}\n<br>\n";
-  out << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic << " pseudo-parabolic subgroup classes that "
-  << " are not parabolic, and " << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n";
+  List<List<Rational> > clippedTauSigs;
+  clippedTauSigs.SetSize(numNonParabolicPseudoParabolic+numParabolicClasses);
+  bool hasRepeatingClippedTauSigs=false;
+  for (int i=0; i<clippedTauSigs.size; i++)
+  { clippedTauSigs[i].SetSize(this->ConjugacyClassCount());
+    for (int j=0; j<this->ConjugacyClassCount(); j++)
+      clippedTauSigs[i][j]= (inputSubgroups[i].tauSignature[j]==0 ? 0 : 1 );
+    if (clippedTauSigs.GetIndex(clippedTauSigs[i])!=i)
+      hasRepeatingClippedTauSigs=true;
+  }
+  if (hasRepeatingClippedTauSigs)
+    out << "<b>Clipped tau signatures repeat!!!</b>";
+  else
+    out << "No repeating clipped tau signatures. ";
+  for (int s=0; s<2; s++)
+  { out << "<table style=\"white-space: nowrap;\" border=\"1\">";
+    Selection parSelrootsAreOuttaLevi;
+    out << "<tr><td>Irrep Label</td><td>Irreducible representation characters</td>";
+    if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
+    { for (int i=0; i<inputSubgroups.size; i++)
+      { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
+        parSelrootsAreOuttaLevi.InvertSelection();
+        out << "<td>" << parSelrootsAreOuttaLevi.ToString() << "</td>";
+      }
+      out << "</tr><tr><td></td><td></td>";
+    }
+    if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
+      for (int i=0; i<inputSubgroups.size; i++)
+        out << "<td>" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne)
+        << "</td>";
+    else
+      for (int i=0; i<inputSubgroups.size; i++)
+        out << "<td>" << inputSubgroups[i].theDynkinType.ToString() << "</td>";
+    out << "</tr>";
+    for (int i=0; i<this->ConjugacyClassCount(); i++)
+    { out << "<tr>";
+      if (i<this->irrepsCarterLabels.size)
+        out << "<td>" << this->irrepsCarterLabels[i] << "</td>";
+      else
+        out << "<td></td>";
+      out << "<td>" << this->characterTable[i].ToString() << "</td>";
+      for (int j=0; j<inputSubgroups.size; j++)
+        if (s==0)
+          out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
+        else
+          if(j<clippedTauSigs.size)
+            out << "<td>" << clippedTauSigs[j][i].ToString() << "</td>";
+      out << "</tr>";
+    }
+    out << "</table>";
+    out << "<br>";
+    if (s==1)
+      out << "Clipped tau signature follows.<br>";
+  }
+
+  out << "<br>A version of the table in ready for LaTeX consumption form follows.<br>\n<br>\n\n<br>\n\n<br>\n";
+  out << "\\documentclass{article}\\usepackage{amssymb}\\usepackage{longtable}\\usepackage{pdflscape}"
+  << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}"
+  << " \\begin{document}\\begin{landscape}\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
+  out << "{\\tiny \n<br>\n \\renewcommand{\\arraystretch}{0}%\n<br>\n";
+  out << "\\begin{longtable}{cc}\\caption{\\label{tableIrrepChars" << this->theDynkinType.ToString()
+  << "}\\\\ Irreducible representations and their characters}\\\\ \n<br>\n Irrep label & Character\\\\\n<br>\n";
+  for (int i=0; i<this->characterTable.size; i++)
+    out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->characterTable[i].ToString() << "$\\\\\n<br>\n";
+  out << "\\end{longtable}\n<br>\n";
+  out << "\\begin{longtable}{ccc}"<< "\\caption{\\label{tableConjugacyClassTable"
+  << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";
+  out << "Representative & Class size & Root subsystem label\\\\\n<br>\n";
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { out << "$" << this->conjugacyClasseS[i].representative.ToString() << "$&$ " << this->conjugacyClasseS[i].size.ToString() << "$";
+    if (i<this->ccCarterLabels.size)
+      out << "&$" << this->ccCarterLabels[i] << "$";
+    out << "\\\\\n<br>\n";
+  }
+  out << "\\end{longtable}\n<br>\n";
+
   out << mainTableHeaderStream.str() << mainTableStream.str();
 /*  out << "\\begin{longtable}{";
   for (int i=0; i<this->ConjugacyClassCount()+1; i++)
@@ -984,6 +1020,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     out << "\\\\\n<br>\n";
   }
   out << "\\end{longtable}\n<br>\n";*/
+  out << "}%arraystretch renewcommand scope\n<br\n>\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "\\end{landscape}\\end{document}";
   return out.str();
 }

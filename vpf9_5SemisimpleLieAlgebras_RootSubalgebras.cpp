@@ -1952,8 +1952,8 @@ bool rootSubalgebra::ComputeEssentials()
   return true;
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
-{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD");
+void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
+{ MacroRegisterFunctionWithName("rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD");
   this->theSubalgebras.size=0;
   this->GetOwnerWeyl().ComputeRho(true);
   //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
@@ -1962,7 +1962,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(Glob
   rootSAsGenerateAll.theSubalgebras[0].genK.size=0;
   rootSAsGenerateAll.theSubalgebras[0].ownEr=this;
   rootSAsGenerateAll.theSubalgebras[0].ComputeAllOld();
-  this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSAsGenerateAll.theSubalgebras, 1, theGlobalVariables);
+  this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(rootSAsGenerateAll.theSubalgebras, 1, theGlobalVariables);
 //  std::cout << this->ToString();
   if (sort)
     this->SortDescendingOrderBySSRank();
@@ -2263,10 +2263,58 @@ void rootSubalgebras::ComputeAllReductiveRootSAsInit()
 //  std::cout << "Valid scales: " << this->validScales.ToString();
 }
 
+void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder");
+  Selection parSel;
+  parSel.init(this->owneR->GetRank());
+  Vectors<Rational> basis, currentBasis;
+  basis.MakeEiBasis(this->owneR->GetRank());
+  HashedList<Vectors<Rational> > theBases;
+  for (int i=0; i<this->theSubalgebras.size; i++)
+  { currentBasis=this->theSubalgebras[i].SimpleBasisK;
+    this->owneR->theWeyl.RaiseToMaximallyDominant(currentBasis, true);
+    theBases.AddOnTop(currentBasis);
+  }
+  List<bool> Explored;
+  Explored.initFillInObject(this->theSubalgebras.size, false);
+  this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.SetSize(0);
+  this->NumNonPseudoParabolic=0;
+  this->NumParabolic=0;
+  this->NumPseudoParabolicNonParabolic=0;
+  for (int i=0; i<2; i++)
+  { do
+    { basis.SubSelection(parSel, currentBasis);
+      if (currentBasis.GetRankOfSpanOfElements()!=currentBasis.size)
+        continue;
+      this->owneR->theWeyl.RaiseToMaximallyDominant(currentBasis, true);
+      if (!theBases.Contains(currentBasis))
+        crash << "Error with some experimental code, things didn't quite work as expected" << crash;
+      int theIndex=theBases.GetIndex(currentBasis);
+      if (!Explored[theIndex])
+      { this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddOnTop
+        (this->theSubalgebras[theIndex]);
+        Explored[theIndex]=true;
+        if (i==0)
+          this->NumParabolic++;
+        else
+          this->NumPseudoParabolicNonParabolic++;
+      }
+    } while (parSel.IncrementReturnFalseIfPastLast());
+    basis.AddOnTop(this->owneR->theWeyl.RootSystem[0]);
+    parSel.init(this->owneR->GetRank()+1);
+  }
+  this->NumNonPseudoParabolic=this->theSubalgebras.size-this->NumParabolic-this->NumPseudoParabolicNonParabolic;
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    if (!Explored[i])
+      this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddOnTop(this->theSubalgebras[i]);
+}
+
 void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
 { MacroRegisterFunctionWithName("rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism");
   this->initOwnerMustBeNonZero();
   this->ComputeAllReductiveRootSAsInit();
+  HashedList<Vector<Rational> > tempVs;
+  this->flagPrintGAPinput= this->owneR->theWeyl.LoadGAPRootSystem(tempVs);
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   rootSubalgebra currentSA;
   currentSA.genK.size=0;
@@ -2313,6 +2361,8 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->SortDescendingOrderBySSRank();
   if (this->flagComputeConeCondition)
     this->ComputeKmodMultTables(this->theGlobalVariables);
+  if (this->flagPrintGAPinput)
+    this->ComputeParabolicPseudoParabolicNeitherOrder(this->theGlobalVariables);
 }
 
 void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed)
@@ -2588,6 +2638,7 @@ void rootSubalgebras::initOwnerMustBeNonZero()
   this->CheckInitialization();
   this->theSubalgebras.SetSize(0);
   this->owneR->theWeyl.ComputeRho(false);
+
 }
 
 int rootSubalgebras::GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input)
@@ -2598,7 +2649,7 @@ int rootSubalgebras::GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input)
   return -1;
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
 { this->theSubalgebras.AddOnTop(bufferSAs[RecursionDepth-1]);
   int currentAlgebraIndex=this->theSubalgebras.size-1;
   if (RecursionDepth>=bufferSAs.size)
@@ -2618,7 +2669,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
       if (indexSA==-1)
       { bufferSAs[RecursionDepth].ComputeAllOld();
         this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->theSubalgebras.size);
-        this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
+        this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
         this->theSubalgebras[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
       bufferSAs[RecursionDepth].genK.RemoveIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);
@@ -2718,8 +2769,12 @@ rootSubalgebras::rootSubalgebras()
   this->NumColsPerTableLatex=4;
   this->UpperLimitNumElementsWeyl=0;
   this->owneR=0;
+  this->flagPrintGAPinput=false;
   this->initForNilradicalGeneration();
   this->theGlobalVariables=0;
+  this->NumNonPseudoParabolic=0;
+  this->NumParabolic=0;
+  this->NumPseudoParabolicNonParabolic=0;
 }
 
 void rootSubalgebras::initForNilradicalGeneration()

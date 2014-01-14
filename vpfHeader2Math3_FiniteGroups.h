@@ -389,6 +389,7 @@ public:
   void GetSignRepresentation(WeylGroupRepresentation<Rational>& output);
   void GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
+  bool LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem)const;
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational>& inputHWsimpleCoords, GlobalVariables& theGlobalVariables);
   bool ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input);

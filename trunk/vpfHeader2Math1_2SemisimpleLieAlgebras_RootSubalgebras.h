@@ -257,6 +257,7 @@ public:
   int NumReductiveRootSAsToBeProcessedNilradicalsGeneration;
   List<int> CountersNilradicalsGeneration;
   List<int> NumConeConditionHoldsBySSpart;
+  List<rootSubalgebra> theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither;
   int RecursionDepthNilradicalsGeneration;
   Controller controllerLProhibitingRelations;
   int NumSubalgebrasProcessed;
@@ -264,6 +265,9 @@ public:
   int NumSubalgebrasCounted;
   int NumLinesPerTableLatex;
   int NumColsPerTableLatex;
+  int NumPseudoParabolicNonParabolic;
+  int NumParabolic;
+  int NumNonPseudoParabolic;
   int UpperLimitNumElementsWeyl;
   std::string ReportStringNonNilradicalParabolic;
   bool flagComputingLprohibitingWeights;
@@ -274,6 +278,7 @@ public:
   bool flagComputeConeCondition;
   bool flagLookingForMinimalRels;
   bool flagStoringNilradicals;
+  bool flagPrintGAPinput;
   SemisimpleLieAlgebra& GetOwnerSSalgebra()const;
   WeylGroup& GetOwnerWeyl()const;
   bool CheckInitialization()const;
@@ -290,11 +295,12 @@ public:
 
   void ComputeAllReductiveRootSAsInit();
   void ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
-  void GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
+  void ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords);
+  void ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariables* theGlobalVariables);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   int GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input);
   int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
-  void GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
+  void ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
   void SortDescendingOrderBySSRank();
   void WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);
   bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);

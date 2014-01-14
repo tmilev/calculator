@@ -892,11 +892,11 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   }
   mainTableHeaderStream << "\\begin{longtable}{c|";
   for (int i=0; i<inputSubgroups.size; i++)
-  { mainTableHeaderStream << "p{0.275cm}";
-    if (i==numParabolicClasses)
+  { if (i==numParabolicClasses)
       mainTableHeaderStream << "|";
     if (i==numParabolicClasses+numNonParabolicPseudoParabolic)
       mainTableHeaderStream << "|";
+    mainTableHeaderStream << "p{0.275cm}";
   }
   mainTableHeaderStream << "}\n<br>\n" << "\\caption{\\label{tableSignSignatureTable"
   << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
@@ -1233,7 +1233,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
     return output.SetError("Error extracting Lie algebra.", theCommands);
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=thePointer;
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(*theCommands.theGlobalVariableS, true, false);
+  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(*theCommands.theGlobalVariableS, true, false);
   std::stringstream out;
   MonomialMacdonald theGenerator;
   HashedList<MonomialMacdonald> theOrbit;

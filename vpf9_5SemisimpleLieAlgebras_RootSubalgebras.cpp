@@ -1462,6 +1462,18 @@ SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg()const
   return *this->ownEr->owneR;
 }
 
+bool rootSubalgebra::operator>(const rootSubalgebra& other)const //current implementation does not work as expected in types E_7 and for large D_n's
+{ if (this->theDynkinType>other.theDynkinType)
+    return true;
+  if (other.theDynkinType>this->theDynkinType)
+    return false;
+  if (this->theCentralizerDynkinType>other.theCentralizerDynkinType)
+    return true;
+  if (other.theCentralizerDynkinType>this->theCentralizerDynkinType)
+    return false;
+  return false;//<-this might need to be fixed.
+}
+
 void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter)
 { impliedSelections.SetSize(this->kModules.size+1);
   parabolicsCounter=0;
@@ -2268,31 +2280,29 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
   Selection parSel;
   parSel.init(this->owneR->GetRank());
   Vectors<Rational> basis, currentBasis;
-  basis.MakeEiBasis(this->owneR->GetRank());
-  HashedList<Vectors<Rational> > theBases;
-  for (int i=0; i<this->theSubalgebras.size; i++)
-  { currentBasis=this->theSubalgebras[i].SimpleBasisK;
-    this->owneR->theWeyl.RaiseToMaximallyDominant(currentBasis, true);
-    theBases.AddOnTop(currentBasis);
-  }
   List<bool> Explored;
   Explored.initFillInObject(this->theSubalgebras.size, false);
   this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.SetSize(0);
   this->NumNonPseudoParabolic=0;
   this->NumParabolic=0;
   this->NumPseudoParabolicNonParabolic=0;
+  rootSubalgebra currentSA;
+  currentSA.ownEr=this;
+  basis.MakeEiBasis(this->owneR->GetRank());
+  List<rootSubalgebra> currentList;
   for (int i=0; i<2; i++)
-  { do
+  { currentList.SetSize(0);
+    do
     { basis.SubSelection(parSel, currentBasis);
       if (currentBasis.GetRankOfSpanOfElements()!=currentBasis.size)
         continue;
-      this->owneR->theWeyl.RaiseToMaximallyDominant(currentBasis, true);
-      if (!theBases.Contains(currentBasis))
-        crash << "Error with some experimental code, things didn't quite work as expected" << crash;
-      int theIndex=theBases.GetIndex(currentBasis);
+      currentSA.genK=currentBasis;
+      currentSA.ComputeAllOld();
+      int theIndex= this->IndexSubalgebra(currentSA, *theGlobalVariables);
+      if (theIndex==-1)
+        crash << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << crash;
       if (!Explored[theIndex])
-      { this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddOnTop
-        (this->theSubalgebras[theIndex]);
+      { currentList.AddOnTop(this->theSubalgebras[theIndex]);
         Explored[theIndex]=true;
         if (i==0)
           this->NumParabolic++;
@@ -2300,13 +2310,18 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
           this->NumPseudoParabolicNonParabolic++;
       }
     } while (parSel.IncrementReturnFalseIfPastLast());
+    currentList.QuickSortAscending();
+    this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddListOnTop(currentList);
     basis.AddOnTop(this->owneR->theWeyl.RootSystem[0]);
     parSel.init(this->owneR->GetRank()+1);
   }
   this->NumNonPseudoParabolic=this->theSubalgebras.size-this->NumParabolic-this->NumPseudoParabolicNonParabolic;
+  currentList.SetSize(0);
   for (int i=0; i<this->theSubalgebras.size; i++)
     if (!Explored[i])
-      this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddOnTop(this->theSubalgebras[i]);
+      currentList.AddOnTop(this->theSubalgebras[i]);
+  currentList.QuickSortAscending();
+  this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.AddListOnTop(currentList);
 }
 
 void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
@@ -2314,6 +2329,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->initOwnerMustBeNonZero();
   this->ComputeAllReductiveRootSAsInit();
   HashedList<Vector<Rational> > tempVs;
+  this->flagPrintParabolicPseudoParabolicInfo=true;
   this->flagPrintGAPinput= this->owneR->theWeyl.LoadGAPRootSystem(tempVs);
   ProgressReport theReport1(this->theGlobalVariables), theReport2(this->theGlobalVariables);
   rootSubalgebra currentSA;
@@ -2361,7 +2377,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   this->SortDescendingOrderBySSRank();
   if (this->flagComputeConeCondition)
     this->ComputeKmodMultTables(this->theGlobalVariables);
-  if (this->flagPrintGAPinput)
+  if (this->flagPrintParabolicPseudoParabolicInfo)
     this->ComputeParabolicPseudoParabolicNeitherOrder(this->theGlobalVariables);
 }
 
@@ -2619,6 +2635,37 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
       out << "</tr>";
   }
   out << "</table>\n\n";
+  if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size>0)
+  { out <<  "<hr>" << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
+    << this->NumNonPseudoParabolic << " non pseudo-parabolic. ";
+    HashedList<Vector<Rational> > GAPPosRootSystem;
+    if (this->flagPrintGAPinput && this->owneR->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
+    { for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)
+      { rootSubalgebra& currentSA=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+        out << "<br>";
+        out << "[";
+        if (i<this->NumParabolic)
+          out << "\"parabolic\",";
+        else if (i<this->NumParabolic+this->NumPseudoParabolicNonParabolic)
+          out << "\"pseudoParabolicNonParabolic\",";
+        else
+          out << "\"nonPseudoParabolic\",";
+        out << "\"" << currentSA.theDynkinType.ToString() << "\", ";
+        out << "[";
+        for (int j=0; j<currentSA.SimpleBasisK.size; j++)
+        { int theIndex=GAPPosRootSystem.GetIndex(currentSA.SimpleBasisK[j]);
+          if (theIndex==-1)
+            theIndex=GAPPosRootSystem.GetIndex(-currentSA.SimpleBasisK[j]);
+          out << theIndex+1;
+          if (j!=currentSA.SimpleBasisK.size-1)
+            out << ", ";
+        }
+        out << "]]";
+        if (i!=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size-1)
+          out << ",";
+      }
+    }
+  }
   return out.str();
 }
 
@@ -2770,6 +2817,7 @@ rootSubalgebras::rootSubalgebras()
   this->UpperLimitNumElementsWeyl=0;
   this->owneR=0;
   this->flagPrintGAPinput=false;
+  this->flagPrintParabolicPseudoParabolicInfo=false;
   this->initForNilradicalGeneration();
   this->theGlobalVariables=0;
   this->NumNonPseudoParabolic=0;

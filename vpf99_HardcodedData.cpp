@@ -425,6 +425,37 @@ bool WeylGroup::LoadCharTable()
   return false;
 }
 
+bool LoadGAPRootSystemF1_4(HashedList<Vector<Rational> >& outputRootSystem)
+{ outputRootSystem.Clear();
+  Vector<Rational> theRoot;
+  theRoot.AssignString("[ 1, 0, 0, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 0, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 0, 1, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 0, 0, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 0, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 1, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 0, 1, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 1, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 2, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 1, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 2, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 1, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 2, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 2, 0 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 2, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 0, 1, 2, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 2, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 1, 2, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 3, 1 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 2, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 3, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 2, 4, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 1, 3, 4, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  theRoot.AssignString("[ 2, 3, 4, 2 ]"); outputRootSystem.AddOnTop(theRoot);
+  return true;
+}
+
+
 bool LoadGAPRootSystemE1_6(HashedList<Vector<Rational> >& outputRootSystem)
 { outputRootSystem.Clear();
   Vector<Rational> theRoot;
@@ -664,6 +695,8 @@ bool LoadGAPRootSystemE1_8(HashedList<Vector<Rational> >& outputRootSystem)
 
 bool WeylGroup::LoadGAPRootSystem(HashedList<Vector<Rational> >& outputPositiveRootSystem)const
 { bool result=false;
+  if (this->theDynkinType.IsOfSimpleType('F', 4))
+    result=LoadGAPRootSystemF1_4(outputPositiveRootSystem);
   if (this->theDynkinType.IsOfSimpleType('E', 8))
     result=LoadGAPRootSystemE1_8(outputPositiveRootSystem);
   if (this->theDynkinType.IsOfSimpleType('E', 7))

@@ -233,6 +233,7 @@ public:
   bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
   void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
   void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);
+  bool operator>(const rootSubalgebra& other)const;
 };
 
 class rootSubalgebras
@@ -279,6 +280,7 @@ public:
   bool flagLookingForMinimalRels;
   bool flagStoringNilradicals;
   bool flagPrintGAPinput;
+  bool flagPrintParabolicPseudoParabolicInfo;
   SemisimpleLieAlgebra& GetOwnerSSalgebra()const;
   WeylGroup& GetOwnerWeyl()const;
   bool CheckInitialization()const;

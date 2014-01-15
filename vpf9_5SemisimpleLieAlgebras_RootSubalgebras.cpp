@@ -105,6 +105,13 @@ void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
+void rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly()
+{ MacroRegisterFunctionWithName("rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly");
+  this->moduleDecompoAmbientAlgebraDimensionsOnly.MakeZero();
+  for (int i=0; i<this->kModules.size; i++)
+    this->moduleDecompoAmbientAlgebraDimensionsOnly.AddMonomial(MonomialVector(this->kModules[i].size-1), 1);
+}
+
 void rootSubalgebra::ComputeAllOld()
 { this->PosRootsKConnectedComponents.size=0;
   this->theKComponentRanks.size=0;
@@ -112,10 +119,14 @@ void rootSubalgebra::ComputeAllOld()
   this->SimpleBasisK=(this->genK);
   this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisK, this->GetAmbientWeyl().RootSystem);
   this->ComputeKModules();
+  if (this->SimpleBasisK.size==0 && this->kModules.size!=this->ownEr->owneR->GetNumGenerators())
+    crash << "Cartan root subalgebra not computed correctly. " << crash;
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
   this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
+  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
+  this->CheckRankInequality();
 }
 
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
@@ -136,9 +147,12 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-//  std::cout << "<hr><hr><hr><hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
+  std::cout << "<hr><hr><hr><hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
+  if (this->theDynkinType==0)
+    if (this->theCentralizerDynkinType.GetRank()+this->theDynkinType.GetRank()!=this->ownEr->owneR->GetRank())
+      crash << "Centralizer of zero Dynkin is not computed correctly. " << crash;
 }
 
 void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
@@ -576,10 +590,17 @@ bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, roo
   for (int i=0; i<this->kModules.size; i++)
     if (!this->NilradicalKmods.selected[i])
       Ksingular.AddOnTop(this->HighestWeightsGmodK.TheObjects[i]);
-  if ( !this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, NilradicalRoots, Ksingular, doExtractRelations))
+  if (!this->ConeConditionHolds(theGlobalVariables, owner, indexInOwner, NilradicalRoots, Ksingular, doExtractRelations))
     return false;
   else
     return true;
+}
+
+bool rootSubalgebra::CheckRankInequality()const
+{ if ((this->theDynkinType.GetRank()+this->theCentralizerDynkinType.GetRank())*2<this->ownEr->owneR->GetRank())
+    crash << "2*(Centralizer rank + rank) < ambient rank, which is mathematically impossible. There was a programming error. "
+    << crash;
+  return true;
 }
 
 bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Rational>& nilradicalRoots)
@@ -1911,6 +1932,8 @@ bool rootSubalgebra::ComputeEssentials()
   this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
+  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
+  this->CheckRankInequality();
   if (this->ownEr->theGlobalVariables!=0)
   { reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
     << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
@@ -2298,7 +2321,7 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
         continue;
       currentSA.genK=currentBasis;
       currentSA.ComputeAllOld();
-      int theIndex= this->IndexSubalgebra(currentSA, *theGlobalVariables);
+      int theIndex= this->GetIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
       if (theIndex==-1)
         crash << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << crash;
       if (!Explored[theIndex])
@@ -2686,6 +2709,19 @@ void rootSubalgebras::initOwnerMustBeNonZero()
   this->theSubalgebras.SetSize(0);
   this->owneR->theWeyl.ComputeRho(false);
 
+}
+
+int rootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSubalgebra& theSA)
+{ MacroRegisterFunctionWithName("rootSubalgebras::GetIndexUpToEquivalenceByDiagramsAndDimensions");
+  int result=-1;
+  for (int i=0; i<this->theSubalgebras.size; i++)
+    if (this->theSubalgebras[i].IsEquivalentToByDiagramsAndDimensions(theSA))
+    { if (result!=-1)
+        crash << "Programming error: experimental code internal check failed. " << crash;
+      result=i;
+
+    }
+  return result;
 }
 
 int rootSubalgebras::GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input)
@@ -3130,24 +3166,22 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
 }
 
 int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
-{ int result=-1;
-  for (int j=0; j<this->theSubalgebras.size; j++)
+{ for (int j=0; j<this->theSubalgebras.size; j++)
   { rootSubalgebra& right=this->theSubalgebras[j];
     if (input.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) ==
         right.theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]) &&
         input.theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])==
         right.theCentralizerDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]))
-    { result=j;
-      if (this->GetOwnerWeyl().IsOfSimpleType('E', 7))
+    { if (!this->GetOwnerWeyl().IsOfSimpleType('E', 7))
+        return j;
+      else
       { input.ComputeAllOld();
-        if(!input.GenerateIsomorphismsPreservingBorel(right, theGlobalVariables, 0, false))
-          result=-1;
+        if(input.GenerateIsomorphismsPreservingBorel(right, theGlobalVariables, 0, false))
+          return j;
       }
-      if (result!=-1)
-        return result;
     }
   }
-  return result;
+  return -1;
 }
 
 bool rootSubalgebras::IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
@@ -3170,6 +3204,9 @@ void rootSubalgebra::ComputeRootsOfK()
   this->PositiveRootsK=this->AllRootsK;
   for (int i=0; i<this->PositiveRootsK.size; i++)
     this->AllRootsK.AddOnTop(-this->PositiveRootsK[i]);
+  if (this->SimpleBasisK.size==0)
+    if (this->AllRootsK.size!=0)
+      crash << "Internal check went bad. " << crash;
 }
 
 void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Rational>& coeffs, Vectors<Rational>& theRoots, bool EpsilonForm)

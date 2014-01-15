@@ -489,6 +489,19 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return -1;
 }
 
+bool rootSubalgebra::IsEquivalentToByDiagramsAndDimensions
+(const rootSubalgebra& other)const
+{ std::cout << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
+  << this->theCentralizerDynkinType.ToString() << " with mod decompo "
+  << this->moduleDecompoAmbientAlgebraDimensionsOnly.ToString()
+  << " to " << other.theDynkinType.ToString() << " centralized by "
+  << other.theCentralizerDynkinType.ToString() << " with mod decompo "
+  << other.moduleDecompoAmbientAlgebraDimensionsOnly.ToString();
+
+  return this->moduleDecompoAmbientAlgebraDimensionsOnly==other.moduleDecompoAmbientAlgebraDimensionsOnly
+  && this->theDynkinType==other.theDynkinType && this->theCentralizerDynkinType==other.theCentralizerDynkinType;
+}
+
 void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD& outputAutomorphisms)
 { this->ComputeAllOld();
   this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);

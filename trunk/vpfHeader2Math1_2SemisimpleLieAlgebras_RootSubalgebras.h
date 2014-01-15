@@ -153,6 +153,7 @@ public:
   List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
+  VectorSparse<Rational> moduleDecompoAmbientAlgebraDimensionsOnly;
 //  int indexInOwners;
   rootSubalgebra();
   ~rootSubalgebra()
@@ -168,6 +169,7 @@ public:
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetCoxeterElement(Matrix<Rational>& output);
   void ComputePotentialExtensions();
+  bool IsEquivalentToByDiagramsAndDimensions(const rootSubalgebra& other)const;
   void ComputeOuterSAautosExtendingToAmbientAutosGenerators();
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
@@ -191,6 +193,7 @@ public:
   bool IsARootOrZero(const Vector<Rational>& input);
   void KEnumerationsToLinComb(GlobalVariables& theGlobalVariables);
   void DoKRootsEnumeration(GlobalVariables& theGlobalVariables);
+  void ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
   void ComputeCentralizerFromKModulesAndSortKModules();
   void MatrixToRelation(coneRelation& output, Matrix<Rational>& matA, Matrix<Rational>& matX, int theDimension, Vectors<Rational>& NilradicalRoots);
   void DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables);
@@ -216,6 +219,7 @@ public:
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
+  bool CheckRankInequality()const;
   bool ComputeEssentials();
   void ComputeAllOld();
   void ComputeRootsOfK();
@@ -301,6 +305,7 @@ public:
   void ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariables* theGlobalVariables);
   bool IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   int GetIndexSubalgebraIsomorphicTo(rootSubalgebra& input);
+  int GetIndexUpToEquivalenceByDiagramsAndDimensions(const rootSubalgebra& theSA);
   int IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables);
   void ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(List<rootSubalgebra>& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables);
   void SortDescendingOrderBySSRank();

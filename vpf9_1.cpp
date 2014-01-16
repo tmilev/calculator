@@ -275,6 +275,11 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rati
 
 //  std::cout << "...after the horrible sort, computing again...";
   this->ComputeDynkinStrings(theBilinearForm);
+  DynkinType tempType;
+  this->GetDynkinType(tempType);
+  if (tempType.IsEqualToZero() && simpleBasisInput.size!=0)
+    crash << "Dynkin type of zero but the roots generating the type are: " << simpleBasisInput.ToString() << crash;
+
 //  std::cout << "...the very final complete absolute computation is done!";
 }
 

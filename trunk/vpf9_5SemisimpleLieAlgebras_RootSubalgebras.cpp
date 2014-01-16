@@ -113,19 +113,23 @@ void rootSubalgebra::ComputeModuleDecompoAmbientAlgebraDimensionsOnly()
 }
 
 void rootSubalgebra::ComputeAllOld()
-{ this->PosRootsKConnectedComponents.size=0;
+{ MacroRegisterFunctionWithName("rootSubalgebra::ComputeAllOld");
+  this->PosRootsKConnectedComponents.size=0;
   this->theKComponentRanks.size=0;
   this->theKEnumerations.size=0;
   this->SimpleBasisK=(this->genK);
-  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisK, this->GetAmbientWeyl().RootSystem);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
+  this->theDynkinDiagram.GetDynkinType(this->theDynkinType);
+  if (this->SimpleBasisK.size!=0)
+    if (this->theDynkinType.IsEqualToZero())
+      crash << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: " << this->theDynkinType.ToString() << crash;
   this->ComputeKModules();
-  if (this->SimpleBasisK.size==0 && this->kModules.size!=this->ownEr->owneR->GetNumGenerators())
-    crash << "Cartan root subalgebra not computed correctly. " << crash;
+  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
+  if (this->SimpleBasisK.size==0 && this->kModules.size!=this->ownEr->owneR->GetNumPosRoots()*2)
+    crash << "Cartan root subalgebra not computed correctly, NumPosRoots: " << this->ownEr->owneR->GetNumPosRoots()
+    << " num k modules: " << this->kModules.size << crash;
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
-  this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
   this->CheckRankInequality();
 }
 
@@ -137,6 +141,12 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
   this->SimpleBasisCentralizerRoots.size=0;
   this->SimpleBasisCentralizerRoots.ReservE(this->kModules.size);
   int counter=0;
+  if (this->SimpleBasisK.size==0)
+  { if (this->kModules.size!=this->ownEr->owneR->theWeyl.RootSystem.size)
+      crash << " bad number of modules!" << crash;
+  } else
+    if (this->theDynkinType.IsEqualToZero())
+      crash << "Simple basis is " << this->SimpleBasisK.ToString() << " but Dynkin type is: " << this->theDynkinType.ToString() << crash;
   for (int i=0; i<this->kModules.size; i++)
     if (this->kModules[i].size==1)
     { this->kModules.SwapTwoIndices(counter, i);
@@ -147,12 +157,15 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-  std::cout << "<hr><hr><hr><hr>Computing centralizer diagram from " << this->SimpleBasisCentralizerRoots.ToString();
+  std::cout << "<br>Module dimension vector: " << this->moduleDecompoAmbientAlgebraDimensionsOnly
+  << ". Roots centralizing " << this->theDynkinType.ToString()
+  << ": " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
-  if (this->theDynkinType==0)
+  if (this->theDynkinType.IsEqualToZero())
     if (this->theCentralizerDynkinType.GetRank()+this->theDynkinType.GetRank()!=this->ownEr->owneR->GetRank())
-      crash << "Centralizer of zero Dynkin is not computed correctly. " << crash;
+      crash << "Centralizer of " << this->theDynkinType.ToString() << " computed to be " << this->theCentralizerDynkinType.ToString()
+      << " which is impossible. " << crash;
 }
 
 void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest)
@@ -545,6 +558,9 @@ void rootSubalgebra::ComputeKModules()
       Explored[ambientRootSystem.GetIndex(currentMod[k])]=true;
     }
   }
+  if (this->SimpleBasisK.size==0)
+    if (this->kModules.size!=this->GetOwnerSSalg().theWeyl.RootSystem.size)
+      crash << "k-modules size is " << this->kModules.size << ", not correct. " << crash;
 }
 
 int rootSubalgebra::NumRootsInNilradical()
@@ -2321,6 +2337,9 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
         continue;
       currentSA.genK=currentBasis;
       currentSA.ComputeAllOld();
+      if (currentBasis.size!=0)
+        if (currentSA.theDynkinType.ToString()=="0")
+          crash << "Subalgebra dynkin type computed incorrectly" << crash;
       int theIndex= this->GetIndexUpToEquivalenceByDiagramsAndDimensions(currentSA);
       if (theIndex==-1)
         crash << "Experimental code has failed an internal check on currentSA: " << currentSA.ToString() << crash;

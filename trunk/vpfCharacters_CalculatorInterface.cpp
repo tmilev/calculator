@@ -866,6 +866,16 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   std::stringstream mainTableStream, mainTableHeaderStream;
   mainTableStream << "Irrep Label";
   int numParabolicClasses=0, numNonParabolicPseudoParabolic=0, numNonPseudoParabolic=0;
+
+  bool hasRepeatingSigs=false;
+  for (int i=0; i<inputSubgroups.size && !hasRepeatingSigs; i++)
+    for (int j=i+1; j<inputSubgroups.size && !hasRepeatingSigs; j++)
+      if (inputSubgroups[i].tauSignature==inputSubgroups[j].tauSignature)
+        hasRepeatingSigs=true;
+  if (hasRepeatingSigs)
+    out << "<hr><b>There are repeating sign signatures. </b><hr>";
+  else
+    out << "<hr>No repeating sign signatures. <hr>";
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
     { SubgroupRootReflections& currentSG=inputSubgroups[i];
@@ -879,7 +889,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
         numParabolicClasses++;
         mainTableStream << "&$\\mathfrak{p}_{" << numParabolicClasses << "}$";
       }
-      if (currentSG.flagIsExtendedParabolic)
+      if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic)
       { //mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << invertedSel.ToString() << "}$";
         numNonParabolicPseudoParabolic++;
         mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << numNonParabolicPseudoParabolic << "}$";
@@ -1060,9 +1070,6 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
       }
     }
   }
-  out << "<hr>";
-  if (finalSubGroups.size!=allRootSubgroups.size)
-    out << "<b>There are root subsystems with same tau signature!" << "</b><hr>";
   out << theWeyl.ToStringSignSignatureRootSubsystem(finalSubGroups);
   return output.AssignValue(out.str(), theCommands);
 }

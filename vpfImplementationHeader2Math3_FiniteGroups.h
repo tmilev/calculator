@@ -1752,7 +1752,7 @@ std::string ClassFunction<someFiniteGroup, coefficient>::ToString(FormatExpressi
   }
   out << ")";
   if (this->Norm().ToString()!="1")
-  { out << "]";
+  { out << "[";
     out << this->Norm();
     out << "]";
   }

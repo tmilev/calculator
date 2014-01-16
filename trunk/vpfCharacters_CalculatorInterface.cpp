@@ -873,9 +873,9 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
       if (inputSubgroups[i].tauSignature==inputSubgroups[j].tauSignature)
         hasRepeatingSigs=true;
   if (hasRepeatingSigs)
-    out << "<hr><b>There are repeating sign signatures. </b><hr>";
+    out << "<hr><b>There are repeating extended sign signatures. </b><hr>";
   else
-    out << "<hr>No repeating sign signatures. <hr>";
+    out << "<hr>No repeating extended sign signatures. <hr>";
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
     { SubgroupRootReflections& currentSG=inputSubgroups[i];
@@ -941,7 +941,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   if (hasRepeatingClippedTauSigs)
     out << "<b>Clipped tau signatures repeat!!!</b>";
   else
-    out << "No repeating clipped tau signatures. ";
+    out << "No repeating pseudo tau signatures. ";
   for (int s=0; s<2; s++)
   { out << "<table style=\"white-space: nowrap;\" border=\"1\">";
     Selection parSelrootsAreOuttaLevi;

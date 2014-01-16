@@ -84,7 +84,7 @@ std::string JSData::GetString(const std::string& json, int begin, int end, int* 
 
 int JSData::AcceptString(const std::string& json, int begin)
 { this->type = JSSTR;
-  // i don't expect this to be bigger then 2147482647 but smaller then 4294967296
+  // i don't expect this to be bigger then 2147482647 but smaller than 4294967296
   // the compiler whines about comparison between int i and json.size()
   unsigned int i = begin+1;
   for(; i<json.size(); i++)
@@ -108,10 +108,18 @@ void JSData::ExtractScalar(const std::string& json, int begin, int end)
 
 int JSData::AcceptList(const std::string& json, int begin)
 { this->type = JSLIST;
-  unsigned int i=begin+1;
-  unsigned int curobjbgn = i;
+  unsigned int curobjbgn = begin+1;
+  unsigned int i=curobjbgn;
   bool havecurobj = false;
-  for(; i<json.size(); i++)
+  this->list.SetSize(0);
+  //this code needs to be fixed. Appears to be too complicated.
+  //check for empty list first: a dirty hack but no time atm. This functino needs a rewrite.
+  for (i=curobjbgn; i<json.size(); i++)
+    if (json[i]==']')
+      return i;
+    else if (json[i]!=' ')
+      break;
+  for(i=curobjbgn; i<json.size(); i++)
   { if(json[i] == ']')
     { if(!havecurobj)
       { // hack: should instead test in extractScalar for any type of reasonable
@@ -225,9 +233,11 @@ void JSData::readfile(const char* filename)
   std::string json;
   json.resize(f.st_size);
   ifp.read(&json[0], json.size());
+  this->readstring(json);
+}
 
-  unsigned int i=0;
-  for(; i<json.size(); i++)
+void JSData::readstring(const std::string& json)
+{ for(unsigned int i=0; i<json.size(); i++)
   { if(json[i] == '"')
     { this->AcceptString(json,0);
       return;

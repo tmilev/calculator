@@ -991,8 +991,8 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
-//    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
-//    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
+    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
+    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
     if (!this->tauSignature[i].IsSmallInteger())
       crash << " Tau signature is not integral, impossible! " << crash ;
   }
@@ -1159,7 +1159,7 @@ void WeylGroup::GetSignSignatureParabolics(List<SubgroupRootReflections>& output
 }
 
 void WeylGroup::GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureParabolics");
+{ MacroRegisterFunctionWithName("WeylGroup::GetSignSignatureExtendedParabolics");
 //  this->ComputeIrreducibleRepresentationsThomasVersion();
   this->ComputeOrLoadCharacterTable(theGlobalVariables);
   ClassFunction<WeylGroup::WeylGroupBase, Rational> signRep;

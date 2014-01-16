@@ -248,7 +248,7 @@ void ElementWeylGroup<templateWeylGroup>::GetCycleStructure
       { currentCycleSize++;
         Explored[theRootSystem.GetIndex(currentRoot)]=true;
       }
-      outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize), 1);
+      outputIndexIsCycleSizeCoordinateIsCycleMult.AddMonomial(MonomialVector(currentCycleSize-1), 1);
     }
 }
 

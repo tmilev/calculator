@@ -359,7 +359,7 @@ public:
    ;
 
   bool LoadConjugacyClassesHelper();
-
+  bool LoadSignSignatures(List<SubgroupRootReflections>& outputSubgroups);
   void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
   void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
 
@@ -824,6 +824,9 @@ public:
   LargeInt GetGroupSizeByFormula()const
   { return this->theDynkinType.GetWeylGroupSizeByFormula();
   }
+  void MakeFromHardCodedStrings
+  (WeylGroup& G, const std::string& inputParabolicity, const std::string& inputType,
+   const std::string& inputIndicesGeneratingRoots, const std::string& inputTauSignature);
   void ComputeDynkinType();
   void ComputeCCSizesRepresentativesPreimages(GlobalVariables* theGlobalVariables);
   SubgroupRootReflections()

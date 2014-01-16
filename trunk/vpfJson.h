@@ -4,7 +4,7 @@
 #define vpfJson_h_already_included
 
 #include "vpfHeader2Math01_LargeIntArithmetic.h"
-static ProjectInformationInstance vpfJson(__FILE__, "Partial implementation of JSON, work in progress.");
+static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, work in progress.");
 
 
 /*The best kind of misleading documentation is aspirational
@@ -63,6 +63,7 @@ public:
   template <typename somestream>
   somestream& IntoStream(somestream& out) const;
   void readfile(const char* filename);
+  void readstring(const std::string& json);
   void writefile(const char* filename) const;
 };
 

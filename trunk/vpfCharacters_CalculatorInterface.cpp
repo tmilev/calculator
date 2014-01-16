@@ -874,9 +874,6 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
         numNonPseudoParabolic++;
         continue;
       }
-      Selection invertedSel;
-      invertedSel=currentSG.simpleRootsInLeviParabolic;
-      invertedSel.InvertSelection();
       if (currentSG.flagIsParabolic)
       { //mainTableStream << "&$\\mathfrak{p}_{" << invertedSel.ToString() << "}$";
         numParabolicClasses++;
@@ -1038,26 +1035,28 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
   }
   std::stringstream out;
   List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
-  theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
-  theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
-  theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
-  List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
-  finalSubGroups.ReservE(allRootSubgroups.size);
-  Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
-  for (int j=0; j<3; j++)
-  { List<SubgroupRootReflections>* currentSGs=0;
-    if (j==0)
-      currentSGs=&parabolicSubgroupS;
-    if (j==1)
-      currentSGs=&extendedParabolicSubgroups;
-    if (j==2)
-      currentSGs=&allRootSubgroups;
-    for (int i=0; i<currentSGs->size; i++)
-    { currentTauSig.Object1=(*currentSGs)[i].theDynkinType.ToString();
-      currentTauSig.Object2=(*currentSGs)[i].tauSignature;
-      if (!tauSigPairs.Contains(currentTauSig))
-      { tauSigPairs.AddOnTop(currentTauSig);
-        finalSubGroups.AddOnTop((*currentSGs)[i]);
+  if (!theWeyl.LoadSignSignatures(finalSubGroups))
+  { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
+    theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
+    theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);
+    List<Pair<std::string, List<Rational>, MathRoutines::hashString> > tauSigPairs;
+    finalSubGroups.ReservE(allRootSubgroups.size);
+    Pair<std::string, List<Rational>, MathRoutines::hashString> currentTauSig;
+    for (int j=0; j<3; j++)
+    { List<SubgroupRootReflections>* currentSGs=0;
+      if (j==0)
+        currentSGs=&parabolicSubgroupS;
+      if (j==1)
+        currentSGs=&extendedParabolicSubgroups;
+      if (j==2)
+        currentSGs=&allRootSubgroups;
+      for (int i=0; i<currentSGs->size; i++)
+      { currentTauSig.Object1=(*currentSGs)[i].theDynkinType.ToString();
+        currentTauSig.Object2=(*currentSGs)[i].tauSignature;
+        if (!tauSigPairs.Contains(currentTauSig))
+        { tauSigPairs.AddOnTop(currentTauSig);
+          finalSubGroups.AddOnTop((*currentSGs)[i]);
+        }
       }
     }
   }

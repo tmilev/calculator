@@ -359,7 +359,7 @@ public:
    ;
 
   bool LoadConjugacyClassesHelper();
-  bool LoadSignSignatures(List<SubgroupRootReflections>& outputSubgroups);
+  bool LoadSignSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
   void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
   void ComputeOrLoadConjugacyClasses(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
 

@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 //  civilizedInput="WeylGroupConjugacyClassesRepresentatives a_2";
 //  civilizedInput="WeylGroupTauSignatures{}(b_2);";
 //  civilizedInput="WeylGroupTauSignatures{}(g_2);";
-//  civilizedInput="WeylGroupTauSignatures{}(f_4);";
+//  civilizedInput="WeylGroupTauSignatures{}(e_7);";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

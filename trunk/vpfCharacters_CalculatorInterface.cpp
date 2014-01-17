@@ -1039,13 +1039,13 @@ bool CalculatorFunctionsWeylGroup::innerSignSignatureRootSubsystems(Calculator& 
   if (!output.IsOfType<WeylGroup>())
     return false;
   WeylGroup& theWeyl=output.GetValueNonConst<WeylGroup>();
-  if (theWeyl.GetDim()>6)
-  { theCommands.Comments << "<hr>Computing sign signatures restricted up to rank 6.";
+  if (theWeyl.GetDim()>8)
+  { theCommands.Comments << "<hr>Computing sign signatures restricted up to rank 8.";
     return false;
   }
   std::stringstream out;
   List<SubgroupRootReflections> parabolicSubgroupS, extendedParabolicSubgroups, allRootSubgroups, finalSubGroups;
-  if (!theWeyl.LoadSignSignatures(finalSubGroups))
+  if (!theWeyl.LoadSignSignatures(finalSubGroups, theCommands.theGlobalVariableS))
   { theWeyl.GetSignSignatureParabolics(parabolicSubgroupS, theCommands.theGlobalVariableS);
     theWeyl.GetSignSignatureExtendedParabolics(extendedParabolicSubgroups, theCommands.theGlobalVariableS);
     theWeyl.GetSignSignatureAllRootSubsystems(allRootSubgroups, theCommands.theGlobalVariableS);

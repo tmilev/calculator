@@ -863,109 +863,161 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   formatSupressUpperIndexOne.flagSupressDynkinIndexOne=true;
   DynkinSimpleType simpleType;
 
-  std::stringstream mainTableStream, mainTableHeaderStream;
-  mainTableStream << "Irrep Label";
+  std::stringstream mainTableStream;
   int numParabolicClasses=0, numNonParabolicPseudoParabolic=0, numNonPseudoParabolic=0;
-  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
-  { for (int i=0; i<inputSubgroups.size; i++)
-    { SubgroupRootReflections& currentSG=inputSubgroups[i];
-      if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
-      { mainTableStream << "&-";
-        numNonPseudoParabolic++;
-        continue;
-      }
-      if (currentSG.flagIsParabolic)
-      { //mainTableStream << "&$\\mathfrak{p}_{" << invertedSel.ToString() << "}$";
-        numParabolicClasses++;
-        mainTableStream << "&$\\mathfrak{p}_{" << numParabolicClasses << "}$";
-      }
-      if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic)
-      { //mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << invertedSel.ToString() << "}$";
-        numNonParabolicPseudoParabolic++;
-        mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << numNonParabolicPseudoParabolic << "}$";
-      }
+  for (int i=0; i<inputSubgroups.size; i++)
+  { SubgroupRootReflections& currentSG=inputSubgroups[i];
+    if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
+    { numNonPseudoParabolic++;
+      continue;
     }
-    mainTableStream << "\\\\\n<br>\n";
+    if (currentSG.flagIsParabolic)
+      numParabolicClasses++;
+    if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic)
+      numNonParabolicPseudoParabolic++;
   }
+
   //check for repeating signatures
-  List<List<Rational> > clippedSignSig, signSig;
-  signSig.SetSize(this->ConjugacyClassCount());
-  clippedSignSig.SetSize(this->ConjugacyClassCount());
+  List<List<Rational> > pseudoSignSig, fullSignSig, parabolicSignSig;
+  fullSignSig.SetSize(this->ConjugacyClassCount());
+  pseudoSignSig.SetSize(this->ConjugacyClassCount());
+  parabolicSignSig.SetSize(this->ConjugacyClassCount());
   for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { signSig[i].SetSize(inputSubgroups.size);
-    clippedSignSig[i].SetSize(numParabolicClasses+numNonParabolicPseudoParabolic);
+  { fullSignSig[i].SetSize(inputSubgroups.size);
+    pseudoSignSig[i].SetSize(numParabolicClasses+numNonParabolicPseudoParabolic);
+    parabolicSignSig[i].SetSize(numParabolicClasses);
     for (int j=0; j<inputSubgroups.size; j++)
-    { signSig[i][j]= (inputSubgroups[j].tauSignature[i]==0 ? 0 : 1 );
+    { fullSignSig[i][j]= (inputSubgroups[j].tauSignature[i]==0 ? 0 : 1 );
       if (j<numParabolicClasses+numNonParabolicPseudoParabolic)
-        clippedSignSig[i][j]=signSig[i][j];
+        pseudoSignSig[i][j]=fullSignSig[i][j];
+      if (j<numParabolicClasses)
+        parabolicSignSig[i][j]=fullSignSig[i][j];
     }
   }
-  bool hasRepeatingExtendedSigs=false, hasRepeatingPseudoParabolicSigs=false;
-  for (int i=0; i<signSig.size && !hasRepeatingExtendedSigs; i++)
-    for (int j=i+1; j<signSig.size && !hasRepeatingExtendedSigs; j++)
-      if (signSig[i]==signSig[j])
-        hasRepeatingExtendedSigs=true;
-  for (int i=0; i<clippedSignSig.size && !hasRepeatingPseudoParabolicSigs; i++)
-    for (int j=i+1; j<clippedSignSig.size && !hasRepeatingPseudoParabolicSigs; j++)
-      if (clippedSignSig[i]==clippedSignSig[j])
+  bool hasRepeatingFullSigs=false;
+  bool hasRepeatingPseudoParabolicSigs=false;
+  bool hasRepeatingParSigs=false;
+  for (int i=0; i<fullSignSig.size && !hasRepeatingFullSigs; i++)
+    for (int j=i+1; j<fullSignSig.size && !hasRepeatingFullSigs; j++)
+      if (fullSignSig[i]==fullSignSig[j])
+        hasRepeatingFullSigs=true;
+  for (int i=0; i<pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; i++)
+    for (int j=i+1; j<pseudoSignSig.size && !hasRepeatingPseudoParabolicSigs; j++)
+      if (pseudoSignSig[i]==pseudoSignSig[j])
         hasRepeatingPseudoParabolicSigs=true;
+  for (int i=0; i<parabolicSignSig.size && !hasRepeatingParSigs; i++)
+    for (int j=i+1; j<parabolicSignSig.size && !hasRepeatingParSigs; j++)
+      if (parabolicSignSig[i]==parabolicSignSig[j])
+        hasRepeatingParSigs=true;
+  if (hasRepeatingParSigs)
+    out << "<hr><b>There are repeating parabolic sign signatures. </b><hr>";
+  else
+    out << "<hr>No repeating parabolic sign signatures. <hr>";
   if (hasRepeatingPseudoParabolicSigs)
     out << "<hr><b>There are repeating pseudo-parabolic sign signatures. </b><hr>";
   else
     out << "<hr>No repeating pseudo-parabolic sign signatures. <hr>";
-  if (hasRepeatingPseudoParabolicSigs)
-  { HashedList<List<Rational> > clippedSignSigsNoRepetition;
+  if (hasRepeatingFullSigs)
+    out << "<hr><b>There are repeating extended sign signatures.</b> <hr>";
+  else
+    out << "<hr>No repeating extended sign signatures. <hr>";
+  if (hasRepeatingParSigs)
+  { HashedList<List<Rational> > parSignSigsNoRepetition;
     List<List<std::string> > irrepsPerSignature;
-    clippedSignSigsNoRepetition.AddOnTopNoRepetition(clippedSignSig);
-    irrepsPerSignature.SetSize(clippedSignSigsNoRepetition.size);
-    for (int i=0; i<clippedSignSig.size; i++)
-      irrepsPerSignature[clippedSignSigsNoRepetition.GetIndex(clippedSignSig[i])].AddOnTop(this->irrepsCarterLabels[i]);
-    mainTableHeaderStream << "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. ";
+    parSignSigsNoRepetition.AddOnTopNoRepetition(parabolicSignSig);
+    irrepsPerSignature.SetSize(parSignSigsNoRepetition.size);
+    for (int i=0; i<parabolicSignSig.size; i++)
+      irrepsPerSignature[parSignSigsNoRepetition.GetIndex(parabolicSignSig[i])].AddOnTop
+      (this->irrepsCarterLabels[i]);
+    mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same sign signature. ";
     for (int i=0; i<irrepsPerSignature.size; i++)
       if (irrepsPerSignature[i].size>1)
-      { mainTableHeaderStream << "$(";
+      { mainTableStream << "$(";
         for (int j=0; j<irrepsPerSignature[i].size; j++)
-        { mainTableHeaderStream << irrepsPerSignature[i][j];
+        { mainTableStream << irrepsPerSignature[i][j];
           if (j!=irrepsPerSignature[i].size-1)
-            mainTableHeaderStream << ", ";
+            mainTableStream << ", ";
         }
-        mainTableHeaderStream << ")$ ";
+        mainTableStream << ")$ ";
       }
-    mainTableHeaderStream << "\n<br>\n";
-  } else
-    out << "<hr>No repeating extended sign signatures. <hr>";
-  //end of check for repeating signatures
-  mainTableHeaderStream << "\n<br>\n\\begin{longtable}{c|";
-  for (int i=0; i<inputSubgroups.size; i++)
-  { if (i==numParabolicClasses)
-      mainTableHeaderStream << "|";
-    if (i==numParabolicClasses+numNonParabolicPseudoParabolic)
-      mainTableHeaderStream << "|";
-    mainTableHeaderStream << "p{0.275cm}";
-  }
-  mainTableHeaderStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
-  << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
-  << "}Multiplicity of the sign representation over the classes of root subgroups. "
-  << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
-  << " pseudo-parabolic subgroup classes that are not parabolic, and "
-  << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n"
-  << "}\\\\ ";
-  if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
-    for (int i=0; i<inputSubgroups.size; i++)
-      mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
-  else
-    for (int i=0; i<inputSubgroups.size; i++)
-      mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
-  for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { mainTableStream << "\\\\";
-    if (i==0)
-      mainTableStream << "\\hline";
-    mainTableStream << "\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
-    for (int j=0; j<inputSubgroups.size; j++)
-      mainTableStream << "&" << inputSubgroups[j].tauSignature[i].ToString();
+    mainTableStream << "\n<br>\n";
+  } //end of check for repeating signatures
+  if (hasRepeatingPseudoParabolicSigs)
+  { HashedList<List<Rational> > pseudoSigsNoRepetition;
+    List<List<std::string> > irrepsPerSignature;
+    pseudoSigsNoRepetition.AddOnTopNoRepetition(pseudoSignSig);
+    irrepsPerSignature.SetSize(pseudoSigsNoRepetition.size);
+    for (int i=0; i<pseudoSignSig.size; i++)
+      irrepsPerSignature[pseudoSigsNoRepetition.GetIndex(pseudoSignSig[i])].AddOnTop(this->irrepsCarterLabels[i]);
+    mainTableStream << "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. ";
+    for (int i=0; i<irrepsPerSignature.size; i++)
+      if (irrepsPerSignature[i].size>1)
+      { mainTableStream << "$(";
+        for (int j=0; j<irrepsPerSignature[i].size; j++)
+        { mainTableStream << irrepsPerSignature[i][j];
+          if (j!=irrepsPerSignature[i].size-1)
+            mainTableStream << ", ";
+        }
+        mainTableStream << ")$ ";
+      }
+    mainTableStream << "\n<br>\n";
+  } //end of check for repeating signatures
+  int startIndex=0;
+  int numColsPerPage=25;
+  int startIndexNextCol=0;
+  for (;;)
+  { startIndex=startIndexNextCol;
+    if (startIndex>=inputSubgroups.size)
+      break;
+    startIndexNextCol=startIndex+numColsPerPage;
+    if (startIndexNextCol-inputSubgroups.size>-3)
+      startIndexNextCol=inputSubgroups.size;
+
+    mainTableStream << "\n<br>\n\\begin{longtable}{c|";
+    for (int i=startIndex; i<startIndexNextCol; i++)
+    { if (i==numParabolicClasses)
+        mainTableStream << "|";
+      if (i==numParabolicClasses+numNonParabolicPseudoParabolic)
+        mainTableStream << "|";
+      mainTableStream << "p{0.275cm}";
+    }
+    mainTableStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
+    << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
+    << "}Multiplicity of the sign representation over the classes of root subgroups. "
+    << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
+    << " pseudo-parabolic subgroup classes that are not parabolic, and "
+    << numNonPseudoParabolic << " non-pseudo-parabolic subgroup classes. \n<br>\n"
+    << "}\\\\ ";
+    for (int i=startIndex; i<startIndexNextCol; i++)
+    { SubgroupRootReflections& currentSG=inputSubgroups[i];
+      if (!currentSG.flagIsParabolic && !currentSG.flagIsExtendedParabolic)
+      { mainTableStream << "&-";
+        continue;
+      }
+      if (currentSG.flagIsParabolic)
+        mainTableStream << "&$\\mathfrak{p}_{" << i+1 << "}$";
+      if (!currentSG.flagIsParabolic && currentSG.flagIsExtendedParabolic)
+        mainTableStream << "&${\\widehat{\\mathfrak{ p}}}_{" << i-numParabolicClasses+1 << "}$";
+    }
     mainTableStream << "\\\\\n<br>\n";
+    mainTableStream << "Irrep label";
+    if (this->theDynkinType.IsSimple(&simpleType.theLetter, &simpleType.theRank, &simpleType.CartanSymmetricInverseScale))
+      for (int i=startIndex; i<startIndexNextCol; i++)
+        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToStringRelativeToAmbientType(simpleType, &formatSupressUpperIndexOne) << "$";
+    else
+      for (int i=startIndex; i<startIndexNextCol; i++)
+        mainTableStream << "&$" << inputSubgroups[i].theDynkinType.ToString() << "$";
+    for (int i=0; i<this->ConjugacyClassCount(); i++)
+    { mainTableStream << "\\\\";
+      if (i==0)
+        mainTableStream << "\\hline";
+      mainTableStream << "\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
+      for (int j=startIndex; j<startIndexNextCol; j++)
+        mainTableStream << "&" << inputSubgroups[j].tauSignature[i].ToString();
+      mainTableStream << "\\\\\n<br>\n";
+    }
+    mainTableStream << "\\end{longtable}\n<br>\n";
   }
-  mainTableStream << "\\end{longtable}\n<br>\n";
   for (int s=0; s<2; s++)
   { out << "<table style=\"white-space: nowrap;\" border=\"1\">";
     Selection parSelrootsAreOuttaLevi;
@@ -997,8 +1049,8 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
         for (int j=0; j<inputSubgroups.size; j++)
           out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
       if (s==1)
-        for (int j=0; j<clippedSignSig[i].size; j++)
-          out << "<td>" << clippedSignSig[i][j].ToString() << "</td>";
+        for (int j=0; j<pseudoSignSig[i].size; j++)
+          out << "<td>" << pseudoSignSig[i][j].ToString() << "</td>";
       out << "</tr>";
     }
     out << "</table>";
@@ -1012,12 +1064,12 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.3cm}\\addtolength{\\textheight}{6.3cm}"
   << " \\begin{document}\\begin{landscape}\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "{\\tiny \n<br>\n \\renewcommand{\\arraystretch}{0}%\n<br>\n";
-  out << "\\begin{longtable}{cc}\\caption{\\label{tableIrrepChars" << this->theDynkinType.ToString()
+  out << "\\begin{longtable}{rl}\\caption{\\label{tableIrrepChars" << this->theDynkinType.ToString()
   << "}\\\\ Irreducible representations and their characters}\\\\ \n<br>\n Irrep label & Character\\\\\n<br>\n";
   for (int i=0; i<this->characterTable.size; i++)
     out << "$" << this->ToStringIrrepLabel(i) << "$&$" << this->characterTable[i].ToString() << "$\\\\\n<br>\n";
   out << "\\end{longtable}\n<br>\n";
-  out << "\\begin{longtable}{ccc}"<< "\\caption{\\label{tableConjugacyClassTable"
+  out << "\\begin{longtable}{rcl}"<< "\\caption{\\label{tableConjugacyClassTable"
   << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString()) << "}}\\\\ ";
   out << "Representative & Class size & Root subsystem label\\\\\n<br>\n";
   for (int i=0; i<this->ConjugacyClassCount(); i++)
@@ -1028,7 +1080,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   }
   out << "\\end{longtable}\n<br>\n";
 
-  out << mainTableHeaderStream.str() << mainTableStream.str();
+  out << mainTableStream.str();
   out << "}%arraystretch renewcommand scope\n<br\n>\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "\\end{landscape}\\end{document}";
   return out.str();

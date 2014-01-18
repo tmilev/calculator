@@ -866,16 +866,6 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   std::stringstream mainTableStream, mainTableHeaderStream;
   mainTableStream << "Irrep Label";
   int numParabolicClasses=0, numNonParabolicPseudoParabolic=0, numNonPseudoParabolic=0;
-
-  bool hasRepeatingSigs=false;
-  for (int i=0; i<inputSubgroups.size && !hasRepeatingSigs; i++)
-    for (int j=i+1; j<inputSubgroups.size && !hasRepeatingSigs; j++)
-      if (inputSubgroups[i].tauSignature==inputSubgroups[j].tauSignature)
-        hasRepeatingSigs=true;
-  if (hasRepeatingSigs)
-    out << "<hr><b>There are repeating extended sign signatures. </b><hr>";
-  else
-    out << "<hr>No repeating extended sign signatures. <hr>";
   if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
   { for (int i=0; i<inputSubgroups.size; i++)
     { SubgroupRootReflections& currentSG=inputSubgroups[i];
@@ -897,7 +887,55 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     }
     mainTableStream << "\\\\\n<br>\n";
   }
-  mainTableHeaderStream << "\\begin{longtable}{c|";
+  //check for repeating signatures
+  List<List<Rational> > clippedSignSig, signSig;
+  signSig.SetSize(this->ConjugacyClassCount());
+  clippedSignSig.SetSize(this->ConjugacyClassCount());
+  for (int i=0; i<this->ConjugacyClassCount(); i++)
+  { signSig[i].SetSize(inputSubgroups.size);
+    clippedSignSig[i].SetSize(numParabolicClasses+numNonParabolicPseudoParabolic);
+    for (int j=0; j<inputSubgroups.size; j++)
+    { signSig[i][j]= (inputSubgroups[j].tauSignature[i]==0 ? 0 : 1 );
+      if (j<numParabolicClasses+numNonParabolicPseudoParabolic)
+        clippedSignSig[i][j]=signSig[i][j];
+    }
+  }
+  bool hasRepeatingExtendedSigs=false, hasRepeatingPseudoParabolicSigs=false;
+  for (int i=0; i<signSig.size && !hasRepeatingExtendedSigs; i++)
+    for (int j=i+1; j<signSig.size && !hasRepeatingExtendedSigs; j++)
+      if (signSig[i]==signSig[j])
+        hasRepeatingExtendedSigs=true;
+  for (int i=0; i<clippedSignSig.size && !hasRepeatingPseudoParabolicSigs; i++)
+    for (int j=i+1; j<clippedSignSig.size && !hasRepeatingPseudoParabolicSigs; j++)
+      if (clippedSignSig[i]==clippedSignSig[j])
+        hasRepeatingPseudoParabolicSigs=true;
+  if (hasRepeatingPseudoParabolicSigs)
+    out << "<hr><b>There are repeating pseudo-parabolic sign signatures. </b><hr>";
+  else
+    out << "<hr>No repeating pseudo-parabolic sign signatures. <hr>";
+  if (hasRepeatingPseudoParabolicSigs)
+  { HashedList<List<Rational> > clippedSignSigsNoRepetition;
+    List<List<std::string> > irrepsPerSignature;
+    clippedSignSigsNoRepetition.AddOnTopNoRepetition(clippedSignSig);
+    irrepsPerSignature.SetSize(clippedSignSigsNoRepetition.size);
+    for (int i=0; i<clippedSignSig.size; i++)
+      irrepsPerSignature[clippedSignSigsNoRepetition.GetIndex(clippedSignSig[i])].AddOnTop(this->irrepsCarterLabels[i]);
+    mainTableHeaderStream << "\n<br>\n\n<br>\nThe following families of representations share the same pseudo-sign signature. ";
+    for (int i=0; i<irrepsPerSignature.size; i++)
+      if (irrepsPerSignature[i].size>1)
+      { mainTableHeaderStream << "$(";
+        for (int j=0; j<irrepsPerSignature[i].size; j++)
+        { mainTableHeaderStream << irrepsPerSignature[i][j];
+          if (j!=irrepsPerSignature[i].size-1)
+            mainTableHeaderStream << ", ";
+        }
+        mainTableHeaderStream << ")$ ";
+      }
+    mainTableHeaderStream << "\n<br>\n";
+  } else
+    out << "<hr>No repeating extended sign signatures. <hr>";
+  //end of check for repeating signatures
+  mainTableHeaderStream << "\n<br>\n\\begin{longtable}{c|";
   for (int i=0; i<inputSubgroups.size; i++)
   { if (i==numParabolicClasses)
       mainTableHeaderStream << "|";
@@ -905,7 +943,7 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
       mainTableHeaderStream << "|";
     mainTableHeaderStream << "p{0.275cm}";
   }
-  mainTableHeaderStream << "}\n<br>\n" << "\\caption{\\label{tableSignSignatureTable"
+  mainTableHeaderStream << "}\n<br>\n" << "\\caption{\\label{table:SignSignature"
   << CGI::CleanUpForLaTeXLabelUse(this->theDynkinType.ToString())
   << "}Multiplicity of the sign representation over the classes of root subgroups. "
   << "There are " << numParabolicClasses << " parabolic subgroup classes, " << numNonParabolicPseudoParabolic
@@ -928,20 +966,6 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
     mainTableStream << "\\\\\n<br>\n";
   }
   mainTableStream << "\\end{longtable}\n<br>\n";
-  List<List<Rational> > clippedTauSigs;
-  clippedTauSigs.SetSize(numNonParabolicPseudoParabolic+numParabolicClasses);
-  bool hasRepeatingClippedTauSigs=false;
-  for (int i=0; i<clippedTauSigs.size; i++)
-  { clippedTauSigs[i].SetSize(this->ConjugacyClassCount());
-    for (int j=0; j<this->ConjugacyClassCount(); j++)
-      clippedTauSigs[i][j]= (inputSubgroups[i].tauSignature[j]==0 ? 0 : 1 );
-    if (clippedTauSigs.GetIndex(clippedTauSigs[i])!=i)
-      hasRepeatingClippedTauSigs=true;
-  }
-  if (hasRepeatingClippedTauSigs)
-    out << "<b>Clipped tau signatures repeat!!!</b>";
-  else
-    out << "No repeating pseudo tau signatures. ";
   for (int s=0; s<2; s++)
   { out << "<table style=\"white-space: nowrap;\" border=\"1\">";
     Selection parSelrootsAreOuttaLevi;
@@ -969,17 +993,17 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
       else
         out << "<td></td>";
       out << "<td>" << this->characterTable[i].ToString() << "</td>";
-      for (int j=0; j<inputSubgroups.size; j++)
-        if (s==0)
+      if (s==0)
+        for (int j=0; j<inputSubgroups.size; j++)
           out << "<td>" << inputSubgroups[j].tauSignature[i].ToString() << "</td>";
-        else
-          if(j<clippedTauSigs.size)
-            out << "<td>" << clippedTauSigs[j][i].ToString() << "</td>";
+      if (s==1)
+        for (int j=0; j<clippedSignSig[i].size; j++)
+          out << "<td>" << clippedSignSig[i][j].ToString() << "</td>";
       out << "</tr>";
     }
     out << "</table>";
     out << "<br>";
-    if (s==1)
+    if (s==0)
       out << "Clipped tau signature follows.<br>";
   }
 
@@ -1005,28 +1029,6 @@ std::string WeylGroup::ToStringSignSignatureRootSubsystem(const List<SubgroupRoo
   out << "\\end{longtable}\n<br>\n";
 
   out << mainTableHeaderStream.str() << mainTableStream.str();
-/*  out << "\\begin{longtable}{";
-  for (int i=0; i<this->ConjugacyClassCount()+1; i++)
-    out << "c";
-  out << "}\n<br>\n";
-  out << "Irrep Label";
-  if (inputSubgroups[0].flagIsParabolic || inputSubgroups[0].flagIsExtendedParabolic)
-  { for (int i=0; i<inputSubgroups.size; i++)
-    { parSelrootsAreOuttaLevi=inputSubgroups[i].simpleRootsInLeviParabolic;
-      parSelrootsAreOuttaLevi.InvertSelection();
-      out << "&{\\tiny" << parSelrootsAreOuttaLevi.ToString() << "}";
-    }
-    out << "\\\\\n<br>\n";
-  }
-  for (int i=0; i<inputSubgroups.size; i++)
-    out << "& $" << inputSubgroups[i].theDynkinType.ToString() << "$";
-  for (int i=0; i<this->ConjugacyClassCount(); i++)
-  { out << "\\\\\n<br>\n$" << this->ToStringIrrepLabel(i) << "$";
-    for (int j=0; j<inputSubgroups.size; j++)
-      out << "&" << (inputSubgroups[j].tauSignature[i]==0 ? "1" :"0");
-    out << "\\\\\n<br>\n";
-  }
-  out << "\\end{longtable}\n<br>\n";*/
   out << "}%arraystretch renewcommand scope\n<br\n>\n<br>\n\n<br>\n\n<br>\n\n<br>\n";
   out << "\\end{landscape}\\end{document}";
   return out.str();

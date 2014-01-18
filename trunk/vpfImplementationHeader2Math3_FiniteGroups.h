@@ -529,16 +529,16 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
   { inputOutputClass.theElements.SetSize(0);
     inputOutputClass.theElements.AddOnTop(inputOutputClass.representative);
   }
-  std::cout << "<br> Generating orbit: <br>Element 1: " << theOrbitIterator.GetCurrentElement().ToString();
+/*  std::cout << "<br> Generating orbit: <br>Element 1: " << theOrbitIterator.GetCurrentElement().ToString();
   Vector<Rational> randomVector, tempV;
   randomVector.AssignString("(23,29,31,37,41,43, 47)");
   HashedList<Vector<Rational> > orbitRV;
   tempV=randomVector;
   theOrbitIterator.GetCurrentElement().ActOn(tempV);
-  orbitRV.AddOnTop(tempV);
+  orbitRV.AddOnTop(tempV);*/
   while (theOrbitIterator.IncrementReturnFalseIfPastLast())
   { inputOutputClass.size++;
-    std::cout << "<br>Element " << inputOutputClass.size.ToString() << ": "
+/*    std::cout << "<br>Element " << inputOutputClass.size.ToString() << ": "
     << theOrbitIterator.GetCurrentElement().ToString();
     tempV=randomVector;
     theOrbitIterator.GetCurrentElement().ActOn(tempV);
@@ -549,7 +549,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
       inputOutputClass.theElements[orbitRV.GetIndex(tempV)].ToString() << crash
       ;
     }
-    orbitRV.AddOnTop(tempV);
+    orbitRV.AddOnTop(tempV);*/
     if (storeCC)
     { if (inputOutputClass.theElements.Contains(theOrbitIterator.GetCurrentElement()))
         crash << " !element " << theOrbitIterator.GetCurrentElement().ToString()

@@ -157,9 +157,9 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
       this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-  std::cout << "<br>Module dimension vector: " << this->moduleDecompoAmbientAlgebraDimensionsOnly
-  << ". Roots centralizing " << this->theDynkinType.ToString()
-  << ": " << this->SimpleBasisCentralizerRoots.ToString();
+//  std::cout << "<br>Module dimension vector: " << this->moduleDecompoAmbientAlgebraDimensionsOnly
+//  << ". Roots centralizing " << this->theDynkinType.ToString()
+//  << ": " << this->SimpleBasisCentralizerRoots.ToString();
   this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
   this->theCentralizerDiagram.GetDynkinType(this->theCentralizerDynkinType);
   if (this->theDynkinType.IsEqualToZero())

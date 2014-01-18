@@ -491,13 +491,13 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 
 bool rootSubalgebra::IsEquivalentToByDiagramsAndDimensions
 (const rootSubalgebra& other)const
-{ std::cout << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
+{/* std::cout << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
   << this->theCentralizerDynkinType.ToString() << " with mod decompo "
   << this->moduleDecompoAmbientAlgebraDimensionsOnly.ToString()
   << " to " << other.theDynkinType.ToString() << " centralized by "
   << other.theCentralizerDynkinType.ToString() << " with mod decompo "
   << other.moduleDecompoAmbientAlgebraDimensionsOnly.ToString();
-
+*/
   return this->moduleDecompoAmbientAlgebraDimensionsOnly==other.moduleDecompoAmbientAlgebraDimensionsOnly
   && this->theDynkinType==other.theDynkinType && this->theCentralizerDynkinType==other.theCentralizerDynkinType;
 }

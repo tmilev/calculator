@@ -2957,7 +2957,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SemisimpleLieAlgebra& inputOwner, 
   for (int i=0; i<output.theRootSAs.theSubalgebras.size; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra " << output.theRootSAs.theSubalgebras[i].theDynkinDiagram.ToStringRelativeToAmbientType(inputOwner.theWeyl.theDynkinType[0])
-    << "(" << (i+1) << " out of " << output.theRootSAs.theSubalgebras.size-1 << " non-trivial)\n";
+    << "(" << (i+1) << " out of " << output.theRootSAs.theSubalgebras.size << ")\n";
     theReport.Report(tempStream.str());
     output.theRootSAs.theSubalgebras[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables);
   }

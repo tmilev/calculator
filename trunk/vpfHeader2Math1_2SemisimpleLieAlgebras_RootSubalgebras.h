@@ -221,6 +221,7 @@ public:
   void ComputeDynkinDiagramKandCentralizer();
   bool CheckRankInequality()const;
   bool ComputeEssentials();
+  bool CheckForMaximalDominanceCartanSA();
   void ComputeAllOld();
   void ComputeRootsOfK();
   void ComputeKModules();

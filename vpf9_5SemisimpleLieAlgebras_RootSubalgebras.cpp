@@ -1888,6 +1888,33 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
         std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
 }
 
+bool rootSubalgebra::CheckForMaximalDominanceCartanSA()
+{ MacroRegisterFunctionWithName("rootSubalgebra::CheckForMaximalDominanceCartanSA");
+  Vectors<Rational> simpleBasisOriginalOrderCopy;
+  bool doDebug=false;
+  for (int i=0; i<this->outerSAautos.theElements.size; i++)
+    if (!this->outerSAautos.theElements[i].IsID())
+    { simpleBasisOriginalOrderCopy=this->SimpleBasisKinOrderOfGeneration;
+      this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
+      if (doDebug)
+        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
+        << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
+      this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
+      if (doDebug)
+        std::cout << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
+      for (int j=0; j<simpleBasisOriginalOrderCopy.size; j++)
+        if (simpleBasisOriginalOrderCopy[j]!=this->SimpleBasisKinOrderOfGeneration[j])
+        { if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j]))
+          { if (this->indexInducingSubalgebra!=-1)
+              this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto++;
+            return false;
+          } else
+            break;
+        }
+    }
+  return true;
+}
+
 bool rootSubalgebra::ComputeEssentials()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeEssentials");
   this->CheckInitialization();
@@ -1896,7 +1923,6 @@ bool rootSubalgebra::ComputeEssentials()
   this->SimpleBasisKScaledToActByTwo=this->SimpleBasisK;
   for (int i=0; i<this->SimpleBasisK.size; i++)
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
-  bool doDebug=false;
   if (this->ownEr->theGlobalVariables!=0)
   { reportStream << "Computing root subalgebra... ";
     theReport.Report(reportStream.str());
@@ -1950,56 +1976,20 @@ bool rootSubalgebra::ComputeEssentials()
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->ComputeModuleDecompoAmbientAlgebraDimensionsOnly();
   this->CheckRankInequality();
+  for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
+    if (this->ownEr->theSubalgebras[i].theDynkinDiagram==this->theDynkinDiagram &&
+        this->ownEr->theSubalgebras[i].theCentralizerDynkinType==this->theCentralizerDynkinType &&
+        this->moduleDecompoAmbientAlgebraDimensionsOnly==this->ownEr->theSubalgebras[i].moduleDecompoAmbientAlgebraDimensionsOnly        )
+    { if (this->indexInducingSubalgebra!=-1)
+        this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedSameModuleDecompo++;
+      return false;
+    }
   if (this->ownEr->theGlobalVariables!=0)
   { reportStream << "...module decomposition computed, subalgebra type: " << this->theDynkinType.ToString()
     << ", centralizer type: " << this->theCentralizerDynkinType.ToString() << ". Computing outer automorphisms that "
     << " have zero action on centralizer and extend to ambient automorphisms... ";
     theReport.Report(reportStream.str());
   }
-  this->ComputeOuterSAautosExtendingToAmbientAutosGenerators();
-  if (this->ownEr->theGlobalVariables!=0)
-  { reportStream << "...done (total " << this->outerSAautos.theElements.size << " outer autos and "
-    << this->outerSAautosExtendingToAmbientAutosGenerators.theElements.size << " extending outer autos). ";
-    theReport.Report(reportStream.str());
-  }
-  Vectors<Rational> simpleBasisOriginalOrderCopy;
-  for (int i=0; i<this->outerSAautos.theElements.size; i++)
-    if (!this->outerSAautos.theElements[i].IsID())
-    { simpleBasisOriginalOrderCopy=this->SimpleBasisKinOrderOfGeneration;
-      this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
-      if (this->theDynkinType.ToString()=="E^{1}_6")
-        doDebug=true;
-      if (doDebug)
-        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
-        << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
-      this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
-      if (doDebug)
-        std::cout << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
-      for (int j=0; j<simpleBasisOriginalOrderCopy.size; j++)
-        if (simpleBasisOriginalOrderCopy[j]!=this->SimpleBasisKinOrderOfGeneration[j])
-        { if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j]))
-          { if (this->indexInducingSubalgebra!=-1)
-              this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedNotMaxWRTouterAuto++;
-            return false;
-          } else
-            break;
-        }
-    }
-  bool sameTypeAlreadyFound=false;
-  for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
-    if (this->ownEr->theSubalgebras[i].theDynkinDiagram==this->theDynkinDiagram &&
-        this->ownEr->theSubalgebras[i].theCentralizerDynkinType==this->theCentralizerDynkinType)
-    { sameTypeAlreadyFound=true;
-      break;
-    }
-  if (!sameTypeAlreadyFound)
-    return true;
-  for (int i=0; i<this->ownEr->theSubalgebras.size; i++)
-    if (this->ModuleDecompoHighestWeights==this->ownEr->theSubalgebras[i].ModuleDecompoHighestWeights)
-    { if (this->indexInducingSubalgebra!=-1)
-        this->ownEr->theSubalgebras[this->indexInducingSubalgebra].numHeirsRejectedSameModuleDecompo++;
-      return false;
-    }
   return true;
 }
 
@@ -2651,7 +2641,7 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   int col=0;
   int row=0;
   out << "g: " << this->theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])
-  << " Table entries: " << this->theSubalgebras.size-2
+  << ". There are " << this->theSubalgebras.size << " table entries= " << this->theSubalgebras.size-2
   << " larger than the Cartan subalgebra + the Cartan subalgebra+ the full subalgebra)\n\n";
   out << "<table border=\"1\">\n <colgroup>";
   for (int i=0; i<this->NumColsPerTableLatex; i++)
@@ -2678,8 +2668,9 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   }
   out << "</table>\n\n";
   if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size>0)
-  { out <<  "<hr>" << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
-    << this->NumNonPseudoParabolic << " non pseudo-parabolic. ";
+  { out << "<hr>There are " << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
+    << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems. The roots needed to generate the "
+    << "root subsystems are listed below in GAP-readable format.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
     if (this->flagPrintGAPinput && this->owneR->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
     { for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)

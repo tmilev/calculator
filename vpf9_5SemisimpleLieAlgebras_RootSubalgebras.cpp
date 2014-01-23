@@ -2669,11 +2669,11 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
   out << "</table>\n\n";
   if (this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size>0)
   { out << "<hr>There are " << this->NumParabolic << " parabolic, " << this->NumPseudoParabolicNonParabolic << " pseudo-parabolic but not parabolic and "
-    << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems. The roots needed to generate the "
-    << "root subsystems are listed below in GAP-readable format.";
+    << this->NumNonPseudoParabolic << " non pseudo-parabolic root subsystems.";
     HashedList<Vector<Rational> > GAPPosRootSystem;
     if (this->flagPrintGAPinput && this->owneR->theWeyl.LoadGAPRootSystem(GAPPosRootSystem))
-    { for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)
+    { out << " The roots needed to generate the root subsystems are listed below using the root indices in GAP. ";
+      for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)
       { rootSubalgebra& currentSA=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
         out << "<br>";
         out << "[";
@@ -2697,6 +2697,34 @@ std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theForma
         if (i!=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size-1)
           out << ",";
       }
+    }
+    out << "<hr>The roots needed to generate the root subsystems are listed below. ";
+    for (int i=0; i<this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size; i++)
+    { rootSubalgebra& currentSA=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither[i];
+      out << "<br>";
+      out << "[";
+      if (i<this->NumParabolic)
+        out << "\"parabolic\",";
+      else if (i<this->NumParabolic+this->NumPseudoParabolicNonParabolic)
+        out << "\"pseudoParabolicNonParabolic\",";
+      else
+        out << "\"nonPseudoParabolic\",";
+      out << "\"" << currentSA.theDynkinType.ToString() << "\", ";
+      out << "[";
+      for (int j=0; j<currentSA.SimpleBasisK.size; j++)
+      { out << "[";
+        for (int k=0; k<currentSA.SimpleBasisK[j].size; k++)
+        { out << currentSA.SimpleBasisK[j][k].ToString();
+          if (k!=currentSA.SimpleBasisK[j].size-1)
+            out << ", ";
+        }
+        out << "]";
+        if (j!=currentSA.SimpleBasisK.size-1)
+          out << ", ";
+      }
+      out << "]]";
+      if (i!=this->theSubalgebrasOrder_Parabolic_PseudoParabolic_Neither.size-1)
+        out << ",";
     }
   }
   return out.str();

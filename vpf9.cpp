@@ -5104,13 +5104,39 @@ std::string WeylGroup::ToStringCppConjugacyClasses(FormatExpressions* theFormat)
   return out.str();
 }
 
+std::string WeylGroup::ToStringRootsAndRootReflections(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("WeylGroup::ToStringRootsAndRootReflections");
+  std::stringstream out, outLatex;
+  out << "<br>The root system has " << this->RootSystem.size << " elements.\n";
+  out << "<table><tr><td>Simple basis coordinates</td><td>Epsilon coordinates</td>"
+  << "<td>Reflection w.r.t. root</td></tr>";
+  Vectors<Rational> rootSystemEpsCoords;
+  this->GetEpsilonCoords(this->RootSystem, rootSystemEpsCoords);
+  ElementWeylGroup<WeylGroup> currentRootReflection;
+  for (int i=0; i<this->RootSystem.size; i++)
+  { const Vector<Rational>& current=this->RootSystem[i];
+    currentRootReflection.MakeRootReflection(current, *this);
+    out << "<tr><td>" << current.ToString() << "</td><td>" << rootSystemEpsCoords[i].ToStringLetterFormat("e") << "</td>"
+    << "<td>" << CGI::GetMathMouseHover(currentRootReflection.ToString()) << "</td>" << "</tr>";
+  }
+  out << "</table>";
+  out << "Comma delimited list of roots: ";
+  for (int i=0; i<this->RootSystem.size; i++)
+  { out << this->RootSystem[i].ToString();
+    if (i!=this->RootSystem.size-1)
+      out << ", ";
+  }
+  out << outLatex.str();
+  return out.str();
+}
+
 std::string WeylGroup::ToString(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("WeylGroup::ToString");
   std::stringstream out;
   out << "<br>Size: " << this->theElements.size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "<br>Half-sum positive roots:" << this->rho.ToString() << "\n";
-  out << "<br>Root system(" << this->RootSystem.size << " elements):\n" << this->RootSystem.ToString() << "\n";
+  out << this->ToStringRootsAndRootReflections();
   out << "<br>Symmetric cartan: " << this->CartanSymmetric.ToString();
   if (this->flagCharTableIsComputed)
   { out << "<br>Character table: ";

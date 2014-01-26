@@ -346,18 +346,10 @@ public:
   void ComputeSquares(GlobalVariables* theGlobalVariables);
   void ComputeInitialIrreps(GlobalVariables* theGlobalVariablesd);
   void ComputeConjugacyClassesThomasVersion();
-  std::string ToStringIrrepLabel(int irrepIndex);
-  std::string ToStringSignSignatureRootSubsystem
-  (const List<SubgroupRootReflections>& inputSubgroups);
   void GetSignSignatureParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
   void GetSignSignatureExtendedParabolics(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
   void GetSignSignatureAllRootSubsystems(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables=0);
-  void GetSignSignatureRootSubgroups
-  (List<SubgroupRootReflections>& outputSubgroups,
-   const List<Vectors<Rational> >& rootsGeneratingReflections,
-   GlobalVariables* theGlobalVariables=0)
-   ;
-
+  void GetSignSignatureRootSubgroups(List<SubgroupRootReflections>& outputSubgroups, const List<Vectors<Rational> >& rootsGeneratingReflections, GlobalVariables* theGlobalVariables=0);
   bool LoadConjugacyClassesHelper();
   bool LoadSignSignatures(List<SubgroupRootReflections>& outputSubgroups, GlobalVariables* theGlobalVariables);
   void ComputeOrLoadCharacterTable(GlobalVariables* theGlobalVariables=0, std::stringstream* reportStream=0);
@@ -369,9 +361,12 @@ public:
   void AddIrreducibleRepresentation(const WeylGroupRepresentation<Rational>& p);
   void AddCharacter(const ClassFunction<WeylGroup::WeylGroupBase, Rational>& X);
   void ComputeRho(bool Recompute);
+  std::string ToStringRootsAndRootReflections(FormatExpressions* theFormat=0);
   std::string ToString(FormatExpressions* theFormat=0);
   std::string ToStringCppConjugacyClasses(FormatExpressions* theFormat=0);
   std::string ToStringCppCharTable(FormatExpressions* theFormat=0);
+  std::string ToStringIrrepLabel(int irrepIndex);
+  std::string ToStringSignSignatureRootSubsystem(const List<SubgroupRootReflections>& inputSubgroups);
   void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFinalSteps();
@@ -480,6 +475,11 @@ public:
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
   void GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output);
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
+  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)const
+  { Vector<Rational> output;
+    this->GetEpsilonCoords(output);
+    return output;
+  }
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);

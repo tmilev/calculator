@@ -2782,20 +2782,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
         << "transpose of the epsilon matrix times the epsilon matrix:  " << tempM2.ToString() << ". " << crash;
     }
   if (Verbose)
-  { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
-    Vectors<Rational> rootSystemEpsCoords;
-    theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
-    for (int i=0; i<theWeyl.RootSystem.size; i++)
-    { const Vector<Rational>& current=theWeyl.RootSystem[i];
-      out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>" << rootSystemEpsCoords[i].ToStringLetterFormat("e") << "</td></tr>";
-    }
-    out << "</table>";
-    out << "Comma delimited list of roots: ";
-    for (int i=0; i<theWeyl.RootSystem.size; i++)
-    { out << theWeyl.RootSystem[i].ToString();
-      if (i!=theWeyl.RootSystem.size-1)
-        out << ", ";
-    }
+  { out << theWeyl.ToStringRootsAndRootReflections();
     DrawingVariables theDV;
     theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
     out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane (computed as explained on John Stembridge's website). "

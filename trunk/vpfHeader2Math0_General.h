@@ -3283,7 +3283,7 @@ public:
   { Vector<Rational> tempRoot1, tempRoot2;
     this->ElementToVectorNegativeRootSpacesFirst(tempRoot1);
     other.ElementToVectorNegativeRootSpacesFirst(tempRoot2);
-   return tempRoot1.IsProportionalTo(tempRoot2);
+    return tempRoot1.IsProportionalTo(tempRoot2);
   }
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other, Rational& outputTimesMeEqualsInput)const
   { Vector<Rational> tempRoot1, tempRoot2;
@@ -3302,6 +3302,7 @@ public:
   void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
   { this->::MonomialCollection<ChevalleyGenerator, coefficient>::operator=(other);
   }
+  Vector<Rational> GetRootIMustBeWeight()const;
 };
 
 template <class Object>

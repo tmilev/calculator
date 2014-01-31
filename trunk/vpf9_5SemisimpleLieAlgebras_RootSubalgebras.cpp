@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2Math1_2SemisimpleLieAlgebras_RootSubalgebras.h"
+#include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
 ProjectInformationInstance ProjectInfoVpf9_5RootSAsSl2sas(__FILE__, "Root and sl(2) subalgebras of semisimple Lie algebras. ");
@@ -515,6 +516,37 @@ void rootSubalgebra::ComputeKModules()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeKModules");
   HashedList<Vector<Rational> >& ambientRootSystem=this->GetAmbientWeyl().RootSystem;
   this->ComputeRootsOfK();
+  this->HighestVectors.SetExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
+  this->HighestVectors.SetSize(0);
+  ElementSemisimpleLieAlgebra<Rational> currentHighestVector;
+  for (int i=0; i<ambientRootSystem.size; i++)
+  { if (!this->IsBKhighest(ambientRootSystem[i]))
+      continue;
+    currentHighestVector.MakeGGenerator(ambientRootSystem[i], this->GetOwnerSSalg());
+    this->HighestVectors.AddOnTop(currentHighestVector);
+  }
+  Vectors<Rational> cartanCentralizer;
+  this->SimpleBasisK.GetOrthogonalComplement(cartanCentralizer, &this->GetAmbientWeyl().CartanSymmetric);
+  for (int i=0; i<cartanCentralizer.size; i++)
+  { currentHighestVector.MakeHgenerator(cartanCentralizer[i], this->GetOwnerSSalg());
+    this->HighestVectors.AddOnTop(currentHighestVector);
+  }
+  this->Modules.SetSize(this->HighestVectors.size);
+  this->HighestWeightsNONPrimal.SetSize(this->Modules.size);
+  this->HighestWeightsPrimalSimple.SetSize(this->Modules.size);
+  this->LowestWeightsPrimalSimple.SetSize(this->Modules.size);
+  for (int i=0; i<this->HighestVectors.size; i++)
+  { this->HighestWeightsPrimalSimple[i]=this->HighestVectors[i].GetRootIMustBeWeight();
+  }
+
+  this->Modules.SetExpectedSize(this->GetOwnerSSalg().GetNumGenerators());
+  this->Modules.SetSize(0);
+  this->HighestWeightsNONPrimal.SetExpectedSize(ambientRootSystem.size);
+  this->HighestWeightsNONPrimal.SetSize(0);
+
+
+
+
   this->kModules.SetExpectedSize(ambientRootSystem.size);
   this->LowestWeightsGmodK.SetExpectedSize(ambientRootSystem.size);
   this->HighestWeightsGmodK.SetExpectedSize(ambientRootSystem.size);
@@ -525,24 +557,26 @@ void rootSubalgebra::ComputeKModules()
 
   List<bool> Explored;
   Explored.initFillInObject(ambientRootSystem.size, false);
-  Vector<Rational> highestWeight, highestWeightFundamentalCoords;
+  Vector<Rational> highestWeight;
+  MonomialChar<Rational> highestWeightFundamentalCoords;
   this->ModuleDecompoHighestWeights.MakeZero();
   for (int i=0; i<ambientRootSystem.size; i++)
-  { if (this->AllRootsK.Contains(ambientRootSystem[i]))
+  { if (Explored[i])
+      continue;
+    if (this->AllRootsK.Contains(ambientRootSystem[i]))
     { Explored[i]=true;
       if (this->IsBKhighest(ambientRootSystem[i]))
-      { highestWeightFundamentalCoords=this->GetFundamentalCoordsOverK(ambientRootSystem[i]);
+      { highestWeightFundamentalCoords.weightFundamentalCoordS=this->GetFundamentalCoordsOverK(ambientRootSystem[i]);
         this->ModuleDecompoHighestWeights.AddMonomial(highestWeightFundamentalCoords, 1);
-        if (!highestWeightFundamentalCoords.IsPositiveOrZero())
+        if (!highestWeightFundamentalCoords.weightFundamentalCoordS.IsPositiveOrZero())
           crash << "highest weight has a negative coordinate: " << highestWeightFundamentalCoords.ToString() << crash;
       }
-    }
-    if (Explored[i])
       continue;
+    }
     this->ComputeHighestWeightInTheSameKMod(ambientRootSystem[i], highestWeight);
     this->HighestWeightsGmodK.AddOnTop(highestWeight);
-    highestWeightFundamentalCoords=this->GetFundamentalCoordsOverK(highestWeight);
-    if (!highestWeightFundamentalCoords.IsPositiveOrZero())
+    highestWeightFundamentalCoords.weightFundamentalCoordS=this->GetFundamentalCoordsOverK(highestWeight);
+    if (!highestWeightFundamentalCoords.weightFundamentalCoordS.IsPositiveOrZero())
       crash << "highest weight has a negative coordinate: " << highestWeightFundamentalCoords.ToString() << crash;
     this->ModuleDecompoHighestWeights.AddMonomial(highestWeightFundamentalCoords, 1);
     this->kModules.SetSize(this->kModules.size+1);
@@ -557,6 +591,18 @@ void rootSubalgebra::ComputeKModules()
         << "computation." << crash;
       Explored[ambientRootSystem.GetIndex(currentMod[k])]=true;
     }
+  }
+  //Handle the elements of the Cartan.
+  int dimExcludingCartanCentralizer=0;
+  for (int i=0; i<this->kModules.size; i++)
+    dimExcludingCartanCentralizer+=this->kModules[i].size;
+  if (dimExcludingCartanCentralizer>this->GetOwnerSSalg().GetNumGenerators())
+    crash << "Sum of k-module dimensions exceed the dimension of the ambient Lie algebra. " << crash;
+  for (int i=dimExcludingCartanCentralizer; i<this->GetOwnerSSalg().GetNumGenerators(); i++)
+  { this->kModules.SetSize(this->kModules.size+1);
+    Vectors<Rational>& currentMod=*this->kModules.LastObject();
+    currentMod.SetSize(1);
+    currentMod[0].MakeZero(this->SimpleBasisK.size);
   }
   if (this->SimpleBasisK.size==0)
     if (this->kModules.size!=this->GetOwnerSSalg().theWeyl.RootSystem.size)
@@ -1103,13 +1149,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   out << "<br>\n simple basis centralizer: "<< this->SimpleBasisCentralizerRoots.ToString();
   out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
   out << "<br>Module decomposition, fundamental coords over k: ";
-  charSSAlgMod<Rational> formattingChar;
-  MonomialChar<Rational> tempM;
-  for (int i=0; i< this->ModuleDecompoHighestWeights.size(); i++)
-  { tempM.weightFundamentalCoordS=this->ModuleDecompoHighestWeights[i];
-    formattingChar.AddMonomial(tempM, this->ModuleDecompoHighestWeights.theCoeffs[i]);
-  }
-  out << CGI::GetMathSpanPure(formattingChar.ToString());
+  out << CGI::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
   out << "<br>\n";
   out << latexHeader;
   this->kModulesgEpsCoords.SetSize(this->kModules.size);
@@ -2628,6 +2668,21 @@ std::string rootSubalgebras::ToStringAlgebraLink(int index)
   out << "<a href=\"rootSubalgebra_" << index+1 << ".html\">"
   << this->theSubalgebras[index].theDynkinDiagram.ToStringRelativeToAmbientType(this->GetOwnerWeyl().theDynkinType[0]) << "</a>";
   return out.str();
+}
+
+template<class coefficient>
+Vector<Rational> ElementSemisimpleLieAlgebra<coefficient>::GetRootIMustBeWeight()const
+{ if (this->IsEqualToZero())
+    crash << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight on a zero element is forbidden." << crash;
+  if (this->size()>1)
+  { if (!this->IsElementCartan())
+      crash << "Calling ElementSemisimpleLieAlgebra::GetRootIMustBeWeight on a non-weight element is forbidden. The element is: "
+      << this->ToString() << crash;
+    Vector<Rational> result;
+    result.MakeZero(this->GetOwner()->GetRank());
+    return result;
+  }
+  return this->GetOwner()->GetWeightOfGenerator((*this)[0].theGeneratorIndex);
 }
 
 std::string rootSubalgebras::ToStringDynkinTableHTML(FormatExpressions* theFormat)

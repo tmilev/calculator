@@ -719,10 +719,12 @@ class Vectors: public List<Vector<coefficient> >
       for (int j=0; j<tempNumCols; j++)
         output.elements[i][j]=this->TheObjects[i][j];
   }
-  void GetOrthogonalComplement(Vectors<coefficient>& output)
-  { Matrix<coefficient> tempMat;
-    tempMat.AssignVectorsToRows(*this);
-    tempMat.GetZeroEigenSpaceModifyMe(output);
+  void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm=0)
+  { Matrix<coefficient> theMatrix;
+    theMatrix.AssignVectorsToRows(*this);
+    if (theBilinearForm!=0)
+      theMatrix*=*theBilinearForm;
+    theMatrix.GetZeroEigenSpaceModifyMe(output);
   }
   bool LinSpanContainsVector(const Vector<coefficient>& input, Matrix<coefficient>& bufferMatrix, Selection& bufferSelection)const;
   void MakeEiBasis(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)

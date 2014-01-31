@@ -6747,7 +6747,8 @@ void WeylGroup::ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSi
 { MacroRegisterFunctionWithName("WeylGroup::ComputeExtremeRootInTheSameKMod");
   output=inputRoot;
   Vector<Rational> tempRoot;
-  for(bool FoundHigher=true; FoundHigher; )
+  bool FoundHigher=true;
+  do
   { FoundHigher=false;
     for (int i=0; i<inputSimpleBasisK.size; i++)
     { tempRoot=output;
@@ -6760,11 +6761,11 @@ void WeylGroup::ComputeExtremeRootInTheSameKMod(const Vectors<Rational>& inputSi
         FoundHigher=true;
       }
       if (tempRoot.IsEqualToZero())
-      { output.MakeZero(this->GetDim());
-        return;
+      { output*=-1;
+        FoundHigher=true;
       }
     }
-  }
+  } while (FoundHigher);
 }
 
 template<class coefficient>

@@ -509,14 +509,8 @@ Vector<Rational> SemisimpleSubalgebras::GetHighestWeightFundNewComponentFromImag
     << "The type is " << input.ToString() << ". " << crash;
   for (int i=0; i<newRank-1; i++)
     simpleBasisOld[i].MakeEi(newRank, imagesOldSimpleRootsAndNewRoot[i]);
-  if (input.ToString()=="G^{3/2}_2")
-    std::cout << "<hr>type: " << input.ToString() << ", simplebasisold: " << simpleBasisOld.ToString() << "<br> new simple root: " << newSimpleRoot.ToString();
   theWeyl.ComputeExtremeRootInTheSameKMod(simpleBasisOld, newSimpleRoot, highestRootInSimpleRootModuleSimpleCoords, true);
-  if (input.ToString()=="G^{3/2}_2")
-    std::cout << "<br>highest weight in component of : " << newSimpleRoot.ToString() << ": " << highestRootInSimpleRootModuleSimpleCoords.ToString();
   result.SetSize(newRank-1);
-  if (input.ToString()=="G^{3/2}_2")
-    std::cout << "<br>Symmetric cartan is: " << theWeyl.CartanSymmetric.ToString();
   for (int i=0; i<simpleBasisOld.size; i++)
     result[i]=theWeyl.RootScalarCartanRoot(highestRootInSimpleRootModuleSimpleCoords, simpleBasisOld[i])*2/
     theWeyl.RootScalarCartanRoot(simpleBasisOld[i], simpleBasisOld[i]);

@@ -112,8 +112,23 @@ public:
   bool flagComputeConeCondition;
   bool flagMakingProgressReport;
   bool flagDeallocated;
+  List<List<ElementSemisimpleLieAlgebra<Rational> > > Modules;
+  List<ElementSemisimpleLieAlgebra<Rational> > HighestVectors;
+  List<Vectors<Rational> > WeightsModulesNONprimal;
+//  List<Vectors<Rational> > WeightsModulesPrimal;
+  List<Vector<Rational> > HighestWeightsNONPrimal;
+
+  List<Vector<Rational> > HighestWeightsPrimalSimple;
+  List<Vector<Rational> > LowestWeightsPrimalSimple;
+
+//  HashedList<Vector<Rational> > HighestWeightsPrimal;
+
+  Vectors<Rational> LowestWeightsGmodK;
+  Vectors<Rational> HighestWeightsGmodK;
+
+
   List<Vectors<Rational> > kModules;
-  MonomialCollection<Vector<Rational>, Rational> ModuleDecompoHighestWeights;
+  charSSAlgMod<Rational> ModuleDecompoHighestWeights;
   List<int> indicesSubalgebrasContainingK;
   List<List<List<int> > > theMultTable;
   List<int> theOppositeKmods;
@@ -134,8 +149,6 @@ public:
   HashedList<Vector<Rational> > AllRootsK;
   Selection NilradicalKmods;
   Selection CentralizerKmods;
-  Vectors<Rational> LowestWeightsGmodK;
-  Vectors<Rational> HighestWeightsGmodK;
   Vectors<Rational> HighestRootsK;
   Vectors<Rational> TestedRootsAlpha;
   Vectors<Rational> CentralizerRoots;

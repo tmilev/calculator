@@ -489,24 +489,6 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 //  return -1;
 }
 
-bool rootSubalgebra::IsEquivalentToByDiagramsAndDimensions
-(const rootSubalgebra& other)const
-{/* std::cout << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
-  << this->theCentralizerDynkinType.ToString() << " with mod decompo "
-  << this->moduleDecompoAmbientAlgebraDimensionsOnly.ToString()
-  << " to " << other.theDynkinType.ToString() << " centralized by "
-  << other.theCentralizerDynkinType.ToString() << " with mod decompo "
-  << other.moduleDecompoAmbientAlgebraDimensionsOnly.ToString();
-*/
-  return this->moduleDecompoAmbientAlgebraDimensionsOnly==other.moduleDecompoAmbientAlgebraDimensionsOnly
-  && this->theDynkinType==other.theDynkinType && this->theCentralizerDynkinType==other.theCentralizerDynkinType;
-}
-
-void rootSubalgebra::GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, SubgroupWeylGroupOLD& outputAutomorphisms)
-{ this->ComputeAllOld();
-  this->GenerateIsomorphismsPreservingBorel(*this, theGlobalVariables, &outputAutomorphisms, false);
-}
-
 bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables)
 { this->theDomain().ComputeChevalleyConstants(&theGlobalVariables);
   this->theRange().ComputeChevalleyConstants(&theGlobalVariables);
@@ -1052,16 +1034,8 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
 { if (RationalFunctionOld::gcdQuicK(left, right, output))
     return;
   MacroRegisterFunctionWithName("RationalFunctionOld::gcd");
-  MemorySaving<Polynomial<Rational> > buf1, buf2, buf3;
-  Polynomial<Rational>& lcmBuf
-  = theGlobalVariables==0 ? buf1.GetElement() : theGlobalVariables->RFgcdBuffer1.GetElement();
-  Polynomial<Rational>& prodBuf
-  = theGlobalVariables==0 ? buf2.GetElement() : theGlobalVariables->RFgcdBuffer2.GetElement();
-  Polynomial<Rational>& remBuf
-  = theGlobalVariables==0 ? buf3.GetElement() : theGlobalVariables->RFgcdBuffer3.GetElement();
-
-  RationalFunctionOld::lcm
-  (left, right, lcmBuf, theGlobalVariables);
+  Polynomial<Rational> lcmBuf, prodBuf, remBuf;
+  RationalFunctionOld::lcm(left, right, lcmBuf, theGlobalVariables);
   prodBuf=left;
   prodBuf*=right;
 //  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
@@ -1132,16 +1106,9 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
 void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("RationalFunctionOld::lcm");
   MemorySaving<Polynomial<Rational> > buffer1, buffer2, buffer3;
-  Polynomial<Rational>& leftTemp=
-  theGlobalVariables==0? buffer1.GetElement() : theGlobalVariables->RFgcdBuffer1.GetElement();
-  Polynomial<Rational>& rightTemp=
-  theGlobalVariables==0? buffer2.GetElement() : theGlobalVariables->RFgcdBuffer2.GetElement();
-  Polynomial<Rational>& tempP=
-  theGlobalVariables==0? buffer3.GetElement() : theGlobalVariables->RFgcdBuffer3.GetElement();
+  Polynomial<Rational> leftTemp, rightTemp, tempP;
   MemorySaving<List<Polynomial<Rational> > > bufferList;
-  List<Polynomial<Rational> >& theBasis=
-  theGlobalVariables==0? bufferList.GetElement():theGlobalVariables->RFgcdBufferList1.GetElement();
-
+  List<Polynomial<Rational> > theBasis;
   leftTemp=(left);
   rightTemp=(right);
   int theNumVars=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());

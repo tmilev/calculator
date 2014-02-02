@@ -720,7 +720,15 @@ class Vectors: public List<Vector<coefficient> >
         output.elements[i][j]=this->TheObjects[i][j];
   }
   void GetOrthogonalComplement(Vectors<coefficient>& output, Matrix<Rational>* theBilinearForm=0)
-  { Matrix<coefficient> theMatrix;
+  { if (this->size==0)
+    { if (theBilinearForm!=0)
+      { output.MakeEiBasis(theBilinearForm->NumRows);
+        return;
+      }
+      crash << "Finding orthogonal complement of zero vectors without specifying a bilinear form is "
+      << " forbidden: I can't determine the dimension of the ambient vector space. " << crash;
+    }
+    Matrix<coefficient> theMatrix;
     theMatrix.AssignVectorsToRows(*this);
     if (theBilinearForm!=0)
       theMatrix*=*theBilinearForm;

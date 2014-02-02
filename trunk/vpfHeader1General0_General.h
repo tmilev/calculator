@@ -953,6 +953,14 @@ public:
   bool QuickSortAscendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy=0)
   { return this->QuickSortAscendingCustomRecursive(0, this->size-1, theCompareror, carbonCopy);
   }
+  template <class compareClass, class carbonCopyType=Object>
+  bool QuickSortDescendingCustom(compareClass& theCompareror, List<carbonCopyType>* carbonCopy=0)
+  { bool result=this->QuickSortAscendingCustomRecursive(0, this->size-1, theCompareror, carbonCopy);
+    this->ReverseOrderElements();
+    if (carbonCopy!=0)
+      carbonCopy->ReverseOrderElements();
+    return result;
+  }
   //The below function is required to preserve the order of elements given by theSelection.elements.
   void SubSelection(const Selection& theSelection, List<Object>& output);
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
@@ -2103,7 +2111,10 @@ public:
       this->elements[0][i]=input[i];
   }
   void DirectSumWith(const Matrix<coefficient>& m2, const coefficient& theRingZero=0);
-  inline bool operator==(const Matrix<coefficient>& other)const
+  inline bool operator!=(const Matrix<coefficient>& other)const
+  { return !((*this)==other);
+  }
+  bool operator==(const Matrix<coefficient>& other)const
   { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)
       return false;
     for(int i=0; i<this->NumRows; i++)

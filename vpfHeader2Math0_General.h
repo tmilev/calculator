@@ -2901,38 +2901,11 @@ public:
   MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer5;
   MemorySaving<Polynomial<LargeInt> > PolyLargeIntPartFracBuffer6;
 
-  MemorySaving<Polynomial<Rational> > RFgcdBuffer1;
-  MemorySaving<Polynomial<Rational> > RFgcdBuffer2;
-  MemorySaving<Polynomial<Rational> > RFgcdBuffer3;
-  MemorySaving<Polynomial<Rational> > RFgcdBuffer4;
-  MemorySaving<Polynomial<Rational> > RFgcdBuffer5;
-
-  MemorySaving<List<Polynomial<Rational> > > RFgcdBufferList1;
-
-  MemorySaving<MonomialP> RFgcdBuferMon1;
-  MemorySaving<MonomialP> RFgcdBuferMon2;
-
   MemorySaving<DynkinDiagramRootSubalgebra > dynGetEpsCoords;
 
   MemorySaving<SubgroupWeylGroupOLD> subGroupActionNormalizerCentralizer;
 
-  MemorySaving<DynkinDiagramRootSubalgebra > dynAttemptTheTripleTrick;
-
-  MemorySaving<Vectors<Rational> > rootsNilradicalRoots;
-  MemorySaving<Vectors<Rational> > rootsConeConditionHolds2;
-  MemorySaving<Vectors<Rational> > rootsAttemptTheTripleTrick;
-  MemorySaving<Vectors<Rational> > rootsAttepmtTheTripleTrickWRTSA;
-  MemorySaving<Vectors<Rational> > rootsComputeEpsCoordsWRTk2;
-  MemorySaving<Vectors<Rational> > rootsComputeEpsCoordsWRTk;
-  MemorySaving<Vectors<Rational> > rootsGetEpsilonCoords;
-  MemorySaving<Vectors<Rational> > rootsConeWriteToFileBuffer;
-
   MemorySaving<HashedList<Vector<Rational> > > hashedRootsComputeSubGroupFromGeneratingReflections;
-
-  MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso1;
-  MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso2;
-  MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso3;
-  MemorySaving<List<Vectors<Rational> > > rootsAttemptExtensionIso4;
 
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
@@ -4441,7 +4414,6 @@ public:
   (Vector<Rational> & SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output);
   bool ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, Vectors<Rational>& buffer, GlobalVariables* theGlobalVariables);
   void operator=(const Cone& other)
   { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->flagIsTheZeroCone=other.flagIsTheZeroCone;

@@ -114,20 +114,16 @@ public:
   bool flagDeallocated;
   List<List<ElementSemisimpleLieAlgebra<Rational> > > Modules;
   List<ElementSemisimpleLieAlgebra<Rational> > HighestVectors;
-  List<Vectors<Rational> > WeightsModulesNONprimal;
-//  List<Vectors<Rational> > WeightsModulesPrimal;
-  List<Vector<Rational> > HighestWeightsNONPrimal;
+  List<Vectors<Rational> > WeightsModulesNONPrimalSimple;
+  List<Vectors<Rational> > WeightsModulesNONPrimalFundamental;
+  List<Vectors<Rational> > WeightsModulesPrimalSimple;
+  List<Vector<Rational> > HighestWeightsNONPrimalFundamental;
 
   List<Vector<Rational> > HighestWeightsPrimalSimple;
   List<Vector<Rational> > LowestWeightsPrimalSimple;
 
 //  HashedList<Vector<Rational> > HighestWeightsPrimal;
 
-  Vectors<Rational> LowestWeightsGmodK;
-  Vectors<Rational> HighestWeightsGmodK;
-
-
-  List<Vectors<Rational> > kModules;
   charSSAlgMod<Rational> ModuleDecompoHighestWeights;
   List<int> indicesSubalgebrasContainingK;
   List<List<List<int> > > theMultTable;
@@ -163,6 +159,8 @@ public:
   rootSubalgebras* ownEr;
   HashedList<Vector<Rational> > bufferForModuleGeneration;
   Matrix<Rational> scalarProdMatrixPermuted, scalarProdMatrixOrdered;
+  Matrix<Rational> scalarProdInvertedMatrixOrdered;
+
   List<Matrix<Rational> > potentialExtensionCartanSymmetrics;
   List<List<int> > potentialExtensionRootPermutations;
   List<DynkinType> potentialExtensionDynkinTypes;
@@ -177,7 +175,12 @@ public:
   //returns -1 if the weight/root  is not in g/k
   bool CheckInitialization()const;
   bool CheckConsistency()const;
-  Vector<Rational> GetFundamentalCoordsOverK(const Vector<Rational>& inputGweightSimpleCoords)const;
+  bool CheckScalarProdMatrixOrdered()const;
+  Vector<Rational> GetFundamentalCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords)const;
+  Vector<Rational> GetSimpleCoordsOverKss(const Vector<Rational>& inputGweightSimpleCoords)const;
+  inline int GetNumModules()const
+  { return this->HighestVectors.size;
+  }
   int GetIndexKmoduleContainingRoot(const Vector<Rational>& input);
   void GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables);
   void GetCoxeterElement(Matrix<Rational>& output);
@@ -187,6 +190,8 @@ public:
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
   bool rootIsInCentralizer(const Vector<Rational>& input);
   bool IsBKhighest(const Vector<Rational>& input);
+  bool IsBKlowest(const Vector<Rational>& input);
+  bool CompareLeftGreaterThanRight(const Vector<Rational>& weightLeft, const Vector<Rational>& weightRight);
   bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational>& input);
   void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
   bool AttemptTheTripleTrick(coneRelation& theRel, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
@@ -223,7 +228,6 @@ public:
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
-  void ElementToStringHeaderFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
   std::string ToString(FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0);
   void ToHTML(int index, FormatExpressions* theFormat, SltwoSubalgebras* sl2s, GlobalVariables* theGlobalVariables);
   std::string ToStringMultTable(bool useLaTeX, bool useHtml, rootSubalgebra& owner);
@@ -233,12 +237,16 @@ public:
   void GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables);
   void ComputeDynkinDiagramKandCentralizer();
   bool CheckRankInequality()const;
-  bool ComputeEssentials();
+  bool ComputeEssentialsIfNew();
+  void ComputeEssentialS();
   bool CheckForMaximalDominanceCartanSA();
-  void ComputeAllOld();
   void ComputeRootsOfK();
   void ComputeKModules();
-  void ComputeOneKModule(int moduleIndex);
+  void ComputeModuleDecompo();
+  void ComputeHighestVectorsHighestWeights();
+  void ComputeModulesFromHighestVectors();
+  void ComputeModuleFromHighestVector(int moduleIndex);
+
   void ComputeHighestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputHW);
   void ComputeExtremeWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
   void ComputeLowestWeightInTheSameKMod(const Vector<Rational>& input, Vector<Rational>& outputLW);
@@ -247,7 +255,7 @@ public:
   void initForNilradicalGeneration();
   void initNoOwnerReset();
   void GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(GlobalVariables& theGlobalVariables);
-  bool LinCombToString(Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
+  bool LinCombToString(const Vector<Rational>& alphaRoot, int coeff, Vector<Rational>& linComb, std::string& output);
   bool LinCombToStringDistinguishedIndex(int distinguished, Vector<Rational>& alphaRoot, int coeff, Vector<Rational> & linComb, std::string& output);
   void WriteMultTableAndOppositeKmodsToFile(std::fstream& output, List<List<List<int> > >& inMultTable, List<int>& inOpposites);
   void ReadMultTableAndOppositeKmodsFromFile(std::fstream& input, List<List<List<int> > >& outMultTable, List<int>& outOpposites);

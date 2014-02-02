@@ -2819,18 +2819,9 @@ void Cone::WriteToFile
   output << XML::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-bool Cone::ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ if (theGlobalVariables!=0)
-    return this->ReadFromFile(output, theGlobalVariables->rootsConeWriteToFileBuffer.GetElement(), theGlobalVariables);
-  else
-  { Vectors<Rational> tempRoots;
-    return this->ReadFromFile(output, tempRoots, 0);
-  }
-}
-
-bool Cone::ReadFromFile
-  (std::fstream& input, Vectors<Rational>& buffer, GlobalVariables* theGlobalVariables)
+bool Cone::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS, rootString;
+  Vectors<Rational> buffer;
   int NumWordsRead;
   XML::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
   if(NumWordsRead!=0)

@@ -16,6 +16,8 @@
 #include "vpfImplementationHeader2Math7_PackedVector.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
+GlobalVariables& theGlobalVariables=onePredefinedCopyOfGlobalVariables;
+
 
 class CharacterTable
 {
@@ -279,10 +281,10 @@ void ComputeIrreps(WeylGroup& G)
   std::cout << "need reps for chars" << charactersWithoutIrreps << std::endl;
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
-  Rational SizeG=G.GetSizeWeylGroupByFormula();
+  Rational SizeG=G.GetGroupSizeByFormula();
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=0; j<G.characterTable.size; j++)
-      M(j,i) = G.characterTable[j][i]*G.conjugacyClasses[i].size/SizeG;
+      M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=i; j<G.characterTable.size; j++)
     { std::cout << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << std::endl;
@@ -290,7 +292,7 @@ void ComputeIrreps(WeylGroup& G)
 }
 
 // this is incorrect.  Do not use it.
-void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWeylGroupParabolic& out)
+void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupRootReflections& out)
 { out.init();
   out.parent = G;
   int d = sel.CardinalitySelection+1;
@@ -316,42 +318,6 @@ void PseudoParabolicSubgroupNope(WeylGroup* G, const Selection& sel, SubgroupWey
   }
   out.SubCartanSymmetric.elements[d-1][d-1] = hr.ScalarProduct(hr,G->CartanSymmetric);
   out.generatorPreimages[d-1] = G->theElements.GetIndex(G->GetRootReflection(G->RootSystem.size-1));
-}
-
-void SubgroupWeylGroup::ComputeTauSignature()
-{ MacroRegisterFunctionWithName("SubgroupWeylGroup::ComputeTauSignature");
-  if(this->ccPreimages.size == 0)
-  { this->ccPreimages.SetSize(this->conjugacyClasses.size);
-    for(int i=0; i<this->conjugacyClasses.size; i++)
-    { ElementWeylGroup<WeylGroup> g;
-      g.MakeID(*this->parent);
-      const ElementWeylGroup<WeylGroup>& currentRepresentative=this->theElements[this->conjugacyClasses[i][0]];
-      for(int j=currentRepresentative.generatorsLastAppliedFirst.size-1; j>=0; j--)
-        g*=this->parent->theElements[this->generatorPreimages[currentRepresentative.generatorsLastAppliedFirst[j]]];
-      int gi = this->parent->theElements.GetIndex(g);
-      bool notFound=true;
-      for(int ci=0; notFound && ci<this->parent->conjugacyClasses.size; ci++)
-        for(int cj=0; notFound && cj<this->parent->conjugacyClasses[ci].size; cj++)
-          if(this->parent->conjugacyClasses[ci][cj] == gi)
-          { this->ccPreimages[i] = ci;
-            notFound=false;
-          }
-    }
-  }
-  Vector<Rational> Xs;
-  this->GetSignCharacter(Xs);
-  Vector<Rational> Xi;
-  Xi.SetSize(this->conjugacyClasses.size);
-  this->tauSignature.SetSize(this->parent->irreps.size);
-  for(int i=0; i<this->parent->irreps.size; i++)
-  { ClassFunction<Rational> Xip = this->parent->irreps[i].GetCharacter();
-    for(int j=0; j<Xi.size; j++)
-      Xi[j] = Xip[this->ccPreimages[j]];
-    if(this->GetHermitianProduct(Xs,Xi) == 0)
-      this->tauSignature[i] = false;
-    else
-      this->tauSignature[i] = true;
-  }
 }
 
 template <typename weylgroup>
@@ -1015,11 +981,11 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
   if(n*n != V.size)
     return false;
   // more expensive test: character of V has unit norm
-  ClassFunction<coefficient> X;
+  ClassFunction<WeylGroup, coefficient> X;
   X.G = &G;
-  X.data.SetSize(G.conjugacyClasses.size);
-  for(int i=0; i<G.conjugacyClasses.size; i++)
-  { int g = G.conjugacyClasses[i][0];
+  X.data.SetSize(G.conjugacyClasseS.size);
+  for(int i=0; i<G.conjugacyClasseS.size; i++)
+  { int g = G.conjugacyClasseS[i].representative;
     coefficient tr = 0;
     for(int j=0; j<V.size; j++)
     { Vector<coefficient> v = ActOnGroupRing(G,g,V[j]);
@@ -1046,7 +1012,7 @@ bool is_isotypic_component(WeylGroup &G, const List<Vector<coefficient> > &V)
 
 
 template <typename coefficient>
-Matrix<coefficient> GetMatrix(const ClassFunction<coefficient>& X)
+Matrix<coefficient> GetMatrix(const ClassFunction<WeylGroup, coefficient>& X)
 { Matrix<coefficient> M;
   M.MakeZeroMatrix(X.G->N);
   for(int i1=0; i1<X.G->ccCount; i1++)
@@ -1258,9 +1224,12 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
 
 
   rootSubalgebras theRootSAs;
+  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
+  theRootSAs.theGlobalVariables=&theGlobalVariables;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(theGlobalVariables, true, false);
+  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
+
   List<Vector<Rational> > roots;
 
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
@@ -1289,7 +1258,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     } while(module.size > mcs);
     std::cout << "...rank is " << module.size << std::endl;
     WeylGroupRepresentation<Rational> rep;
-    rep.reset(&W);
+    rep.init(W);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     for(int i=1; i<W.GetDim()+1; i++)
@@ -1330,7 +1299,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational)i<W.GetSizeWeylGroupByFormula(); i++)
+  for(int i=0; (Rational)i<W.GetGroupSizeByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1380,7 +1349,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   std::cout << "module rank is " << monomials_used.size << std::endl;
 
   WeylGroupRepresentation<Rational> rep;
-  rep.reset(&W);
+  rep.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -1728,11 +1697,11 @@ int pointis(int d, int n)
 
 
 WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ std::cout << "starting with roots " << roots << " at time " <<   theGlobalVariables.GetElapsedSeconds() << std::endl;
+{ std::cout << "starting with roots " << roots << " at time " << theGlobalVariables.GetElapsedSeconds() << std::endl;
   List<Vector<Rational> > monomial;
   HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
-  for(int i=0; (Rational) i<W.GetSizeWeylGroupByFormula(); i++)
+  for(int i=0; (Rational) i<W.GetGroupSizeByFormula(); i++)
   { W.GetStandardRepresentationMatrix(i,m);
     monomial.SetSize(roots.size);
     for(int j=0; j<roots.size; j++)
@@ -1861,7 +1830,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     B65521.AddVector(images65521[monomials_used[i]]);
 
   WeylGroupRepresentation<f65521> rep65521;
-  rep65521.reset(&W);
+  rep65521.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -1956,7 +1925,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     B.AddVector(images[monomials_used[i]]);
 
   WeylGroupRepresentation<Rational> rep;
-  rep.reset(&W);
+  rep.init(W);
   for(int i=1; i<W.GetDim()+1; i++)
   { Matrix<Rational> m;
     W.GetStandardRepresentationMatrix(i,m);
@@ -2024,14 +1993,13 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
 
 void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSlieAlg)
 { WeylGroup& W = theSSlieAlg.theWeyl;
-
-  GlobalVariables localGlobalVariables;
-  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
 
   rootSubalgebras theRootSAs;
   theRootSAs.owneR=&theSSlieAlg;
   DynkinSimpleType dt = W.theDynkinType.GetGreatestSimpleType();
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphismOLD(localGlobalVariables, true, false);
+  theRootSAs.theGlobalVariables=&theGlobalVariables;
+  theRootSAs.ComputeAllReductiveRootSubalgebrasUpToIsomorphism();
   List<Vector<Rational> > roots;
 
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
@@ -2753,11 +2721,10 @@ int main(void)
   LoadAndPrintTauSignatures(letter, number);
 
 
-  GlobalVariables localGlobalVariables;
-  localGlobalVariables.SetFeedDataToIndicatorWindowDefault(CGI::makeStdCoutReport);
+  theGlobalVariables.SetStandardStringOutput(CGI::MakeStdCoutReport);
   SemisimpleLieAlgebra theSSlieAlg;
   theSSlieAlg.theWeyl.MakeArbitrarySimple(letter, number);
-  theSSlieAlg.ComputeChevalleyConstants(&localGlobalVariables);
+  theSSlieAlg.ComputeChevalleyConstants(&theGlobalVariables);
   WeylGroup& W=theSSlieAlg.theWeyl;
   W.ComputeConjugacyClassesThomasVersion();
 

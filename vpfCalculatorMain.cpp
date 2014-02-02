@@ -124,6 +124,7 @@ int main(int argc, char **argv)
 //  civilizedInput="WeylGroupTauSignatures{}(b_2);";
 //  civilizedInput="WeylGroupTauSignatures{}(g_2);";
 //  civilizedInput="WeylGroupTauSignatures{}(e_7);";
+//civilizedInput="printRootSubalgebras{}a_1";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

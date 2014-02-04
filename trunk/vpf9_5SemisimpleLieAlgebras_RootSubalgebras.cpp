@@ -531,12 +531,12 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex)
   HashedList<Vector<Rational> > currentWeights;
   Vectors<Rational> zeroSpace;
   Vector<Rational> currentWeight;
-  currentWeights.SetExpectedSize(this->GetNumModules());
+  currentWeights.SetExpectedSize(this->GetAmbientWeyl().RootSystem.size);
   currentWeights.AddOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
   if (this->HighestWeightsPrimalSimple[moduleIndex].IsEqualToZero())
     zeroSpace.AddOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
   else
-    for (int j=0; j<currentWeights.size; j++)
+  { for (int j=0; j<currentWeights.size; j++)
       for (int k=0; k<this->SimpleBasisK.size; k++)
       { currentWeight= currentWeights[j]-this->SimpleBasisK[k];
         if (this->IsARoot(currentWeight))
@@ -544,9 +544,13 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex)
         if (currentWeight.IsEqualToZero())
           if (!zeroSpace.LinSpanContainsVector(currentWeights[j]))
           { zeroSpace.AddOnTop(currentWeights[j]);
-            currentWeights.AddOnTop(currentWeight);
+            currentWeights.AddOnTop(-this->SimpleBasisK[k]);
           }
       }
+    currentWeight.MakeZero(this->GetOwnerSSalg().GetRank());
+    for (int i=0; i<zeroSpace.size; i++)
+      currentWeights.AddOnTop(currentWeight);
+  }
   Vectors<Rational>& wPrimalSimple=this->WeightsModulesPrimalSimple[moduleIndex];
   Vectors<Rational>& wNONprimalFundamental=this->WeightsModulesNONPrimalFundamental[moduleIndex];
   Vectors<Rational>& wNONprimalSimple=this->WeightsModulesNONPrimalSimple[moduleIndex];
@@ -560,7 +564,7 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex)
     if (this->IsBKlowest(wPrimalSimple[j]) || wPrimalSimple.size==1)
     { this->LowestWeightsPrimalSimple[moduleIndex]=wPrimalSimple[j];
       if (j!=wPrimalSimple.size- 1)
-        crash << "Last module weight is not lowest. The lowest weight is "
+        crash << "Last module weight is not lowest. The simple basis is: " << this->SimpleBasisK.ToString() << ". The lowest weight is "
         << this->LowestWeightsPrimalSimple[moduleIndex].ToString() << " and the weights of the module are: "
         << wPrimalSimple.ToString() << ". I think this shouldn't happen, should it?" << crash;
     }
@@ -1123,8 +1127,7 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   out << CGI::GetMathSpanPure(this->ModuleDecompoHighestWeights.ToString());
   out << "<br>\n";
   out << "\ng/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>"
-  << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Vectors<Rational></th>"
-  << "<th>epsilon coordinates</th>";
+  << "<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>Module basis</th><th>Weights epsilon coords</th>";
   if (includeKEpsCoords)
     out << "<th>epsilon coords wrt k</th>";
   out << "</tr>";
@@ -1133,10 +1136,19 @@ std::string rootSubalgebra::ToString(FormatExpressions* theFormat, GlobalVariabl
   { out << "\n<tr><td>Module " << i+1 << "</td><td>" << this->Modules[i].size << "</td>";
     out << "<td>" << this->LowestWeightsPrimalSimple[i].ToString() << "</td>";
     out << "<td>" << this->HighestWeightsPrimalSimple[i].ToString() << "</td>";
-    out << "<td>" << this->Modules[i].ToString() << "</td><td>";
-    if (i>=this->kModulesgEpsCoords.size)
-      this->GetAmbientWeyl().GetEpsilonCoords(this->WeightsModulesPrimalSimple[i], this->kModulesgEpsCoords[i]);
-    out << this->kModulesgEpsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
+    out << "<td>";
+    for (int j=0; j<this->Modules[i].size; j++)
+    { out << this->Modules[i][j].ToString();
+      if (j!=this->Modules[i].size-1)
+        out << "<br>";
+    }
+    out << "</td><td>";
+    this->GetAmbientWeyl().GetEpsilonCoords(this->WeightsModulesPrimalSimple[i], this->kModulesgEpsCoords[i]);
+    for (int j=0; j<this->Modules[i].size; j++)
+    { out << this->kModulesgEpsCoords[i][j].ToStringEpsilonFormat();
+      if (j!=this->Modules[i].size-1)
+        out << "<br>";
+    }
     out << "</td>";
     if (includeKEpsCoords)
     { out << "<td>";

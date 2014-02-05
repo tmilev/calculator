@@ -213,7 +213,7 @@ public:
 };
 
 template <class coefficient>
-class MonomialChar
+class Weight
 {
 public:
   SemisimpleLieAlgebra* owner;
@@ -221,11 +221,11 @@ public:
   static const bool IsMonEqualToZero()
   { return false;
   }
-  friend std::ostream& operator << (std::ostream& output, const MonomialChar<coefficient>& input)
+  friend std::ostream& operator << (std::ostream& output, const Weight<coefficient>& input)
   { output << input.ToString();
     return output;
   }
-  MonomialChar():owner(0){}
+  Weight():owner(0){}
   void CheckNonZeroOwner()const
   { if (this->owner!=0)
       return;
@@ -234,24 +234,24 @@ public:
   void AccountSingleWeight
   (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
    Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const;
-  std::string TensorAndDecompose(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
+  std::string TensorAndDecompose(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   inline unsigned int HashFunction()const
   { return weightFundamentalCoordS.HashFunction();
   }
-  static inline unsigned int HashFunction(const MonomialChar<coefficient>& input)
+  static inline unsigned int HashFunction(const Weight<coefficient>& input)
   { return input.HashFunction();
   }
-  inline bool operator==(const MonomialChar<coefficient>& other) const
+  inline bool operator==(const Weight<coefficient>& other) const
   { return this->weightFundamentalCoordS==other.weightFundamentalCoordS && this->owner==other.owner;
   }
-  inline bool operator>(const MonomialChar<coefficient>& other) const
+  inline bool operator>(const Weight<coefficient>& other) const
   { return this->weightFundamentalCoordS>other.weightFundamentalCoordS;
   }
 };
 
 template <class coefficient>
-class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coefficient>
+class charSSAlgMod : public MonomialCollection<Weight<coefficient>, coefficient>
 {
   public:
   void CheckConsistency()const
@@ -274,7 +274,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const charSSAlgMod<coefficient>& input)
-  { return input.::MonomialCollection<MonomialChar<coefficient>, coefficient>::HashFunction(input);
+  { return input.::MonomialCollection<Weight<coefficient>, coefficient>::HashFunction(input);
   }
   void GetDual(charSSAlgMod<coefficient>& output)const;
   void MakeFromWeight(const Vector<coefficient>& inputWeightSimpleCoords, SemisimpleLieAlgebra* inputOwner);
@@ -305,9 +305,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<coefficient>, coeffi
   void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
-  std::string operator*=(const MonomialChar<Rational>& other);
+  std::string operator*=(const Weight<Rational>& other);
   void operator*=(const coefficient& other)
-  { this->::MonomialCollection<MonomialChar<coefficient>, coefficient>::operator*=(other);
+  { this->::MonomialCollection<Weight<coefficient>, coefficient>::operator*=(other);
   }
 };
 

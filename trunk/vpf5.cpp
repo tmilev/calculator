@@ -1333,12 +1333,12 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
 //  std::cout << "<br>starting char: " << this->ToString();
   charSSAlgMod charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
 
-  MonomialChar<coefficient> tempMon, localHighest;
+  Weight<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
   coefficient bufferCoeff, highestCoeff;
   for (int i=0; i<this->size(); i++)
-  { const MonomialChar<coefficient>& currentMon=(*this)[i];
+  { const Weight<coefficient>& currentMon=(*this)[i];
     if (!inputData.WeylFD.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;

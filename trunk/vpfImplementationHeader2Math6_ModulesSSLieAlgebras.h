@@ -481,7 +481,7 @@ bool ModuleSSalgebra<coefficient>::MakeFromHW
     return false;
   }
   this->theModuleWeightsSimpleCoords.Clear();
-  MonomialChar<coefficient> tempCharMon;
+  Weight<coefficient> tempCharMon;
   tempCharMon.owner=0;
   this->theCharOverH.MakeZero();
   for (int i=0; i<this->thePaths.size; i++)

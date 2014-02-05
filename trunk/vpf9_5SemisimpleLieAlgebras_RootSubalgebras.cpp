@@ -598,7 +598,7 @@ void rootSubalgebra::ComputeModulesFromHighestVectors()
 void rootSubalgebra::ComputeModuleDecompo()
 { MacroRegisterFunctionWithName("rootSubalgebra::ComputeModuleDecompo");
   this->ModuleDecompoHighestWeights.MakeZero();
-  MonomialChar<Rational> theM;
+  Weight<Rational> theM;
   for (int i=0; i<this->Modules.size; i++)
   { theM.weightFundamentalCoordS=this->HighestWeightsNONPrimalFundamental[i];
     this->ModuleDecompoHighestWeights.AddMonomial(theM, 1);

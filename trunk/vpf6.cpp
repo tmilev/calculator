@@ -1129,6 +1129,10 @@ bool Expression::IsEqualToOne()const
   return false;
 }
 
+bool Expression::IsMonEqualToZero()const
+{ return this->IsEqualToZero();
+}
+
 bool Expression::IsEqualToZero()const
 { if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().IsEqualToZero();
@@ -1614,8 +1618,8 @@ class quasiDiffMon
   unsigned int HashFunction()const
   { return HashFunction(*this);
   }
-  bool IsEqualToZero()const
-  { return this->theMatMon.IsEqualToZero();
+  bool IsMonEqualToZero()const
+  { return this->theMatMon.IsMonEqualToZero();
   }
   bool operator==(const quasiDiffMon& other)const
   { return this->theWeylMon==other.theWeylMon && this->theMatMon==other.theMatMon;

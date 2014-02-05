@@ -218,7 +218,7 @@ class MonomialChar
 public:
   SemisimpleLieAlgebra* owner;
   Vector<coefficient> weightFundamentalCoordS;
-  static const bool IsEqualToZero()
+  static const bool IsMonEqualToZero()
   { return false;
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialChar<coefficient>& input)

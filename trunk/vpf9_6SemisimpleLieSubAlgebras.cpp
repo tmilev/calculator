@@ -532,8 +532,8 @@ void CandidateSSSubalgebra::SetUpInjectionHs
   this->CartanSAsByComponent=baseSubalgebra.CartanSAsByComponent;
   int indexOffset=theNewType.GetRank()-newComponent.theRank;
   int newIndexInNewComponent=0;
-  if (!newComponent.IsEqualToZero())
-    newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
+//  if (!newComponent.IsEqualToZero())
+  newIndexInNewComponent=*theRootInjection.LastObject()-indexOffset;
   Vector<Rational> NewH;
   if (newHScaledToActByTwo!=0)
   { NewH= *newHScaledToActByTwo;

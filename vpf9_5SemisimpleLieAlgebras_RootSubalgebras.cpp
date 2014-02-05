@@ -534,7 +534,7 @@ void rootSubalgebra::ComputeModuleFromHighestVector(int moduleIndex)
   currentWeights.SetExpectedSize(this->GetAmbientWeyl().RootSystem.size);
   currentWeights.AddOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
   if (this->HighestWeightsPrimalSimple[moduleIndex].IsEqualToZero())
-    zeroSpace.AddOnTop(this->HighestWeightsPrimalSimple[moduleIndex]);
+    zeroSpace.AddOnTop(this->HighestVectors[moduleIndex].GetCartanPart());
   else
   { for (int j=0; j<currentWeights.size; j++)
       for (int k=0; k<this->SimpleBasisK.size; k++)
@@ -1976,11 +1976,11 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
   ProgressReport theReport(this->ownEr->theGlobalVariables);
   std::stringstream reportStream;
   this->SimpleBasisKScaledToActByTwo=this->SimpleBasisK;
-  std::cout << "Simple basis k: " << this->SimpleBasisK.ToString();
+//  std::cout << "Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i=0; i<this->SimpleBasisK.size; i++)
-  { std::cout << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
+//  { std::cout << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
-  }
+//  }
   if (this->ownEr->theGlobalVariables!=0)
   { reportStream << "Computing root subalgebra... ";
     theReport.Report(reportStream.str());

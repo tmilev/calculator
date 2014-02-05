@@ -1574,7 +1574,7 @@ void CandidateSSSubalgebra::ComputeCharsPrimalModules()
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeCharsPrimalModules");
   this->CharsPrimalModules.SetSize(this->Modules.size);
   this->CharsPrimalModulesMerged.SetSize(this->Modules.size);
-  MonomialChar<Rational> currentWeight;
+  Weight<Rational> currentWeight;
   currentWeight.owner=0;
   for (int i=0; i<this->CharsPrimalModules.size; i++)
   { this->CharsPrimalModules[i].MakeZero();
@@ -2311,7 +2311,7 @@ void CandidateSSSubalgebra::ComputePrimalModuleDecompositionHWsHWVsOnlyLastPart(
   this->HighestWeightsPrimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   this->HighestWeightsNONprimalNonSorted.SetSize(this->HighestVectorsNonSorted.size);
   this->thePrimalChaR.MakeZero();
-  MonomialChar<Rational> theWeight;
+  Weight<Rational> theWeight;
   theWeight.owner=0;
   Vector<Rational> currentRoot;
   //std::cout << this->theWeylNonEmbeddeD.theDynkinType.ToString();
@@ -2618,7 +2618,7 @@ bool CandidateSSSubalgebra::ComputeChar(bool allowBadCharacter)
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
   this->CheckInitialization();
   this->theWeylNonEmbeddeD.ComputeRho(true);
-  MonomialChar<Rational> tempMon;
+  Weight<Rational> tempMon;
   tempMon.weightFundamentalCoordS.MakeZero(this->theWeylNonEmbeddeD.GetDim());
   tempMon.owner=0;
   this->theCharFundamentalCoordsRelativeToCartan.MakeZero();
@@ -4349,7 +4349,7 @@ void CandidateSSSubalgebra::ComputeCentralizerIsWellChosen()
   { this->flagCentralizerIsWellChosen=false;
     return;
   }
-  MonomialChar<Rational> theZeroWeight;
+  Weight<Rational> theZeroWeight;
   theZeroWeight.owner=0;
   theZeroWeight.weightFundamentalCoordS.MakeZero(this->theHs.size);
   this->centralizerRank =this->theCharNonPrimalFundCoords.GetMonomialCoefficient(theZeroWeight);

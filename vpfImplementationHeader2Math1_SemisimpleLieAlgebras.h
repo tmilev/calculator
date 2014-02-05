@@ -7,7 +7,7 @@
 static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLieAlgebras(__FILE__, "Implementation header, semisimple Lie algebra routines. ");
 
 template <class coefficient>
-std::string MonomialChar<coefficient>::ToString(FormatExpressions* theFormat)const
+std::string Weight<coefficient>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool useOmega=true;
   std::string oldCustomPlus;
@@ -29,7 +29,7 @@ std::string MonomialChar<coefficient>::ToString(FormatExpressions* theFormat)con
 }
 
 template <class coefficient>
-void MonomialChar<coefficient>::AccountSingleWeight
+void Weight<coefficient>::AccountSingleWeight
 (const Vector<Rational>& currentWeightSimpleCoords, const Vector<Rational>& otherHighestWeightSimpleCoords,
  Rational& theMult, charSSAlgMod<coefficient>& outputAccum)const
 { //This is the Brauer-Klimyk formula. Reference:
@@ -37,7 +37,7 @@ void MonomialChar<coefficient>::AccountSingleWeight
   //page 142, exercise 9.
   //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
   //<< " with coefficient " << finalCoeff.ToString();
-  MacroRegisterFunctionWithName("MonomialChar_CoefficientType::AccountSingleWeight");
+  MacroRegisterFunctionWithName("Weight_CoefficientType::AccountSingleWeight");
   this->CheckNonZeroOwner();
   Vector<Rational> dominant=currentWeightSimpleCoords;
   dominant+=otherHighestWeightSimpleCoords;
@@ -54,7 +54,7 @@ void MonomialChar<coefficient>::AccountSingleWeight
   dominant-=theWeyl.rho;
   if (!theWeyl.IsDominantWeight(dominant))
     return;
-  MonomialChar<Rational> tempMon;
+  Weight<Rational> tempMon;
   tempMon.owner=this->owner;
   tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
   coefficient coeffChange;
@@ -66,12 +66,12 @@ void MonomialChar<coefficient>::AccountSingleWeight
 }
 
 template <class coefficient>
-std::string MonomialChar<coefficient>::TensorAndDecompose
-(const MonomialChar<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
+std::string Weight<coefficient>::TensorAndDecompose
+(const Weight<coefficient>& other, charSSAlgMod<coefficient>& output, GlobalVariables& theGlobalVariables)const
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J. Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
-  MacroRegisterFunctionWithName("MonomialChar_CoefficientType::TensorAndDecompose");
+  MacroRegisterFunctionWithName("Weight_CoefficientType::TensorAndDecompose");
   this->CheckNonZeroOwner();
   std::stringstream errorLog;
   std::string tempS;
@@ -127,7 +127,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeFullCharacter
   Vectors<Rational> theVect;
   HashedList<Vector<Rational> > theOrbit;
   theVect.SetSize(1);
-  MonomialChar<coefficient> tempMon;
+  Weight<coefficient> tempMon;
   tempMon.owner=0;
   for (int i=0; i<domChar.size(); i++)
   { theVect[0]=this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(domChar[i].weightFundamentalCoordS);
@@ -151,7 +151,7 @@ void charSSAlgMod<coefficient>::GetDual(charSSAlgMod<coefficient>& output)const
     thisCopy.GetDual(output);
     return;
   }
-  MonomialChar<coefficient> tempM;
+  Weight<coefficient> tempM;
   output.MakeZero();
   for (int i=0; i<this->size(); i++)
   { tempM=(*this)[i];
@@ -167,7 +167,7 @@ void charSSAlgMod<coefficient>::MakeFromWeight(const Vector<coefficient>& inputW
     crash << "This is a programming error: attempting to create a character from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << (inputOwner->GetRank()) << crash;
-  MonomialChar<coefficient> theMon;
+  Weight<coefficient> theMon;
   theMon.owner=inputOwner;
   theMon.weightFundamentalCoordS=
   inputOwner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
@@ -190,7 +190,7 @@ bool charSSAlgMod<coefficient>::FreudenthalEvalMeDominantWeightsOnly
   HashedList<Vector<coefficient> > currentWeights;
   std::stringstream localErrors, localDetails;
   std::string localDetail;
-  MonomialChar<coefficient> tempMon;
+  Weight<coefficient> tempMon;
   tempMon.owner=0;
   coefficient bufferCoeff;
   for (int i=0; i<this->size(); i++)
@@ -380,7 +380,7 @@ bool charSSAlgMod<coefficient>::DrawMe
   HashedList<Vector<coefficient> > finalWeights;
   Vector<Rational> convertor;
   for (int i=0; i< CharCartan.size(); i++)
-  { const MonomialChar<coefficient>& currentMon=CharCartan[i];
+  { const Weight<coefficient>& currentMon=CharCartan[i];
     dominantWeightsNonHashed.size=0;
     dominantWeightsNonHashed.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoordS));
     bool isTrimmed=!theWeyl.GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
@@ -450,7 +450,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
   SubgroupWeylGroupOLD theFDWeyl;
   theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
-  MonomialChar<coefficient> tempMon, localHighest;
+  Weight<coefficient> tempMon, localHighest;
   List<coefficient> tempMults;
   HashedList<Vector<coefficient> > tempHashedRoots;
   WeylGroup& theWeyL=this->GetOwner()->theWeyl;
@@ -459,7 +459,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
   out << "Starting character: " << this->ToString();
   tempMon.owner=this->GetOwner();
   for (int i=0; i<this->size(); i++)
-  { const MonomialChar<coefficient>& currentMon=(*this)[i];
+  { const Weight<coefficient>& currentMon=(*this)[i];
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
@@ -569,7 +569,7 @@ bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
 template <class coefficient>
 void charSSAlgMod<coefficient>::MakeTrivial(SemisimpleLieAlgebra& inputOwner)
 { this->MakeZero();
-  MonomialChar<Rational> tempMon;
+  Weight<Rational> tempMon;
   tempMon.owner=&inputOwner;
   tempMon.weightFundamentalCoordS.MakeZero(inputOwner.GetRank());
   this->AddMonomial(tempMon, 1);
@@ -592,8 +592,8 @@ std::string charSSAlgMod<coefficient>::MultiplyBy(const charSSAlgMod& other, Glo
   coefficient theCF;
   for (int i=0; i<this->size(); i++)
     for (int j=0; j<other.size(); j++)
-    { const MonomialChar<Rational>& left = (*this)[i];
-      const MonomialChar<Rational>& right=other[j];
+    { const Weight<Rational>& left = (*this)[i];
+      const Weight<Rational>& right=other[j];
       potentialError=left.TensorAndDecompose(right, summand, theGlobalVariables);
       if (potentialError!="")
         return potentialError;

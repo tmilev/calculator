@@ -1399,7 +1399,7 @@ bool Calculator::fDecomposeCharGenVerma(Calculator& theCommands, const Expressio
   invertedParSel=parSel;
   invertedParSel.InvertSelection();
   charSSAlgMod<RationalFunctionOld> theChar, currentChar;
-  MonomialChar<RationalFunctionOld> theMon;
+  Weight<RationalFunctionOld> theMon;
   theChar.MakeZero();
   FormatExpressions formatChars;
   formatChars.FDrepLetter="L";
@@ -2320,7 +2320,7 @@ void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
 { output.MakeZero();
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
-  MonomialChar<coefficient> tempMon;
+  Weight<coefficient> tempMon;
   tempMon.owner=&this->GetOwner();
   WeylGroup& theWeyl=this->GetOwner().theWeyl;
   for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
@@ -2447,7 +2447,7 @@ bool Calculator::innerSplitGenericGenVermaTensorFD(Calculator& theCommands, cons
   tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter="\\bar{h}";
   theFDLeviSplitShifteD.MakeZero();
-  MonomialChar<RationalFunctionOld> tempMon;
+  Weight<RationalFunctionOld> tempMon;
   tempMon.owner=theSSalgebra;
   ElementUniversalEnveloping<RationalFunctionOld> currentChar;
   for (int i=0; i<theLeviEigenVectors.size; i++)

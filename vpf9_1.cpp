@@ -71,14 +71,14 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
 }
 
 template<>
-typename List<MonomialChar<RationalFunctionOld> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<MonomialChar<RationalFunctionOld> >()
+typename List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >()
 { return 0;
 }
 
 template<>
-typename List<MonomialChar<Rational> >::OrderLeftGreaterThanRight
-FormatExpressions::GetMonOrder<MonomialChar<Rational> >()
+typename List<Weight<Rational> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<Weight<Rational> >()
 { return 0;
 }
 

@@ -288,6 +288,7 @@ class Expression
   { return this->GetAmbientSSAlgebraNonConstUseWithCaution();
   }
   bool IsEqualToZero()const;
+  bool IsMonEqualToZero()const;
   bool IsEqualToOne()const;
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);

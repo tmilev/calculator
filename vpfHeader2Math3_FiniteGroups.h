@@ -34,6 +34,9 @@ public:
   bool IsEqualToZero()const
   { return this->data.IsEqualToZero();
   }
+  bool IsMonEqualToZero()const
+  { return this->data.IsEqualToZero();
+  }
   coefficient InnerProduct(const ClassFunction &other) const;
   coefficient Norm() const;
   ClassFunction operator*(const ClassFunction &other) const;
@@ -240,7 +243,7 @@ public:
     result*=other;
     return result;
   }
-  static inline bool IsEqualToZero()
+  static inline bool IsMonEqualToZero()
   { return false;
   }
   void GetCycleStructure(VectorSparse<Rational>& outputIndexIsCycleSizeCoordinateIsCycleMult)const;

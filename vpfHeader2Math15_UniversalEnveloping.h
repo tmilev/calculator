@@ -249,7 +249,7 @@ public:
   bool IsAConstant()const
   { return this->IsEqualToOne();
   }
-  static const bool IsEqualToZero()
+  static const bool IsMonEqualToZero()
   { return false;
   }
   bool AdjointRepresentationAction(const ElementUniversalEnveloping<coefficient>& input, ElementUniversalEnveloping<coefficient>& output, GlobalVariables* theGlobalVariables=0)const;

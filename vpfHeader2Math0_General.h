@@ -41,7 +41,7 @@ public:
     return output;
   }
   bool CheckInitialization()const;
-  static const bool IsEqualToZero()
+  static const bool IsMonEqualToZero()
   { return false;
   }
   static inline unsigned int HashFunction(const ChevalleyGenerator& input)
@@ -231,7 +231,7 @@ public:
         return false;
     return true;
   }
-  static const inline bool IsEqualToZero()
+  static const inline bool IsMonEqualToZero()
   { return false;
   }
   void ExponentMeBy(const Rational& theExp);
@@ -454,7 +454,7 @@ class MonomialWeylAlgebra
   { output << theMon.ToString();
     return output;
   }
-  static const inline bool IsEqualToZero()
+  static const inline bool IsMonEqualToZero()
   { return false;
   }
   bool IsAConstant()const
@@ -925,7 +925,7 @@ class MonomialVector
   void MakeEi(int inputIndex)
   { this->theIndex=inputIndex;
   }
-  inline static bool IsEqualToZero()
+  inline static bool IsMonEqualToZero()
   { return false;
   }
   bool operator>(const MonomialVector& other)const
@@ -2241,7 +2241,7 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
-  if (inputCoeff==0 || inputMon.IsEqualToZero())
+  if (inputCoeff==0 || inputMon.IsMonEqualToZero())
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j>=this->size())
@@ -2267,7 +2267,7 @@ int MonomialCollection<TemplateMonomial, coefficient>::AddMonomialNoCoeffCleanUp
 
 template <class TemplateMonomial, class coefficient>
 int MonomialCollection<TemplateMonomial, coefficient>::SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(const TemplateMonomial& inputMon, const coefficient& inputCoeff)
-{ if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
+{ if (inputCoeff.IsEqualToZero() || inputMon.IsMonEqualToZero())
     return -1;
   int j= this->theMonomials.GetIndex(inputMon);
   if (j==-1)
@@ -4188,7 +4188,9 @@ public:
   { crash << " Not implemented, please fix. " << crash;
     return output;
   }
-  static const bool IsEqualToZero(){return false;}
+  static const bool IsMonEqualToZero()
+  { return false;
+  }
   bool RemoveRedundantShortRootsClassicalRootSystem
   (PartFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
@@ -4754,7 +4756,7 @@ class DynkinSimpleType
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  inline bool IsEqualToZero()const
+  inline bool IsMonEqualToZero()const
   { return false;
   }
   void GetAutomorphismActingOnVectorColumn(MatrixTensor<Rational>& output, int AutoIndex)const;
@@ -5155,7 +5157,7 @@ class MonomialMatrix
     this->vIndex=-1;
     this->dualIndex=-1;
   }
-  bool IsEqualToZero()const
+  bool IsMonEqualToZero()const
   { return !this->IsId && this->vIndex==-1 && this->dualIndex==-1;
   }
   bool operator==(const MonomialMatrix& other)const
@@ -5540,7 +5542,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ToString(FormatExpressions* theFormat=0, bool includeV=true)const;
-  static const bool IsEqualToZero()
+  static const bool IsMonEqualToZero()
   { return false;
   }
   bool operator==(const MonomialGeneralizedVerma<coefficient>& other)const
@@ -5630,7 +5632,9 @@ public:
   { output << input.ToString();
     return output;
   }
-  static const bool IsEqualToZero(){return false;}
+  static const bool IsMonEqualToZero()
+  { return false;
+  }
   int GetNumVars()
   { return this->Coefficient.GetNumVars();
   }

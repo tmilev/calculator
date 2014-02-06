@@ -29,7 +29,7 @@ public:
   static bool innerAddRatToRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAddAlgebraicNumberToAlgebraicNumber(Calculator& theCommands, const Expression& input, Expression& output);
-
+  static bool innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAlgNumPolyByAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);
@@ -50,6 +50,7 @@ public:
   static bool innerMultiplyCharSSLieAlgByCharSSLieAlg(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);

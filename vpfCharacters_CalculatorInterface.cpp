@@ -1312,7 +1312,7 @@ bool CalculatorFunctionsWeylGroup::innerMacdonaldPolys(Calculator& theCommands, 
 
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraWeight");
-  Weight<Rational> resultWeight;
+  Weight<Polynomial<Rational> > resultWeight;
   if (input.children.size!=4)
     return false;
   SemisimpleLieAlgebra* theSSowner;
@@ -1322,20 +1322,24 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   }
   resultWeight.weightFundamentalCoordS.MakeZero(theSSowner->GetRank());
   resultWeight.owner=theSSowner;
-  return output.AssignValue(resultWeight, theCommands);
+  Expression theContext;
+  theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
+  return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight");
-  Weight<Rational> resultWeight;
+  Weight<Polynomial<Rational> > resultWeight;
   SemisimpleLieAlgebra* theSSowner;
   if (!CalculatorSerialization::innerSSLieAlgebra(theCommands, input, theSSowner))
   { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
+  Expression theContext;
+  theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
   resultWeight.weightFundamentalCoordS= theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(theSSowner->theWeyl.rho);
   resultWeight.owner=theSSowner;
-  return output.AssignValue(resultWeight, theCommands);
+  return output.AssignValueWithContext(resultWeight, theContext, theCommands);
 }
 
 bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands, const Expression& input, Expression& output)

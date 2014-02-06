@@ -546,7 +546,7 @@ public:
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
-  HashedListReferences<Weight<Polynomial<Rational> > > thePolyWeights;
+  HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
   ListReferences<CalculusFunctionPlot> thePlots;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -1773,7 +1773,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
   tempE.theBoss=&owner;
   int curType=tempE.GetTypeOperation<theType>();
   if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
-      curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra())
+      curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
     << crash;

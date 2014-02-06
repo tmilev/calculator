@@ -242,6 +242,14 @@ public:
   static inline unsigned int HashFunction(const Weight<coefficient>& input)
   { return input.HashFunction();
   }
+  void operator+=(const Weight<coefficient>& other)
+  { if (this->owner!=other.owner)
+      crash << "Attempting to add weights with different owner algebras. " << crash;
+    this->weightFundamentalCoordS+=other.weightFundamentalCoordS;
+  }
+  void operator*=(const coefficient& other)
+  { this->weightFundamentalCoordS*=other;
+  }
   inline bool operator==(const Weight<coefficient>& other) const
   { return this->weightFundamentalCoordS==other.weightFundamentalCoordS && this->owner==other.owner;
   }

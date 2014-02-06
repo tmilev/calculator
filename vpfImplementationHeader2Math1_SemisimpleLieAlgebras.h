@@ -9,6 +9,15 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderSemisimpleLi
 template <class coefficient>
 std::string Weight<coefficient>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
+  bool formatWeightAsIndexVectorSpace=theFormat==0 ? true : theFormat->flagFormatWeightAsVectorSpaceIndex;
+  if (!formatWeightAsIndexVectorSpace)
+  { if (this->owner==0)
+      return this->weightFundamentalCoordS.ToStringLetterFormat("\\psi", theFormat);
+    Vector<coefficient> weightEpsCoords, weightSimpleCoords;
+    weightSimpleCoords=this->owner->theWeyl.GetSimpleCoordinatesFromFundamental(this->weightFundamentalCoordS);
+    this->owner->theWeyl.GetEpsilonCoords(weightSimpleCoords, weightEpsCoords);
+    return weightEpsCoords.ToStringLetterFormat("\\varepsilon", theFormat);
+  }
   bool useOmega=true;
   std::string oldCustomPlus;
   std::string VectorSpaceLetter="V";

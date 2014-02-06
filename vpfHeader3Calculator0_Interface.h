@@ -545,6 +545,8 @@ public:
   HashedListReferences<MatrixTensor<Rational> > theMatTensorRats;
   HashedListReferences<Matrix<RationalFunctionOld> > theMatRFs;
   HashedListReferences<ElementZmodP> theEltsModP;
+  HashedListReferences<Weight<Rational> > theWeights;
+  HashedListReferences<Weight<Polynomial<Rational> > > thePolyWeights;
   ListReferences<CalculusFunctionPlot> thePlots;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
@@ -1036,6 +1038,12 @@ public:
   }
   int opLessThan()
   { return this->theAtoms.GetIndexIMustContainTheObject("<");
+  }
+  int opWeightLieAlg()
+  { return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlg");
+  }
+  int opWeightLieAlgPoly()
+  { return this->theAtoms.GetIndexIMustContainTheObject("weightLieAlgPoly");
   }
   int opError()
   { return this->theAtoms.GetIndexIMustContainTheObject("Error");
@@ -1576,12 +1584,15 @@ public:
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, slTwoSubalgebra& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, ElementSemisimpleLieAlgebra<Rational>& output);
   static bool innerLoadFromObject(Calculator& theCommands, const Expression& input, RationalFunctionOld& output);
+
   static bool innerLoadSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output, SemisimpleLieAlgebra** outputPointer=0);
+  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, SemisimpleLieAlgebra*& output);
+
   static bool innerLoadCandidateSA
   (Calculator& theCommands, const Expression& input, Expression& output, CandidateSSSubalgebra& outputPointer, SemisimpleSubalgebras& owner);
   static bool innerLoadDynkinType(Calculator& theCommands, const Expression& input, DynkinType& output);
   static bool innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSSLieAlgebra(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStoreSemisimpleSubalgebrasFromExpression(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerStoreSemisimpleSubalgebras(Calculator& theCommands, const SemisimpleSubalgebras& input, Expression& output);

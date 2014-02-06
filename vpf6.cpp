@@ -64,6 +64,18 @@ int Expression::GetTypeOperation<Matrix<Rational> >()const
 }
 
 template < >
+int Expression::GetTypeOperation<Weight<Rational> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opWeightLieAlg();
+}
+
+template < >
+int Expression::GetTypeOperation<Weight<Polynomial<Rational> > >()const
+{ this->CheckInitialization();
+  return this->theBoss->opWeightLieAlgPoly();
+}
+
+template < >
 int Expression::GetTypeOperation<MatrixTensor<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opMatTensorRat();
@@ -226,6 +238,24 @@ ElementUniversalEnveloping<RationalFunctionOld>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theUEs
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Weight<Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theWeights
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Weight<Polynomial<Rational> >
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.thePolyWeights
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 

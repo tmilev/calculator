@@ -437,6 +437,7 @@ public:
   bool flagUseReflectionNotation;
   bool flagCandidateSubalgebraShortReportOnly;
   bool flagSupressDynkinIndexOne;
+  bool flagFormatWeightAsVectorSpaceIndex;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>

@@ -983,6 +983,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseMathSpanPureVsMouseHover=false;
   this->flagDynkinTypeDontUsePlusAndExponent=false;
   this->flagSupressDynkinIndexOne=false;
+  this->flagFormatWeightAsVectorSpaceIndex=true;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -5305,14 +5306,6 @@ void WeylGroup::GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<R
   output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     this->GetEpsilonCoords(input[i], output[i]);
-}
-
-void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
-{ if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer())
-    this->theDynkinType.GetEpsilonMatrix
-    (this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
-  output=input;
-  this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
 }
 
 void WeylGroup::GetWeylChamber(Cone& output, GlobalVariables& theGlobalVariables)

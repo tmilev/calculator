@@ -286,6 +286,37 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& t
   return output.AssignValueWithContext(resultTensor, inputConverted[1].GetContext(), theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerAddWeightToWeight(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddWeightToWeight");
+  return CalculatorFunctionsBinaryOps::innerAddTypeToType<Weight<Polynomial<Rational> > >(theCommands, input, output);
+}
+
+bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
+  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+  { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
+    return false;
+  }
+  Expression inputConverted;
+  if (!input.MergeContextsMyAruments(inputConverted))
+    return false;
+  Weight<Polynomial<Rational> > theWeight;
+  Rational cfRat;
+  Polynomial<Rational> theCoefficient;
+  if (!inputConverted[1].IsOfType<Polynomial<Rational> >(&theCoefficient))
+  { if (!inputConverted[1].IsOfType<Rational>(&cfRat))
+      return false;
+    theCoefficient=cfRat;
+  }
+  if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
+    return false;
+  theWeight*=theCoefficient;
+  return output.AssignValueWithContext(theWeight,inputConverted.GetContext(), theCommands );
+}
+
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

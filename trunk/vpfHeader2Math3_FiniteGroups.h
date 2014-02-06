@@ -476,7 +476,14 @@ public:
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
-  void GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output);
+  template <class coefficient>
+  void GetEpsilonCoords(const Vector<coefficient>& input, Vector<coefficient>& output)
+  { if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer())
+      this->theDynkinType.GetEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
+    output=input;
+    this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
+  }
+
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
   Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)const
   { Vector<Rational> output;

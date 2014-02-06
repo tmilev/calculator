@@ -255,7 +255,7 @@ int Expression::AddObjectReturnIndex(const
 Weight<Polynomial<Rational> >
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.thePolyWeights
+  return this->theBoss->theObjectContainer.theWeightsPoly
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -513,6 +513,13 @@ LittelmannPath& Expression::GetValueNonConst()const
 }
 
 template < >
+Weight<Polynomial<Rational> >& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Weight<Polynomial<Rational> > >())
+    crash << "This is a programming error: expression not of required type LittelmannPath. The expression equals " << this->ToString() << "." << crash;
+  return this->theBoss->theObjectContainer.theWeightsPoly.GetElement(this->GetLastChild().theData);
+}
+
+template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValueNonConst()const
 { if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
     crash << "This is a programming error: expression not of required type MonomialTensor. The expression equals " << this->ToString() << "." << crash;
@@ -684,6 +691,17 @@ bool Expression::ConvertToType<ElementWeylAlgebra<Rational> >(Expression& output
     return output.AssignValueWithContext(resultEWA, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<ElementWeylAlgebra<Rational> >())
+  { output=*this;
+    return true;
+  }
+  return false;
+}
+
+template< >
+bool Expression::ConvertToType<Weight<Polynomial<Rational> > >(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_Weight_Polynomial");
+  this->CheckInitialization();
+  if (this->IsOfType<Weight<Polynomial<Rational> > >())
   { output=*this;
     return true;
   }
@@ -3655,6 +3673,11 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "RationalFunction{}("
     << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
+    result=true;
+  } else if (this->IsOfType<Weight<Polynomial<Rational> > >())
+  { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
+    contextFormat.GetElement().flagFormatWeightAsVectorSpaceIndex=false;
+    out << this->GetValue<Weight<Polynomial<Rational> > >().ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
   { out << "SSLieAlg{}("

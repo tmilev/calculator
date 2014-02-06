@@ -284,6 +284,16 @@ bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const E
   return true;
 }
 
+bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const Expression& input, SemisimpleLieAlgebra*& output)
+{ MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
+  Expression tempE;
+  if (!CalculatorSerialization::innerLoadSSLieAlgebra(theCommands, input, tempE, &output))
+    return false;
+  if (tempE.IsError())
+    return false;
+  return true;
+}
+
 bool CalculatorSerialization::innerLoadWeylGroup(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerLoadWeylGroup");
   DynkinType theType;

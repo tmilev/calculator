@@ -159,6 +159,8 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("WeylGroupRep");
   this->AddOperationBuiltInType("WeylGroupVirtualRep");
   this->AddOperationBuiltInType("ElementWeylAlgebra");
+  this->AddOperationBuiltInType("weightLieAlg");
+  this->AddOperationBuiltInType("weightLieAlgPoly");
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");

@@ -231,7 +231,24 @@ void Calculator::initPredefinedInnerFunctions()
    "WeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (-1, -3, -2, 0)  ); \
    \nWeylRaiseToMaximallyDominant{}(F_4,  (3, 6, 8, 4), (0, -3, -4, -2)  );\
    \nWeylRaiseToMaximallyDominant{}(F_4, (0, -3, -4, -2) , (3, 6, 8, 4)  );\
-   ");  this->AddOperationInnerHandler
+   ");
+  this->AddOperationInnerHandler
+  ("MakeWeight", CalculatorFunctionsWeylGroup::innerLieAlgebraWeight, "",
+   "Makes a weight. First argument= type. Second argument= coordinate. Third argument =\
+   one of the keywords epsilon, simple, fundamental, standing for the coordinate system. ",
+   "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon); \
+   \n\\psi_{{a}}:=MakeWeight{}(B_3, a, fundamental);\
+   \n\\eta_{{a}}:= MakeWeight{}(B_3, a, simple);\
+   \n\\varepsilon_1;\
+   \n\\psi_1;\
+   \n\\eta_3\
+   ");
+  this->AddOperationInnerHandler
+  ("MakeRho", CalculatorFunctionsWeylGroup::innerLieAlgebraRhoWeight, "",
+   "Makes the half-sum of the positive roots.",
+   "\n\\rho:=MakeRho(B_3);\
+   ");
+   this->AddOperationInnerHandler
   ("IsOuterAuto", CalculatorFunctionsWeylGroup::innerIsOuterAutoWeylGroup, "",
    "Checks if element is outer automorphism of a root system. First argument = type. \
    Second argument = matrix linear operator corresponding written in simple basis. ",

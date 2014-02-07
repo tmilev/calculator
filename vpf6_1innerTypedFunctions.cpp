@@ -314,7 +314,35 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
   if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
     return false;
   theWeight*=theCoefficient;
-  return output.AssignValueWithContext(theWeight,inputConverted.GetContext(), theCommands );
+  return output.AssignValueWithContext(theWeight,inputConverted[2].GetContext(), theCommands);
+}
+
+bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
+  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (!input.IsListNElements(3))
+  { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
+    return false;
+  }
+  Expression inputConverted;
+  if (!input.MergeContextsMyAruments(inputConverted))
+    return false;
+  Weight<Polynomial<Rational> > theWeight;
+  if (!inputConverted[2].IsOfType<Weight<Polynomial<Rational> > >(&theWeight))
+    return false;
+  if (!inputConverted[1].IsOfType<ElementWeylGroup<WeylGroup> >())
+    return false;
+  ElementWeylGroup<WeylGroup> theElt=inputConverted[1].GetValue<ElementWeylGroup<WeylGroup> >();
+  if (theElt.owner!=&theWeight.owner->theWeyl)
+  { theCommands.Comments << "<hr>Possible user input error: attempting to apply Weyl group element to weight corresponding to different Weyl group.";
+    return false;
+  }
+  Vector<Polynomial<Rational> > theWeightSimpleCoords=theElt.owner->GetSimpleCoordinatesFromFundamental(theWeight.weightFundamentalCoordS);
+  theElt.ActOn(theWeightSimpleCoords);
+  theWeight.weightFundamentalCoordS=theElt.owner->GetFundamentalCoordinatesFromSimple(theWeightSimpleCoords);
+  return output.AssignValueWithContext(theWeight, inputConverted[2].GetContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)

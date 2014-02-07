@@ -51,6 +51,7 @@ public:
   static bool innerMultiplyAnyByUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerLieBracketRatOrUEWithRatOrUE(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLieBracketRatPolyOrEWAWithRatPolyOrEWA(Calculator& theCommands, const Expression& input, Expression& output);

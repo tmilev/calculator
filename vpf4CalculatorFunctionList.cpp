@@ -1353,6 +1353,11 @@ void Calculator::initPredefinedStandardOperations()
    "DoubleValue{}(3.14159265358979323846)+1"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", CalculatorFunctionsBinaryOps::innerAddWeightToWeight, this->opWeightLieAlgPoly(), this->opWeightLieAlgPoly(),
+   "Adds two weights. ",
+   "\\lambda:=Polynomial{}\\lambda; \\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon); (1/2+\\lambda)\\varepsilon_1+1/2\\varepsilon_2+1/2\\varepsilon_3  "
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddUEToAny, this->opElementUEoverRF(), this->opElementUEoverRF(),
    "Adds an element of UE (Universal Enveloping algebra) to an element of UE.",
    " g_{{{i}}}:=getChevalleyGenerator{}(F_{1}, {{i}});\nh_{{{i}}}:=getCartanGenerator{}(F_{1}, {{i}});\n\
@@ -1633,6 +1638,22 @@ void Calculator::initPredefinedStandardOperations()
    "Carries out multiplication between a rational number on left \
    and sequence on the right.",
    "x:=Polynomial{}x; v:=x*(1, 2, 3);"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly, this->opWeylGroupElement(), this->opWeightLieAlgPoly(),
+   "Element of weyl group action on a weight. ",
+   "s_{{a}}:=MakeWeylGroupElement(B_3, a); \\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   \
+   \nx:=Polynomial{}x; \\mu:= x\\varepsilon_1; s_1s_2s_3s_2s_1 \\mu"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opPoly(), this->opWeightLieAlgPoly(),
+   "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
+   "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   x:=Polynomial{}x; x\\varepsilon_1"
+   , true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly, this->opRational(), this->opWeightLieAlgPoly(),
+   "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
+   "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   x:=Polynomial{}x; x\\varepsilon_1"
    , true);
     this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix,

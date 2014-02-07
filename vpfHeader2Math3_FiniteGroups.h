@@ -197,8 +197,10 @@ public:
   { this->owner=other.owner;
     this->generatorsLastAppliedFirst=other.generatorsLastAppliedFirst;
   }
-  void ActOn(Vector<Rational>& inputOutput)const
-  { this->owner->ActOn(*this, inputOutput);
+  template<class coefficient>
+  void ActOn(Vector<coefficient>& inputOutput)const
+  { this->CheckInitialization();
+    this->owner->ActOn(*this, inputOutput);
   }
   bool CheckConsistency()const
   { if (this->flagDeallocated)
@@ -422,6 +424,10 @@ public:
   template<class coefficient>
   Vector<coefficient> GetFundamentalCoordinatesFromSimple(const Vector<coefficient>& inputInSimpleCoords);
   template<class coefficient>
+  Vector<coefficient> GetFundamentalCoordinatesFromEpsilon(const Vector<coefficient>& inputInEpsCoords);
+  template<class coefficient>
+  Vector<coefficient> GetSimpleCoordinatesFromEpsilon(const Vector<coefficient>& inputInEpsCoords);
+  template<class coefficient>
   Vector<coefficient> GetDualCoordinatesFromSimple(const Vector<coefficient>& inputInSimpleCoords)
   { return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
   }
@@ -476,18 +482,21 @@ public:
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
-  template <class coefficient>
-  void GetEpsilonCoords(const Vector<coefficient>& input, Vector<coefficient>& output)
+  void ComputeEpsilonMatrix()
   { if (this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer())
       this->theDynkinType.GetEpsilonMatrix(this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement());
+  }
+  template <class coefficient>
+  void GetEpsilonCoords(const Vector<coefficient>& input, Vector<coefficient>& output)
+  { this->ComputeEpsilonMatrix();
     output=input;
     this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement().ActOnVectorColumn(output);
   }
 
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
-  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)const
+  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)
   { Vector<Rational> output;
-    this->GetEpsilonCoords(output);
+    this->GetEpsilonCoords(input, output);
     return output;
   }
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);

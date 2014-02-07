@@ -1320,7 +1320,44 @@ bool CalculatorFunctionsWeylGroup::innerLieAlgebraWeight(Calculator& theCommands
   { theCommands.Comments << "<hr>Failed to load semisimple Lie algebra";
     return false;
   }
-  resultWeight.weightFundamentalCoordS.MakeZero(theSSowner->GetRank());
+  std::string theCoordsString;
+  bool isGood=input[3].IsAtom(&theCoordsString);
+  if (isGood)
+    isGood= (theCoordsString=="epsilon") || (theCoordsString=="fundamental") || (theCoordsString=="simple");
+  if (!isGood)
+  { theCommands.Comments << "<hr>The third argument of MakeWeight is bad: must be one of the keywords: epsilon, fundamental, simple. ";
+    return false;
+  }
+  int theWeightIndex=-1;
+  if (!input[2].IsSmallInteger(&theWeightIndex))
+    return false;
+  if (theCoordsString!="epsilon")
+  { if (theWeightIndex<1 || theWeightIndex> theSSowner->GetRank())
+    { std::stringstream errorStream;
+      errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and the Lie algebra rank. "
+      << "However, the index is " << theWeightIndex << ".";
+      return output.SetError(errorStream.str(), theCommands);
+    }
+    Vector<Polynomial<Rational> > EiVector;
+    EiVector.MakeEi(theSSowner->GetRank(), theWeightIndex-1);
+    if (theCoordsString=="fundamental")
+      resultWeight.weightFundamentalCoordS= EiVector;
+    else if (theCoordsString=="simple")
+      resultWeight.weightFundamentalCoordS= theSSowner->theWeyl.GetFundamentalCoordinatesFromSimple(EiVector);
+  } else
+  { Vector<Rational> EiVector;
+    EiVector.MakeZero(theSSowner->GetRank());
+    Vector<Rational> tempV=theSSowner->theWeyl.GetEpsilonCoords(EiVector);
+    if (theWeightIndex>tempV.size || theWeightIndex<1)
+    { std::stringstream errorStream;
+      errorStream << "The second argument of the MakeWeight function needs to be index of a weight between 1 and " << tempV.size
+      << ". However, the index is " << theWeightIndex << ".";
+      return output.SetError(errorStream.str(), theCommands);
+    }
+    EiVector.MakeEi(tempV.size, theWeightIndex-1);
+    std::cout << "Getting fundamental coords from eps coords: " << EiVector.ToString();
+    resultWeight.weightFundamentalCoordS=theSSowner->theWeyl.GetFundamentalCoordinatesFromEpsilon(EiVector);
+  }
   resultWeight.owner=theSSowner;
   Expression theContext;
   theContext.MakeContextSSLieAlg(theCommands, *theSSowner);
@@ -1361,13 +1398,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylGroupElement(Calculator& theCommands
       return false;
     theElt.generatorsLastAppliedFirst.AddOnTop(tmp-1);
   }
-  WeylGroup theGroup;
-  theGroup=thePointer->theWeyl;
-  int indexOfownerGroupInObjectContainer=theCommands.theObjectContainer.theWeylGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
-  //std::cout << "Group type: " << theGroup.ToString() << "<br>Index in container: "
-  //<< indexOfownerGroupInObjectContainer;
-
-  theElt.owner=&theCommands.theObjectContainer.theWeylGroups[indexOfownerGroupInObjectContainer];
+  theElt.owner=&thePointer->theWeyl;
   //std::cout << "<br>theElt.owner: " << theElt.owner;
 //  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
   for(int i=0; i<theElt.generatorsLastAppliedFirst.size; i++)

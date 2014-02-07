@@ -299,9 +299,8 @@ bool CalculatorSerialization::innerLoadWeylGroup(Calculator& theCommands, const 
   DynkinType theType;
   if (!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theType))
     return false;
-  WeylGroup tempWeyl;
-  tempWeyl.MakeFromDynkinType(theType);
-  WeylGroup& theWeyl=theCommands.theObjectContainer.theWeylGroups[theCommands.theObjectContainer.theWeylGroups.AddNoRepetitionOrReturnIndexFirst(tempWeyl)];
+  WeylGroup theWeyl;
+  theWeyl.MakeFromDynkinType(theType);
   return output.AssignValue(theWeyl, theCommands);
 }
 

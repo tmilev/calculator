@@ -400,9 +400,15 @@ int Expression::AddObjectReturnIndex(const
 WeylGroup
 & inputValue)const
 { this->CheckInitialization();
-  if (!this->theBoss->theObjectContainer.theWeylGroups.Contains(inputValue))
+  int index=-1;
+  for (int i=0; i<this->theBoss->theObjectContainer.theLieAlgebras.size; i++)
+    if (this->theBoss->theObjectContainer.theLieAlgebras[i].theWeyl==inputValue)
+    { index=i;
+      break;
+    }
+  if (index==-1)
     crash << "Weyl group must be allocated directly in the object container. " << crash;
-  return this->theBoss->theObjectContainer.theWeylGroups.GetIndex(inputValue);
+  return index;
 }
 
 template < >
@@ -586,7 +592,7 @@ template < >
 WeylGroup& Expression::GetValueNonConst()const
 { if (!this->IsOfType<WeylGroup>())
     crash << "This is a programming error: expression not of required type WeylGroup. The expression equals " << this->ToString() << "." << crash;
-  return this->theBoss->theObjectContainer.theWeylGroups[this->GetLastChild().theData];
+  return this->theBoss->theObjectContainer.theLieAlgebras.GetElement(this->GetLastChild().theData).theWeyl;
 }
 
 template < >
@@ -878,6 +884,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 //    std::cout << "<hr>Context of rational set; rational is: " << this->ToString();
     return true;
   }
+  if (this->IsOfType<ElementWeylGroup<WeylGroup> >())
+    return this->AssignValueWithContext(this->GetValue<ElementWeylGroup<WeylGroup> >(), inputOutputMinContext, *this->theBoss);
   if (this->IsOfType<AlgebraicNumber>())
     return this->SetChilD(1, inputOutputMinContext);
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
@@ -934,6 +942,14 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
     newETGV.Substitution(subPolyPart, this->theBoss->theObjectContainer.theCategoryOmodules);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->theBoss);
+  }
+  if (this->IsOfType<Weight<Polynomial<Rational> > >())
+  { PolynomialSubstitution<Rational> subPolyPart;
+    myOldContext.ContextGetPolySubFromSuperContextNoFailure(newContext, subPolyPart);
+    Weight<Polynomial<Rational> > theWeight=this->GetValue<Weight<Polynomial<Rational> > >();
+    for (int i=0; i<theWeight.weightFundamentalCoordS.size; i++)
+      theWeight.weightFundamentalCoordS[i].Substitution(subPolyPart);
+    return this->AssignValueWithContext(theWeight, inputOutputMinContext, *this->theBoss);
   }
   this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type but is not handled by Expression::SetContextAtLeastEqualTo";
   return false;
@@ -1043,8 +1059,8 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   int leftSSindex=leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex=rightContext.ContextGetIndexAmbientSSalg();
-//  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
-//  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
+  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
+  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
   if (leftSSindex==-1)
     leftSSindex=rightSSindex;
   if (rightSSindex==-1)
@@ -4839,7 +4855,6 @@ void ObjectContainer::reset()
 { this->theWeylGroupElements.Clear();
   this->theWeylGroupReps.Clear();
   this->theWeylGroupVirtualReps.Clear();
-  this->theWeylGroups.SetSize(0);
   this->theCategoryOmodules.SetSize(0);
   this->theLieAlgebras.Clear();
   this->theSSsubalgebras.SetSize(0);

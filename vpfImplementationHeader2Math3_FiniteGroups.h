@@ -948,6 +948,27 @@ Vector<coefficient> WeylGroup::GetFundamentalCoordinatesFromSimple(const Vector<
 }
 
 template<class coefficient>
+Vector<coefficient> WeylGroup::GetSimpleCoordinatesFromEpsilon(const Vector<coefficient>& inputInEpsCoords)
+{ Vectors<Rational> simpleBasis, simpleBasisEpsCoords;
+  simpleBasis.MakeEiBasis(this->GetDim());
+  this->GetEpsilonCoords(simpleBasis, simpleBasisEpsCoords);
+  std::cout << "simple basis eps coords: " << simpleBasisEpsCoords.ToString();
+  Vector<coefficient> result;
+  result.SetSize(this->GetDim());
+  for (int i=0; i<simpleBasisEpsCoords.size; i++)
+    result[i]=simpleBasisEpsCoords[i].ScalarEuclidean(inputInEpsCoords);
+  Matrix<Rational> invertedCartanSymmetric=this->CartanSymmetric;
+  invertedCartanSymmetric.Invert();
+  invertedCartanSymmetric.ActOnVectorColumn(result);
+  return result;
+}
+
+template<class coefficient>
+Vector<coefficient> WeylGroup::GetFundamentalCoordinatesFromEpsilon(const Vector<coefficient>& inputInEpsCoords)
+{ return this->GetFundamentalCoordinatesFromSimple(this->GetSimpleCoordinatesFromEpsilon(inputInEpsCoords));
+}
+
+template<class coefficient>
 Vector<coefficient> WeylGroup::GetSimpleCoordinatesFromFundamental(const Vector<coefficient>& inputInFundamentalCoords)
 { Matrix<Rational>& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
   Vector<coefficient> result;

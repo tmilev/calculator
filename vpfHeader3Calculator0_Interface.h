@@ -523,7 +523,6 @@ public:
   HashedListReferences<ElementWeylGroup<WeylGroup> > theWeylGroupElements;
   HashedListReferences<WeylGroupRepresentation<Rational> > theWeylGroupReps;
   HashedListReferences<WeylGroupVirtualRepresentation<Rational> > theWeylGroupVirtualReps;
-  ListReferences<WeylGroup> theWeylGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   HashedListReferences<SemisimpleLieAlgebra> theLieAlgebras;
   ListReferences<SltwoSubalgebras> theSltwoSAs;

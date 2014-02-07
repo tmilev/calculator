@@ -125,6 +125,8 @@ int main(int argc, char **argv)
 //  civilizedInput="WeylGroupTauSignatures{}(g_2);";
 //  civilizedInput="WeylGroupTauSignatures{}(e_7);";
 //civilizedInput="printRootSubalgebras{}a_1";
+// civilizedInput="\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon); 2\\varepsilon_2;";
+//civilizedInput="eta_{{a}}:=MakeWeight{}(A_3, a, epsilon);eta_2";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

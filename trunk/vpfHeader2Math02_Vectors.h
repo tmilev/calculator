@@ -127,18 +127,20 @@ public:
       result+=this->TheObjects[i];
     return result;
   }
-  inline coefficient ScalarEuclidean(const Vector<coefficient>& other)const
-  { coefficient output;
+  template <class otherType>
+  inline otherType ScalarEuclidean(const Vector<otherType>& other)const
+  { otherType output;
     this->ScalarEuclidean(other, output);
     return output;
   }
-  void ScalarEuclidean(const Vector<coefficient>& other, coefficient& output)const
+  template <class otherType>
+  void ScalarEuclidean(const Vector<otherType>& other, otherType& output)const
   { if (this->size!=other.size)
     { crash.theCrashReport << "This is a programming error: taking scalar product of elements of different dimensions: "
       << *this << " and " << other << ". ";
       crash << crash;
     }
-    coefficient tempElt;
+    otherType tempElt;
     output=0;
     for (int i=0; i<this->size; i++)
     { tempElt=other[i];

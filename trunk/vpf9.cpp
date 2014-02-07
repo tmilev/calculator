@@ -4792,6 +4792,7 @@ void WeylGroup::init()
   this->flagOuterAutosGeneratorsComputed=false;
   this->flagIrrepsAreComputed=false;
   this->flagCharTableIsComputed=false;
+  this->MatrixSendsSimpleVectorsToEpsilonVectors.FreeMemory();
   this->::FiniteGroup<ElementWeylGroup<WeylGroup> >::init();
 }
 

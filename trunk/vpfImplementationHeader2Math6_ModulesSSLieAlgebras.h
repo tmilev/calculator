@@ -255,6 +255,149 @@ void ModuleSSalgebra<coefficient>::GetMatrixHomogenousElt
 //  std::cout << "<hr>output GetMatrixHomogenousElt: " << output.ToString(true, false);
 }
 
+template <class coefficient>
+bool charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight
+(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
+ SubgroupWeylGroupOLD& outputWeylSub, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("charSSAlgMod<coefficient>::SplitOverLeviMonsEncodeHIGHESTWeight");
+  this->CheckNonZeroOwner();
+  std::stringstream out;
+  std::string tempS;
+//  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
+  if (this->GetOwner()->GetRank()!=splittingParSel.MaxSize)
+    crash << "This is a programming error: parabolic selection selects out of " << splittingParSel.MaxSize
+    << " elements while the weyl group is of rank " << this->GetOwner()->GetRank() << ". " << crash;
+  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, splittingParSel, theGlobalVariables, 1);
+  outputWeylSub.ComputeRootSubsystem();
+  SubgroupWeylGroupOLD complementGroup;
+  Selection invertedSel;
+  invertedSel=splittingParSel;
+  invertedSel.InvertSelection();
+  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, invertedSel, theGlobalVariables, 1);
+  complementGroup.ComputeRootSubsystem();
+  out << outputWeylSub.ToString(false);
+//  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ToString(false);
+//  std::cout << this->ToString();
+//  std::cout << out.str();
+  charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
+  SubgroupWeylGroupOLD theFDWeyl;
+  theFDWeyl.MakeParabolicFromSelectionSimpleRoots(this->GetOwner()->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
+  Weight<coefficient> tempMon, localHighest;
+  List<coefficient> tempMults;
+  HashedList<Vector<coefficient> > tempHashedRoots;
+  WeylGroup& theWeyL=this->GetOwner()->theWeyl;
+  charAmbientFDWeyl.MakeZero();
+  coefficient bufferCoeff, highestCoeff;
+  out << "Starting character: " << this->ToString();
+  tempMon.owner=this->GetOwner();
+  for (int i=0; i<this->size(); i++)
+  { const Weight<coefficient>& currentMon=(*this)[i];
+    if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart(currentMon.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+//    std::cout << "<hr>FreudenthalEval on " << currentMon.ToString() << " generated the following report: "
+//    << tempS << "<hr>";
+    for (int j=0; j<tempHashedRoots.size; j++)
+    { bufferCoeff=this->theCoeffs[i];
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      bufferCoeff*=tempMults[j];
+      charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
+    }
+  }
+//  std::cout << "<hr>" << tempS;
+//  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
+
+  remainingCharDominantLevi.MakeZero();
+  Vectors<coefficient> orbitDom;
+  tempMon.owner=this->GetOwner();
+  for (int i=0; i<charAmbientFDWeyl.size(); i++)
+  { orbitDom.SetSize(0);
+    if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated
+        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
+    { out << "failed to generate the complement-sub-Weyl-orbit of weight "
+      << this->GetOwner()->theWeyl.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
+      if (Report!=0)
+        *Report=out.str();
+      return false;
+    }
+//    std::cout << "<hr>the orbit with highest weight "
+//    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
+//    << " is: ";
+//    for (int l=0; l<orbitDom.size; l++)
+//      std::cout <<"<br>" << orbitDom[l].ToString();
+//    std::cout << "<hr>of them dominant are: <br>";
+    for (int k=0; k<orbitDom.size; k++)
+      if (outputWeylSub.IsDominantWeight(orbitDom[k]))
+      { tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
+        remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
+//        std::cout << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
+      }
+  }
+  output.MakeZero();
+  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(remainingCharDominantLevi.ToString());
+//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+// (remainingCharDominantLevi.ToString());
+
+  Vector<coefficient> simpleGeneratorBaseField;
+  while(!remainingCharDominantLevi.IsEqualToZero())
+  { localHighest=*remainingCharDominantLevi.theMonomials.LastObject();
+    for (bool Found=true; Found; )
+    { Found=false;
+      for (int i=0; i<outputWeylSub.simpleGenerators.size; i++)
+      { tempMon=localHighest;
+        simpleGeneratorBaseField=outputWeylSub.simpleGenerators[i]; // <- implicit type conversion here!
+        tempMon.weightFundamentalCoordS+=this->GetOwner()->theWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
+        if (remainingCharDominantLevi.theMonomials.Contains(tempMon))
+        { localHighest=tempMon;
+          Found=true;
+        }
+      }
+    }
+    highestCoeff=remainingCharDominantLevi.theCoeffs[remainingCharDominantLevi.theMonomials.GetIndex(localHighest)];
+    output.AddMonomial(localHighest, highestCoeff);
+    if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
+        (localHighest.weightFundamentalCoordS, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+//    std::cout << "<hr>accounting " << localHighest.ToString() << " with coeff "
+//    << highestCoeff.ToString() << "<br>"
+//    << remainingCharDominantLevi.ToString();
+    for (int i=0; i<tempHashedRoots.size; i++)
+    { tempMon.owner=this->GetOwner();
+      tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+      bufferCoeff=tempMults[i];
+      bufferCoeff*=highestCoeff;
+      remainingCharDominantLevi.SubtractMonomial(tempMon, bufferCoeff);
+//      std::cout << "<br>-(" << bufferCoeff.ToString() << ")" << tempMon.ToString();
+    }
+//    std::cout << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ToString();
+  }
+  out << "<br>Character w.r.t Levi part: " << CGI::GetMathMouseHover(output.ToString());
+  if (Report!=0)
+  { //out << "<hr>"  << "The split character is: " << output.ToString("V", "\\omega", false);
+    DrawingVariables theDV;
+    std::string tempS;
+    this->DrawMeNoMults(tempS, theGlobalVariables, theDV, 10000);
+    Vector<Rational> tempRoot;
+    out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
+    << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
+    for (int i=0; i<output.size(); i++)
+    { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoordS).GetVectorRational();
+      outputWeylSub.DrawContour(tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      std::stringstream tempStream;
+      tempStream << output.theCoeffs[i].ToString();
+      theDV.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+    }
+    out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
+    *Report=out.str();
+  }
+  return true;
+}
+
 template<class coefficient>
 void ModuleSSalgebra<coefficient>::SplitOverLevi
 (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit,
@@ -750,6 +893,20 @@ void ModuleSSalgebra<coefficient>::CheckConsistency(GlobalVariables& theGlobalVa
 }
 
 template <class coefficient>
+void ModuleSSalgebra<coefficient>::GetFDchar(charSSAlgMod<coefficient>& output)
+{ output.MakeZero();
+  if (this->theHWFundamentalCoordsBaseField.size<=0)
+    return;
+  Weight<coefficient> tempMon;
+  tempMon.owner=&this->GetOwner();
+  WeylGroup& theWeyl=this->GetOwner().theWeyl;
+  for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
+  { tempMon.weightFundamentalCoordS=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+    output.AddMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);
+  }
+}
+
+template <class coefficient>
 void ModuleSSalgebra<coefficient>::ExpressAsLinearCombinationHomogenousElement
 (ElementUniversalEnveloping<coefficient>& inputHomogeneous, ElementUniversalEnveloping<coefficient>& outputHomogeneous, int indexInputBasis,
  const Vector<coefficient>& subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
@@ -1039,4 +1196,31 @@ void ElementTensorsGeneralizedVermas<coefficient>::MultiplyByElementLieAlg
     }
   }
 }
+
+template <class coefficient>
+void ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight
+(const ElementTensorsGeneralizedVermas<coefficient>& right, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)
+{ MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<coefficient>::TensorOnTheRight");
+  if (right.IsEqualToZero())
+  { this->MakeZero();
+    return;
+  }
+  int maxNumMonsFinal=this->size()*right.size();
+  ElementTensorsGeneralizedVermas<coefficient> output;
+  MonomialTensorGeneralizedVermas<coefficient> bufferMon;
+  output.MakeZero();
+  output.SetExpectedSize(maxNumMonsFinal);
+  coefficient theCoeff;
+  for (int i=0; i<right.size(); i++)
+    for (int j=0; j<this->size(); j++)
+    { bufferMon=(*this)[j];
+      bufferMon*=(right[i]);
+      theCoeff=this->theCoeffs[j];
+      theCoeff*=right.theCoeffs[i];
+      output.AddMonomial(bufferMon, theCoeff);
+      ParallelComputing::SafePointDontCallMeFromDestructors();
+    }
+  *this=output;
+}
+
 #endif

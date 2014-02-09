@@ -1089,8 +1089,8 @@ public:
   int opPolyOverANs()
   { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
-  int opRationalFunction()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
+  int opRationalExpression()
+  { return this->theAtoms.GetIndexIMustContainTheObject("RationalExpression");
   }
   int opDifferentiate()
   { return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
@@ -1148,6 +1148,15 @@ public:
   }
   int opCos()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\cos");
+  }
+  int opArcTan()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\arctan");
+  }
+  int opArcSin()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\arcsin");
+  }
+  int opArcCos()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\arccos");
   }
   int opTan()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\tan");
@@ -1296,7 +1305,6 @@ public:
   int GetNumBuiltInFunctions();
   void AutomatedTestRun
   (List<std::string>& outputCommandStrings, List<std::string>& outputResultsWithInit, List<std::string>& outputResultsNoInit);
-  static bool innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTranspose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetElementWeylGroup(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerUnion(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1311,7 +1319,6 @@ public:
   static bool StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMatrixRationalTensorForm(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerMinus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerEqualEqual(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerGreaterThan(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1365,7 +1372,6 @@ public:
    Expression::FunctionAddress conversionFunction=0);
   static bool innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGenerateMultiplicativelyClosedSet(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerInvertMatrixVerbose(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1393,18 +1399,12 @@ public:
   static bool fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
   bool fPrintB3G2branchingIntermediate
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext);
-  static bool fPrintB3G2branchingTableInit
-  (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
-  static bool fDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fDifferential(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fPrintB3G2branchingTableCommon
   (Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext);
-  static bool innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetChevGen(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output);
-  bool innerSplitFDpartB3overG2Init(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext);
   static bool fSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSLieAlgebraShort(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
@@ -1433,23 +1433,15 @@ public:
   { return theCommands.innerGroebner(theCommands, input, output, false, false, true);
   }
   static bool innerGroebner(Calculator& theCommands, const Expression& input, Expression& output, bool useGr, bool useRevLex=false, bool useModZp=false);
-  static bool fParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fKLcoeffs(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
 //  static bool innerSSLieAlgebra
 //  (Calculator& theCommands, const Expression& input, Expression& output)
 //  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
 //  }
-  static bool fSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data);
   static bool fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output);
   static bool innerDrawWeightSupportWithMults(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDrawWeightSupport(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool fWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fLittelmannOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSqrt(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1468,15 +1460,12 @@ public:
   static bool TypeHighestWeightParabolic
   (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeight, Selection& outputInducingSel, Expression* outputContext=0);
   static bool innerDrawRootSystem(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintZnEnumeration(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerHWV(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerNot(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerZmodP(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAdCommonEigenSpaces(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerEmbedG2inB3(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators);
   static bool innerWriteGenVermaModAsDiffOperatorsSimpleGensOnly(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerWriteGenVermaModAsDiffOperators(theCommands, input, output, false);
@@ -1771,7 +1760,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 { Expression tempE;
   tempE.theBoss=&owner;
   int curType=tempE.GetTypeOperation<theType>();
-  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
+  if (curType==owner.opPoly() || curType==owner.opRationalExpression() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
       curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "
@@ -1863,5 +1852,46 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
   Expression theContext;
   theContext.MakeContextWithOnePolyVar(theCommands, input);
   return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
+}
+
+template<class coefficient>
+bool Calculator::GetTypeHighestWeightParabolic
+(Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords,
+ Selection& outputInducingSel, Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun)
+{ if (!input.IsListNElements(4) && !input.IsListNElements(3))
+    return output.SetError
+    ("Function TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
+  const Expression& leftE=input[1];
+  const Expression& middleE=input[2];
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+    return output.SetError("Error extracting Lie algebra.", theCommands);
+  if (!theCommands.GetVectoR<coefficient>(middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(), ConversionFun))
+  { std::stringstream tempStream;
+    tempStream << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
+    return output.SetError(tempStream.str(), theCommands);
+  }
+  if (input.IsListNElements(4))
+  { Vector<Rational> parabolicSel;
+    const Expression& rightE=input[3];
+    if (!theCommands.GetVectoR<Rational>(rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
+    { std::stringstream tempStream;
+      tempStream << "Failed to convert the third argument of HWV to a list of " << ambientSSalgebra->GetRank()
+      << " rationals. The third argument you gave is " << rightE.ToString() << ".";
+      return output.SetError(tempStream.str(), theCommands);
+    }
+    outputInducingSel=parabolicSel;
+  } else
+  { outputInducingSel.init(ambientSSalgebra->GetRank());
+    for (int i=0; i<outputWeightHWFundcoords.size; i++)
+      if (!outputWeightHWFundcoords[i].IsSmallInteger())
+        outputInducingSel.AddSelectionAppendNewIndex(i);
+  }
+  if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
+    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName() << " contained object container more than once. " << crash;
+  int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
+  outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
+//  std::cout << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
+  return true;
 }
 #endif

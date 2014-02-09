@@ -5,6 +5,7 @@
 #include "vpfImplementationHeader2Math3_WeylAlgebra.h"
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
+#include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
 
 ProjectInformationInstance ProjectInfoVpf6_1cpp(__FILE__, "Calculator inner binary typed functions. ");
 
@@ -1167,47 +1168,4 @@ bool CalculatorFunctionsBinaryOps::innerNChooseK(Calculator& theCommands, const 
     return output.AssignValue(0, theCommands);
   Rational result= result.NChooseK(N, K);
   return output.AssignValue(result, theCommands);
-}
-
-bool Calculator::innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerHWTAABF");
-  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(4))
-    return output.SetError("Function expects three arguments.", theCommands);
-  Expression leftMerged=input[1];
-  Expression rightMerged=input[2];
-  if (!Expression::MergeContexts(leftMerged, rightMerged))
-    return output.SetError("Failed to merge the contexts of the two UE elements ", theCommands);
-  Expression finalContext=rightMerged.GetContext();
-  int algebraIndex=finalContext.ContextGetIndexAmbientSSalg();
-  if (algebraIndex==-1)
-    return output.SetError("I couldn't extract a Lie algebra to compute hwtaabf.", theCommands);
-  SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIndex);
-  const Expression& weightExpression=input[3];
-  Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerRationalFunction))
-  { theCommands.Comments << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
-    return false;
-  }
-  if (!leftMerged.SetContextAtLeastEqualTo(finalContext) || !rightMerged.SetContextAtLeastEqualTo(finalContext))
-    return output.SetError("Failed to merge the contexts of the highest weight and the elements of the Universal enveloping. ", theCommands);
-  Expression leftConverted, rightConverted;
-  if (!leftMerged.ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(leftConverted))
-    return false;
-  if (!rightMerged.ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(rightConverted))
-    return false;
-  const ElementUniversalEnveloping<RationalFunctionOld>& leftUE=leftConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  const ElementUniversalEnveloping<RationalFunctionOld>& rightUE=rightConverted.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  SemisimpleLieAlgebra theSSalgebra;
-  theSSalgebra=*constSSalg;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  std::stringstream out;
-  Vector<RationalFunctionOld> hwDualCoords;
-  theSSalgebra.OrderSSalgebraForHWbfComputation();
-  hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
-  RationalFunctionOld outputRF;
-  //std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
-  if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, *theCommands.theGlobalVariableS, 1, 0, &theCommands.Comments))
-    return output.SetError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
-  return output.AssignValueWithContext(outputRF, finalContext, theCommands);
 }

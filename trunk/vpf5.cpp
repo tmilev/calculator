@@ -151,33 +151,6 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
-bool Calculator::fWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(3))
-    return output.SetError("This function takes 2 arguments", theCommands);
-
-  SemisimpleLieAlgebra* theSSowner;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSowner))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-
-  Vector<RationalFunctionOld> theWeight;
-  Expression newContext(theCommands);
-//  std::cout << "<br>input[2] is: " << input[2].ToString();
-  if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), theCommands.innerRationalFunction))
-    return output.SetError("Failed to convert the argument of the function to a highest weight vector", theCommands);
-  RationalFunctionOld rfOne;
-  rfOne.MakeOne(theCommands.theGlobalVariableS);
-  Vector<RationalFunctionOld> theWeightInSimpleCoords;
-  FormatExpressions theFormat;
-  newContext.ContextGetFormatExpressions(theFormat);
-  theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
-  //std::cout << "The fundamental coords: " << theWeight.ToString();
-  theCommands.Comments << "<br>Weyl dim formula input: simple coords: " << theWeightInSimpleCoords.ToString(&theFormat) << ", fundamental coords: " << theWeight.ToString(&theFormat);
-  RationalFunctionOld tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
-  //std::cout << "<br>The result: " << tempRF.ToString();
-  return output.AssignValueWithContext(tempRF, newContext, theCommands);
-}
-
 bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!input.IsListNElements(3))
@@ -265,41 +238,6 @@ bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
 //  out << "<meta http-equiv=\"refresh\" content=\"1; url=" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">";
   return output.AssignValue(out.str(), theCommands);
-}
-
-bool Calculator::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (!input.IsListNElements(5))
-    return output.SetError("Function fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
-  const Expression& typeNode=input[1];
-  const Expression& weightNode=input[2];
-  const Expression& inducingParNode=input[3];
-  const Expression& splittingParNode=input[4];
-  SemisimpleLieAlgebra* ownerSSPointer=0;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, typeNode, ownerSSPointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-  Vector<RationalFunctionOld> theWeightFundCoords;
-  Vector<Rational> inducingParSel, splittingParSel;
-  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
-  WeylGroup& theWeyl=ownerSS.theWeyl;
-  int theDim=ownerSS.GetRank();
-  Expression finalContext;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.innerRationalFunction))
-    return output.SetError("Failed to extract highest weight from the second argument.", theCommands);
-  if (!theCommands.GetVectoR<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0))
-    return output.SetError("Failed to extract parabolic selection from the third argument", theCommands);
-  if (!theCommands.GetVectoR<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, 0))
-    return output.SetError("Failed to extract parabolic selection from the fourth argument", theCommands);
-  theCommands.Comments << "Your input weight in fundamental coordinates: " << theWeightFundCoords.ToString();
-  theCommands.Comments << "<br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString()
-  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << "." <<"<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
-  ModuleSSalgebra<RationalFunctionOld> theMod;
-  Selection selInducing= inducingParSel;
-  Selection selSplittingParSel=splittingParSel;
-  theMod.MakeFromHW(ownerSS, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
-  std::string report;
-  theMod.SplitOverLevi(&report, selSplittingParSel, *theCommands.theGlobalVariableS, 1, 0);
-  return output.AssignValue(report, theCommands);
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
@@ -666,49 +604,6 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
     *comments << out.str();
 }
 
-bool Calculator::fSplitFDpartB3overG2CharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
-{ branchingData theG2B3Data;
-  return theCommands.fSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
-}
-
-bool Calculator::innerSplitFDpartB3overG2Init(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext)
-{ MacroRegisterFunctionWithName("Calculator::innerSplitFDpartB3overG2Init");
-  if (!input.IsListNElements(4))
-    return output.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
-  //std::cout << input.ToString();
-  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, theCommands.innerRationalFunction))
-    output.SetError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
-  theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
-  theG2B3Data.selInducing.init(3);
-  for (int i=0; i<theG2B3Data.theWeightFundCoords.size; i++)
-    if (!theG2B3Data.theWeightFundCoords[i].IsSmallInteger())
-      theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
-  theG2B3Data.initAssumingParSelAndHmmInittedPart1NoSubgroups(*theCommands.theGlobalVariableS);
-  return true;
-}
-
-bool Calculator::fSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data)
-{ MacroRegisterFunctionWithName("fSplitFDpartB3overG2CharsOutput");
-  Expression theContext(theCommands);
-  theCommands.innerSplitFDpartB3overG2Init(theCommands, input, output, theG2B3Data, theContext);
-  if (output.IsError())
-    return true;
-  std::stringstream out;
-  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: " << theG2B3Data.selInducing.ToString();
-  std::string report;
-  Vectors<RationalFunctionOld> outputWeightsFundCoordS;
-  Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
-  Vectors<RationalFunctionOld> leviEigenSpace;
-  Vector<RationalFunctionOld> ih1, ih2;
-  SubgroupWeylGroupOLD subGroupLarge, subGroupSmall;
-  charSSAlgMod<RationalFunctionOld> tempChar;
-  charSSAlgMod<RationalFunctionOld> startingChar;
-  startingChar.MakeFromWeight(theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords), &theG2B3Data.theHmm.theRange());
-  startingChar.SplitCharOverRedSubalg(&report, tempChar, theG2B3Data, *theCommands.theGlobalVariableS);
-  out << report;
-  return output.AssignValue(out.str(), theCommands);
-}
-
 void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 { SemisimpleLieAlgebra tempb3alg, tempg2alg;
   tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
@@ -911,23 +806,6 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::fPrintB3G2branchingTableInit
-(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableInit");
-  if (input.children.size!=3)
-    return output.SetError("I need two arguments: first is height, second is parabolic selection. ", theCommands);
-  desiredHeight=0;
-  if (!input[1].IsSmallInteger(&desiredHeight))
-    return output.SetError("the first argument must be a small integer", theCommands);
-  if (desiredHeight<0)
-    desiredHeight=0;
-  const Expression& weightNode= input[2];
-  theCommands.innerSplitFDpartB3overG2Init(theCommands, weightNode, output, theG2B3data, outputContext);
-  if (output.IsError())
-    return true;
-  return false;
-}
-
 bool Calculator::fPrintB3G2branchingTable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTable");
   Vectors<RationalFunctionOld> theHWs;
@@ -939,37 +817,6 @@ bool Calculator::fPrintB3G2branchingTable(Calculator& theCommands, const Express
     return true;
 //  std::cout << " <br>the highest weights: " << theHWs.ToString();
   return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
-}
-
-bool Calculator::fPrintB3G2branchingTableCommon
-(Calculator& theCommands, const Expression& input, Expression& output, Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext)
-{ MacroRegisterFunctionWithName("Calculator::fPrintB3G2branchingTableCommon");
-  std::stringstream out, timeReport;
-  Vector<Rational> theHW;
-  Vector<RationalFunctionOld> theHWrf;
-  SelectionWithMaxMultiplicity theHWenumerator;
-  int desiredHeight=0;
-  if (!theCommands.fPrintB3G2branchingTableInit(theCommands, input, output, theG2B3Data, desiredHeight, theContext))
-    return false;
-  if (output.IsError())
-    return true;
-  Selection invertedSelInducing=theG2B3Data.selInducing;
-  theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
-  invertedSelInducing.InvertSelection();
-  outputHWs.SetSize(0);
-  for (int j=0; j<=desiredHeight; j++)
-  { theHWenumerator.initMaxMultiplicity(3-theG2B3Data.selInducing.CardinalitySelection, j);
-    theHWenumerator.IncrementSubsetFixedCardinality(j);
-    int numCycles=theHWenumerator.NumCombinationsOfCardinality(j);
-    for (int i=0; i<numCycles; i++, theHWenumerator.IncrementSubsetFixedCardinality(j))
-    { theHWrf=theG2B3Data.theWeightFundCoords;
-      for (int k=0; k<invertedSelInducing.CardinalitySelection; k++)
-        theHWrf[invertedSelInducing.elements[k]]+=theHWenumerator.Multiplicities[k];
-      outputHWs.AddOnTop(theHWrf);
-    }
-  }
-//  std::cout << " <br>the highest weights: " << outputHWs.ToString();
-  return true;
 }
 
 bool Calculator::fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1087,76 +934,6 @@ bool Calculator::fPrintB3G2branchingTableCharsOnly(Calculator& theCommands, cons
   latexTable << "\\end{longtable}";
   out << "<br><b>Ready for LaTeX consumption:</b><br>%preamble: <br>\\documentclass{article}<br>\\usepackage{longtable, amssymb}"
   << "<br>\\begin{document}<br>%text body<br>" << latexTable.str() << "<br>%end of text body <br>\\end{document}";
-  return output.AssignValue(out.str(), theCommands);
-}
-
-bool Calculator::fSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2");
-  branchingData theG2B3Data;
-  Expression theContext(theCommands);
-  theCommands.innerSplitFDpartB3overG2Init(theCommands, input, output, theG2B3Data, theContext);
-  if (output.IsError())
-    return true;
-  std::stringstream out;
-  Vectors<RationalFunctionOld> theHWs;
-  theHWs.AddOnTop(theG2B3Data.theWeightFundCoords);
-  return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
-}
-
-bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2old");
-  branchingData theG2B3Data;
-  theCommands.fSplitFDpartB3overG2CharsOutput(theCommands, input, output, theG2B3Data);
-  if (output.IsError())
-    return true;
-  std::stringstream out;
-  theCommands.fSplitFDpartB3overG2inner(theCommands, theG2B3Data, output);
-  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
-  << theG2B3Data.selInducing.ToString() << "<br>common Levi part of G_2 and B_3: "
-  << theG2B3Data.selSmallParSel.ToString();
-  out
-  << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
-  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
-  std::stringstream readyForLatexConsumptionTable1, readyForLatexConsumptionTable2;
-
-  readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  <<  theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega")
-  << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
-  for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunctionOld>& currentWeightSimpleB3coords=theG2B3Data.outputWeightsSimpleCoords[i];
-    Vector<RationalFunctionOld>& currentWeightFundB3coords=theG2B3Data.outputWeightsFundCoordS[i];
-    Vector<RationalFunctionOld>& currentG2Weight=theG2B3Data.g2Weights[i];
-    Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
-    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ToStringLetterFormat("\\omega")
-    << " $ & $" << theG2B3Data.leviEigenSpace[i].ToStringLetterFormat("m")
-    << " $ & $ " << currentG2Weight.ToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
-    out << "<tr><td>" << theG2B3Data.outputEigenWords[i].ToString() << "</td><td> "
-    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
-    << "</td><td>" << currentG2Weight.ToStringLetterFormat("\\alpha") << "</td><td> "
-    << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
-    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
-    out << "<td>" << CGI::GetMathSpanPure(theG2B3Data.theChars[i].ToString()) << "</td>";
-    out << "</tr>";
-  }
-  readyForLatexConsumptionTable1 <<"\\hline \n";
-  out << "</table>";
-  out << "<br>Ready for LaTeX consumption: ";
-  out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
-  out << "<table border=\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
-  Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
-  std::stringstream formulaStream1;
-  for (int k=0; k<theG2B3Data.g2Weights.size; k++)
-  { out << "<tr><td>" << theG2B3Data.g2Weights[k].ToString() << "</td><td>";
-    for (int j=0; j<theG2B3Data.g2Weights.size; j++)
-    { weightDifference=theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
-      if (weightDifference.IsPositive())
-        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].ToString() <<  "))";
-    }
-    formulaStream1 << "v_\\lambda";
-    out << CGI::GetMathSpanPure(formulaStream1.str()) << "</td><td>" << CGI::GetMathSpanPure(theG2B3Data.theEigenVectorS[k].ToString()) << "</td></tr>";
-  }
-  out << "</table>";
-  out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -1513,130 +1290,6 @@ bool Calculator::fJacobiSymbol(Calculator& theCommands, const Expression& input,
     return false;
 //  int result=Jacobi(leftInt, rightInt);
   return true;
-}
-
-bool Calculator::fParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output)
-{ Selection selectionParSel;
-  SemisimpleLieAlgebra* theSSPointer;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, theSSPointer))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-  SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
-  int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
-  SubgroupWeylGroupOLD theSubgroup;
-  std::stringstream out;
-  for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
-  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theSSalgebra.theWeyl, selectionParSel, *theCommands.theGlobalVariableS, 2000);
-    out << "<hr>" << CGI::GetMathSpanPure(theSubgroup.ToString());
-  }
-  return output.AssignValue(out.str(), theCommands);
-}
-
-bool Calculator::fParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::fParabolicWeylGroupsBruhatGraph");
-  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  Selection parabolicSel;
-  Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
-  Expression hwContext(theCommands);
-  SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, theCommands.innerRationalFunction))
-    return output.SetError("Failed to extract highest weight vector data", theCommands);
-  else
-    if (output.IsError())
-      return true;
-  SemisimpleLieAlgebra& theSSalgebra=*theSSalgPointer;
-
-  WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
-  SubgroupWeylGroupOLD theSubgroup;
-  std::stringstream out;
-  std::fstream outputFile, outputFile2;
-  std::string fileName, filename2;
-  fileName=theCommands.PhysicalNameDefaultOutput+"1";
-  filename2=theCommands.PhysicalNameDefaultOutput+"2";
-  XML::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  XML::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
-  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
-    return output.SetError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
-  theSubgroup.FindQuotientRepresentatives(2000);
-  out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
-  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
-  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.theElements.size;
-  outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-  outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-  FormatExpressions theFormat;
-  hwContext.ContextGetFormatExpressions(theFormat);
-  if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.GetGroupSizeByFormula('E', 6) <= theSubgroup.AmbientWeyl.GetGroupSizeByFormula())
-      out << "Even I can't handle the truth, when it is so large<br>";
-    else
-      out << "LaTeX can't handle handle the truth, when it is so large. <br>";
-  } else
-  { bool useJavascript=theSubgroup.size<100;
-    outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
-    outputFile << "\n\\end{document}";
-    outputFile2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
-    outputFile2 << "\n\\end{document}";
-    out << "<hr>"
-    << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
-    << theCommands.DisplayNameDefaultOutput << "1.tex\"> "
-    << theCommands.DisplayNameDefaultOutput << "1.tex</a>";
-    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
-    << "1.png\" width=\"800\" height=\"600\">"
-    << theCommands.DisplayNameDefaultOutput << "1.png</iframe>";
-    out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
-    << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
-    << "<a href=\""
-    << theCommands.DisplayNameDefaultOutput
-    << "2.tex\"> " <<  theCommands.DisplayNameDefaultOutput << "2.tex</a>";
-    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
-    << "2.png\" width=\"800\" height=\"600\"> "
-    << theCommands.DisplayNameDefaultOutput << "2.png</iframe>";
-    out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
-    << "please check whether the .tex corresponds to the .png.</b>";
-    out << "<hr>Additional printout follows.<br> ";
-    out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
-    out << "<table><tr><td>Element</td><td>weight simple coords</td><td>weight fund. coords</td></tr>";
-    theFormat.fundamentalWeightLetter="\\omega";
-    for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
-    { ElementWeylGroup<WeylGroup>& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
-      out << "<tr><td>"
-      << (useJavascript ? CGI::GetMathSpanPure(current.ToString()) : current.ToString())
-      << "</td>";
-      theHWsimplecoords=
-      theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-      theSSalgebra.theWeyl.ActOnRhoModified
-      (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords);
-      out << "<td>"
-      << (useJavascript ? CGI::GetMathSpanPure(theHWsimplecoords.ToString(&theFormat))
-      : theHWsimplecoords.ToString(&theFormat))
-      << "</td>";
-      tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
-      std::string theFundString=
-      tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
-      out << "<td>" << (useJavascript ? CGI::GetMathSpanPure(theFundString): theFundString)
-      << "</td>";
-      out << "</tr>";
-    }
-    out << "</table><hr>";
-    out << theSubgroup.ToString();
-  }
-  outputFile.close();
-  outputFile2.close();
-  std::cout << "<!--";
-  std::cout.flush();
-  std::string command1="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + fileName + ".tex";
-  std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
-  std::string command3="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + filename2 + ".tex";
-  std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
-//  std::cout << "<br>" << command1;
-//  std::cout << "<br>" << command2;
-//  std::cout << "<br>" << command3;
-//  std::cout << "<br>" << command4;
-  theCommands.theGlobalVariableS->System(command1);
-  theCommands.theGlobalVariableS->System(command2);
-  theCommands.theGlobalVariableS->System(command3);
-  theCommands.theGlobalVariableS->System(command4);
-  std::cout << "-->";
-  return output.AssignValue(out.str(), theCommands);
 }
 
 bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& input, Expression& output)

@@ -300,10 +300,31 @@ bool CalculatorFunctionsGeneral::innerConstantFunction(Calculator& theCommands, 
 bool CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromBuiltInType");
   if (input.IsOfType<Polynomial<Rational> >())
-  { return CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, input, output);
-  }
-
+    return CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, input, output);
+  if (input.IsOfType<RationalFunctionOld>())
+    return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, input, output);
   return false;
+}
+
+bool CalculatorFunctionsGeneral::innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExpressionFromRF");
+  if (!input.IsOfType<RationalFunctionOld>() )
+    return false;
+  const RationalFunctionOld& theRF=input.GetValue<RationalFunctionOld>();
+  Rational aConst;
+  if (theRF.IsConstant(&aConst))
+    return output.AssignValue(aConst, theCommands);
+  Expression numPolyE, denPolyE, numE, denE;
+  Polynomial<Rational> numP, denP;
+  theRF.GetNumerator(numP);
+  numPolyE.AssignValueWithContext(numP, input.GetContext(), theCommands);
+  if (theRF.expressionType==theRF.typePoly)
+    return CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, numPolyE, output);
+  theRF.GetDenominator(denP);
+  denPolyE.AssignValueWithContext(denP, input.GetContext(), theCommands);
+  CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, numPolyE, numE);
+  CalculatorFunctionsGeneral::innerExpressionFromPoly(theCommands, denPolyE, denE);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
 }
 
 bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output)
@@ -350,9 +371,11 @@ bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& t
     return false;
   if (input[0].GetValue<RationalFunctionOld>().GetMinNumVars()>1)
     return false;
+  Expression ResultRationalForm;
   Expression finalContext;
   finalContext.MakeContextWithOnePolyVar(theCommands, input[1]);
-  return output.AssignValueWithContext(input[0].GetValue<RationalFunctionOld>(), finalContext, theCommands);
+  ResultRationalForm.AssignValueWithContext(input[0].GetValue<RationalFunctionOld>(), finalContext, theCommands);
+  return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
 
 bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output)

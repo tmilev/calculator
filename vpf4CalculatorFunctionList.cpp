@@ -48,7 +48,8 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("MakeExpression", CalculatorFunctionsGeneral::innerExpressionFromBuiltInType, "",
    "Creates expression from built-in polynomial. ",
-   "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));");
+   "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));\
+   \nMakeExpression( MakeRationalFunction(1/(1+x^2)));");
   this->AddOperationInnerHandler
   ("Polynomial", CalculatorSerialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",

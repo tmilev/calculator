@@ -29,8 +29,9 @@ public:
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeApowerBevaluatedAtC(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerConstantFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerDifferentiateSinCos(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDifferentiateTrigAndInverseTrig(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateChainRule(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAplusB(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateAtimesB(Calculator& theCommands, const Expression& input, Expression& output);
@@ -84,7 +85,7 @@ public:
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerMakeRationalExpression(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMakeRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
@@ -110,6 +111,9 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
 };
 
 #endif

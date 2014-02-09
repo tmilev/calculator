@@ -300,6 +300,7 @@ class Expression
     this->theData=input;
     return true;
   }
+  bool MakeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   void MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
@@ -1089,8 +1090,8 @@ public:
   int opPolyOverANs()
   { return this->theAtoms.GetIndexIMustContainTheObject("PolynomialOverANs");
   }
-  int opRationalExpression()
-  { return this->theAtoms.GetIndexIMustContainTheObject("RationalExpression");
+  int opRationalFunction()
+  { return this->theAtoms.GetIndexIMustContainTheObject("RationalFunction");
   }
   int opDifferentiate()
   { return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
@@ -1760,7 +1761,7 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 { Expression tempE;
   tempE.theBoss=&owner;
   int curType=tempE.GetTypeOperation<theType>();
-  if (curType==owner.opPoly() || curType==owner.opRationalExpression() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
+  if (curType==owner.opPoly() || curType==owner.opRationalFunction() || curType==owner.opElementTensorGVM() || curType==owner.opElementUEoverRF() ||
       curType==owner.opMatRF() || curType==owner.opElementWeylAlgebra() || curType==owner.opWeightLieAlgPoly())
   { crash << "This may or may not be a programming error. Assigning value WITHOUT CONTEXT to data type "
     << this->theBoss->GetOperations()[curType] << " is discouraged, and most likely is an error. Crashing to let you know. "

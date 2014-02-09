@@ -4086,7 +4086,7 @@ void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVa
 double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
 { double result;
   if (x!=0)
-   result= FloatingPoint::arctan(y/x);
+    result= FloatingPoint::arctan(y/x);
   else
     if (y>0)
       result= MathRoutines::Pi()/2;

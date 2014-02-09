@@ -862,7 +862,7 @@ ParallelComputing::GlobalPointerCounter++;
   { this->Assign(right);
   }
   void operator=(const Polynomial<Rational>& other);
-  inline bool operator==(const int other)
+  inline bool operator==(const int other)const
   { if (other==0)
       return this->IsEqualToZero();
     Rational tempRat=other;

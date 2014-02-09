@@ -22,7 +22,7 @@ FormatExpressions::GetMonOrder<Expression>()
 template < >
 int Expression::GetTypeOperation<RationalFunctionOld>()const
 { this->CheckInitialization();
-  return this->theBoss->opRationalExpression();
+  return this->theBoss->opRationalFunction();
 }
 
 template < >
@@ -1057,8 +1057,8 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   int leftSSindex=leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex=rightContext.ContextGetIndexAmbientSSalg();
-  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
-  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
+//  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
+//  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
   if (leftSSindex==-1)
     leftSSindex=rightSSindex;
   if (rightSSindex==-1)
@@ -1286,5 +1286,11 @@ bool Expression::ContextGetPolyAndEWASubFromSuperContext
       return false;
     outputEWApart[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
   }
+  return true;
+}
+
+bool Expression::MakeAtom(const std::string& atomName, Calculator& newBoss)
+{ this->reset(newBoss);
+  this->theData=newBoss.AddOperationNoRepetitionOrReturnIndexFirst(atomName);
   return true;
 }

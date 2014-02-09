@@ -140,7 +140,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("PolynomialOverANs");
-  this->AddOperationBuiltInType("RationalExpression");
+  this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
   this->AddOperationBuiltInType("ElementTensorGVM");
@@ -161,6 +161,8 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("ElementWeylAlgebra");
   this->AddOperationBuiltInType("weightLieAlg");
   this->AddOperationBuiltInType("weightLieAlgPoly");
+//  this->AddOperationBuiltInType("\\arctan");
+
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
@@ -193,7 +195,6 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("csc");
   this->controlSequences.AddOnTop("sec");
   this->controlSequences.AddOnTop("sqrt");
-  this->controlSequences.AddOnTop("arctan");
   this->controlSequences.AddOnTop("arcsin");
   this->controlSequences.AddOnTop("arccos");
   this->controlSequences.AddOnTop("SequenceStatements");
@@ -235,6 +236,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   //additional operations with the same status as user-input expressions.
   this->AddOperationNoRepetitionAllowed("\\pi");
   this->AddOperationNoRepetitionAllowed("e");
+  this->AddOperationNoRepetitionAllowed("\\arctan");
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();

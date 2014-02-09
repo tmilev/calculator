@@ -46,6 +46,10 @@ void Calculator::initPredefinedInnerFunctions()
    "Prints macdonald polynomials from a semisimple type. ",
    "printMacdonaldPolys{}(B_3)", true);
   this->AddOperationInnerHandler
+  ("MakeExpression", CalculatorFunctionsGeneral::innerExpressionFromBuiltInType, "",
+   "Creates expression from built-in polynomial. ",
+   "MakeExpression(Polynomial{}((x-2y+z-1)^2(x+y-z)));");
+  this->AddOperationInnerHandler
   ("Polynomial", CalculatorSerialization::innerPolynomial<Rational>, "",
    "Creates a polynomial expression with rational coefficients. ",
    "Polynomial{}((x-2y+z-1)^2(x+y-z));\nPolynomial{}(y^2)-(Polynomial{}y)^2");
@@ -68,7 +72,7 @@ void Calculator::initPredefinedInnerFunctions()
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
 
   this->AddOperationInnerHandler
-  ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSinCos, "",
+  ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
    "Differentiation - product rule.  ",
    "Differentiate(x,  (\\sin x) \\cos x )");
   this->AddOperationInnerHandler
@@ -115,9 +119,9 @@ void Calculator::initPredefinedInnerFunctions()
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
    "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1");
   this->AddOperationInnerHandler
-  ("MakeRationalExpression", CalculatorFunctionsGeneral::innerMakeRationalExpression, "",
+  ("MakeRationalFunction", CalculatorFunctionsGeneral::innerMakeRationalFunction, "",
    "Creates a built-in rational function.",
-   "MakeRationalExpression{}(x_1+MakeRationalExpression{}x_1+x_2)");
+   "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)");
   this->AddOperationInnerHandler
   ("MatrixRationals", this->innerMatrixRational,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
@@ -1336,7 +1340,7 @@ void Calculator::initPredefinedStandardOperations()
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalExpression(), this->opRationalExpression(),
+  ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
    , true);
@@ -1587,7 +1591,7 @@ void Calculator::initPredefinedStandardOperations()
    \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalExpression(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
    "Multiplies rational number by a rational function.",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);
 
@@ -1610,7 +1614,7 @@ void Calculator::initPredefinedStandardOperations()
    \nv:=hwv{}(G_2, (z,1),(1,0));\
    \n(2*z) v;\n", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalExpression(), this->opElementTensorGVM(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
    "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -1809,7 +1813,7 @@ void Calculator::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalExpression(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",
@@ -1970,6 +1974,11 @@ void Calculator::initPredefinedOperationsComposite()
    "If x is a constant, replaces x{}({{anything}}):=x; ",
    "0{}3;2{}y;(\\sqrt{}2){}x;", true);
   this->AddOperationComposite
+  ("RationalFunction", CalculatorFunctionsGeneral::innerRationalFunctionSubstitution, "",
+   "If x is a constant, replaces x{}({{anything}}):=x; ",
+   "0{}3;2{}y;(\\sqrt{}2){}x;", true);
+
+  this->AddOperationComposite
   ("AlgebraicNumber", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}}):=x; ",
    "0{}3;2{}y;(\\sqrt{}2){}x;", true);
@@ -2041,15 +2050,12 @@ void Calculator::initBuiltInAtomsNotInterprettedAsFunctions()
   this->atomsNotInterprettedAsFunctions.SetExpectedSize(30);
   this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\pi");
   this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("e");
-
 }
 
 void Calculator::initAtomsThatFreezeArguments()
 { MacroRegisterFunctionWithName("Calculator::initAtomsThatFreezeArguments");
   this->atomsThatFreezeArguments.SetExpectedSize(this->builtInTypes.size+50);
   this->atomsThatFreezeArguments.AddOnTop(this->builtInTypes);
-
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraDO"); //<-needed to facilitate civilized context handling
   this->atomsThatFreezeArguments.AddOnTopNoRepetitionMustBeNewCrashIfNot("ElementWeylAlgebraPoly"); //<-needed to facilitate civilized context handling
-
 }

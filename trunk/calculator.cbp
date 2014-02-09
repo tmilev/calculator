@@ -49,6 +49,7 @@
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf6_2serialization_code.cpp" />
 		<Unit filename="vpf6_3calculatorMathRoutines.cpp" />
+		<Unit filename="vpf6_4ExpressionsImplementation.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />

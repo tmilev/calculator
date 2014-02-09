@@ -979,21 +979,6 @@ bool CalculatorSerialization::innerStorePoly(Calculator& theCommands, const Expr
   return true;
 }
 
-bool Calculator::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerPolynomial");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
-  Expression theConverted;
-  bool result= CalculatorSerialization::innerPolynomial<Rational>(theCommands, input, theConverted);
-  if (!result)
-    return false;
-  if (!theConverted.IsOfType<Polynomial<Rational> >())
-    crash << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
-    << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". " << crash;
-  return theConverted.ConvertToType<RationalFunctionOld>(output);
-}
-
 bool CalculatorSerialization::innerStoreRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { RationalFunctionOld theRF;
   if (!input.IsOfType(&theRF))

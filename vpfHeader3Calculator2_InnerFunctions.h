@@ -84,9 +84,32 @@ public:
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerMakeRationalExpression(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerEmbedSSalgInSSalg(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWeylDimFormula(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDecomposeCharGenVerma(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2Init(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data, Expression& outputContext);
+  static bool innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerParabolicWeylGroups(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerParabolicWeylGroupsBruhatGraph(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPrintGenVermaModule(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerWriteGenVermaModAsDiffOperatorUpToLevel(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHWV(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitGenericGenVermaTensorFD(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerHWTAABF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data);
+  static bool innerPrintB3G2branchingTableInit
+  (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
+  static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
+
 };
 
 #endif

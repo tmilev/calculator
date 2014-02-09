@@ -2126,9 +2126,9 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
       SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
-  bool ereBeProbs=(h.ToString()=="(6, 10, 14, 8)");
-  if (ereBeProbs)
-    std::cout << "<hr>The roots in play are: " << rootsInPlay.ToString();
+//  bool ereBeProbs=(h.ToString()=="(6, 10, 14, 8)");
+//  if (ereBeProbs)
+//    std::cout << "<hr>The roots in play are: " << rootsInPlay.ToString();
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;

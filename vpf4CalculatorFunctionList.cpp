@@ -115,9 +115,9 @@ void Calculator::initPredefinedInnerFunctions()
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
    "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1");
   this->AddOperationInnerHandler
-  ("RF", this->innerRationalFunction, "",
+  ("MakeRationalExpression", CalculatorFunctionsGeneral::innerMakeRationalExpression, "",
    "Creates a built-in rational function.",
-   "RF{}(x_1+RF{}x_1+x_2)");
+   "MakeRationalExpression{}(x_1+MakeRationalExpression{}x_1+x_2)");
   this->AddOperationInnerHandler
   ("MatrixRationals", this->innerMatrixRational,"",
    "Creates an internal c++ matrix structure from double list of rationals. \
@@ -130,7 +130,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Same as MatrixRationals but uses different c++ implementation (class MatrixTensor instead of class Matrix). \
    ", "s_1:=MatrixRationalsTensorForm{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1)); ");
   this->AddOperationInnerHandler
-  ("MatrixRFs", this->innerMatrixRationalFunction,"",
+  ("MatrixRFs", CalculatorFunctionsGeneral::innerMatrixRationalFunction,"",
    "Creates an internal c++ matrix structure from double list of rational functions. \
    ", "s_1:=MatrixRFs{}((1-t, 2), (3, 2-t))");
   this->AddOperationInnerHandler
@@ -619,7 +619,7 @@ void Calculator::initPredefinedInnerFunctions()
    ", "Transpose{}(1,2); (1,2)^t");
 
   this->AddOperationInnerHandler
-  ("\\det", this->innerDeterminant, "",
+  ("\\det", CalculatorFunctionsGeneral::innerDeterminant, "",
    "Tries to convert to a matrix of rationals or matrix of rational \
    functions and computes the determinant if\
    not too large. \
@@ -649,7 +649,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
 */  this->AddOperationInnerHandler
-  ("hwv", this->innerHWV, "",
+  ("hwv", CalculatorFunctionsGeneral::innerHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
    gives the highest weight in fundamental coordinates. \
@@ -659,7 +659,7 @@ void Calculator::initPredefinedInnerFunctions()
    "g_{{i}}:=getChevalleyGenerator{}(B_3, i);h_{{i}}:=getCartanGenerator{}(B_3, i);\
    \nv_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0));\nv_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1}v_\\lambda");
   this->AddOperationInnerHandler
-  ("printModule", this->innerPrintGenVermaModule, "",
+  ("printModule", CalculatorFunctionsGeneral::innerPrintGenVermaModule, "",
    "Makes a report on a finite dimensional Lie algebra module, or more generally, on \
    a generalized Verma module (irreducible finite dimensional semisimple Lie algebra \
    modules are a partial case of generalized Verma modules). \
@@ -671,7 +671,7 @@ void Calculator::initPredefinedInnerFunctions()
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
    "printModule{} (G_2, (2,0),(0,0))");
   this->AddOperationInnerHandler
-  ("hwTAAbf", this->innerHWTAABF, "",
+  ("hwTAAbf", CalculatorFunctionsGeneral::innerHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
    Let M be a Verma module with highest weight vector v given in \
    fundamental coordinates. Let P:M->M\
@@ -680,7 +680,7 @@ void Calculator::initPredefinedInnerFunctions()
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
    "g_{{a}}:=getChevalleyGenerator{} (G_2, a);\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
   this->AddOperationInnerHandler
-  ("WeylDimFormula", this->fWeylDimFormula, "",
+  ("WeylDimFormula", CalculatorFunctionsGeneral::innerWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
     Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
@@ -694,7 +694,7 @@ void Calculator::initPredefinedInnerFunctions()
    "animateLittelmannPaths{}(G_2, (2,0));");
   this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
-   this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
+   CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
    "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
    The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
    fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
@@ -750,7 +750,7 @@ void Calculator::initPredefinedInnerFunctions()
     subalgebra of B_3. ",
    "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
   this->AddOperationInnerHandler
-  ("SplitFDpartB3overG2", this->fSplitFDpartB3overG2, "",
+  ("SplitFDpartB3overG2", CalculatorFunctionsGeneral::innerSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of \
    B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental \
@@ -775,12 +775,12 @@ void Calculator::initPredefinedInnerFunctions()
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
    "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))", true, true);
   this->AddOperationInnerHandler
-  ("SplitFDTensorGenericGeneralizedVerma", this->innerSplitGenericGenVermaTensorFD, "",
+  ("SplitFDTensorGenericGeneralizedVerma", CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
   this->AddOperationInnerHandler
   ("WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-   this->innerWriteGenVermaModAsDiffOperatorUpToLevel, "",
+   CalculatorFunctionsGeneral::innerWriteGenVermaModAsDiffOperatorUpToLevel, "",
    "<b>Experimental, please don't use</b>. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The third argument gives the highest weight. \
@@ -861,7 +861,7 @@ void Calculator::initPredefinedInnerFunctions()
    "printSlTwoSubalgebras{}(E_6)");
 
    this->AddOperationInnerHandler
-  ("parabolicsInfoBruhatGraph", this->fParabolicWeylGroupsBruhatGraph, "",
+  ("parabolicsInfoBruhatGraph", CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph, "",
    " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
    as well as the cosets \
    (given by minimal coset representatives) of the Weyl subgroup in question. \
@@ -1081,7 +1081,7 @@ void Calculator::initPredefinedInnerFunctions()
    CanBeExtendedParabolicallyTo(b_3+e_6+a_3, d_4+e_8+f_4)\
    ", true, false);
   this->AddOperationInnerHandler
-  ("EmbedSemisimpleInSemisimple", this->innerEmbedSSalgInSSalg, "",
+  ("EmbedSemisimpleInSemisimple", CalculatorFunctionsGeneral::innerEmbedSSalgInSSalg, "",
    " Trys to find all embeddings of the first semisimple type into the second. Records all intermediate subalgebras. ",
    "EmbedSemisimpleInSemisimple{}(G^3_2, B_3);EmbedSemisimpleInSemisimple{}(G_2, B_3)", true, false);
   this->AddOperationInnerHandler
@@ -1336,7 +1336,7 @@ void Calculator::initPredefinedStandardOperations()
    " \\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i); \nx_{{i}}:=Polynomial{}x_i;\nx_i\\partial_i-\\partial_i x_i-[x_i, \\partial_i]"
    , true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalFunction(), this->opRationalFunction(),
+  ("+", CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF, this->opRationalExpression(), this->opRationalExpression(),
    "Adds a rational function to a rational function. ",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) "
    , true);
@@ -1587,7 +1587,7 @@ void Calculator::initPredefinedStandardOperations()
    \n[g_{22}+g_{20}+g_{14},g_{17}-6/5g_{14}]", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalFunction(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF, this->opRational(), this->opRationalExpression(),
    "Multiplies rational number by a rational function.",
    "WeylDimFormula{}(a_2, (0,3)) + WeylDimFormula{}(a_2, (3,0)) + 4 WeylDimFormula{}(a_2, (1,1)) ", true);
 
@@ -1610,7 +1610,7 @@ void Calculator::initPredefinedStandardOperations()
    \nv:=hwv{}(G_2, (z,1),(1,0));\
    \n(2*z) v;\n", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
+  ("*", CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor, this->opRationalExpression(), this->opElementTensorGVM(),
    "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
@@ -1809,7 +1809,7 @@ void Calculator::initPredefinedStandardOperations()
     \n ((((g_1)^{Polynomial{}x})^{Polynomial{}y})+g_2)^2",
    true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalFunction(),
+  ("^", CalculatorFunctionsBinaryOps::innerPowerElementUEbyRatOrPolyOrRF, this->opElementUEoverRF(), this->opRationalExpression(),
    "Provided that an element of Universal Enveloping algebra is \
    a single generator (raised to arbitrary formal RF power) with coefficient 1,\
    raises (formally) the element of the UE to arbitrary RF power. ",

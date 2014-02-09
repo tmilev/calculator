@@ -707,43 +707,6 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Calculator::innerDeterminant(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerDeterminant");
-  Matrix<Rational> matRat;
-  Matrix<RationalFunctionOld> matRF;
-  Expression theContext;
-  if (theCommands.GetMatriXFromArguments(input, matRat, 0, 0, 0))
-  { if (matRat.NumRows==matRat.NumCols)
-    { if (matRat.NumRows>100)
-      { theCommands.Comments << "<hr>I have been instructed not to compute determinants of rational matrices larger than 100 x 100 "
-        << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
-        << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
-        return false;
-      }
-      //std::cout << " <br> ... and the matRat is: " << matRat.ToString();
-      return output.AssignValue(matRat.GetDeterminant(), theCommands);
-    } else
-      return output.SetError("Requesting to compute determinant of non-square matrix. ", theCommands);
-  }
-  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
-  { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
-    << " rational functions or rationals, and I failed to convert your matrix to either type. "
-    << " If this is not how you expect this function to act, correct it: the code is located in  "
-    << " file " << __FILE__ << ", line " << __LINE__ << ". ";
-    return false;
-  }
-  if (matRF.NumRows==matRF.NumCols)
-  { if (matRF.NumRows>10)
-    { theCommands.Comments << "I have been instructed not to compute determinants of matrices of rational functions larger than "
-      << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. To lift the restriction edit function located in file "
-      << __FILE__ << ", line " << __LINE__ << ". ";
-      return false;
-    }
-    return output.AssignValueWithContext(matRF.GetDeterminant(), theContext, theCommands);
-  } else
-    return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
-}
-
 bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerDeterminantPolynomial");
   Matrix<Polynomial<Rational> > matPol;
@@ -800,18 +763,6 @@ bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Ex
     return false;
   outputMat=output.GetValue<Matrix<Rational> >();
   return output.AssignValue(outputMat, theCommands);
-}
-
-bool Calculator::innerMatrixRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerMatrixRationalFunction");
-  Matrix<RationalFunctionOld> outputMat;
-  Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, Calculator::innerRationalFunction))
-  { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
-    return false;
-  }
-//  std::cout << "<hr>And the context is: " << ContextE.ToString();
-  return output.AssignValueWithContext(outputMat, ContextE, theCommands);
 }
 
 void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)

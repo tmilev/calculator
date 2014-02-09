@@ -140,7 +140,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("PolynomialOverANs");
-  this->AddOperationBuiltInType("RationalFunction");
+  this->AddOperationBuiltInType("RationalExpression");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
   this->AddOperationBuiltInType("ElementTensorGVM");

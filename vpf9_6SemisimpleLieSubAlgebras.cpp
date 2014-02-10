@@ -467,6 +467,8 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner,
   if (targetType!=0)
     this->flagAttemptToAdjustCentralizers=false;
   this->HookUpCentralizers(false);
+  if (this->flagComputeNilradicals)
+    this->ComputePairingTablesAndFKFTtypes();
 }
 
 bool SemisimpleSubalgebras::RanksAndIndicesFit(const DynkinType& input)const
@@ -2002,7 +2004,7 @@ void CandidateSSSubalgebra::EnumerateAllNilradicals(GlobalVariables* theGlobalVa
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::EnumerateAllNilradicals");
   ProgressReport theReport(theGlobalVariables);
   ProgressReport theReport2(theGlobalVariables);
-
+//  std::cout << "Enumerating!!!!!";
   std::stringstream reportStream;
   reportStream << "Enumerating recursively nilradicals of type " << this->ToStringTypeAndHs() << "...";
   theReport.Report(reportStream.str());
@@ -4851,6 +4853,7 @@ int CandidateSSSubalgebra::GetNumModules()const
 
 void SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes()
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ComputePairingTablesAndFKFTtypes");
+  //std::cout << "computing pairing tables";
   ProgressReport theReport(this->theGlobalVariables);
   for (int i=0; i<this->theSubalgebraCandidates.size; i++)
   { CandidateSSSubalgebra& currentSA=this->theSubalgebraCandidates[i];

@@ -116,14 +116,19 @@ class Expression
   bool flagDeallocated;
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
 //////
-  friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
-  { output << theMon.ToString();
-    return output;
-  }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac
   };
+  friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  friend Expression operator*(const Expression& left, const Expression& right);
+  friend Expression operator/(const Expression& left, const Expression& right);
+  friend Expression operator+(const Expression& left, const Expression& right);
+  friend Expression operator-(const Expression& left, const Expression& right);
+
   void reset(Calculator& newBoss, int numExpectedChildren=0)
   { this->theBoss=&newBoss;
     this->theData=0;

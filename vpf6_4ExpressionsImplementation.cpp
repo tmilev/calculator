@@ -8,6 +8,34 @@
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 ProjectInformationInstance ProjectInfoVpf6_4ExpressionsImplementationcpp(__FILE__, "Calculator expression implementation. ");
 
+Expression operator*(const Expression& left, const Expression& right)
+{ left.CheckInitialization();
+  Expression result;
+  result.MakeXOX(*left.theBoss, left.theBoss->opTimes(), left, right);
+  return result;
+}
+
+Expression operator/(const Expression& left, const Expression& right)
+{ left.CheckInitialization();
+  Expression result;
+  result.MakeXOX(*left.theBoss, left.theBoss->opDivide(), left, right);
+  return result;
+}
+
+Expression operator+(const Expression& left, const Expression& right)
+{ left.CheckInitialization();
+  Expression result;
+  result.MakeXOX(*left.theBoss, left.theBoss->opPlus(), left, right);
+  return result;
+}
+
+Expression operator-(const Expression& left, const Expression& right)
+{ left.CheckInitialization();
+  Expression result;
+  result.MakeXOX(*left.theBoss, left.theBoss->opMinus(), left, right);
+  return result;
+}
+
 //If you get a specialization after instantiation error:
 //the following template specialization funcitons must appear
 //here and nowhere else (discovered through extremely painful experimentation).

@@ -1246,8 +1246,15 @@ void Calculator::initPredefinedStandardOperations()
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
   this->AddOperationOuterHandler
+  ("+", CalculatorFunctionsGeneral::outerCombineFractionsCommutative, "",
+   "Combines fractions on condition that all participants commute. \
+   Equivalent to {{a}}/{{b}}+{{c}}/{{d}}:=(a *d+c*b)/(d*b); \
+   Please note that this transformation is not correct if b and d do not commute. ",
+   "a/b+c/d", true);
+
+  this->AddOperationOuterHandler
   ("+", this->outerCombineFractions, "",
-   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b ",
+   "Combines fractions. Equivalent to {{a}}/{{b}}+{{c}}:=(a+c*b)/b; ",
    "f{}{{x}}:=(2x+3)/(2x+1);\ng{}{{y}}:=(y-2)/(y+3);\ng{}f{}z;\nf{}g{}z", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),

@@ -451,7 +451,8 @@ bool Calculator::innerPrintSSsubalgebrasRegular(Calculator& theCommands, const E
 }
 
 bool Calculator::innerPrintSSsubalgebras
-(Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,
+(Calculator& theCommands, const Expression& input, Expression& output,
+ bool doForceRecompute, bool doAttemptToSolveSystems,
  bool doComputePairingTable, bool doComputeModuleDecomposition, bool doComputeNilradicals, bool doAdjustCentralizers)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("Calculator::innerPrintSSsubalgebras");

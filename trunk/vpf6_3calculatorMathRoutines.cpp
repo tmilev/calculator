@@ -363,9 +363,23 @@ bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands
   return output.MakeSum(theCommands, theTerms);
 }
 
+bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCombineFractionsCommutative");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+    return false;
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
+  if (!leftE.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3) ||
+      !rightE.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  output=(leftE[1]*rightE[2]+rightE[1]*leftE[2])/(leftE[2]*rightE[2]);
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerConstantFunction");
-  if (!input.children.size!=2)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
+//std::cout << "input of innerRationalFunctionSubstitution: " << input.ToString();
+  if (input.children.size!=2)
     return false;
   if (!input[0].IsOfType<RationalFunctionOld>())
     return false;

@@ -532,6 +532,11 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "plotWedge(2, 2, 1.1,1.570796327, 2*3.1415 )")
    ;
+  this->AddOperationInnerHandler ("IntegrateRF", CalculatorFunctionsGeneral::innerIntegrateRF, "",
+   "Provided that the second argument is a rational function which is sufficiently easy to factor, \
+   integrates the second argument with respect to d of the first argument.",
+   "IntegrateRF(x, \\frac{x^5 }{x^3-1})")
+   ;
 
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \

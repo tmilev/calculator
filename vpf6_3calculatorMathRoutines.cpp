@@ -376,6 +376,14 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRF");
+  if (input.children.size!=2)
+    return false;
+//  if (!CalculatorSerialization::inner)
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerRationalFunctionSubstitution");
 //std::cout << "input of innerRationalFunctionSubstitution: " << input.ToString();

@@ -113,6 +113,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);

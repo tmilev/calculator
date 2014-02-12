@@ -65,7 +65,7 @@ bool Expression::MakeEmptyContext(Calculator& owner)
   return this->AddChildAtomOnTop(owner.opContexT());
 }
 
-bool Expression::MakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE)
+bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const Expression& inputPolyVarE)
 { this->MakeEmptyContext(owner);
   Expression thePolyVars;
   thePolyVars.reset(owner, 2);
@@ -84,10 +84,10 @@ bool Expression::MakeContextSSLieAlg(Calculator& owner, const SemisimpleLieAlgeb
   return this->ContextSetSSLieAlgebrA(owner.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSLiealg), owner);
 }
 
-bool Expression::MakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName)
+bool Expression::ContextMakeContextWithOnePolyVar(Calculator& owner, const std::string& inputPolyVarName)
 { Expression varNameE;
   varNameE.MakeAtom(owner.AddOperationNoRepetitionOrReturnIndexFirst(inputPolyVarName), owner);
-  return this->MakeContextWithOnePolyVar(owner, varNameE);
+  return this->ContextMakeContextWithOnePolyVar(owner, varNameE);
 }
 
 bool Expression::MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex)
@@ -198,7 +198,7 @@ void ModuleSSalgebra<coefficient>::GetGenericUnMinusElt
     varShift=this->GetMinNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
-  { tempRF.MakeOneLetterMoN(i+varShift, 1, theGlobalVariables);
+  { tempRF.MakeOneLetterMoN(i+varShift, 1, &theGlobalVariables);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(&theGlobalVariables);
@@ -1914,6 +1914,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   MemorySaving<FormatExpressions> contextFormat;
+  bool showContext= theBoss==0 ? false : theBoss->flagDisplayContext;
   if (this->IsAtom())
   { if (this->theData< this->theBoss->GetOperations().size && this->theData>=0)
       out << this->theBoss->GetOperations()[this->theData];
@@ -1945,18 +1946,22 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "Polynomial{}(";
     out << this->GetValue<Polynomial<Rational> >().ToString(&contextFormat.GetElement()) << ")";
-//    out << "[" << this->GetContext().ToString() << "]";
+    if (showContext)
+      out << "[" << this->GetContext().ToString() << "]";
     result=true;
   } else if (this->IsOfType<Polynomial<AlgebraicNumber> >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "PolynomialAlgebraicNumbers{}(";
     out << this->GetValue<Polynomial<AlgebraicNumber> >().ToString(&contextFormat.GetElement()) << ")";
-    out << "[" << this->GetContext().ToString() << "]";
+    if (showContext)
+      out << "[" << this->GetContext().ToString() << "]";
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
     out << "RationalFunction{}("
     << this->GetValue<RationalFunctionOld>().ToString(&contextFormat.GetElement()) << ")";
+    if (showContext)
+      out << "[" << this->GetContext().ToString() << "]";
     result=true;
   } else if (this->IsOfType<Weight<Polynomial<Rational> > >())
   { this->GetContext().ContextGetFormatExpressions(contextFormat.GetElement());
@@ -2068,7 +2073,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << "ElementWeylAlgebra{}(";
     out << this->GetValue<ElementWeylAlgebra<Rational> >().ToString(&contextFormat.GetElement());
     out << ")";
-    out << "[" << this->GetContext().ToString() << "]";
+    if (showContext)
+      out << "[" << this->GetContext().ToString() << "]";
     result=true;
   }
   output=out.str();

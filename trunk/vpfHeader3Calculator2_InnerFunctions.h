@@ -87,8 +87,6 @@ public:
   static bool innerLastElement(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRemoveLastElement(Calculator& theCommands, const Expression& input, Expression& output);
 
-  static bool innerMakeRationalFunction(Calculator& theCommands, const Expression& input, Expression& output);
-
   static bool innerPlotWedge(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispify(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerLispifyFull(Calculator& theCommands, const Expression& input, Expression& output);

@@ -121,4 +121,71 @@ bool CalculatorFunctionsBinaryOps::innerDivideTypeByType(Calculator& theCommands
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
+template <class coefficient>
+bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorSerialization::innerPolynomial");
+  RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+//  std::cout << "Extracting poly from: " << input.ToString();
+  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
+  { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
+    << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
+    return false;
+  }
+  if (input.IsOfType<Polynomial<coefficient> >())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<coefficient>() || input.IsOfType<Rational>())
+  { if (!input.ConvertToType<Polynomial<coefficient> >(output))
+      crash << "This is a programming error: failed to convert coefficient to polynomial. " << crash;
+    return true;
+  }
+  Expression theConverted, theComputed;
+  if (input.IsListStartingWithAtom(theCommands.opTimes()) || input.IsListStartingWithAtom(theCommands.opPlus()))
+  { theComputed.reset(theCommands, input.children.size);
+    theComputed.AddChildOnTop(input[0]);
+    for (int i=1; i<input.children.size; i++)
+    { if (!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[i], theConverted))
+      { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[i].ToString();
+        return false;
+      }
+      theComputed.AddChildOnTop(theConverted);
+    }
+    if (input.IsListStartingWithAtom(theCommands.opTimes()))
+      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly(theCommands, theComputed, output);
+    if (input.IsListStartingWithAtom(theCommands.opPlus()))
+      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly(theCommands, theComputed, output);
+    crash << "Error, this line of code should never be reached. " << crash;
+  }
+  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  { if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
+    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
+      return false;
+    }
+    int thePower=-1;
+    if (!input[2].IsSmallInteger(&thePower))
+    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input.ToString() << " because the exponenet was not a small integer.";
+      return false;
+    }
+    Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();
+    if (thePower<0)
+      if (!resultP.IsAConstant())
+      { theCommands.Comments << "<hr>Failed to extract polynomial from  " << input.ToString() << " because the exponent was negative. ";
+        return false;
+      }
+    if (thePower==0)
+      if (resultP.IsEqualToZero())
+        return output.SetError("Error: 0^0 is undefined. ", theCommands);
+    resultP.RaiseToPower(thePower);
+    return output.AssignValueWithContext(resultP, theConverted.GetContext(), theCommands);
+  }
+
+  Polynomial<coefficient> JustAmonomial;
+  JustAmonomial.MakeMonomiaL(0,1,1);
+  Expression theContext;
+  theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+  return output.AssignValueWithContext(JustAmonomial, theContext, theCommands);
+}
+
+
 #endif

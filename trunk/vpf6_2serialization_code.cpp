@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".#include "vpfHeader3Calculator0_Interface.h"
 #include "vpfHeader3Calculator0_Interface.h"
+#include "vpfHeader3Calculator1_InnerTypedFunctions.h"
 static ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "C++ object <-> calculator expression serialization/deserialization.");
 
 bool CalculatorSerialization::innerStoreChevalleyGenerator(Calculator& theCommands, const ChevalleyGenerator& input, Expression& output)
@@ -1009,4 +1010,66 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Ra
     return false;
   }
   return output.MakeXOX(theCommands, theCommands.opDivide(), numE, denE);
+}
+
+bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
+  //std::cout << "converting to rf: " << input.ToString();
+  Expression intermediate(theCommands);
+  if (input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3) ||
+      input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
+      input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+  { Expression leftE, rightE;
+    if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE) ||
+        !CalculatorSerialization::innerRationalFunction(theCommands, input[2], rightE) )
+    { theCommands.Comments << "<hr> Failed to convert " << input[1].ToString() << " and " << input[2].ToString() << " to rational function. ";
+      return false;
+    }
+    if (leftE.IsError() || rightE.IsError())
+    { theCommands.Comments << "<hr> Conversion of " << input[1].ToString() << " and " << input[2].ToString() << "  returned error(s): "
+      << leftE.ToString() << " and " << rightE.ToString();
+      return false;
+    }
+    intermediate.AddChildOnTop(input[0]);
+    intermediate.AddChildOnTop(leftE);
+    intermediate.AddChildOnTop(rightE);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
+      return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(theCommands, intermediate, output);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
+      return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(theCommands, intermediate, output);
+    if (input.IsListNElementsStartingWithAtom(theCommands.opDivide()))
+      return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(theCommands, intermediate, output);
+    crash << "This line of code should never be reached, something has gone wrong." << crash;
+  }
+  int theSmallPower=-1;
+  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3) )
+  { if (input[2].IsSmallInteger(&theSmallPower))
+    { Expression leftE;
+      if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE))
+      { theCommands.Comments << "<hr> Failed to convert " << input[1].ToString() << " to rational function. ";
+        return false;
+      }
+      if (leftE.IsError())
+      { theCommands.Comments << "<hr> Conversion of " << input[1].ToString() << "  returned error: " << leftE.ToString();
+        return false;
+      }
+      RationalFunctionOld theRF=leftE.GetValue<RationalFunctionOld>();
+      theRF.RaiseToPower(theSmallPower);
+      return output.AssignValueWithContext(theRF, leftE.GetContext(), theCommands);
+    }
+    theCommands.Comments << "<hr>Failed to raise " << input[3].ToString() << " to power " << input[2].ToString()
+    << ": failed to convert the power to small integer";
+    return false;
+  }
+  if (input.IsOfType<RationalFunctionOld>())
+  { output=input;
+    return true;
+  }
+  if (input.IsOfType<Polynomial<Rational> >() || input.IsOfType<Rational>())
+    return input.ConvertToType<RationalFunctionOld> (output);
+  Expression theContext;
+  theContext.ContextMakeContextWithOnePolyVar(theCommands, input);
+  RationalFunctionOld theRF;
+  theRF.MakeOneLetterMoN(0, 1, theCommands.theGlobalVariableS);
+  return output.AssignValueWithContext(theRF, theContext, theCommands);
 }

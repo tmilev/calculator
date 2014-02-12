@@ -395,7 +395,7 @@ bool CalculatorFunctionsGeneral::innerRationalFunctionSubstitution(Calculator& t
     return false;
   Expression ResultRationalForm;
   Expression finalContext;
-  finalContext.MakeContextWithOnePolyVar(theCommands, input[1]);
+  finalContext.ContextMakeContextWithOnePolyVar(theCommands, input[1]);
   ResultRationalForm.AssignValueWithContext(input[0].GetValue<RationalFunctionOld>(), finalContext, theCommands);
   return CalculatorFunctionsGeneral::innerExpressionFromRF(theCommands, ResultRationalForm, output);
 }
@@ -593,7 +593,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig(Calculator
     oneOverOnePlusXsquared.MakeOne(theCommands.theGlobalVariableS);
     oneOverOnePlusXsquared/=onePlusXsquared;
     Expression theContext;
-    theContext.MakeContextWithOnePolyVar(theCommands, "x");
+    theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
     return output.AssignValueWithContext(oneOverOnePlusXsquared, theContext, theCommands);
   }
   return false;
@@ -1746,7 +1746,7 @@ bool CalculatorFunctionsGeneral::innerWeylDimFormula(Calculator& theCommands, co
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
 //  std::cout << "<br>input[2] is: " << input[2].ToString();
-  if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(input[2], theWeight, &newContext, theSSowner->GetRank(), CalculatorSerialization::innerRationalFunction))
     return output.SetError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
   rfOne.MakeOne(theCommands.theGlobalVariableS);
@@ -1778,7 +1778,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeFDPartGeneralizedVermaModuleOverL
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Expression finalContext;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightNode, theWeightFundCoords, &finalContext, theDim, CalculatorSerialization::innerRationalFunction))
     return output.SetError("Failed to extract highest weight from the second argument.", theCommands);
   if (!theCommands.GetVectoR<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0))
     return output.SetError("Failed to extract parabolic selection from the third argument", theCommands);
@@ -1801,7 +1801,7 @@ bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2Init(Calculator& theCom
   if (!input.IsListNElements(4))
     return output.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments", theCommands);
   //std::cout << input.ToString();
-  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>(input, theG2B3Data.theWeightFundCoords, &outputContext, 3, CalculatorSerialization::innerRationalFunction))
     output.SetError("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   theG2B3Data.selInducing.init(3);
@@ -1835,7 +1835,7 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer, CalculatorSerialization::innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -1954,7 +1954,7 @@ bool CalculatorFunctionsGeneral::innerDeterminant(Calculator& theCommands, const
     } else
       return output.SetError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
-  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, matRF, &theContext, -1, CalculatorSerialization::innerRationalFunction))
   { theCommands.Comments << "<hr>I have been instructed to only compute determinants of matrices whose entries are "
     << " rational functions or rationals, and I failed to convert your matrix to either type. "
     << " If this is not how you expect this function to act, correct it: the code is located in  "
@@ -1977,7 +1977,7 @@ bool CalculatorFunctionsGeneral::innerMatrixRationalFunction(Calculator& theComm
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerMatrixRationalFunction");
   Matrix<RationalFunctionOld> outputMat;
   Expression ContextE;
-  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetMatriXFromArguments(input, outputMat, &ContextE, -1, CalculatorSerialization::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to get matrix of rational functions. ";
     return false;
   }
@@ -1994,7 +1994,7 @@ bool CalculatorFunctionsGeneral::innerDecomposeCharGenVerma(Calculator& theComma
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
   if (!theCommands.GetTypeHighestWeightParabolic<RationalFunctionOld>
-      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg, CalculatorSerialization::innerRationalFunction))
    return false;
   if (output.IsError())
     return true;
@@ -2090,7 +2090,7 @@ bool CalculatorFunctionsGeneral::innerPrintGenVermaModule(Calculator& theCommand
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if(!theCommands.GetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorSerialization::innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -2178,7 +2178,7 @@ bool CalculatorFunctionsGeneral::innerHWV(Calculator& theCommands, const Express
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorFunctionsGeneral::innerMakeRationalFunction) )
+  if(!theCommands.GetTypeHighestWeightParabolic(theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, CalculatorSerialization::innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -2201,7 +2201,7 @@ bool CalculatorFunctionsGeneral::innerSplitGenericGenVermaTensorFD(Calculator& t
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands);
-  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, CalculatorSerialization::innerRationalFunction))
   { theCommands.Comments
     << "Failed to convert the third argument of innerSplitGenericGenVermaTensorFD to a list of " << theRank
     << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
@@ -2425,7 +2425,7 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   SemisimpleLieAlgebra* constSSalg= &theCommands.theObjectContainer.theLieAlgebras.GetElement(algebraIndex);
   const Expression& weightExpression=input[3];
   Vector<RationalFunctionOld> weight;
-  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), CalculatorFunctionsGeneral::innerMakeRationalFunction))
+  if (!theCommands.GetVectoR<RationalFunctionOld>(weightExpression, weight, &finalContext, constSSalg->GetRank(), CalculatorSerialization::innerRationalFunction))
   { theCommands.Comments << "<hr>Failed to obtain highest weight from the third argument which is " << weightExpression.ToString();
     return false;
   }
@@ -2450,21 +2450,6 @@ bool CalculatorFunctionsGeneral::innerHWTAABF(Calculator& theCommands, const Exp
   if(!leftUE.HWTAAbilinearForm(rightUE, outputRF, &hwDualCoords, *theCommands.theGlobalVariableS, 1, 0, &theCommands.Comments))
     return output.SetError("Error: couldn't compute Shapovalov form, see comments.", theCommands);
   return output.AssignValueWithContext(outputRF, finalContext, theCommands);
-}
-
-bool CalculatorFunctionsGeneral::innerMakeRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerPolynomial");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
-  Expression theConverted;
-  bool result= CalculatorSerialization::innerPolynomial<Rational>(theCommands, input, theConverted);
-  if (!result)
-    return false;
-  if (!theConverted.IsOfType<Polynomial<Rational> >())
-    crash << "<br>This is a programming error: innerPolynomial returned true " << "from input " << input.ToString()
-    << " but the result is not of type innerPolynomial, instead it is " << theConverted.ToString() << ". " << crash;
-  return theConverted.ConvertToType<RationalFunctionOld>(output);
 }
 
 bool CalculatorFunctionsGeneral::innerSplitFDpartB3overG2CharsOutput(Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3Data)

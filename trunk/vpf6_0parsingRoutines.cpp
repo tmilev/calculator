@@ -70,6 +70,7 @@ void Calculator::reset()
   this->flagMaxTransformationsErrorEncountered=false;
   this->flagMaxRecursionErrorEncountered=false;
   this->flagAbortComputationASAP=false;
+  this->flagDisplayContext=false;
   this->ExpressionStack.Clear();
   this->theCruncherIds.Clear();
   this->theCruncherS.SetSize(0);
@@ -216,6 +217,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("&");
   this->controlSequences.AddOnTop("%");
   this->controlSequences.AddOnTop("UseFrac");
+  this->controlSequences.AddOnTop("ShowContext");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LogFull");
@@ -1007,6 +1009,11 @@ bool Calculator::ApplyOneRule()
   }
   if (secondToLastS=="%" && lastS=="LogEvaluation")
   { this->flagLogEvaluatioN=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="%" && lastS=="ShowContext")
+  { this->flagDisplayContext=true;
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }

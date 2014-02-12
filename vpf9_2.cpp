@@ -1049,13 +1049,13 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
 //  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
-void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables, int ExpectedNumVars)
+void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables* theGlobalVariables, int ExpectedNumVars)
 { if ( theIndex<0)
     crash << "This is a programming error: I am asked to create Monomial which has a variable of negative index " << theIndex << ". " << crash;
   this->expressionType=this->typePoly;
   ExpectedNumVars=MathRoutines::Maximum(theIndex+1, ExpectedNumVars);
   this->Numerator.GetElement().MakeDegreeOne(ExpectedNumVars, theIndex, theCoeff);
-  this->context=&theGlobalVariables;
+  this->context=theGlobalVariables;
 }
 
 void RationalFunctionOld::SetNumVariablesSubDeletedVarsByOne(int newNumVars)

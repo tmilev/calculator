@@ -1984,7 +1984,7 @@ bool Calculator::innerInterpolatePoly(Calculator& theCommands, const Expression&
   pointsOfInterpoly.GetVectorFromColumn(1, theValues);
   interPoly.Interpolate(theArgs, theValues);
   Expression theContext;
-  theContext.MakeContextWithOnePolyVar(theCommands, "x");
+  theContext.ContextMakeContextWithOnePolyVar(theCommands, "x");
   return output.AssignValueWithContext(interPoly, theContext, theCommands);
 }
 

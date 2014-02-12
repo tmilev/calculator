@@ -120,7 +120,7 @@ void Calculator::initPredefinedInnerFunctions()
    "Creates a monomial from the second argument whose differential operator letter is the first argument. ",
    "x_{{i}}:=ElementWeylAlgebraPoly{}(\\partial_i, x_i); \n\\partial_{{i}}:=ElementWeylAlgebraDO{}(\\partial_i, x_i);\n\\partial_1 x_1");
   this->AddOperationInnerHandler
-  ("MakeRationalFunction", CalculatorFunctionsGeneral::innerMakeRationalFunction, "",
+  ("MakeRationalFunction", CalculatorSerialization::innerRationalFunction, "",
    "Creates a built-in rational function.",
    "MakeRationalFunction{}(x_1+MakeRationalFunction{}x_1+x_2)");
   this->AddOperationInnerHandler
@@ -1672,7 +1672,7 @@ void Calculator::initPredefinedStandardOperations()
    "Carries out multiplication between a rational or polynomial on left and a weight on the right.",
    "\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon);   x:=Polynomial{}x; x\\varepsilon_1"
    , true);
-    this->AddOperationBinaryInnerHandlerWithTypes
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix,
    this->opSequence(), this->opSequence(),
    "Multiplies two sequences of sequences in a similar way as if those were matrices.",

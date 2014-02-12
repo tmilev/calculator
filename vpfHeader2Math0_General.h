@@ -1712,7 +1712,7 @@ public:
   { this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
   }
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  void MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables, int ExpectedNumVars=0);
+  void MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables* theGlobalVariables=0, int ExpectedNumVars=0);
   void GetNumerator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
     { case RationalFunctionOld::typeRational: output.MakeConst(this->ratValue); return;

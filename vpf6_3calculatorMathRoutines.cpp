@@ -376,10 +376,38 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
+
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateRF");
-  if (input.children.size!=2)
+  if (input.children.size!=3)
     return false;
+  Expression theConvertedE;
+  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input[2],theConvertedE);
+  if (isGood)
+    if (theConvertedE.IsOfType<RationalFunctionOld>())
+      isGood=false;
+  if (!isGood)
+  { theCommands.Comments << "<hr>Failed to convert " << input[2].ToString() << " to rational function. ";
+    return false;
+  }
+  if (theConvertedE.GetNumContextVariables()>1)
+  { theCommands.Comments << "<hr>I converted " << input[2].ToString() << " to rational function, but it is of " << theConvertedE.GetNumContextVariables()
+    << " variables. I have been taught to work with 1 variable only. ";
+    return false;
+  }
+  if (theConvertedE.GetNumContextVariables()==1)
+    if (theConvertedE.GetContext().ContextGetContextVariable(0)!=input[1])
+    { theCommands.Comments << "<hr>The univariate rational function was in variable " << theConvertedE.GetContext().ToString()
+      << " but the variable of integration is " << input[1].ToString();
+      return false;
+    }
+  RationalFunctionOld theRF=theConvertedE.GetValue<RationalFunctionOld>();
+  crash << "not implemented yet" << crash ;
+
 //  if (!CalculatorSerialization::inner)
   return false;
 }

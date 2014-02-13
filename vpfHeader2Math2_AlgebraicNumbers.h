@@ -149,6 +149,9 @@ public:
   bool AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
   bool AdjoinRootQuadraticPolyToQuadraticRadicalExtension(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables);
   std::string ToString(FormatExpressions* theFormat=0)const;
+  bool splitToPartialFractionsOverRealAlgebraicNumbers
+  (RationalFunctionOld& inputRF, List<Polynomial<AlgebraicNumber> >& outputNumerators, List<Polynomial<AlgebraicNumber> >& outputDenominators,
+   std::stringstream* reportStream=0);
 };
 
 class ElementZmodP

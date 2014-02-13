@@ -537,6 +537,13 @@ void Calculator::initPredefinedInnerFunctions()
    integrates the second argument with respect to d of the first argument.",
    "IntegrateRF(x, \\frac{x^5 }{x^3-1})")
    ;
+  this->AddOperationInnerHandler ("UnivariatePartialFractions", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals, "",
+   "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\
+   <b>Currently the function is not implemented properly.</b> \
+   At the moment, the function factors the denominator over the rationals. If this factorization\
+   yields quadratic and linear terms at the function succeeds, else fails.",
+   "UnivariatePartialFractions(\\frac{x^5 }{x^3-1})")
+   ;
 
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \

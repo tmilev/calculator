@@ -537,12 +537,17 @@ void Calculator::initPredefinedInnerFunctions()
    integrates the second argument with respect to d of the first argument.",
    "IntegrateRF(x, \\frac{x^5 }{x^3-1})")
    ;
+  this->AddOperationInnerHandler ("GaussianElimination", CalculatorFunctionsGeneral::innerGaussianEliminationMatrix, "",
+   "Gaussian elimination of a matrix. Prints a detailed string that shows the Gaussian elimination of \
+    a matrix.",
+   "GaussianElimination(\\begin{array}{ccc}2& 3& 5& 7\\\\11&13&17&19\\\\23&29&31&37 \\end{array})")
+   ;
   this->AddOperationInnerHandler ("UnivariatePartialFractions", CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals, "",
    "Attempts to splits a univariate rational function into partial fractions over the real algebraic numbers.\
    <b>Currently the function is not implemented properly.</b> \
    At the moment, the function factors the denominator over the rationals. If this factorization\
    yields quadratic and linear terms at the function succeeds, else fails.",
-   "UnivariatePartialFractions(\\frac{x^5 }{x^3-1})")
+   "UnivariatePartialFractions(\\frac{x^11 }{x^6-2x^3+1})")
    ;
 
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",

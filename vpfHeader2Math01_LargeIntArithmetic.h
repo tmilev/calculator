@@ -407,9 +407,10 @@ private:
   friend std::istream& operator >> (std::istream& input, const Rational& output)
   { std::string tempS;
     crash << crash;
-//    input >> tempS;
-    //output.
     return input;
+  }
+  friend bool operator < (int left, const Rational& right)
+  { return (Rational) left < right;
   }
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
@@ -689,8 +690,8 @@ ParallelComputing::GlobalPointerCounter++;
     this->Extended->den.MultiplyBy(x);
     this->Simplify();
   }
-  std::string ToString(FormatExpressions* notUsed=0)const;
-  std::string ToStringFrac(FormatExpressions* notUsed=0)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
+  std::string ToStringFrac()const;
   std::string ToStringForFileOperations(FormatExpressions* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;

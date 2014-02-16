@@ -690,7 +690,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(GlobalVariables* theGlobalV
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
-  this->Computed.NullifyAll(false);
+  this->Computed.MakeZero(false);
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic=false;
   Vectors<Rational>& posRoots=this->theWeyl.RootsOfBorel;
@@ -802,7 +802,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
   this->theLiebrackets.init(numGenerators, numGenerators);
 //  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
   this->UEGeneratorOrderIncludingCartanElts.initFillInObject(numGenerators, -1);
-//  this->theLiebracketPairingIndices.NullifyAll(-1);
+//  this->theLiebracketPairingIndices.MakeZero(-1);
 //  this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, -1);
   Vector<Rational> leftWeight, rightWeight, hRoot;
   for (int i=0; i<numGenerators; i++)
@@ -1914,7 +1914,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
   int numNonParams=NonParams.size;
   output.init(numParams+numNonParams-1, numParams-1);
   outputTranslation.MakeZero(numParams+numNonParams-1);
-  output.NullifyAll();
+  output.MakeZero();
   for (int l=0; l<numNonParams; l++)
   { for (int k=0; k<numParams-1; k++)
       output.elements[l][k]= NonParams[l][k];
@@ -1945,7 +1945,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex
   Vector<Rational>& theTranslation=this->theTranslationS[theIndex];
   Matrix<Rational> tempMat;
   tempMat.init(dimLargerAlgebra+dimSmallerAlgebra+1, dimSmallerAlgebra);
-  tempMat.NullifyAll();
+  tempMat.MakeZero();
   for (int j=0; j<dimSmallerAlgebra; j++)
   { tempMat.elements[j][j]=1;
     for (int i=0; i<dimLargerAlgebra; i++)

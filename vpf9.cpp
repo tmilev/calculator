@@ -818,8 +818,11 @@ bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
   return tempRat.IsPositiveOrZero();
 }
 
-std::string Rational::ToString(FormatExpressions* notUsed)const
-{ std::stringstream out;
+std::string Rational::ToString(FormatExpressions* theFormat)const
+{ if (theFormat!=0)
+    if (theFormat->flagUseFrac)
+      return this->ToStringFrac();
+  std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;
     if (this->DenShort!=1)
@@ -860,7 +863,7 @@ std::string Rational::ToStringForFileOperations(FormatExpressions* notUsed)const
   return out.str();
 }
 
-std::string Rational::ToStringFrac(FormatExpressions* notUsed)const
+std::string Rational::ToStringFrac()const
 { std::stringstream out;
   if (this->Extended==0)
   { if (this->NumShort<0)
@@ -984,6 +987,7 @@ FormatExpressions::FormatExpressions()
   this->flagDynkinTypeDontUsePlusAndExponent=false;
   this->flagSupressDynkinIndexOne=false;
   this->flagFormatWeightAsVectorSpaceIndex=true;
+  this->flagUseFrac=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -4334,7 +4338,7 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared(int rootIndex)const
 void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output)
 { if (WeylLetter=='A')
   { output.init(WeylRank+1, WeylRank);
-    output.NullifyAll();
+    output.MakeZero();
     for (int i=0; i<WeylRank; i++)
     { output(i,i)=1;
       output(i+1,i)=-1;
@@ -4343,7 +4347,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter=='B')
   { output.init(WeylRank, WeylRank);
-    output.NullifyAll();
+    output.MakeZero();
     for (int i=0; i<WeylRank-1; i++)
     { output(i,i)=1;
       output(i+1,i)=-1;
@@ -4352,7 +4356,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter=='C')
   { output.init(WeylRank, WeylRank);
-    output.NullifyAll();
+    output.MakeZero();
     for (int i=0; i<WeylRank-1; i++)
     { output(i,i)=1;
       output(i+1,i)=-1;
@@ -4361,7 +4365,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
   if (WeylLetter=='D')
   { output.init(WeylRank, WeylRank);
-    output.NullifyAll();
+    output.MakeZero();
     for (int i=0; i<WeylRank-1; i++)
     { output(i,i)=1;
       output(i+1,i)=-1;
@@ -4376,7 +4380,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
     //Humpreys, Introduction to Lie algebras and representation theory, page 65
     //first comes first root, then the sticky part, then string with the rest of the roots.
     output.init(8, WeylRank);
-    output.NullifyAll();
+    output.MakeZero();
     //first simple root: -1/2e_1-1/2e_8+1/2e_2+1/2e_3+1/2e_4+1/2e_5+1/2e_6+1/2e_7
     output(0,0)=RMHalf;
     output(1,0)=RHalf;
@@ -4416,7 +4420,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   { //as of May 11 2013 the convention has been changed to coincide with that of
     //Wikipedia
     output.init(4, 4);
-    output.NullifyAll();
+    output.MakeZero();
 
     //image of first simple root = e_1-e_2 (long one):
     output(0,0)=1;
@@ -4438,7 +4442,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   { //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
     // the long root has the higher index
     output.init(3, 2);
-    output.NullifyAll();
+    output.MakeZero();
     //image of the first simple root(short one):
     output(0,0)=1;
     output(1,0)=-1;
@@ -4454,7 +4458,7 @@ void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output)const
     crash << "This is a programming error: attempting to create type A_n with n=" << n << " is illegal. If this was a bad user input, it should "
     << " be handled at an earlier stage. " << crash;
   output.init(n, n);
-  output.NullifyAll();
+  output.MakeZero();
   for (int i=0; i<n-1; i++)
   { output(i,i)=2;
     output(i+1,i)=-1;

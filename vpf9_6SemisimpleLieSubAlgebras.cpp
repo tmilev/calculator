@@ -5040,8 +5040,8 @@ void CandidateSSSubalgebra::ComputeCartanOfCentralizer(GlobalVariables* theGloba
   bilinearFormInverted.Invert();
   diagMat.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
   diagMatrix2.init(this->BilinearFormSimplePrimal.NumRows, this->BilinearFormSimplePrimal.NumCols);
-  diagMat.NullifyAll();
-  diagMatrix2.NullifyAll();
+  diagMat.MakeZero();
+  diagMatrix2.MakeZero();
   for (int i=0; i<this->BilinearFormSimplePrimal.NumRows; i++)
     if (i<this->theHs.size)
     { diagMat(i,i)=this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(i,i)/2;

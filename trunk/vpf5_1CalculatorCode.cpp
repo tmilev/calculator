@@ -43,7 +43,7 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
   theGlobalVariables==0 ? tempSelList.GetElement() : theGlobalVariables->hashedSelSimplexAlg.GetElement();
   VisitedVertices.Clear();
   BaseVariables.init(tempMatA.NumCols);
-  tempMatA.NullifyAll();
+  tempMatA.MakeZero();
   matX.MakeZero(tempMatA.NumCols);
   for (int j=0; j<matA.NumCols; j++)
     for (int i=0; i<matA.NumRows; i++)
@@ -186,7 +186,7 @@ bool Vectors<coefficient>::ConesIntersect
   int numCols= StrictCone.size + NonStrictCone.size;
   matA.init((int)theDimension+1, (int)numCols);
   matb.init((int)theDimension+1, 1);
-  matb.NullifyAll(); matb.elements[theDimension][0].MakeOne();
+  matb.MakeZero(); matb.elements[theDimension][0].MakeOne();
   for (int i=0; i<StrictCone.size; i++)
   { for (int k=0; k<theDimension; k++)
       matA.elements[k][i].Assign(StrictCone[i][k]);
@@ -730,7 +730,9 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 }
 
 bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
-{ Matrix<Rational> outputMat;
+{ MacroRegisterFunctionWithName("Calculator::innerMatrixRational");
+//  std::cout << "ere i am, jh";
+  Matrix<Rational> outputMat;
   if (input.IsOfType<Matrix<Rational> >())
   { output=input;
     return true;

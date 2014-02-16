@@ -2062,7 +2062,7 @@ public:
 //  bool ExpressColumnAsALinearCombinationOfColumnsModifyMyself
 //    (Matrix<coefficient>& inputColumn, Matrix<coefficient>* outputTheGaussianTransformations Matrix<coefficient>& outputColumn);
   bool Invert(GlobalVariables* theGlobalVariables=0);
-  void NullifyAll(const coefficient& theRingZero=0);
+  void MakeZero(const coefficient& theRingZero=0);
   //if m1 corresponds to a linear operator from V1 to V2 and
   // m2 to a linear operator from W1 to W2, then the result of the below function
   //corresponds to the linear operator from V1+W1 to V2+W2 (direct sum)
@@ -2215,7 +2215,10 @@ public:
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   void GaussianEliminationByRows
-  (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0, Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0);
+  (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0,
+   Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0,
+   std::stringstream* humanReadableReport=0, bool formatAsLinearSystem=false)
+  ;
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<coefficient>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
   void GaussianEliminationEuclideanDomain
   (Matrix<coefficient>* otherMatrix=0, const coefficient& theRingMinusUnit=-1, const coefficient& theRingUnit=1,
@@ -2626,7 +2629,7 @@ void Matrix<Element>::AssignDirectSum(Matrix<Element>& m1, Matrix<Element>& m2)
 { if(this==&m1 || this==&m2)
     crash << crash;
   this->Resize(m1.NumRows+m2.NumRows, m1.NumCols+m2.NumCols, false);
-  this->NullifyAll();
+  this->MakeZero();
   for(int i=0; i<m1.NumRows; i++)
     for(int j=0; j<m1.NumCols; j++)
       this->elements[i][j]=m1.elements[i][j];
@@ -2772,7 +2775,7 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 }
 
 template <typename Element>
-inline void Matrix<Element>::NullifyAll(const Element& theRingZero)
+inline void Matrix<Element>::MakeZero(const Element& theRingZero)
 { for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j]=theRingZero;

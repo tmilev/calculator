@@ -112,6 +112,7 @@ public:
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);

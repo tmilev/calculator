@@ -427,7 +427,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
       Explored.TheObjects[i]=true;
       Matrix<Rational> & currentMat= this->EmbeddingsRootSpaces.TheObjects[i];
       currentMat.init(weightSupport.size, weightSupport.size);
-      currentMat.NullifyAll();
+      currentMat.MakeZero();
       for (int j=0; j<weightSupport.size; j++)
       { int indexTarget= weightSupport.GetIndex(current+weightSupport.TheObjects[j]);
         if (indexTarget!=-1)
@@ -463,7 +463,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
   for (int i=0; i<theDimension; i++)
   { Matrix<Rational> & current= this->EmbeddingsCartan.TheObjects[i];
     current.init(weightSupport.size, weightSupport.size);
-    current.NullifyAll();
+    current.MakeZero();
     Vector<Rational> tempRoot;
     tempRoot.MakeEi(theDimension, i);
     for (int j=0; j<weightSupport.size; j++)
@@ -1017,15 +1017,26 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
   if (this->expressionType==this->typePoly)
     return this->Numerator.GetElementConst().ToString(theFormat);
   std::stringstream out;
-  bool needBracket=false;
-  if (this->Numerator.GetElementConst().NeedsBrackets())
-  { needBracket=true;
+  bool useFrac= theFormat==0 ? false : theFormat->flagUseFrac;
+  bool needParenthesis=false;
+  if (!useFrac)
+    needParenthesis=this->Numerator.GetElementConst().NeedsBrackets();
+  if(useFrac)
+    out << "\\frac{";
+  if (needParenthesis)
     out << "(";
-  }
   out << this->Numerator.GetElementConst().ToString(theFormat);
-  if (needBracket)
+  if (needParenthesis)
     out << ")";
-  out << "/(" << this->Denominator.GetElementConst().ToString(theFormat) << ")";
+  if (useFrac)
+    out << "}{";
+  else
+    out << "/(";
+  out << this->Denominator.GetElementConst().ToString(theFormat);
+  if (useFrac)
+    out << "}";
+  else
+    out << ")";
 //  out << " Num vars: " << this->GetNumVars();
   return out.str();
 }
@@ -1482,7 +1493,7 @@ void SemisimpleLieAlgebraOrdered::init
   this->theOwner=owner;
   this->theOrder=inputOrder;
   this->ChevalleyGeneratorsInCurrentCoords.init(owner.GetNumGenerators(), owner.GetNumGenerators());
-  this->ChevalleyGeneratorsInCurrentCoords.NullifyAll();
+  this->ChevalleyGeneratorsInCurrentCoords.MakeZero();
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
@@ -1796,7 +1807,7 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
     //std::cout << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
     remainder-=(component);
   }
-  //remainder.NullifyAll();
+  //remainder.MakeZero();
 //  for (int i=0; i<outputVectors.size; i++)
 //    remainder.Add(outputVectors.TheObjects[i]);
 //  std::cout << "<br>sum of all components:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
@@ -1847,9 +1858,9 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   this->theDimension=0;
   for (int i=0; i<this->thePartition.size; i++)
     this->theDimension+=this->thePartition.TheObjects[i];
-  theH.init(this->theDimension, this->theDimension); theH.NullifyAll();
-  theE.init(this->theDimension, this->theDimension); theE.NullifyAll();
-  theF.init(this->theDimension, this->theDimension); theF.NullifyAll();
+  theH.init(this->theDimension, this->theDimension); theH.MakeZero();
+  theE.init(this->theDimension, this->theDimension); theE.MakeZero();
+  theF.init(this->theDimension, this->theDimension); theF.MakeZero();
   this->theProjectors.SetSize(this->thePartition.size);
   int currentOffset=0;
   std::string beginMath, endMath, newLine;
@@ -1863,24 +1874,24 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     newLine="\n\n\n";
   }
   for (int i=0; i<this->thePartition.size; i++)
-  { this->theProjectors.TheObjects[i].init(this->theDimension, this->theDimension);
-    this->theProjectors.TheObjects[i].NullifyAll();
-    for (int j=0; j<this->thePartition.TheObjects[i]; j++)
-    { theH.elements[currentOffset+j][currentOffset+j]=this->thePartition.TheObjects[i]-1-2*j;
-      this->theProjectors.TheObjects[i].elements[currentOffset+j][currentOffset+j]=1;
-      if (j!=this->thePartition.TheObjects[i]-1)
+  { this->theProjectors[i].init(this->theDimension, this->theDimension);
+    this->theProjectors[i].MakeZero();
+    for (int j=0; j<this->thePartition[i]; j++)
+    { theH.elements[currentOffset+j][currentOffset+j]=this->thePartition[i]-1-2*j;
+      this->theProjectors[i].elements[currentOffset+j][currentOffset+j]=1;
+      if (j!=this->thePartition[i]-1)
       { theF.elements[currentOffset +j+1][currentOffset +j]=1;
-        theE.elements[currentOffset +j][currentOffset +j+1]=(j+1)*(this->thePartition.TheObjects[i]-j-1);
+        theE.elements[currentOffset +j][currentOffset +j+1]=(j+1)*(this->thePartition[i]-j-1);
       }
     }
-    currentOffset+=this->thePartition.TheObjects[i];
+    currentOffset+=this->thePartition[i];
   }
   out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
   << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "e=" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
   << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
   out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
-  << this->theF.ElementToStringWithBlocks(this->thePartition)  << endMath;
+  << this->theF.ElementToStringWithBlocks(this->thePartition) << endMath;
   Matrix<Rational>  tempMat;
   tempMat.init(this->theDimension, this->theDimension);
   List<Matrix<Rational> > Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
@@ -1888,20 +1899,20 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   this->theGmodKModules.size=0;
   for (int i=0; i<this->theDimension; i++)
     for (int j=0; j< this->theDimension; j++)
-    { tempMat.NullifyAll();
+    { tempMat.MakeZero();
       tempMat.elements[i][j]=1;
       this->ExtractHighestWeightVectorsFromVector(tempMat, Decomposition, theHwCandidatesBeforeProjection);
       theHwCandidatesProjected.size=0;
       for (int k=0; k<theHwCandidatesBeforeProjection.size; k++)
         for (int l=0; l<this->theProjectors.size; l++)
-        { tempMat=theHwCandidatesBeforeProjection.TheObjects[k];
-          tempMat.MultiplyOnTheLeft(this->theProjectors.TheObjects[l]);
+        { tempMat=theHwCandidatesBeforeProjection[k];
+          tempMat.MultiplyOnTheLeft(this->theProjectors[l]);
           if (!tempMat.IsEqualToZero())
             theHwCandidatesProjected.AddOnTop(tempMat);
         }
       for (int k=0; k<theHwCandidatesProjected.size; k++)
-        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected.TheObjects[k])==-1)
-        { Matrix<Rational> & currentHighest=theHwCandidatesProjected.TheObjects[k];
+        if (this->GetModuleIndexFromHighestWeightVector(theHwCandidatesProjected[k])==-1)
+        { Matrix<Rational>& currentHighest=theHwCandidatesProjected[k];
           this->theHighestWeightVectors.AddOnTop(currentHighest);
           this->theGmodKModules.ExpandOnTop(1);
           List<Matrix<Rational> >& currentMod=*this->theGmodKModules.LastObject();
@@ -1914,10 +1925,10 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
   out << newLine << "...and the highest weights of the module decomposition are (" <<
   this->theHighestWeightVectors.size << " modules):";
   for (int i=0; i<this->theHighestWeightVectors.size; i++)
-  { out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors.TheObjects[i], useHtml)
+  { out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors[i], useHtml)
     << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
-   //for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
+   //for (int j=1; j<this->theGmodKModules[i].size; j++)
    //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ToString(false, true) << "</div>";
    // out << "<br><br><br>";
   }
@@ -1930,9 +1941,9 @@ std::string slTwoInSlN::initPairingTable(bool useHtml)
 { std::stringstream out;
   this->PairingTable.SetSize(this->theHighestWeightVectors.size);
   for (int i=0; i<this->PairingTable.size; i++)
-  { this->PairingTable.TheObjects[i].SetSize(this->theHighestWeightVectors.size);
-    for(int j=0; j<this->PairingTable.TheObjects[i].size; j++)
-    { List<int>& currentPairing=this->PairingTable.TheObjects[i].TheObjects[j];
+  { this->PairingTable[i].SetSize(this->theHighestWeightVectors.size);
+    for(int j=0; j<this->PairingTable[i].size; j++)
+    { List<int>& currentPairing=this->PairingTable[i][j];
       out << this->PairTwoIndices(currentPairing, i, j, useHtml);
     }
   }
@@ -1955,21 +1966,21 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   }
   std::stringstream out;
   output.size=0;
-  List<Matrix<Rational> >& leftElements=this->theGmodKModules.TheObjects[leftIndex];
-  List<Matrix<Rational> >& rightElements=this->theGmodKModules.TheObjects[rightIndex];
-  Matrix<Rational>  tempMat;
+  List<Matrix<Rational> >& leftElements=this->theGmodKModules[leftIndex];
+  List<Matrix<Rational> >& rightElements=this->theGmodKModules[rightIndex];
+  Matrix<Rational> tempMat;
   List<Matrix<Rational> > HighestWeightsContainingModules;
   List<Matrix<Rational> > tempDecomposition;
   for (int i=0; i<leftElements.size; i++)
     for (int j=0; j<rightElements.size; j++)
-    { Matrix<Rational>& leftElt=leftElements.TheObjects[i];
-      Matrix<Rational>& rightElt=rightElements.TheObjects[j];
+    { Matrix<Rational>& leftElt=leftElements[i];
+      Matrix<Rational>& rightElt=rightElements[j];
       Matrix<Rational>::LieBracket(leftElt, rightElt, tempMat);
       if (!tempMat.IsEqualToZero())
       { this->ExtractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
         for (int k=0; k<HighestWeightsContainingModules.size; k++)
-        { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k]));
-          if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k])==-1)
+        { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
+          if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k])==-1)
             std::cout << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
             << rightElt.ToString(&latexFormat) << "]=" << tempMat.ToString(&latexFormat) << endMath;
         }
@@ -1978,14 +1989,14 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
   out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and "
   << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
   for (int i=0; i<output.size; i++)
-  { out << beginMath << this->ElementModuleIndexToString(output.TheObjects[i], useHtml) << endMath;
+  { out << beginMath << this->ElementModuleIndexToString(output[i], useHtml) << endMath;
     if (i!=output.size-1)
       out << beginMath << "\\oplus" << endMath;
   }
   if (output.size>0)
   { out << "  hw vectors: ";
     for (int i=0; i<output.size; i++)
-      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors.TheObjects[output.TheObjects[i]], useHtml) << endMath << ",";
+      out << beginMath << this->ElementMatrixToTensorString(this->theHighestWeightVectors[output[i]], useHtml) << endMath << ",";
   }
   return out.str();
 }

@@ -272,9 +272,8 @@ public:
   bool IsLinear()const
   { return this->IsAConstant() || this->IsLinearNoConstantTerm();
   }
-  bool IsLinearNoConstantTerm()const
-  { int tempInt;
-    return this->IsOneLetterFirstDegree(&tempInt);
+  bool IsLinearNoConstantTerm(int* whichLetter=0)const
+  { return this->IsOneLetterFirstDegree(whichLetter);
   }
   bool IsOneLetterFirstDegree(int* whichLetter=0)const
   { Rational whichDegree;
@@ -438,6 +437,7 @@ public:
   bool flagCandidateSubalgebraShortReportOnly;
   bool flagSupressDynkinIndexOne;
   bool flagFormatWeightAsVectorSpaceIndex;
+  bool flagUseFrac;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>
@@ -1029,9 +1029,13 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
+  static bool IsMonEqualToZero()
+  { return false;
+  }
   static void GetValuesLagrangeInterpolandsAtConsecutivePoints
   (Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation, Vectors<Rational>& outputValuesInterpolands);
   bool FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments);
+  bool FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const;
   void Interpolate(const Vector<coefficient>& thePoints, const Vector<coefficient>& ValuesAtThePoints);
   bool FindOneVarRatRoots(List<Rational>& output);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
@@ -1042,6 +1046,9 @@ public:
   void MakeLinPolyFromRootNoConstantTerm(const Vector<Rational> & r);
   void MakeLinPolyFromRootLastCoordConst(const Vector<Rational> & input);
   void MakePolyFromDirectionAndNormal(Vector<coefficient>& direction, Vector<coefficient>& normal, coefficient& Correction);
+  static bool GetLinearSystemFromLinearPolys
+  (const List<Polynomial<coefficient> >& theLinPolys, Matrix<coefficient>& homogenousPart,
+   Matrix<coefficient>& minusConstTerms);
   bool IsOneVariablePoly(int* whichVariable=0)const;
   bool IsOneVariableNonConstPoly(int* whichVariable=0)const
   { int tempInt;
@@ -1088,6 +1095,12 @@ public:
     }
     return result;
   }
+  void GetPolyWithPolyCoeff
+  (Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output)const
+  ;
+  void GetPolyUnivariateWithPolyCoeffs
+  (int theVar, Polynomial<Polynomial<coefficient> >& output)const
+  ;
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
   void DivideBy(const Polynomial<coefficient>& inputDivisor, Polynomial<coefficient>& outputQuotient, Polynomial<coefficient>& outputRemainder)const;
@@ -1377,7 +1390,7 @@ class PolynomialSubstitution: public List<Polynomial<coefficient> >
       result=MathRoutines::Maximum(result, this->TheObjects[i].GetHighestIndexSuchThatHigherIndexVarsDontParticipate());
     return result;
   }
-  void NullifyAll(int NumVars)
+  void MakeZero(int NumVars)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeZero((int)NumVars);
   }
@@ -3146,15 +3159,15 @@ class CompleX
   public:
   Base Im;
   Base Re;
-  std::string ToString()
+  std::string ToString(FormatExpressions* theFormat=0)
   { std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
   }
-  void ToString(std::string& output)
-  { output=this->ToString();
+  friend std::iostream& operator<<(std::iostream& output, const CompleX<Base>& input)
+  { output << input.Re << "+i" << input.Im;
+    return output;
   }
-  friend std::iostream& operator<< <Base>(std::iostream& output, const CompleX<Base>& input);
   void operator*=(const CompleX<Base>& other)
   { CompleX Accum;
     Accum.Re=this->Re*other.Re-this->Im*other.Im;
@@ -3444,9 +3457,9 @@ bool Vectors<coefficient>::GetNormalSeparatingCones
   }
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
   matA.init((int)numRows, (int)theDimension*2+numRows);
-  matA.NullifyAll();
+  matA.MakeZero();
   matb.init((int)numRows, 1);
-  matb.NullifyAll();
+  matb.MakeZero();
   for (int i=0; i<coneStrictlyPositiveCoeffs.size; i++)
   { for (int k=0; k<theDimension; k++)
     { matA.elements[i][k].Assign(coneStrictlyPositiveCoeffs.TheObjects[i].TheObjects[k]);
@@ -3928,8 +3941,12 @@ inline void Matrix<coefficient>::AddTwoRows(int fromRowIndex, int ToRowIndex, in
 }
 
 template <typename coefficient>
-void Matrix<coefficient>::GaussianEliminationByRows(Matrix<coefficient>* carbonCopyMat, Selection* outputNonPivotColumns, Selection* outputPivotColumns, GlobalVariables* theGlobalVariables)
-{ //Checking for bees
+void Matrix<coefficient>::GaussianEliminationByRows
+(Matrix<coefficient>* carbonCopyMat, Selection* outputNonPivotColumns,
+ Selection* outputPivotColumns, GlobalVariables* theGlobalVariables,
+ std::stringstream* humanReadableReport, bool formatAsLinearSystem)
+{ MacroRegisterFunctionWithName("Matrix::GaussianEliminationByRows");
+  //Checking for bees
   if (this->NumRows==0)
     crash << "This is a programming error: requesting to do Gaussian elimination on a matrix with "
     << " zero rows. " << crash;
@@ -3948,6 +3965,14 @@ void Matrix<coefficient>::GaussianEliminationByRows(Matrix<coefficient>* carbonC
     outputPivotColumns->init(this->NumCols);
   bool doProgressReport= theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
   ProgressReport theReport(theGlobalVariables);
+  if (humanReadableReport!=0)
+  { *humanReadableReport << "Gaussian elimination of: <br>";
+    if (formatAsLinearSystem)
+      *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex());
+    else
+      *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex());
+
+  }
   //Initialization done! Time to do actual work:
   for (int i=0; i<this->NumCols; i++)
   { if (NumFoundPivots == MaxRankMat)
@@ -3961,6 +3986,11 @@ void Matrix<coefficient>::GaussianEliminationByRows(Matrix<coefficient>* carbonC
     { if (outputNonPivotColumns!=0)
         outputNonPivotColumns->AddSelectionAppendNewIndex(i);
       continue;
+    }
+    if (humanReadableReport!=0)
+    { *humanReadableReport << "Current pivot: column " << i+1 << ". ";
+      if (NumFoundPivots!=tempI)
+        *humanReadableReport << "Switching the pivot row. ";
     }
     if (outputPivotColumns!=0)
       outputPivotColumns->AddSelectionAppendNewIndex(i);
@@ -3990,6 +4020,15 @@ void Matrix<coefficient>::GaussianEliminationByRows(Matrix<coefficient>* carbonC
           //  crash << crash;
           //this->ComputeDebugString();
         }
+    if (humanReadableReport!=0)
+    { *humanReadableReport
+      << "Using the pivot row we eliminated the non-zero entries in the pivot column to get:<br>";
+      if (formatAsLinearSystem)
+        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex());
+      else
+        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex());
+
+    }
     NumFoundPivots++;
   }
 }
@@ -5374,7 +5413,7 @@ public:
   void GetMatrix(Matrix<coefficient>& output, int theDim)const
   { theDim=MathRoutines::Maximum(theDim, this->GetMinNumColsNumRows());
     output.init(theDim, theDim);
-    output.NullifyAll();
+    output.MakeZero();
     for (int i=0; i<this->size(); i++)
       if ((*this)[i].IsId)
         for (int j=0; j<theDim; j++)

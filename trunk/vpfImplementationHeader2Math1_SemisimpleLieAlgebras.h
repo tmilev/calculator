@@ -231,7 +231,7 @@ template <class coefficient>
 void SemisimpleLieAlgebra::GetAd(Matrix<coefficient>& output, ElementSemisimpleLieAlgebra<coefficient>& e)
 { int NumGenerators=this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);
-  output.NullifyAll();
+  output.MakeZero();
   ElementSemisimpleLieAlgebra<coefficient> theGen, theResult;
   for (int i=0; i<NumGenerators; i++)
   { theGen.MakeGenerator(i, *this);

@@ -889,7 +889,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   Matrix<Rational>  theProjectionLatticeLevel;
   Matrix<Rational>  theProjectionAffine;
   theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
-  theProjectionLatticeLevel.NullifyAll();
+  theProjectionLatticeLevel.MakeZero();
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
   direction.MakeEi(theDimProjectivized, 0);

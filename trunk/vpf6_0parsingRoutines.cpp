@@ -521,8 +521,11 @@ void Calculator::ParseFillDictionary(const std::string& input)
       current=" ";
     if (current=="~")
       current=" ";
-    if (this->isLeftSeparator(current[0]) ||
-        this->isRightSeparator(LookAheadChar) || current==" ")
+    bool shouldSplit= (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) || current==" ");
+    if (MathRoutines::isADigit(LookAheadChar))
+      if (current[current.size()-1]=='\\')
+        shouldSplit=true;
+    if (shouldSplit)
     { if (this->controlSequences.Contains(current))
       { currentElement.controlIndex=this->controlSequences.GetIndex(current);
         currentElement.theData.reset(*this);

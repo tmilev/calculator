@@ -376,9 +376,228 @@ bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& th
   return true;
 }
 
+template<class coefficient>
+void Polynomial<coefficient>::GetPolyWithPolyCoeff
+(Selection& theNonCoefficientVariables, Polynomial<Polynomial<coefficient> >& output)const
+{ MacroRegisterFunctionWithName("Polynomial::GetPolyWithPolyCoeff");
+  if (theNonCoefficientVariables.MaxSize!=this->GetMinNumVars())
+    crash << "GetPolyWithPolyCoeff called with selection which has selects the wrong number of variables. " << crash;
+  output.MakeZero();
+  MonomialP coeffPart, polyPart;
+  Polynomial<coefficient> currentCF;
+  for (int i=0; i<this->size(); i++)
+  { coeffPart.MakeOne();
+    polyPart.MakeOne();
+    for (int j=0; j<(*this)[i].GetMinNumVars(); j++)
+      if (theNonCoefficientVariables.selected[j])
+        polyPart[j]=(*this)[i](j);
+      else
+        coeffPart[j]=(*this)[i](j);
+    currentCF.MakeZero();
+    currentCF.AddMonomial(coeffPart, this->theCoeffs[i]);
+    output.AddMonomial(polyPart, currentCF);
+  }
+}
+
+template<class coefficient>
+void Polynomial<coefficient>::GetPolyUnivariateWithPolyCoeffs
+(int theVar, Polynomial<Polynomial<coefficient> >& output)const
+{ Selection theVars;
+  theVars.init(this->GetMinNumVars());
+  theVars.AddSelectionAppendNewIndex(theVar);
+  this->GetPolyWithPolyCoeff(theVars, output);
+}
+
+template <class coefficient>
+bool Polynomial<coefficient>::GetLinearSystemFromLinearPolys
+(const List<Polynomial<coefficient> >& theLinPolys, Matrix<coefficient>& homogenousPart,
+ Matrix<coefficient>& minusConstTerms)
+{ MacroRegisterFunctionWithName("Polynomial::GetLinearSystemFromLinearPolys");
+  int theLetter;
+  int numVars=0;
+  for (int i=0; i<theLinPolys.size; i++)
+    numVars=MathRoutines::Maximum(theLinPolys[i].GetMinNumVars(), numVars);
+  homogenousPart.init(theLinPolys.size, numVars);
+  homogenousPart.MakeZero();
+  minusConstTerms.init(theLinPolys.size,1);
+  minusConstTerms.MakeZero();
+  for (int i=0; i<theLinPolys.size; i++)
+    for (int j=0; j<theLinPolys[i].size(); j++)
+      if (theLinPolys[i][j].IsLinearNoConstantTerm(&theLetter))
+        homogenousPart(i,theLetter)=theLinPolys[i].theCoeffs[j];
+      else if (theLinPolys[i][j].IsAConstant())
+        minusConstTerms(i,0)=theLinPolys[i].theCoeffs[j];
+      else
+        return false;
+  return true;
+}
+
 bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals");
+  Expression convertedInput;
+  bool isGood=CalculatorSerialization::innerRationalFunction(theCommands, input, convertedInput);
+  if (isGood)
+    isGood=convertedInput.IsOfType<RationalFunctionOld>();
+  if (!isGood)
+  { theCommands.Comments << "Failed to convert " << input.ToString() << " to rational function. ";
+    return false;
+  }
+  const RationalFunctionOld& inputRF=convertedInput.GetValue<RationalFunctionOld>();
+  if (inputRF.GetMinNumVars()>1)
+  { theCommands.Comments << "The input rational function is of " << inputRF.GetMinNumVars() << " variables and "
+    << " I can handle only 1.";
+    return false;
+  }
+  Polynomial<Rational> theDen, theNum;
+  inputRF.GetDenominator(theDen);
+  inputRF.GetNumerator(theNum);
+  List<Polynomial<Rational> > theFactors;
+  if (!theDen.FactorMe(theFactors, &theCommands.Comments))
+  { theCommands.Comments << "<hr>I failed to factor the denominator of the rational function, I surrender.";
+    return false;
+  }
+  FormatExpressions theFormat;
+  convertedInput.GetContext().ContextGetFormatExpressions(theFormat);
+  theFormat.flagUseFrac=true;
+  std::stringstream out;
+  out << "The rational function is: " << CGI::GetMathSpanPure(inputRF.ToString(&theFormat)) << ".";
+  out << "<br>The denominator factors are: ";
+  bool allFactorsAreOfDegree2orless=true;
+  for (int i=0; i<theFactors.size; i++)
+  { out << CGI::GetMathSpanPure(theFactors[i].ToString(&theFormat));
+    if (i!=theFactors.size-1)
+      out << ", ";
+    if (theFactors[i].TotalDegree()>2)
+      allFactorsAreOfDegree2orless=false;
+  }
+  out << ". <br>";
+  if (!allFactorsAreOfDegree2orless)
+  { out << "There were factors (over the rationals) of degree greater than 2. I surrender. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
+  Polynomial<Rational> quotient, remainder;
+  theNum.DivideBy(theDen, quotient, remainder);
+  if (!quotient.IsEqualToZero())
+  { out << "<br>The numerator " << CGI::GetMathSpanPure(theNum.ToString(&theFormat))
+    << " divided by the denominator "
+    << CGI::GetMathSpanPure(theDen.ToString(&theFormat)) << " yields "
+    << CGI::GetMathSpanPure(quotient.ToString(&theFormat))
+    << " with remainder "
+    << CGI::GetMathSpanPure(remainder.ToString(&theFormat));
+  }
+  MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMults;
+  for (int i=0; i<theFactors.size; i++)
+    theDenominatorFactorsWithMults.AddMonomial(theFactors[i], 1);
+  theDenominatorFactorsWithMults.QuickSortAscending();
+  out << "<br><br>I need to find " << CGI::GetMathSpanPure("A_i")
+  << "'s so that I have the equality of rational functions: ";
+  RationalFunctionOld transformedRF;
+  transformedRF=remainder;
+  transformedRF/=theDen;
+  std::stringstream rfStream, polyStream;
+  rfStream << transformedRF.ToString(&theFormat) << " = ";
+  polyStream << remainder.ToString(&theFormat) << "=";
+  int varCounter=0;
+  Polynomial<Rational> thePolyThatMustVanish, currentSummand;
+  MonomialP currentMon;
+  thePolyThatMustVanish.MakeZero();
+  thePolyThatMustVanish-=remainder;
+  for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
+    for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
+    { rfStream << "\\frac{";
+      if (theDenominatorFactorsWithMults[i].TotalDegree()>1)
+        polyStream << "(";
+      currentSummand.MakeZero();
+      for (int j=0; j<theDenominatorFactorsWithMults[i].TotalDegree(); j++)
+      { varCounter++;
+        std::stringstream varNameStream;
+        varNameStream << "A_{" << varCounter << "} ";
+        currentMon.MakeEi(varCounter);
+        currentMon[0]=j;
+        currentSummand.AddMonomial(currentMon, 1);
+        rfStream << varNameStream.str();
+        polyStream << varNameStream.str();
+        theFormat.polyAlphabeT.AddOnTop(varNameStream.str());
+        if (j>0)
+        { rfStream << "x";
+          polyStream << "x";
+        }
+        if (j>1)
+        { rfStream << "^{" << j << "}";
+          polyStream << "^{" << j << "}";
+        }
+        if ((theDenominatorFactorsWithMults[i].TotalDegree()-1)!=j)
+        { rfStream << " + ";
+          polyStream << " + ";
+        }
+      }
+      if (theDenominatorFactorsWithMults[i].TotalDegree()>1)
+        polyStream << ")";
+      for (int j=0; j<theDenominatorFactorsWithMults.size(); j++)
+      { Rational theExp=theDenominatorFactorsWithMults.theCoeffs[j];
+        if (j==i)
+          theExp-=k+1;
+        if (theExp==0)
+          continue;
+        polyStream << "(" << theDenominatorFactorsWithMults[j].ToString(&theFormat) << ")";
+        if (theExp>1)
+          polyStream << "^{" << theExp << "}";
+        for (int p=0; p<theExp; p++)
+          currentSummand*=theDenominatorFactorsWithMults[j];
+      }
+      rfStream << "}{";
+      if (k>0)
+        rfStream << "(";
+      rfStream << theDenominatorFactorsWithMults[i].ToString(&theFormat);
+      if (k>0)
+        rfStream << ")^{" << k+1 << "}";
+      rfStream << "}";
+      if (((theDenominatorFactorsWithMults.theCoeffs[i]-1)!=k) || (i!=theDenominatorFactorsWithMults.size()-1))
+      { rfStream << "+";
+        polyStream << "+";
+      }
+      thePolyThatMustVanish+=currentSummand;
+    }
+  out << CGI::GetMathSpanPure(rfStream.str(), -1);
+  out << "<br><br>After clearing denominators, we get the equality: ";
+  out << "<br><br>" << CGI::GetMathSpanPure(polyStream.str());
+  Polynomial<Polynomial<Rational> > univariateThatMustDie;
+  thePolyThatMustVanish.GetPolyUnivariateWithPolyCoeffs(0, univariateThatMustDie);
+  out << "<br><br>After rearanging we get that the following polynomial must vanish: " << CGI::GetMathSpanPure(univariateThatMustDie.ToString(&theFormat));
+  out << "<br>Here, by ``vanish'', we mean that the coefficients in front of the powers of x must vanish.";
+  out << "<br>In other words, we need to solve the system: ";
+  std::stringstream theLinearSystem;
+  theLinearSystem << "\\begin{array}{rcl}";
+  for (int i=0; i<univariateThatMustDie.size(); i++)
+    theLinearSystem << univariateThatMustDie.theCoeffs[i].ToString(&theFormat) << "&=&0\\\\";
+  theLinearSystem << "\\end{array}";
+  out << CGI::GetMathSpanPure(theLinearSystem.str(),-1);
+  Matrix<Rational> theSystemHomogeneous, theConstTerms;
+  Polynomial<Rational>::GetLinearSystemFromLinearPolys
+  (univariateThatMustDie.theCoeffs, theSystemHomogeneous, theConstTerms);
 
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("innerGaussianEliminationMatrix");
+  Expression theConverted;
+  if (!Calculator::innerMatrixRational(theCommands, input, theConverted))
+  { theCommands.Comments << "<hr>Failed to extract rational matrix from " << input.ToString();
+    return false;
+  }
+  Matrix<Rational> theMat;
+  if (!theConverted.IsOfType<Matrix<Rational> >(&theMat))
+  { theCommands.Comments << "<hr>Failed to extract rational matrix, got intermediate conversion to: " << theConverted.ToString();
+    return false;
+  }
+  if (theMat.NumRows<2)
+  { theCommands.Comments << "<hr>The matrix I got as input had only 1 row. Possible user typo?";
+    return false;
+  }
+  std::stringstream out;
+  theMat.GaussianEliminationByRows(0,0,0,0,&out);
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output)

@@ -1724,6 +1724,23 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
 }
 
 template <class coefficient>
+bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const
+{ MacroRegisterFunctionWithName("Polynomial::FactorMe");
+  Polynomial<Rational> smallestDiv;
+  Polynomial<Rational> thePoly=*this;
+  outputFactors.SetSize(0);
+  while (!thePoly.IsAConstant())
+  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, comments))
+      return false;
+    //std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
+    Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    thePoly/=tempRat;
+    outputFactors.AddOnTop(smallestDiv);
+  }
+  return true;
+}
+
+template <class coefficient>
 bool Polynomial<coefficient>::
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
@@ -1888,16 +1905,9 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
   Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
     return output.SetError("I have been taught to factor one variable polys only. ", theCommands);
-  Polynomial<Rational> smallestDiv;
   List<Polynomial<Rational> > theFactors;
-  while (!thePoly.IsAConstant())
-  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, &theCommands.Comments))
-      return false;
-    //std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
-    Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    thePoly/=tempRat;
-    theFactors.AddOnTop(smallestDiv);
-  }
+  if(!thePoly.FactorMe(theFactors, &theCommands.Comments))
+    return false;
   output.reset(theCommands, theFactors.size+1);
   Expression tempE;
   output.AddChildAtomOnTop(theCommands.opSequence());

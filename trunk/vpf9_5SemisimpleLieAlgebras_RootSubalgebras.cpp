@@ -2216,8 +2216,8 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
     outputSystemToBeSolved[i+oldSize].AddConstant(targetH[i]*(-1));
   outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
   outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
-  outputMatrixSystemToBeSolved.NullifyAll();
-  outputSystemColumnVector.NullifyAll();
+  outputMatrixSystemToBeSolved.MakeZero();
+  outputSystemColumnVector.MakeZero();
   for (int i=0; i<outputSystemToBeSolved.size; i++)
     for (int j=0; j<outputSystemToBeSolved[i].size(); j++)
     { int lowerIndex=-1; int higherIndex=-1;

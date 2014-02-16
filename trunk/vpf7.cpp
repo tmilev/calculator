@@ -782,7 +782,7 @@ std::string CGI::GetMathSpanPure(const std::string& input, int upperNumChars)
 { std::stringstream out;
 //  int dirtylittleHAckHEre;
 //  upperNumChars=1;
-  if (input.size()> (unsigned) upperNumChars)
+  if (input.size()> (unsigned) upperNumChars && upperNumChars>0)
   { out << "<b>LaTeX output is longer than " << upperNumChars << " characters and I dare not use jsmath. Here is the output as plain LaTeX.</b> " << input;
     return out.str();
   }

@@ -1300,21 +1300,21 @@ void CandidateSSSubalgebra::ExtendToModule(List<ElementSemisimpleLieAlgebra<Alge
     }
 }
 
-template <class TemplateMonomial, class coefficient>
+template <class templateMonomial, class coefficient>
 template <class MonomialCollectionTemplate>
-void MonomialCollection<TemplateMonomial, coefficient>::IntersectVectorSpaces
+void MonomialCollection<templateMonomial, coefficient>::IntersectVectorSpaces
 (const List<MonomialCollectionTemplate>& vectorSpace1, const List<MonomialCollectionTemplate>& vectorSpace2, List<MonomialCollectionTemplate>& outputIntersection,
- HashedList<TemplateMonomial>* seedMonomials)
+ HashedList<templateMonomial>* seedMonomials)
 { List<MonomialCollectionTemplate> theVspaces=vectorSpace1;
   List<MonomialCollectionTemplate> vectorSpace2eliminated=vectorSpace2;
-  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, 0, seedMonomials);
-  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, 0, seedMonomials);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(vectorSpace2eliminated, 0, seedMonomials);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRowsDeleteZeroRows(theVspaces, 0, seedMonomials);
   Matrix<coefficient> theLinCombiMat;
   int firstSpaceDim=theVspaces.size;
   theLinCombiMat.MakeIdMatrix(theVspaces.size+vectorSpace2eliminated.size);
   theVspaces.AddListOnTop(vectorSpace2eliminated);
   vectorSpace2eliminated=theVspaces;
-  MonomialCollection<TemplateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, 0, seedMonomials, &theLinCombiMat);
+  MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRows(theVspaces, 0, seedMonomials, &theLinCombiMat);
   int dimResult=0;
   for (int i=theVspaces.size-1; i>=0; i--)
     if (theVspaces[i].IsEqualToZero())

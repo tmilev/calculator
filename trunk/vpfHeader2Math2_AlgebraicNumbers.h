@@ -13,6 +13,15 @@ class AlgebraicNumber
   { output << theNumber.ToString();
     return output;
   }
+  friend AlgebraicNumber operator-(const AlgebraicNumber& argument)
+  { argument.CheckConsistency();
+    AlgebraicNumber result=argument;
+    result.CheckConsistency();
+    result*=-1;
+    std::cout << "here be unary minus!";
+    result.CheckConsistency();
+    return result;
+  }
   public:
   AlgebraicClosureRationals* owner;
   int basisIndex;
@@ -25,7 +34,7 @@ class AlgebraicNumber
   AlgebraicNumber(int other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=((Rational)other);
   }
-  AlgebraicNumber(const AlgebraicNumber& other)
+  AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=(other);
   }
   bool NeedsBrackets()const;
@@ -79,6 +88,12 @@ class AlgebraicNumber
   Rational GetDenominatorRationalPart()const;
   Rational GetNumeratorRationalPart()const;
   void SqrtMeDefault();
+  bool IsSmallInteger(int* whichInteger)const
+  { Rational theRat;
+    if (!this->IsRational(&theRat))
+      return false;
+    return theRat.IsSmallInteger(whichInteger);
+  }
   void RadicalMeDefault(int theRad);
   void Invert();
   void operator/=(const AlgebraicNumber& other);
@@ -98,6 +113,33 @@ class AlgebraicNumber
   { this->theElT*=-1;
   }
   void operator=(const Polynomial<AlgebraicNumber>& other);
+  AlgebraicNumber operator+(const AlgebraicNumber& other)const
+  { this->CheckConsistency();
+    AlgebraicNumber result=*this;
+    result.CheckConsistency();
+    other.CheckConsistency();
+    result+=other;
+    result.CheckConsistency();
+    return result;
+  }
+  AlgebraicNumber operator-(const AlgebraicNumber& other)const
+  { AlgebraicNumber result=*this;
+    result-=other;
+    return result;
+  }
+  AlgebraicNumber operator*(const AlgebraicNumber& other)const
+  { AlgebraicNumber result=*this;
+    result*=other;
+    return result;
+  }
+  AlgebraicNumber operator/(const AlgebraicNumber& other)const
+  { this->CheckConsistency();
+    other.CheckConsistency();
+    AlgebraicNumber result=*this;
+
+    result/=other;
+    return result;
+  }
   void operator+=(const AlgebraicNumber& other);
   void operator-=(const AlgebraicNumber& other);
   void operator*=(const AlgebraicNumber& other);
@@ -108,6 +150,7 @@ class AlgebraicNumber
   void operator*=(int other)
   { this->operator*=((Rational)other);
   }
+  bool operator>(const AlgebraicNumber& other)const;
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
 

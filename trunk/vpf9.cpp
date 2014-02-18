@@ -988,6 +988,7 @@ FormatExpressions::FormatExpressions()
   this->flagSupressDynkinIndexOne=false;
   this->flagFormatWeightAsVectorSpaceIndex=true;
   this->flagUseFrac=false;
+  this->flagFormatMatrixAsLinearSystem=false;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

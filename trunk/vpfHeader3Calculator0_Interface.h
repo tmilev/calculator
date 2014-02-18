@@ -1608,15 +1608,15 @@ public:
   static bool innerStoreObject(Calculator& theCommands, const DynkinSimpleType& input, Expression& output, Expression* theContext=0, bool* inputOutputNonConst=0);
   template <class TemplateList>
   static bool innerStoreObject(Calculator& theCommands, const TemplateList& input, Expression& output, Expression* theContext=0);
-  template <class TemplateMonomial, typename coefficient>
+  template <class templateMonomial, typename coefficient>
   static bool innerStoreMonCollection
-  (Calculator& theCommands, const MonomialCollection<TemplateMonomial, coefficient>& input, Expression& output, Expression* theContext=0);
-  template <class TemplateMonomial, typename coefficient>
-  static bool DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output);
-  template <class TemplateMonomial>
+  (Calculator& theCommands, const MonomialCollection<templateMonomial, coefficient>& input, Expression& output, Expression* theContext=0);
+  template <class templateMonomial, typename coefficient>
+  static bool DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output);
+  template <class templateMonomial>
   static bool DeSerializeMonGetContext(Calculator& theCommands, const Expression& input, Expression& outputContext);
-  template <class TemplateMonomial>
-  static bool DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, TemplateMonomial& outputMon);
+  template <class templateMonomial>
+  static bool DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, templateMonomial& outputMon);
 };
 
 template <class TemplateList>
@@ -1634,15 +1634,15 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Te
   return true;
 }
 
-template <class TemplateMonomial, typename coefficient>
+template <class templateMonomial, typename coefficient>
 bool CalculatorSerialization::innerStoreMonCollection
-(Calculator& theCommands, const MonomialCollection<TemplateMonomial, coefficient>& input, Expression& output, Expression* theContext)
+(Calculator& theCommands, const MonomialCollection<templateMonomial, coefficient>& input, Expression& output, Expression* theContext)
 { MacroRegisterFunctionWithName("CalculatorSerialization::SerializeMonCollection");
   Expression termE, coeffE, tempE;
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
   for (int i=input.size()-1; i>=0; i--)
-  { const TemplateMonomial& currentMon=input[i];
+  { const templateMonomial& currentMon=input[i];
     bool isNonConst=true;
     if (!CalculatorSerialization::innerStoreObject(theCommands, currentMon, termE, theContext, &isNonConst))
     { theCommands.Comments << "<hr>Failed to store " << currentMon.ToString() << ". ";
@@ -1669,15 +1669,15 @@ bool CalculatorSerialization::innerStoreMonCollection
   return true;
 }
 
-template <class TemplateMonomial, typename coefficient>
-bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<TemplateMonomial, coefficient>& output)
+template <class templateMonomial, typename coefficient>
+bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, const Expression& input, MonomialCollection<templateMonomial, coefficient>& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMonCollection");
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
   Expression currentContext, finalContext;
   finalContext.MakeEmptyContext(theCommands);
   for (int i=0; i<theSum.size(); i++)
-  { if (!CalculatorSerialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
+  { if (!CalculatorSerialization::DeSerializeMonGetContext<templateMonomial>(theCommands, theSum[i], currentContext))
     { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
     }
@@ -1687,7 +1687,7 @@ bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, 
     }
   }
   output.MakeZero();
-  TemplateMonomial tempM;
+  templateMonomial tempM;
   for (int i=0; i<theSum.size(); i++)
   { if (!CalculatorSerialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
     { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString() << " using monomial context " << finalContext.ToString() << ". </hr>";

@@ -102,7 +102,7 @@ class Vector;
 template <class coefficient>
 class Vectors;
 class MonomialP;
-template <class TemplateMonomial, class coefficient>
+template <class templateMonomial, class coefficient>
 class MonomialCollection;
 template <class coefficient>
 class Polynomial;
@@ -1932,6 +1932,7 @@ public:
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ToStringLatex(FormatExpressions* theFormat=0)const;
+  std::string ToStringSystemLatex(Matrix<coefficient>* constTerms=0, FormatExpressions* theFormat=0)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const coefficient& theRingUnit=1, const coefficient& theRingZero=0)
   { this->init(theDimension, theDimension);
@@ -2217,7 +2218,7 @@ public:
   void GaussianEliminationByRows
   (Matrix<coefficient>* carbonCopyMat=0, Selection* outputNonPivotColumns=0,
    Selection* outputPivotColumns=0, GlobalVariables* theGlobalVariables=0,
-   std::stringstream* humanReadableReport=0, bool formatAsLinearSystem=false)
+   std::stringstream* humanReadableReport=0, FormatExpressions* theFormat=0)
   ;
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows(int firstNonProcessedRow, Matrix<coefficient>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized);
   void GaussianEliminationEuclideanDomain

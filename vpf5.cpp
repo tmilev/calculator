@@ -1726,23 +1726,33 @@ void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
 template <class coefficient>
 bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactors, std::stringstream* comments)const
 { MacroRegisterFunctionWithName("Polynomial::FactorMe");
-  Polynomial<Rational> smallestDiv;
-  Polynomial<Rational> thePoly=*this;
+  List<Polynomial<Rational> > factorsToBeProcessed;
   outputFactors.SetSize(0);
-  while (!thePoly.IsAConstant())
-  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, comments))
+  factorsToBeProcessed.AddOnTop(*this);
+  Polynomial<Rational> currentFactor, divisor;
+  while (factorsToBeProcessed.size>0)
+  { currentFactor=factorsToBeProcessed.PopLastObject();
+//    std::cout << "<hr>Factoring " << currentFactor.ToString() << "<br>";
+    if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
       return false;
-    //std::cout << "<hr><b>Smallest divisor: " << smallestDiv.ToString() << ", thepoly: " << thePoly.ToString() << "</b>";
-    Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    thePoly/=tempRat;
-    outputFactors.AddOnTop(smallestDiv);
+    if (currentFactor.IsEqualToOne())
+    { outputFactors.AddOnTop(divisor);
+      continue;
+    }
+//    std::cout << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
+//    << currentFactor.ToString() << "</b>";
+    Rational tempRat=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    currentFactor/=tempRat;
+    factorsToBeProcessed.AddOnTop(divisor);
+    factorsToBeProcessed.AddOnTop(currentFactor);
   }
+  outputFactors.QuickSortAscending();
   return true;
 }
 
 template <class coefficient>
 bool Polynomial<coefficient>::
-FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
+FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
   if (this->GetMinNumVars()>1)
     return false;

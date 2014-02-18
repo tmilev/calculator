@@ -220,9 +220,11 @@ bool AlgebraicClosureRationals::ReduceMe()
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim=this->theBasisMultiplicative.size;
 //  std::cout << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
-  bool mustBeTrue=theMinPoly.FactorMeOutputIsSmallestDivisor(smallestFactor, 0);
+  List<Polynomial<Rational> > theFactors;
+  bool mustBeTrue=theMinPoly.FactorMe(theFactors, 0);
   if (!mustBeTrue)
     crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
+  smallestFactor=theFactors[0];
 //  std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt()==theDim)
     return true;
@@ -702,6 +704,14 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
 
 void AlgebraicNumber::SqrtMeDefault()
 { this->RadicalMeDefault(2);
+}
+
+bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
+{ Rational left, right;
+  if (this->IsRational(&left) && other.IsRational(&right))
+    return left>right;
+  this->CheckCommonOwner(other);
+  return this->theElT>other.theElT;
 }
 
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)

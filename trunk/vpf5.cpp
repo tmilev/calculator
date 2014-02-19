@@ -1661,6 +1661,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     return false;
   if (this->IsEqualToZero())
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
+  //std::cout << "Factoring: " << this->ToString();
   unsigned int n=this->theDigits[0];
   outputPrimeFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
@@ -1683,6 +1684,8 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     }
   if (n>1)
     this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
+  //std::cout << " ... and the factors are: " << outputPrimeFactors
+  //<< " with mults: " << outputMultiplicites;
   return true;
 }
 
@@ -1705,7 +1708,8 @@ void Polynomial<coefficient>::Interpolate(const Vector<coefficient>& thePoints, 
 
 template <class coefficient>
 void Polynomial<coefficient>::GetValuesLagrangeInterpolandsAtConsecutivePoints
-(Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation, Vectors<Rational>& outputValuesInterpolands)
+(Vector<Rational>& inputConsecutivePointsOfInterpolation, Vector<Rational>& inputPointsOfEvaluation,
+ Vectors<Rational>& outputValuesInterpolands)
 { outputValuesInterpolands.SetSize(inputConsecutivePointsOfInterpolation.size);
   for (int i=0; i<inputConsecutivePointsOfInterpolation.size; i++)
   { Vector<Rational>& currentInterpoland=outputValuesInterpolands[i];
@@ -1753,7 +1757,7 @@ bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactor
 template <class coefficient>
 bool Polynomial<coefficient>::
 FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
+{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsADivisor");
   if (this->GetMinNumVars()>1)
     return false;
   if (this->GetMinNumVars()==0)
@@ -1764,16 +1768,15 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   if (!thePoly.TotalDegree().IsSmallInteger(&degree))
     return false;
   int degreeLeft=degree/2;
-  int degreeRight=degree-degreeLeft;
   Vector<Rational> AllPointsOfEvaluation;
   List<List<unsigned int> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
-  Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft, theValuesAtPointsRight;
+  Vector<Rational> theValuesAtPoints, theValuesAtPointsLeft;
   AllPointsOfEvaluation.SetSize(degree+1);
   thePrimeFactorsAtPoints.SetSize(degreeLeft+1);
   thePrimeFactorsMults.SetSize(degreeLeft+1);
-  //std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
-  //std::cout << "<br>Degree left: " << degreeLeft;
+//  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
+//  std::cout << "<br>Degree left: " << degreeLeft;// << " degree right: " << degreeRight;
   //std::cout << "<br>Interpolating at: 0,";
   AllPointsOfEvaluation[0]=0;
   for (int i=1; i<AllPointsOfEvaluation.size; i++)
@@ -1787,8 +1790,8 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   for (int i=0; i<AllPointsOfEvaluation.size; i++)
   { theArgument[0]=AllPointsOfEvaluation[i];
     theValuesAtPoints[i]= thePoly.Evaluate(theArgument);
-    //std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
-    //<< " equals: " << theValuesAtPoints[i].ToString();
+//    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
+//    << " equals: " << theValuesAtPoints[i].ToString();
     if (theValuesAtPoints[i].IsEqualToZero())
     { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
       //std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
@@ -1804,44 +1807,33 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer " << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
-      //std::cout << "=+/- ";
-      //for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
-      //  for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
-      //    std::cout << thePrimeFactorsAtPoints[i][j] << "*";
+/*      std::cout << "=+/- ";
+      for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
+        for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
+          std::cout << thePrimeFactorsAtPoints[i][j] << "*";*/
     }
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
   Incrementable<SelectionOneItem> signSel;
-  Vector<Rational> eiVector;
-  Polynomial<Rational> interPoly, checkRemainder;
-  Vectors<Rational> valuesLeftInterpolands, valuesRightInterpolands;
-  Vector<Rational> PointsOfInterpolationLeft, PointsOfInterpolationRight;
+  Polynomial<Rational> quotient, remainder;
+  Vectors<Rational> valuesLeftInterpolands;
+  Vector<Rational> PointsOfInterpolationLeft;
   PointsOfInterpolationLeft.ReservE(degreeLeft+1);
-  PointsOfInterpolationRight.ReservE(degreeRight+1);
-  Vector<Rational> theArgumentRat;
   Rational currentPrimePowerContribution, currentPointContribution;
-  theArgumentRat.SetSize(1);
   for (int i=0; i<=degreeLeft; i++)
     PointsOfInterpolationLeft.AddOnTop(AllPointsOfEvaluation[i]);
-  for (int i=0; i<=degreeRight; i++)
-    PointsOfInterpolationRight.AddOnTop(AllPointsOfEvaluation[i]);
   theDivisorSel.initFromMults(thePrimeFactorsMults);
   signSel.initFromMults(1, degreeLeft+1);
   //signSel.theElements[0].initFromMults(0);
   valuesLeftInterpolands.SetSize(degreeLeft+1);
-  valuesRightInterpolands.SetSize(degreeRight+1);
   this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands);
-  if (degreeLeft!=degreeRight)
-    this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationRight, AllPointsOfEvaluation, valuesRightInterpolands);
-  else
-    valuesRightInterpolands=valuesLeftInterpolands;
   do do
   { //std::cout << "<hr>Selection: " << theDivisorSel.ToString() << "<br>Sign selection: " << signSel.ToString();
     //continue;
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood=false;//<-we shall first check if the divisor is constant.
-    //std::cout << "<hr>Values left candidate: ";
+  //  std::cout << "<hr>Values left candidate: ";
     for (int j=0; j<theDivisorSel.theElements.size; j++)
     { currentPointContribution=1;
       for (int k=0; k<theDivisorSel[j].theElements.size; k++)
@@ -1851,24 +1843,32 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
       }
       if (signSel[j].SelectedMult == 1)
         currentPointContribution*=-1;
-      if (j==0)
-        firstValue=currentPointContribution;
-      else
-        if (firstValue!=currentPointContribution)
-          isGood=true; //<- the divisor has takes two different values, hence is non-constant.
-      //std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
-      //std::cout << theValuesAtPointsLeft.ToString();
-      //std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
-      //<< " to " << theValuesAtPointsLeft.ToString();
-      //std::cout.flush();
+      if (!isGood)
+      { if (j==0)
+          firstValue=currentPointContribution;
+        else
+          if (firstValue!=currentPointContribution)
+            isGood=true; //<- the divisor has takes two different values, hence is non-constant.
+      }
+//      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
+//      std::cout << "<br>ValuesAtPointsLeft: " << theValuesAtPointsLeft.ToString();
+ //     std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
+ //     << " to " << theValuesAtPointsLeft.ToString();
+ //     std::cout.flush();
       theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
-      //std::cout << " to get " << theValuesAtPointsLeft.ToString();
+//      std::cout << " to get " << theValuesAtPointsLeft.ToString();
     }
     //std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
+/*    if (true)
+    { //debugging code here! turn off when done debugging!
+      output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
+      std::cout << "<hr>Trying divisor: " << output.ToString();
+      if (!isGood)
+        std::cout << "<br>aint no good 'cause is constant";
+    }*/
     if (!isGood)
       continue;
-    theValuesAtPointsRight.MakeZero(theValuesAtPoints.size);
-    for (int j=0; j<valuesRightInterpolands.size; j++)
+    for (int j=0; j<AllPointsOfEvaluation.size; j++)
     { if (theValuesAtPointsLeft[j].IsEqualToZero() )
       { isGood=false;
         break;
@@ -1878,24 +1878,19 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
       { isGood=false;
         break;
       }
-      theValuesAtPointsRight+=valuesRightInterpolands[j]*currentPointContribution;
     }
     //std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
-    if (!isGood)
-      continue;
-    for (int k=valuesRightInterpolands.size; k<theValuesAtPoints.size; k++)
-      if ((theValuesAtPointsLeft[k]*theValuesAtPointsRight[k])!=theValuesAtPoints[k])
-      { isGood=false;
-        break;
-      }
+//    if (!isGood)
+//      std::cout << "<br>aint no good 'cause of crappy divisibility.";
     if (!isGood)
       continue;
     output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
-    this->DivideBy(output, interPoly, checkRemainder);
-    if (!checkRemainder.IsEqualToZero())
-      crash << "This is a programming error: polynomial " << output.ToString() << " was computed to be a divisor of " << this->ToString()
-      << " but it is not. " << crash;
-    *this=interPoly;
+    this->DivideBy(output, quotient, remainder);
+    if (!remainder.IsEqualToZero())
+    { //std::cout << "<br>ain't no good cause left times right aint right.";
+      continue;
+    }
+    *this=quotient;
     return true;
   } while (theDivisorSel.IncrementReturnFalseIfPastLast());
   while (signSel.IncrementReturnFalseIfPastLast());

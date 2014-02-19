@@ -903,7 +903,8 @@ bool Calculator::AllowsTimesInPreceding(const std::string& lookAhead)
   lookAhead=="(" || lookAhead=="[" ||
   lookAhead==")" || lookAhead=="]" || lookAhead=="}" ||
   lookAhead=="=" || lookAhead=="Variable" || lookAhead=="," || lookAhead==";" ||
-  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" || lookAhead=="EndProgram"
+  lookAhead==":" || lookAhead=="&" || lookAhead=="MatrixSeparator" || lookAhead=="\\" ||
+  lookAhead=="sqrt" || lookAhead=="\\sqrt" || lookAhead=="EndProgram"
   ;
 }
 

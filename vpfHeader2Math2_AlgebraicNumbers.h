@@ -18,7 +18,7 @@ class AlgebraicNumber
     AlgebraicNumber result=argument;
     result.CheckConsistency();
     result*=-1;
-    std::cout << "here be unary minus!";
+//    std::cout << "here be unary minus!";
     result.CheckConsistency();
     return result;
   }

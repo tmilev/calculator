@@ -547,7 +547,7 @@ void Calculator::initPredefinedInnerFunctions()
    <b>Currently the function is not implemented properly.</b> \
    At the moment, the function factors the denominator over the rationals. If this factorization\
    yields quadratic and linear terms at the function succeeds, else fails.",
-   "UnivariatePartialFractions(\\frac{x^11 }{x^6-2x^3+1})")
+   "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
    ;
 
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",

@@ -327,6 +327,7 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+  theFormat.flagUseLatex=true;
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
 

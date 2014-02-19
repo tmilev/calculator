@@ -462,6 +462,14 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
     << " I can handle only 1.";
     return false;
   }
+  std::stringstream out;
+  FormatExpressions theFormat;
+  convertedInput.GetContext().ContextGetFormatExpressions(theFormat);
+  if (inputRF.GetMinNumVars()<1 || inputRF.expressionType== inputRF.typeRational ||
+      inputRF.expressionType==inputRF.typePoly)
+  { out << inputRF.ToString(&theFormat) << " is already split into partial fractions. ";
+    return output.AssignValue(out.str(), theCommands);
+  }
   Polynomial<Rational> theDen, theNum;
   inputRF.GetDenominator(theDen);
   inputRF.GetNumerator(theNum);
@@ -470,10 +478,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   { theCommands.Comments << "<hr>I failed to factor the denominator of the rational function, I surrender.";
     return false;
   }
-  FormatExpressions theFormat;
-  convertedInput.GetContext().ContextGetFormatExpressions(theFormat);
   theFormat.flagUseFrac=true;
-  std::stringstream out;
   out << "The rational function is: " << CGI::GetMathSpanPure(inputRF.ToString(&theFormat)) << ".";
   out << "<br>The denominator factors are: ";
   bool allFactorsAreOfDegree2orless=true;
@@ -491,6 +496,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   }
   Polynomial<Rational> quotientRat, remainderRat;
   Polynomial<AlgebraicNumber> quotientAlg, remainderAlg;
+
   theNum.DivideBy(theDen, quotientRat, remainderRat);
   quotientAlg=quotientRat;
   remainderAlg=remainderRat;
@@ -500,7 +506,18 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
     << CGI::GetMathSpanPure(theDen.ToString(&theFormat)) << " yields "
     << CGI::GetMathSpanPure(quotientRat.ToString(&theFormat))
     << " with remainder "
-    << CGI::GetMathSpanPure(remainderRat.ToString(&theFormat));
+    << CGI::GetMathSpanPure(remainderRat.ToString(&theFormat)) << ". ";
+    Expression theDivStringArguments(theCommands), thePolyDivStringE, numE, denE;
+    theDivStringArguments.AddChildAtomOnTop("PolyDivStringGrLex");
+    numE.AssignValueWithContext(theNum, convertedInput.GetContext(), theCommands);
+    denE.AssignValueWithContext(theDen, convertedInput.GetContext(), theCommands);
+    theDivStringArguments.AddChildOnTop(numE);
+    theDivStringArguments.AddChildOnTop(denE);
+    theCommands.innerPolynomialDivisionVerboseGrLex(theCommands, theDivStringArguments, thePolyDivStringE);
+    if(thePolyDivStringE.IsOfType<std::string>())
+    { out << "<br>Here is a detailed long polynomial division:<br> ";
+      out << thePolyDivStringE.GetValue<std::string>();
+    }
   }
   MonomialCollection<Polynomial<Rational>, Rational> theDenominatorFactorsWithMultsCopy;
   MonomialCollection<Polynomial<AlgebraicNumber>, Rational> theDenominatorFactorsWithMults;
@@ -520,7 +537,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
       continue;
     }
     Rational theDiscriminant=currentSecondDegreePoly.GetDiscriminant();
-    std::cout << "The discriminant: " << theDiscriminant.ToString();
+//    std::cout << "The discriminant: " << theDiscriminant.ToString();
     if (theDiscriminant<0)
     { theDenominatorFactorsWithMults.AddMonomial(currentSecondDegreePolyAlgebraic, theDenominatorFactorsWithMultsCopy.theCoeffs[i]);
       continue;
@@ -531,7 +548,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
       << " (radical too large?).";
       return false;
     }
-    std::cout << "<br>sqrt of discriminant: " << theDiscriminantSqrt.ToString();
+//    std::cout << "<br>sqrt of discriminant: " << theDiscriminantSqrt.ToString();
     theDiscriminantSqrt.CheckConsistency();
     AlgebraicNumber a=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,2));
     AlgebraicNumber b=currentSecondDegreePoly.GetMonomialCoefficient(MonomialP(0,1));
@@ -640,7 +657,7 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
   theSub.MakeIdSubstitution(varCounter+1);
   for (int i=1; i<theSub.size; i++)
     theSub[i].MakeConst(theConstTerms(i-1,0));
-  out << "The sub is: " << theSub.ToString();
+//  out << "The sub is: " << theSub.ToString();
   std::stringstream rfComputedStream;
   for (int i =0; i<theDenominatorFactorsWithMults.size(); i++)
     for (int k=0; k<theDenominatorFactorsWithMults.theCoeffs[i]; k++)
@@ -656,8 +673,13 @@ bool CalculatorFunctionsGeneral::innerSplitToPartialFractionsOverAlgebraicReals(
     }
   out << "<br>Therefore, the final partial fraction decomposition is: ";
   std::stringstream answerFinalStream;
-  answerFinalStream << inputRF.ToString(&theFormat) << "=" << quotientRat.ToString(&theFormat) << "+ "
-  << transformedRF.ToString(&theFormat) << "=" << rfComputedStream.str();
+  answerFinalStream << inputRF.ToString(&theFormat) << "=";
+  if (!quotientRat.IsEqualToZero())
+    answerFinalStream << quotientRat.ToString(&theFormat) << "+ ";
+  answerFinalStream << transformedRF.ToString(&theFormat) << "=";
+  if (!quotientRat.IsEqualToZero())
+    answerFinalStream << quotientRat.ToString(&theFormat) << "+ ";
+  answerFinalStream << rfComputedStream.str();
   out << CGI::GetMathSpanPure(answerFinalStream.str());
   return output.AssignValue(out.str(), theCommands);
 }

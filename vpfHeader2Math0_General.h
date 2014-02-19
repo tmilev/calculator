@@ -4072,9 +4072,9 @@ void Matrix<coefficient>::GaussianEliminationByRows
     if (humanReadableReport!=0)
     { *humanReadableReport << "<tr><td style=\"border-bottom:1pt solid black;\">";
       if (formatAsLinearSystem)
-        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat));
+        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1);
       else
-        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex());
+        *humanReadableReport << CGI::GetMathSpanPure(this->ToStringLatex(),-1);
       *humanReadableReport << "</td><td style=\"border-bottom:1pt solid black;\">Selected pivot column "
       << i+1 << ". ";
       if (NumFoundPivots!=tempI)
@@ -4115,7 +4115,7 @@ void Matrix<coefficient>::GaussianEliminationByRows
   }
   if (humanReadableReport!=0)
   { if (formatAsLinearSystem)
-      *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat))
+      *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringSystemLatex(carbonCopyMat, theFormat),-1)
       << "</td><td> Final result.</td></tr></table>\n\n\n\n";
     else
       *humanReadableReport << "<tr><td>" << CGI::GetMathSpanPure(this->ToStringLatex())

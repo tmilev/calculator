@@ -64,6 +64,7 @@ public:
   static bool innerComputeSemisimpleSubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerComputePairingTablesAndFKFTsubalgebras(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output);
 

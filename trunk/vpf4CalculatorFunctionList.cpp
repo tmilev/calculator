@@ -1726,6 +1726,10 @@ void Calculator::initPredefinedStandardOperations()
    "Provided that x is not equal to zero, substitutes 0/x with 0. ",
    "0/b; ", true);
   this->AddOperationOuterHandler
+  ("/", CalculatorFunctionsGeneral::outerDivCancellations, "",
+   "Division cancellations. Substitutes (a/b)/(a/d) with d/a and (a/b)/(c/b) with a/c. ",
+   " (a/b)/(a/d); (a/b)/(c/b)  ", true);
+  this->AddOperationOuterHandler
   ("/", CalculatorFunctionsGeneral::outerAssociateDivisionDivision, "",
    "Substitutes (a/b)/c :=a/(c*b); a/(b/c):=a*c/b; .\
    Note the order of multiplication in the rules: this operation is safe and correct for \

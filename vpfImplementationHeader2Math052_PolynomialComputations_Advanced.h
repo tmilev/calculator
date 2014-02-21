@@ -343,7 +343,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
       out << ", ";
   }
   out << "<br>";
-  out << theRemainders.size  << " division steps total.<br>";
+  out << theRemainders.size << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
   out << "<tr><td " << underlineStyle << "><b>Remainder:</b></td>";
   out << this->GetPolynomialStringSpacedMonomials(this->remainderDivision, totalMonCollection, underlineStyle, HighlightedStyle, theFormat, &this->remainderDivision.theMonomials)

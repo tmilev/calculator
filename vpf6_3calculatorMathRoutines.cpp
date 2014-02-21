@@ -985,6 +985,21 @@ bool CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD(Calculator& theCo
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
+bool CalculatorFunctionsGeneral::outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerDivCancellations");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1][2]==input[2][2])
+    return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], input[2][1]);
+  if (input[1][1]==input[2][1])
+    return output.MakeXOX(theCommands, theCommands.opDivide(), input[2][2], input[1][2]);
+  return false;
+}
+
 bool CalculatorFunctionsGeneral::outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerAssociateDivisionDivision");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))

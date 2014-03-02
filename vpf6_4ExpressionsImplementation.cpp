@@ -174,7 +174,13 @@ int Expression::GetTypeOperation<charSSAlgMod<Rational> >()const
 }
 
 template < >
-int Expression::GetTypeOperation<CalculusFunctionPlot>()const
+int Expression::GetTypeOperation<Plot>()const
+{ this->CheckInitialization();
+  return this->theBoss->opCalculusPlot();
+}
+
+template < >
+int Expression::GetTypeOperation<PlotObject>()const
 { this->CheckInitialization();
   return this->theBoss->opCalculusPlot();
 }
@@ -414,11 +420,22 @@ Matrix<RationalFunctionOld>
 
 template < >
 int Expression::AddObjectReturnIndex(const
-CalculusFunctionPlot
+Plot
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+PlotObject
+& inputValue)const
+{ this->CheckInitialization();
+  Plot plotContainer;
+  plotContainer+=inputValue;
+  return this->theBoss->theObjectContainer.thePlots
+  .AddNoRepetitionOrReturnIndexFirst(plotContainer);
 }
 
 template < >
@@ -608,9 +625,9 @@ SemisimpleSubalgebras& Expression::GetValueNonConst()const
 }
 
 template < >
-CalculusFunctionPlot& Expression::GetValueNonConst()const
-{ if (!this->IsOfType<CalculusFunctionPlot>())
-    crash << "This is a programming error: expression not of required type CalculusFunctionPlot. The expression equals " << this->ToString() << "." << crash;
+Plot& Expression::GetValueNonConst()const
+{ if (!this->IsOfType<Plot>())
+    crash << "This is a programming error: expression not of required type Plot. The expression equals " << this->ToString() << "." << crash;
   return this->theBoss->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
 

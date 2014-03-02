@@ -80,6 +80,7 @@ public:
   static bool innerCharPolyMatrix(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotIntegralOf(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output);

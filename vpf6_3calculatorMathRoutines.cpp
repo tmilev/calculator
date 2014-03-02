@@ -1604,7 +1604,6 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
     return false;
   }
   std::stringstream out;
-  CalculusFunctionPlot thePlot;
   double x1wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(startAngle.DoubleValue()));
   double y1wedge= MathRoutines::ReducePrecision(yCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::sin(startAngle.DoubleValue()));
   double x2wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(endAngle.DoubleValue()));
@@ -1620,11 +1619,13 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
   out << "\\pscustom[linecolor=blue]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
   << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
   << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
-  thePlot.lowerBounds.AddOnTop(-5);
-  thePlot.upperBounds.AddOnTop(5);
-  thePlot.thePlotElementS.AddOnTop(input);
-  thePlot.thePlotStrings.AddOnTop(out.str());
-  thePlot.thePlotStringsWithHtml.AddOnTop(out.str());
+  PlotObject thePlot;
+  thePlot.lowerBound=(-5);
+  thePlot.upperBound=(5);
+  thePlot.thePlotElement=(input);
+  thePlot.thePlotString=(out.str());
+  thePlot.thePlotStringWithHtml=(out.str());
+  thePlot.thePlotType="plotFunction";
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1645,22 +1646,23 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
     out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
     return output.SetError(out.str(), theCommands);
   }
-  CalculusFunctionPlot thePlot;
   std::stringstream theShadedRegion, theShadedRegionHTML;
+  PlotObject thePlot;
   theShadedRegion << "\\pscustom*[linecolor=cyan]{"
   << thePlot.GetPlotStringFromFunctionStringAndRanges(false, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
   << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
   theShadedRegionHTML << "\\pscustom*[linecolor=cyan]{"
   << thePlot.GetPlotStringFromFunctionStringAndRanges(true, functionE.GetValue<std::string>(), input[1].ToString(), lowerBound, upperBound)
   << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
-  thePlot.thePlotStrings.AddOnTop(theShadedRegion.str());
-  thePlot.thePlotStringsWithHtml.AddOnTop(theShadedRegionHTML.str());
-  thePlot.lowerBounds.AddOnTop(lowerBound);
-  thePlot.upperBounds.AddOnTop(upperBound);
-  thePlot.thePlotElementS.AddOnTop(input[1]);
-  thePlot.AddPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
-  return output.AssignValue(thePlot, theCommands);
-
+  thePlot.thePlotString=theShadedRegion.str();
+  thePlot.thePlotStringWithHtml=theShadedRegionHTML.str();
+  thePlot.lowerBound=lowerBound;
+  thePlot.upperBound=upperBound;
+  thePlot.thePlotElement=(input[1]);
+  Plot plotFinal;
+  plotFinal+=thePlot;
+  plotFinal.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  return output.AssignValue(plotFinal, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1681,8 +1683,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     out << "Failed to convert expression " << input[1].ToString() << " to postfix notation. ";
     return output.SetError(out.str(), theCommands);
   }
-  CalculusFunctionPlot thePlot;
-  thePlot.AddPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  Plot thePlot;
+  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1694,18 +1696,18 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   Expression lowerEplot=input, upperEplot=input;
   lowerEplot.children.RemoveIndexShiftDown(2);
   upperEplot.children.RemoveIndexShiftDown(1);
-  CalculusFunctionPlot outputPlot;
+  Plot outputPlot;
   bool tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, lowerEplot, output);
-  if (!tempB || !output.IsOfType<CalculusFunctionPlot>(&outputPlot))
+  if (!tempB || !output.IsOfType<Plot>(&outputPlot))
   { theCommands.Comments << "<hr>Failed to get a plot from " << lowerEplot.ToString() << ", not proceding with bar plot.";
     return false;
   }
   tempB=CalculatorFunctionsGeneral::innerPlot2D(theCommands, upperEplot, output);
-  if (!tempB || !output.IsOfType<CalculusFunctionPlot>())
+  if (!tempB || !output.IsOfType<Plot>())
   { theCommands.Comments << "<hr>Failed to get a plot from " << upperEplot.ToString() << ", not proceding with bar plot.";
     return false;
   }
-  outputPlot+=output.GetValue<CalculusFunctionPlot>();
+  outputPlot+=output.GetValue<Plot>();
   const Expression& lowerFunctionE=input[1];
   const Expression& upperFunctionE=input[2];
   const Expression& lowerE=input[3];
@@ -1814,14 +1816,16 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
     outTex << tempStream.str();
   }
   outHtml << "<br>";
-  CalculusFunctionPlot thePlot;
-  thePlot.thePlotStrings.AddOnTop(outTex.str());
-  thePlot.thePlotStringsWithHtml.AddOnTop(outHtml.str());
-  thePlot.lowerBounds.AddOnTop(lowerBound);
-  thePlot.upperBounds.AddOnTop(upperBound);
-  thePlot.thePlotElementS.AddOnTop(input[1]);
-  thePlot+=outputPlot;
-  return output.AssignValue(thePlot, theCommands);
+  PlotObject thePlot;
+  thePlot.thePlotString=outTex.str();
+  thePlot.thePlotStringWithHtml=outHtml.str();
+  thePlot.lowerBound=lowerBound;
+  thePlot.upperBound=upperBound;
+  thePlot.thePlotElement=input[1];
+  Plot plotFinal;
+  plotFinal+=thePlot;
+  plotFinal+=outputPlot;
+  return output.AssignValue(plotFinal, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1850,6 +1854,48 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
   out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
   return output.AssignValue(out.str(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotParametricCurve");
+  if (input.children.size<5)
+  { theCommands.Comments
+    << "Parametric curve plots take 4+ arguments, first arguments stand for the functions in the various coordinates, "
+    << " the last two arguments stands for the variable range.";
+    return false;
+  }
+  if (input.children.size!=5)
+  { theCommands.Comments << "At the moment I can draw on curves sitting in 2d space. ";
+    return false;
+  }
+  List<Expression> theConvertedExpressions;
+  theConvertedExpressions.SetSize(input.children.size-3);
+  for (int i=1; i<input.children.size-2; i++)
+    if (!Calculator::innerSuffixNotationForPostScript(theCommands, input[i], theConvertedExpressions[i-1]))
+    { theCommands.Comments << "Failed to extract suffix notation from argument " << input[i].ToString();
+      return false;
+    }
+  double leftEndPoint, rightEndPoint;
+  if (!input[input.children.size-2].EvaluatesToRealDouble(&leftEndPoint) ||
+      !input[input.children.size-1].EvaluatesToRealDouble(&rightEndPoint))
+  { theCommands.Comments << "Failed to convert " << input[input.children.size-2].ToString() << " and "
+    << input[input.children.size-1].ToString() << " to left and right endpoint of parameter interval. ";
+    return false;
+  }
+  std::stringstream outLatex, outHtml;
+  outLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
+  outHtml << "<br>%Calculator input: " << input.ToString()
+  << "<br>\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
+  << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
+
+  PlotObject thePlot;
+  thePlot.lowerBound=leftEndPoint;
+  thePlot.upperBound=rightEndPoint;
+  thePlot.thePlotElement=input;
+  thePlot.thePlotString=outLatex.str();
+  thePlot.thePlotStringWithHtml=outHtml.str();
+  return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1886,7 +1932,6 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
   double theProjXradius=radius;
   //std::cout << "<br>theProjYradius: " << theProjYradius;
   //std::cout << "<br>theProjXradius: " << theProjXradius;
-  CalculusFunctionPlot thePlot;
   std::stringstream out;
   Vector<double> tipOfTheCone, centerOfTheCone;
   centerOfTheCone.MakeZero(3);
@@ -1925,11 +1970,12 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
     out << "\\psparametricplot[algebraic,linecolor=\\psColorGraph]{0}{6.283185307}{cos(t)*" << MathRoutines::ReducePrecision(theProjXradius)
     << " |sin(t)*" << MathRoutines::ReducePrecision(theProjYradius) << "}";
   }
-  thePlot.lowerBounds.AddOnTop(-5);
-  thePlot.upperBounds.AddOnTop(5);
-  thePlot.thePlotElementS.AddOnTop(input);
-  thePlot.thePlotStrings.AddOnTop(out.str());
-  thePlot.thePlotStringsWithHtml.AddOnTop(out.str());
+  PlotObject thePlot;
+  thePlot.lowerBound=-5;
+  thePlot.upperBound=5;
+  thePlot.thePlotElement=input;
+  thePlot.thePlotString=out.str();
+  thePlot.thePlotStringWithHtml=out.str();
   return output.AssignValue(thePlot, theCommands);
 }
 

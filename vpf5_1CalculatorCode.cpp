@@ -769,44 +769,56 @@ bool Calculator::innerMatrixRationalTensorForm(Calculator& theCommands, const Ex
   return output.AssignValue(outputMat, theCommands);
 }
 
-void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
-{ this->thePlotElementS.AddListOnTop(other.thePlotElementS);
-  this->thePlotStrings.AddListOnTop(other.thePlotStrings);
-  this->thePlotStringsWithHtml.AddListOnTop(other.thePlotStringsWithHtml);
-  this->upperBounds.AddListOnTop(other.upperBounds);
-  this->lowerBounds.AddListOnTop(other.lowerBounds);
+void Plot::operator+=(const Plot& other)
+{ this->thePlots.AddListOnTop(other.thePlots);
 }
 
-void CalculusFunctionPlot::AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound)
-{ this->upperBounds.AddOnTop(inputUpperBound);
-  this->lowerBounds.AddOnTop(inputLowerBound);
-  this->thePlotElementS.AddOnTop(inputE);
-  this->thePlotStrings.AddOnTop(this->GetPlotStringFromFunctionStringAndRanges(false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
-  this->thePlotStringsWithHtml.AddOnTop(this->GetPlotStringFromFunctionStringAndRanges(true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound));
+void Plot::operator+=(const PlotObject& other)
+{ this->thePlots.AddOnTop(other);
 }
 
-std::string CalculusFunctionPlot::GetPlotStringFromFunctionStringAndRanges
-(bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound)
+void Plot::AddFunctionPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound)
+{ PlotObject thePlot;
+  thePlot.upperBound=(inputUpperBound);
+  thePlot.lowerBound=(inputLowerBound);
+  thePlot.thePlotElement=(inputE);
+  thePlot.thePlotString=
+  thePlot.GetPlotStringFromFunctionStringAndRanges
+  (false, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
+  thePlot.thePlotStringWithHtml=
+  thePlot.GetPlotStringFromFunctionStringAndRanges
+  (true, inputPostfixNotation, inputE.ToString(), inputLowerBound, inputUpperBound);
+  thePlot.thePlotType="plotFunction";
+  this->thePlots.AddOnTop(thePlot);
+}
+
+std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
+(bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat,
+ double inputLowerBound, double inputUpperBound)
 { std::stringstream out;
+  if (useHtml)
+    out << "<br>";
   out << "\n\n%Function formula: " << functionStringCalculatorFormat << "\n\n";
   if (useHtml)
     out << "<br>";
-  out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
+  //out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   if (useHtml)
     out << "<br>\n";
-  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << std::fixed << lowerBound << "}{" <<std::fixed << upperBound << "}{";
+  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << std::fixed
+  << inputLowerBound << "}{" << std::fixed << inputUpperBound << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
 
-std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
-{ MacroRegisterFunctionWithName("CalculusFunctionPlot::GetPlotStringAddLatexCommands");
+std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
+{ MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
   double theLowerBoundAxes=-0.5, theUpperBoundAxes=1;
-  for (int i=0; i<this->lowerBounds.size; i++)
-  { theLowerBoundAxes=MathRoutines::Minimum(this->lowerBounds[i], theLowerBoundAxes);
-    theUpperBoundAxes=MathRoutines::Maximum(this->upperBounds[i], theUpperBoundAxes);
-  }
+  for (int i=0; i<this->thePlots.size; i++)
+    if (this->thePlots[i].thePlotType=="plotFunction")
+    { theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].lowerBound, theLowerBoundAxes);
+      theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].upperBound, theUpperBoundAxes);
+    }
   double theLowerBoundFrame=theLowerBoundAxes-0.5;
   double theUpperBoundFrame=theUpperBoundAxes+0.5;
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
@@ -822,11 +834,11 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
   resultStream << "\\psframe*[linecolor=white](" << std::fixed << theLowerBoundFrame << ",-5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
   resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{-4.5}{" << std::fixed << theUpperBoundAxes << "}{4.5}";
-  for (int i=0; i<this->thePlotStringsWithHtml.size; i++)
+  for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
-      resultStream << this->thePlotStringsWithHtml[i] << lineSeparator;
+      resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
     else
-      resultStream << this->thePlotStrings[i] << lineSeparator;
+      resultStream << this->thePlots[i].thePlotString << lineSeparator;
   resultStream << lineSeparator << "\\end{pspicture}\n\n" << lineSeparator << "\\end{document}";
   return resultStream.str();
 }

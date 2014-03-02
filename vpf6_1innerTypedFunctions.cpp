@@ -539,10 +539,10 @@ bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, c
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-  CalculusFunctionPlot leftPlot, rightPlot;
-  if(!input[1].IsOfType<CalculusFunctionPlot>(&leftPlot))
+  Plot leftPlot, rightPlot;
+  if(!input[1].IsOfType<Plot>(&leftPlot))
     return false;
-  if(!input[2].IsOfType<CalculusFunctionPlot>(&rightPlot))
+  if(!input[2].IsOfType<Plot>(&rightPlot))
     return false;
   leftPlot+=rightPlot;
   return output.AssignValue(leftPlot, theCommands);

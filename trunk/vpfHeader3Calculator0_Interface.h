@@ -502,22 +502,37 @@ class SyntacticElement
   }
 };
 
-//the following class is meant to use to draw plots for calculus students.
-class CalculusFunctionPlot
-{ public:
-  List<std::string> thePlotStrings;
-  List<std::string> thePlotStringsWithHtml;
-  List<double> lowerBounds;
-  List<double> upperBounds;
-  List<Expression> thePlotElementS;
-  std::string GetPlotStringAddLatexCommands(bool useHtml);
-  void AddPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound);
+class PlotObject
+{
+public:
+  std::string thePlotString;
+  std::string thePlotStringWithHtml;
+  double lowerBound;
+  double upperBound;
+  Expression thePlotElement;
+  std::string thePlotType;
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
-  void operator+=(const CalculusFunctionPlot& other);
-  bool operator==(const CalculusFunctionPlot& other)const
-  { return this->thePlotStrings==other.thePlotStrings && this->thePlotStringsWithHtml==other.thePlotStringsWithHtml &&
-    this->lowerBounds==other.lowerBounds && this->upperBounds==other.upperBounds && this->thePlotElementS==other.thePlotElementS;
+  bool operator==(const PlotObject& other)const
+  { return this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
+    this->lowerBound==other.lowerBound &&
+    this->upperBound==other.upperBound &&
+    this->thePlotElement==other.thePlotElement &&
+    this->thePlotType==other.thePlotType;
+  }
+};
+
+//the following class is meant to use to draw plots for calculus students.
+class Plot
+{ public:
+  List<PlotObject> thePlots;
+
+  std::string GetPlotStringAddLatexCommands(bool useHtml);
+  void AddFunctionPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound);
+  void operator+=(const Plot& other);
+  void operator+=(const PlotObject& other);
+  bool operator==(const Plot& other)const
+  { return this->thePlots==other.thePlots;
   }
 };
 
@@ -552,7 +567,7 @@ public:
   HashedListReferences<ElementZmodP> theEltsModP;
   HashedListReferences<Weight<Rational> > theWeights;
   HashedListReferences<Weight<Polynomial<Rational> > > theWeightsPoly;
-  ListReferences<CalculusFunctionPlot> thePlots;
+  ListReferences<Plot> thePlots;
   AlgebraicClosureRationals theAlgebraicClosure;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;

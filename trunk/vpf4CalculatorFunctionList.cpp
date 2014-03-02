@@ -550,6 +550,13 @@ void Calculator::initPredefinedInnerFunctions()
    "UnivariatePartialFractions(\\frac{x^11}{x^{8}-2x^{6}-2x^{5}+4x^{3}+x^{2}-2});")
    ;
 
+  this->AddOperationInnerHandler ("plotCurve", CalculatorFunctionsGeneral::innerPlotParametricCurve, "",
+   "<b>Calculus teaching function.</b> Plots a curve sitting in 2-dimensional space. \
+    The first and second argument give the x and y coordinate functions; the curve parameter must be t.\
+   ",
+   "plotCurve{}(sin{}t,\\cos(2t), 0, 5)")
+   ;
+
   this->AddOperationInnerHandler ("plot2D", CalculatorFunctionsGeneral::innerPlot2D, "",
    "<b>Calculus teaching function.</b> Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \

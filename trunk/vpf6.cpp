@@ -2002,9 +2002,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << this->GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString(&contextFormat.GetElement());
     out << ")";
     result=true;
-  } else if (this->IsOfType<CalculusFunctionPlot>())
+  } else if (this->IsOfType<Plot>())
   { if (isFinal)
-    { CalculusFunctionPlot& thePlot=this->GetValueNonConst<CalculusFunctionPlot>();
+    { Plot& thePlot=this->GetValueNonConst<Plot>();
       out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink(thePlot.GetPlotStringAddLatexCommands(false), true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>" << thePlot.GetPlotStringAddLatexCommands(true);
     } else
@@ -2414,7 +2414,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "</td><td valign=\"top\"><hr>";
         if ((*this)[i].IsOfType<std::string>() && isFinal)
           out << (*this)[i].GetValue<std::string>();
-        else if (((*this)[i].IsOfType<CalculusFunctionPlot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroup>()
+        else if (((*this)[i].IsOfType<Plot> () || (*this)[i].IsOfType<SemisimpleSubalgebras>() || (*this)[i].IsOfType<WeylGroup>()
                   || (*this)[i].IsOfType<WeylGroupRepresentation<Rational> >()) && isFinal)
           out << (*this)[i].ToString(theFormat);
         else
@@ -2481,7 +2481,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       outTrue << out.str();
     else
     { outTrue << "<tr><td>" << CGI::GetMathSpanBeginArrayL(startingExpression->ToString(theFormat));
-      if ((this->IsOfType<std::string>() || this->IsOfType<CalculusFunctionPlot>() ||
+      if ((this->IsOfType<std::string>() || this->IsOfType<Plot>() ||
            this->IsOfType<SemisimpleSubalgebras>() || this->IsOfType<WeylGroup>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else

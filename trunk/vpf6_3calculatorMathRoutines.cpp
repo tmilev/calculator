@@ -1670,6 +1670,8 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   //std::cout << input.ToString();
   if (input.children.size<4)
     return output.SetError("Plotting coordinates takes at least three arguments: function, lower and upper bound. ", theCommands);
+  if (input.HasBoundVariables())
+    return false;
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
   Expression functionE;
@@ -2032,7 +2034,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
 
 bool CalculatorFunctionsGeneral::innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
-//  std::cout << "<br>evaluatetodouble: " << input.ToString();
+  //std::cout << "<br>evaluatetodouble: " << input.ToString();
   if (input.IsOfType<double>())
   { output=input;
     return true;
@@ -2047,15 +2049,19 @@ bool CalculatorFunctionsGeneral::innerEvaluateToDouble(Calculator& theCommands, 
   if (input.IsAtomGivenData(theCommands.opE()))
     return output.AssignValue(MathRoutines::E(), theCommands);
   if (input.IsAtomGivenData(theCommands.opPi()))
+  { //std::cout << "Evaluates to 3.1415...!";
     return output.AssignValue(MathRoutines::Pi(), theCommands);
-
+  }
   bool isArithmeticOperationTwoArguments=
-  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) || input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) || input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
+  input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
   input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
   ;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
-    std::cout << "Starting with sqrt: " << input.ToStringFull();
+  //std::cout << " is arithmetic operation two arguments! ";
+  //if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+  //  std::cout << "Starting with sqrt: " << input.ToStringFull();
   if (isArithmeticOperationTwoArguments)
   { double leftD, rightD;
     if (!input[1].EvaluatesToRealDouble(&leftD) || !input[2].EvaluatesToRealDouble(&rightD))

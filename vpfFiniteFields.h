@@ -43,6 +43,9 @@ class f65521
   bool operator!=(const f65521 rhs) const;
   bool IsEqualToZero() const;
   bool IsEqualToOne() const;
+  bool NeedsBrackets()
+  { return false;
+  }
 
   std::string ToString(FormatExpressions* f = 0) const;
 };

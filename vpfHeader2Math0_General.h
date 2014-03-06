@@ -1065,7 +1065,16 @@ public:
   bool FindOneVarRatRoots(List<Rational>& output);
   coefficient GetDiscriminant();
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, coefficient& output);
-  void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff=1, int ExpectedNumVars=0);
+  void MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff=1, int ExpectedNumVars=0)
+  { if (LetterIndex<0)
+    crash << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. " << crash;
+    int numVars=MathRoutines::Maximum(LetterIndex+1, ExpectedNumVars);
+    this->MakeZero();
+    MonomialP tempM;
+    tempM.MakeOne(numVars);
+    tempM[LetterIndex]=Power;
+    this->AddMonomial(tempM, Coeff);
+  }
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff);
   void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const coefficient& coeff1, const coefficient& coeff2);
   void MakeDegreeOne(int NVar, int NonZeroIndex, const coefficient& coeff1, const coefficient& ConstantTerm);

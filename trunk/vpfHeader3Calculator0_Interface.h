@@ -1513,7 +1513,6 @@ public:
   static bool innerPrintSSsubalgebrasNoCentralizers(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasNoSolutions(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebrasRegular(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDouble(Calculator& theCommands, const Expression& input, Expression& output);
   void AddEmptyHeadedCommand();
   Calculator();
   int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);

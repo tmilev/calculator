@@ -869,7 +869,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   { if (input.ToString()=="e")
       return output.AssignValue<std::string>("2.718281828 ", theCommands);
     if (input.ToString()=="\\pi")
-      return output.AssignValue<std::string>("3.14159 ", theCommands);
+      return output.AssignValue<std::string>("3.141592654 ", theCommands);
     if (input.theData>=theCommands.NumPredefinedAtoms)
       return output.AssignValue(currentString, theCommands);
     if (currentString=="+")
@@ -901,8 +901,9 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
     return output.SetError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
   }
   std::stringstream out;
+  out.precision(7);
   if (input.IsOfType<Rational>())
-  { out << input.GetValue<Rational>().DoubleValue();
+  { out << std::fixed << input.GetValue<Rational>().DoubleValue();
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.IsOfType<double>())

@@ -1866,6 +1866,8 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
     << " the last two arguments stands for the variable range.";
     return false;
   }
+  if (input.HasBoundVariables())
+    return false;
   if (input.children.size!=5)
   { theCommands.Comments << "At the moment I can draw on curves sitting in 2d space. ";
     return false;

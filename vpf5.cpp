@@ -1947,20 +1947,6 @@ bool Calculator::innerZmodP(Calculator& theCommands, const Expression& input, Ex
   return output.AssignValue(outputElt, theCommands);
 }
 
-bool Calculator::innerDouble(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Calculator::innerDouble");
-  Rational ratValue;
-  if (input.IsOfType<double>())
-  { output=input;
-    return true;
-  }
-  if (!input.IsOfType(&ratValue))
-  { std::cout << "input not of rat value: " << input.ToString();
-    return false;
-  }
-  return output.AssignValue(ratValue.DoubleValue(), theCommands);
-}
-
 bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSqrt");
   if (input.children.size!=3)

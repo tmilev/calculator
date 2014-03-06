@@ -415,7 +415,7 @@ void Calculator::initPredefinedInnerFunctions()
    ;
 
   this->AddOperationInnerHandler
-  ("DoubleValue", this->innerDouble, "",
+  ("DoubleValue", CalculatorFunctionsGeneral::innerEvaluateToDouble, "",
    "Double value of a rational number.",
    "DoubleValue{}(3/7)", true, false)
    ;

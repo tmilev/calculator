@@ -190,19 +190,6 @@ void Polynomial<coefficient>::MakeDegreeOne(int NVar, int NonZeroIndex, const co
   *this+=ConstantTerm;
 }
 
-
-template <class coefficient>
-void Polynomial<coefficient>::MakeMonomiaL(int LetterIndex, const Rational& Power, const coefficient& Coeff, int ExpectedNumVars)
-{ if (LetterIndex<0)
-    crash << "This is a programming error: the index" << LetterIndex+1 << " is  non-positive which is not allowed. " << crash;
-  int numVars=MathRoutines::Maximum(LetterIndex+1, ExpectedNumVars);
-  this->MakeZero();
-  MonomialP tempM;
-  tempM.MakeOne(numVars);
-  tempM[LetterIndex]=Power;
-  this->AddMonomial(tempM, Coeff);
-}
-
 template <class coefficient>
 coefficient Polynomial<coefficient>::Evaluate(const Vector<coefficient>& input)
 { MacroRegisterFunctionWithName("Polynomial::Evaluate");

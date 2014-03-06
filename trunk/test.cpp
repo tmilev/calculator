@@ -2080,7 +2080,7 @@ int main(void)
       G.GetMatrixOfElement(0,M);
 
 
-      Graph *g = new Graph(6,3);
+      GraphOLD *g = new GraphOLD(6,3);
       g->AddEdge(0,1);
       g->AddEdge(1,2);
       g->AddEdge(2,3);

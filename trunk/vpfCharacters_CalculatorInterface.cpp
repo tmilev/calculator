@@ -580,9 +580,9 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
 //  theFormat.fundamentalWeightLetter="\\psi";
   theHWs.AddOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
-  WeylGroup orbitGeneratingSet;
+  HashedList<ElementWeylGroup<WeylGroup> > orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet.theElements, 1921))
+  if (!theSSalgebra->theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921))
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size << " elements only.";
   else
     out << "The orbit has " << outputOrbit.size << " elements.";
@@ -597,6 +597,38 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   bool useMathTag=outputOrbit.size<150;
   Matrix<Rational> epsCoordMat;
   theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
+  Graph integralPositiveRootReflectionGraph;
+  integralPositiveRootReflectionGraph.numNodes=outputOrbit.size;
+  integralPositiveRootReflectionGraph.nodeLabels.SetSize(outputOrbit.size);
+  for (int i=0; i<outputOrbit.size; i++)
+    integralPositiveRootReflectionGraph.nodeLabels[i]= outputOrbit[i].ToString();
+  ElementWeylGroup<WeylGroup> currentElt;
+  Vector<Polynomial<Rational> > differenceVector;
+  Rational currentCoordDifference;
+  for (int i=0; i<outputOrbit.size; i++)
+  { for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
+    { currentWeight=outputOrbit[i];
+      currentElt.MakeRootReflection(theWeyl.RootsOfBorel[j], theWeyl);
+      theWeyl.ActOn(currentElt, currentWeight);
+      differenceVector=outputOrbit[i]-currentWeight;
+      bool isGood=!differenceVector.IsEqualToZero();
+      for (int k=0; k<differenceVector.size; k++)
+        if (!differenceVector[k].IsAConstant(&currentCoordDifference))
+        { isGood=false;
+          break;
+        } else
+          if (!currentCoordDifference.IsInteger() || currentCoordDifference<0)
+          { isGood=false;
+            break;
+          }
+      if (isGood)
+      { std::stringstream reflectionStream;
+        reflectionStream << "s_{" << i << "}";
+        integralPositiveRootReflectionGraph.AddEdge(i, outputOrbit.GetIndex(currentWeight), reflectionStream.str());
+      }
+    }
+  }
+  out << integralPositiveRootReflectionGraph.ToStringLatex(0);
   for (int i=0; i<outputOrbit.size; i++)
   { theFormat.simpleRootLetter="\\alpha";
     theFormat.fundamentalWeightLetter="\\psi";
@@ -607,22 +639,22 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet.theElements[i].ToString()) : orbitGeneratingSet.theElements[i].ToString())
+    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
     << (useMathTag ? CGI::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
     << (useMathTag ? CGI::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
     << (useMathTag ? CGI::GetMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
-    latexReport << "$" << orbitGeneratingSet.theElements[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
+    latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
     << "$\\\\\n<br>";
     if (useRho)
     { currentWeight=theHWsimpleCoords;
       standardElt.MakeOne(*theSSalgebra);
       bool isGood=true;
-      for (int j=orbitGeneratingSet.theElements[i].generatorsLastAppliedFirst.size-1; j>=0; j--)
-      { int simpleIndex=orbitGeneratingSet.theElements[i].generatorsLastAppliedFirst[j];
+      for (int j=orbitGeneratingSet[i].generatorsLastAppliedFirst.size-1; j>=0; j--)
+      { int simpleIndex=orbitGeneratingSet[i].generatorsLastAppliedFirst[j];
         theExp=theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
         theWeyl.SimpleReflectionRhoModified(simpleIndex, currentWeight);
         theExp*=2;

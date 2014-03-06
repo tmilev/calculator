@@ -57,7 +57,7 @@ void WeylGroup::ComputeConjugacyClassesThomasVersion()
 {//From Todor: Thomas, you need to explain how this code works.
   if(rhoOrbit.size == 0)
     this->ComputeAllElements();
-  Graph G = Graph(this->theElements.size,this->GetDim());
+  GraphOLD G = GraphOLD(this->theElements.size,this->GetDim());
   for(int i=0;i<this->theElements.size;i++)
     for(int j=0;j<this->GetDim();j++)
       G.AddEdge(i, this->theElements.GetIndex(this->SimpleConjugation(j, this->theElements[i])));

@@ -73,8 +73,60 @@ void Graph::AddEdge(int i, int j, const std::string& inputLabel)
   this->theEdges.AddMonomial(theEdge, 1);
 }
 
+void Graph::ComputeEdgesPerNodesNoMultiplicities()
+{ MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
+  List<int> emptyList;
+  this->edgesPerNodeNoMultiplicities.initFillInObject(this->numNodes, emptyList);
+  for (int i=0; i<this->theEdges.size(); i++)
+    this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
+}
+
+void Graph::ComputeDistanceToFirstNode()
+{ MacroRegisterFunctionWithName("Graph::ComputeDistanceToFirstNode");
+  this->distanceToFirstNode.initFillInObject(this->numNodes, -1);
+  List<int> theOrbit;
+  theOrbit.SetExpectedSize(this->theEdges.size());
+  theOrbit.AddOnTop(0);
+  this->distanceToFirstNode[0]=0;
+  for (int i=0; i<theOrbit.size; i++)
+  { List<int>& currentHeirs=this->edgesPerNodeNoMultiplicities[theOrbit[i]];
+    for (int j=0; j<currentHeirs.size; j++)
+      if (this->distanceToFirstNode[currentHeirs[j]]==-1)
+      { this->distanceToFirstNode[currentHeirs[j]]=this->distanceToFirstNode[i]+1;
+        theOrbit.AddOnTop(currentHeirs[j]);
+      }
+  }
+}
+
+void Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode()
+{ MacroRegisterFunctionWithName("Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode");
+  this->nodeGroupsForDisplay.SetSize(0);
+/*  List<int> emptyList;
+  this->nodeGroupsForDisplay
+
+  for (int i=0; i<this->distanceToFirstNode.size; i++)
+    if (this->distanceToFirstNode[i]!=-1)
+    { int currentDistance=this->distanceToFirstNode[i];
+      if (currentDistance>this->nodeGroupsForDisplay.size+1)
+      {
+      }
+
+    }
+  { maxDist=MathRoutines::Maximum(maxDist, this->distanceToFirstNode[i]);
+    if (this->distanceToFirstNode[i]==-1)
+      numNodesInComponentsNotConnectedToFirstNode++;
+  }
+  int numGroups=maxDist+numNodesInComponentsNotConnectedToFirstNode+1;
+  this->nodeGroupsForDisplay.initFillInObject(numGroups, emptyList);
+  int
+  for (int i=0; i<)*/
+}
+
 std::string Graph::ToStringLatex(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Graph::ToStringLatex");
+  this->ComputeEdgesPerNodesNoMultiplicities();
+  this->ComputeDistanceToFirstNode();
+  this->ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges. ";
   return out.str();

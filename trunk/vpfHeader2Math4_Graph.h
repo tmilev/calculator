@@ -59,8 +59,14 @@ public:
   int numNodes;
   List<std::string> nodeLabels;
   MonomialCollection<GraphEdge, Rational> theEdges;
+  List<List<int> > edgesPerNodeNoMultiplicities;
+  List<List< int> > nodeGroupsForDisplay;
+  List<int> distanceToFirstNode;
   Graph(): numNodes(-1){}
   void AddEdge(int i, int j);
+  void ComputeEdgesPerNodesNoMultiplicities();
+  void ComputeDistanceToFirstNode();
+  void ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   void AddEdge(int i, int j, const std::string& inputLabel);
   std::string ToStringLatex(FormatExpressions* theFormat);
 };

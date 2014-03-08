@@ -101,25 +101,23 @@ void Graph::ComputeDistanceToFirstNode()
 void Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode()
 { MacroRegisterFunctionWithName("Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode");
   this->nodeGroupsForDisplay.SetSize(0);
-/*  List<int> emptyList;
-  this->nodeGroupsForDisplay
-
+  int numNodesInComponentsNotConnectedToFirstNode=0;
+  int maxDist=0;
   for (int i=0; i<this->distanceToFirstNode.size; i++)
-    if (this->distanceToFirstNode[i]!=-1)
-    { int currentDistance=this->distanceToFirstNode[i];
-      if (currentDistance>this->nodeGroupsForDisplay.size+1)
-      {
-      }
-
-    }
   { maxDist=MathRoutines::Maximum(maxDist, this->distanceToFirstNode[i]);
     if (this->distanceToFirstNode[i]==-1)
       numNodesInComponentsNotConnectedToFirstNode++;
   }
   int numGroups=maxDist+numNodesInComponentsNotConnectedToFirstNode+1;
-  this->nodeGroupsForDisplay.initFillInObject(numGroups, emptyList);
-  int
-  for (int i=0; i<)*/
+  List<int> tempList;
+  this->nodeGroupsForDisplay.initFillInObject(numGroups, tempList);
+  int numDisconnectedFound=0;
+  for (int i=0; i<this->distanceToFirstNode.size; i++ )
+    if (this->distanceToFirstNode[i]==-1)
+    { this->nodeGroupsForDisplay[numDisconnectedFound+maxDist+1].AddOnTop(i);
+      numDisconnectedFound++;
+    } else
+      this->nodeGroupsForDisplay[this->distanceToFirstNode[i]].AddOnTop(i);
 }
 
 std::string Graph::ToStringLatex(FormatExpressions* theFormat)

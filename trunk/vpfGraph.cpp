@@ -70,6 +70,7 @@ void Graph::AddEdge(int i, int j)
 
 void Graph::AddEdge(int i, int j, const std::string& inputLabel)
 { GraphEdge theEdge(i,j, inputLabel);
+  std::cout << " adding edge: " << theEdge.ToString();
   this->theEdges.AddMonomial(theEdge, 1);
 }
 
@@ -126,6 +127,11 @@ std::string Graph::ToStringLatex(FormatExpressions* theFormat)
   this->ComputeDistanceToFirstNode();
   this->ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   std::stringstream out;
-  out << "The graph has " << this->theEdges.size() << " edges. ";
+  out << "The graph has " << this->theEdges.size() << " edges. <br>\n";
+  out << "\\documentclass{article}<br>\n\n";
+  out << "\\usepackage{pst-plot}<br>\n";
+  out << "\\begin{document}<br>\n";
+  out << "\\pspicture";
+  out << "\\end{document}<br>\n";
   return out.str();
 }

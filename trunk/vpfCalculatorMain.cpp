@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 // civilizedInput="\\varepsilon_{{a}}:=MakeWeight{}(B_3, a, epsilon); 2\\varepsilon_2;";
 //civilizedInput="eta_{{a}}:=MakeWeight{}(A_3, a, epsilon);eta_2";
 //civilizedInput="UnivariatePartialFractions(\\frac{1}{x^2-2})";
+  civilizedInput="WeylOrbitFundRho{}(B_2, (1/2, 0) )";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

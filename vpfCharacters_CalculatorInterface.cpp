@@ -609,7 +609,11 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   { for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
     { currentWeight=outputOrbit[i];
       currentElt.MakeRootReflection(theWeyl.RootsOfBorel[j], theWeyl);
+      if (useRho)
+        currentWeight+=theWeyl.rho;
       theWeyl.ActOn(currentElt, currentWeight);
+      if (useRho)
+        currentWeight-=theWeyl.rho;
       differenceVector=outputOrbit[i]-currentWeight;
       bool isGood=!differenceVector.IsEqualToZero();
       for (int k=0; k<differenceVector.size; k++)
@@ -628,6 +632,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
       }
     }
   }
+  integralPositiveRootReflectionGraph.CheckConsistency();
   out << integralPositiveRootReflectionGraph.ToStringLatex(0);
   for (int i=0; i<outputOrbit.size; i++)
   { theFormat.simpleRootLetter="\\alpha";

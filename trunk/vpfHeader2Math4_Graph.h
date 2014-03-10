@@ -63,6 +63,7 @@ public:
   List<List< int> > nodeGroupsForDisplay;
   List<int> distanceToFirstNode;
   Graph(): numNodes(-1){}
+  bool CheckConsistency()const;
   void AddEdge(int i, int j);
   void ComputeEdgesPerNodesNoMultiplicities();
   void ComputeDistanceToFirstNode();

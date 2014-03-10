@@ -70,14 +70,25 @@ void Graph::AddEdge(int i, int j)
 
 void Graph::AddEdge(int i, int j, const std::string& inputLabel)
 { GraphEdge theEdge(i,j, inputLabel);
-  std::cout << " adding edge: " << theEdge.ToString();
+//  std::cout << " adding edge: " << theEdge.ToString();
   this->theEdges.AddMonomial(theEdge, 1);
+}
+
+bool Graph::CheckConsistency()const
+{ for (int i=0; i<this->theEdges.size(); i++)
+  { if (this->theEdges[i].vStart<0 || this->theEdges[i].vStart>=this->numNodes ||
+        this->theEdges[i].vEnd  <0 || this->theEdges[i].vEnd>=this->numNodes)
+      crash << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
+      << this->theEdges[i].ToString() << " is a bad." << crash;
+  }
+  return true;
 }
 
 void Graph::ComputeEdgesPerNodesNoMultiplicities()
 { MacroRegisterFunctionWithName("Graph::ComputeEdgesPerNodesNoMultiplicities");
   List<int> emptyList;
   this->edgesPerNodeNoMultiplicities.initFillInObject(this->numNodes, emptyList);
+  this->CheckConsistency();
   for (int i=0; i<this->theEdges.size(); i++)
     this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
 }

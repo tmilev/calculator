@@ -601,7 +601,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   integralPositiveRootReflectionGraph.numNodes=outputOrbit.size;
   integralPositiveRootReflectionGraph.nodeLabels.SetSize(outputOrbit.size);
   for (int i=0; i<outputOrbit.size; i++)
-    integralPositiveRootReflectionGraph.nodeLabels[i]= outputOrbit[i].ToString();
+    integralPositiveRootReflectionGraph.nodeLabels[i]= "$" + outputOrbit[i].ToString() + "$";
   ElementWeylGroup<WeylGroup> currentElt;
   Vector<Polynomial<Rational> > differenceVector;
   Rational currentCoordDifference;

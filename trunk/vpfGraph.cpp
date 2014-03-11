@@ -81,6 +81,11 @@ bool Graph::CheckConsistency()const
       crash << "Graph error in graph with " << this->numNodes << " nodes: detected a corrupt edge: "
       << this->theEdges[i].ToString() << " is a bad." << crash;
   }
+  for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
+    for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
+      if (this->nodeGroupsForDisplay[i][j]<0 || this->nodeGroupsForDisplay[i][j]>=numNodes)
+        crash << "Graph error in graph with " << this->numNodes << " nodes: display group " << i+1 << " is corrupt: has "
+        << " node of index " << this->nodeGroupsForDisplay[i][j] << crash;
   return true;
 }
 
@@ -121,8 +126,8 @@ void Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode()
       numNodesInComponentsNotConnectedToFirstNode++;
   }
   int numGroups=maxDist+numNodesInComponentsNotConnectedToFirstNode+1;
-  List<int> tempList;
-  this->nodeGroupsForDisplay.initFillInObject(numGroups, tempList);
+  List<int> emptyList;
+  this->nodeGroupsForDisplay.initFillInObject(numGroups, emptyList);
   int numDisconnectedFound=0;
   for (int i=0; i<this->distanceToFirstNode.size; i++ )
     if (this->distanceToFirstNode[i]==-1)
@@ -130,6 +135,35 @@ void Graph::ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode()
       numDisconnectedFound++;
     } else
       this->nodeGroupsForDisplay[this->distanceToFirstNode[i]].AddOnTop(i);
+  this->groupMaxSize=0;
+  for (int i =0; i<this->nodeGroupsForDisplay.size; i++)
+    this->groupMaxSize=MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
+}
+
+std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
+{ MacroRegisterFunctionWithName("Graph::GetNodePSStrings");
+  std::stringstream out;
+  out << "\\rput(" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
+  << ") " << "{";
+  int nodeIndex=this->nodeGroupsForDisplay[groupIndex][indexInGroup];
+  if (nodeIndex<this->nodeLabels.size)
+    out << this->nodeLabels[nodeIndex];
+  else
+    out << "node " << nodeIndex+1;
+  out << "}";
+  return out.str();
+}
+
+double Graph::GetXnode(int groupIndex, int indexInGroup)
+{ return groupIndex;
+}
+
+double Graph::GetYnode(int groupIndex, int indexInGroup)
+{ double result=0;
+  result= groupIndex/2;
+  if (groupIndex%2==1)
+    result=-1-result;
+  return result;
 }
 
 std::string Graph::ToStringLatex(FormatExpressions* theFormat)
@@ -137,12 +171,18 @@ std::string Graph::ToStringLatex(FormatExpressions* theFormat)
   this->ComputeEdgesPerNodesNoMultiplicities();
   this->ComputeDistanceToFirstNode();
   this->ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
+  this->CheckConsistency();
   std::stringstream out;
   out << "The graph has " << this->theEdges.size() << " edges. <br>\n";
   out << "\\documentclass{article}<br>\n\n";
   out << "\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";
-  out << "\\pspicture";
+  out << "\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
+  << this->nodeGroupsForDisplay << ", " << (this->groupMaxSize+1)/2 << ")";
+  for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
+  { for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
+      out << this->GetNodePSStrings(i, j);
+  }
   out << "\\end{document}<br>\n";
   return out.str();
 }

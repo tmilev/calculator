@@ -57,15 +57,19 @@ class Graph
 {
 public:
   int numNodes;
+  int groupMaxSize;
   List<std::string> nodeLabels;
   MonomialCollection<GraphEdge, Rational> theEdges;
   List<List<int> > edgesPerNodeNoMultiplicities;
   List<List< int> > nodeGroupsForDisplay;
   List<int> distanceToFirstNode;
-  Graph(): numNodes(-1){}
+  Graph(): numNodes(-1), groupMaxSize(-1){}
   bool CheckConsistency()const;
   void AddEdge(int i, int j);
   void ComputeEdgesPerNodesNoMultiplicities();
+  double GetXnode(int groupIndex, int indexInGroup);
+  double GetYnode(int groupIndex, int indexInGroup);
+  std::string GetNodePSStrings(int groupIndex, int indexInGroup);
   void ComputeDistanceToFirstNode();
   void ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   void AddEdge(int i, int j, const std::string& inputLabel);

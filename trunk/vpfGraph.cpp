@@ -160,10 +160,22 @@ double Graph::GetXnode(int groupIndex, int indexInGroup)
 
 double Graph::GetYnode(int groupIndex, int indexInGroup)
 { double result=0;
-  result= groupIndex/2;
-  if (groupIndex%2==1)
+  result= indexInGroup/2;
+  if (indexInGroup%2==1)
     result=-1-result;
   return result;
+}
+
+std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("Graph::ToStringNodesAndEdges");
+  std::stringstream out;
+  out << "The graph has " << this->theEdges.size() << " edges: <br>\n";
+  for (int i=0; i<this->theEdges.size(); i++)
+  { out << this->theEdges[i].ToString();
+    if (i!=this->theEdges.size()-1)
+      out << ", ";
+  }
+  return out.str();
 }
 
 std::string Graph::ToStringLatex(FormatExpressions* theFormat)
@@ -173,16 +185,17 @@ std::string Graph::ToStringLatex(FormatExpressions* theFormat)
   this->ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   this->CheckConsistency();
   std::stringstream out;
-  out << "The graph has " << this->theEdges.size() << " edges. <br>\n";
-  out << "\\documentclass{article}<br>\n\n";
-  out << "\\usepackage{pst-plot}<br>\n";
-  out << "\\begin{document}<br>\n";
-  out << "\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
-  << this->nodeGroupsForDisplay << ", " << (this->groupMaxSize+1)/2 << ")";
+  out << this->ToStringNodesAndEdges(theFormat);
+  out << "<hr><br><br>\\documentclass{article}<br>\n\n";
+  out << "\\usepackage{lscape} \\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
+  out << "\\begin{document}\\begin{landscape}<br>\n";
+  out << "\\psset{xunit=2cm, yunit=2cm}\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
+  << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize+1)/2 << ")";
   for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
   { for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
       out << this->GetNodePSStrings(i, j);
   }
-  out << "\\end{document}<br>\n";
+  out << "\n<br>\\end{pspicture}\\end{landscape}";
+  out << "\\end{document}<br><br>\n";
   return out.str();
 }

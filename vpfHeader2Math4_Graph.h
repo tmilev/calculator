@@ -74,6 +74,7 @@ public:
   void ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
   void AddEdge(int i, int j, const std::string& inputLabel);
   std::string ToStringLatex(FormatExpressions* theFormat);
+  std::string ToStringNodesAndEdges(FormatExpressions* theFormat);
 };
 
 #endif

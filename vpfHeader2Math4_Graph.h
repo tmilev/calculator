@@ -62,7 +62,8 @@ public:
   MonomialCollection<GraphEdge, Rational> theEdges;
   List<List<int> > edgesPerNodeNoMultiplicities;
   List<List< int> > nodeGroupsForDisplay;
-  List<int> distanceToFirstNode;
+  List<int> distanceToBaseNode;
+  List<int> baseNode;
   Graph(): numNodes(-1), groupMaxSize(-1){}
   bool CheckConsistency()const;
   void AddEdge(int i, int j);
@@ -70,8 +71,8 @@ public:
   double GetXnode(int groupIndex, int indexInGroup);
   double GetYnode(int groupIndex, int indexInGroup);
   std::string GetNodePSStrings(int groupIndex, int indexInGroup);
-  void ComputeDistanceToFirstNode();
-  void ComputeNodeGroupsForDisplayAccordingToDistanceFromFirstNode();
+  void SplitByBaseNodeDistance();
+  void ComputeDistancesToBaseNodes();
   void AddEdge(int i, int j, const std::string& inputLabel);
   std::string ToStringLatex(FormatExpressions* theFormat);
   std::string ToStringNodesAndEdges(FormatExpressions* theFormat);

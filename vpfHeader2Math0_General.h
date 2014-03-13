@@ -1006,6 +1006,14 @@ class ElementMonomialAlgebra: public MonomialCollection<templateMonomial, coeffi
 };
 
 template<class coefficient>
+struct PolynomialOrder
+{
+  public:
+  List<MonomialP>::OrderLeftGreaterThanRight theMonOrder;
+  bool CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const;
+};
+
+template<class coefficient>
 class Polynomial: public ElementMonomialAlgebra<MonomialP, coefficient>
 {
 public:
@@ -1530,7 +1538,7 @@ template<class coefficient>
 class GroebnerBasisComputation
 {
   public:
-  List<MonomialP>::OrderLeftGreaterThanRight theMonOrdeR;
+  PolynomialOrder<coefficient> thePolynomialOrder;
   Polynomial<coefficient> SoPolyBuf;
   Polynomial<coefficient> remainderDivision;
   Polynomial<coefficient> bufPoly;
@@ -1575,6 +1583,8 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasisImprovedAlgorithm(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation();
   void MakeMinimalBasis();
+  int GetNumVars()const;
+  std::string ToStringLetterOrder(FormatExpressions* theFormat=0)const;
   static int GetNumEquationsThatWouldBeLinearIfIsubbedVar(int theVarIndex, List<Polynomial<coefficient> >& input);
   static int GetNumVarsToSolveFor(const List<Polynomial<coefficient> >& input);
   static void GetVarsToSolveFor(const List<Polynomial<coefficient> >& input, Selection& output);
@@ -4469,6 +4479,10 @@ class Cone
 {
   void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables* theGlobalVariables=0);
   bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables* theGlobalVariables=0);
+  friend std::ostream& operator << (std::ostream& output, const Cone& theCone)
+  { output << theCone.ToString();
+    return output;
+  }
 public:
   inline static const std::string GetXMLClassName()
   { return "Cone";

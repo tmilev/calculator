@@ -1122,6 +1122,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   for (int i =1; i<rightPolyV.children.size; i++)
     polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
   polyVarUnion.QuickSortAscending();
+//  std::cout << "<br>Polyvarunion is: " << polyVarUnion.ToString();
   Calculator& owner=*leftContext.theBoss;
   outputContext.reset(owner, 5+polyVarUnion.size);
   outputContext.AddChildAtomOnTop(owner.opContexT());

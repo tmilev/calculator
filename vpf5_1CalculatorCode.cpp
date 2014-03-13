@@ -323,10 +323,11 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   }
 //  Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
-  theGB.theMonOrdeR= theMonOrder;
+  theGB.thePolynomialOrder.theMonOrder= theMonOrder;
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+//  std::cout << "context vars: " << theFormat.polyAlphabeT;
   theFormat.flagUseLatex=true;
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
@@ -635,6 +636,8 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
+//  std::cout << "context vars: " << theFormat.polyAlphabeT;
+
   theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
   if (useModZp)
   { ElementZmodP tempElt;
@@ -659,21 +662,19 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
   if (useGr)
   { if (!useRevLex)
-    { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest;
-      theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
-    } else
-      crash << "This is not programmed yet! Crashing to let you know. " << crash;
+      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
+    else
+      theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest;
   } else if (!useRevLex)
-  { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-    theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
-  } else
-  { theGroebnerComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
-    theFormat.thePolyMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
-  }
+    theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
+  else
+    theGroebnerComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftGreaterThanLexicographicLastVariableWeakest;
+  theFormat.thePolyMonOrder=theGroebnerComputation.thePolynomialOrder.theMonOrder;
   theGroebnerComputation.MaxNumGBComputations=upperBoundComputations;
   bool success=theGroebnerComputation.TransformToReducedGroebnerBasis(outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
-  out << "Letter/expression ordrer: ";
+  out << theGroebnerComputation.ToStringLetterOrder(&theFormat);
+  out << "Letter/expression order: ";
   for (int i=0; i<theContext.ContextGetNumContextVariables(); i++)
   { out << theContext.ContextGetContextVariable(i).ToString();
     if (i!=theContext.ContextGetNumContextVariables()-1)
@@ -687,6 +688,14 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     << theGroebnerComputation.MaxNumGBComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> " << CGI::GetMathSpanPure(outputGroebner[i].ToString(&theFormat));
+    out << "<br>Output in calculator-ready format: ";
+    out << "<br>(";
+    for(int i=0; i<outputGroebner.size; i++)
+    { out << outputGroebner[i].ToString(&theFormat);
+      if (i!=outputGroebner.size-1)
+        out << ", <br>";
+    }
+    out << ")";
   } else
   { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  " << upperBoundComputations << " polynomial operations. ";
     out << "<br>A partial result, a (non-Groebner) basis of the ideal with " << theGroebnerComputation.theBasiS.size << " elements follows ";

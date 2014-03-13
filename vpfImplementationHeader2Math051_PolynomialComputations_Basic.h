@@ -563,4 +563,15 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
   return true;
 }
 
+template <class coefficient>
+bool PolynomialOrder<coefficient>::CompareLeftGreaterThanRight(const Polynomial<coefficient>& left, const Polynomial<coefficient>& right) const
+{ MacroRegisterFunctionWithName("PolynomialOrder::CompareLeftGreaterThanRight");
+  Polynomial<coefficient> difference=left;
+  difference-=right;
+  if (difference.IsEqualToZero())
+    return false;
+  if (difference.theCoeffs[difference.GetIndexMaxMonomial(this->theMonOrder)]>0)
+    return true;
+  return false;
+}
 #endif

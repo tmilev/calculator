@@ -1647,9 +1647,18 @@ public:
 
 class FileInformation
 {
+  friend std::ostream& operator << (std::ostream& output, const FileInformation& theFI)
+  { output << theFI.ToString();
+    return output;
+  }
   public:
   std::string FileName;
   std::string FileDescription;
+  std::string ToString()const
+  { std::stringstream out;
+    out << "file: " << this->FileName << ", description: " << this->FileDescription;
+    return out.str();
+  }
   bool operator>(const FileInformation& other)
   { return this->FileName>other.FileName;
   }
@@ -2838,9 +2847,12 @@ void List<Object>::QuickSortAscendingOrder(int BottomIndex, int TopIndex, List<O
     }
   if (theOrder(this->TheObjects[HighIndex], this->TheObjects[BottomIndex]))
   { if (HighIndex==BottomIndex)
-      crash << "This is a programming error. The programmer has given me a bad strict order: the order claims that object of index "
+    { crash.theCrashReport << "This is a programming error. The programmer has given me a bad strict order: the order claims that object "
+      << this->TheObjects[HighIndex] << " of index "
       << HighIndex << " is strictly greater than itself which is not allowed for strict orders. Maybe the programmer has given a "
-      << "non-strict order instead of strict one by mistake? " << crash;
+      << "non-strict order instead of strict one by mistake? ";
+      crash << crash;
+    }
     HighIndex--;
   }
   this->SwapTwoIndices(BottomIndex, HighIndex);

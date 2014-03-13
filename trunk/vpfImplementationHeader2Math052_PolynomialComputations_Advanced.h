@@ -34,8 +34,8 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
       for (int j=i+1; j<this->theBasiS.size && i<this->theBasiS.size; j++)
       { Polynomial<coefficient>& currentLeft= this->theBasiS[i];
         Polynomial<coefficient>& currentRight= this->theBasiS[j];
-        int leftIndex=currentLeft.GetIndexMaxMonomial(this->theMonOrdeR);
-        int rightIndex=currentRight.GetIndexMaxMonomial(this->theMonOrdeR);
+        int leftIndex=currentLeft.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
+        int rightIndex=currentRight.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
         const MonomialP& leftHighestMon=currentLeft[leftIndex];
         const MonomialP& rightHighestMon=currentRight[rightIndex];
         int numVars=MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
@@ -78,6 +78,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List
         return false;
   }
 //  this->MakeMinimalBasis();
+  this->theBasiS.QuickSortAscendingCustom(this->thePolynomialOrder);
   inputOutpuT=this->theBasiS;
   return true;
 }
@@ -309,12 +310,44 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
 }
 
 template <class coefficient>
+int GroebnerBasisComputation<coefficient>::GetNumVars()const
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::GetNumVars");
+  int result=0;
+  for (int i=0; i<this->theBasiS.size; i++)
+    for (int j=0; j<this->theBasiS[i].size(); j++)
+    { const MonomialP& currentMon=this->theBasiS[i][j];
+      result=MathRoutines::Maximum(currentMon.GetMinNumVars(), result);
+    }
+  return result;
+}
+
+template <class coefficient>
+std::string GroebnerBasisComputation<coefficient>::ToStringLetterOrder
+(FormatExpressions* theFormat)const
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::ToStringLetterOrder");
+  std::stringstream out;
+  int numVars=this->GetNumVars();
+  List<MonomialP> theVars;
+  out << "Variable name(s): ";
+  theVars.SetSize(numVars);
+  for (int i=0; i<theVars.size; i++)
+    theVars[i].MakeEi(i, 1);
+  theVars.QuickSortAscending(this->thePolynomialOrder.theMonOrder);
+  for (int i=0; i<numVars; i++)
+  { out << theVars[i].ToString(theFormat);
+    if (i!=numVars-1)
+      out << " < ";
+  }
+  return out.str();
+}
+
+template <class coefficient>
 std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpressions* theFormat)
 { std::stringstream out;
   List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
   List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
   if (theFormat!=0)
-    theFormat->thePolyMonOrder=this->theMonOrdeR;
+    theFormat->thePolyMonOrder=this->thePolynomialOrder.theMonOrder;
   bool flagUseLatex= theFormat==0 ? false : theFormat->flagUseLatex;
   HashedList<MonomialP> totalMonCollection;
   std::string underlineStyle=" style=\"white-space: nowrap; border-bottom:1px solid black;\"";
@@ -327,21 +360,10 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   }
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
-  totalMonCollection.QuickSortDescending(this->theMonOrdeR);
+  totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
 //  std::cout << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
-  int numVars=0;
-  for (int i=0; i<totalMonCollection.size; i++)
-  { const MonomialP& currentMon=totalMonCollection[i];
-    numVars=MathRoutines::Maximum(currentMon.GetMinNumVars(), numVars);
-  }
-  out << "Variable name(s): ";
-  for (int i=0; i<numVars; i++)
-  { MonomialP tempMon;
-    tempMon.MakeEi(i, 1);
-    out << tempMon.ToString(theFormat);
-    if (i!=numVars-1)
-      out << ", ";
-  }
+//  int numVars=this->GetNumVars();
+  out << this->ToStringLetterOrder(theFormat);
   out << "<br>";
   out << theRemainders.size << " division steps total.<br>";
   out << "<table style=\"white-space: nowrap; border:1px solid black;\">";
@@ -435,7 +457,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
   while (!currentRemainder.IsEqualToZero())
   { bool divisionOcurred=false;
     int i=0;
-    int indexLeadingMonRemainder= currentRemainder.GetIndexMaxMonomial(this->theMonOrdeR);
+    int indexLeadingMonRemainder= currentRemainder.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
     leadingMonCoeff=currentRemainder.theCoeffs[indexLeadingMonRemainder];
     highestMonCurrentDivHighestMonOther=currentRemainder[indexLeadingMonRemainder];
     while (i<this->theBasiS.size && !divisionOcurred)
@@ -540,14 +562,14 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis(GlobalVariables*
   if (this->remainderDivision.IsEqualToZero())
     return false;
   this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-  int indexMaxMon=this->remainderDivision.GetIndexMaxMonomial(this->theMonOrdeR);
+  int indexMaxMon=this->remainderDivision.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
   const MonomialP& theNewLeadingMon=this->remainderDivision[indexMaxMon];
   if (this->flagDoSortBasis)
   { this->theBasiS.SetSize(this->theBasiS.size+1);
     this->leadingMons.SetSize(this->theBasiS.size);
     this->leadingCoeffs.SetSize(this->theBasiS.size);
     for (int i=theBasiS.size-1; i>=0; i--)
-    { bool shouldAddHere=(i==0) ? true: theNewLeadingMon>this->theBasiS[i-1].GetMaxMonomial(this->theMonOrdeR);
+    { bool shouldAddHere=(i==0) ? true: theNewLeadingMon>this->theBasiS[i-1].GetMaxMonomial(this->thePolynomialOrder.theMonOrder);
       if (shouldAddHere)
       { this->theBasiS[i]=this->remainderDivision;
         this->leadingMons[i]=theNewLeadingMon;
@@ -572,7 +594,7 @@ bool GroebnerBasisComputation<coefficient>::AddRemainderToBasis(GlobalVariables*
 
 template <class coefficient>
 GroebnerBasisComputation<coefficient>::GroebnerBasisComputation()
-{ this->theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+{ this->thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   this->NumberGBComputations=0;
   this->NumberSerreSystemComputations=0;
   this->flagDoProgressReport=true;
@@ -595,7 +617,7 @@ void GroebnerBasisComputation<coefficient>::initForDivisionAlone(List<Polynomial
   this->leadingCoeffs.SetSize(inputOutpuT.size);
   for (int i=0; i<this->theBasiS.size; i++)
   { Polynomial<Rational>& curPoly=theBasiS[i];
-    int theIndex=curPoly.GetIndexMaxMonomial(this->theMonOrdeR);
+    int theIndex=curPoly.GetIndexMaxMonomial(this->thePolynomialOrder.theMonOrder);
     if (theIndex==-1)
       crash << "This is a programming error: initialization for polynomial division with respect to at least one zero polynomial. "
       << "If this is a bad user input, it should be handled at an earlier level. Here is the current basis by which we need to divide. "

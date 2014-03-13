@@ -74,6 +74,11 @@ class NilradicalCandidate
 
 class CandidateSSSubalgebra
 {
+  friend std::ostream& operator << (std::ostream& output, const CandidateSSSubalgebra& theCandidate)
+  { output << theCandidate.ToString();
+    return output;
+  }
+
 public:
   WeylGroup theWeylNonEmbeddeD;
   WeylGroup theWeylNonEmbeddeDdefaultScale;

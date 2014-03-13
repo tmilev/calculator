@@ -91,6 +91,10 @@ public:
   HashedList<elementSomeGroup> unionGeneratorsCC;
   struct ConjugacyClass
   {
+    friend std::ostream& operator << (std::ostream& output, const ConjugacyClass& theClass)
+    { output << theClass.ToString();
+      return output;
+    }
   public:
     ConjugacyClass()
     { this->flagRepresentativeComputed=false;
@@ -102,6 +106,11 @@ public:
     elementSomeGroup representative;
     bool flagRepresentativeComputed;
     bool flagElementsComputed;
+    std::string ToString(FormatExpressions* theFormat=0)const
+    { std::stringstream out;
+      out << "Conj. class size: " << this->size.ToString();
+      return out.str();
+    }
     bool operator>(const ConjugacyClass& other)const
     { return this->representative>other.representative;
     }
@@ -668,6 +677,11 @@ public:
 template <class coefficient>
 class WeylGroupRepresentation
 {
+  friend std::ostream& operator << (std::ostream& output, const WeylGroupRepresentation& theIrrep)
+  { output << theIrrep.ToString();
+    return output;
+  }
+
   private:
   List<Matrix<coefficient> > theElementImageS;
   List<bool> theElementIsComputed;

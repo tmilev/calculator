@@ -1905,7 +1905,16 @@ bool Expression::GreaterThanNoCoeff(const Expression& other)const
         return leftS>rightS;
     return this->theData>other.theData;
   }
-  return this->children>other.children;
+  if (this->children.size>other.children.size)
+    return true;
+  if (this->children.size<other.children.size)
+    return false;
+  for (int i=0; i<this->children.size; i++)
+    if ((*this)[i]>other[i])
+      return true;
+    else if (other[i]>(*this)[i])
+      return false;
+  return false;
 }
 
 bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)const

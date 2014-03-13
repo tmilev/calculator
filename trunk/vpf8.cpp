@@ -1606,7 +1606,7 @@ void RationalFunctionOld::GetRelations(List<Polynomial<Rational> >& theGenerator
 //  std::cout << currentPoly.ToString(false, tempFormat) << "<br>";
   }
   GroebnerBasisComputation<Rational> theComputation;
-  theComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  theComputation.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
   theComputation.TransformToReducedGroebnerBasis(theGroebnerBasis, &theGlobalVariables);
 //  std::cout << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)

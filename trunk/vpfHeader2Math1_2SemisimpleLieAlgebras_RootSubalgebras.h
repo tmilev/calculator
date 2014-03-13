@@ -93,6 +93,10 @@ public:
 
 class rootSubalgebra
 {
+  friend std::ostream& operator << (std::ostream& output, rootSubalgebra& theSA)
+  { output << theSA.ToString();
+    return output;
+  }
 public:
   int numHeirsRejectedNotMaximallyDominant;
   int numHeirsRejectedSameModuleDecompo;

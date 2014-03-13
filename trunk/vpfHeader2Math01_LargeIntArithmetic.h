@@ -187,6 +187,10 @@ class LargeInt
     tempI=right;
     return left*tempI;
   }
+  friend std::ostream& operator << (std::ostream& output, const LargeInt& theLI)
+  { output << theLI.ToString();
+    return output;
+  }
 public:
   inline static const std::string GetXMLClassName()
   { return "LInt";

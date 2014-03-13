@@ -1142,7 +1142,7 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational>& theComp=theGlobalVariables==0?
   bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
-  theComp.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  theComp.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)

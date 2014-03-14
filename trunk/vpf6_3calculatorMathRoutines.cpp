@@ -1665,6 +1665,29 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
   return output.AssignValue(plotFinal, theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver");
+  if (input.children.size!=7)
+  { theCommands.Comments << "Euler method function takes 6 arguments";
+    return false;
+  }
+  double xInitial, yInitial, leftEndpoint, rightEndpoint;
+  int numPoints;
+  if (!input[2].EvaluatesToRealDouble(&xInitial) || !input[3].EvaluatesToRealDouble(&yInitial))
+  { theCommands.Comments << "Failed to extract initial x,y values from " << input.ToString();
+    return false;
+  }
+  std::cout << "xInitial=" << xInitial << " yInitial=" << yInitial;
+  if (!input[4].EvaluatesToRealDouble(&leftEndpoint) || !input[3].EvaluatesToRealDouble(&rightEndpoint))
+  { theCommands.Comments << "Failed to extract left and right endpoints from " << input.ToString();
+    return false;
+  }
+  if (!input[2].EvaluatesToRealDouble(&xInitial) || !input[3].EvaluatesToRealDouble(&yInitial))
+  { theCommands.Comments << "Failed to extract initial x,y values from " << input.ToString();
+    return false;
+  }
+}
+
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlot2D");
   //std::cout << input.ToString();

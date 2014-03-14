@@ -835,7 +835,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   resultStream << lineSeparator << "\\newcommand{\\psLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
   resultStream << "\\newcommand{\\psColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
   << "\\newcommand{\\psColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\psColorNegativeAreaUnderGraph}{orange}"
-  << "\\newcommand{\\psaxesStandard}[4]{\\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
+  << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
   resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundFrame << ", -5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";

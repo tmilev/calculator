@@ -512,6 +512,14 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
+  this->AddOperationInnerHandler ("approxDFQsolutionEuler", CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver, "",
+   "<b>Calculus teaching function.</b> Iterates Euler's method to approximate solutions of first order ordinary DFQ's. \
+   First argument = expression for y',\
+   second and third argument = x and y initial values, fourth argument = number of approximating points,\
+    fifth and sixth argument = left and right endpoints.\
+   ",
+   "approxDFQsolutionEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
+   ;
   this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \

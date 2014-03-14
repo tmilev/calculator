@@ -45,8 +45,8 @@ public:
     return out.str();
   }
   std::string ToStringLetterFormat(const std::string& inputLetter, FormatExpressions* theFormat=0, bool DontIncludeLastVar=false)const;
-  std::string ToStringEpsilonFormat()const
-  { return this->ToStringLetterFormat("\\varepsilon");
+  std::string ToStringEpsilonFormat(FormatExpressions* theFormat=0)const
+  { return this->ToStringLetterFormat("\\varepsilon", theFormat);
   }
   template <class otherType>
   static void ScalarProduct(const Vector<coefficient>& r1, const Vector<coefficient>& r2, const Matrix<otherType>& TheBilinearForm, coefficient& result)

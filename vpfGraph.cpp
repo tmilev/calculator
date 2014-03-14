@@ -146,7 +146,7 @@ void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
       }
     }
   this->connectedComponents.SetSize(0);
-  for (int i=0; i<this->theEdges.size(); i++)
+  for (int i=0; i<this->numNodes; i++)
     this->AddNodeToComponent(i);
 }
 
@@ -212,15 +212,15 @@ std::string Graph::ToStringLatex(FormatExpressions* theFormat)
   std::stringstream out;
   out << this->ToStringNodesAndEdges(theFormat);
   out << "<hr><br><br>\\documentclass{article}<br>\n\n";
-  out << "\\usepackage{lscape} \\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
-  out << "\\begin{document}\\begin{landscape}<br>\n";
+  out << "\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
+  out << "\\begin{document}<br>\n";
   out << "\\psset{xunit=2cm, yunit=2cm}\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
   << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize+1)/2 << ")";
   for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
   { for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
       out << this->GetNodePSStrings(i, j);
   }
-  out << "\n<br>\\end{pspicture}\\end{landscape}";
+  out << "\n<br>\\end{pspicture}";
   out << "\\end{document}<br><br>\n";
   return out.str();
 }

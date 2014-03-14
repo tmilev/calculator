@@ -53,6 +53,7 @@ public:
   static bool outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerInvertMatrix(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDiscreteApproxDFQSolver(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGetAlgebraicNumberFromMinPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerMakeMakeFile(Calculator& theCommands, const Expression& input, Expression& output);

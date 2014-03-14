@@ -98,18 +98,43 @@ void Graph::ComputeEdgesPerNodesNoMultiplicities()
     this->edgesPerNodeNoMultiplicities[this->theEdges[i].vStart].AddOnTop(this->theEdges[i].vEnd);
 }
 
-void Graph::ComputeDistancesToBaseNodes()
-{ MacroRegisterFunctionWithName("Graph::ComputeDistancesToBaseNodes");
+void Graph::AddNodeToComponent(int nodeIndex)
+{ MacroRegisterFunctionWithName("Graph::AddNodeToComponent");
+  int componentIndex=this->baseNode[nodeIndex];
+  if (componentIndex==-1)
+    crash << "Bad component index." << crash;
+  if (componentIndex>=this->connectedComponents.size)
+  { int oldSize=this->connectedComponents.size;
+    this->connectedComponents.SetSize(componentIndex+1);
+    for (int i=oldSize; i<this->connectedComponents.size; i++)
+      this->connectedComponents[i].SetSize(0);
+  }
+  List<List<int> >& currentComponent=this->connectedComponents[componentIndex];
+  int distanceFromBase=this->distanceToBaseNode[nodeIndex];
+  if (distanceFromBase==-1)
+    crash << "Bad node distance." << crash;
+  if (distanceFromBase>=currentComponent.size)
+  { int oldSize=currentComponent.size;
+    currentComponent.SetSize(distanceFromBase+1);
+    for (int i=oldSize; i<currentComponent.size; i++)
+      currentComponent[i].SetSize(0);
+  }
+  List<int>& currentDistanceGroup=currentComponent[distanceFromBase];
+  currentDistanceGroup.AddOnTop(nodeIndex);
+}
+
+void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
+{ MacroRegisterFunctionWithName("Graph::ComputeConnectedComponentsAndBaseNodeDistances");
   this->distanceToBaseNode.initFillInObject(this->numNodes, -1);
   this->baseNode.initFillInObject(this->numNodes, -1);
   List<int> theOrbit;
   theOrbit.SetExpectedSize(this->theEdges.size());
   for (int indexBaseNode=0; indexBaseNode<this->numNodes; indexBaseNode++)
-    if (this->baseNode[0]==-1)
-    { theOrbit.SetSize(0);
+    if (this->baseNode[indexBaseNode]==-1)
+    { this->distanceToBaseNode[indexBaseNode]=0;
+      this->baseNode[indexBaseNode]=indexBaseNode;
+      theOrbit.SetSize(0);
       theOrbit.AddOnTop(indexBaseNode);
-      this->distanceToBaseNode[indexBaseNode]=0;
-      this->baseNode[0]=indexBaseNode;
       for (int i=0; i<theOrbit.size; i++)
       { List<int>& currentHeirs=this->edgesPerNodeNoMultiplicities[theOrbit[i]];
         for (int j=0; j<currentHeirs.size; j++)
@@ -120,32 +145,24 @@ void Graph::ComputeDistancesToBaseNodes()
           }
       }
     }
+  this->connectedComponents.SetSize(0);
+  for (int i=0; i<this->theEdges.size(); i++)
+    this->AddNodeToComponent(i);
 }
 
-void Graph::SplitByBaseNodeDistance()
-{ MacroRegisterFunctionWithName("Graph::SplitByBaseNodeDistance");
-/*  this->nodeGroupsForDisplay.SetSize(0);
-  int numNodesInComponentsNotConnectedToFirstNode=0;
-  VectorSparse<LargeInt> theGroupSizes;
-  int maxDist=0;
-  for (int i=0; i<this->.size; i++)
-  { maxDist=MathRoutines::Maximum(maxDist, this->distanceToFirstNode[i]);
-    if (this->distanceToFirstNode[i]==-1)
-      numNodesInComponentsNotConnectedToFirstNode++;
-  }
-  int numGroups=maxDist+numNodesInComponentsNotConnectedToFirstNode+1;
-  List<int> emptyList;
-  this->nodeGroupsForDisplay.initFillInObject(numGroups, emptyList);
-  int numDisconnectedFound=0;
-  for (int i=0; i<this->distanceToFirstNode.size; i++ )
-    if (this->distanceToFirstNode[i]==-1)
-    { this->nodeGroupsForDisplay[numDisconnectedFound+maxDist+1].AddOnTop(i);
-      numDisconnectedFound++;
-    } else
-      this->nodeGroupsForDisplay[this->distanceToFirstNode[i]].AddOnTop(i);
+void Graph::ComputeDisplayGroups()
+{ MacroRegisterFunctionWithName("Graph::ComputeDisplayGroups");
+  int numGroups=0;
+  for (int i=0; i<this->connectedComponents.size; i++)
+    numGroups+=this->connectedComponents[i].size;
+  this->nodeGroupsForDisplay.SetExpectedSize(numGroups);
+  this->nodeGroupsForDisplay.SetSize(0);
+  for (int i=0; i<this->connectedComponents.size; i++)
+    for (int j=0; j<this->connectedComponents[i].size; j++)
+      this->nodeGroupsForDisplay.AddOnTop(this->connectedComponents[i][j]);
   this->groupMaxSize=0;
   for (int i =0; i<this->nodeGroupsForDisplay.size; i++)
-    this->groupMaxSize=MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);*/
+    this->groupMaxSize=MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
 }
 
 std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
@@ -189,8 +206,8 @@ std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
 std::string Graph::ToStringLatex(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Graph::ToStringLatex");
   this->ComputeEdgesPerNodesNoMultiplicities();
-  this->ComputeDistancesToBaseNodes();
-  this->SplitByBaseNodeDistance();
+  this->ComputeConnectedComponentsAndBaseNodeDistances();
+  this->ComputeDisplayGroups();
   this->CheckConsistency();
   std::stringstream out;
   out << this->ToStringNodesAndEdges(theFormat);

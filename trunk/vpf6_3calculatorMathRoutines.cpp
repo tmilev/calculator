@@ -1725,7 +1725,10 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   { theCommands.Comments << "Whlie doing Euler's method: right endpoint equals left!";
     return false;
   }
+//  std::cout << "numpoints: " << numPoints << ", rightendpt: " << rightEndpoint << ", left end pt: " << leftEndpoint;
+
   double delta= (rightEndpoint-leftEndpoint)/numPoints;
+//  std::cout << "delta: " << delta;
   List<double> XValues, YValues;
   XValues.SetExpectedSize(numPoints+5);
   YValues.SetExpectedSize(numPoints+5);
@@ -1791,14 +1794,15 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
           << ", the y value is: " << YValues[i] << ". Max y is  " << maxYallowed << " and min y is " << minYallowed << ". ";
         }
       }
+      if (direction==-1)
+        firstGoodXIndex=i+1;
+      else
+        lastGoodXIndex=i-1;
       if (!isGood)
-      { if (direction==-1)
-          firstGoodXIndex=i+1;
-        else
-          lastGoodXIndex=i-1;
         break;
-      }
+//      std::cout << "evaluated at " << XValues[i] << " to get " << YValues[i];
     }
+//  std::cout << "first good index: " << firstGoodXIndex << " last good index: " << lastGoodXIndex;
   PlotObject thePlot;
   thePlot.xLow=XValues[0];
   thePlot.xHigh=*XValues.LastObject();

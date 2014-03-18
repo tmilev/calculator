@@ -386,7 +386,14 @@ class Expression
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsConstantNumber()const;
+  bool EvaluatesToRealDoubleInRange
+  (const std::string& varName, double lowBound, double highBound, int numPoints,
+   double* outputYmin=0, double* outputYmax=0)const
+   ;
   bool EvaluatesToRealDouble(double* whichDouble=0)const;
+bool EvaluatesToRealDoubleUnderSubstitutions
+(const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble=0)const
+  ;
 
   bool HasBoundVariables()const;
   bool IsMeltable(int* numResultingChildren=0)const;
@@ -507,16 +514,21 @@ class PlotObject
 public:
   std::string thePlotString;
   std::string thePlotStringWithHtml;
-  double lowerBound;
-  double upperBound;
+  double xLow;
+  double xHigh;
+  double yLow;
+  double yHigh;
   Expression thePlotElement;
   std::string thePlotType;
   std::string GetPlotStringFromFunctionStringAndRanges
   (bool useHtml, const std::string& functionStringPostfixNotation, const std::string& functionStringCalculatorFormat, double lowerBound, double upperBound);
+  PlotObject(): xLow(0), xHigh(0), yLow(0), yHigh(0) {}
   bool operator==(const PlotObject& other)const
   { return this->thePlotStringWithHtml==other.thePlotStringWithHtml &&
-    this->lowerBound==other.lowerBound &&
-    this->upperBound==other.upperBound &&
+    this->xLow==other.xLow&&
+    this->xHigh==other.xHigh &&
+    this->yLow==other.yLow &&
+    this->yHigh==other.yHigh &&
     this->thePlotElement==other.thePlotElement &&
     this->thePlotType==other.thePlotType;
   }
@@ -528,7 +540,9 @@ class Plot
   List<PlotObject> thePlots;
 
   std::string GetPlotStringAddLatexCommands(bool useHtml);
-  void AddFunctionPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound);
+  void AddFunctionPlotOnTop
+  (const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound,
+   double inputUpperBound, double inputYmin, double inputYmax);
   void operator+=(const Plot& other);
   void operator+=(const PlotObject& other);
   bool operator==(const Plot& other)const
@@ -673,6 +687,9 @@ public:
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
   List<Function> theCruncherS;
+
+  HashedList<Expression> knownDoubleConstants;
+  List<double> knownDoubleConstantValues;
 
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
@@ -1518,6 +1535,7 @@ public:
   int AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName);
   void AddOperationNoRepetitionAllowed(const std::string& theOpName);
   void AddOperationBuiltInType(const std::string& theOpName);
+  void AddKnownDoubleConstant(const std::string& theConstantName, double theValue);
   void AddOperationComposite
   (const std::string& theOpName, Expression::FunctionAddress handler, const std::string& opArgumentListIgnoredForTheTimeBeing, const std::string& opDescription,
    const std::string& opExample, bool isInner, bool visible=true, bool experimental=false);

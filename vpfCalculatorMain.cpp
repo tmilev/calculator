@@ -130,6 +130,7 @@ int main(int argc, char **argv)
 //civilizedInput="UnivariatePartialFractions(\\frac{1}{x^2-2})";
 //  civilizedInput="WeylOrbitFundRho{}(B_2, (1/2, 0) )";
 //  civilizedInput="WeylOrbitFundRho{}(B_3, (3/2, 0,0) )";
+//  civilizedInput="DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

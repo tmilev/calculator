@@ -512,13 +512,13 @@ void Calculator::initPredefinedInnerFunctions()
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
-  this->AddOperationInnerHandler ("approxDFQsolutionEuler", CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver, "",
+  this->AddOperationInnerHandler ("DFQEuler", CalculatorFunctionsGeneral::innerDFQsEulersMethod, "",
    "<b>Calculus teaching function.</b> Iterates Euler's method to approximate solutions of first order ordinary DFQ's. \
    First argument = expression for y',\
    second and third argument = x and y initial values, fourth argument = number of approximating points,\
     fifth and sixth argument = left and right endpoints.\
    ",
-   "approxDFQsolutionEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
+   "DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)")
    ;
   this->AddOperationInnerHandler ("drawPolar", CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta, "",
    "<b>Calculus teaching function.</b> Draws polar curve given in polar coordinates in the form \
@@ -2089,11 +2089,19 @@ void Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()
   this->atomsWhoseExponentsAreInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\csc");
 }
 
+void Calculator::AddKnownDoubleConstant(const std::string& theConstantName, double theConstantValue)
+{ this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantName);
+  Expression theConstantE;
+  theConstantE.MakeAtom(theConstantName, *this);
+  this->knownDoubleConstants.AddOnTopNoRepetitionMustBeNewCrashIfNot(theConstantE);
+  this->knownDoubleConstantValues.AddOnTop(theConstantValue);
+}
+
 void Calculator::initBuiltInAtomsNotInterprettedAsFunctions()
 { MacroRegisterFunctionWithName("Calculator::initBuiltInAtomsNotInterprettedAsFunctions");
   this->atomsNotInterprettedAsFunctions.SetExpectedSize(30);
-  this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\pi");
-  this->atomsNotInterprettedAsFunctions.AddOnTopNoRepetitionMustBeNewCrashIfNot("e");
+  this->AddKnownDoubleConstant("\\pi", MathRoutines::Pi());
+  this->AddKnownDoubleConstant("e", MathRoutines::E());
 }
 
 void Calculator::initAtomsThatFreezeArguments()

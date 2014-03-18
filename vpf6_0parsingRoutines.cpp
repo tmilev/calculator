@@ -61,6 +61,8 @@ void Calculator::reset()
   this->atomsNotInterprettedAsFunctions.Clear();
   this->atomsNotAllowingChainRule.Clear();
   this->atomsWhoseExponentsAreInterprettedAsFunctions.Clear();
+  this->knownDoubleConstants.Clear();
+  this->knownDoubleConstantValues.SetSize(0);
   this->FunctionHandlers.SetSize(0);
 
   this->syntacticSouP.SetSize(0);

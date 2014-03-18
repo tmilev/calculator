@@ -786,10 +786,14 @@ void Plot::operator+=(const PlotObject& other)
 { this->thePlots.AddOnTop(other);
 }
 
-void Plot::AddFunctionPlotOnTop(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound)
+void Plot::AddFunctionPlotOnTop
+(const Expression& inputE, const std::string& inputPostfixNotation, double inputLowerBound, double inputUpperBound,
+ double inputYmin, double inputYmax)
 { PlotObject thePlot;
-  thePlot.upperBound=(inputUpperBound);
-  thePlot.lowerBound=(inputLowerBound);
+  thePlot.xLow=inputLowerBound;
+  thePlot.xHigh=inputUpperBound;
+  thePlot.yLow=inputYmin;
+  thePlot.yHigh=inputYmax;
   thePlot.thePlotElement=(inputE);
   thePlot.thePlotString=
   thePlot.GetPlotStringFromFunctionStringAndRanges
@@ -823,26 +827,30 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
 { MacroRegisterFunctionWithName("Plot::GetPlotStringAddLatexCommands");
   std::stringstream resultStream;
   double theLowerBoundAxes=-0.5, theUpperBoundAxes=1;
+  double lowBoundY=-0.5, highBoundY=0.5;
   for (int i=0; i<this->thePlots.size; i++)
-    if (this->thePlots[i].thePlotType=="plotFunction")
-    { theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].lowerBound, theLowerBoundAxes);
-      theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].upperBound, theUpperBoundAxes);
-    }
-  double theLowerBoundFrame=theLowerBoundAxes-0.5;
-  double theUpperBoundFrame=theUpperBoundAxes+0.5;
+  { theLowerBoundAxes=MathRoutines::Minimum(this->thePlots[i].xLow, theLowerBoundAxes);
+    theUpperBoundAxes=MathRoutines::Maximum(this->thePlots[i].xHigh, theUpperBoundAxes);
+    highBoundY=MathRoutines::Maximum(this->thePlots[i].yHigh, highBoundY);
+    lowBoundY=MathRoutines::Minimum(this->thePlots[i].yLow, lowBoundY);
+  }
+
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-3dplot}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\psLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
+  resultStream << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.2cm}\\addtolength{\\textheight}{6.3cm}"
+  << lineSeparator;
   resultStream << "\\newcommand{\\psColorGraph}{red}" << lineSeparator << "\\begin{document} \\pagestyle{empty}" << lineSeparator
   << "\\newcommand{\\psColorAreaUnderGraph}{cyan}" << lineSeparator << "\\newcommand{\\psColorNegativeAreaUnderGraph}{orange}"
   << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundFrame << ", -5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";
+  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundAxes-0.2 << ", "
+  << lowBoundY-0.2 << ")(" << std::fixed << theUpperBoundAxes+0.2 << "," << highBoundY+0.2 << ")\n\n";
   resultStream << lineSeparator;
-  resultStream << "\\psframe*[linecolor=white](" << std::fixed << theLowerBoundFrame << ",-5)(" << std::fixed << theUpperBoundFrame << ",5)\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{-4.5}{" << std::fixed << theUpperBoundAxes << "}{4.5}";
+  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{" << lowBoundY << "}{" << std::fixed << theUpperBoundAxes
+  << "}{" << highBoundY << "}";
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;

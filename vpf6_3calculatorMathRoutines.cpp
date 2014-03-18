@@ -1620,8 +1620,10 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
   << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
   << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
   PlotObject thePlot;
-  thePlot.lowerBound=(-5);
-  thePlot.upperBound=(5);
+  thePlot.xLow=(-5);
+  thePlot.xHigh=(5);
+  thePlot.yLow=-2;
+  thePlot.yHigh=5;
   thePlot.thePlotElement=(input);
   thePlot.thePlotString=(out.str());
   thePlot.thePlotStringWithHtml=(out.str());
@@ -1656,17 +1658,19 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
   << "\\psline(" << std::fixed << upperBound << ", 0)(" << std::fixed << lowerBound << ", 0)}";
   thePlot.thePlotString=theShadedRegion.str();
   thePlot.thePlotStringWithHtml=theShadedRegionHTML.str();
-  thePlot.lowerBound=lowerBound;
-  thePlot.upperBound=upperBound;
+  thePlot.xLow=lowerBound;
+  thePlot.xHigh=upperBound;
+  thePlot.yLow=-4;
+  thePlot.yHigh=4;
   thePlot.thePlotElement=(input[1]);
   Plot plotFinal;
   plotFinal+=thePlot;
-  plotFinal.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  plotFinal.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, -4,  4);
   return output.AssignValue(plotFinal, theCommands);
 }
 
-bool CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver");
+bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDFQsEulersMethod");
   if (input.children.size!=7)
   { theCommands.Comments << "Euler method function takes 6 arguments";
     return false;
@@ -1677,15 +1681,145 @@ bool CalculatorFunctionsGeneral::innerDiscreteApproxDFQSolver(Calculator& theCom
   { theCommands.Comments << "Failed to extract initial x,y values from " << input.ToString();
     return false;
   }
-  std::cout << "xInitial=" << xInitial << " yInitial=" << yInitial;
-  if (!input[4].EvaluatesToRealDouble(&leftEndpoint) || !input[3].EvaluatesToRealDouble(&rightEndpoint))
+//  std::cout << "xInitial=" << xInitial << " yInitial=" << yInitial;
+  if (!input[4].IsSmallInteger(&numPoints) )
+  { theCommands.Comments << "Failed to extract number of points from " << input.ToString();
+    return false;
+  }
+  if (!input[5].EvaluatesToRealDouble(&leftEndpoint) || !input[6].EvaluatesToRealDouble(&rightEndpoint))
   { theCommands.Comments << "Failed to extract left and right endpoints from " << input.ToString();
     return false;
   }
-  if (!input[2].EvaluatesToRealDouble(&xInitial) || !input[3].EvaluatesToRealDouble(&yInitial))
-  { theCommands.Comments << "Failed to extract initial x,y values from " << input.ToString();
+  if (leftEndpoint>rightEndpoint)
+    MathRoutines::swap(leftEndpoint, rightEndpoint);
+  if (xInitial>rightEndpoint || xInitial<leftEndpoint)
+  { theCommands.Comments << "The initial value for x, " << xInitial << ", does not lie between the left and right endpoints "
+    << leftEndpoint << ", " << rightEndpoint << ". I am aborting Euler's method.";
     return false;
   }
+  HashedList<Expression> knownConsts;
+  List<double> knownValues;
+  knownConsts.AddOnTop(theCommands.knownDoubleConstants);
+  knownValues.AddListOnTop(theCommands.knownDoubleConstantValues);
+  Expression xE, yE;
+  xE.MakeAtom("x", theCommands);
+  yE.MakeAtom("y", theCommands);
+  if (knownConsts.Contains(xE) || knownConsts.Contains(yE))
+  { theCommands.Comments << "The letters x, y appear to be already used to denote known constants, I cannot run Euler's method.";
+    return false;
+  }
+  knownConsts.AddOnTop(xE);
+  knownConsts.AddOnTop(yE);
+  knownValues.AddOnTop(0);
+  knownValues.AddOnTop(0);
+  if (numPoints<2)
+  { theCommands.Comments << "The number of points for Euler's method is " << numPoints << ", too few. ";
+    return false;
+  }
+  if (numPoints>10001)
+  { theCommands.Comments << "The number of points for Euler's method is " << numPoints
+    << ", I am not allowed to handle that many. ";
+    return false;
+  }
+  if (leftEndpoint==rightEndpoint)
+  { theCommands.Comments << "Whlie doing Euler's method: right endpoint equals left!";
+    return false;
+  }
+  double delta= (rightEndpoint-leftEndpoint)/numPoints;
+  List<double> XValues, YValues;
+  XValues.SetExpectedSize(numPoints+5);
+  YValues.SetExpectedSize(numPoints+5);
+  int pointsCounter=0;
+  for (double currentX=xInitial; currentX>leftEndpoint-delta; currentX-=delta)
+  { XValues.AddOnTop(currentX);
+    pointsCounter++;
+    if (pointsCounter>numPoints)
+      break; //<-in case floating point arithmetic is misbehaving
+  }
+  XValues.ReverseOrderElements();
+  int indexXinitial=XValues.size-1;
+  pointsCounter=0;
+  for (double currentX=xInitial+delta; currentX<rightEndpoint+delta; currentX+=delta)
+  { XValues.AddOnTop(currentX);
+    pointsCounter++;
+    if (pointsCounter>numPoints)
+      break; //<-in case floating point arithmetic is misbehaving
+  }
+  YValues.initFillInObject(XValues.size, 0);
+  YValues[indexXinitial]=yInitial;
+  Expression functionE=input[1];
+  double currentYprimeApprox=0;
+//  std::cout << "Xvalues: ";
+//  for (int i=0; i<XValues.size; i++)
+//    std::cout << XValues[i] << ", ";
+  int lastGoodXIndex=indexXinitial;
+  int firstGoodXIndex=indexXinitial;
+  double maxYallowed=(rightEndpoint-leftEndpoint)*2+yInitial;
+  double minYallowed=-(rightEndpoint-leftEndpoint)*2+yInitial;
+  //std::cout << "maxYallowed=" << maxYallowed;
+  //std::cout << "minYallowed=" << minYallowed;
+  for (int direction=-1; direction<2; direction+=2)
+    for (int i=indexXinitial+direction; i>=0 && i<XValues.size; i+=direction)
+    { knownValues[knownValues.size-2]=XValues[i];
+      bool isGood=true;
+      for (int counter=0; ; counter++)
+      { knownValues[knownValues.size-1]=YValues[i];
+        if (!functionE.EvaluatesToRealDoubleUnderSubstitutions(knownConsts, knownValues, &currentYprimeApprox))
+        { theCommands.Comments << "Failed to evaluate yPrime approximation at x=" << XValues[i];
+          return false;
+        }
+        double adjustment=delta*direction*currentYprimeApprox;
+        double ynew=YValues[i-direction]+adjustment;
+        double difference= ynew-YValues[i];
+        YValues[i]=ynew;
+        if (counter>20) //<- we run Euler algorithm at least 20 times.
+          if (difference>-0.01 && difference<0.01)//<-if changes are smaller than 0.01 we assume success.
+            break;
+        if (counter>200) //<- we ran Euler algorithm 100 times, but the difference is still greater than 0.01. Something is wrong, we abort
+        { theCommands.Comments << "Euler method: no convergence. At x=" << XValues[i] << ", y="
+          << YValues[i] << ", the change in y is: " << difference << " after " << counter << " iterations. ";
+          if (counter>205)
+          { isGood=false;
+            break;
+          }
+        }
+      }
+      if (isGood)
+      { isGood= (YValues[i]<=maxYallowed && YValues[i]>=minYallowed);
+        if (!isGood)
+        { theCommands.Comments << "Euler method: y values outside of the bounding box. At x=" << XValues[i]
+          << ", the y value is: " << YValues[i] << ". Max y is  " << maxYallowed << " and min y is " << minYallowed << ". ";
+        }
+      }
+      if (!isGood)
+      { if (direction==-1)
+          firstGoodXIndex=i+1;
+        else
+          lastGoodXIndex=i-1;
+        break;
+      }
+    }
+  PlotObject thePlot;
+  thePlot.xLow=XValues[0];
+  thePlot.xHigh=*XValues.LastObject();
+  thePlot.yLow=-0.5;
+  thePlot.yHigh=0.5;
+  thePlot.thePlotElement=input;
+  std::stringstream outLatex, outHtml;
+  outLatex << "\n\n%calculator input:" << input.ToString() << "\n\n"
+  << "\\psline[linecolor=\\psColorGraph]";
+  outHtml << "\n<br>\n%calculator input:" << input.ToString() << "\n<br>\n"
+  << "\\psline[linecolor=\\psColorGraph]";
+  for(int i=firstGoodXIndex; i<=lastGoodXIndex; i++)
+  { outLatex << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
+    outHtml << std::fixed << "(" << XValues[i] << ", " << YValues[i] << ")";
+    thePlot.yLow=MathRoutines::Minimum(YValues[i], thePlot.yLow);
+    thePlot.yHigh=MathRoutines::Maximum(YValues[i], thePlot.yHigh);
+  }
+//  std::cout << "final yhigh: " << thePlot.yHigh << ", ylow: " << thePlot.yLow;
+  thePlot.thePlotString=outLatex.str();
+  thePlot.thePlotStringWithHtml=outHtml.str();
+  return output.AssignValue(thePlot, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1709,7 +1843,12 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
     return output.SetError(out.str(), theCommands);
   }
   Plot thePlot;
-  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound);
+  double yLow, yHigh;
+  if (!input[1].EvaluatesToRealDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh))
+  { theCommands.Comments << "<hr>I failed to evaluate the input function, something is wrong!";
+    return false;
+  }
+  thePlot.AddFunctionPlotOnTop(input[1], functionE.GetValue<std::string>(), lowerBound, upperBound, yLow, yHigh);
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -1772,6 +1911,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
     for (Rational i=lowerBoundRat; i<=upperBoundRat; i+=deltaRat)
       rValues.AddOnTop(i);
   }
+  double yMax=-0.5, yMin=0.5;
   for (double i=lowerBound; i<=upperBound; i+=theDeltaNoSign)
     for (int j=0; j<2; j++)
     { if (theDeltaWithSign<0 && i==lowerBound)
@@ -1797,6 +1937,8 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
         fValuesLower.AddOnTop(finalResultDouble);
       } else
         fValuesUpper.AddOnTop(finalResultDouble);
+      yMin=MathRoutines::Minimum(yMin, finalResultDouble);
+      yMax=MathRoutines::Maximum(yMax, finalResultDouble);
     }
   std::stringstream outTex, outHtml;
   for (int k=0; k<2; k++)
@@ -1844,8 +1986,11 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   PlotObject thePlot;
   thePlot.thePlotString=outTex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();
-  thePlot.lowerBound=lowerBound;
-  thePlot.upperBound=upperBound;
+  thePlot.xLow=lowerBound;
+  thePlot.xHigh=upperBound;
+  thePlot.yLow=yMin;
+  thePlot.yHigh=yMax;
+
   thePlot.thePlotElement=input[1];
   Plot plotFinal;
   plotFinal+=thePlot;
@@ -1915,10 +2060,13 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   outHtml << "<br>%Calculator input: " << input.ToString()
   << "<br>\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
-
   PlotObject thePlot;
-  thePlot.lowerBound=leftEndPoint;
-  thePlot.upperBound=rightEndPoint;
+  if (!input[1].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
+  { theCommands.Comments << "<hr>Failed to evaluate curve function. ";
+    return false;
+  }
+  thePlot.xLow=leftEndPoint;
+  thePlot.xHigh=rightEndPoint;
   thePlot.thePlotElement=input;
   thePlot.thePlotString=outLatex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();
@@ -1998,8 +2146,10 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
     << " |sin(t)*" << MathRoutines::ReducePrecision(theProjYradius) << "}";
   }
   PlotObject thePlot;
-  thePlot.lowerBound=-5;
-  thePlot.upperBound=5;
+  thePlot.xLow=-5;
+  thePlot.xHigh=5;
+  thePlot.yLow=-5;
+  thePlot.yHigh=5;
   thePlot.thePlotElement=input;
   thePlot.thePlotString=out.str();
   thePlot.thePlotStringWithHtml=out.str();
@@ -2059,59 +2209,10 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
 
 bool CalculatorFunctionsGeneral::innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
-  //std::cout << "<br>evaluatetodouble: " << input.ToString();
-  if (input.IsOfType<double>())
-  { output=input;
-    return true;
-  }
-  if (input.IsOfType<Rational>())
-    return output.AssignValue(input.GetValue<Rational>().DoubleValue(), theCommands);
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (theCommands.RecursionDeptH >theCommands.MaxRecursionDeptH)
-  { theCommands.Comments << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+  double theValue=0;
+  if (!input.EvaluatesToRealDouble(&theValue))
     return false;
-  }
-  if (input.IsAtomGivenData(theCommands.opE()))
-    return output.AssignValue(MathRoutines::E(), theCommands);
-  if (input.IsAtomGivenData(theCommands.opPi()))
-  { //std::cout << "Evaluates to 3.1415...!";
-    return output.AssignValue(MathRoutines::Pi(), theCommands);
-  }
-  bool isArithmeticOperationTwoArguments=
-  input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
-  input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
-  ;
-  //std::cout << " is arithmetic operation two arguments! ";
-  //if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
-  //  std::cout << "Starting with sqrt: " << input.ToStringFull();
-  if (isArithmeticOperationTwoArguments)
-  { double leftD, rightD;
-    if (!input[1].EvaluatesToRealDouble(&leftD) || !input[2].EvaluatesToRealDouble(&rightD))
-      return false;
-    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
-      return output.AssignValue(leftD*rightD, theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opPlus(),3))
-      return output.AssignValue(leftD+rightD, theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
-      return output.AssignValue(FloatingPoint::power(leftD, rightD) , theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),3))
-      return output.AssignValue(FloatingPoint::power(rightD,1/leftD), theCommands);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
-      return output.AssignValue(leftD/rightD, theCommands);
-    crash << "This is a piece of code which should never be reached. " << crash;
-  }
-  if(input.IsListNElementsStartingWithAtom(theCommands.opSqrt(),2))
-  { double argumentD;
-    if (!input[1].EvaluatesToRealDouble(&argumentD))
-      return false;
-    if (argumentD<0)
-      return false;
-    return output.AssignValue(FloatingPoint::sqrt(argumentD), theCommands);
-  }
-  return false;
+  return output.AssignValue(theValue, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output)
@@ -3041,15 +3142,142 @@ bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expressi
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::EvaluatesToRealDouble(double* whichDouble)const
-{ if (this->theBoss==0)
+bool Expression::EvaluatesToRealDoubleInRange
+  (const std::string& varName, double lowBound, double highBound, int numIntervals,
+   double* outputYmin, double* outputYmax)const
+{ MacroRegisterFunctionWithName("Expression::EvaluatesToRealDoubleInRange");
+  if (numIntervals<1 || this->theBoss==0)
     return false;
-  Expression doubleE;
-  if (!CalculatorFunctionsGeneral::innerEvaluateToDouble(*this->theBoss, *this, doubleE))
+  HashedList<Expression> knownEs= this->theBoss->knownDoubleConstants;
+  List<double> knownValues=this->theBoss->knownDoubleConstantValues;
+  Expression theVarNameE;
+  theVarNameE.MakeAtom(varName, *this->theBoss);
+  if (knownEs.Contains(theVarNameE))
+  { this->theBoss->Comments << "Variable name is an already known constant, variable name is bad.";
     return false;
-  if (!doubleE.IsOfType<double>())
-    return false;
-  if (whichDouble!=0)
-    *whichDouble=doubleE.GetValue<double>();
+  }
+  knownEs.AddOnTop(theVarNameE);
+  knownValues.AddOnTop(0);
+  int numPoints=numIntervals+1;
+  double delta=(highBound-lowBound)/(numPoints);
+  *knownValues.LastObject()=lowBound;
+  double currentValue=0;
+  for (int i=0; i<numIntervals; i++)
+  { if (!this->EvaluatesToRealDoubleUnderSubstitutions(knownEs, knownValues, & currentValue))
+    { this->theBoss->Comments << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
+      << *knownValues.LastObject() << ". ";
+      return false;
+    }
+    *knownValues.LastObject()+=delta;
+    if (outputYmin!=0)
+    { if (i==0)
+        *outputYmin=currentValue;
+      else
+        *outputYmin=MathRoutines::Minimum(currentValue, *outputYmin);
+    }
+    if (outputYmax!=0)
+    { if (i==0)
+        *outputYmax=currentValue;
+      else
+        *outputYmax=MathRoutines::Maximum(currentValue, *outputYmax);
+    }
+  }
   return true;
+}
+
+bool Expression::EvaluatesToRealDouble(double* whichDouble)const
+{ return this->EvaluatesToRealDoubleUnderSubstitutions
+  (this->theBoss->knownDoubleConstants, this->theBoss->knownDoubleConstantValues, whichDouble);
+}
+
+bool Expression::EvaluatesToRealDoubleUnderSubstitutions
+(const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
+{ MacroRegisterFunctionWithName("Expression::EvaluatesToRealDoubleUnderSubstitutions");
+  if (this->theBoss==0)
+    return false;
+//  std::cout << "<br>Evaluating to double: " << this->ToString();
+  Calculator& theCommands=*this->theBoss;
+  RecursionDepthCounter theRcounter(&this->theBoss->RecursionDeptH);
+  //std::cout << "<br>evaluatetodouble: " << input.ToString();
+  if (this->IsOfType<double>(whichDouble))
+    return true;
+  if (this->IsOfType<Rational>())
+  { if (whichDouble!=0)
+      *whichDouble=this->GetValue<Rational>().DoubleValue();
+    return true;
+  }
+  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
+  if (this->theBoss->RecursionDeptH >this->theBoss->MaxRecursionDeptH)
+  { this->theBoss->Comments << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
+    return false;
+  }
+  if (knownEs.Contains(*this))
+  { if (whichDouble!=0)
+      *whichDouble=valuesKnownEs[knownEs.GetIndex(*this)];
+    return true;
+  }
+
+/*  if (this->IsAtomGivenData(theCommands.opE()))
+    return output.AssignValue(MathRoutines::E(), theCommands);
+  if (input.IsAtomGivenData(theCommands.opPi()))
+  { //std::cout << "Evaluates to 3.1415...!";
+    return output.AssignValue(MathRoutines::Pi(), theCommands);
+  }*/
+  bool isArithmeticOperationTwoArguments=
+  this->IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
+  ;
+  //std::cout << " is arithmetic operation two arguments! ";
+  //if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+  //  std::cout << "Starting with sqrt: " << input.ToStringFull();
+  if (isArithmeticOperationTwoArguments)
+  { double leftD, rightD;
+    if (!(*this)[1].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &leftD) ||
+        !(*this)[2].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &rightD))
+      return false;
+    if ((*this).IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+    { if (whichDouble!=0)
+        *whichDouble=leftD*rightD;
+      return true;
+    }
+    if ((*this).IsListNElementsStartingWithAtom(theCommands.opPlus(),3))
+    { if (whichDouble!=0)
+        *whichDouble=leftD+rightD;
+      return true;
+    }
+    if ((*this).IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+    { if (whichDouble!=0)
+        *whichDouble=FloatingPoint::power(leftD, rightD);
+      return true;
+    }
+    if ((*this).IsListNElementsStartingWithAtom(theCommands.opSqrt(),3))
+    { if (whichDouble!=0)
+        *whichDouble=FloatingPoint::power(rightD,1/leftD);
+      return true;
+    }
+    if ((*this).IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+    { if (whichDouble!=0)
+        *whichDouble=leftD/rightD;
+      return true;
+    }
+    crash << "This is a piece of code which should never be reached. " << crash;
+  }
+  if((*this).IsListNElementsStartingWithAtom(theCommands.opSqrt(),2))
+  { double argumentD;
+    if (!(*this)[1].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
+      return false;
+    if (argumentD<0)
+      return false;
+    if (whichDouble!=0)
+      *whichDouble= FloatingPoint::sqrt(argumentD);
+    return true;
+  }
+//  std::cout << "<br>" << this->ToString() << " aint no double! constants are:";
+//  for (int i=0; i<knownEs.size; i++)
+//    std::cout << "<br>" << knownEs[i].ToString() << " -> " << valuesKnownEs[i];
+
+  return false;
 }

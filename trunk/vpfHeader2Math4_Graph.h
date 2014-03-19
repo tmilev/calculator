@@ -61,10 +61,12 @@ public:
   List<std::string> nodeLabels;
   MonomialCollection<GraphEdge, Rational> theEdges;
   List<List<int> > edgesPerNodeNoMultiplicities;
-  List<List< int> > nodeGroupsForDisplay;
+  List<List<int> > nodeGroupsForDisplay;
   List<List<List<int> > > connectedComponents;
   List<int> distanceToBaseNode;
   List<int> baseNode;
+  List<int> positionInDisplayGroup;
+  List<int> displayGroupIndices;
   List<int> connectedComponentSizes;
   Graph(): numNodes(-1), groupMaxSize(-1){}
   bool CheckConsistency()const;
@@ -77,8 +79,9 @@ public:
   void ComputeConnectedComponentsAndBaseNodeDistances();
   void AddNodeToComponent(int nodeIndex);
   void AddEdge(int i, int j, const std::string& inputLabel);
-  std::string ToStringLatex(FormatExpressions* theFormat);
+  std::string ToStringPsTricks(FormatExpressions* theFormat);
   std::string ToStringNodesAndEdges(FormatExpressions* theFormat);
+  std::string ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat=0);
 };
 
 #endif

@@ -590,7 +590,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& Hw minus wt. \\\\\n<br>";
   out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>Epsilon coords</td><td>Fundamental coords</td>";
   if (useRho)
-    out << "<td>Standard homomorphism generator candidate</td>";
+    out << "<td>Homomorphism generator candidate</td>";
   out << "</tr>";
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
   LargeInt tempInt;
@@ -603,7 +603,8 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
   theFormat.flagUseFrac=true;
   for (int i=0; i<outputOrbit.size; i++)
     integralPositiveRootReflectionGraph.nodeLabels[i]=
-    "$" + theWeyl.GetEpsilonCoords(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$";
+    "$" + theWeyl.GetEpsilonCoords(outputOrbit[i]).ToStringEpsilonFormat(&theFormat) + "$ = $"+
+    theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\psi")+"$";
   ElementWeylGroup<WeylGroup> currentElt;
   Vector<Polynomial<Rational> > differenceVector;
   Rational currentCoordDifference;
@@ -635,7 +636,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
     }
   }
   integralPositiveRootReflectionGraph.CheckConsistency();
-  out << integralPositiveRootReflectionGraph.ToStringLatex(0);
+  out << integralPositiveRootReflectionGraph.ToStringPsTricks(0);
   for (int i=0; i<outputOrbit.size; i++)
   { theFormat.simpleRootLetter="\\alpha";
     theFormat.fundamentalWeightLetter="\\psi";
@@ -646,12 +647,12 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
     std::string weightEltString=
     theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
+    << (useMathTag ? CGI::GetMathMouseHover(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
-    << (useMathTag ? CGI::GetMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
+    << (useMathTag ? CGI::GetMathMouseHover(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? CGI::GetMathMouseHover(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords)
     << "</td><td>"
-    << (useMathTag ? CGI::GetMathSpanPure(weightEltString) : weightEltString)
+    << (useMathTag ? CGI::GetMathMouseHover(weightEltString) : weightEltString)
     << "</td>";
     latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $" << orbitEltStringEpsilonCoords
     << "$ & $" <<  weightEltString << "$ & $" << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
@@ -676,7 +677,7 @@ bool CalculatorFunctionsWeylGroup::innerWeylOrbit(Calculator& theCommands, const
       }
       out << "<td>";
       if (isGood)
-        out << CGI::GetMathSpanPure(standardElt.ToString(&theFormat));
+        out << CGI::GetMathMouseHover(standardElt.ToString(&theFormat));
       else
         out << "-";
       out << "</td>";

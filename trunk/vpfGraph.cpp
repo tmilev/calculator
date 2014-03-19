@@ -57,7 +57,7 @@ void GraphOLD::TreeRecurseCopyDelete(List<int> &l, int v, int m){
 
 std::string GraphEdge::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << this->vStart << "->" << this->vEnd;
+  out << this->vStart+1 << "->" << this->vEnd+1;
   if (this->label!="")
     out << "(" << this->label << ")";
   return out.str();
@@ -139,7 +139,7 @@ void Graph::ComputeConnectedComponentsAndBaseNodeDistances()
       { List<int>& currentHeirs=this->edgesPerNodeNoMultiplicities[theOrbit[i]];
         for (int j=0; j<currentHeirs.size; j++)
           if (this->distanceToBaseNode[currentHeirs[j]]==-1)
-          { this->distanceToBaseNode[currentHeirs[j]]=this->distanceToBaseNode[i]+1;
+          { this->distanceToBaseNode[currentHeirs[j]]=this->distanceToBaseNode[theOrbit[i]]+1;
             this->baseNode[currentHeirs[j]]=indexBaseNode;
             theOrbit.AddOnTop(currentHeirs[j]);
           }
@@ -163,19 +163,28 @@ void Graph::ComputeDisplayGroups()
   this->groupMaxSize=0;
   for (int i =0; i<this->nodeGroupsForDisplay.size; i++)
     this->groupMaxSize=MathRoutines::Maximum(this->groupMaxSize, this->nodeGroupsForDisplay[i].size);
+  this->positionInDisplayGroup.initFillInObject(this->numNodes, -1);
+  this->displayGroupIndices.initFillInObject(this->numNodes, -1);
+  for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
+    for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
+    { this->positionInDisplayGroup[this->nodeGroupsForDisplay[i][j] ]=j;
+      this->displayGroupIndices[this->nodeGroupsForDisplay[i][j]]=i;
+    }
 }
 
 std::string Graph::GetNodePSStrings(int groupIndex, int indexInGroup)
 { MacroRegisterFunctionWithName("Graph::GetNodePSStrings");
   std::stringstream out;
-  out << "\\rput(" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
-  << ") " << "{";
+//  out << "\\pscircle*[linecolor=blue](" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
+//  << "){0.05}";
+  out << "\\rput[l](" << this->GetXnode(groupIndex, indexInGroup) << ", " << this->GetYnode(groupIndex, indexInGroup)
+  << ") " << "{\\framebox{\\parbox{0.8cm}{ ";
   int nodeIndex=this->nodeGroupsForDisplay[groupIndex][indexInGroup];
   if (nodeIndex<this->nodeLabels.size)
     out << this->nodeLabels[nodeIndex];
   else
     out << "node " << nodeIndex+1;
-  out << "}";
+  out << "}}}";
   return out.str();
 }
 
@@ -185,9 +194,16 @@ double Graph::GetXnode(int groupIndex, int indexInGroup)
 
 double Graph::GetYnode(int groupIndex, int indexInGroup)
 { double result=0;
-  result= indexInGroup/2;
-  if (indexInGroup%2==1)
-    result=-1-result;
+  if (groupIndex%2==1)
+  { result= indexInGroup/2;
+    if (indexInGroup%2==1)
+      result=-1-result;
+    result+=0.5;
+  } else
+  { result=-indexInGroup/2;
+    if (indexInGroup%2==1)
+      result=1-result;
+  }
   return result;
 }
 
@@ -200,26 +216,63 @@ std::string Graph::ToStringNodesAndEdges(FormatExpressions* theFormat)
     if (i!=this->theEdges.size()-1)
       out << ", ";
   }
+  out << "<br>DisplayGroups:";
+  for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
+  { out << "<br>Group " << i+1 << ", nodes: ";
+    for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
+      out << this->nodeGroupsForDisplay[i][j] << ", ";
+  }
+  for (int i=0; i<this->baseNode.size; i++)
+    out << "<br>Node " << i+1 << " has base node " << this->baseNode[i]+1;
   return out.str();
 }
 
-std::string Graph::ToStringLatex(FormatExpressions* theFormat)
+std::string Graph::ToStringPsTricksEdge(int fromIndex, int toIndex, FormatExpressions* theFormat)
+{ MacroRegisterFunctionWithName("Graph::ToStringPsTricksEdge");
+  std::stringstream out;
+  int startGroupIndex=this->displayGroupIndices[fromIndex];
+  int startIndexInGroup=this->positionInDisplayGroup[fromIndex];
+  int endGroupIndex=this->displayGroupIndices[toIndex];
+  int endIndexInGroup=this->positionInDisplayGroup[toIndex];
+  double startX=this->GetXnode(startGroupIndex, startIndexInGroup);
+  double startY= this->GetYnode(startGroupIndex, startIndexInGroup);
+  double endX= this->GetXnode(endGroupIndex, endIndexInGroup);
+  double endY= this->GetYnode(endGroupIndex, endIndexInGroup);
+  bool goingRight=(startX<endX);
+  bool goingLeft= (startX>endX);
+  if (goingRight)
+    out << "\\psline[linecolor=red, arrows=<-](" << startX +0.7 << ", " << startY << ")";
+  else
+    out << "\\psline[linecolor=red, arrows=<-](" << startX << ", " << startY << ")";
+  if (goingLeft)
+    out << "(" << endX +0.7;
+  else
+    out << "(" << endX;
+  out << ", " << endY-(endY-startY)*0.05 << ")";
+
+  return out.str();
+}
+
+std::string Graph::ToStringPsTricks(FormatExpressions* theFormat)
 { MacroRegisterFunctionWithName("Graph::ToStringLatex");
   this->ComputeEdgesPerNodesNoMultiplicities();
   this->ComputeConnectedComponentsAndBaseNodeDistances();
   this->ComputeDisplayGroups();
   this->CheckConsistency();
   std::stringstream out;
-  out << this->ToStringNodesAndEdges(theFormat);
-  out << "<hr><br><br>\\documentclass{article}<br>\n\n";
-  out << "\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
+//  out << this->ToStringNodesAndEdges(theFormat);
+  out << "<br>\\documentclass{article}<br>\n\n";
+  out << "\\usepackage{pstricks}\\usepackage{lscape}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}<br>\n";
   out << "\\begin{document}<br>\n";
-  out << "\\psset{xunit=2cm, yunit=2cm}\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
-  << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize+1)/2 << ")";
+  out << "\\psset{xunit=1.5cm, yunit=1.5cm}\\begin{pspicture}(0," << -(this->groupMaxSize+1)/2 << ")("
+  << this->nodeGroupsForDisplay.size << ", " << (this->groupMaxSize+1)/2 << ")"
+  << "\n<br>\\tiny\n<br>\n";
+  for (int i=0; i<this->edgesPerNodeNoMultiplicities.size; i++)
+    for (int j=0; j<this->edgesPerNodeNoMultiplicities[i].size; j++)
+      out << this->ToStringPsTricksEdge(i, this->edgesPerNodeNoMultiplicities[i][j], theFormat);
   for (int i=0; i<this->nodeGroupsForDisplay.size; i++)
-  { for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
+    for (int j=0; j<this->nodeGroupsForDisplay[i].size; j++)
       out << this->GetNodePSStrings(i, j);
-  }
   out << "\n<br>\\end{pspicture}";
   out << "\\end{document}<br><br>\n";
   return out.str();

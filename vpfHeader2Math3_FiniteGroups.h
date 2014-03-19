@@ -503,8 +503,9 @@ public:
   }
 
   void GetEpsilonCoords(const List<Vector<Rational> >& input, Vectors<Rational>& output);
-  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)
-  { Vector<Rational> output;
+  template <class coefficient>
+  Vector<coefficient> GetEpsilonCoords(const Vector<coefficient>& input)
+  { Vector<coefficient> output;
     this->GetEpsilonCoords(input, output);
     return output;
   }

@@ -849,7 +849,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << lowBoundY-0.2 << ")(" << std::fixed << theUpperBoundAxes+0.2 << "," << highBoundY+0.2 << ")\n\n";
   resultStream << lineSeparator;
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{" << lowBoundY << "}{" << std::fixed << theUpperBoundAxes
+  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{" << lowBoundY-0.05 << "}{" << std::fixed << theUpperBoundAxes
   << "}{" << highBoundY << "}";
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)

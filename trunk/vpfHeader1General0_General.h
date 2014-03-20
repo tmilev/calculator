@@ -3146,7 +3146,13 @@ void List<Object>::ExpandArrayOnTop(int increase)
   if (increase<=0)
     return;
   MacroIncrementCounter(NumListResizesTotal);
-  Object* newArray = new Object[this->ActualSize+increase];
+  Object* newArray =0;
+  try
+  { newArray= new Object[this->ActualSize+increase];
+  }
+  catch(std::bad_alloc& theBA)
+  { crash << "Memory allocation failure: failed to allocate " << this->ActualSize+increase << " objects. " << crash;
+  }
 #ifdef CGIversionLimitRAMuse
 ParallelComputing::GlobalPointerCounter+=this->ActualSize+increase;
   ParallelComputing::CheckPointerCounters();

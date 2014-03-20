@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 //  civilizedInput="WeylOrbitFundRho{}(B_3, (3/2, 0,0) )";
 //  civilizedInput="DFQEuler(x^2 + y^2 - 1, 0, 0, 1000, -2.5, 2.5)";
 //  civilizedInput="WeylOrbitFundRho{}(B_2, (y, 0) )";
+//  civilizedInput="printSemisimpleSubalgebras{}(e_7 )";
   PredefinedStrings(civilizedInput);
 
   crash.userInputStringIfAvailable=civilizedInput;

@@ -464,8 +464,8 @@ bool Calculator::innerPrintSSsubalgebras
   if (!isAlreadySubalgebrasObject)
   { if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSSPointer))
       return output.SetError("Error extracting Lie algebra.", theCommands);
-    if (ownerSSPointer->GetRank()>6)
-    { out << "<b>This code is completely experimental and has been set to run up to rank 4. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    if (ownerSSPointer->GetRank()>7)
+    { out << "<b>This code is completely experimental and has been set to run up to rank 6. As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
       return output.AssignValue(out.str(), theCommands);
     } else
       out << "<b>This code is completely experimental. Use the following printouts on your own risk</b>";

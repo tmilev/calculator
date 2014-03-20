@@ -815,8 +815,8 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   if (useHtml)
     out << "<br>";
   //out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
-  if (useHtml)
-    out << "<br>\n";
+  //if (useHtml)
+  //  out << "<br>\n";
   out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << std::fixed
   << inputLowerBound << "}{" << std::fixed << inputUpperBound << "}{";
   out << functionStringPostfixNotation << "}";

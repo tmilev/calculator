@@ -2065,12 +2065,14 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << "<br>\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
-  if (!input[1].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
+  if (!input[1].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh))
   { theCommands.Comments << "<hr>Failed to evaluate curve function. ";
     return false;
   }
-  thePlot.xLow=leftEndPoint;
-  thePlot.xHigh=rightEndPoint;
+  if (!input[2].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
+  { theCommands.Comments << "<hr>Failed to evaluate curve function. ";
+    return false;
+  }
   thePlot.thePlotElement=input;
   thePlot.thePlotString=outLatex.str();
   thePlot.thePlotStringWithHtml=outHtml.str();
@@ -3269,14 +3271,32 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
     }
     crash << "This is a piece of code which should never be reached. " << crash;
   }
-  if((*this).IsListNElementsStartingWithAtom(theCommands.opSqrt(),2))
+  bool isKnownFunctionOneArgument=
+  this->IsListNElementsStartingWithAtom(theCommands.opSin(),2) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opCos(),2) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opArcTan(),2) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opSqrt(),2)
+  ;
+
+  if(isKnownFunctionOneArgument)
   { double argumentD;
     if (!(*this)[1].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
       return false;
-    if (argumentD<0)
-      return false;
-    if (whichDouble!=0)
-      *whichDouble= FloatingPoint::sqrt(argumentD);
+    if (this->IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+    { if (argumentD<0)
+        return false;
+      if (whichDouble!=0)
+        *whichDouble= FloatingPoint::sqrt(argumentD);
+    }
+    if (this->IsListNElementsStartingWithAtom(theCommands.opSin()))
+      if (whichDouble!=0)
+        *whichDouble= FloatingPoint::sin(argumentD);
+    if (this->IsListNElementsStartingWithAtom(theCommands.opCos()))
+      if (whichDouble!=0)
+        *whichDouble=FloatingPoint::cos(argumentD);
+    if (this->IsListNElementsStartingWithAtom(theCommands.opArcTan()))
+      if (whichDouble!=0)
+        *whichDouble=FloatingPoint::arctan(argumentD);
     return true;
   }
 //  std::cout << "<br>" << this->ToString() << " aint no double! constants are:";

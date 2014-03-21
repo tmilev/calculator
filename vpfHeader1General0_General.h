@@ -1481,7 +1481,9 @@ public:
     }
     this->TemplateList::SetExpectedSize(expectedSize);
     if (!this->IsSparseRelativeToExpectedSize(expectedSize))
+    { //Not allowed, causes stack mess: MacroRegisterFunctionWithName("HashTemplate::SetExpectedSize");
       this->SetHashSizE(expectedSize*5);
+    }
   }
   void SetHashSizE(unsigned int HS)
   { if (HS==(unsigned) this->TheHashedArrays.size)

@@ -845,12 +845,12 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundAxes-0.2 << ", "
-  << lowBoundY-0.2 << ")(" << std::fixed << theUpperBoundAxes+0.2 << "," << highBoundY+0.2 << ")\n\n";
+  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundAxes-0.4 << ", "
+  << lowBoundY-0.4 << ")(" << std::fixed << theUpperBoundAxes+0.4 << "," << highBoundY+0.5 << ")\n\n";
   resultStream << lineSeparator;
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes << "}{" << lowBoundY-0.05 << "}{" << std::fixed << theUpperBoundAxes
-  << "}{" << highBoundY << "}";
+  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes-0.15 << "}{" << lowBoundY-0.15 << "}{"
+  << std::fixed << theUpperBoundAxes+0.15 << "}{" << highBoundY+0.15 << "}";
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;

@@ -145,7 +145,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
 //    std::cout << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
-    diagramWithoutTripleNode.ComputeDiagramTypeKeepInput(rootsWithoutTripleNode, theBilinearForm);
+    diagramWithoutTripleNode.ComputeDiagramInputIsSimple(rootsWithoutTripleNode, theBilinearForm);
 //    std::cout << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
@@ -244,8 +244,8 @@ std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const Dyn
   return theType.ToStringRelativeToAmbientType(ambientType);
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
-{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput");
+void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
   //std::cout << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
@@ -335,17 +335,17 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(Vectors<Rational>& domai
     }
 }
 
-void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
-{ MacroRegisterFunctionWithName("ComputeDiagramTypeModifyInput");
-  theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput, theWeyl.RootSystem);
-  this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl.CartanSymmetric);
+void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroup& theWeyl)
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInput");
+  theWeyl.TransformToSimpleBasisGenerators(inputRoots, theWeyl.RootSystem);
+  this->ComputeDiagramInputIsSimple(inputRoots, theWeyl.CartanSymmetric);
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative
 (Vectors<Rational>& inputOutputSimpleWeightSystem, const HashedList<Vector<Rational> >& weightSystem, const Matrix<Rational>& theBilinearForm)
-{ MacroRegisterFunctionWithName("ComputeDiagramTypeModifyInputRelative");
+{ MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramTypeModifyInputRelative");
   WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(inputOutputSimpleWeightSystem, weightSystem);
-  this->ComputeDiagramTypeKeepInput(inputOutputSimpleWeightSystem, theBilinearForm);
+  this->ComputeDiagramInputIsSimple(inputOutputSimpleWeightSystem, theBilinearForm);
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinStrings(const Matrix<Rational>& theBilinearForm)

@@ -2009,8 +2009,8 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   const Expression& lowerE=input[2];
   const Expression& upperE=input[3];
   Expression functionE;
-  Rational upperBound, lowerBound;
-  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
+  double upperBound, lowerBound;
+  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -2021,7 +2021,7 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-plot}\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{" << lowerBound << "}{" << upperBound << "}{";
   std::string funString=functionE.GetValue<std::string>();
   resultStream << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
   resultStream << "\\end{pspicture}\\end{document}";

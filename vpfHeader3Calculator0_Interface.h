@@ -1456,6 +1456,12 @@ public:
   static bool innerConesIntersect(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPerturbSplittingNormal(Calculator& theCommands, const Expression& input, Expression& output);
   template<class coefficient>
+  bool GetTypeWeight
+(Calculator& theCommands, const Expression& input, Vector<coefficient>& outputWeightSimpleCoords,
+ Expression& outputWeightContext, SemisimpleLieAlgebra*& ambientSSalgebra,
+ Expression::FunctionAddress ConversionFun)
+;
+  template<class coefficient>
   bool GetTypeHighestWeightParabolic
   (Calculator& theCommands, const Expression& input, Expression& output, Vector<coefficient>& outputWeightHWFundcoords, Selection& outputInducingSel,
    Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra, Expression::FunctionAddress ConversionFun);
@@ -1832,6 +1838,38 @@ bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
     }
     output.AddChildOnTop(convertedE);
   }
+  return true;
+}
+
+template<class coefficient>
+bool Calculator::GetTypeWeight
+(Calculator& theCommands, const Expression& input, Vector<coefficient>& outputWeightSimpleCoords,
+ Expression& outputWeightContext, SemisimpleLieAlgebra*& ambientSSalgebra,
+ Expression::FunctionAddress ConversionFun)
+{ MacroRegisterFunctionWithName("Calculator::GetTypeWeight");
+  if (!input.IsListNElements(3))
+  { theCommands.Comments
+    << "Function TypeHighestWeightParabolic is expected to have two arguments: "
+    << "SS algebra type, highest weight in simple coords. ";
+    return false;
+  }
+  const Expression& leftE=input[1];
+  const Expression& middleE=input[2];
+  if (!Calculator::CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, leftE, ambientSSalgebra))
+  { theCommands.Comments << "Error extracting Lie algebra from " << leftE.ToString();
+    return false;
+  }
+  if (!theCommands.GetVectoR<coefficient>
+      (middleE, outputWeightSimpleCoords, &outputWeightContext, ambientSSalgebra->GetRank(), ConversionFun))
+  { theCommands.Comments << "Failed to convert the second argument of HWV to a list of " << ambientSSalgebra->GetRank()
+    << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
+    return false;
+  }
+  if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
+    crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
+    << " contained object container more than once. " << crash;
+  int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
+  outputWeightContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
   return true;
 }
 

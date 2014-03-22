@@ -5047,9 +5047,9 @@ public:
   //The procedure calls a
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
   //simple as required!
-  void ComputeDiagramTypeModifyInput(Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl);
+  void ComputeDiagramTypeModifyInput(Vectors<Rational>& inputRoots, WeylGroup& theWeyl);
   //the below function is just as the above but doesn't modify simpleBasisInput
-  void ComputeDiagramTypeKeepInput(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm);
+  void ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm);
   void ComputeDiagramTypeModifyInputRelative
   (Vectors<Rational>& inputOutputSimpleWeightSystem, const HashedList<Vector<Rational> >& weightSystem, const Matrix<Rational>& theBilinearForm);
   void ComputeDynkinStrings(const Matrix<Rational>& theBilinearForm);

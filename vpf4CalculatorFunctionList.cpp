@@ -204,6 +204,10 @@ void Calculator::initPredefinedInnerFunctions()
    "WeylGroupIrrepsAndCharTableComputeFromScratch{}(b_3);", true, true)
    ;
     this->AddOperationInnerHandler
+  ("WeylOrbitSize",  CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSize, "",
+   "Computes the size of a Weyl group orbit of a weight",
+   "WeylOrbitSize(E_6, (3,3,3,7,7,11)); WeylOrbitSize(E_8, (3,3,3,7,7,11,13,13));");
+    this->AddOperationInnerHandler
   ("WeylOrbitSimpleCoords",  CalculatorFunctionsWeylGroup::innerWeylGroupOrbitSimple, "",
    "Generates a Weyl orbit printout from simple coords.\
     First argument = type. Second argument = weight in simple coords. \

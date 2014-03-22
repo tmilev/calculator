@@ -743,13 +743,11 @@ bool WeylGroup::GenerateOuterOrbit
     output.AddOnTop(theWeights[i]);
   Vector<coefficient> currentRoot;
   ElementWeylGroup<WeylGroup> currentElt;
-  if (UpperLimitNumElements<10000000)
-    output.SetExpectedSize(UpperLimitNumElements);
-  else
-    output.SetExpectedSize(10000000);
+  int numElementsToReserve=MathRoutines::Minimum(UpperLimitNumElements, 1000000);
+  output.SetExpectedSize(numElementsToReserve);
   if (outputSubset!=0)
   { currentElt.MakeID(*this);
-    outputSubset->SetExpectedSize(UpperLimitNumElements);
+    outputSubset->SetExpectedSize(numElementsToReserve);
     outputSubset->Clear();
     outputSubset->AddOnTop(currentElt);
   }

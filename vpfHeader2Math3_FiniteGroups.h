@@ -385,6 +385,8 @@ public:
   void MakeFromDynkinType(const DynkinType& inputType);
   void MakeFinalSteps();
   void InitGenerators();
+  template <class coefficient>
+  LargeInt GetOrbitSize(Vector<coefficient>& theWeight, GlobalVariables* theGlobalVariableS=0);
   void MakeMeFromMyCartanSymmetric();
   void MakeFromDynkinTypeDefaultLengthKeepComponentOrder(const DynkinType& inputType);
   void ComputeCoCartanSymmetricFromCartanSymmetric();
@@ -553,7 +555,7 @@ public:
   bool GenerateOrbit
   (Vector<coefficient>& theWeight, bool RhoAction, HashedList<Vector<coefficient> >& output, bool UseMinusRho, int expectedOrbitSize=-1,
    HashedList<ElementWeylGroup<WeylGroup> >* outputSubset=0, int UpperLimitNumElements=-1, GlobalVariables* theGlobalVariables=0)
-  { Vectors<Rational> theWeights;
+  { Vectors<coefficient> theWeights;
     theWeights.AddOnTop(theWeight);
     return this->GenerateOrbit(theWeights, RhoAction, output, UseMinusRho, expectedOrbitSize, outputSubset, UpperLimitNumElements, theGlobalVariables);
   }

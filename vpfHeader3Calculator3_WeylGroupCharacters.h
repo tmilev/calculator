@@ -15,6 +15,7 @@ public:
   static bool innerWeylNoOuterRaiseToMaximallyDominant(Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsWeylGroup::innerWeylRaiseToMaximallyDominant(theCommands, input, output, false);
   }
+  static bool innerWeylGroupOrbitSize(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitFund(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitSimple(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerWeylGroupOrbitOuterSimple(Calculator& theCommands, const Expression& input, Expression& output);

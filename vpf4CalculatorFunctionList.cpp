@@ -533,6 +533,12 @@ void Calculator::initPredefinedInnerFunctions()
    "drawPolar(1+sin  t, 0, \\pi); \
    \ndrawPolar((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
    ;
+  this->AddOperationInnerHandler ("drawPolarExtended", CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended, "",
+   "<b>Calculus teaching function.</b> Same as drawPolar but also produces a graph in the (rho,theta)-plane. \
+   ",
+   "drawPolarExtended(1+sin  t, 0, \\pi); \
+   \ndrawPolarExtended((1 + 9/10 cos(8 t) ) (1 + 1/10 cos (24 t) ) (9/10 + 5/100 cos (200 t)) (1 + sin t), 0, 2\\pi)")
+   ;
   this->AddOperationInnerHandler ("plotConeUsualProjection", CalculatorFunctionsGeneral::innerPlotConeUsualProjection, "",
    "<b>Calculus teaching function.</b>Plots a cone with center of base at (0,0,0) with base lying in the xy plane\
     of radius r and height h(first and second argument) viewed from a distance d (third argument) and viewing height vh (fourth argument).\

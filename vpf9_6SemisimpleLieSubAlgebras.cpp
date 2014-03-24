@@ -617,6 +617,79 @@ bool CandidateSSSubalgebra::CreateAndAddByExtendingBaseSubalgebra
   return true;
 }
 
+void SemisimpleSubalgebras::GetHCandidates
+(Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
+ DynkinType& currentType, List<int>& currentRootInjection)
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::GetHCandidates");
+  ProgressReport theReport2(this->theGlobalVariables), theReport3(this->theGlobalVariables);
+  int baseRank=currentType.GetRank()-1;
+
+  DynkinSimpleType theSmallType;
+  theSmallType=currentType.GetSmallestSimpleType();
+
+  if (this->theGlobalVariables!=0)
+  { std::stringstream reportStream;
+    reportStream << "the latest root of the candidate simple component " << theSmallType.ToString();
+    theReport2.Report(reportStream.str());
+  }
+  int indexNewRooT=*currentRootInjection.LastObject();
+  int indexNewRootInSmallType=indexNewRooT-currentType.GetRank()+theSmallType.theRank;
+  Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2*theSmallType.GetDefaultRootLengthSquared(0)/
+  theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
+  outputHCandidatesScaledToActByTwo.SetSize(0);
+  for (int j=0; j<this->theSl2s.size; j++)
+  { if (this->theGlobalVariables!=0)
+    { std::stringstream reportStreamX;
+      reportStreamX << "Trying to realize via orbit number " << j+1 << ".";
+      if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
+        reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
+        << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
+        << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
+      //else
+        //std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
+        //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
+      //std::cout << "<br>" << reportStreamX.str();
+      theReport3.Report(reportStreamX.str());
+    }
+    if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
+      continue;
+    if (baseRank==0)
+    { outputHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
+      if (theGlobalVariables!=0)
+      { std::stringstream out;
+        out << "Orbit of " << this->theSl2s[j].theH.GetCartanPart().ToString() << " not generated because that is the very first H element selected.";
+      }
+      continue;
+    }
+    const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
+    outputHCandidatesScaledToActByTwo.ReservE(outputHCandidatesScaledToActByTwo.size+ currentOrbit.size);
+    for (int k=0; k<currentOrbit.size; k++)
+    { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], currentRootInjection))
+      { if (theGlobalVariables!=0)
+        { std::stringstream out2;
+          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
+          theReport2.Report(out2.str());
+          //std::cout << "<hr>" << out2.str();
+        }
+        outputHCandidatesScaledToActByTwo.AddOnTop(currentOrbit[k]);
+      } else
+        if (theGlobalVariables!=0)
+        { std::stringstream out2;
+          out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). ";
+          theReport2.Report(out2.str());
+          //std::cout << "<hr>" << out2.str();
+        }
+    }
+    if (outputHCandidatesScaledToActByTwo.size==0)
+    { std::stringstream out2;
+      out2 << "Sl(2) orbit " << j+1 << ": extension to " << currentType.ToString()
+      << " not possible because there were no h candidates.";
+      theReport2.Report(out2.str());
+      //std::cout << "<hr>" << out2.str();
+    }
+  }
+}
+
 void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
   int baseRank=baseCandidate.theWeylNonEmbeddeD.GetDim();
@@ -651,7 +724,6 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
   indicesModulesNewComponentExtensionMod.ReservE(this->owneR->theWeyl.RootSystem.size);
   Vectors<Rational> startingVector;
   Vectors<Rational> theHCandidatesScaledToActByTwo;
-  DynkinSimpleType theSmallType;
   Selection oldRoots;
   for (int i=0; i<theLargerTypes.size; i++)
   { if (theLargerTypes[i].GetRootSystemSize()>this->owneR->GetNumPosRoots()*2)
@@ -689,91 +761,33 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive(const CandidateSSSubalgebr
         continue;
       }
     }
-    theSmallType=theLargerTypes[i].GetSmallestSimpleType();
-    int indexNewRooT=*theRootInjections[i].LastObject();
-    int indexNewRootInSmallType=indexNewRooT-theLargerTypes[i].GetRank()+theSmallType.theRank;
-    Rational desiredHLengthSquared=theSmallType.CartanSymmetricInverseScale*2*theSmallType.GetDefaultRootLengthSquared(0)/
-    theSmallType.GetDefaultRootLengthSquared(indexNewRootInSmallType);
     newCandidate.SetUpInjectionHs(baseCandidate, theLargerTypes[i], theRootInjections[i]);
-    for (int j=0; j<this->theSl2s.size; j++)
+    this->GetHCandidates(theHCandidatesScaledToActByTwo, newCandidate, theLargerTypes[i], theRootInjections[i]);
+    //std::cout << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
+    for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
     { if (theGlobalVariables!=0)
-      { std::stringstream reportStreamX;
-        reportStreamX << "Trying to realize via orbit number " << j+1 << " the latest root (index " << indexNewRootInSmallType
-        << ") of the candidate simple component  " << theSmallType.ToString();
-        if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-          reportStreamX << ". The h element "  << this->theSl2s[j].theH.GetCartanPart().ToString() << " of length "
-          << this->theOrbitHelementLengths[j].ToString() << " generating orbit number " << j+1 << " out of "
-          << this->theSl2s.size << " does not have the required length of " << desiredHLengthSquared.ToString();
-        //else
-          //std::cout << " The h element " << this->theSl2s[j].theH.GetCartanPart().ToString() << " generating orbit number "
-          //<< j+1 << " out of " << this->theSl2s.size << " has the required length. ";
-        //std::cout << "<br>" << reportStreamX.str();
-        theReport3.Report(reportStreamX.str());
-      }
-      if (this->theSl2s[j].LengthHsquared!=desiredHLengthSquared)
-        continue;
-      theHCandidatesScaledToActByTwo.SetSize(0);
-      if (baseRank!=0)
-      { const HashedList<Vector<Rational> >& currentOrbit=this->GetOrbitSl2Helement(j);
-        theHCandidatesScaledToActByTwo.ReservE(currentOrbit.size);
-        for (int k=0; k<currentOrbit.size; k++)
-        { if (newCandidate.IsGoodHnewActingByTwo(currentOrbit[k], theRootInjections[i]))
-          { if (theGlobalVariables!=0)
-            { std::stringstream out2;
-              out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " has desired scalar products, adding to list of good candidates. ";
-              theReport2.Report(out2.str());
-              //std::cout << "<hr>" << out2.str();
-            }
-            theHCandidatesScaledToActByTwo.AddOnTop(currentOrbit[k]);
-          } else
-            if (theGlobalVariables!=0)
-            { std::stringstream out2;
-              out2 << "sl(2) orbit " << j+1 << ", h orbit candidate " << k+1 << " out of " << currentOrbit.size << " is not a valid candidate (doesn't have desired scalar products). ";
-              theReport2.Report(out2.str());
-              //std::cout << "<hr>" << out2.str();
-            }
-        }
-      } else
-      { theHCandidatesScaledToActByTwo.AddOnTop(this->theSl2s[j].theH.GetCartanPart());
-        if (theGlobalVariables!=0)
-        { std::stringstream out;
-          out << "Orbit of " << this->theSl2s[j].theH.GetCartanPart().ToString() << " not generated because that is the very first H element selected.";
-        }
-      }
-      if (theHCandidatesScaledToActByTwo.size==0)
       { std::stringstream out2;
-        out2 << "Sl(2) orbit " << j+1 << ": extension of " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()
-        << " to " << theLargerTypes[i].ToString() << " not possible because there were no h candidates.";
+        out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString()
+        << " using h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ".";
         theReport2.Report(out2.str());
-        //std::cout << "<hr>" << out2.str();
+        //std::cout << "<br>" << out2.str();
       }
-      //std::cout << "<hr>Testing total of " << theHCandidatesScaledToActByTwo.size << " candidates: " << theHCandidatesScaledToActByTwo.ToString();
-      for (int k=0; k<theHCandidatesScaledToActByTwo.size; k++)
+      if (newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesScaledToActByTwo[k], theLargerTypes[i], theRootInjections[i]))
       { if (theGlobalVariables!=0)
-        { std::stringstream out2;
-          out2 << "Attempting to extend " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to " << theLargerTypes[i].ToString()
-          << " using sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ".";
-          theReport2.Report(out2.str());
-          //std::cout << "<br>" << out2.str();
+        { std::stringstream reportStream;
+          reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
+          << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
+          << ", h candidate " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << "). ";
+          //std::cout << reportStream.str();
+          theReport3.Report(reportStream.str());
         }
-        if (newCandidate.CreateAndAddByExtendingBaseSubalgebra(baseCandidate, theHCandidatesScaledToActByTwo[k], theLargerTypes[i], theRootInjections[i]))
-        { if (theGlobalVariables!=0)
-          { std::stringstream reportStream;
-            reportStream << " Successfully extended " << baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " to "
-            << newCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << " (Type " << i+1 << " out of " << theLargerTypes.size
-            << ", h candidate " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << "). ";
-            //std::cout << reportStream.str();
-            theReport3.Report(reportStream.str());
-          }
-          this->ExtendCandidatesRecursive(newCandidate, targetType);
-        } else
-        { std::stringstream out2;
-          out2 << "sl(2) orbit " << j+1 << ", h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ": did not succeed extending. ";
-          //std::cout << out2.str();
-          theReport2.Report(out2.str());
-        }
+        this->ExtendCandidatesRecursive(newCandidate, targetType);
+      } else
+      { std::stringstream out2;
+        out2 << "h element " << k+1 << " out of " << theHCandidatesScaledToActByTwo.size << ": did not succeed extending. ";
+        //std::cout << out2.str();
+        theReport2.Report(out2.str());
       }
-      //std::cout << "<hr>Done with the type";
     }
   }
 }

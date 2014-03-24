@@ -349,6 +349,11 @@ public:
   void FindAllEmbeddings(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner);
   void FindTheSSSubalgebras(SemisimpleLieAlgebra& newOwner, const DynkinType* targetType=0);
   void ExtendCandidatesRecursive(const CandidateSSSubalgebra& baseCandidate, const DynkinType* targetType=0);
+  void GetHCandidates
+(Vectors<Rational>& outputHCandidatesScaledToActByTwo, CandidateSSSubalgebra& newCandidate,
+ DynkinType& currentType, List<int>& currentRootInjection)
+  ;
+
 };
 
 

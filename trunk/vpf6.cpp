@@ -40,7 +40,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   }
   std::stringstream out;
   out << "<img src=\"" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\"></img><a href=\"" << this->DisplayNameDefaultOutput
-  << this->numOutputFiles << ".png\">output png</a>";
+  << this->numOutputFiles << ".png\">" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png</a>";
   this->numOutputFiles++;
   return out.str();
 }

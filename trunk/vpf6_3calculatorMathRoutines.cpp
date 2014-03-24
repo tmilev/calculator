@@ -2030,6 +2030,53 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   return output.AssignValue(out.str(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDrawPolarRfunctionTheta");
+  if (!input.IsListNElements(4))
+    return output.SetError("Drawing polar coordinates takes three arguments: function, lower angle bound and upper angle bound. ", theCommands);
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
+  Expression functionE;
+  PlotObject thePlotCartesian, thePlotPolar;
+  if (!lowerE.EvaluatesToRealDouble(&thePlotPolar.xLow) || !upperE.EvaluatesToRealDouble(&thePlotPolar.xHigh))
+    return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (thePlotPolar.xHigh<thePlotPolar.xLow)
+    MathRoutines::swap(thePlotPolar.xHigh, thePlotPolar.xLow);
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSuffixNotationForPostScript, input[1], functionE))
+    return false;
+  Expression xCoordE, yCoordE, costE(theCommands), sintE(theCommands);
+  costE.AddChildAtomOnTop(theCommands.opCos());
+  costE.AddChildAtomOnTop("t");
+  sintE.AddChildAtomOnTop(theCommands.opSin());
+  sintE.AddChildAtomOnTop("t");
+  xCoordE.MakeProducT(theCommands, input[1], costE);
+  yCoordE.MakeProducT(theCommands, input[1], sintE);
+  if (!xCoordE.EvaluatesToRealDoubleInRange("t", thePlotPolar.xLow, thePlotPolar.xHigh, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh))
+    return false;
+  if (!yCoordE.EvaluatesToRealDoubleInRange("t", thePlotPolar.xLow, thePlotPolar.xHigh, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh))
+    return false;
+  if (!input[1].EvaluatesToRealDoubleInRange("t", thePlotPolar.xLow, thePlotPolar.xHigh, 500, &thePlotPolar.yLow, &thePlotPolar.yHigh))
+    return false;
+  std::stringstream outCartesian, outPolar;
+
+  outCartesian << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  << thePlotPolar.xHigh << "}{";
+  outPolar << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  << thePlotPolar.xHigh << "}{";
+  std::string funString=functionE.GetValue<std::string>();
+  outCartesian << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
+  outPolar << "t " << funString << "}";
+  thePlotCartesian.thePlotString=outCartesian.str();
+  thePlotCartesian.thePlotStringWithHtml=outCartesian.str();
+  thePlotPolar.thePlotString=outPolar.str();
+  thePlotPolar.thePlotStringWithHtml=outPolar.str();
+
+  Expression cartesianPlotE, polarPlotE;
+  cartesianPlotE.AssignValue(thePlotCartesian, theCommands);
+  polarPlotE.AssignValue(thePlotPolar, theCommands);
+  return output.MakeXOX(theCommands, theCommands.opSequence(), cartesianPlotE, polarPlotE);
+}
+
 bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPlotParametricCurve");
   if (input.children.size<5)

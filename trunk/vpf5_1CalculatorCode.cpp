@@ -847,16 +847,15 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   resultStream << lineSeparator;
   resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundAxes-0.4 << ", "
   << lowBoundY-0.4 << ")(" << std::fixed << theUpperBoundAxes+0.4 << "," << highBoundY+0.5 << ")\n\n";
-  resultStream << lineSeparator;
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
   resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes-0.15 << "}{" << lowBoundY-0.15 << "}{"
-  << std::fixed << theUpperBoundAxes+0.15 << "}{" << highBoundY+0.15 << "}";
+  << std::fixed << theUpperBoundAxes+0.15 << "}{" << highBoundY+0.15 << "}" << lineSeparator;
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
     else
       resultStream << this->thePlots[i].thePlotString << lineSeparator;
-  resultStream << lineSeparator << "\\end{pspicture}\n\n" << lineSeparator << "\\end{document}";
+  resultStream << "\\end{pspicture}\n\n" << lineSeparator << "\\end{document}";
   return resultStream.str();
 }
 

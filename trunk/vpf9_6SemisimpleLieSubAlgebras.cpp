@@ -942,7 +942,8 @@ const HashedList<Vector<Rational> >& SemisimpleSubalgebras::GetOrbitSl2Helement(
 //      if (baseCandidate.theWeylNonEmbeddeD.theDynkinType.ToString()=="A^{6}_2")
 //        std::cout << out.str();
   }
-  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit(startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], 30000000))
+  if (!this->GetSSowner().theWeyl.GenerateOuterOrbit
+      (startingVector, this->theOrbits[indexSl2], &this->theOrbitGeneratingElts[indexSl2], -1))
     crash << "<hr> Failed to generate weight orbit: orbit has more than hard-coded limit of 30000000 elements. "
     << " This is not a programming error, but I am crashing in flames to let you know you hit the computational limits. "
     << "You might want to work on improving the algorithm for generating semisimple subalgebras. Here is a stack trace for you. " << crash;

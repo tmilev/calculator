@@ -2057,19 +2057,27 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
     return false;
   if (!input[1].EvaluatesToRealDoubleInRange("t", thePlotPolar.xLow, thePlotPolar.xHigh, 500, &thePlotPolar.yLow, &thePlotPolar.yHigh))
     return false;
-  std::stringstream outCartesian, outPolar;
+  std::stringstream outCartesianLatex, outCartesianHtml, outPolarLatex, outPolarHtml;
+  outCartesianLatex << "%Calculator command: " << input.ToString() << "\n";
+  outCartesianHtml << "%Calculator command: " << input.ToString() << "\n<br>\n";
 
-  outCartesian << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  outCartesianLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
   << thePlotPolar.xHigh << "}{";
-  outPolar << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  outCartesianHtml << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  << thePlotPolar.xHigh << "}{";
+  outPolarLatex << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
+  << thePlotPolar.xHigh << "}{";
+  outPolarHtml << "\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000, algebraic=false]{" << thePlotPolar.xLow << "}{"
   << thePlotPolar.xHigh << "}{";
   std::string funString=functionE.GetValue<std::string>();
-  outCartesian << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
-  outPolar << "t " << funString << "}";
-  thePlotCartesian.thePlotString=outCartesian.str();
-  thePlotCartesian.thePlotStringWithHtml=outCartesian.str();
-  thePlotPolar.thePlotString=outPolar.str();
-  thePlotPolar.thePlotStringWithHtml=outPolar.str();
+  outCartesianLatex << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
+  outCartesianHtml << funString << " t 57.29578 mul cos mul " << funString << " t 57.29578 mul sin mul " << "}";
+  outPolarLatex << "t " << funString << "}";
+  outPolarHtml << "t " << funString << "}";
+  thePlotCartesian.thePlotString=outCartesianLatex.str();
+  thePlotCartesian.thePlotStringWithHtml=outCartesianHtml.str();
+  thePlotPolar.thePlotString=outPolarLatex.str();
+  thePlotPolar.thePlotStringWithHtml=outPolarHtml.str();
 
   Expression cartesianPlotE, polarPlotE;
   cartesianPlotE.AssignValue(thePlotCartesian, theCommands);

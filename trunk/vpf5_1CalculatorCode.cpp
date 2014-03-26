@@ -883,9 +883,9 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   std::string currentString;
   if (input.IsAtom(&currentString))
   { if (input.ToString()=="e")
-      return output.AssignValue<std::string>("2.718281828 ", theCommands);
+      return output.AssignValue<std::string>(" 2.718281828 ", theCommands);
     if (input.ToString()=="\\pi")
-      return output.AssignValue<std::string>("3.141592654 ", theCommands);
+      return output.AssignValue<std::string>(" 3.141592654 ", theCommands);
     if (input.theData>=theCommands.NumPredefinedAtoms)
       return output.AssignValue(currentString, theCommands);
     if (currentString=="+")
@@ -919,11 +919,11 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   std::stringstream out;
   out.precision(7);
   if (input.IsOfType<Rational>())
-  { out << std::fixed << input.GetValue<Rational>().DoubleValue();
+  { out << std::fixed << " " << input.GetValue<Rational>().DoubleValue();
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.IsOfType<double>())
-  { out << std::fixed << input.GetValue<double>();
+  { out << std::fixed << " " << input.GetValue<double>();
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;

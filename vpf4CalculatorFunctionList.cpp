@@ -395,11 +395,16 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("\\arccos", CalculatorFunctionsGeneral::innerArccos, "",
    "Arccos function. Tries to evaluate the arccos function. ",
-   "\\c(3/4)", true, false)
+   "\\arccos(3/4)", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\arcsin", CalculatorFunctionsGeneral::innerArcsin, "",
+   "Arcsin function. Tries to evaluate the arcsin function. ",
+   "\\arcsin(3/4)", true, false)
    ;
   this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerSin, "",
-   "Arcsin function. Evaluates to a decimal approximation if the input is a double number. ",
+   "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
    "\\sin{}(3.1415)", true, false)
    ;
   this->AddOperationInnerHandler

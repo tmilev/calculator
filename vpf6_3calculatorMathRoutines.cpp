@@ -206,6 +206,14 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
   return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands );
 }
 
+bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArcsin");
+  double theArgument;
+  if (!input.EvaluatesToRealDouble(&theArgument))
+    return false;
+  return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands );
+}
+
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
   if (input.IsAtomGivenData(theCommands.opPi()))

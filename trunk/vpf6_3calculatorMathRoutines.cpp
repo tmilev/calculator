@@ -190,6 +190,22 @@ bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const E
   return output.AssignValue(result.Factorial(inputInt), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArctan");
+  double theArgument;
+  if (!input.EvaluatesToRealDouble(&theArgument))
+    return false;
+  return output.AssignValue(FloatingPoint::arctan(theArgument), theCommands );
+}
+
+bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArccos");
+  double theArgument;
+  if (!input.EvaluatesToRealDouble(&theArgument))
+    return false;
+  return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands );
+}
+
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
   if (input.IsAtomGivenData(theCommands.opPi()))
@@ -3322,6 +3338,7 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
   this->IsListNElementsStartingWithAtom(theCommands.opSin(),2) ||
   this->IsListNElementsStartingWithAtom(theCommands.opCos(),2) ||
   this->IsListNElementsStartingWithAtom(theCommands.opArcTan(),2) ||
+  this->IsListNElementsStartingWithAtom(theCommands.opArcCos(),2) ||
   this->IsListNElementsStartingWithAtom(theCommands.opSqrt(),2)
   ;
 
@@ -3334,6 +3351,12 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
         return false;
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::sqrt(argumentD);
+    }
+    if (this->IsListNElementsStartingWithAtom(theCommands.opArcCos()))
+    { if (argumentD>1 ||argumentD<-1)
+        return false;
+      if (whichDouble!=0)
+        *whichDouble= FloatingPoint::arccos(argumentD);
     }
     if (this->IsListNElementsStartingWithAtom(theCommands.opSin()))
       if (whichDouble!=0)

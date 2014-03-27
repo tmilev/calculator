@@ -2061,7 +2061,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())
-  { out << std::fixed << this->GetValue<double>();
+  { out << MathRoutines::DoubleToString(this->GetValue<double>());
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
   { out << this->GetValue<AlgebraicNumber>().ToString();

@@ -546,6 +546,18 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
   return false;
 }
 
+std::string MathRoutines::DoubleToString(double input)
+{ std::stringstream out;
+  out << std::fixed << input;
+  std::string result=out.str();
+  int firstNonZeroIndex=0;
+  for (firstNonZeroIndex=result.size()-1; firstNonZeroIndex>=0; firstNonZeroIndex--)
+    if (result[firstNonZeroIndex]!='0' && result[firstNonZeroIndex]!='.')
+      break;
+  result.resize(firstNonZeroIndex+1);
+  return result;
+}
+
 int MathRoutines::lcm(int a, int b)
 { if (a<0)
     a=-a;

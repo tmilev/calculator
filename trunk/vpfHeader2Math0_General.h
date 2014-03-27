@@ -17,6 +17,7 @@ class FloatingPoint
 public:
   static double sin(double argument);
   static double cos(double argument);
+  static double arccos(double argument);
   static double arctan(double argument);
   static double arcsin(double argument);
   static double sqrt(double argument);

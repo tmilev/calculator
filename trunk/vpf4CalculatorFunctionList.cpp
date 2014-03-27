@@ -388,8 +388,18 @@ void Calculator::initPredefinedInnerFunctions()
    "\\log{}(e); \\log 10", true, false)
    ;
   this->AddOperationInnerHandler
+  ("\\arctan", CalculatorFunctionsGeneral::innerArctan, "",
+   "Arctan function. Tries to evaluate the arctan function. ",
+   "\\arctan(3/4)", true, false)
+   ;
+  this->AddOperationInnerHandler
+  ("\\arccos", CalculatorFunctionsGeneral::innerArccos, "",
+   "Arccos function. Tries to evaluate the arccos function. ",
+   "\\c(3/4)", true, false)
+   ;
+  this->AddOperationInnerHandler
   ("\\sin", CalculatorFunctionsGeneral::innerSin, "",
-   "Sine function. Evaluates to a decimal approximation if the input is a double number. ",
+   "Arcsin function. Evaluates to a decimal approximation if the input is a double number. ",
    "\\sin{}(3.1415)", true, false)
    ;
   this->AddOperationInnerHandler

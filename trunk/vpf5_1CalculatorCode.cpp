@@ -817,8 +817,8 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   //out << "\\rput(1,3){$y=" << functionStringCalculatorFormat << "$}\n\n";
   //if (useHtml)
   //  out << "<br>\n";
-  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{" << std::fixed
-  << inputLowerBound << "}{" << std::fixed << inputUpperBound << "}{";
+  out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{"
+  << MathRoutines::DoubleToString(inputLowerBound) << "}{" << MathRoutines::DoubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -836,7 +836,7 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   }
 
   std::string lineSeparator= useHtml ? "<br>\n" : "\n";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-3dplot}\\usepackage{pst-plot}";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{auto-pst-pdf}\\usepackage{pst-math}\\usepackage{pst-plot}";
   resultStream << lineSeparator << "\\newcommand{\\psLabels}[2]{\\rput[t](#1, -0.1){$x$}\\rput[r](-0.1, #2){$y$}}" << lineSeparator;
   resultStream << "\\addtolength{\\hoffset}{-3.5cm}\\addtolength{\\textwidth}{6.8cm}\\addtolength{\\voffset}{-3.2cm}\\addtolength{\\textheight}{6.3cm}"
   << lineSeparator;
@@ -845,11 +845,15 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << std::fixed << theLowerBoundAxes-0.4 << ", "
-  << lowBoundY-0.4 << ")(" << std::fixed << theUpperBoundAxes+0.4 << "," << highBoundY+0.5 << ")\n\n";
+  resultStream << "\\begin{pspicture}(" << MathRoutines::DoubleToString(theLowerBoundAxes-0.4) << ", "
+  << MathRoutines::DoubleToString(lowBoundY-0.4) << ")("
+  << MathRoutines::DoubleToString(theUpperBoundAxes+0.4)
+  << "," << MathRoutines::DoubleToString(highBoundY+0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << std::fixed << theLowerBoundAxes-0.15 << "}{" << lowBoundY-0.15 << "}{"
-  << std::fixed << theUpperBoundAxes+0.15 << "}{" << highBoundY+0.15 << "}" << lineSeparator;
+  resultStream << " \\psaxesStandard{" << MathRoutines::DoubleToString(theLowerBoundAxes-0.15)
+  << "}{" << MathRoutines::DoubleToString(lowBoundY-0.15) << "}{"
+  << MathRoutines::DoubleToString(theUpperBoundAxes+0.15) << "}{"
+  << MathRoutines::DoubleToString(highBoundY+0.15) << "}" << lineSeparator;
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
@@ -919,11 +923,11 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   std::stringstream out;
   out.precision(7);
   if (input.IsOfType<Rational>())
-  { out << std::fixed << " " << input.GetValue<Rational>().DoubleValue();
+  { out << " " << MathRoutines::DoubleToString(input.GetValue<Rational>().DoubleValue());
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.IsOfType<double>())
-  { out << std::fixed << " " << input.GetValue<double>();
+  { out << " " << MathRoutines::DoubleToString(input.GetValue<double>());
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;

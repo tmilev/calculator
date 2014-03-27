@@ -25,6 +25,14 @@ double FloatingPoint::arctan(double argument)
 { return ::atan(argument);
 }
 
+double FloatingPoint::arccos(double argument)
+{ return ::acos(argument);
+}
+
+double FloatingPoint::arcsin(double argument)
+{ return ::asin(argument);
+}
+
 double FloatingPoint::floor(double argument)
 { return ::floor(argument);
 }

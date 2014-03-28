@@ -49,8 +49,34 @@ inline int IntIdentity(const int& x)
 { return x;
 }
 
-void Expression::MakeProducT(Calculator& owner, const Expression& left, const Expression& right)
-{ this->MakeXOX(owner, owner.opTimes(), left, right);
+bool Expression::MakeProducT(Calculator& owner, const Expression& left, const Expression& right)
+{ return this->MakeXOX(owner, owner.opTimes(), left, right);
+}
+
+bool Expression::MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands)
+{ if (theMultiplicands.size==0)
+    return this->AssignValue(1, owner);
+  return this->MakeXOXOdotsOX(owner, owner.opTimes(), theMultiplicands);
+}
+
+bool Expression::MakeSum(Calculator& owner, const List<Expression>& theSummands)
+{ if (theSummands.size==0)
+    return this->AssignValue(0, owner);
+  return this->MakeXOXOdotsOX(owner, owner.opPlus(), theSummands);
+}
+
+bool Expression::MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& theOpands)
+{ MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
+  if (theOpands.size==0)
+    crash << "Zero opands not allowed at this point. " << crash;
+  if (theOpands.size==1)
+  { *this=theOpands[0];
+    return true;
+  }
+  *this=*theOpands.LastObject();
+  for (int i=theOpands.size-2; i>=0; i--)
+    this->MakeXOX(owner, theOp, theOpands[i], *this);
+  return true;
 }
 
 void Expression::MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument)
@@ -1484,6 +1510,18 @@ bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands
   return output.MakeXOX(theCommands, theAdditiveOp, leftE, rightE);
 }
 
+bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expression>& outputOpands)
+{ MacroRegisterFunctionWithName("Calculator::CollectOpands");
+  const Expression* currentE=&input;
+  outputOpands.SetSize(0);
+  while (currentE->IsListNElementsStartingWithAtom(theOp, 3))
+  { outputOpands.AddOnTop((*currentE)[1]);
+    currentE=&(*currentE)[2];
+  }
+  outputOpands.AddOnTop(*currentE);
+  return true;
+}
+
 bool Calculator::CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
 { MacroRegisterFunctionWithName("Calculator::CollectSummands");
   List<Expression> summands;
@@ -1539,8 +1577,8 @@ bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expressio
   return false;
 }
 
-bool Expression::MakeXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input)
-{ MacroRegisterFunctionWithName("Expression::MakeXOdotsOX");
+bool Expression::MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input)
+{ MacroRegisterFunctionWithName("Expression::MakeOXdotsX");
   if (input.size==0)
     crash << "This is a programming error: cannot create operation sequence from an empty list. " << crash;
   if (input.size==1)
@@ -1591,7 +1629,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
   if (summandsWithCoeff.size>=2)
     if (summandsWithCoeff[0]>summandsWithCoeff[1] && summandsWithCoeff[1]>summandsWithCoeff[0])
       crash << "This is a pgoramming error: bad comparison! " << crash;
-  return this->MakeXOdotsOX(theCommands, theCommands.opPlus(), summandsWithCoeff);
+  return this->MakeOXdotsX(theCommands, theCommands.opPlus(), summandsWithCoeff);
 }
 
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)

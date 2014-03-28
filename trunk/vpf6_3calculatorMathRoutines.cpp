@@ -256,12 +256,65 @@ bool CalculatorFunctionsGeneral::innerCsc(Calculator& theCommands, const Express
   return output.MakeXOX(theCommands, theCommands.opDivide(), num, den);
 }
 
-bool CalculatorFunctionsGeneral::innerCompositeSequenceDereference(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeSequenceDereference");
+bool Calculator::GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands)
+{ MacroRegisterFunctionWithName("Calculator::GetSumProductsExpressions");
+  List<Expression> theSummands, currentMultiplicands;
+  outputSumMultiplicands.SetSize(0);
+  if (!this->CollectOpands(inputSum, this->opPlus(), theSummands))
+    return false;
+  for (int i=0; i<theSummands.size; i++)
+  { this->CollectOpands(theSummands[i], this->opTimes(), currentMultiplicands);
+    outputSumMultiplicands.AddOnTop(currentMultiplicands);
+  }
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCoefficientOf");
+  if (input.children.size!=3)
+    return false;
+  List<List<Expression> > theSummands;
+  List<Expression> currentListMultiplicands, survivingSummands;
+  Expression currentMultiplicand;
+  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide()))
+  { Expression coefficientNumerator=input;
+    coefficientNumerator.SetChilD(2, input[2][1]);
+    if (!CalculatorFunctionsGeneral::innerCoefficientOf(theCommands, coefficientNumerator, output))
+      return false;
+    return output.MakeXOX(theCommands, theCommands.opDivide(), output, input[2][2]);
+  }
+  if (!theCommands.GetSumProductsExpressions(input[2], theSummands))
+  { theCommands.Comments << "Failed to extract product of expressions from " << input[2].ToString();
+    return false;
+  }
+  for(int i=0; i<theSummands.size; i++)
+  { bool isGood=false;
+    for (int j=0; j<theSummands[i].size; j++)
+      if (theSummands[i][j]==input[1])
+      { if (isGood)
+        { isGood=false;
+          break;
+        }
+        isGood=true;
+      }
+    if (!isGood)
+      continue;
+    currentListMultiplicands.SetSize(0);
+    for (int j=0; j<theSummands[i].size; j++)
+      if (theSummands[i][j]!=input[1])
+        currentListMultiplicands.AddOnTop(theSummands[i][j]);
+    currentMultiplicand.MakeProducT(theCommands, currentListMultiplicands);
+    survivingSummands.AddOnTop(currentMultiplicand);
+  }
+  return output.MakeSum(theCommands, survivingSummands);
+}
+
+bool CalculatorFunctionsGeneral::innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDereferenceOperator");
   if (input.children.size!=2)
     return false;
-  if (!input[0].IsListStartingWithAtom(theCommands.opSequence()))
-    return false;
+//  if (!input[0].IsListStartingWithAtom(theCommands.opSequence()))
+//    return false;
   int theIndex;
   if (!input[1].IsSmallInteger(&theIndex))
     return false;
@@ -1307,8 +1360,8 @@ bool Expression::SplitProduct(int numDesiredMultiplicandsLeft, Expression& outpu
   for (int i=numDesiredMultiplicandsLeft; i<theMultiplicandsLeft.size; i++)
     theMultiplicandsRight.AddOnTop(theMultiplicandsLeft[i]);
   theMultiplicandsLeft.SetSize(numDesiredMultiplicandsLeft);
-  outputLeftMultiplicand.MakeXOdotsOX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsLeft);
-  return outputRightMultiplicand.MakeXOdotsOX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsRight);
+  outputLeftMultiplicand.MakeOXdotsX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsLeft);
+  return outputRightMultiplicand.MakeOXdotsX(*this->theBoss, this->theBoss->opTimes(), theMultiplicandsRight);
 }
 
 bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator& theCommands, const Expression& input, Expression& output)

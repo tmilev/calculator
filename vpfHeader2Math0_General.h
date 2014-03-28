@@ -24,6 +24,7 @@ public:
   static double power(double base, double exponent);
   static double log(double argument);
   static double floor(double argument);
+  static std::string DoubleToString(double input);
 };
 
 class WeylGroup;

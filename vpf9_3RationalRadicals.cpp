@@ -343,6 +343,58 @@ Rational AlgebraicNumber::GetDenominatorRationalPart()const
   return resultLCM;
 }
 
+bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
+{ MacroRegisterFunctionWithName("AlgebraicNumber::AssignCosRationalTimesPi");
+  Rational fracPart=input;
+  fracPart.AssignFracValue();
+  Rational halfIntegerPart=input*2;
+  halfIntegerPart.AssignFloor();
+  LargeInt halfIntegerPartTimesTwo;
+  if (!halfIntegerPart.IsInteger(&halfIntegerPartTimesTwo))
+    crash << "something went wrong: floor function returns non-integer" << crash;
+  halfIntegerPart/=2;
+  Rational halfFracPart=input-halfIntegerPart;
+  Rational half(1,2);
+  halfIntegerPartTimesTwo%=4;
+  std::cout << "input is: " << input.ToString();
+  std::cout << "Here be I: halfFracPart is: " << halfFracPart.ToString();
+  std::cout << "Here be I: halfIntegerPartTimesTwo is: " << halfIntegerPartTimesTwo.ToString();
+  int sign=1;
+  if (halfIntegerPartTimesTwo==1)
+  { sign =-1;
+    halfFracPart=half-halfFracPart;
+  }
+  if (halfIntegerPartTimesTwo==2)
+    sign=-1;
+  if (halfIntegerPartTimesTwo==3)
+    halfFracPart=half-halfFracPart;
+  if (halfFracPart==Rational(1,6))
+  { this->AssignRationalQuadraticRadical(3, inputOwner);
+    *this/=2;
+    *this*=sign;
+    return true;
+  }
+  if (halfFracPart==Rational(1,4))
+  { this->AssignRationalQuadraticRadical(2, inputOwner);
+    *this/=2;
+    *this*=sign;
+    return true;
+  }
+  if (halfFracPart==Rational(1,3))
+  { *this=half*sign;
+    return true;
+  }
+  if (halfFracPart==half)
+  { *this=0;
+    return true;
+  }
+  if (halfFracPart==0)
+  { *this=sign;
+    return true;
+  }
+  return false;
+}
+
 Rational AlgebraicNumber::GetNumeratorRationalPart()const
 { if (this->owner==0)
   { if (this->theElT.IsEqualToZero())

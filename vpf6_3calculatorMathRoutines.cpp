@@ -171,16 +171,6 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   return output.MakeXOX(theCommands, theCommands.opPlus(), lnPart, ipiE);
 }
 
-bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
-  if (input.IsAtomGivenData(theCommands.opPi()))
-    return output.AssignValue(0, theCommands);
-  double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
-    return false;
-  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
-}
-
 bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
   int inputInt;
@@ -195,7 +185,7 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
   double theArgument;
   if (!input.EvaluatesToRealDouble(&theArgument))
     return false;
-  return output.AssignValue(FloatingPoint::arctan(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::arctan(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output)
@@ -203,7 +193,7 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
   double theArgument;
   if (!input.EvaluatesToRealDouble(&theArgument))
     return false;
-  return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output)
@@ -211,13 +201,49 @@ bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expr
   double theArgument;
   if (!input.EvaluatesToRealDouble(&theArgument))
     return false;
-  return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands );
+  return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerSin");
+  if (input.IsAtomGivenData(theCommands.opPi()))
+    return output.AssignValue(0, theCommands);
+  Rational piProportion;
+  if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    if (input[2].IsAtomGivenData(theCommands.opPi()))
+      if (input[1].IsOfType<Rational>(&piProportion))
+      { AlgebraicNumber algOutput;
+        Rational ratOutput;
+        if (algOutput.AssignSinRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure))
+        { if (algOutput.IsRational(&ratOutput))
+            return output.AssignValue(ratOutput, theCommands);
+          return output.AssignValue(algOutput, theCommands);
+        }
+      }
+
+  double theArgument;
+  if (!input.EvaluatesToRealDouble(&theArgument))
+    return false;
+  return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCos");
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(-1, theCommands);
+  Rational piProportion;
+  if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    if (input[2].IsAtomGivenData(theCommands.opPi()))
+      if (input[1].IsOfType<Rational>(&piProportion))
+      { std::cout << " here be i!";
+        AlgebraicNumber algOutput;
+        Rational ratOutput;
+        if (algOutput.AssignCosRationalTimesPi(piProportion, theCommands.theObjectContainer.theAlgebraicClosure))
+        { if (algOutput.IsRational(&ratOutput))
+            return output.AssignValue(ratOutput, theCommands);
+          return output.AssignValue(algOutput, theCommands);
+        }
+      }
   double theArgument;
   if (!input.EvaluatesToRealDouble(&theArgument))
     return false;

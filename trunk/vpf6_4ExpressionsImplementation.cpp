@@ -1244,6 +1244,8 @@ bool Expression::IsMonEqualToZero()const
 bool Expression::IsEqualToZero()const
 { if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().IsEqualToZero();
+  if (this->IsOfType<double>())
+    return this->GetValue<double>()==0;
   if (this->IsOfType<Rational>())
     return this->GetValue<Rational>().IsEqualToZero();
   if (this->IsOfType<Polynomial<Rational> >())

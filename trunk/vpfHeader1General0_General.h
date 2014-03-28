@@ -419,7 +419,6 @@ public:
     else
       return -1;
   }
-  static std::string DoubleToString(double input);
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   static bool IsPrime(int theInt);
   template <class coefficient>

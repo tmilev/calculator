@@ -37,6 +37,12 @@ class AlgebraicNumber
   AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=(other);
   }
+  bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
+  bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
+  { Rational rHalf(1,2);
+    return this->AssignCosRationalTimesPi(rHalf-input, inputOwner);
+  }
+
   bool NeedsBrackets()const;
   bool CheckConsistency()const;
   bool CheckNonZeroOwner()const;

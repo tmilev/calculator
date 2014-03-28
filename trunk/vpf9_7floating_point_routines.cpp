@@ -13,6 +13,36 @@ double FloatingPoint::sin(double argument)
 { return ::sin(argument);
 }
 
+std::string FloatingPoint::DoubleToString(double input)
+{ std::stringstream out;
+  out << std::fixed << input;
+  std::string result=out.str();
+//  std::cout << "got as input " << input << ", before resizing got: " << result << "";
+  bool hasDot=false;
+  for (int i=result.size()-1; i>=0; i--)
+    if (result[i]=='.')
+    { hasDot=true;
+      break;
+    }
+  if (!hasDot)
+    return result;
+  int firstNonZeroIndex=0;
+  for (firstNonZeroIndex=result.size()-1; firstNonZeroIndex>=0; firstNonZeroIndex--)
+  { if (result[firstNonZeroIndex]=='.')
+    { result.resize(firstNonZeroIndex);
+      result+="+\\varepsilon";
+      return result;
+      //firstNonZeroIndex--;
+      //break;
+    }
+    if (result[firstNonZeroIndex]!='0')
+      break;
+  }
+  result.resize(firstNonZeroIndex+1);
+  //std::cout << "got as input " << input << ", am producing: " << result << " as output";
+  return result;
+}
+
 double FloatingPoint::cos(double argument)
 { return ::cos(argument);
 }

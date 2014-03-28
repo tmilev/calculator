@@ -2099,7 +2099,8 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     out << theSubalgebras.ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<double>())
-  { out << MathRoutines::DoubleToString(this->GetValue<double>());
+  { out << FloatingPoint::DoubleToString(this->GetValue<double>());
+    //std::cout << " converting to string : " << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
   { out << this->GetValue<AlgebraicNumber>().ToString();

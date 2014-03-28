@@ -818,7 +818,7 @@ std::string PlotObject::GetPlotStringFromFunctionStringAndRanges
   //if (useHtml)
   //  out << "<br>\n";
   out << "\\psplot[linecolor=\\psColorGraph, plotpoints=1000]{"
-  << MathRoutines::DoubleToString(inputLowerBound) << "}{" << MathRoutines::DoubleToString(inputUpperBound) << "}{";
+  << FloatingPoint::DoubleToString(inputLowerBound) << "}{" << FloatingPoint::DoubleToString(inputUpperBound) << "}{";
   out << functionStringPostfixNotation << "}";
   return out.str();
 }
@@ -845,15 +845,15 @@ std::string Plot::GetPlotStringAddLatexCommands(bool useHtml)
   << "\\newcommand{\\psaxesStandard}[4]{ \\psframe*[linecolor=white](! #1 #2)(! #3 0.1 add #4 01 add) \\psaxes[ticks=none, labels=none]{<->}(0,0)(#1, #2)(#3, #4)\\psLabels{#3}{#4}}"
   << lineSeparator << " \\psset{xunit=1cm, yunit=1cm}";
   resultStream << lineSeparator;
-  resultStream << "\\begin{pspicture}(" << MathRoutines::DoubleToString(theLowerBoundAxes-0.4) << ", "
-  << MathRoutines::DoubleToString(lowBoundY-0.4) << ")("
-  << MathRoutines::DoubleToString(theUpperBoundAxes+0.4)
-  << "," << MathRoutines::DoubleToString(highBoundY+0.5) << ")\n\n";
+  resultStream << "\\begin{pspicture}(" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.4) << ", "
+  << FloatingPoint::DoubleToString(lowBoundY-0.4) << ")("
+  << FloatingPoint::DoubleToString(theUpperBoundAxes+0.4)
+  << "," << FloatingPoint::DoubleToString(highBoundY+0.5) << ")\n\n";
   resultStream << lineSeparator << "\\tiny\n" << lineSeparator;
-  resultStream << " \\psaxesStandard{" << MathRoutines::DoubleToString(theLowerBoundAxes-0.15)
-  << "}{" << MathRoutines::DoubleToString(lowBoundY-0.15) << "}{"
-  << MathRoutines::DoubleToString(theUpperBoundAxes+0.15) << "}{"
-  << MathRoutines::DoubleToString(highBoundY+0.15) << "}" << lineSeparator;
+  resultStream << " \\psaxesStandard{" << FloatingPoint::DoubleToString(theLowerBoundAxes-0.15)
+  << "}{" << FloatingPoint::DoubleToString(lowBoundY-0.15) << "}{"
+  << FloatingPoint::DoubleToString(theUpperBoundAxes+0.15) << "}{"
+  << FloatingPoint::DoubleToString(highBoundY+0.15) << "}" << lineSeparator;
   for (int i=0; i<this->thePlots.size; i++)
     if (useHtml)
       resultStream << this->thePlots[i].thePlotStringWithHtml << lineSeparator;
@@ -923,11 +923,11 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   std::stringstream out;
   out.precision(7);
   if (input.IsOfType<Rational>())
-  { out << " " << MathRoutines::DoubleToString(input.GetValue<Rational>().DoubleValue());
+  { out << " " << FloatingPoint::DoubleToString(input.GetValue<Rational>().DoubleValue());
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.IsOfType<double>())
-  { out << " " << MathRoutines::DoubleToString(input.GetValue<double>());
+  { out << " " << FloatingPoint::DoubleToString(input.GetValue<double>());
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;

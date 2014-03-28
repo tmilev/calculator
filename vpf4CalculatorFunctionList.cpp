@@ -1219,9 +1219,16 @@ void Calculator::initPredefinedInnerFunctions()
    ;
    this->AddOperationInnerHandler
   ("TestMouseHover", CalculatorFunctionsGeneral::innerTestMathMouseHover, "",
-   "This is not a mahtematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
+   "This is not a mathematical function; instead it is an html/javascript test function. Converts the input to a math mouse hover class.",
    "TestMouseHover(x^2)", true, false)
    ;
+   this->AddOperationInnerHandler
+  ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
+   "Gets the coefficient of the first argument in the second. ",
+   "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)", true)
+   ;
+
+
 //  this->AddOperationInnerHandler
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
@@ -2053,7 +2060,7 @@ void Calculator::initPredefinedOperationsComposite()
    "If x is a constant, replaces x{}({{anything}}):=x; ",
    "0{}3;2{}y;(\\sqrt{}2){}x;", true);
   this->AddOperationComposite
-  ("Sequence", CalculatorFunctionsGeneral::innerCompositeSequenceDereference, "",
+  ("Sequence", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
    "Dereferences a sequence. The syntax is as illustrated by the example. ",
    "X:=(a,b,c); X_1; X_2; X_3; X_4; X_j; j:=3; X_j; \
     \nDenominations:=(1, 5, 10, 25,50, 100,200, 500, 1000, 2000, 5000);\
@@ -2063,6 +2070,10 @@ void Calculator::initPredefinedOperationsComposite()
     \np({{a}},{{x}} ):=p(a-1,x)+ p(a, x-Denominations_a);\
     \np(11,100)\
   ", true);
+  this->AddOperationComposite
+  (";", CalculatorFunctionsGeneral::innerDereferenceOperator, "",
+   "Dereferences a sequence of rules. The syntax is as illustrated by the example. ",
+   "A:=d/dx( \\sqrt(x+y)-4x^2y^2); (d/dx(y):=0; A)_2;  ", true);
   this->AddOperationComposite
   ("ElementWeylAlgebra", CalculatorFunctionsGeneral::innerCompositeEWAactOnPoly, "",
    "Differential operation acting on a polynomial. ",

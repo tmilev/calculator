@@ -20,11 +20,12 @@ public:
   static bool innerCsc(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCot(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCoefficientOf(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerArcsin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerCompositeSequenceDereference(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeApowerBevaluatedAtC(Calculator& theCommands, const Expression& input, Expression& output);

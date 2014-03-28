@@ -298,7 +298,6 @@ class Expression
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);
-  bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum);
   void MakeSerialization(const std::string& secondEntry, Calculator& theCommands, int numElementsToReserve=0);
   bool MakeAtom(int input, Calculator& newBoss)
   { this->reset(newBoss);
@@ -308,14 +307,18 @@ class Expression
   bool MakeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
-  void MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
+  bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum);
+  bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
+  bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
+  bool MakeProducT(Calculator& owner, const Expression& left, const Expression& right);
   void MakeFunction(Calculator& owner, const Expression& theFunction, const Expression& theArgument);
   int GetNumCols()const;
   bool MakeSequence(Calculator& owner, List<Expression>& inputSequence);
   bool MakeXOX(Calculator& owner, int theOp, const Expression& left, const Expression& right);
   bool MakeSqrt(Calculator& owner, const Rational& argument, const Rational& radicalSuperIndex=2);
 
-  bool MakeXOdotsOX(Calculator& owner, int theOp, const List<Expression>& input);
+  bool MakeXOXOdotsOX(Calculator& owner, int theOp, const List<Expression>& theOpands);
+  bool MakeOXdotsX(Calculator& owner, int theOp, const List<Expression>& input);
   bool MakeOX(Calculator& owner, int theOp, const Expression& opArgument);
   bool Sequencefy();
   void Substitute(const Expression& input, Expression& output);
@@ -1352,6 +1355,9 @@ public:
   static bool outerStandardFunction(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPlus(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output);
+  bool CollectOpands
+  (const Expression& input, int theOp, List<Expression>& outputOpands)
+  ;
   static bool CollectSummands(Calculator& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum);
   static bool outerTensor(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDivide(Calculator& theCommands, const Expression& input, Expression& output);
@@ -1403,6 +1409,7 @@ public:
     }
     return this->GetVectoR(tempE, output, inputOutputStartingContext, targetDimNonMandatory, conversionFunction);
   }
+  bool GetSumProductsExpressions(const Expression& inputSum, List<List<Expression> >& outputSumMultiplicands);
   bool GetVectorExpressions(const Expression& input, List<Expression>& output, int targetDimNonMandatory=-1);
   bool ConvertExpressionsToCommonContext(List<Expression>& inputOutputEs, Expression* inputOutputStartingContext=0);
   template <class theType>

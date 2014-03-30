@@ -913,15 +913,20 @@ void Calculator::initPredefinedInnerFunctions()
    "RootSubsystem(F_4, (0,1,0,0), (0,0,1,0), (1,1,2,2))");
 
   this->AddOperationInnerHandler
-  ("printRootSubalgebras", this->innerPrintRootSAs, "",
+  ("printRootSubalgebras", CalculatorFunctionsGeneral::innerPrintRootSAs, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-   "printRootSubalgebras{}(E_6)");
+   "printRootSubalgebras(E_6)");
   this->AddOperationInnerHandler
-  ("printSlTwoSubalgebras", this->innerPrintSltwos, "",
+  ("printRootSubalgebrasRecompute", CalculatorFunctionsGeneral::innerPrintRootSAsForceRecompute, "",
+   "Same as printRootSubalgebras but forces recomputation. Use to  \
+   recompute obsolete or interrupted output files.",
+   "printRootSubalgebras(f_4)");
+  this->AddOperationInnerHandler
+  ("printSlTwoSubalgebras", CalculatorFunctionsGeneral::innerPrintSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-   "printSlTwoSubalgebras{}(E_6)");
+   "printSlTwoSubalgebras(g_2)");
 
    this->AddOperationInnerHandler
   ("parabolicsInfoBruhatGraph", CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph, "",

@@ -4,54 +4,6 @@
 #include "vpfHeader1General0_General.h"
 ProjectInformationInstance projectInfoInstanceCalculatorHTML(__FILE__, "Calculator html routines. ");
 
-
-std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<std::string>& optionsRank, std::string& selectedType, std::string& selectedRank, bool usePreamble)
-{ std::stringstream out;
-  out << "\n<script language=\"javascript\">\n"
-  << "function updatePreamble(){\n"
-  << "  if (! document.getElementById(\"checkUsePreambleID\").checked)\n"
-  << "  { document.getElementById(\"textPreamble\").style.display = \"none\";\n"
-  << "    document.getElementById(\"textTypeID\").disabled= \"disabled\";\n"
-  << "    document.getElementById(\"textDimID\").disabled = \"disabled\";\n"
-  << "  }"
-  << "  else\n"
-  << "  { document.getElementById(\"textPreamble\").innerHTML=\"g_{{i}}:= getChevalleyGenerator{}(\"+"
-  << " document.getElementById(\"textTypeID\").value+\"_\""
-  << "+ document.getElementById(\"textDimID\").value+\", i)"
-  << "; h_{{i}}:=getCartanGenerator{}(\""
-  << "+document.getElementById(\"textTypeID\").value+\"_\""
-  << "+ document.getElementById(\"textDimID\").value+ \", i) ; \"; \n"
-  << "    document.getElementById(\"textPreamble\").style.display = '';\n"
-  << "    document.getElementById(\"textTypeID\").disabled = '';\n"
-  << "    document.getElementById(\"textDimID\").disabled = '';\n"
-  << "  }\n"
-  << "}\n"
-  << "\n</script>\n";
-  out << "Use predefined preamble";
-  out << "<input type=\"checkbox\"";
-  if (usePreamble)
-    out << " checked=\"checked\"";
-  out << " name=\"checkUsePreamble\" id= \"checkUsePreambleID\"onchange=\"updatePreamble();\"></input>";
-  out << "  <select name=\"textType\" id=\"textTypeID\" onchange=\"updatePreamble();\">\n";
-  for (int i=0; i<optionsType.size; i++)
-  { out << "   <option";
-    if (selectedType==optionsType[i])
-      out << " selected=\"selected\"";
-    out << ">" << optionsType[i] << "</option>\n";
-  }
-  out << "</select>";
-  out << "  <select name=\"textDim\" id=\"textDimID\" onchange=\"updatePreamble();\">\n";
-  for (int i=0; i<optionsRank.size; i++)
-  { out << "   <option";
-    if (selectedRank==optionsRank[i])
-      out << " selected=\"selected\"";
-    out << ">" << optionsRank[i] << "</option>\n";
-  }
-  out << " </select>\n";
-  out << "<span name=\"textPreamble\" id=\"textPreamble\"> </span>";
-  return out.str();
-}
-
 void PredefinedStrings(std::string& inputOutputCivilizedString)
 { if (inputOutputCivilizedString=="PenkovProject")
     inputOutputCivilizedString="experimentalPrintSemisimpleSubalgebras{}(F_4)";

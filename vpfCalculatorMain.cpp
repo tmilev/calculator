@@ -7,6 +7,7 @@ ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculato
 
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
+extern int serverMain();
 
 int main_command_input(int argc, char **argv)
 { MacroRegisterFunctionWithName("main_command_input");
@@ -34,9 +35,8 @@ int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
-	std::cout << "Content-Type: text/html\n\n";
-
-//	std::cout <<  "<br>" << (int) &theGlobalVariables.callSystem ;
+  std::cout << "Content-Type: text/html\n\n";
+  //	std::cout <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
   onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
@@ -60,9 +60,7 @@ int main(int argc, char **argv)
     std::string::size_type foundExperimental=onePredefinedCopyOfGlobalVariables.inputDisplayPath.find("experimental");
     if (foundExperimental!=std::string::npos)
       std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
-
   }
-  std::string tempS;
   //  std::cout << "input path: " << inputDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1)
@@ -91,31 +89,10 @@ int main(int argc, char **argv)
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  std::string civilizedInput, inputRankString, inputWeylString;
+  std::string civilizedInput;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
-  if (inputStringNames.Contains("textDim"))
-    inputRankString= inputStrings[inputStringNames.GetIndex("textDim")];
-  if (inputStringNames.Contains("textType"))
-    inputWeylString= inputStrings[inputStringNames.GetIndex("textType")];
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  List<std::string> optionsType, optionsRank;
-  optionsType.AddOnTop("A");
-  optionsType.AddOnTop("B");
-  optionsType.AddOnTop("C");
-  optionsType.AddOnTop("D");
-  optionsType.AddOnTop("E");
-  optionsType.AddOnTop("F");
-  optionsType.AddOnTop("G");
-  //  optionsType.AddOnTop("NoPreamble");
-  optionsRank.AddOnTop("1");
-  optionsRank.AddOnTop("2");
-  optionsRank.AddOnTop("3");
-  optionsRank.AddOnTop("4");
-  optionsRank.AddOnTop("5");
-  optionsRank.AddOnTop("6");
-  optionsRank.AddOnTop("7");
-  optionsRank.AddOnTop("8");
 //  civilizedInput="WeylGroupTauSignatures{}(b_3)";
 //  civilizedInput="WeylGroupTauSignatures{}(f_4);";
 //  civilizedInput="WeylGroupConjugacyClassesRepresentatives{}a_2";
@@ -142,9 +119,6 @@ int main(int argc, char **argv)
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
-  std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString, inputStringNames.Contains("checkUsePreamble"))
-  << tempStreamXX.str();
-  std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -161,13 +135,7 @@ int main(int argc, char **argv)
   std::cout.flush();
   //  std::cout << "<br>Number of lists created before evaluation: " << NumListsCreated;
   if (civilizedInput!="")
-  { if (inputStringNames.Contains("checkUsePreamble"))
-    { std::stringstream tempStream;
-      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString << "_" << inputRankString << ", i); h_{{i}}:=getCartanGenerator{}( "
-      << inputWeylString << "_" << inputRankString << ", i) ;";
-      civilizedInput=tempStream.str()+civilizedInput;
-    }
-    theParser.Evaluate(civilizedInput);
+  { theParser.Evaluate(civilizedInput);
     ComputationComplete=true;
     if (theParser.flagProduceLatexLink)
       std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> " << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, civilizedInput);

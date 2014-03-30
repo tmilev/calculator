@@ -1527,13 +1527,6 @@ public:
   }
   static bool innerCasimir(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGetLinksToSimpleLieAlgerbas(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos);
-  static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerRootSAsAndSltwos(theCommands, input, output, false);
-  }
-  static bool innerPrintSltwos(Calculator& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerRootSAsAndSltwos(theCommands, input, output, true);
-  }
   static bool innerCharacterSSLieAlgFD(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPrintSSsubalgebras
   (Calculator& theCommands, const Expression& input, Expression& output, bool doForceRecompute, bool doAttemptToSolveSystems,

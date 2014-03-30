@@ -2397,10 +2397,23 @@ void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariable
   currentSA.ownEr=this;
   basis.MakeEiBasis(this->owneR->GetRank());
   List<rootSubalgebra> currentList;
+  ProgressReport theReport(theGlobalVariables);
   for (int i=0; i<2; i++)
   { currentList.SetSize(0);
+    int counter =0;
     do
-    { basis.SubSelection(parSel, currentBasis);
+    { if (theGlobalVariables!=0)
+      { std::stringstream reportStream;
+        if (i==0)
+          reportStream << "Exploring which of the subalgebras are parabolic. ";
+        else
+          reportStream << "Exploring which of the subalgebras are pseudo-parabolic. ";
+        reportStream << "Current " << (i==0 ? "pseudo-parabolic " : "parabolic ") << "selection: "
+        << parSel.ToString() << ", total  " << counter << " selections explored. ";
+        counter++;
+        theReport.Report(reportStream.str());
+      }
+      basis.SubSelection(parSel, currentBasis);
       if (currentBasis.GetRankOfSpanOfElements()!=currentBasis.size)
         continue;
       currentSA.genK=currentBasis;
@@ -2486,12 +2499,41 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
       this->theSubalgebras.LastObject()->ComputePotentialExtensions();
     }
   }
+  std::stringstream reportStream;
+  if (this->theGlobalVariables!=0)
+  { reportStream << "Reductive root subalgebra computation done: total " << this->theSubalgebras.size
+    << " subalgebras. Proceeding to sort the subalgebras...";
+    theReport2.Report(reportStream.str());
+  }
 //  std::cout << "end!";
   this->SortDescendingOrderBySSRank();
+  if (this->theGlobalVariables!=0)
+  { reportStream << "done. ";
+    theReport2.Report(reportStream.str());
+  }
+
   if (this->flagComputeConeCondition)
+  { if (this->theGlobalVariables!=0)
+    { reportStream << "Proceeding to compute the module pairing tables ... ";
+      theReport2.Report(reportStream.str());
+    }
     this->ComputeKmodMultTables(this->theGlobalVariables);
+    if (this->theGlobalVariables!=0)
+    { reportStream << " done. ";
+      theReport2.Report(reportStream.str());
+    }
+  }
   if (this->flagPrintParabolicPseudoParabolicInfo)
+  { if (this->theGlobalVariables!=0)
+    { reportStream << "Computing which subalgebras are pseudo parabolic/parabolic/neither... ";
+      theReport2.Report(reportStream.str());
+    }
     this->ComputeParabolicPseudoParabolicNeitherOrder(this->theGlobalVariables);
+    if (this->theGlobalVariables!=0)
+    { reportStream << " done. ";
+      theReport2.Report(reportStream.str());
+    }
+  }
 }
 
 void rootSubalgebras::ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed)

@@ -186,60 +186,6 @@ void Calculator::GetOutputFolders(const DynkinType& theType, std::string& output
   outputFormat.PathDisplayServerBaseFolder=this->DisplayPathServerBase;
 }
 
-bool Calculator::innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos)
-{ MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");
-  //bool showIndicator=true;
-  SemisimpleLieAlgebra* ownerSS;
-  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSS))
-    return output.SetError("Error extracting Lie algebra.", theCommands);
-  CGI::SetCGIServerIgnoreUserAbort();
-  std::string outMainDisplayPatH, outMainPatH;
-  std::stringstream outSltwoPath, outSltwoDisplayPath;
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  FormatExpressions theFormat;
-  theCommands.GetOutputFolders(ownerSS->theWeyl.theDynkinType, outMainPatH, outMainDisplayPatH, theFormat);
-  outSltwoPath << outMainPatH << "sl2s/";
-  outSltwoDisplayPath << outMainDisplayPatH << "sl2s/";
-  bool NeedToCreateFolders=(!XML::FileExists(outMainPatH) || !XML::FileExists(outSltwoPath.str()));
-  if (NeedToCreateFolders)
-  { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << outMainPatH;
-    outMkDirCommand2 << "mkdir " << outSltwoPath.str();
-    theCommands.theGlobalVariableS->System(outMkDirCommand1.str());
-    theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
-  }
-  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << outMainPatH << "rootSubalgebras.html";
-  outRootHtmlDisplayName << outMainDisplayPatH << "rootSubalgebras.html";
-  bool mustRecompute=false;
-  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!XML::FileExists(outSltwoMainFile.str()) || !XML::FileExists(outRootHtmlFileName.str()))
-    mustRecompute=true;
-  std::cout << "FORCED recompute!!! ";
-  mustRecompute=true;
-  std::stringstream out;
-  if (mustRecompute)
-  { //std::cout << theCommands.javaScriptDisplayingIndicator;
-    std::cout.flush();
-    std::cout << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. "
-    << "<br>Appologies for this technical (Apache server configuration) problem. <br>Alleviating it is around the bottom of a very long to-do list.</b>"
-    << "<br> The computation is slow, up to around 10 minutes for E_8.<br>";
-    SltwoSubalgebras theSl2s(*ownerSS);
-    ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
-    std::string PathSl2= outSltwoPath.str();
-    std::string DisplayPathSl2=outSltwoDisplayPath.str();
-    theSl2s.ToHTML(&theFormat, theCommands.theGlobalVariableS);
-  } else
-    out << "The table is precomputed and served from the hard disk. <br>";
-//  out << "The full file name: " << outSltwoFileDisplayName.str();
-  out << "<a href=\"" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">"
-  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << " </a>";
-//  out << "<meta http-equiv=\"refresh\" content=\"1; url=" << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str()) << "\">";
-  return output.AssignValue(out.str(), theCommands);
-}
-
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSalg=0;

@@ -57,13 +57,12 @@ void* RunTimerVoidPtr(void* ptr)
       break;
   }
   if (!ComputationComplete)
-  { std::cout << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
-    std::cout << "<br>The maximum allowed run time for " << " the entire system is  " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
+  { stOutput << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
+    stOutput << "<br>The maximum allowed run time for " << " the entire system is  " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
     << " seconds (twice the amount of time allowed for calculator interpretation). <br>This safety limit is hard coded in this particular server. "
     << "<br>However, if you install the calculator on your own machine you may <br>allow arbitrarily large execution time by modifying "
     << " the variable onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit located in file "
     << __FILE__ << "<br><b>Signalling ungraceful exit...</b> ";
-    std::cout.flush();
     crash << crash;
     return 0;
   } else

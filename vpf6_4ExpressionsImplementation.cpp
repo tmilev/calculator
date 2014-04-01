@@ -760,7 +760,7 @@ bool Expression::ConvertToType<Weight<Polynomial<Rational> > >(Expression& outpu
 template< >
 bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
-  //std::cout << "<hr>convert to ue called on: " << this->ToString();
+  //stOutput << "<hr>convert to ue called on: " << this->ToString();
   this->CheckInitialization();
   if (!this->IsBuiltInType())
     return false;
@@ -768,7 +768,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
   { output=*this;
     return true;
   }
-//  std::cout << "<hr>Getting ue from: " << this->ToString();
+//  stOutput << "<hr>Getting ue from: " << this->ToString();
   SemisimpleLieAlgebra* theOwner=this->GetAmbientSSAlgebraNonConstUseWithCaution();
   if (theOwner==0)
   { this->theBoss->Comments << "<hr>Failed to convert " << this->ToString() << " (Lispified: " << this->ToStringFull()
@@ -912,11 +912,11 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     << Crasher::GetStackTraceEtcErrorMessage();
     inputOutputMinContext.MakeEmptyContext(*this->theBoss);
   }
-//  std::cout << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
+//  stOutput << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
 //  << " in expression " << this->ToString();
   Expression newContext;
   Expression myOldContext=this->GetContext();
-//  std::cout << "<br>In " << this->ToString() << ", merging my old context, " << myOldContext.Lispify() << " and the input context, " << inputOutputMinContext.Lispify();
+//  stOutput << "<br>In " << this->ToString() << ", merging my old context, " << myOldContext.Lispify() << " and the input context, " << inputOutputMinContext.Lispify();
   if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext))
     return false;
   if (myOldContext==newContext)
@@ -924,7 +924,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   inputOutputMinContext=newContext;
   if (this->IsOfType<Rational>())
   { this->SetChilD(1, inputOutputMinContext);
-//    std::cout << "<hr>Context of rational set; rational is: " << this->ToString();
+//    stOutput << "<hr>Context of rational set; rational is: " << this->ToString();
     return true;
   }
   if (this->IsOfType<ElementWeylGroup<WeylGroup> >())
@@ -940,7 +940,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { Polynomial<Rational> newPoly=this->GetValue<Polynomial<Rational> >();
-    //std::cout << "<br>Subbing " << polySub.ToString() << " in "
+    //stOutput << "<br>Subbing " << polySub.ToString() << " in "
     PolynomialSubstitution<Rational> subPolyPart;
     //<< newPoly.ToString();
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<Rational>(newContext, subPolyPart);
@@ -950,7 +950,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   }
   if (this->IsOfType<Polynomial<AlgebraicNumber> >())
   { Polynomial<AlgebraicNumber> newPoly=this->GetValue<Polynomial<AlgebraicNumber> >();
-    //std::cout << "<br>Subbing " << polySub.ToString() << " in "
+    //stOutput << "<br>Subbing " << polySub.ToString() << " in "
     PolynomialSubstitution<AlgebraicNumber> subPolyPart;
     //<< newPoly.ToString();
     myOldContext.ContextGetPolySubFromSuperContextNoFailure<AlgebraicNumber>(newContext, subPolyPart);
@@ -963,13 +963,13 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     PolynomialSubstitution<Rational> subPolyPart;
     myOldContext.ContextGetPolyAndEWASubFromSuperContextNoFailure(newContext, subPolyPart, subEWApart);
     ElementWeylAlgebra<Rational> outputEWA =this->GetValue<ElementWeylAlgebra<Rational> >();
-//    std::cout << "<hr>Subbing in: " << outputEWA.ToString();
+//    stOutput << "<hr>Subbing in: " << outputEWA.ToString();
     if (!outputEWA.Substitution(subPolyPart, subEWApart))
     { this->theBoss->Comments << "<hr>Failed to convert " << outputEWA.ToString() << ": failed to carry out substitution "
       << subEWApart.ToString() << ", " << subPolyPart.ToString();
       return false;
     }
-//    std::cout << "... to get: " << outputEWA.ToString();
+//    stOutput << "... to get: " << outputEWA.ToString();
     return this->AssignValueWithContext(outputEWA, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
@@ -1102,7 +1102,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   }
   int leftSSindex=leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex=rightContext.ContextGetIndexAmbientSSalg();
-//  std::cout << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
+//  stOutput << "<br>left, right semisimple Lie algebra indices extracted from contexts " << leftContext.ToString() << " and "
 //  << rightContext.ToString() << " are " << leftSSindex << ", " << rightSSindex << ". ";
   if (leftSSindex==-1)
     leftSSindex=rightSSindex;
@@ -1110,10 +1110,10 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     rightSSindex=leftSSindex;
   if (leftSSindex!=rightSSindex)
     return false;
-//  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
+//  stOutput << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
-//  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
+//  stOutput << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   HashedList<Expression> polyVarUnion;
   MemorySaving<HashedList<Expression> > EWAVarUnion;
   polyVarUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
@@ -1122,7 +1122,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
   for (int i =1; i<rightPolyV.children.size; i++)
     polyVarUnion.AddOnTopNoRepetition(rightPolyV[i]);
   polyVarUnion.QuickSortAscending();
-//  std::cout << "<br>Polyvarunion is: " << polyVarUnion.ToString();
+//  stOutput << "<br>Polyvarunion is: " << polyVarUnion.ToString();
   Calculator& owner=*leftContext.theBoss;
   outputContext.reset(owner, 5+polyVarUnion.size);
   outputContext.AddChildAtomOnTop(owner.opContexT());
@@ -1189,7 +1189,7 @@ bool Expression::ContextMergeContexts(const Expression& leftContext, const Expre
     ssAlgE.AddChildAtomOnTop(leftSSindex);
     outputContext.AddChildOnTop(ssAlgE);
   }
-//  std::cout << "<br>The result of the merge is: " << outputContext.ToString();
+//  stOutput << "<br>The result of the merge is: " << outputContext.ToString();
   return true;
 }
 
@@ -1275,8 +1275,8 @@ bool Expression::IsConstantNumber()const
     return true;
   if (this->IsAtomGivenData(this->theBoss->opE()))
     return true;
-//  std::cout << "testing for constant: " << this->ToString();
-//  std::cout << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
+//  stOutput << "testing for constant: " << this->ToString();
+//  stOutput << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
   return this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>();
 }
 

@@ -205,7 +205,7 @@ void PrintCharTable(const somegroup& G, const char* filename)
     data.IntoStream(out);
   }
   else
-  { data.IntoStream(std::cout);
+  { data.IntoStream(stOutput);
   }
 }
 
@@ -216,7 +216,7 @@ void AddCharTable(JSData& chartable, somegroup& G)
   // check sizes
   for(int i=0; i<G.conjugacyClasses.size; i++)
     if(chartable[sizes][i].number != G.conjugacyClasses[i].size)
-      std::cout << "Size mismatch in conjugacy class " << i;
+      stOutput << "Size mismatch in conjugacy class " << i;
   // check representatives... well, not yet.
   // load characters
 
@@ -238,7 +238,7 @@ template <typename weylgroup>
 List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc)
 { if(G.theElements.size == 0)
     G.ComputeAllElements();
-  std::cout << "Computing conjugacy class representatives... ";
+  stOutput << "Computing conjugacy class representatives... ";
   // hashing these might be nice
   // need to figure out how to pass MathRoutines::IntUnsignIdentity in
   List<List<int> > cycleTypes;
@@ -248,15 +248,15 @@ List<int> FindConjugacyClassRepresentatives(weylgroup &G, int ncc)
     WeylElementPermutesRootSystem(G.theElements[gi],pi);
     List<int> cycleType;
     pi.GetCycleStructure(cycleType);
-    std::cout << pi;
+    stOutput << pi;
     for(int i=1; i<cycleType.size; i++)
-      std::cout << ' ' << cycleType[i];
-    std::cout << std::endl;
+      stOutput << ' ' << cycleType[i];
+    stOutput << "\n";
     if(cycleTypes.GetIndex(cycleType) == -1)
     { cycleTypes.AddOnTop(cycleType);
       representatives.AddOnTop(gi);
-      //std::cout << representatives.size << ' ';
-      std::cout << "^ New cycle type, now have " << representatives.size << std::endl;
+      //stOutput << representatives.size << ' ';
+      stOutput << "^ New cycle type, now have " << representatives.size << "\n";
       if(representatives.size == ncc)
         break;
     }
@@ -272,13 +272,13 @@ void ComputeIrreps(WeylGroup& G)
   List<int> charactersWithoutIrreps;
   for(int i=0; i<G.irreps.size; i++)
   { charactersWithIrreps.AddOnTop(G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()));
-    std::cout << G.irreps[i].GetCharacter() << ": " << G.characterTable.BSExpectedIndex(G.irreps[i].GetCharacter()) << G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()) << std::endl;
+    stOutput << G.irreps[i].GetCharacter() << ": " << G.characterTable.BSExpectedIndex(G.irreps[i].GetCharacter()) << G.characterTable.BSGetIndex(G.irreps[i].GetCharacter()) << "\n";
   }
-  std::cout << "characters with irreps " << charactersWithIrreps << std::endl;
+  stOutput << "characters with irreps " << charactersWithIrreps << "\n";
   for(int i=0; i<G.characterTable.size; i++)
     if(!charactersWithIrreps.BSContains(i))
       charactersWithoutIrreps.AddOnTop(i);
-  std::cout << "need reps for chars" << charactersWithoutIrreps << std::endl;
+  stOutput << "need reps for chars" << charactersWithoutIrreps << "\n";
   Matrix<Rational> M;
   M.init(G.characterTable.size, G.characterTable.size);
   Rational SizeG=G.GetGroupSizeByFormula();
@@ -287,7 +287,7 @@ void ComputeIrreps(WeylGroup& G)
       M(j,i) = G.characterTable[j][i]*G.conjugacyClasseS[i].size/SizeG;
   for(int i=0; i<G.characterTable.size; i++)
     for(int j=i; j<G.characterTable.size; j++)
-    { std::cout << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << std::endl;
+    { stOutput << i << "⊗" << j << ": " << M*(G.characterTable[i]*G.characterTable[j]).data << "\n";
     }
 }
 
@@ -330,13 +330,13 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
      sel.RemoveSelection(0);
      SubgroupWeylGroup H;
      ParabolicSubgroup(&G,sel,H);
-     std::cout << G.CartanSymmetric.ToString(&consoleFormat) << std::endl;
+     stOutput << G.CartanSymmetric.ToString(&consoleFormat) << "\n";
      H.ComputeIrreducibleRepresentations();
-     std::cout << "subgroup" << std::endl;
-     std::cout << H.ToString(&consoleFormat) << std::endl;
-     std::cout << "sigs" << std::endl;
+     stOutput << "subgroup" << "\n";
+     stOutput << H.ToString(&consoleFormat) << "\n";
+     stOutput << "sigs" << "\n";
      H.ComputeTauSignature();
-     std::cout << H.tauSignature << std::endl;
+     stOutput << H.tauSignature << "\n";
   */
   List<List<bool> > ts;
   AllTauSignatures(&G,ts,true);
@@ -347,113 +347,113 @@ void PrettyPrintTauSignatures(weylgroup& G, JSData& data, bool pseudo = false)
       data[i][j] = ts[i][j];
   /* this prints out everything for some reason
   for(int i=0; i<G.conjugacyClasses.size; i++)
-  {std::cout << "conjugacy class " << i << std::endl;
+  {stOutput << "conjugacy class " << i << "\n";
    for(int j=0; j<G.conjugacyClasses[i].size; j++)
    {ElementWeylGroup<WeylGroup> g = G.theElements[G.conjugacyClasses[i][j]];
      for(int k=0; k<g.size; k++)
-      std::cout << g[k] << ' ';
-     std::cout << std::endl;
+      stOutput << g[k] << ' ';
+     stOutput << "\n";
    }
-   std::cout << std::endl;
+   stOutput << "\n";
   }*/
 
 // lets print out the character table
-  std::cout << "\\[ \\begin{array}{";
+  stOutput << "\\[ \\begin{array}{";
   for(int i=0; i<G.conjugacyClasses.size+1; i++)
-    std::cout << 'c';
-  std::cout << "}\n";
+    stOutput << 'c';
+  stOutput << "}\n";
 
   for(int i=0; i<G.conjugacyClasses.size; i++)
   { List<int> g;
     G.GetGeneratorList(G.conjugacyClasses[i][0],g);
-    std::cout << "&\\rotatebox{90}{";
+    stOutput << "&\\rotatebox{90}{";
     for(int k=0; k<g.size; k++)
-      std::cout << g[k] << ' ';
-    std::cout << "}\t";
+      stOutput << g[k] << ' ';
+    stOutput << "}\t";
   }
-  std::cout << "\\\\" << std::endl;
+  stOutput << "\\\\" << "\n";
 
   for(int i=0; i<G.conjugacyClasses.size; i++)
-    std::cout << '&' << G.conjugacyClasses[i].size << '\t';
-  std::cout << "\\\\\n\\hline\n";
+    stOutput << '&' << G.conjugacyClasses[i].size << '\t';
+  stOutput << "\\\\\n\\hline\n";
 
   for(int i=0; i<G.characterTable.size; i++)
   { for(int j=0; j<G.conjugacyClasses.size; j++)
-      std::cout << '&' << G.characterTable[i][j] << '\t';
-    std::cout << "\\\\\n";
+      stOutput << '&' << G.characterTable[i][j] << '\t';
+    stOutput << "\\\\\n";
   }
-  std::cout << "\\end{array} \\]" << std::endl;
+  stOutput << "\\end{array} \\]" << "\n";
 
 // okay now the regular tau signatures
   Selection sel;
   sel.init(G.CartanSymmetric.NumCols);
   int numCycles=MathRoutines::TwoToTheNth(sel.MaxSize);
-  std::cout << "\\[ \\begin{array}{";
+  stOutput << "\\[ \\begin{array}{";
   for(int i=0; i<numCycles+1; i++)
-    std::cout << 'c';
-  std::cout << "}\n";
+    stOutput << 'c';
+  stOutput << "}\n";
   for(int i=0; i<numCycles; i++)
-  { std::cout << "&\\rotatebox{90}{(";
+  { stOutput << "&\\rotatebox{90}{(";
     for(int j=0; j<sel.CardinalitySelection; j++)
-    { std::cout << sel.elements[j];
+    { stOutput << sel.elements[j];
       if(j+1<sel.elements.size)
-        std::cout << ' ';
+        stOutput << ' ';
     }
-    std::cout << ")}\t";
+    stOutput << ")}\t";
     sel.incrementSelection();
   }
 
-  std::cout << "\\\\" << std::endl;
+  stOutput << "\\\\" << "\n";
   for(int i=0; i<ts.size; i++)
   { for(int j=0; j<numCycles; j++)
-    { std::cout << '&';
-      std::cout << ts[i][j] << '\t';
+    { stOutput << '&';
+      stOutput << ts[i][j] << '\t';
     }
-    std::cout << "\\\\\n";
+    stOutput << "\\\\\n";
   }
-  std::cout << "\\end{array} \\]" << std::endl;
+  stOutput << "\\end{array} \\]" << "\n";
 
 // now the pseudo tau signatures
   if(pseudo)
   {
 
     if(ts[0].size > numCycles)
-    { std::cout << "hr is ";
+    { stOutput << "hr is ";
 // WeylGroup is alittle different from AnotherWeylGroup<derp>
 //    ElementWeylGroup<WeylGroup> hr = G.theElements[G.GetRootReflection(G.RootSystem.size-1)];
       List<int> hr;
       G.GetGeneratorList(G.GetRootReflection(G.RootSystem.size-1), hr);
       for(int i=0; i<hr.size; i++)
-        std::cout << hr[i] << ' ';
-      std::cout << std::endl;
+        stOutput << hr[i] << ' ';
+      stOutput << "\n";
 
       // make enough columns
-      std::cout << "\\[ \\begin{array}{";
+      stOutput << "\\[ \\begin{array}{";
       for(int i=0; i<numCycles; i++)
-        std::cout << 'c';
-      std::cout << "}\n";
+        stOutput << 'c';
+      stOutput << "}\n";
 
       // labels at the top
       sel.init(G.CartanSymmetric.NumCols);
       for(int i=0; i<numCycles-1; i++)
-      { std::cout << "&\\rotatebox{90}{(";
+      { stOutput << "&\\rotatebox{90}{(";
         for(int j=0; j<sel.CardinalitySelection; j++)
-          std::cout << sel.elements[j] << ' ';
-        std::cout << "hr";
-        std::cout << ")}\t";
+          stOutput << sel.elements[j] << ' ';
+        stOutput << "hr";
+        stOutput << ")}\t";
         sel.incrementSelection();
       }
 
       // data goes out here
-      std::cout << "\\\\" << std::endl;
+      stOutput << "\\\\" << "\n";
       for(int i=0; i<ts.size; i++)
       { for(int j=numCycles; j<numCycles+numCycles-1; j++)
-        { std::cout << '&';
-          std::cout << ts[i][j] << '\t';
+        { stOutput << '&';
+          stOutput << ts[i][j] << '\t';
         }
-        std::cout << "\\\\\n";
+        stOutput << "\\\\\n";
       }
-      std::cout << "\\end{array} \\]" << std::endl;
+      stOutput << "\\end{array} \\]" << "\n";
     }
   }
 }
@@ -482,7 +482,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
 {  List<CoxeterRepresentation<coefficient> > out;
    if(GetNumberOfComponents() == 1)
    { if(ct.GetIndex(character) == -1)
-     { std::cout << "new irrep found, have " << ct.size << std::endl;
+     { stOutput << "new irrep found, have " << ct.size << "\n";
        ct.AddOnTop(character);
        gr.AddOnTop(*this);
      }
@@ -492,7 +492,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
    List<Vector<coefficient> > Vb = basis;
    for(int i=0; i<ct.size; i++)
    { if(character.IP(ct[i])!=0)
-     { std::cout << "contains irrep " << i << std::endl;
+     { stOutput << "contains irrep " << i << "\n";
        Matrix<coefficient> M = ClassFunctionMatrix(ct[i]);
        Vb = intersection(Vb,DestructiveKernel(M));
      }
@@ -504,7 +504,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
      V.classFunctionMatrices = classFunctionMatrices;
      V.basis = Vb;
      V = V.Reduced();
-     std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
+     stOutput << "Decomposing remaining subrep " << V.GetCharacter() << "\n";
      return V.Decomposition(ct,gr);
    }
    if(Vb.size == 0)
@@ -516,25 +516,25 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
       cf.G = G;
       cf.MakeZero();
       cf[cfi] = 1;
-      std::cout << "getting matrix " << cf << std::endl;
+      stOutput << "getting matrix " << cf << "\n";
       Matrix<coefficient> A = ClassFunctionMatrix(cf);
       List<List<Vector<coefficient> > > es = eigenspaces(A);
-      std::cout << "eigenspaces were ";
+      stOutput << "eigenspaces were ";
       for(int i=0; i<es.size; i++)
-         std::cout << es[i].size << " ";
-      std::cout << std::endl;
+         stOutput << es[i].size << " ";
+      stOutput << "\n";
       for(int i=0; i<es.size; i++)
          st.PlaceInTree(es[i]);
-      std::cout << "tree is ";
+      stOutput << "tree is ";
       st.DisplayTree();
-      std::cout << std::endl;
+      stOutput << "\n";
    }
    List<List<Vector<coefficient> > > leaves;
    st.GetLeaves(leaves);
-   std::cout << "leaves are ";
+   stOutput << "leaves are ";
    for(int i=0; i<leaves.size; i++)
-      std::cout << leaves[i].size << " ";
-   std::cout << std::endl;
+      stOutput << leaves[i].size << " ";
+   stOutput << "\n";
 
    for(int i=0; i<leaves.size; i++)
    {  CoxeterRepresentation<coefficient> outeme;
@@ -567,10 +567,10 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     cf.G = G;
     cf.MakeZero();
     cf[cfi] = 1;
-    std::cout << "getting matrix" << cf << std::endl;
+    stOutput << "getting matrix" << cf << "\n";
     Matrix<coefficient> A = ClassFunctionMatrix(cf);
-    std::cout << A.ToString(&consoleFormat) << std::endl;
-    std::cout << "getting eigenspaces" << std::endl;
+    stOutput << A.ToString(&consoleFormat) << "\n";
+    stOutput << "getting eigenspaces" << "\n";
     List<List<Vector<coefficient> > > es = eigenspaces(A);
     for(int i=0; i<es.size; i++)
     { if(dim_components == basis.size)
@@ -582,7 +582,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
         List<Vector<coefficient> > middle = intersection(es[i],spaces[j]);
         if(!((0<middle.size)&&(middle.size<spaces[j].size)))
           continue;
-        std::cout << "eigenspace " << i << " intersects with space " << j << std::endl;
+        stOutput << "eigenspace " << i << " intersects with space " << j << "\n";
         List<Vector<coefficient> > right = relative_complement(spaces[j],middle);
         spaces[j] = middle;
         spaces.AddOnTop(right);
@@ -607,7 +607,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
       }
     }
   }
-  std::cout << "spaces.size " << spaces.size << std::endl;
+  stOutput << "spaces.size " << spaces.size << "\n";
   for(int i=0; i<spaces.size; i++)
   { CoxeterRepresentation<coefficient> s;
     s.G = this->G;
@@ -615,7 +615,7 @@ List<CoxeterRepresentation<coefficient> > CoxeterRepresentation<coefficient>::De
     s.basis = spaces[i];
     out.AddOnTop(s);
   }
-  std::cout << "decomposition might be complete, found " << out.size << " components" << std::endl;
+  stOutput << "decomposition might be complete, found " << out.size << " components" << "\n";
   return out;
 }*/
 
@@ -883,9 +883,9 @@ template <typename coefficient>
 List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M)
 { Matrix<coefficient> MM; // idk what this does
   Selection s;
-//  std::cout << "DestructiveKernel: GaussianEliminationByRows" << std::endl;
+//  stOutput << "DestructiveKernel: GaussianEliminationByRows" << "\n";
   M.GaussianEliminationByRows(0,0,s);
-//  std::cout << "DestructiveKernel: calculating kernel space" << std::endl;
+//  stOutput << "DestructiveKernel: calculating kernel space" << "\n";
   List<Vector<coefficient> > V;
   for(int i=0; i<s.selected.size; i++)
   { if(!s.selected[i])
@@ -900,7 +900,7 @@ List<Vector<coefficient> > DestructiveKernel(Matrix<coefficient> &M)
       }
     V.AddOnTop(v);
   }
-//  std::cout << "DestructiveKernel: done" << std::endl;
+//  stOutput << "DestructiveKernel: done" << "\n";
   return V;
 }
 
@@ -1112,9 +1112,9 @@ void BSTest()
   l.BSInsertDontDup(5);
   l.InsertAtIndexShiftElementsUp(1,1);
   l.AddOnTop(5);
-  std::cout << "list contents " << l << std::endl;
+  stOutput << "list contents " << l << "\n";
   for(int i=0; i<7; i++)
-    std::cout << i << ": " << l.BSExpectedIndex(i) << std::endl;
+    stOutput << i << ": " << l.BSExpectedIndex(i) << "\n";
 }
 
 int chartable[10][10] =
@@ -1237,11 +1237,11 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
     roots=currentRootSA.PositiveRootsK;
     Polynomial<Rational> macdonaldPoly;
     make_macdonald_polynomial(W,roots,macdonaldPoly);
-    std::cout << macdonaldPoly << std::endl;
+    stOutput << macdonaldPoly << "\n";
     Polynomial<Rational> p;
     Matrix<Rational> m;
     List<Polynomial<Rational> > module;
-    std::cout << "I am processing root subalgebra of type "
+    stOutput << "I am processing root subalgebra of type "
               << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     module.AddOnTop(macdonaldPoly);
     int mcs=0;
@@ -1256,7 +1256,7 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
       }
       Polynomial<Rational>::GaussianEliminationByRowsDeleteZeroRows(module);
     } while(module.size > mcs);
-    std::cout << "...rank is " << module.size << std::endl;
+    stOutput << "...rank is " << module.size << "\n";
     WeylGroupRepresentation<Rational> rep;
     rep.init(W);
     rep.names.SetSize(1);
@@ -1274,15 +1274,19 @@ void get_macdonald_representations_of_weyl_group(SemisimpleLieAlgebra& theSSlieA
       }
       rep.SetElementImage(i,rm);
     }
-    std::cout << "has character ";
-    std::cout << rep.GetCharacter() << std::endl;
+    stOutput << "has character ";
+    stOutput << rep.GetCharacter() << "\n";
     W.AddIrreducibleRepresentation(rep);
-    std::cout << "elapsed seconds: " << theGlobalVariables.GetElapsedSeconds() << std::endl;
+    stOutput << "elapsed seconds: " << theGlobalVariables.GetElapsedSeconds() << "\n";
   }
 }
 
 class lennum
 { public:
+  friend std::ostream& operator << (std::ostream& output, const lennum& input)
+  { output << "num: " << input.num << " len: " << input.len.ToString();
+    return output;
+  }
   int num;
   Rational len;
 
@@ -1295,7 +1299,7 @@ class lennum
 };
 
 WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ std::cout << "starting with roots " << roots << std::endl;
+{ stOutput << "starting with roots " << roots << "\n";
   List<Vector<Rational> > monomial;
   List<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
@@ -1310,7 +1314,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
     monomial.QuickSortAscending();
     monomials.BSInsertDontDup(monomial);
   }
-  std::cout << "have all " << monomials.size << " monomials";
+  stOutput << "have all " << monomials.size << " monomials";
 
   List<lennum> lens;
   List<Vector<Rational> > images;
@@ -1334,7 +1338,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
     lens[i].num = i;
   }
   lens.QuickSortAscending();
-  std::cout << " ... sorted" << std::endl;
+  stOutput << " ... sorted" << "\n";
 
   List<int> monomials_used;
   VectorSpace<Rational> vs;
@@ -1346,7 +1350,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
   for(int i=0; i<monomials_used.size; i++)
     B.AddVector(images[monomials_used[i]]);
 
-  std::cout << "module rank is " << monomials_used.size << std::endl;
+  stOutput << "module rank is " << monomials_used.size << "\n";
 
   WeylGroupRepresentation<Rational> rep;
   rep.init(W);
@@ -1377,9 +1381,9 @@ WeylGroupRepresentation<Rational> get_macdonald_representation(WeylGroup& W, con
       rm.AssignVectorToColumnKeepOtherColsIntactNoInit(j,be);
     }
     rep.SetElementImage(i,rm);
-    std::cout << rm.ToString(&consoleFormat) << std::endl;
+    stOutput << rm.ToString(&consoleFormat) << "\n";
     if(!(rm*rm).IsIdMatrix())
-      std::cout << "Error: this matrix is not an involution" << std::endl;
+      stOutput << "Error: this matrix is not an involution" << "\n";
   }
   return rep;
 }
@@ -1492,7 +1496,7 @@ Vector<int> pointi_slow(int d, int i)
 { static List<Vector<int> > points;
   static int old_d;
   if((points.size == 0) || (old_d != d))
-  { std::cout << "generating points...";
+  { stOutput << "generating points...";
     old_d = d;
     int n = 10-d; // values of each coordinate range from -n to n
     Vector<int> point;
@@ -1519,12 +1523,12 @@ Vector<int> pointi_slow(int d, int i)
     //points.QuickSortAscending(&pointgt);
     std::sort(points.TheObjects, points.TheObjects+points.size, pointlt);
     for(int k=0; k<points.size; k++)
-      std::cout << points[k] << std::endl;
-    std::cout << " " << points.size << " generated." << std::endl;
+      stOutput << points[k] << "\n";
+    stOutput << " " << points.size << " generated." << "\n";
     maxpoints = points.size;
   }
   if(i>=points.size)
-    std::cout << "only " << points.size << " points in dimension " << d << " available so far (requested point " << i << ")" << std::endl;
+    stOutput << "only " << points.size << " points in dimension " << d << " available so far (requested point " << i << ")" << "\n";
   return points[i];
 }
 /*Vector<int> pointi(int d, int i)
@@ -1697,7 +1701,7 @@ int pointis(int d, int n)
 
 
 WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, const List<Vector<Rational> >& roots)
-{ std::cout << "starting with roots " << roots << " at time " << theGlobalVariables.GetElapsedSeconds() << std::endl;
+{ stOutput << "starting with roots " << roots << " at time " << theGlobalVariables.GetElapsedSeconds() << "\n";
   List<Vector<Rational> > monomial;
   HashedList<List<Vector<Rational> > > monomials;
   Matrix<Rational> m;
@@ -1712,7 +1716,7 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     monomial.QuickSortAscending();
     monomials.AddNoRepetitionOrReturnIndexFirst(monomial);
   }
-  std::cout << "have all " << monomials.size << " monomials (" << theGlobalVariables.GetElapsedSeconds() << ")";
+  stOutput << "have all " << monomials.size << " monomials (" << theGlobalVariables.GetElapsedSeconds() << ")";
 
   // Σ(n choose k)x<<k
   int number_of_images = 1;
@@ -1745,30 +1749,30 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
     lens[i].num = i;
   }
   lens.QuickSortAscending();
-  std::cout << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
+  stOutput << " ... sorted (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
 
   for(int i=0; i<monomials.size; i++)
-  { std::cout << lens[i].num << ": ";
+  { stOutput << lens[i].num << ": ";
     Rational is = 0;
     for(int j=0; j<monomials[lens[i].num].size; j++)
     { Rational js=0;
       for(int k=0; k<monomials[lens[i].num][j].size; k++)
         js += monomials[lens[i].num][j][k];
-      std::cout << monomials[lens[i].num][j] << " [" << js << "], ";
+      stOutput << monomials[lens[i].num][j] << " [" << js << "], ";
       is += js;
     }
-    std::cout << "[[" << is << "]]" << std::endl;
+    stOutput << "[[" << is << "]]" << "\n";
   }
 
   List<Vector<f65521> > images65521;
   images65521.SetSize(monomials.size);
   getting_images_time:
-  std::cout << "using " << number_of_images << " points";
+  stOutput << "using " << number_of_images << " points";
   if(maxpoints > 0 && number_of_images >= maxpoints)
   { number_of_images = maxpoints;
-    std::cout << "... max points reached, actually using " << number_of_images;
+    stOutput << "... max points reached, actually using " << number_of_images;
   }
-  std::cout << std::endl;
+  stOutput << "\n";
 
   for(int i=0; i<monomials.size; i++)
   { int images_old_size = images65521[i].size;
@@ -1793,12 +1797,12 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
   { if(vsr.AddVectorToBasis(images[lens[i].num]))
       monomials_used_rational.AddOnTop(lens[i].num);
   }
-  std::cout << "rational module rank is " << monomials_used_rational.size << std::endl;
-  //std::cout << vsr.fastbasis.ToString(&consoleFormat) << std::endl;
-  std::cout << "monomials used: ";
+  stOutput << "rational module rank is " << monomials_used_rational.size << "\n";
+  //stOutput << vsr.fastbasis.ToString(&consoleFormat) << "\n";
+  stOutput << "monomials used: ";
   for(int i=0; i<monomials_used_rational.size; i++)
-    std::cout << monomials_used_rational[i] << " ";
-  std::cout << std::endl;
+    stOutput << monomials_used_rational[i] << " ";
+  stOutput << "\n";
   */
 
   List<int> monomials_used;
@@ -1808,20 +1812,20 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       monomials_used.AddOnTop(lens[i].num);
   }
 
-  std::cout << "finite module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
-  //std::cout << vs.fastbasis.ToString(&consoleFormat) << std::endl;
-  std::cout << "monomials used: ";
+  stOutput << "finite module rank is " << monomials_used.size << " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
+  //stOutput << vs.fastbasis.ToString(&consoleFormat) << "\n";
+  stOutput << "monomials used: ";
   for(int i=0; i<monomials_used.size; i++)
-    std::cout << monomials_used[i] << " ";
-  std::cout << std::endl;
+    stOutput << monomials_used[i] << " ";
+  stOutput << "\n";
 
   /*
   if(monomials_used_rational.size != monomials_used.size)
-  { std::cout << "linear combinations over Z and Zp are different" << std::endl;
+  { stOutput << "linear combinations over Z and Zp are different" << "\n";
     for(int i=0; i<monomials_used_rational.size; i++)
-      std::cout << monomials_used_rational[i] << " " << images[monomials_used_rational[i]] << std::endl;
+      stOutput << monomials_used_rational[i] << " " << images[monomials_used_rational[i]] << "\n";
     for(int i=0; i<monomials_used.size; i++)
-      std::cout << monomials_used[i] << " " << images65521[monomials_used[i]] << std::endl;
+      stOutput << monomials_used[i] << " " << images65521[monomials_used[i]] << "\n";
     assert(false);
   }*/
 
@@ -1857,9 +1861,9 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       Vector<f65521> be;
       /*Vector<f65521> evbackup = evaluated;
       if(!vs.GetCoordinatesDestructively(evaluated, be))
-      { std::cout << "error: vector " << evbackup << " not in vector space " << vs.fastbasis.ToString(&consoleFormat) << " made with vectors " << std::endl;
+      { stOutput << "error: vector " << evbackup << " not in vector space " << vs.fastbasis.ToString(&consoleFormat) << " made with vectors " << "\n";
         for(int i=0; i<monomials_used.size; i++)
-          std::cout << images65521[monomials_used[i]] << std::endl;
+          stOutput << images65521[monomials_used[i]] << "\n";
         assert(false);
       }*/
       be = B65521.PutInBasis(evaluated);
@@ -1867,12 +1871,12 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
         rm.elements[j][mnop] = be[mnop];
     }
     rep65521.SetElementImage(i,rm);
-    std::cout << rm.ToString(&consoleFormat) << std::endl;
+    stOutput << rm.ToString(&consoleFormat) << "\n";
     if((rm*rm).IsIdMatrix())
-      std::cout << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
+      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
     else
-    { std::cout << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << std::endl;
-      //std::cout << "failed finite reflection test; trying rational anyway" << std::endl;
+    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
+      //stOutput << "failed finite reflection test; trying rational anyway" << "\n";
       //goto make_rational_matrices;
       number_of_images *= 2;
       goto getting_images_time;
@@ -1895,9 +1899,9 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       Matrix<f65521> M3 = M1*M2;
       MathRoutines::RaiseToPower(M3,w,idr65521);
       if(M3.IsIdMatrix())
-        std::cout << "passed Coxeter presentation test " << i << "," << j << std::endl;
+        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
       else
-      { std::cout << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << std::endl;
+      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
         number_of_images *= 2;
         goto getting_images_time;
       }
@@ -1954,11 +1958,11 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
         rm.elements[j][mnop] = be[mnop];
     }
     rep.SetElementImage(i,rm);
-    std::cout << rm.ToString(&consoleFormat) << std::endl;
+    stOutput << rm.ToString(&consoleFormat) << "\n";
     if((rm*rm).IsIdMatrix())
-      std::cout << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << std::endl;
+      stOutput << "passed reflection test " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")" << "\n";
     else
-    { std::cout << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << std::endl;
+    { stOutput << "failed reflection test; retrying with more points " <<  " (" << theGlobalVariables.GetElapsedSeconds() << ")"  << "\n";
       number_of_images *= 2;
       goto getting_images_time;
     }
@@ -1980,9 +1984,9 @@ WeylGroupRepresentation<Rational> get_macdonald_representation_v2(WeylGroup& W, 
       Matrix<Rational> M3 = M1*M2;
       MathRoutines::RaiseToPower(M3,w,idr);
       if(M3.IsIdMatrix())
-        std::cout << "passed Coxeter presentation test " << i << "," << j << std::endl;
+        stOutput << "passed Coxeter presentation test " << i << "," << j << "\n";
       else
-      { std::cout << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << std::endl;
+      { stOutput << "failed Coxeter presentation test " << i << "," << j << ", retrying with more points" << "\n";
         number_of_images *= 2;
         goto getting_images_time;
       }
@@ -2005,13 +2009,13 @@ void get_macdonald_representations_of_weyl_group_v2(SemisimpleLieAlgebra& theSSl
   for (int k=0; k<theRootSAs.theSubalgebras.size; k++)
   { rootSubalgebra& currentRootSA=theRootSAs.theSubalgebras[k];
     roots=currentRootSA.PositiveRootsK;
-    std::cout << "I am processing root subalgebra of type "
+    stOutput << "I am processing root subalgebra of type "
               << currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
     WeylGroupRepresentation<Rational> rep = get_macdonald_representation_v2(W,roots);
     rep.names.SetSize(1);
     rep.names[0] = currentRootSA.theDynkinDiagram.ToStringRelativeToAmbientType(W.theDynkinType[0]);
-    std::cout << " has character ";
-    std::cout << rep.GetCharacter() << std::endl;
+    stOutput << " has character ";
+    stOutput << rep.GetCharacter() << "\n";
     W.AddIrreducibleRepresentation(rep);
   }
 }
@@ -2031,7 +2035,7 @@ int main(void)
       Rational zero = Rational(0,1);
       Rational one = Rational(1,1);
       Rational two = Rational(2,1);
-      std::cout << zero*one << "\n" << zero+one << one*two << one+two << two*two << std::endl;
+      stOutput << zero*one << "\n" << zero+one << one*two << one+two << two*two << "\n";
 
   //    Vector<Rational> v;
   //    v.SetSize(3);
@@ -2040,20 +2044,20 @@ int main(void)
     //  v[2]=5;
       Vector<Rational> v;
       v = "(1/3,1,2)";
-      std::cout << v << std::endl;
+      stOutput << v << "\n";
 
       Vector<Rational> w;
       w.SetSize(3);
       w[0] = 0;
       w[1] = 1;
       w[2] = 2;
-      std::cout << w << std::endl;
+      stOutput << w << "\n";
 
       Matrix<Rational> M;
       M.Resize(3,3,false,&zero);
       M.ActOnVectorColumn(v,zero);
-      std::cout << M << std::endl;
-      std::cout << v << std::endl;
+      stOutput << M << "\n";
+      stOutput << v << "\n";
   */
   /*
       Rational one = 1;
@@ -2061,22 +2065,22 @@ int main(void)
       D.MakeSimpleType('B',3,&one);
       WeylGroup G;
       G.MakeFromDynkinType(D);
-      std::cout << G << std::endl;
-      std::cout << G.CartanSymmetric << std::endl;
+      stOutput << G << "\n";
+      stOutput << G.CartanSymmetric << "\n";
       G.ComputeAllElements();
-      std::cout << G << std::endl;
+      stOutput << G << "\n";
   */
   /*
       Vector<Rational> v1; v1 = "(1,0)";
       Vector<Rational> v2; v2 = "(0,1)";
 
-      std::cout << D << std::endl;
+      stOutput << D << "\n";
       D.GetCartanSymmetric(M);
-      std::cout << M << std::endl;
+      stOutput << M << "\n";
       Vectors<Rational> V;
       G.ComputeWeylGroupAndRootsOfBorel(V);
-      std::cout << G.GetReport() << std::endl;
-      std::cout << "printing G " << G << std::endl;
+      stOutput << G.GetReport() << "\n";
+      stOutput << "printing G " << G << "\n";
       G.GetMatrixOfElement(0,M);
 
 
@@ -2086,18 +2090,18 @@ int main(void)
       g->AddEdge(2,3);
       g->AddEdge(4,5);
       g->AddEdge(0,3);
-      std::cout << "g" << g->edges << std::endl;
-      std::cout << g->data << std::endl;
+      stOutput << "g" << g->edges << "\n";
+      stOutput << g->data << "\n";
       List<List<int> > ccs;
       ccs = g->DestructivelyGetConnectedComponents();
-      std::cout << ccs << std::endl;
+      stOutput << ccs << "\n";
 
-      std::cout << G.RootsOfBorel << std::endl;
+      stOutput << G.RootsOfBorel << "\n";
 
-      std::cout << G[0] << '\n' << G[1] << '\n' << G[2] << '\n' << std::endl;
+      stOutput << G[0] << '\n' << G[1] << '\n' << G[2] << '\n' << "\n";
       M = GetMatrixOfElement(G,G[6]);
-      std::cout << GetMatrixOfElement(G,G[6]) << std::endl;
-      std::cout << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << std::endl;
+      stOutput << GetMatrixOfElement(G,G[6]) << "\n";
+      stOutput << G[6] << ' ' << M.GetDeterminant() << ' ' << M(0,0)+M(1,1)+M(2,2) << "\n";
   */
   /*
 
@@ -2105,7 +2109,7 @@ int main(void)
      D.MakeSimpleType('G',2);
      Matrix<Rational> M;
      D.GetCartanSymmetric(M);
-     std::cout << M << std::endl;
+     stOutput << M << "\n";
 
   //  Matrix<f65521> M2;
   //  M2.init(M.NumRows, M.NumCols);
@@ -2120,7 +2124,7 @@ int main(void)
     ClassFunction<Rational> cf;
     cf = G.irreps[0].GetCharacter();
     r.ClassFunctionMatrix(cf,cfm);
-    std::cout << cfm.ToString(&consoleFormat) << std::endl;
+    stOutput << cfm.ToString(&consoleFormat) << "\n";
   */
 
   /*
@@ -2128,15 +2132,15 @@ int main(void)
    G.MakeFrom(M);
    G.ComputeInitialCharacters();
    for(int i=0; i<G.characterTable.size; i++)
-      std::cout << G.characterTable[i] << std::endl;
+      stOutput << G.characterTable[i] << "\n";
   */
   /*
     for(int i=0;i<G.ccCount;i++){
       int n = G.conjugacyClasses[i][0];
       Matrix<Rational> M = G.TodorsVectorToMatrix(G.rhoOrbit[n]);
-      std::cout << i << charpoly(M) << "\n\n";
-    //  std::cout << M << '\n';
-    //  std::cout << "\n\n";
+      stOutput << i << charpoly(M) << "\n\n";
+    //  stOutput << M << '\n';
+    //  stOutput << "\n\n";
     }
 
     G.characterTable.size = 0;
@@ -2149,48 +2153,48 @@ int main(void)
       G.characterTable.AddOnTop(X);
     }
 
-    std::cout << G.characterTable << std::endl;
+    stOutput << G.characterTable << "\n";
   */
   /*
     ElementWeylGroup<WeylGroup>Ring<Rational> XeP;
     XeP.MakeFromClassFunction(G.characterTable[0]);
-    std::cout << XeP.data << std::endl;
+    stOutput << XeP.data << "\n";
 
     ElementWeylGroup<WeylGroup>Ring<Rational> E;
     E.MakeEi(&G,0);
-    std::cout << E << std::endl;
-    std::cout << XeP*E << std::endl;
+    stOutput << E << "\n";
+    stOutput << XeP*E << "\n";
 
     ElementWeylGroup<WeylGroup>Ring<Rational> XstdP;
     XstdP.MakeFromClassFunction(G.characterTable[2]);
-    std::cout << XstdP << std::endl;
+    stOutput << XstdP << "\n";
 
-    std::cout << "\nhi there\n";
+    stOutput << "\nhi there\n";
     for(int i=0; i<G.N; i++)
     { E.MakeEi(&G,i);
-      std::cout << XstdP*E << std::endl;
+      stOutput << XstdP*E << "\n";
     }
 
-    std::cout << GetMatrix(G.characterTable[0]) << std::endl;
-    std::cout << GetMatrix(G.characterTable[2]) << std::endl;
+    stOutput << GetMatrix(G.characterTable[0]) << "\n";
+    stOutput << GetMatrix(G.characterTable[2]) << "\n";
 
     E.MakeEi(&G,33);
-    std::cout << XstdP*E << std::endl;
-    std::cout << GetMatrix(G.characterTable[2])*E.data << std::endl;
+    stOutput << XstdP*E << "\n";
+    stOutput << GetMatrix(G.characterTable[2])*E.data << "\n";
 
     ElementMonomialAlgebra<CoxeterElement, Rational> Xstdp = FromClassFunction(G.characterTable[2]);
-    std::cout << Xstdp << std::endl;
-    std::cout << "here they are" << std::endl;
+    stOutput << Xstdp << "\n";
+    stOutput << "here they are" << "\n";
     List<ElementMonomialAlgebra<CoxeterElement, Rational> > l;
     for(int i=0; i<G.N; i++)
     { ElementMonomialAlgebra<CoxeterElement, Rational> tmp;
       tmp.AddMonomial(G.GetCoxeterElement(i),1);
       tmp *= Xstdp;
       l.AddOnTop(tmp);
-      std::cout << tmp << '\n' << std::endl;
+      stOutput << tmp << '\n' << "\n";
     }
     Xstdp.GaussianEliminationByRowsDeleteZeroRows(l);
-    std::cout << l.size << std::endl;
+    stOutput << l.size << "\n";
   */
   /*
     Matrix<Rational> ct;
@@ -2207,7 +2211,7 @@ int main(void)
   Vectors<Rational> powers2;
   Vector<Rational> v;
   v = G.characterTable[2].data;
-  std::cout << v << '\n' << ct*v << '\n';
+  stOutput << v << '\n' << ct*v << '\n';
   powers.AddOnTop(v);
   for(int i=1; i<50; i++)
   { Vector<Rational> v;
@@ -2215,21 +2219,21 @@ int main(void)
     for(int j=0; j<G.ccCount; j++)
       v[j] *= powers[i-1][j];
     Vector<Rational> w = ct*v;
-    std::cout << v << '\n' << w << '\n';
+    stOutput << v << '\n' << w << '\n';
     powers.AddOnTop(v);
     powers2.AddOnTop(w);
   }
-  std::cout << powers2.GetRank() << std::endl;
-  std::cout << powers.GetRank() << std::endl;
+  stOutput << powers2.GetRank() << "\n";
+  stOutput << powers.GetRank() << "\n";
 
   ClassFunction<Rational> X;
   X.G = &G;
   X.data = powers[5];
-  std::cout << X << std::endl;
+  stOutput << X << "\n";
 
   List<ClassFunction<Rational> > tstct;
   for(int i=0;i<G.ccCount;i++)
-    std::cout << X.IP(G.characterTable[i]) << std::endl;
+    stOutput << X.IP(G.characterTable[i]) << "\n";
 
   Matrix<Rational> XP;
   XP = GetMatrix(G.characterTable[2]);
@@ -2240,13 +2244,13 @@ int main(void)
   for(int i=0; i<G.N; i++)
   { vv.MakeEi(G.N,i);
     vP.MakeEi(&G,i);
-    std::cout << (XP*vv == (XPP*vP).data) << ' ';
+    stOutput << (XP*vv == (XPP*vP).data) << ' ';
   }
   */
   //  Vectors<Rational> V;
   //  XP.GetZeroEigenSpace(V);
-  //  std::cout << V << std::endl;
-  //  std::cout << V.GetRank() << std::endl;
+  //  stOutput << V << "\n";
+  //  stOutput << V.GetRank() << "\n";
 
   /*
   Matrix<Rational> A;
@@ -2256,13 +2260,13 @@ int main(void)
   A(0,0) = 1; A(0,1) = 2; A(0,2) = 3;
   A(1,0) = 4; A(1,1) = 5; A(1,2) = 6;
   A(2,0) = 7; A(2,1) = 8; A(2,2) = 9;
-  std::cout << Kernel(A) << std::endl;
+  stOutput << Kernel(A) << "\n";
 
   A(0,0) = 1; A(0,1) = 0; A(0,2) = 0;
   A(1,0) = 0; A(1,1) = 1; A(1,2) = 0;
   A(2,0) = 0; A(2,1) = 0; A(2,2) = 0;
-  std::cout << Kernel(A) << std::endl;
-  std::cout << Eigenspace(A,one) << std::endl;
+  stOutput << Kernel(A) << "\n";
+  stOutput << Eigenspace(A,one) << "\n";
   */
   /*
     Matrix<Rational> A;
@@ -2275,14 +2279,14 @@ int main(void)
     A(4,0) = 0; A(4,1) = 0; A(4,2) = 0; A(4,3) =-1; A(4,4) = 2; A(4,5) =-1;
     A(5,0) = 0; A(5,1) = 0; A(5,2) = 0; A(5,3) =-1; A(5,4) =-1; A(5,5) = 2;
     A /= 3;
-    std::cout << DestructiveEigenspace(A,one) << std::endl;
+    stOutput << DestructiveEigenspace(A,one) << "\n";
 
     Rational zero = 0;
     Rational negone = -1;
     List<List<Rational> > ll;
     GlobalVariables g;
     A.FindZeroEigenSpacE(ll,one,negone,zero,g);
-    std::cout << ll << std::endl;
+    stOutput << ll << "\n";
   */
   /*
     Matrix<Rational> XP;
@@ -2290,18 +2294,18 @@ int main(void)
     {
     XP = GetMatrix(G.characterTable[i]);
     XP *= G.characterTable[i].data[0];
-    std::cout << G.characterTable[i] << std::endl;
-    std::cout << DestructiveEigenspace(XP,one) << std::endl;
+    stOutput << G.characterTable[i] << "\n";
+    stOutput << DestructiveEigenspace(XP,one) << "\n";
     }
   */
   /*
     Rational three = 3;
     List<Rational> p;
     p.AddOnTop(one); p.AddOnTop(three); p.AddOnTop(three); p.AddOnTop(one);
-    std::cout << factorpoly(p,5) << std::endl;
+    stOutput << factorpoly(p,5) << "\n";
     p.size = 0;
     p.AddOnTop(one); p.AddOnTop(three); p.AddOnTop(one); p.AddOnTop(three);
-    std::cout << factorpoly(p,5) << std::endl;
+    stOutput << factorpoly(p,5) << "\n";
 
     Vector<Rational> v;
     List<Vector<Rational> > B;
@@ -2312,7 +2316,7 @@ int main(void)
     v.AssignString("(0,1,1)");
     B.AddOnTop(v);
     v.AssignString("(2,2,2)");
-    std::cout << PutInBasis(v,B) << std::endl;
+    stOutput << PutInBasis(v,B) << "\n";
     B.size = 0;
     v.AssignString("(1,1,0,0)");
     B.AddOnTop(v);
@@ -2320,16 +2324,16 @@ int main(void)
     B.AddOnTop(v);
     v.AssignString("(0,0,1,1)");
     B.AddOnTop(v);
-    std::cout << "4-vector tests" << std::endl;
+    stOutput << "4-vector tests" << "\n";
     v.AssignString("(1,0,0,1)");
-    std::cout << PutInBasis(v,B) << std::endl;
+    stOutput << PutInBasis(v,B) << "\n";
     v.AssignString("(0,1,1,0)");
-    std::cout << PutInBasis(v,B) << std::endl;
+    stOutput << PutInBasis(v,B) << "\n";
 
     M = GetMatrix(G.characterTable[2]);
     M *= 3;
     B = DestructiveEigenspace(M,one);
-    std::cout << B << std::endl;
+    stOutput << B << "\n";
 
     Matrix<Rational> BM;
     BM.init(B.size,B[0].size);
@@ -2339,9 +2343,9 @@ int main(void)
       }
     }
 
-    std::cout << BM.ToString(&consoleFormat) << std::endl;
+    stOutput << BM.ToString(&consoleFormat) << "\n";
     for(int i=0; i<BM.NumRows; i++)
-    { std::cout << PutInBasis(B[i],B) << std::endl;
+    { stOutput << PutInBasis(B[i],B) << "\n";
     }
 
     int ge = 37;
@@ -2357,7 +2361,7 @@ int main(void)
       { M.elements[i][j] = v[j];
       }
     }
-    std::cout << M.ToString(&consoleFormat) << std::endl;
+    stOutput << M.ToString(&consoleFormat) << "\n";
 
 
 
@@ -2367,16 +2371,16 @@ int main(void)
     spaces.AddOnTop(B);
     List<ClassFunction<Rational> > Xs;
     Xs.AddOnTop(G.characterTable[2]);
-    std::cout << spaces << std::endl;
+    stOutput << spaces << "\n";
     { int i=1;
       Xs.AddOnTop(Xs[i-1]*Xs[i-1]);
       M = GetMatrix(Xs[i]);
   //    List<Rational> p = charpoly(M);
-  //    std::cout << p << std::endl;
+  //    stOutput << p << "\n";
   //    List<int> ls = factorpoly(p,Xs[i].data[0].floorIfSmall());
-  //    std::cout << ls << std::endl;
+  //    stOutput << ls << "\n";
       B = DestructiveColumnSpace(M);
-      std::cout << B << std::endl;
+      stOutput << B << "\n";
     }
   */
   /*
@@ -2388,34 +2392,34 @@ int main(void)
     a(0,0) = -1; a(0,1) = -1; a(1,0) =  1; a(1,1) =  0;
     b(0,0) =  1; b(0,1) =  0; b(1,0) = -1; b(1,1) = -1;
     M.AssignTensorProduct(b,b);
-    std::cout << M.ToString(&consoleFormat) << std::endl;
+    stOutput << M.ToString(&consoleFormat) << "\n";
   */
   /*
-      std::cout << "this orbit has " << G.rhoOrbit.size << std::endl;
-      std::cout << G.rhoOrbit << std::endl;
+      stOutput << "this orbit has " << G.rhoOrbit.size << "\n";
+      stOutput << G.rhoOrbit << "\n";
       Vector<Rational> v = G.rhoOrbit[34];
       M = G.TodorsVectorToMatrix(v);
-      std::cout << M*G.rho << " derp " << v << std::endl;
+      stOutput << M*G.rho << " derp " << v << "\n";
   */
 //    for(int i=0;i<G.rhoOrbit.size;i++){
-//    std::cout << G.TodorsVectorToMatrix(G.rhoOrbit[i]) << "\n\n";
+//    stOutput << G.TodorsVectorToMatrix(G.rhoOrbit[i]) << "\n\n";
 //    }
-//    std::cout << std::endl;
+//    stOutput << "\n";
   /*
-      std::cout << v << G.DecomposeTodorsVector(v) << G.ComposeTodorsVector(G.DecomposeTodorsVector(v)) << std::endl;
+      stOutput << v << G.DecomposeTodorsVector(v) << G.ComposeTodorsVector(G.DecomposeTodorsVector(v)) << "\n";
 
       G.ComputeConjugacyClasses();
-      std::cout << G.conjugacyClasses << std::endl;
-      std::cout << G.ccSizes << std::endl;
+      stOutput << G.conjugacyClasses << "\n";
+      stOutput << G.ccSizes << "\n";
       G.ComputeSquares();
-      std::cout << G.squares << std::endl;
+      stOutput << G.squares << "\n";
       G.ComputeInitialCharacters();
-      std::cout << G.characterTable << std::endl;
-      std::cout << G.characterTable[0].norm() << G.characterTable[1].norm() << G.characterTable[2].norm() << std::endl;
+      stOutput << G.characterTable << "\n";
+      stOutput << G.characterTable[0].norm() << G.characterTable[1].norm() << G.characterTable[2].norm() << "\n";
 
   //    ElementMonomialAlgebra<FiniteGroupElement, Rational> a;
       ClassFunction X = G.characterTable[2] - G.characterTable[0];
-      std::cout << X << X.norm() << std::endl;
+      stOutput << X << X.norm() << "\n";
 
       List<Vector<Rational> > l;
       for(int i=0;i<G.rootSystem.size;i++){
@@ -2428,7 +2432,7 @@ int main(void)
           if(usethis == true)
               l.AddOnTop(G.rootSystem[i]);
       }
-      std::cout << l << std::endl;
+      stOutput << l << "\n";
   */
   /*
       std::string* S = [
@@ -2436,7 +2440,7 @@ int main(void)
 
       ]
   */
-  /*    std::cout << "polynom1al" << std::endl;
+  /*    stOutput << "polynom1al" << "\n";
       polynom1al<Rational> zeropoly;
       Matrix<polynom1al<Rational> > MP;
       MP.MakeZeroMatrix(G.N, zeropoly);
@@ -2456,7 +2460,7 @@ int main(void)
 
       cp = MP.GetDeterminant();
 
-      std::cout << cp << std::endl;
+      stOutput << cp << "\n";
   */
 //    List<bool> isod;
 //    isod.AddOnTop(false);
@@ -2495,11 +2499,11 @@ int main(void)
       while(true)
       { if(!usedchars.Contains(chars[ci][cj]))
         { usedchars.AddOnTop(chars[ci][cj]);
-          std::cout << "matrix for " << ci << " " << cj << " " << chars[ci][cj] << std::endl;
+          stOutput << "matrix for " << ci << " " << cj << " " << chars[ci][cj] << "\n";
           Matrix<Rational> MM = GetMatrix(chars[ci][cj]);
-          std::cout << "eigenspaces" << std::endl;
+          stOutput << "eigenspaces" << "\n";
           List<List<Vector<Rational> > > es = eigenspaces(MM,G.N);
-          std::cout << "splitting spaces" << std::endl;
+          stOutput << "splitting spaces" << "\n";
           for(int i=0; i<es.size; i++)
           { int spaces_to_check = spaces.size;
             for(int j=0; j<spaces_to_check; j++)
@@ -2507,28 +2511,28 @@ int main(void)
               //  continue;
               if(spaces[j].size < 9)
                 continue;
-              std::cout << "intersect eigenspace " << i << " with space " << j << std::endl;
+              stOutput << "intersect eigenspace " << i << " with space " << j << "\n";
               List<Vector<Rational> > middle = intersection(es[i], spaces[j]);
-              std::cout << "result is " << middle.size << "dimensional" << std::endl;
+              stOutput << "result is " << middle.size << "dimensional" << "\n";
               if(0 < middle.size and middle.size < spaces[j].size)
-              { std::cout << "finding relative complement" << std::endl;
+              { stOutput << "finding relative complement" << "\n";
                 List<Vector<Rational> > right = relative_complement(spaces[j],es[i]);
-                std::cout << "relative complement is " << right.size << "dimensional" << std::endl;
+                stOutput << "relative complement is " << right.size << "dimensional" << "\n";
                 spaces[j] = middle;
                 //if(is_isotypic_component(G,middle))
                 //{ isod[j] = true;
                 //  isodd += middle.size;
-                //  std::cout << "intersection was an isotypic component" << std::endl;
+                //  stOutput << "intersection was an isotypic component" << "\n";
                 //}
                 spaces.AddOnTop(right);
                 //if(is_isotypic_component(G,right))
                 //{ isod.AddOnTop(true);
                 //  isodd += right.size;
-                //  std::cout << "complement was an isotypic component" << std::endl;
+                //  stOutput << "complement was an isotypic component" << "\n";
                 //} else
                 //{ isod.AddOnTop(false);
                 //}
-                std::cout << "moving on" << std::endl;
+                stOutput << "moving on" << "\n";
               }
             }
           }
@@ -2537,7 +2541,7 @@ int main(void)
           if(spaces.size == G.ccCount)
             break;
         }
-        std::cout << "finding next character" << std::endl;
+        stOutput << "finding next character" << "\n";
         if(ci!=0)
         { ci--;
           cj++;
@@ -2550,13 +2554,13 @@ int main(void)
           chars.AddOnTop(cil);
         }
       }
-      std::cout << "spaces" << std::endl;
-      std::cout << spaces.size << std::endl;
+      stOutput << "spaces" << "\n";
+      stOutput << spaces.size << "\n";
       for(int i=0; i<spaces.size; i++)
-        std::cout << spaces[i].size << " ";
-      std::cout << std::endl;
-      //std::cout << isod << std::endl;
-      //std::cout << isodd << std::endl;
+        stOutput << spaces[i].size << " ";
+      stOutput << "\n";
+      //stOutput << isod << "\n";
+      //stOutput << isodd << "\n";
   */
   /*    int i=0; j=0;
       while(spaces.size > 0)
@@ -2565,26 +2569,26 @@ int main(void)
       }
   */
 
-  /*    std::cout << V2.GetCharacter() << std::endl;
+  /*    stOutput << V2.GetCharacter() << "\n";
       CoxeterRepresentation<Rational> V2x2 = V2*V2;
-      std::cout << V2x2.GetCharacter() << std::endl;
+      stOutput << V2x2.GetCharacter() << "\n";
       for(int i=0; i<G.rank; i++)
-      { std::cout << V2x2.gens[i].ToString(&consoleFormat);
-        std::cout << V2x2.gens[i].GetDeterminant() << ' ' << V2x2.gens[i].GetTrace() << std::endl;
+      { stOutput << V2x2.gens[i].ToString(&consoleFormat);
+        stOutput << V2x2.gens[i].GetDeterminant() << ' ' << V2x2.gens[i].GetTrace() << "\n";
       }
-      std::cout << "class function matrices" << std::endl;
+      stOutput << "class function matrices" << "\n";
       for(int cfi=0; cfi<G.ccCount; cfi++)
       { ClassFunction<Rational> cf;
         cf.G = &G;
         cf.MakeZero();
         cf[cfi] = 1;
-        std::cout << cfi << std::endl;
-        std::cout << V2x2.ClassFunctionMatrix(cf).ToString(&consoleFormat) << std::endl;
+        stOutput << cfi << "\n";
+        stOutput << V2x2.ClassFunctionMatrix(cf).ToString(&consoleFormat) << "\n";
       }
       List<CoxeterRepresentation<Rational> > Vs;
       Vs = V2x2.Decomposition();
       for(int i=0; i<Vs.size; i++)
-        std::cout << Vs[i].Reduced().GetCharacter() << std::endl;
+        stOutput << Vs[i].Reduced().GetCharacter() << "\n";
     */
 
   /*Matrix<Rational> A;
@@ -2595,20 +2599,20 @@ int main(void)
   A(3,0) = 0; A(3,1) = 0; A(3,2) = 0; A(3,3) = 2; A(3,4) =-1; A(3,5) =-1;
   A(4,0) = 0; A(4,1) = 0; A(4,2) = 0; A(4,3) =-1; A(4,4) = 2; A(4,5) =-1;
   A(5,0) = 0; A(5,1) = 0; A(5,2) = 0; A(5,3) =-1; A(5,4) =-1; A(5,5) = 2;
-  std::cout << "polynomial test" << std::endl;
+  stOutput << "polynomial test" << "\n";
   UDPolynomial<Rational> p = MinPoly(A);
-  std::cout << p.data.size << std::endl;
-  std::cout << p << std::endl;
+  stOutput << p.data.size << "\n";
+  stOutput << p << "\n";
   */
 
-  /*std::cout << '[';
+  /*stOutput << '[';
   for(int i=0; i<G.ccCount; i++)
-    std::cout << G.conjugacyClasses[i][0] << ", ";
-  std::cout << ']' << std::endl;
+    stOutput << G.conjugacyClasses[i][0] << ", ";
+  stOutput << ']' << "\n";
   for(int i=0; i<G.ccCount; i++)
-    std::cout << i << ' ' << G.ccSizes[i] << ' ' << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << std::endl;
+    stOutput << i << ' ' << G.ccSizes[i] << ' ' << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << "\n";
   for(int i=0; i<G.ccCount; i++)
-    std::cout << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << ", ";*/
+    stOutput << G.GetCoxeterElement(G.conjugacyClasses[i][0]) << ", ";*/
 //  G.ComputeIrreducibleRepresentations();
   /*
   List<ClassFunction<Rational> > ct;
@@ -2619,18 +2623,18 @@ int main(void)
 
   List<CoxeterRepresentation<Rational> > sr2d = sr2.Decomposition(ct,gr);
 
-  std::cout << "std (x) std = ";
+  stOutput << "std (x) std = ";
   for(int i=0; i<sr2d.size; i++)
-  { std::cout << sr2d[i].GetCharacter() << std::endl;
+  { stOutput << sr2d[i].GetCharacter() << "\n";
     for(int j=0; j<sr2d[i].gens.size; j++)
-     std::cout << sr2d[i].gens[j].ToString(&consoleFormat) << std::endl;
+     stOutput << sr2d[i].gens[j].ToString(&consoleFormat) << "\n";
   }
   */
 
 
 
   /*
-     std::cout << "Building QG" << std::endl;
+     stOutput << "Building QG" << "\n";
      WeylGroupRepresentation<Rational> QG;
      QG.reset(&G);
      for(int g=1; g<G.CartanSymmetric.NumRows+1; g++)
@@ -2646,7 +2650,7 @@ int main(void)
        QG.SetElementImage(g,M);
      }
 
-     std::cout << "getting isotypic components of QG" << std::endl;
+     stOutput << "getting isotypic components of QG" << "\n";
      List<WeylGroupRepresentation<Rational> > isocomps;
      isocomps.SetSize(G.irreps.size);
      for(int i=0; i<G.irreps.size; i++)
@@ -2665,11 +2669,11 @@ int main(void)
        QG.Restrict(B,v,isocomps[i]);
      }
 
-     std::cout << "trying to break up one isotypic component" << std::endl;
+     stOutput << "trying to break up one isotypic component" << "\n";
      int cmpx = 2;
-     std::cout << isocomps[cmpx].ToString(&consoleFormat) << std::endl;
+     stOutput << isocomps[cmpx].ToString(&consoleFormat) << "\n";
      int d = isocomps[cmpx].GetRank();
-     std::cout << "the smoothed-out inner product" << std::endl;
+     stOutput << "the smoothed-out inner product" << "\n";
      Matrix<Rational> B;
      B.init(d,d);
      for(int i=0; i<d; i++)
@@ -2680,14 +2684,14 @@ int main(void)
            isocomps[cmpx].GetElementImage(g).GetVectorFromColumn(j,w);
            B.elements[i][j] = v.ScalarEuclidean(w);
          }
-    std::cout << B.ToString(&consoleFormat) << std::endl;
+    stOutput << B.ToString(&consoleFormat) << "\n";
 
     Vector<Rational> v;
     v.MakeZero(B.NumRows);
     for(int i=0; i<B.NumCols; i++)
       for(int j=0; j<B.NumRows; j++)
         v[j] += B.elements[i][j];
-    std::cout << v << std::endl;
+    stOutput << v << "\n";
 
     VectorSpace<Rational> WS;
     Vectors<Rational> W;
@@ -2700,8 +2704,8 @@ int main(void)
     Vector<Rational> derp;
     isocomps[cmpx].Restrict(W,derp,comp);
 
-    std::cout << "This should be one component" << std::endl;
-    std::cout << comp.ToString(&consoleFormat) << std::endl;
+    stOutput << "This should be one component" << "\n";
+    stOutput << comp.ToString(&consoleFormat) << "\n";
   */
 
   /*
@@ -2709,10 +2713,10 @@ int main(void)
   f211 one = 1;
   f211 third = 3;
   third.Invert();
-  std::cout << "f211 test " << third << " " << one/three << " " << (one/three)*three << std::endl;
+  stOutput << "f211 test " << third << " " << one/three << " " << (one/three)*three << "\n";
   f211 n2 = -2;
   f211 two = 2;
-  std::cout << n2 << " " << n2 + two << " " << n2 + three << " " << " " << one / three << " " << n2 / three << " " << (n2/three)*three << std::endl;
+  stOutput << n2 << " " << n2 + two << " " << n2 + three << " " << " " << one / three << " " << n2 / three << " " << (n2/three)*three << "\n";
   */
 
   char letter = 'F';
@@ -2730,7 +2734,7 @@ int main(void)
 
   get_macdonald_representations_of_weyl_group_v2(theSSlieAlg);
   for(int i=0; i<W.irreps.size; i++)
-    std::cout << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << std::endl;
+    stOutput << W.irreps[i].GetName() << '\t' << W.irreps[i].GetCharacter() << "\n";
 
   ComputeCharacterTable(W);
 
@@ -2741,7 +2745,7 @@ int main(void)
   { for(int j=0; j<W.conjugacyClasses[i].size; j++)
     { W.GetStandardRepresentationMatrix(W.conjugacyClasses[i][j],m);
       p.AssignCharPoly(m);
-      std::cout << i << ',' << j << ": " << p << std::endl;
+      stOutput << i << ',' << j << ": " << p << "\n";
     }
   }*/
 
@@ -2749,7 +2753,7 @@ int main(void)
      JSData data;
      data.readfile("c7ct");
      if(data.type != JSNULL)
-     { std::cout << data << std::endl;
+     { stOutput << data << "\n";
        AddCharTable(data,G);
      } else
      { ComputeCharacterTable(G);
@@ -2761,12 +2765,12 @@ int main(void)
      ts.writefile("c7ts");
   */
 //   G.ComputeConjugacyClasses();
-//   std::cout << "Conjugacy class representatives" << std::endl;
+//   stOutput << "Conjugacy class representatives" << "\n";
 //   for(int i=0; i<G.conjugacyClasses.size; i++)
-//    std::cout << G.rhoOrbit[G.conjugacyClasses[i][0]] << std::endl;
+//    stOutput << G.rhoOrbit[G.conjugacyClasses[i][0]] << "\n";
   /*   List<Vector<Rational> > chars = ComputeCharacterTable(G);
      for(int i=0; i<chars.size; i++)
-       std::cout << chars[i] << std::endl;
+       stOutput << chars[i] << "\n";
        */
 
 /*
@@ -2776,23 +2780,23 @@ int main(void)
   JSData out;
   for(int i=0; i<G.conjugacyClasses.size; i++)
     out[i] = (double) G.conjugacyClasses[i].size;
-  std::cout << out << std::endl;
+  stOutput << out << "\n";
   */
-//  std::cout <<
-//  std::cout << FindConjugacyClassRepresentatives(G,500);
+//  stOutput <<
+//  stOutput << FindConjugacyClassRepresentatives(G,500);
 
-  std::cout << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
-  std::cout << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;
-  std::cout << "\nRational.TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
-  std::cout << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << std::endl;
+  stOutput << "Rational.TotalSmallAdditions: " << Rational::TotalSmallAdditions;
+  stOutput << "\nRational.TotalLargeAdditions: " << Rational::TotalLargeAdditions;
+  stOutput << "\nRational.TotalSmallMultiplications: " << Rational::TotalSmallMultiplications;
+  stOutput << "\nRational.TotalLargeMultiplications: " << Rational::TotalLargeMultiplications << "\n";
 
 
   /*  f65521 a;
     a.n = 2;
     f65521 b;
     b.n = 5;
-    std::cout << (a*b).n << std::endl;
-    std::cout << (a/b).n << std::endl;
+    stOutput << (a*b).n << "\n";
+    stOutput << (a/b).n << "\n";
   */
 
 //   std::string s;

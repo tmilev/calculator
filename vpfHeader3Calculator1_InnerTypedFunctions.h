@@ -87,7 +87,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyTypeByType(Calculator& theComman
   Expression inputContextsMerged;
   if (!input.MergeContextsMyArumentsAndConvertThem<theType>(inputContextsMerged))
     return false;
-//  std::cout << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+//  stOutput << "Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   theType result=inputContextsMerged[1].GetValue<theType>();
   result*=inputContextsMerged[2].GetValue<theType>();
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
@@ -125,7 +125,7 @@ template <class coefficient>
 bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerPolynomial");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-//  std::cout << "Extracting poly from: " << input.ToString();
+//  stOutput << "Extracting poly from: " << input.ToString();
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
   { theCommands.Comments << "Max recursion depth of " << theCommands.MaxRecursionDeptH
     << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";

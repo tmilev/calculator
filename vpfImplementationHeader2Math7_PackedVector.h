@@ -73,7 +73,7 @@ inline scalar PackedVector<scalar>::operator[](int i) const
 template <typename scalar>
 void PackedVector<scalar>::SetSize(int s)
 { if(s>this->size)
-  { std::cout << "if this was intentional, recompile PackedVector with size>=" << s << std::endl;
+  { stOutput << "if this was intentional, recompile PackedVector with size>=" << s << "\n";
     assert(false);
   }
 }

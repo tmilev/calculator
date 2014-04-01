@@ -25,6 +25,7 @@ extern std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<
 extern void PredefinedStrings(std::string& inputOutputCivilizedString);
 extern void getPath(char* path, std::string& output);
 extern void ignoreUserAbortSignal();
+extern bool ForkWrapper(int&);
 
 extern void InitializeGlobalObjects();
 extern void InitializeTimer();

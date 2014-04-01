@@ -53,8 +53,8 @@ bool CalculatorSerialization::DeSerializeMonGetContext<DynkinSimpleType>
 template <>
 bool CalculatorSerialization::DeSerializeMon(Calculator& theCommands, const Expression& input, const Expression& inputContext, ChevalleyGenerator& outputMon)
 { MacroRegisterFunctionWithName("CalculatorSerialization::DeSerializeMon");
-//  std::cout << "here i am again -!. ";
-//  std::cout.flush();
+//  stOutput << "here i am again -!. ";
+//  stOutput.flush();
   int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
   if (AlgIndex==-1)
   { theCommands.Comments << "<hr>Can't load Chevalley generator: failed extract ambient algebra index from context " << inputContext.ToString();
@@ -75,7 +75,7 @@ bool CalculatorSerialization::DeSerializeMon(Calculator& theCommands, const Expr
     return false;
   }
   outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras.GetElement(AlgIndex);
-//  std::cout << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
+//  stOutput << "<hr>owner rank, owner num gens: " << outputMon.owneR->GetRank() << ", "
 //  << outputMon.owneR->GetNumGenerators();
   if (theOperation=="getCartanGenerator")
     generatorIndex+=outputMon.owneR->GetNumPosRoots();
@@ -220,8 +220,8 @@ bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCo
     << "Instead, it is " << theTypeName + ". Error encountered while processing " << input.ToString();
     return false;
   }
-  //std::cout << "here i am again 2. ";
-  //std::cout.flush();
+  //stOutput << "here i am again 2. ";
+  //stOutput.flush();
   char theWeylLetter=theTypeName[0];
   if (theWeylLetter=='a') theWeylLetter='A';
   if (theWeylLetter=='b') theWeylLetter='B';
@@ -251,8 +251,8 @@ bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCo
   { theCommands.Comments << "<hr>Type D is expected to have rank 4 or more, your input was of rank " << theRank << ". ";
     return false;
   }
-  //std::cout << "here i am again 3. ";
-  //std::cout.flush();
+  //stOutput << "here i am again 3. ";
+  //stOutput.flush();
   outputMon.MakeArbitrary(theWeylLetter, theRank, theScale);
   return true;
 }
@@ -272,7 +272,7 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Dy
   output.format=output.formatFunctionUseUnderscore;
   output.AddChildOnTop(letterAndIndexE);
   output.AddChildOnTop(rankE);
-//  std::cout << "output: " << output.ToString();
+//  stOutput << "output: " << output.ToString();
   return true;
 }
 
@@ -280,7 +280,7 @@ bool CalculatorSerialization::innerSSLieAlgebra(Calculator& theCommands, const E
 { MacroRegisterFunctionWithName("Calculator::innerSSLieAlgebra");
   CalculatorSerialization::innerLoadSSLieAlgebra(theCommands, input, output, (SemisimpleLieAlgebra**) 0);
   //theCommands.ToString();
-  //std::cout << "The semisimple lie alg: " << output.ToString();
+  //stOutput << "The semisimple lie alg: " << output.ToString();
 
   return true;
 }
@@ -334,15 +334,15 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::innerLoadSSLieAlgebra");
   DynkinType theDynkinType;
-//  std::cout << "<br>Now I'm here!";
-//  std::cout.flush();
+//  stOutput << "<br>Now I'm here!";
+//  stOutput.flush();
   if(!CalculatorSerialization::innerLoadDynkinType(theCommands, input, theDynkinType))
-  { //  std::cout << "got to error";
-  //std::cout.flush();
+  { //  stOutput << "got to error";
+  //stOutput.flush();
     return output.SetError("Failed to extract Dynkin type.", theCommands);
   }
-//  std::cout << "got to making the type, " << theDynkinType.ToString();
-//  std::cout.flush();
+//  stOutput << "got to making the type, " << theDynkinType.ToString();
+//  stOutput.flush();
   if (theDynkinType.GetRank()>20)
   { std::stringstream out;
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. If you would like to relax this limitation edit file " << __FILE__
@@ -353,8 +353,8 @@ bool CalculatorSerialization::innerLoadSSLieAlgebra(Calculator& theCommands, con
   SemisimpleLieAlgebra tempSSalgebra;
   tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
-  //std::cout << "processing " << theDynkinType.ToString();
-  //std::cout.flush();
+  //stOutput << "processing " << theDynkinType.ToString();
+  //stOutput.flush();
 
   bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);
   if (feelsLikeTheVeryFirstTime)
@@ -525,13 +525,13 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Sl
 bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerStoreObject");
   output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
-//  std::cout << "<hr>" << output.ToString() << "<br>";
+//  stOutput << "<hr>" << output.ToString() << "<br>";
   Expression emptyC, tempE;
   emptyC.MakeEmptyContext(theCommands);
   if (!CalculatorSerialization::innerStoreMonCollection
       (theCommands, input.theWeyl.theDynkinType, tempE, &emptyC))
     return false;
-//  std::cout << "<br>The mon collection: " << tempE.ToString();
+//  stOutput << "<br>The mon collection: " << tempE.ToString();
   output.AddChildOnTop(tempE);
   output.format=output.formatDefault;
   return true;
@@ -590,11 +590,11 @@ bool CalculatorSerialization::innerLoadCandidateSA(Calculator& theCommands, cons
   { theCommands.Comments << "<hr> Failed to load dynkin type of candidate subalgebra from "<< input[2].ToString() << "<hr>";
     return false;
   }
-  //std::cout << "<br> input[2]: " << input[2].ToString();
+  //stOutput << "<br> input[2]: " << input[2].ToString();
   //if (input[2].ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
-  //  std::cout << "<br> loading " << input[2].ToString() << " to get "
+  //  stOutput << "<br> loading " << input[2].ToString() << " to get "
   //  << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
-  //std::cout << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
+  //stOutput << "<hr>Making subalgebra from type " << outputSubalgebra.theWeylNonEmbeddeD.theDynkinType.ToString();
   outputSubalgebra.theWeylNonEmbeddeD.MakeFromDynkinType(outputSubalgebra.theWeylNonEmbeddeD.theDynkinType);
   //int theSmallRank=outputSubalgebra.theWeylNonEmbeddeD.GetDim();
   int theRank=owner.owneR->GetRank();
@@ -693,7 +693,7 @@ bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theComm
   (*ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
    &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
   //FormatExpressions tempFormat;
-//  std::cout << ownerSS->ToString();
+//  stOutput << ownerSS->ToString();
   Expression theCandidatesE=input[2];
   theCandidatesE.Sequencefy();
   theSAs.theSubalgebraCandidates.ReservE(theCandidatesE.children.size-1);
@@ -717,15 +717,15 @@ bool CalculatorSerialization::innerLoadSemisimpleSubalgebras(Calculator& theComm
       << tempCandidate.theWeylNonEmbeddeD.theDynkinType.ToString() << ". <hr>";
       return false;
     }
-    //std::cout << "<hr>read cartan elements: " << tempCandidate.theHs.size;
+    //stOutput << "<hr>read cartan elements: " << tempCandidate.theHs.size;
     theSAs.theSubalgebraCandidates.AddOnTop(tempCandidate);
   }
-  std::cout << "centralizers off";
+  stOutput << "centralizers off";
   theSAs.flagAttemptToAdjustCentralizers=false;
   theSAs.HookUpCentralizers(true);
-  //std::cout << "<hr>And the pointer is ....: " << &theSAs << "<br>";
-  //std::cout << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
-  //std::cout << theCommands.theObjectContainer.ToString();
+  //stOutput << "<hr>And the pointer is ....: " << &theSAs << "<br>";
+  //stOutput << "<hr>And the other pointer is: " << &theCommands.theObjectContainer.theSSsubalgebras[0];
+  //stOutput << theCommands.theObjectContainer.ToString();
   theSAs.timeComputationEndInSeconds=theCommands.theGlobalVariableS->GetElapsedSeconds();
   return output.AssignValue(theSAs, theCommands);
 }
@@ -955,7 +955,7 @@ bool CalculatorSerialization::innerLoadElementSemisimpleLieAlgebraRationalCoeffs
     currentSummand*=currentMultiplicandRFpart;
     outputUE+=currentSummand;
   }
-//  std::cout << "<hr>outputUE: " << outputUE.ToString();
+//  stOutput << "<hr>outputUE: " << outputUE.ToString();
   Expression outputContext;
   outputContext.MakeEmptyContext(theCommands);
   outputContext.AddChildOnTop(outputPolyVars);
@@ -1014,7 +1014,7 @@ bool CalculatorSerialization::innerStoreObject(Calculator& theCommands, const Ra
 
 bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
-  //std::cout << "converting to rf: " << input.ToString();
+  //stOutput << "converting to rf: " << input.ToString();
   Expression intermediate(theCommands);
   if (input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3) ||
       input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||

@@ -28,14 +28,14 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   theFile.flush();
   theFile.close();
   systemCommand1 << " latex -output-directory=" << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
-  //std::cout << "<br>system command:<br>" << systemCommand1.str();
+  //stOutput << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());
   if (useLatexDviPSpsTopdf)
   { systemCommand2 << " dvips -o " <<  fileName.str() << ".ps " << fileName.str() << ".dvi";
-    //std::cout << "<br>system command:<br>" << systemCommand2.str();
+    //stOutput << "<br>system command:<br>" << systemCommand2.str();
     this->SystemCommands.AddOnTop(systemCommand2.str());
     systemCommand3 << " convert " << fileName.str() << ".ps " << fileName.str() << ".png";
-    //std::cout << "<br>system command:<br>" << systemCommand3.str();
+    //stOutput << "<br>system command:<br>" << systemCommand3.str();
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
@@ -357,16 +357,16 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 //  tempFormat.polyAlphabeT[3]="\\partial_2";
 
   Element tempE;
-//  std::cout << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
-//  std::cout << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
+//  stOutput << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
+//  stOutput << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
   output=standsOnTheLeft;
   output*=standsOnTheRight;
-//  std::cout << "<br>intermediate: " << output.ToString(&tempFormat);
+//  stOutput << "<br>intermediate: " << output.ToString(&tempFormat);
   tempE=standsOnTheRight;
   tempE*=standsOnTheLeft;
-//  std::cout << "<br>intermediate2: " << tempE.ToString(&tempFormat);
+//  stOutput << "<br>intermediate2: " << tempE.ToString(&tempFormat);
   output-=tempE;
-//  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
+//  stOutput << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
 }
 
 template <class coefficient>
@@ -374,10 +374,10 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
 { MacroRegisterFunctionWithName("quasiDiffOp<coefficient>::GenerateBasisLieAlgebra");
   ProgressReport theReport (theGlobalVariables);
   HashedList<quasiDiffMon> bufferMons;
-  //std::cout << "<br> the elts:" << theElts.ToString();
+  //stOutput << "<br> the elts:" << theElts.ToString();
   List< MonomialCollection<quasiDiffMon, coefficient> > theEltsConverted;
   theEltsConverted=theElts;
-  //std::cout << "<br>the elts converted: " << theEltsConverted.ToString();
+  //stOutput << "<br>the elts converted: " << theEltsConverted.ToString();
   this->GaussianEliminationByRows(theEltsConverted);
   quasiDiffOp tempQDO;
   bool foundNew=true;
@@ -390,13 +390,13 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
         std::stringstream report;
         report << "Lie bracketing elements " << " of indices " << i+1 << " and " << j+1 << " out of " << theEltsConverted.size << "<br> "
         << tempQDO.ToString(theFormat) << "<br> with element <br>" << theEltsConverted[j].ToString(theFormat) << " to get <br>";
-        //      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
+        //      stOutput << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
   //      << " and " << theEltsConverted[j].ToString(&tempFormat);
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
         theReport.Report(report.str());
         report << tempQDO.ToString(theFormat);
         theReport.Report(report.str());
-  //      std::cout << ", to get " << tempQDO.ToString(&tempFormat);
+  //      stOutput << ", to get " << tempQDO.ToString(&tempFormat);
         theEltsConverted.AddOnTop(tempQDO);
         quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
         numTimesEliminationWasExecuted++;
@@ -409,14 +409,14 @@ void quasiDiffOp<coefficient>::GenerateBasisLieAlgebra(List<quasiDiffOp<coeffici
             break;
       }
   }
-  std::cout << "<hr>" << "<b>Num times Gaussian Elimination was called = " << numTimesEliminationWasExecuted << ".</b>";
+  stOutput << "<hr>" << "<b>Num times Gaussian Elimination was called = " << numTimesEliminationWasExecuted << ".</b>";
   theElts.SetSize(theEltsConverted.size);
   for (int i=0; i<theEltsConverted.size; i++)
     theElts[i]=theEltsConverted[i];
-//  std::cout << "<hr>the elts at end: ";
+//  stOutput << "<hr>the elts at end: ";
 //  theElts=theEltsConverted;
 //  for (int i=0; i<theElts.size; i++)
-//    std::cout << "<br>" << theElts[i].ToString();
+//    stOutput << "<br>" << theElts[i].ToString();
 }
 
 template <class coefficient>
@@ -471,11 +471,11 @@ template <class coefficient>
 bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& theCoeff, ElementWeylAlgebra<Rational>& outputDO, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
 //  int varShift=this->GetMinNumVars();
-//  std::cout << "<br>varShift for Euler operator: " << varShift;
+//  stOutput << "<br>varShift for Euler operator: " << varShift;
   int powerMonCoeff=0;
   ElementWeylAlgebra<Rational> currentMonContribution;
   outputDO.MakeOne();
-//  std::cout << "<br>Getting Euler part contribution of " << theCoeff.ToString()
+//  stOutput << "<br>Getting Euler part contribution of " << theCoeff.ToString()
 //  <<  " with min num vars equal to " << theCoeff.GetMinNumVars();
   for (int i=0; i<theCoeff.GetMinNumVars(); i++)
   { if (!theCoeff(i).IsSmallInteger(&powerMonCoeff))
@@ -484,11 +484,11 @@ bool ModuleSSalgebra<coefficient>::GetActionEulerOperatorPart(const MonomialP& t
     currentMonContribution.Makexidj(i, i, 0);
     currentMonContribution.RaiseToPower(powerMonCoeff);
     outputDO*=currentMonContribution;
-    //std::cout << "<br>Accounted index " << i+1 << "  out of " << theCoeff.GetMinNumVars()
+    //stOutput << "<br>Accounted index " << i+1 << "  out of " << theCoeff.GetMinNumVars()
     //<< ", power is " << powerMonCoeff << ", current output DO has "
     //<< outputDO.size << " monomials.";
   }
-//  std::cout << ".. Final euler: "  << outputDO.ToString();
+//  stOutput << ".. Final euler: "  << outputDO.ToString();
   return true;
 }
 
@@ -504,19 +504,19 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
 //  Polynomial<Rational> Pone, Pzero;
   result.AssignElementLieAlgebra(inputElt, *this->owneR, 1, 0);
   std::stringstream out;
-//  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+//  stOutput << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify(&theGlobalVariables);
-//  std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
-//  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
+//  stOutput << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+//  stOutput << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
   result*=(theGenElt);
   result.Simplify(&theGlobalVariables);
-//  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
+//  stOutput << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunctionOld> tempMat1;
 
   int varShift=this->GetMinNumVars();
-//  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
+//  stOutput  << "<br>Num elements nilrad: " << indicesNilrad.size;
   ElementWeylAlgebra<Rational> weylPartSummand, exponentContribution, oneIndexContribution,
   eulerOperatorContribution;
   Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
@@ -549,12 +549,12 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
     theCoeff=result.theCoeffs[i];
     for (int j=0; j<indicesNilrad.size; j++)
     { //if (problemCounter==249)
-        //std::cout << "ere be problem!";
+        //stOutput << "ere be problem!";
       //problemCounter++;
       currentMon.Powers[j].GetConstantTerm(currentShift);
       ElementWeylAlgebra<Rational>::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
       (currentShift, j+varShift, oneIndexContribution, negativeExponentDenominatorContribution, theGlobalVariables);
-//      std::cout << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
+//      stOutput << "<br>result from GetStandardOrderDiffOperatorCorrespondingToNraisedTo: "
 //      << negativeExponentDenominatorContribution.ToString() << " divided by "
 //      << oneIndexContribution.ToString();
       exponentContribution*=oneIndexContribution;
@@ -562,16 +562,16 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
       if (!tempP1.IsEqualToZero())
         crash << "This is a mathematical error! Something is very wrong with embedding semisimple Lie algebras in Weyl algebras. " << crash;
     }
-//    std::cout << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
-//    std::cout << "<br>Exponent contribution of " << currentMon.ToString() << ": "
+//    stOutput << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
+//    stOutput << "<br>Exponent contribution of " << currentMon.ToString() << ": "
 //    << exponentContribution.ToString();
     for (int l=0; l<theCoeff.size(); l++)
     { //problemCounter++;
       //if (problemCounter==249)
-        //std::cout << "ere be problem!";
+        //stOutput << "ere be problem!";
       if (!this->GetActionEulerOperatorPart(theCoeff[l], eulerOperatorContribution, theGlobalVariables))
         return false;
-//      std::cout << "<br>Euler operator contribution: " << eulerOperatorContribution.ToString();
+//      stOutput << "<br>Euler operator contribution: " << eulerOperatorContribution.ToString();
       weylPartSummand=exponentContribution;
       weylPartSummand*=eulerOperatorContribution;
       weylPartSummand*=theCoeff.theCoeffs[l];
@@ -586,17 +586,17 @@ bool ModuleSSalgebra<coefficient>::GetActionGenVermaModuleAsDiffOperator
             tempRat=currentEndoCoeff.theCoeffs[m];
             tempRat*=weylPartSummand.theCoeffs[j];
   //          if (problemCounter==5)
-  //          std::cout << "<br>adding " << monQDO.ToString() << " times "
+  //          stOutput << "<br>adding " << monQDO.ToString() << " times "
   //          << tempRat.ToString()  << " to "
   //          << output.ToString();
             output.AddMonomial(monQDO2, tempRat);
   //          if (problemCounter==5)
-  //          std::cout << " to get " << output.ToString();
+  //          stOutput << " to get " << output.ToString();
           }
         }
     }
   }
-//  std::cout << "<br>result qdo: " << output.ToString();
+//  stOutput << "<br>result qdo: " << output.ToString();
   return true;
 }
 
@@ -665,7 +665,7 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
   theMods.SetSize(theHws.size);
   Vector<RationalFunctionOld> tempV;
   int numStartingVars=hwContext.ContextGetNumContextVariables();
-  //std::cout << "<br>num starting vars:" << numStartingVars;
+  //stOutput << "<br>num starting vars:" << numStartingVars;
   std::stringstream reportFourierTransformedCalculatorCommands, reportCalculatorCommands;
   for (int i=0; i<theHws.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
@@ -678,18 +678,18 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
       Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
-      //std::cout << "<br>highest weight: " << tempV.ToString();
-      //std::cout << "<br>generic elt: " <<  genericElt.ToString();
+      //stOutput << "<br>highest weight: " << tempV.ToString();
+      //stOutput << "<br>generic elt: " <<  genericElt.ToString();
 
-      //std::cout << "<br>theWeylFormat: ";
+      //stOutput << "<br>theWeylFormat: ";
 //      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
-//        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
+//        stOutput << theWeylFormat.polyAlphabeT[k] << ", ";
       theWeylFormat.polyAlphabeT.SetSize(numStartingVars+ elementsNegativeNilrad.size);
       theWeylFormat.weylAlgebraLetters.SetSize(numStartingVars+ elementsNegativeNilrad.size);
       theUEformat.polyAlphabeT.SetSize(numStartingVars+ elementsNegativeNilrad.size);
       for (int k=0; k<numStartingVars; k++)
         theWeylFormat.weylAlgebraLetters[k]="error";
-      //std::cout << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
+      //stOutput << "<br>HW num context vars: " << hwContext.ContextGetNumContextVariables();
       std::string theFinalXletter= (xLetter==0) ? "x": *xLetter;
       std::string theFinalPartialLetter=(partialLetter==0) ? "\\partial" : *partialLetter;
       for (int k=numStartingVars; k<theUEformat.polyAlphabeT.size; k++)
@@ -705,9 +705,9 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
         theWeylFormat.polyAlphabeT[k]=tempstream2.str();
         theWeylFormat.weylAlgebraLetters[k]=tempStream4.str();
       }
-//      std::cout << "<br>theUEformat: ";
+//      stOutput << "<br>theUEformat: ";
 //      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
-//        std::cout << theUEformat.polyAlphabeT[k] << ", ";
+//        stOutput << theUEformat.polyAlphabeT[k] << ", ";
       out << "<tr><td>General monomial in U(n_-):</td><td>" << CGI::GetMathMouseHover(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
@@ -742,8 +742,8 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
     << elementsNegativeNilrad.size << "}&";
 
     latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
-    //std::cout << "<hr>hw: " << theMod.theHWFundamentalCoordsBaseField.ToString() << " nilrad elts: " << elementsNegativeNilrad.ToString();
-    //std::cout << "<br>generic element: " << genericElt.ToString();
+    //stOutput << "<hr>hw: " << theMod.theHWFundamentalCoordsBaseField.ToString() << " nilrad elts: " << elementsNegativeNilrad.ToString();
+    //stOutput << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
     { theGenerator=theGeneratorsItry[j];
       theMod.GetActionGenVermaModuleAsDiffOperator(theGenerator, theQDOs[j], *theCommands.theGlobalVariableS);
@@ -796,10 +796,10 @@ bool Calculator::innerWriteGenVermaModAsDiffOperatorInner
       reportCalculatorCommands << "<hr>";
     }
 //    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
-//    std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
-//    std::cout << "<br>The qdos: ";
+//    stOutput << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
+//    stOutput << "<br>The qdos: ";
 //    for (int j=0; j<theQDOs.size; j++)
- //     std::cout << "<br>" << theQDOs[j].ToString();
+ //     stOutput << "<br>" << theQDOs[j].ToString();
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
@@ -868,7 +868,7 @@ std::string ModuleSSalgebra<coefficient>::ToString(FormatExpressions* theFormat)
       if (this->GetDim()<28)
       { Matrix<coefficient> outputMat;
         this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
-        //std::cout << outputMat.ToString(&latexFormat);
+        //stOutput << outputMat.ToString(&latexFormat);
         out << CGI::GetMathMouseHover(outputMat.ToString(&latexFormat), 5000) << " = ";
         out << this->actionsGeneratorsMaT[i].ToString();
       }
@@ -925,8 +925,8 @@ bool Calculator::innerHWVCommon
  Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose)
 { MacroRegisterFunctionWithName("Calculator::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
-  //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
-//  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
+  //  stOutput << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
+//  stOutput << "<br>parabolic selection: " << parabolicSel.ToString();
   RationalFunctionOld RFOne, RFZero;
   RFOne.MakeOne(theCommands.theGlobalVariableS);
   RFZero.MakeZero(theCommands.theGlobalVariableS);
@@ -983,17 +983,17 @@ bool Calculator::CheckConsistencyAfterInitializationExpressionStackEmpty()
 
 bool Calculator::innerFunctionToMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerFunctionToMatrix");
-//  std::cout << input.ToString();
+//  stOutput << input.ToString();
   if (!input.IsListNElements(4))
     return false;
   const Expression& leftE  =input[1];
   const Expression& middleE=input[2];
   const Expression& rightE =input[3];
-//  std::cout << leftE.ToString() << ", " << rightE.ToString() << ", " << middleE.ToString();
+//  stOutput << leftE.ToString() << ", " << rightE.ToString() << ", " << middleE.ToString();
   int numRows, numCols;
   if (!middleE.IsSmallInteger(&numRows) || !rightE.IsSmallInteger(&numCols))
     return false;
-//  std::cout << "<br>Rows, cols: " << numRows << ", " << numCols;
+//  stOutput << "<br>Rows, cols: " << numRows << ", " << numCols;
   if (numRows<=0 || numCols<=0)
     return false;
   if (numRows>1000 || numCols>1000)
@@ -1052,19 +1052,19 @@ bool Calculator::innerGetChevGen(Calculator& theCommands, const Expression& inpu
 }
 
 bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& input, Expression& output)
-{ //std::cout << "<br>Here I am with input: " << input.ToString();
+{ //stOutput << "<br>Here I am with input: " << input.ToString();
   if (!input.IsListNElements(3))
     return false;
   SemisimpleLieAlgebra* theSSalg=0;
-//  std::cout << "<br>before calling inner ss: " << input.ToString();
-//  std::cout.flush();
+//  stOutput << "<br>before calling inner ss: " << input.ToString();
+//  stOutput.flush();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input[1], theSSalg))
     return output.SetError("Error extracting Lie algebra.", theCommands);
   if (theSSalg==0)
     crash << "This is a programming error: called conversion function successfully, but the output is a zero pointer to a semisimple Lie algebra. "
     << crash;
-//  std::cout << "<br>Here I am at next phase: " << input.ToString() << ", ss alg: " << theSSalg->ToString();
-//  std::cout.flush();
+//  stOutput << "<br>Here I am at next phase: " << input.ToString() << ", ss alg: " << theSSalg->ToString();
+//  stOutput.flush();
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -1075,14 +1075,14 @@ bool Calculator::innerGetCartanGen(Calculator& theCommands, const Expression& in
   theIndex--;
   theH.MakeEi(theSSalg->GetRank(), theIndex);
   theElt.MakeHgenerator(theH, *theSSalg);
-//  std::cout << "<br>good before ue! " << input.ToString();
-//  std::cout.flush();
+//  stOutput << "<br>good before ue! " << input.ToString();
+//  stOutput.flush();
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
   int theAlgIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
   theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
-  //std::cout << "<br>And the context is: " << theContext.ToString();
+  //stOutput << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
@@ -1166,7 +1166,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
       theRatio*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[j], theWeyl.RootSystem[j]);
       Rational tempRat=theWeyl.GetKillingDivTraceRatio();
       tempRat.Invert();
-  //    std::cout << "<br>" << j+1 << ": " << theRatio.ToString() << "=? " << tempRat.ToString();
+  //    stOutput << "<br>" << j+1 << ": " << theRatio.ToString() << "=? " << tempRat.ToString();
     }*/
   //Lattice tempLattice;
   //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
@@ -1202,7 +1202,7 @@ bool Calculator::innerPrintSSLieAlgebra(Calculator& theCommands, const Expressio
   DynkinSimpleType tempSimpleType;
   if (theWeyl.theDynkinType.IsSimple(&tempSimpleType.theLetter, &tempSimpleType.theRank, &tempSimpleType.CartanSymmetricInverseScale))
     if (tempSimpleType.CartanSymmetricInverseScale==1)
-    { //std::cout << "here i am";
+    { //stOutput << "here i am";
       Matrix<Rational> tempM, tempM2;
       theWeyl.theDynkinType.GetEpsilonMatrix(tempM);
       tempM2=tempM;
@@ -1292,20 +1292,20 @@ Expression::FunctionAddress Calculator::GetInnerFunctionFromOp(int theOp, const 
 }
 
 bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, Expression& output)
-{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
+{ //stOutput << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("Calculator::StandardTensor");
   if (theCommands.outerDistribute
       (theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
     return true;
-  //std::cout << "<br>After distribute: " << theExpression.ToString();
+  //stOutput << "<br>After distribute: " << theExpression.ToString();
   if (theCommands.outerAssociate(theCommands, input, output))
     return true;
   if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
     return true;
 //  if (theExpression.children.size!=2)
 //    return false;
-  //std::cout << "<br>After do associate: " << theExpression.ToString();
+  //stOutput << "<br>After do associate: " << theExpression.ToString();
   return false;
 }
 
@@ -1313,14 +1313,14 @@ bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expres
 { MacroRegisterFunctionWithName("Calculator::innerCollectMultiplicands");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
-//  std::cout << "<hr>Collecting multiplicands. input: " << input.ToString();
+//  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
   const Expression* left= &input[1];
   const Expression* right=&input[2];
   if (*left==*right)
   { constPower.AssignValue(2, theCommands);
     output.MakeXOX(theCommands, theCommands.opThePower(), *left, constPower);
-    //std::cout << "<br>output be at first place: " << output.ToString();
+    //stOutput << "<br>output be at first place: " << output.ToString();
     return true;
   }
   for (int i=0; i<2; i++, MathRoutines::swap(left, right))
@@ -1334,7 +1334,7 @@ bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expres
         if ((*left)[1]==(*right)[1])
         { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
           output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
-          //std::cout << "<br>output be at second place: " << output.ToString();
+          //stOutput << "<br>output be at second place: " << output.ToString();
           return true;
         }
     }
@@ -1455,7 +1455,7 @@ bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const 
   if (input.children.size<2)
     return false;
   const Expression& firstElt=input[1];
-//  std::cout << " <hr>outer times to function ";
+//  stOutput << " <hr>outer times to function ";
   if (!firstElt.IsBuiltInAtom())
   { if (!firstElt.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
       return false;
@@ -1540,14 +1540,14 @@ bool Calculator::CollectSummands(Calculator& theCommands, const Expression& inpu
       currentSummandNoCoeff=&oneE;
     outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
-//  std::cout << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
+//  stOutput << "<hr> before mon sort, mon order: " << outputSum.theMonomials.ToString();
 //  if (outputSum.theMonomials[0]>outputSum.theMonomials[1])
-//    std::cout << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
+//    stOutput << outputSum.theMonomials[0].ToString() << " > " << outputSum.theMonomials[1].ToString();
 //  else
-//    std::cout << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
+//    stOutput << outputSum.theMonomials[0].ToString() << " < " << outputSum.theMonomials[1].ToString();
   outputSum.QuickSortDescending();
 
-//  std::cout << " after mon sort: " << outputSum.theMonomials.ToString();
+//  stOutput << " after mon sort: " << outputSum.theMonomials.ToString();
   return true;
 }
 
@@ -1744,11 +1744,11 @@ bool Calculator::outerUnionNoRepetition(Calculator& theCommands, const Expressio
 
 bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerDivide");
-//  std::cout << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
+//  stOutput << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
 //  << input.Lispify() ;
   if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
-//  std::cout << "<br>Now I'm here! 2";
+//  stOutput << "<br>Now I'm here! 2";
   Rational tempRat;
   if (!input[2].IsOfType<Rational>(&tempRat))
     return false;
@@ -1836,10 +1836,10 @@ SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()con
 }
 
 int Expression::ContextGetIndexAmbientSSalg()const
-{ //std::cout << "<hr>trying to get ambient algebra from " << this->ToString();
+{ //stOutput << "<hr>trying to get ambient algebra from " << this->ToString();
   if (!this->IsContext() )
     return -1;
-//  std::cout << ". I have " << this->children.size << " children. ";
+//  stOutput << ". I have " << this->children.size << " children. ";
   for (int i=1; i<this->children.size; i++)
     if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 3))
       return (*this)[i][2].theData;
@@ -2100,7 +2100,7 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     result=true;
   } else if (this->IsOfType<double>())
   { out << FloatingPoint::DoubleToString(this->GetValue<double>());
-    //std::cout << " converting to string : " << this->GetValue<double>();
+    //stOutput << " converting to string : " << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
   { out << this->GetValue<AlgebraicNumber>().ToString();
@@ -2311,7 +2311,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         this->CheckConsistency();
         newE.CheckConsistency();
         newFunE.CheckConsistency();
-        //std::cout << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
+        //stOutput << "<br> tostringing a very special case: " << newE.ToString() << " lispified: " << this->ToStringFull();
         out << newE.ToString(theFormat);
       }
     if (!involvesExponentsInterprettedAsFunctions)
@@ -2335,14 +2335,14 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << firstEstr;
       out << "^{" << secondEstr << "}";
     }
-//    std::cout << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
+//    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
   } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { if (this->children.size<2)
       crash << crash;
     std::string tempS2= (*this)[1].ToString(theFormat);
     tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
-//    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
+//    stOutput << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
 //    << allowNewLine;
     if (allowNewLine && tempS2.size()>(unsigned)lineBreak)
       out << "\\\\\n";
@@ -2514,7 +2514,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "}";
     else if (needParenthesis)
       out << ")";
-//    std::cout << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
+//    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
 
   } else //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)" ;
@@ -2524,7 +2524,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     outTrue << "<tr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
     outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
     << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
-   // std::cout << this->Lispify();
+   // stOutput << this->Lispify();
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
     else
@@ -2669,7 +2669,7 @@ bool Expression::IsGoodForChainRuleFunction(std::string* outputWhichOperation)co
     return false;
   if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
-//  std::cout << "ere be i - checking whether operation " << this->theBoss->GetOperations()[this->theData] << " is good for chain rule. ";
+//  stOutput << "ere be i - checking whether operation " << this->theBoss->GetOperations()[this->theData] << " is good for chain rule. ";
   if (outputWhichOperation!=0)
     *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
   return !this->theBoss->atomsNotAllowingChainRule.Contains(this->theBoss->GetOperations()[this->theData]);
@@ -2690,7 +2690,7 @@ bool Expression::HasContext()const
   if (!this->IsBuiltInType() || !this->children.size==3)
     return false;
   //std::string debugString=(*this)[1].ToString();
-  //std::cout << "<br>Trying to fetch context from: " << debugString ;
+  //stOutput << "<br>Trying to fetch context from: " << debugString ;
   return (*this)[1].IsListStartingWithAtom(this->theBoss->opContexT());
 }
 
@@ -3030,7 +3030,7 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
   newExpr.AddChildOnTop(left.theData);
   left.theData=newExpr;
   left.controlIndex=this->conSequenceStatements();
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -3045,7 +3045,7 @@ bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
   left.theData.format=Expression::formatDefault;
   left.controlIndex=this->conSequenceStatements();
   (*this->CurrentSyntacticStacK).PopIndexShiftDown((*this->CurrentSyntacticStacK).size-numDots-1);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -3060,7 +3060,7 @@ bool Calculator::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
   newExpr.format=formatOptions;
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -3074,7 +3074,7 @@ bool Calculator::ReplaceEXEXByEX(int formatOptions)
   newExpr.format=formatOptions;
   left.theData=newExpr;
   this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -3305,11 +3305,11 @@ bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, c
   if (input.children.size>6)
     exponentLetterString=input[6].ToString();
 
-//std::cout << "<br>theContext:" << theContext.ToString();
-//std::cout << ", numvars: " << theContext.ContextGetNumContextVariables();
+//stOutput << "<br>theContext:" << theContext.ToString();
+//stOutput << ", numvars: " << theContext.ContextGetNumContextVariables();
 //  FormatExpressions theFormat;
 //  theContext.ContextGetFormatExpressions(theFormat);
-//  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
+//  stOutput << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.innerWriteGenVermaModAsDiffOperatorInner
   (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra, AllGenerators, &letterString, &partialString, &exponentLetterString);
 }
@@ -3371,11 +3371,11 @@ bool Expression::IsMeltable(int* numResultingChildren)const
 
 bool Expression::MergeContextsMyAruments(Expression& output)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyAruments");
-//  std::cout << "<hr>Merging contexts of expression " << this->ToString();
+//  stOutput << "<hr>Merging contexts of expression " << this->ToString();
   this->CheckInitialization();
   if (this->children.size<2)
     return false;
-//  std::cout << " ... continuing to merge..." ;
+//  stOutput << " ... continuing to merge..." ;
   for (int i=1; i< this->children.size; i++)
     if (!(*this)[i].IsBuiltInType())
     { this->theBoss->Comments << "<hr>Failed to merge the arguments of the expression" << this->ToString() << ": the argument "
@@ -3390,7 +3390,7 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
       break;
     }
 //  if (needsMerge)
-//    std::cout << "needs merge!"; else std::cout << "no need merge no nothin";
+//    stOutput << "needs merge!"; else stOutput << "no need merge no nothin";
   if (!needsMerge)
   { output=*this;
     return true;
@@ -3400,24 +3400,24 @@ bool Expression::MergeContextsMyAruments(Expression& output)const
     { this->theBoss->Comments << "<hr>Failed to merge contexts of arguments: an argument is not of built-in type";
       return false;
     }
-//    std::cout << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
+//    stOutput << "<br>Merging context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
     if (!commonContext.ContextMergeContexts(commonContext, (*this)[i].GetContext(), commonContext))
     { this->theBoss->Comments << "<hr>Failed to merge context " << commonContext.ToString() << " with " << (*this)[i].GetContext().ToString();
       return false;
     }
-//    std::cout << " ...  to get context: " << commonContext.ToString();
+//    stOutput << " ...  to get context: " << commonContext.ToString();
   }
   output.reset(*this->theBoss, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<this->children.size; i++)
   { convertedE=(*this)[i];
-//    std::cout << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
+//    stOutput << "<hr>Setting context of " << convertedE.ToString() << " to be the context " << commonContext.ToString();
     if (!convertedE.SetContextAtLeastEqualTo(commonContext))
     { this->theBoss->Comments << "<hr>Failed to convert " << convertedE.ToString() << " to context " << commonContext.ToString();
       return false;
     }
-//    std::cout << "... and the result is: " << convertedE.ToString();
+//    stOutput << "... and the result is: " << convertedE.ToString();
     output.AddChildOnTop(convertedE);
   }
   return true;
@@ -3452,10 +3452,10 @@ bool Calculator::ConvertExpressionsToCommonContext(List<Expression>& inputOutput
 bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  //std::cout << "outerMeltBrackets meldet sich!";
+  //stOutput << "outerMeltBrackets meldet sich!";
   if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
     return false;
-  //std::cout << "<br>outerMeltBrackets meldet sich!";
+  //stOutput << "<br>outerMeltBrackets meldet sich!";
   int tempInt;
   int ChildIncrease=0;
   bool found=false;
@@ -3467,10 +3467,10 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
     }
   }
 //  if (!found)
-//    std::cout << "<br>not found!";
+//    stOutput << "<br>not found!";
   if (!found)
     return false;
-//  std::cout << "<br>ChildIncrease: " << ChildIncrease;
+//  stOutput << "<br>ChildIncrease: " << ChildIncrease;
   output.reset(theCommands, input.children.size+ChildIncrease);
   output.AddChildAtomOnTop(theCommands.opEndStatement());
   for (int i=1; i<input.children.size; i++)
@@ -3480,7 +3480,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       output.AddChildOnTop(input[i]);
       continue;
     }
-//    std::cout << "<br>shift:" << shift;
+//    stOutput << "<br>shift:" << shift;
     if (!currentChild[1].IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
     { //output.SetChild(i+shift, currentChild.children[1]);
       output.AddChildOnTop(currentChild[1]);
@@ -3491,7 +3491,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       output.AddChildOnTop(currentChild[1][j]);
     }
   }
-//  std::cout << output.ToString();
+//  stOutput << output.ToString();
 
   return true;
 }

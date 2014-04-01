@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -105,6 +106,7 @@
 		<Unit filename="vpfJson.cpp" />
 		<Unit filename="vpfJson.h" />
 		<Unit filename="vpfMacros.h" />
+		<Unit filename="vpfWebServer.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

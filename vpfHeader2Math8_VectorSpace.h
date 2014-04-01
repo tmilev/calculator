@@ -107,8 +107,8 @@ bool VectorSpace<coefficient>::AddVector(const Vector<coefficient>& v)
 
 template <typename coefficient>
 bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
-{ //std::cout << "AddVectorDestructively: v = " << v << " matrix is" << std::endl;
-  //std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+{ //stOutput << "AddVectorDestructively: v = " << v << " matrix is" << "\n";
+  //stOutput << fastbasis.ToString(&consoleFormat) << "\n";
   if(fastbasis.NumRows == 0)
   { this->fastbasis.MakeZeroMatrix(v.size);
     this->degree = v.size;
@@ -125,8 +125,8 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
       fastbasis.elements[0][i] = v[i] / v[nzi];
     rank = 1;
     this->fastbasis.NumRows = 1;
-//    std::cout << "starting matrix" << std::endl;
-//    std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+//    stOutput << "starting matrix" << "\n";
+//    stOutput << fastbasis.ToString(&consoleFormat) << "\n";
     return true;
   }
   int jj=0;
@@ -150,8 +150,8 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
         fastbasis.elements[i][bj] = v[bj];
       fastbasis.GaussianEliminationByRows();
       rank++;
-//      std::cout << "stuffed in the middle" << std::endl;
-//      std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+//      stOutput << "stuffed in the middle" << "\n";
+//      stOutput << fastbasis.ToString(&consoleFormat) << "\n";
       return true;
     }
     if(jj>j)
@@ -170,8 +170,8 @@ bool VectorSpace<coefficient>::AddVectorDestructively(Vector<coefficient>& v)
   for(int j=0; j<fastbasis.NumCols; j++)
     fastbasis.elements[fastbasis.NumRows-1][j] = v[j];
   rank++;
-//  std::cout << "tacked on the end" << std::endl;
-//  std::cout << fastbasis.ToString(&consoleFormat) << std::endl;
+//  stOutput << "tacked on the end" << "\n";
+//  stOutput << fastbasis.ToString(&consoleFormat) << "\n";
   return true;
 }
 
@@ -306,14 +306,14 @@ VectorSpace<coefficient> VectorSpace<coefficient>::OrthogonalComplement(VectorSp
     V.AddVectorDestructively(VVs[i]);
   if(ambient && ambient->rank<ambient->degree)
   { VectorSpace<coefficient> W = V.Intersection(*ambient);
-    //std::cout << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << std::endl;
+    //stOutput << "Orthogonal complement of rank " << this->rank << " in rank " << ambient->rank << " is rank " << W.rank << "\n";
     //if(ambient->rank - this->rank - W.rank != 0)
-    //  std::cout << "*ambient is not *this (+) W" << std::endl;
+    //  stOutput << "*ambient is not *this (+) W" << "\n";
     return W;
   }
-  //std::cout << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << std::endl;
+  //stOutput << "Orthogonal complement of rank " << this->rank << " is rank " << V.rank << "\n";
   //if(this->degree - this->rank - V.rank != 0)
-  //  std::cout << "Error: ranks of subspace and orthogonal complement should sum to degree" << std::endl;
+  //  stOutput << "Error: ranks of subspace and orthogonal complement should sum to degree" << "\n";
   return V;
 }
 

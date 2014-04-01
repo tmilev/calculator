@@ -15,10 +15,10 @@ static ProjectInformationInstance vpfJson(__FILE__, "Implementation of JSON, wor
   data["types"][1] = "boolean";
   data["types"][2] = "number";
   data.writefile("jslib");
-  std::cout << data << std::endl;
+  stOutput << data << "\n";
   JSData data2;
   data2.readfile("jslib");
-  std::cout << data2 << std::endl;
+  stOutput << data2 << "\n";
 */
 
 //enum JSType{null, boolean, number, string, list, hash};

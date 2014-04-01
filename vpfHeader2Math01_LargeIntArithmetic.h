@@ -57,7 +57,7 @@ public:
     for (unsigned int i=2; i<=n; i++)
       if (theSieve.TheObjects[i]!=0)
       { output.AddOnTop(i);
-//        std::cout << i << ",";
+//        stOutput << i << ",";
         for (unsigned int j=i; j<=n; j+=i)
           theSieve.TheObjects[j]=0;
       }
@@ -454,9 +454,9 @@ private:
   { register int OtherNumAbs, thisNumAbs;
     if (this->DenShort<=0 || OtherDen<=0)
     { if (DenShort==0 || OtherDen==0)
-        std::cout << "This is a programming error: division by zero. ";
+        stOutput << "This is a programming error: division by zero. ";
       else
-        std::cout << "This is a programming error: corrupt rational number denominator. ";
+        stOutput << "This is a programming error: corrupt rational number denominator. ";
       crash << crash;
     }
     if (OtherNum<0)

@@ -291,10 +291,8 @@ public:
       }
       ParallelComputing::flagUngracefulExitInitiated=true;
       tempMutex.UnlockMe();
-      std::cout << "<b>Error:</b> Number of pointers allocated exceeded allowed <b>limit of " <<
+      stOutput << "<b>Error:</b> Number of pointers allocated exceeded allowed <b>limit of " <<
       ParallelComputing::cgiLimitRAMuseNumPointersInList << ".</b>\n<br><b>Signalling ungraceful exit...</b>";
-      std::cout.flush();
-
       std::exit(0);
     }
     if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
@@ -360,12 +358,12 @@ public:
   }
   template <typename integral>
   static integral lcm(integral a, integral b)
-  { //std::cout << "<br>\nlcm(" << a << ',' << b << ")=" << std::endl;
+  { //stOutput << "<br>\nlcm(" << a << ',' << b << ")=" << "\n";
     integral result;
     result=a;
     result/=MathRoutines::gcd(a,b);
     result*=b;
-    //std::cout << result << std::endl;
+    //stOutput << result << "\n";
     return result;
   }
   static int TwoToTheNth(int n);

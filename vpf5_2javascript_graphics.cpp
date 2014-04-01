@@ -281,7 +281,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 
   if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
   { this->theBuffer.MakeMeAStandardBasis(theDimension);
-    //std::cout << "made a standard basis!";
+    //stOutput << "made a standard basis!";
   }
   out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
@@ -884,7 +884,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
 
   if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
   { this->theBuffer.MakeMeAStandardBasis(theDimension);
-    //std::cout << "made a standard basis!";
+    //stOutput << "made a standard basis!";
   }
   out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)

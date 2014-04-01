@@ -246,7 +246,7 @@ void f211::operator=(const Rational rhs)
 
 bool f211::operator<(int rhs) const
 { if(rhs != 0)
-  { std::cout << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << std::endl;
+  { stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
   if(n>104)
@@ -257,7 +257,7 @@ bool f211::operator<(int rhs) const
 
 bool f211::operator>(int rhs) const
 { if(rhs != 0)
-  { std::cout << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << std::endl;
+  { stOutput << "finite fields are not ordered (if you think they are, modify around " << __FILE__ << ':' << __LINE__ << ", and may God have mercy on your soul)" << "\n";
     assert(false);
   }
   if(n<105)

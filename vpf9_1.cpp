@@ -7,6 +7,7 @@
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines implementation. ");
 
 Crasher crash;
+StdoutClass stOutput;
 
 void Crasher::FirstRun()
 { if (this->flagFirstRun)
@@ -42,7 +43,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
       for (int i=this->theGlobalVariables->ProgressReportStringS.size-1; i>=0; i--)
         this->theCrashReport << this->theGlobalVariables->ProgressReportStringS[i] << "<br>";
     }
-  std::cout << this->theCrashReport.str();
+  stOutput << this->theCrashReport.str();
   std::fstream theFile;
   std::string theFileName="../output/crashdump.txt";
   bool succeededToDump=true;
@@ -51,10 +52,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     succeededToDump=XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
   if (succeededToDump)
-    std::cout << "<hr>Crash dumped in file " << theFileName;
+    stOutput << "<hr>Crash dumped in file " << theFileName;
   else
-    std::cout << "<hr>Failed to dump crash: check if folder exists and the executable has file permissions for file " << theFileName << ".";
-  std::cout.flush();
+    stOutput << "<hr>Failed to dump crash: check if folder exists and the executable has file permissions for file " << theFileName << ".";
   theFile << this->theCrashReport.str();
   theFile.close();
   assert(false);
@@ -124,11 +124,11 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     crash << crash;
   DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
-  //std::cout << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
+  //stOutput << "<hr><hr>Computing dynkin string from " << currentComponent.ToString();
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (currentComponent.size<1)
     crash << "This is a programming error: currentComponent is empty which is impossible. " << crash;
-//  std::cout << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
+//  stOutput << "<hr> Extracting component from " << currentComponent.ToString() << " with bilinear form "
 //  << theBilinearForm.ToString();
   if (this->numberOfThreeValencyNodes(indexComponent, theBilinearForm)==1)
   { //type D or E
@@ -144,9 +144,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
     Vectors<Rational> rootsWithoutTripleNode=currentComponent;
     rootsWithoutTripleNode.RemoveIndexSwapWithLast(this->indicesThreeNodes[indexComponent]);
     DynkinDiagramRootSubalgebra diagramWithoutTripleNode;
-//    std::cout << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
+//    stOutput << "<br>Computing helper Dynkin diagram from: " << rootsWithoutTripleNode.ToString();
     diagramWithoutTripleNode.ComputeDiagramInputIsSimple(rootsWithoutTripleNode, theBilinearForm);
-//    std::cout << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
+//    stOutput << " ... to get: " << diagramWithoutTripleNode.ToStringRelativeToAmbientType(DynkinSimpleType('A',1));
     if (diagramWithoutTripleNode.SimpleBasesConnectedComponents.size!=3)
       crash << "This is a programming error: Dynkin diagram has a triple node whose removal does not yield 3 connected components. " << crash;
     for (int i=0; i<3; i++)
@@ -221,7 +221,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
         outputType.MakeArbitrary('C', currentComponent.size, 2/length2);
     }
   }
-//  std::cout << "<hr><hr>before swapping:" << currentComponent.ToString();
+//  stOutput << "<hr><hr>before swapping:" << currentComponent.ToString();
   currentComponent.SwapTwoIndices(0, currentEnds[0]);
   for (int i=0; i<currentComponent.size; i++)
     for (int j=i+1; j<currentComponent.size; j++)
@@ -229,7 +229,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString(int indexComponent, const 
       { currentComponent.SwapTwoIndices(i+1, j);
         break;
       }
-//  std::cout << "<br>after swapping:" << currentComponent.ToString();
+//  stOutput << "<br>after swapping:" << currentComponent.ToString();
   //so far we made sure the entire component is one properly ordered string, starting with the long root.
   if (outputType.theLetter=='G' || outputType.theLetter=='C' )
     currentComponent.ReverseOrderElements();//<-in G_2 and C_n the short root comes first so we need to reverse elements.
@@ -246,7 +246,7 @@ std::string DynkinDiagramRootSubalgebra::ToStringRelativeToAmbientType(const Dyn
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rational>& simpleBasisInput, const Matrix<Rational>& theBilinearForm)
 { MacroRegisterFunctionWithName("DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple");
-  //std::cout << "<br>Computing diagram from " << simpleBasisInput.ToString();
+  //stOutput << "<br>Computing diagram from " << simpleBasisInput.ToString();
   this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
   for (int i=0; i<simpleBasisInput.size; i++)
@@ -269,18 +269,18 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramInputIsSimple(const Vectors<Rati
     }
   }
   this->ComputeDynkinStrings(theBilinearForm);
-//  std::cout << "<br>before the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
+//  stOutput << "<br>before the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
   this->Sort();
-//  std::cout << "<br>'n after  the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
+//  stOutput << "<br>'n after  the horrible sort, the roots be: " << this->SimpleBasesConnectedComponents.ToString();
 
-//  std::cout << "...after the horrible sort, computing again...";
+//  stOutput << "...after the horrible sort, computing again...";
   this->ComputeDynkinStrings(theBilinearForm);
   DynkinType tempType;
   this->GetDynkinType(tempType);
   if (tempType.IsEqualToZero() && simpleBasisInput.size!=0)
     crash << "Dynkin type of zero but the roots generating the type are: " << simpleBasisInput.ToString() << crash;
 
-//  std::cout << "...the very final complete absolute computation is done!";
+//  stOutput << "...the very final complete absolute computation is done!";
 }
 
 bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2)
@@ -1163,7 +1163,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   drawOps.theBuffer.GraphicsUnit[0]=50;
   PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables),
   theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
-  //std::cout << "<hr>" << this->GmodKNegWeightsBasisChanged.ToString() << "<hr>";
+  //stOutput << "<hr>" << this->GmodKNegWeightsBasisChanged.ToString() << "<hr>";
   std::string tempS;
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
   Vectors<Rational> translationsProjectedFinal;
@@ -1176,7 +1176,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].ToString();
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
-  //std::cout << theStartingPoly.ToString(false, true);
+  //stOutput << theStartingPoly.ToString(false, true);
   drawOps.drawCoordSystemBuffer(drawOps, 2, 0);
   //out << this->log.str();
   Cone smallWeylChamber;
@@ -1185,7 +1185,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Vectors<Rational> tempVertices;
   Vector<Rational> tMpRt;
   tMpRt=this->ParabolicSelectionSmallerAlgebra;
-//  std::cout << "<br>sel smaller: " << tMpRt.ToString();
+//  stOutput << "<br>sel smaller: " << tMpRt.ToString();
   for (int i=0; i<this->ParabolicSelectionSmallerAlgebra.MaxSize; i++)
   { tempMat.GetVectorFromRow(i, tempRoot);
     tempVertices.AddOnTop(tempRoot);
@@ -1197,15 +1197,15 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   tempMat.elements[0][0]=1; tempMat.elements[0][1]=0;
   tempMat.elements[1][0]=1; tempMat.elements[1][1]=1;
 
-//  std::cout << smallWeylChamber.ToString(false, true, theFormat);
+//  stOutput << smallWeylChamber.ToString(false, true, theFormat);
   tempMat.Transpose();
   smallWeylChamber.ChangeBasis
   (tempMat, theGlobalVariables)
   ;
-//  std::cout << "<br> after the basis change: " << smallWeylChamber.ToString(false, true, theFormat);
+//  stOutput << "<br> after the basis change: " << smallWeylChamber.ToString(false, true, theFormat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.ToString(&theFormat);
   Vector<Rational> highestWeightSmallAlgBasisChanged= -translationsProjectedFinal[0];
-//  std::cout << highestWeightSmallAlgBasisChanged.ToString();
+//  stOutput << highestWeightSmallAlgBasisChanged.ToString();
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=100;
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
@@ -1223,26 +1223,26 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     { DrawingVariables tempDV, tempDV2;
       tempDV.NumHtmlGraphics=100;
       tempDV2.NumHtmlGraphics=109;
-      std::cout << "<hr><hr>first point of failure: <hr>accum: ";
+      stOutput << "<hr><hr>first point of failure: <hr>accum: ";
       Accum.DrawMe(tempDV);
       tempDV.drawCoordSystemBuffer(tempDV, 2, 0);
-      std::cout << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-      std::cout << "<hr>subbed poly: ";
+      stOutput << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+      stOutput << "<hr>subbed poly: ";
       theSubbedPoly.DrawMe(tempDV2);
       tempDV.drawCoordSystemBuffer(tempDV2, 2, 0);
-      std::cout << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+      stOutput << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
     }*/
     Accum+=theSubbedPoly;
 /*    if (i==2)
     { DrawingVariables tempDrawOps;
       tempDrawOps.NumHtmlGraphics=500;
-      std::cout << "<hr><hr> <b>Index: " << i+1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
+      stOutput << "<hr><hr> <b>Index: " << i+1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
       Accum.DrawMe(tempDrawOps);
-      std::cout << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+      stOutput << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
     }
     */
   }
-//  std::cout << "<hr>so far so good!";
+//  stOutput << "<hr>so far so good!";
   drawOps.theBuffer.theDrawCircleAtVectorOperations.ReservE(2500);
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
 //  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);

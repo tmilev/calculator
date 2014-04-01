@@ -13,7 +13,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
   if (this->IsAConstant())
     return true;
   Polynomial<coefficient> tempPoly;
-//  std::cout << "<hr>subbing in monomial " << this->ToString();
+//  stOutput << "<hr>subbing in monomial " << this->ToString();
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
     { if(i>=TheSubstitution.size)
@@ -28,7 +28,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
           output*=tempMon;
           continue;
         }
-        std::cout << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
+        stOutput << "This may or may not be a programming error. I cannot carry out a substitution in a monomial that has exponent "
         << "which is not a small integer: it is " << this->monBody[i] << " instead. " << Crasher::GetStackTraceEtcErrorMessage();
         return false;
       }
@@ -39,7 +39,7 @@ bool MonomialP::SubstitutioN(const List<Polynomial<coefficient> >& TheSubstituti
       output*=(tempPoly);
 //      output.ComputeDebugString();
     }
-//  std::cout << " to get: " << output.ToString();
+//  stOutput << " to get: " << output.ToString();
   return true;
 }
 
@@ -67,7 +67,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
   permutation thePerm;
   thePerm.initPermutation(theMat.NumRows);
   int numCycles=thePerm.GetNumPermutations();
-  //std::cout << "<hr>" << numCycles << " total cycles";
+  //stOutput << "<hr>" << numCycles << " total cycles";
   List<int> permutationIndices;
   thePerm.GetPermutationLthElementIsTheImageofLthIndex(permutationIndices);
   Polynomial<coefficient> result, theMonomial;
@@ -83,7 +83,7 @@ void Polynomial<coefficient>::MakeDeterminantFromSquareMatrix(const Matrix<Polyn
       for (int k=j+1; k<permutationIndices.size; k++)
         if (permutationIndices[k]<permutationIndices[j])
           sign*=-1;
-    //std::cout << "<hr>" << permutationIndices << " sign: " << sign;
+    //stOutput << "<hr>" << permutationIndices << " sign: " << sign;
     theMonomial*=sign;
     result+=theMonomial;
   }
@@ -153,11 +153,11 @@ bool Polynomial<coefficient>::Substitution(const List<Polynomial<coefficient> >&
       return false;
     TempPoly*=this->theCoeffs[i];
     Accum+=(TempPoly);
-    //std::cout << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
+    //stOutput << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
   }
   *this=(Accum);
 //  this->GrandMasterConsistencyCheck();
-  //std::cout << "<hr>to finally get<br>" << output.ToString(theFormat);
+  //stOutput << "<hr>to finally get<br>" << output.ToString(theFormat);
   return true;
 }
 
@@ -360,8 +360,8 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   if (inputMaxMonomial>=tempInput.size() || inputMaxMonomial<0)
     crash << "This is a programming error: the index of the maximal input monomial is " << inputMaxMonomial << " while the polynomial has "
     << tempInput.size() << "  monomials. I am attempting to divide " << this->ToString() << " by " << inputDivisor.ToString() << ". " << crash;
-//  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
-//  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
+//  stOutput << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
+//  stOutput << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
   { if (remainderMaxMonomial>=outputRemainder.size())
@@ -375,13 +375,13 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
     outputQuotient.AddMonomial(tempMon, tempCoeff);
     tempP=(tempInput);
     tempP.MultiplyBy(tempMon, tempCoeff);
-/*    std::cout << "<br>hash function tempMon: " <<  tempMon.HashFunction();
-    std::cout << "<br>HashFunctions of outputRemainder monomials: ";
+/*    stOutput << "<br>hash function tempMon: " <<  tempMon.HashFunction();
+    stOutput << "<br>HashFunctions of outputRemainder monomials: ";
     for (int i=0; i<outputRemainder.size; i++)
-      std::cout << outputRemainder[i].HashFunction() << ", ";
-    std::cout << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();*/
+      stOutput << outputRemainder[i].HashFunction() << ", ";
+    stOutput << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();*/
     outputRemainder-=(tempP);
-//    std::cout << " to get " << outputRemainder.ToString();
+//    stOutput << " to get " << outputRemainder.ToString();
     remainderMaxMonomial= outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
     if (remainderMaxMonomial==-1)
       break;
@@ -390,7 +390,7 @@ void Polynomial<coefficient>::DivideBy(const Polynomial<coefficient>& inputDivis
   outputQuotient.MultiplyBy(scaleInput, 1);
   outputQuotient.MultiplyBy(scaleRemainder, 1);
   outputRemainder.MultiplyBy(scaleRemainder, 1);
-//  std::cout << "<br> " << this->ToString() << " divided by " << inputDivisor.ToString() << " yields " << outputQuotient.ToString()
+//  stOutput << "<br> " << this->ToString() << " divided by " << inputDivisor.ToString() << " yields " << outputQuotient.ToString()
 //  << " with remainder " << outputRemainder.ToString();
 
 }
@@ -458,7 +458,7 @@ void Polynomial<coefficient>::AssignMinPoly(const Matrix<coefficient>& input)
     }
     tempM.MakeEi(0, theBasis.size,1);
     currentFactor.AddMonomial(tempM, 1);
-//    std::cout << "current factor: " << currentFactor.ToString();
+//    stOutput << "current factor: " << currentFactor.ToString();
     *this = MathRoutines::lcm(*this, currentFactor);
   }
   this->ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
@@ -547,7 +547,7 @@ bool Polynomial<coefficient>::FindOneVarRatRoots(List<Rational>& output)
     for (int j=0; j<divisorsS.size; j++)
     { tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
       val=myCopy.Evaluate(tempV);
-//      std::cout << "<br>" << myCopy.ToString() << " eval at "
+//      stOutput << "<br>" << myCopy.ToString() << " eval at "
 //      << tempV.ToString() << " equals " << val.ToString();
       if (val==0)
       { Polynomial<Rational> divisor, tempP;

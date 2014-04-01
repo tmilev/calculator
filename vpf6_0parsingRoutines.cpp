@@ -46,6 +46,7 @@ void Calculator::reset()
   this->flagDisplayFullExpressionTree=false;
   this->flagUseFracInRationalLaTeX=false;
   this->flagDontDistribute=false;
+  this->flagForkingProcessAllowed=true;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=277777;
@@ -269,7 +270,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
 */
 
 
-//  std::cout << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
+//  stOutput << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
 }
 
 bool Calculator::ReplaceOXEXEXEXByE(int formatOptions)
@@ -364,7 +365,7 @@ bool Calculator::ReplaceOXXEXEXEXByE(int formatOptions)
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
   this->DecreaseStackSetCharacterRangeS(8);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -379,7 +380,7 @@ bool Calculator::ReplaceOXEByE(int formatOptions)
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOEByE(int formatOptions)
@@ -393,7 +394,7 @@ bool Calculator::ReplaceOEByE(int formatOptions)
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
   return this->DecreaseStackSetCharacterRangeS(1);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
 }
 
 bool Calculator::ReplaceOEXByEX(int formatOptions)
@@ -407,7 +408,7 @@ bool Calculator::ReplaceOEXByEX(int formatOptions)
   middle.theData=newExpr;
   middle.controlIndex=this->conExpression();
   this->DecreaseStackExceptLast(1);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -540,7 +541,7 @@ void Calculator::ParseFillDictionary(const std::string& input)
       { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
         currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-       // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
+       // stOutput << "<br>Adding syntactic element " << currentElement.ToString(*this);
       }
       current="";
     }
@@ -627,7 +628,7 @@ bool Calculator::ReplaceXXByEEmptySequence()
 bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   int theBoundVar=theElt.theData.theData;
-//  std::cout << "<br>Registering bound variable index: " << theBoundVar;
+//  stOutput << "<br>Registering bound variable index: " << theBoundVar;
   if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string " << this->theAtoms[theBoundVar] << " is first used to denote a non-bound variable"
@@ -644,10 +645,10 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
   theElt.theData.AddChildAtomOnTop(this->opBind());
   theElt.theData.AddChildAtomOnTop(theBoundVar);
   theElt.controlIndex=this->conExpression();
-//  std::cout << ", got to element: " << theElt.theData.ToString();
+//  stOutput << ", got to element: " << theElt.theData.ToString();
   this->DecreaseStackSetCharacterRangeS(numXs);
   this->ReplaceXXYByY();
-//  std::cout << ", finally got: "
+//  stOutput << ", finally got: "
 //  << (*this->CurrentSyntacticStacK).LastObject()->ToString(*this);
   return true;
 }
@@ -655,7 +656,7 @@ bool Calculator::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
 bool Calculator::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
   int theBoundVar=theElt.theData.theData;
-//  std::cout << "<br>index of variable: " << theElt.ToString(*this);
+//  stOutput << "<br>index of variable: " << theElt.ToString(*this);
   if (this->IsBoundVarInContext(theBoundVar))
   { theElt.theData.reset(*this, 2);
     theElt.theData.AddChildAtomOnTop(this->opBind());
@@ -673,7 +674,7 @@ bool Calculator::ReplaceAXbyEX()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
 //  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
   theElt.controlIndex=this->conExpression();
-//  std::cout << "replaceAbyE: " << theElt.theData.ToString();
+//  stOutput << "replaceAbyE: " << theElt.theData.ToString();
   return true;
 }
 
@@ -690,7 +691,7 @@ bool Calculator::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputF
   left.controlIndex=theControlIndex;
   afterleft=*this->CurrentSyntacticStacK->LastObject();
   this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -701,7 +702,7 @@ bool Calculator::ReplaceSequenceXEBySequence(int theControlIndex, int inputForma
   left.theData.format=inputFormat;
   left.controlIndex=theControlIndex;
   this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -729,7 +730,7 @@ bool Calculator::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
   left.theData=newExpr;
   left.controlIndex=theControlIndex;
   this->DecreaseStackSetCharacterRangeS(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -744,7 +745,7 @@ bool Calculator::ReplaceEEByEusingO(int theControlIndex)
   newExpr.AddChildOnTop(right.theData);
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -758,7 +759,7 @@ bool Calculator::ReplaceEOXbyEX()
   newExpr.AddChildOnTop(left.theData);
   left.theData=newExpr;
   this->DecreaseStackExceptLast(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -773,7 +774,7 @@ bool Calculator::ReplaceEEXByEXusingO(int theControlIndex)
   newExpr.AddChildOnTop(right.theData);
   left.theData=newExpr;
   this->DecreaseStackExceptLast(1);
-  //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  //    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -789,7 +790,7 @@ bool Calculator::ReplaceEXXEXEByEusingO(int theControlIndex)
   newExpr.AddChildOnTop(right.theData);
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(5);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -805,7 +806,7 @@ bool Calculator::ReplaceEXXEXEXByEXusingO(int theControlIndex)
   newExpr.AddChildOnTop(right.theData);
   left.theData=newExpr;
   this->DecreaseStackExceptLast(5);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -823,12 +824,12 @@ bool Calculator::ReplaceEOEXByEX(int formatOptions)
   middle=*(*this->CurrentSyntacticStacK).LastObject();
 //  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
   this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
 bool Calculator::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
-{ //std::cout << "<b>Here iam!</b>";
+{ //stOutput << "<b>Here iam!</b>";
   SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -843,7 +844,7 @@ bool Calculator::ReplaceXEEXByEXusingO(int inputOperation, int formatOptions)
   middle=*(*this->CurrentSyntacticStacK).LastObject();
 //  left.IndexLastCharPlusOne=right.IndexLastCharPlusOne;
   this->DecreaseStackExceptLast(2);
-//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+//    stOutput << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
 
@@ -956,7 +957,7 @@ bool Calculator::ExtractExpressions(Expression& outputExpression, std::string* o
     if (result.errorString=="" && result.controlIndex==this->conExpression())
     { outputExpression=result.theData;
       success=true;
-//      std::cout << "Success: " << result.theData.ToString();
+//      stOutput << "Success: " << result.theData.ToString();
     } else if (result.errorString!="")
       errorLog << "Syntax error with message: " << result.errorString;
     else
@@ -1006,7 +1007,7 @@ bool Calculator::ApplyOneRule()
     return this->PopTopSyntacticStack();
   }
   if (secondToLastS=="%" && lastS=="LogFull")
-  { std::cout
+  { stOutput
     << "<hr>You are requesting a full log of the evaluation process. <br><b>WARNING requesting  a full log of the evaluation process is very slow, "
     << " and might produce a HUGE printout. </b><br><b>You have been warned. </b><hr>";
     this->flagLogFullTreeCrunching=true;
@@ -1152,7 +1153,7 @@ bool Calculator::ApplyOneRule()
   if (lastS=="Sequence" && lastE.theData.children.size==0 && lastE.theData.theData==this->opLisT())
     return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("MakeSequence"));
   //else
-  //  std::cout << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
+  //  stOutput << "lastS is sequence but lastE is |" << lastE.theData.ToString() << "|";
   if (thirdToLastS=="\\sqrt" && secondToLastS=="Expression")
     return this->ReplaceSqrtEXByEX();
   if (fourthToLastS=="\\sqrt"  && thirdToLastS == "{}" && secondToLastS=="Expression")

@@ -291,7 +291,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 
 void WeylGroup::WriteToFile(std::fstream& output)
 { output << "Weyl_group: ";
-  std::cout << "This code is not implemented yet (due to a regression).";
+  stOutput << "This code is not implemented yet (due to a regression).";
   crash << crash;
 //  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
@@ -304,7 +304,7 @@ void WeylGroup::ReadFromFile(std::fstream& input)
 { std::string tempS;
 //  int tempI;
   input >> tempS;
-  std::cout << "This code is not implemented yet (due to a regression).";
+  stOutput << "This code is not implemented yet (due to a regression).";
   crash << crash;
   //input >> this->WeylLetter >> tempI >> tempS;
   if(tempS!="Long_root_length:")
@@ -332,7 +332,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
 //  Matrix<Rational>  theDet=mapOnRootSpaces;
 //  Rational tempRat;
 //  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
-//  std::cout << " ... and the det is: " << tempRat.ToString();
+//  stOutput << " ... and the det is: " << tempRat.ToString();
   Selection NonExplored;
   int numRoots= this->theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -512,11 +512,11 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
       tempDomain[index].AddMonomial(tempGen, 1);
       tempRange[index] = this->imagesSimpleChevalleyGenerators[i+j*theDomainDimension];
       NonExplored.RemoveSelection(index);
-//      std::cout <<"<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
-//      std::cout <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
+//      stOutput <<"<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
+//      stOutput <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
     }
   }
-//  std::cout << this->ToString(theGlobalVariables) << "<br>";
+//  stOutput << this->ToString(theGlobalVariables) << "<br>";
   Vector<Rational> right;
   while (NonExplored.CardinalitySelection>0)
   { for (int i=0; i<NonExplored.CardinalitySelection; i++)
@@ -570,9 +570,9 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   { this->domainAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.ActOnVectorColumn(tempRoot, imageRoot);
     this->imagesAllChevalleyGenerators[i].AssignVectorNegRootSpacesCartanPosRootSpaces(imageRoot, this->theRange());
-//    std::cout << this->domainAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
-//    std::cout << "->" << this->imagesAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
-//    std::cout << "<br>";
+//    stOutput << this->domainAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
+//    stOutput << "->" << this->imagesAllChevalleyGenerators.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
+//    stOutput << "<br>";
   }
   return true;
 }
@@ -674,7 +674,7 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId(char theWeylLetter, int th
     ElementSemisimpleLieAlgebra<Rational>& tempElt2=this->imagesSimpleChevalleyGenerators[theWeylDim+i];
     tempElt2.MakeGenerator(i+numPosRoots, this->theRange());
   }
-//  std::cout << this->ToString(theGlobalVariables);
+//  stOutput << this->ToString(theGlobalVariables);
 }
 
 void HomomorphismSemisimpleLieAlgebra::ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
@@ -715,7 +715,7 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
   Vector<Rational> theScalarProducts;
   theScalarProducts.SetSize(rankSA);
 //  tempMat.ComputeDebugString(true, false);
-//  std::cout << tempMat.DebugString << "<br>";
+//  stOutput << tempMat.DebugString << "<br>";
   for (int i=0; i<theRootSystem.size; i++)
   { for (int j=0; j<rankSA; j++)
     { ElementSemisimpleLieAlgebra<Rational>& currentH=this->imagesAllChevalleyGenerators[j+numPosRootsDomain];
@@ -953,7 +953,7 @@ bool RationalFunctionOld::ConvertToType(int theType)
 }
 
 void RationalFunctionOld::Invert()
-{ //std::cout << "inverting " << this->ToString();
+{ //stOutput << "inverting " << this->ToString();
   if(!this->checkConsistency())
     crash << crash;
   if (this->expressionType==this->typeRational)
@@ -973,7 +973,7 @@ void RationalFunctionOld::Invert()
   this->SimplifyLeadingCoefficientOnly();
   if(!this->checkConsistency())
     crash << crash;
-  //std::cout << " to get: " << this->ToString();
+  //stOutput << " to get: " << this->ToString();
 }
 
 bool RationalFunctionOld::checkConsistency()const
@@ -1049,7 +1049,7 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
   RationalFunctionOld::lcm(left, right, lcmBuf, theGlobalVariables);
   prodBuf=left;
   prodBuf*=right;
-//  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
+//  stOutput << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
   prodBuf.DivideBy(lcmBuf, output, remBuf);
   if (!remBuf.IsEqualToZero() || output.IsEqualToZero() )
     crash << "This is a programming error. <br>While computing the gcd of left=" << left.ToString() << " <br>and right="
@@ -1057,7 +1057,7 @@ void RationalFunctionOld::gcd(const Polynomial<Rational>& left, const Polynomial
     << lcmBuf.ToString() << " <br>but at the same time right*left divided by lcm (left, right) equals <br>" << output.ToString()
     << "<br> with remainder " << remBuf.ToString() << ", which is imposible. <br>The Groebner basis follows. <br>" << crash;
   output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-//  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
+//  stOutput << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
 void RationalFunctionOld::MakeOneLetterMoN(int theIndex, const Rational& theCoeff, GlobalVariables* theGlobalVariables, int ExpectedNumVars)
@@ -1135,18 +1135,18 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
   theBasis.size=0;
   theBasis.AddOnTop(leftTemp);
   theBasis.AddOnTop(rightTemp);
-/*  std::cout << "<br>In the beginning: <br>";
+/*  stOutput << "<br>In the beginning: <br>";
   for (int i=0; i<theBasis.size; i++)
-  { std::cout << theBasis[i].ToString() << "<br>\n";
+  { stOutput << theBasis[i].ToString() << "<br>\n";
   }*/
   MemorySaving<GroebnerBasisComputation<Rational> > bufComp;
   GroebnerBasisComputation<Rational>& theComp=theGlobalVariables==0?
   bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
   theComp.thePolynomialOrder.theMonOrder=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables);
-//  std::cout << "<br><br> ... and the basis is: <br>";
+//  stOutput << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
-//  { std::cout << tempList[i].ToString() << "<br>\n";
+//  { stOutput << tempList[i].ToString() << "<br>\n";
 //  }
   int maxMonNoTIndex=-1;
   Rational MaxTotalDeg;
@@ -1175,13 +1175,13 @@ void RationalFunctionOld::lcm(const Polynomial<Rational>& left, const Polynomial
 }
 
 void RationalFunctionOld::operator*=(const MonomialP& other)
-{ //std::cout << "<br>Multiplying " << this->ToString() << " times " << other.ToString();
+{ //stOutput << "<br>Multiplying " << this->ToString() << " times " << other.ToString();
   Polynomial<Rational> otherP;
   otherP.MakeZero();
   otherP.AddMonomial(other, 1);
-  //std::cout << ", otherP is: " << otherP.ToString();
+  //stOutput << ", otherP is: " << otherP.ToString();
   (*this)*=otherP;
-  //std::cout << " to get " << this->ToString();
+  //stOutput << " to get " << this->ToString();
 }
 
 void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
@@ -1308,7 +1308,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
-    std::cout << out.str();
+    stOutput << out.str();
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
@@ -1382,17 +1382,17 @@ void RationalFunctionOld::Simplify()
   if (this->expressionType==this->typeRationalFunction)
     if(!this->Numerator.GetElement().IsEqualToZero())
     { Polynomial<Rational> theGCD, tempP, tempP2;
-//      std::cout << "<br>fetching gcd of " << this->Numerator.GetElement().ToString() << " and "
+//      stOutput << "<br>fetching gcd of " << this->Numerator.GetElement().ToString() << " and "
 //      << this->Denominator.GetElement().ToString() << "<br>";
       this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD, this->context);
       if (theGCD.IsEqualToZero())
         crash << "This is a programing error: " << " while fetching the gcd of " << this->Numerator.GetElement().ToString() << " and " << this->Denominator.GetElement().ToString()
         << " I got 0, which is impossible. " << crash;
-//      std::cout << "to get " << theGCD.ToString();
-//      std::cout << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
+//      stOutput << "to get " << theGCD.ToString();
+//      stOutput << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement()=(tempP);
-//      std::cout << "<br>the critical divide: " << this->Denominator.GetElement().ToString() << " by " << theGCD.ToString() << ".";
+//      stOutput << "<br>the critical divide: " << this->Denominator.GetElement().ToString() << " by " << theGCD.ToString() << ".";
       //crash << crash ;
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Denominator.GetElement()=(tempP);
@@ -1502,12 +1502,12 @@ void SemisimpleLieAlgebraOrdered::init
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
       this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis[j];
-//    std::cout << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();
+//    stOutput << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();
   }
-//  std::cout << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false) << "<br><br>";
+//  stOutput << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false) << "<br><br>";
 
  // this->ChevalleyGeneratorsInCurrentCoords.Invert(theGlobalVariables);
-  //std::cout << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false);
+  //stOutput << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false);
 }
 
 void SemisimpleLieAlgebraOrdered::initDefaultOrder(SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
@@ -1668,7 +1668,7 @@ void slTwoInSlN::ClimbDownFromHighestWeightAlongSl2String(Matrix<Rational>& inpu
   Matrix<Rational> ::LieBracket(this->theH, input, output);
   bool tempBool=input.IsProportionalTo(output, currentWeight);
   if (!tempBool)
-    std::cout << "<br>oh no! climbing down is fucked up!";
+    stOutput << "<br>oh no! climbing down is fucked up!";
   Rational RaiseCoeff;
   RaiseCoeff.MakeZero();
   outputCoeff.MakeOne();
@@ -1786,9 +1786,9 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
   while(!remainder.IsEqualToZero() )
-  { //std::cout << "<br>remainder:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
+  { //stOutput << "<br>remainder:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
     this->ClimbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    //std::cout << "<br>highest weight vector:<div class=\"math\">" << highestWeightVector.ToString(false, true) << "</div>";
+    //stOutput << "<br>highest weight vector:<div class=\"math\">" << highestWeightVector.ToString(false, true) << "</div>";
     this->ClimbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
     for (int i=0; i<this->theProjectors.size; i++)
     { Matrix<Rational> & currentProjector=this->theProjectors.TheObjects[i];
@@ -1804,13 +1804,13 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector(Matrix<Rational> & input,
       crash << crash;
     component/=(theCoeff);
     outputDecompositionOfInput.AddOnTop(component);
-    //std::cout << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
+    //stOutput << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
     remainder-=(component);
   }
   //remainder.MakeZero();
 //  for (int i=0; i<outputVectors.size; i++)
 //    remainder.Add(outputVectors.TheObjects[i]);
-//  std::cout << "<br>sum of all components:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
+//  stOutput << "<br>sum of all components:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
 
 }
 
@@ -1981,7 +1981,7 @@ std::string slTwoInSlN::PairTwoIndices(List<int>& output, int leftIndex, int rig
         for (int k=0; k<HighestWeightsContainingModules.size; k++)
         { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules[k])==-1)
-            std::cout << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
+            stOutput << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
             << rightElt.ToString(&latexFormat) << "]=" << tempMat.ToString(&latexFormat) << endMath;
         }
       }
@@ -2020,7 +2020,7 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     this->Simplify();
 //    this->ComputeDebugString();
   } else
-  { std::cout << "Adding " << this->ToString() << " + " << other.ToString();
+  { stOutput << "Adding " << this->ToString() << " + " << other.ToString();
     this->Numerator.GetElement()*=(tempRat);
     this->Denominator.GetElement()*=(tempRat);
     this->Numerator.GetElement()+=(other.Numerator.GetElementConst());

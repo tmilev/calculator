@@ -17,7 +17,7 @@ std::string FloatingPoint::DoubleToString(double input)
 { std::stringstream out;
   out << std::fixed << input;
   std::string result=out.str();
-//  std::cout << "got as input " << input << ", before resizing got: " << result << "";
+//  stOutput << "got as input " << input << ", before resizing got: " << result << "";
   bool hasDot=false;
   for (int i=result.size()-1; i>=0; i--)
     if (result[i]=='.')
@@ -30,7 +30,7 @@ std::string FloatingPoint::DoubleToString(double input)
   for (firstNonZeroIndex=result.size()-1; firstNonZeroIndex>=0; firstNonZeroIndex--)
   { if (result[firstNonZeroIndex]=='.')
     { result.resize(firstNonZeroIndex);
-      result+="+\\varepsilon";
+//      result+="+\\varepsilon";
       return result;
       //firstNonZeroIndex--;
       //break;
@@ -39,7 +39,7 @@ std::string FloatingPoint::DoubleToString(double input)
       break;
   }
   result.resize(firstNonZeroIndex+1);
-  //std::cout << "got as input " << input << ", am producing: " << result << " as output";
+  //stOutput << "got as input " << input << ", am producing: " << result << " as output";
   return result;
 }
 

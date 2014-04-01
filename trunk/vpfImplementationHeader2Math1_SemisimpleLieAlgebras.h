@@ -44,7 +44,7 @@ void Weight<coefficient>::AccountSingleWeight
 { //This is the Brauer-Klimyk formula. Reference:
   //Humphreys J., Introduction to Lie algebras and representation theory
   //page 142, exercise 9.
-  //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
+  //stOutput << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
   //<< " with coefficient " << finalCoeff.ToString();
   MacroRegisterFunctionWithName("Weight_CoefficientType::AccountSingleWeight");
   this->CheckNonZeroOwner();
@@ -57,9 +57,9 @@ void Weight<coefficient>::AccountSingleWeight
   for (int i=0; i<theWeyl.RootsOfBorel.size; i++)
     if (theWeyl.RootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).IsEqualToZero())
       return;
-//  std::cout << "<br> Before raising to dominant, in simple coords: " << dominant.ToString() << "<br>";
+//  stOutput << "<br> Before raising to dominant, in simple coords: " << dominant.ToString() << "<br>";
   theWeyl.RaiseToDominantWeight(dominant, &sign);
-//  std::cout << "After raising to dominant: " << dominant.ToString() << "<br>";
+//  stOutput << "After raising to dominant: " << dominant.ToString() << "<br>";
   dominant-=theWeyl.rho;
   if (!theWeyl.IsDominantWeight(dominant))
     return;
@@ -69,7 +69,7 @@ void Weight<coefficient>::AccountSingleWeight
   coefficient coeffChange;
   coeffChange= theMult;
   coeffChange*=sign;
-//  std::cout << "; final contribution: " << tempMon.Coefficient.ToString()
+//  stOutput << "; final contribution: " << tempMon.Coefficient.ToString()
 //  << "*" << tempMon.weightFundamentalCoords.ToString() << "<br>";
   outputAccum.AddMonomial(tempMon, coeffChange);
 }
@@ -109,7 +109,7 @@ std::string Weight<coefficient>::TensorAndDecompose
   Vector<Rational> rightHWSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
   Vectors<Rational> tempRoots;
   tempRoots.SetSize(1);
-//  std::cout << "weights of smaller module: " << weightsLeftSimpleCoords.ToString();
+//  stOutput << "weights of smaller module: " << weightsLeftSimpleCoords.ToString();
   for (int i=0; i<weightsLeftSimpleCoords.size; i++)
   { tempRoots[0]=weightsLeftSimpleCoords[i];
     theWeyl.GenerateOrbit(tempRoots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
@@ -120,7 +120,7 @@ std::string Weight<coefficient>::TensorAndDecompose
     for (int j=0; j<currentOrbit.size; j++)
       this->AccountSingleWeight(currentOrbit[j], rightHWSimpleCoords, multsLeft[i], output);
   }
-//  std::cout << "<hr><hr><hr><hr>";
+//  stOutput << "<hr><hr><hr><hr>";
   return errorLog.str();
 }
 
@@ -252,8 +252,8 @@ void SemisimpleLieAlgebra::GetCommonCentralizer
   }
   Vectors<coefficient> outputV;
   commonAd.GetZeroEigenSpace(outputV);
-//  std::cout << "<br>Common ad: " << commonAd.ToString();
-//  std::cout << "<br>Eigenvectors: " << outputV.ToString();
+//  stOutput << "<br>Common ad: " << commonAd.ToString();
+//  stOutput << "<br>Eigenvectors: " << outputV.ToString();
   outputCentralizingElements.SetSize(outputV.size);
   for (int i=0; i<outputV.size; i++)
   { ElementSemisimpleLieAlgebra<coefficient>& currentElt=outputCentralizingElements[i];
@@ -311,7 +311,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
   int theRank=owner->GetRank();
   int numPosRoots=owner->GetNumPosRoots();
   result.MakeZero(theRank);
-//  std::cout << "<br>Zero vector in GetCartanPart is: " << result.ToString();
+//  stOutput << "<br>Zero vector in GetCartanPart is: " << result.ToString();
   if (theRank<=0 || owner==0)
     crash << "This is a programming error: the owner of a semisimple Lie algebra element is non-present or corrupted. " << crash;
   for (int i=0; i<theRank; i++)
@@ -320,7 +320,7 @@ Vector<coefficient> ElementSemisimpleLieAlgebra<coefficient>::GetCartanPart()con
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];
   }
-//  std::cout << "<br>GetCartanPart is returning vector: " << result.ToString();
+//  stOutput << "<br>GetCartanPart is returning vector: " << result.ToString();
   return result;
 }
 

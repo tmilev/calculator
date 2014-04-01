@@ -36,7 +36,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   ZeroRoot.MakeZero(theDimension);
   Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
-//  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ToString();
+//  stOutput << "the SA Coxeter matrix: " << matCoxeterElt.ToString();
 //  tempMat=matCoxeterElt;
   this->ComputeDynkinDiagramKandCentralizer();
   SubgroupWeylGroupOLD tempGroup;
@@ -50,10 +50,10 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
     lastRoot.GetCoordsInBasiS(tempGroup.simpleGenerators, lastRootInSimpleCoords);
     coxeterNumber=MathRoutines::Maximum(lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber);
   }
-//  std::cout << "<hr>the corresponding Coxeter number: " << coxeterNumber;
+//  stOutput << "<hr>the corresponding Coxeter number: " << coxeterNumber;
 //  for (int i=0; i<coxeterNumber-1; i++)
 //    tempMat.MultiplyOnTheLeft(matCoxeterElt);
-//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
+//  stOutput << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
   CompleX<double> theEigenValue;
   theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
   theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
@@ -1911,9 +1911,9 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
     doDebug=true;
   this->outerSAautos.GenerateElements(0, this->ownEr->theGlobalVariables);
   if (doDebug)
-  { std::cout << "<br>Outer autos: ";
+  { stOutput << "<br>Outer autos: ";
     for (int i=0; i<this->outerSAautos.theElements.size; i++)
-      std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm();
+      stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm();
   }
   this->outerSAautosExtendingToAmbientAutosGenerators.theElements.Clear();
   for (int i=0; i<this->outerSAautos.theElements.size; i++)
@@ -1921,7 +1921,7 @@ void rootSubalgebra::ComputeOuterSAautosExtendingToAmbientAutosGenerators()
       this->outerSAautosExtendingToAmbientAutosGenerators.theElements.AddOnTop(this->outerSAautos.theElements[i]);
     else
       if (doDebug)
-        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
+        stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm() << " ain't no good. ";
 }
 
 bool rootSubalgebra::CheckForMaximalDominanceCartanSA()
@@ -1933,11 +1933,11 @@ bool rootSubalgebra::CheckForMaximalDominanceCartanSA()
     { simpleBasisOriginalOrderCopy=this->SimpleBasisKinOrderOfGeneration;
       this->outerSAautos.theElements[i].ActOnVectorsColumn(simpleBasisOriginalOrderCopy);
       if (doDebug)
-        std::cout << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
+        stOutput << "<br>" << this->outerSAautos.theElements[i].ToStringMatForm()
         << " acting on " << this->SimpleBasisKinOrderOfGeneration.ToString() << " yields " << simpleBasisOriginalOrderCopy.ToString();
       this->GetAmbientWeyl().RaiseToMaximallyDominant(simpleBasisOriginalOrderCopy, true);
       if (doDebug)
-        std::cout << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
+        stOutput << "which get raised to: " << simpleBasisOriginalOrderCopy.ToString();
       for (int j=0; j<simpleBasisOriginalOrderCopy.size; j++)
         if (simpleBasisOriginalOrderCopy[j]!=this->SimpleBasisKinOrderOfGeneration[j])
         { if (simpleBasisOriginalOrderCopy[j].IsGreaterThanLexicographic(this->SimpleBasisKinOrderOfGeneration[j]))
@@ -1976,9 +1976,9 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
   ProgressReport theReport(this->ownEr->theGlobalVariables);
   std::stringstream reportStream;
   this->SimpleBasisKScaledToActByTwo=this->SimpleBasisK;
-//  std::cout << "Simple basis k: " << this->SimpleBasisK.ToString();
+//  stOutput << "Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i=0; i<this->SimpleBasisK.size; i++)
-//  { std::cout << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
+//  { stOutput << "the scalar prod: " << this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]).ToString();
     this->SimpleBasisKScaledToActByTwo[i]*=2/this->GetAmbientWeyl().RootScalarCartanRoot(this->SimpleBasisK[i], this->SimpleBasisK[i]);
 //  }
   if (this->ownEr->theGlobalVariables!=0)
@@ -1986,7 +1986,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
     theReport.Report(reportStream.str());
   }
   if (this->indexInducingSubalgebra!=-1)
-  { //std::cout << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
+  { //stOutput << "<hr>Testing simple basis: " << this->SimpleBasisK.ToString();
     this->SimpleBasisK.GetGramMatrix(this->scalarProdMatrixPermuted, &this->GetAmbientWeyl().CartanSymmetric);
     int goodPermutation=-1;
     List<List<int> >& extensionRootPermutations=this->ownEr->theSubalgebras[this->indexInducingSubalgebra].potentialExtensionRootPermutations;
@@ -2054,7 +2054,7 @@ bool rootSubalgebra::ComputeEssentialsIfNew()
 
 bool rootSubalgebra::IsEquivalentToByDiagramsAndDimensions
 (const rootSubalgebra& other)const
-{/* std::cout << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
+{/* stOutput << "<br>Comparing " << this->theDynkinType.ToString() << " centralized by "
   << this->theCentralizerDynkinType.ToString() << " with mod decompo "
   << this->moduleDecompoAmbientAlgebraDimensionsOnly.ToString()
   << " to " << other.theDynkinType.ToString() << " centralized by "
@@ -2082,7 +2082,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphismOLD(Globa
   rootSAsGenerateAll.theSubalgebras[0].ownEr=this;
   rootSAsGenerateAll.theSubalgebras[0].ComputeEssentialS();
   this->ComputeAllReductiveRootSubalgebrasContainingInputUpToIsomorphismOLD(rootSAsGenerateAll.theSubalgebras, 1, theGlobalVariables);
-//  std::cout << this->ToString();
+//  stOutput << this->ToString();
   if (sort)
     this->SortDescendingOrderBySSRank();
   if(computeEpsCoords)
@@ -2128,7 +2128,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingHFtoHEFWRTSubalgebra
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
 //  bool ereBeProbs=(h.ToString()=="(6, 10, 14, 8)");
 //  if (ereBeProbs)
-//    std::cout << "<hr>The roots in play are: " << rootsInPlay.ToString();
+//    stOutput << "<hr>The roots in play are: " << rootsInPlay.ToString();
 
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
@@ -2272,13 +2272,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   theSl2.owneR= &this->GetOwnerSSalg();
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   DynkinDiagramRootSubalgebra diagramZeroCharRoots;
-//  std::cout << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
+//  stOutput << "<br>problems abound here!" << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0]);
   //bool ereBeProbs=this->theDynkinDiagram.ToStringRelativeToAmbientType(this->owneR->theWeyl.theDynkinType[0])=="3A^{1}_1";
   //if (ereBeProbs)
-  //{ std::cout << "<hr>Ere be probs. ";
+  //{ stOutput << "<hr>Ere be probs. ";
   //}
   //if (ereBeProbs)
-  //  std::cout << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
+  //  stOutput << "<br>Simple basis k: " << this->SimpleBasisK.ToString();
   for (int i=0; i<numCycles; i++, selectionRootsWithZeroCharacteristic.incrementSelection())
   { this->SimpleBasisK.SubSelection(selectionRootsWithZeroCharacteristic, rootsZeroChar);
     diagramZeroCharRoots.ComputeDiagramTypeModifyInput(rootsZeroChar, this->GetAmbientWeyl());
@@ -2300,7 +2300,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     //(but selectionRootsWithZeroCharacteristic still have to be found)
     //this is done in the below code.
 //    if (ereBeProbs)
-//      std::cout << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
+//      stOutput << "<br>Sel: " << selectionRootsWithZeroCharacteristic.ToString() << ", dynkin epsilon: " << theDynkinEpsilon;
     if (theDynkinEpsilon!=0)
       continue;
     Vector<Rational> tempRoot, tempRoot2;
@@ -2322,13 +2322,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     ////////////////////
     reflectedSimpleBasisK=this->SimpleBasisK;
     //if (ereBeProbs)
-    //std::cout << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
+    //stOutput << "<hr>'n the raising element is: drumroll..." << raisingElt.ToString()
     //<< ", acting on: " << reflectedSimpleBasisK.ToString();
     for (int k=0; k<reflectedSimpleBasisK.size; k++)
       this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k]);
     ////////////////////
     //if (ereBeProbs)
-    //  std::cout << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
+    //  stOutput << "<br>so the reflected simple basis becomes: " << reflectedSimpleBasisK.ToString();
 
     theSl2.RootsWithScalar2WithH=rootsScalarProduct2HnonRaised;
     for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
@@ -2341,7 +2341,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     theSl2.theE.MakeZero();
     theSl2.theF.MakeZero();
     //theSl2.ComputeDebugString(false, false, theGlobalVariables);
-//    std::cout << "<br>accounting " << characteristicH.ToString();
+//    stOutput << "<br>accounting " << characteristicH.ToString();
     if(theLieAlgebra.AttemptExtendingHFtoHEFWRTSubalgebra
        (theSl2.RootsWithScalar2WithH, selectionRootsWithZeroCharacteristic, reflectedSimpleBasisK, characteristicH, theSl2.theE,
         theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
@@ -2359,18 +2359,18 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     { output.BadHCharacteristics.AddOnTop(characteristicH);
 //      DynkinType tempType;
 //      diagramZeroCharRoots.GetDynkinType(tempType);
-//      std::cout << "<br>obtained bad characteristic " << characteristicH.ToString() << ". The zero char root diagram is "
+//      stOutput << "<br>obtained bad characteristic " << characteristicH.ToString() << ". The zero char root diagram is "
 //      << tempType.ToString() << "; the Dynkin epsilon is " << theDynkinEpsilon << "= the num roots generated by diagram "
 //      << diagramZeroCharRoots.NumRootsGeneratedByDiagram() << " + the relative dimension " << theRelativeDimension
 //      << " - the slack " << theSlack << "<br>The relative root system is: " << relativeRootSystem.ToString();
-//      std::cout << "<br> I was exploring " << this->ToString();
+//      stOutput << "<br> I was exploring " << this->ToString();
     }
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
-//    std::cout << "<br>" << out.str();
+//    stOutput << "<br>" << out.str();
     theReport.Report(out.str());
   }
-//  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
+//  stOutput << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
 void rootSubalgebras::ComputeAllReductiveRootSAsInit()
@@ -2379,7 +2379,7 @@ void rootSubalgebras::ComputeAllReductiveRootSAsInit()
   this->validScales.SetExpectedSize(this->owneR->GetRank()*2);
   for (int i=0; i<this->owneR->GetRank(); i++)
     this->validScales.AddOnTopNoRepetition(2/this->owneR->theWeyl.CartanSymmetric(i,i));
-//  std::cout << "Valid scales: " << this->validScales.ToString();
+//  stOutput << "Valid scales: " << this->validScales.ToString();
 }
 
 void rootSubalgebras::ComputeParabolicPseudoParabolicNeitherOrder(GlobalVariables* theGlobalVariables)
@@ -2463,7 +2463,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
   currentSA.ComputePotentialExtensions();
   this->theSubalgebras.ReservE(this->GetOwnerWeyl().RootsOfBorel.size);
   this->theSubalgebras.AddOnTop(currentSA);
-  //std::cout << "Here I am!";
+  //stOutput << "Here I am!";
   List<DynkinType> possibleExtensions;
   DynkinType currentType;
   std::string reportString;
@@ -2505,7 +2505,7 @@ void rootSubalgebras::ComputeAllReductiveRootSubalgebrasUpToIsomorphism()
     << " subalgebras. Proceeding to sort the subalgebras...";
     theReport2.Report(reportStream.str());
   }
-//  std::cout << "end!";
+//  stOutput << "end!";
   this->SortDescendingOrderBySSRank();
   if (this->theGlobalVariables!=0)
   { reportStream << "done. ";

@@ -58,7 +58,7 @@ std::string JSData::GetString(const std::string& json, int begin, int end, int* 
       break;
     }
   if(i>=minend)
-  { std::cout << "GetString: there does not appear to be a string between " << begin << " and " << minend << std::endl;
+  { stOutput << "GetString: there does not appear to be a string between " << begin << " and " << minend << "\n";
     if(actualend)
       *actualend = minend;
     return json.substr(i,0);
@@ -71,12 +71,12 @@ std::string JSData::GetString(const std::string& json, int begin, int end, int* 
     }
   }
   if(endlt)
-  { std::cout << "string being extracted failed to terminate in a timely manner, ending it at position" << i << std::endl;
+  { stOutput << "string being extracted failed to terminate in a timely manner, ending it at position" << i << "\n";
     if(actualend)
       *actualend = i;
     return json.substr(begin+1,i-begin);
   }
-  std::cout << "json ended before string being extracted" << std::endl;
+  stOutput << "json ended before string being extracted" << "\n";
   if(actualend)
     *actualend = i;
   return json.substr(begin+1,i-begin);
@@ -93,7 +93,7 @@ int JSData::AcceptString(const std::string& json, int begin)
       return i;
     }
   }
-  std::cout << "parse error: input string ended but current data string is incomplete" << std::endl;
+  stOutput << "parse error: input string ended but current data string is incomplete" << "\n";
   this->string = json.substr(begin+1,json.size()-begin-1);
   return json.size();
 }
@@ -159,7 +159,7 @@ int JSData::AcceptList(const std::string& json, int begin)
       continue;
     }
   }
-  std::cout << "parse error: string ended but list is incomplete" << std::endl;
+  stOutput << "parse error: string ended but list is incomplete" << "\n";
   return i;
 }
 
@@ -172,7 +172,7 @@ int JSData::AcceptObject(const std::string& json, int begin)
   for(; i<json.size(); i++)
   { if(json[i] == '}')
     { if(!isvaluetime)
-      { std::cout << "parse error: } in key, character " << i << " key will be ignored" << std::endl;
+      { stOutput << "parse error: } in key, character " << i << " key will be ignored" << "\n";
         return i;
       }
       if(!havecurobj)
@@ -181,7 +181,7 @@ int JSData::AcceptObject(const std::string& json, int begin)
     }
     if(json[i] == ':')
     { if(isvaluetime)
-      { std::cout << "parse error: : in value, second key ignored" << std::endl;
+      { stOutput << "parse error: : in value, second key ignored" << "\n";
         curobjbgn = i+1;
         continue;
       }
@@ -193,7 +193,7 @@ int JSData::AcceptObject(const std::string& json, int begin)
     }
     if(json[i] == ',')
     { if(!isvaluetime)
-      { std::cout << "parse error: , in key, key ignored";
+      { stOutput << "parse error: , in key, key ignored";
         curobjbgn = i+1;
         continue;
       }
@@ -220,7 +220,7 @@ int JSData::AcceptObject(const std::string& json, int begin)
       }
     }
   }
-  std::cout << "parse error: string ended but object is incomplete" << std::endl;
+  stOutput << "parse error: string ended but object is incomplete" << "\n";
   return i;
 }
 

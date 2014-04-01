@@ -10,7 +10,7 @@ static ProjectInformationInstance ProjectInfovpfImplementationHeaderPolynomialCo
 template <class coefficient>
 bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasis(List<Polynomial<coefficient> >& inputOutpuT, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::TransformToReducedGroebnerBasis");
-  //std::cout << "<hr>Processing" << inputOutpuT.ToString() << ".<br>";
+  //stOutput << "<hr>Processing" << inputOutpuT.ToString() << ".<br>";
   this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport(theGlobalVariables);
@@ -128,7 +128,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
       { std::stringstream out;
         out << "Reducing: " << theBasiS.size << " basis elements, " << this->basisCandidates.size << " candidates. ";
         theReport.Report(out.str());
-//          std::cout << "<br>" << out.str();
+//          stOutput << "<br>" << out.str();
       }
     }
     this->flagBasisGuaranteedToGenerateIdeal=true;
@@ -140,7 +140,7 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
       { std::stringstream out;
         out << "Verifying basis element " << i+1 << " out of " << theBasiS.size << " basis elements, " << this->basisCandidates.size << " candidates. ";
         theReport.Report(out.str());
-//        std::cout << "<br>" << out.str();
+//        stOutput << "<br>" << out.str();
       }
       this->NumberGBComputations++;
       this->RemainderDivisionWithRespectToBasis(this->bufPolyForGaussianElimination, &this->remainderDivision, theGlobalVariables, i);
@@ -166,26 +166,26 @@ bool GroebnerBasisComputation<coefficient>::AddPolyAndReduceBasis(GlobalVariable
 template<class coefficient>
 void GroebnerBasisComputation<coefficient>::MakeMinimalBasis()
 { MacroRegisterFunctionWithName("GroebnerBasisComputation::MakeMinimalBasis");
-/*  std::cout << "<br><br> and the leading monomials are: ";
+/*  stOutput << "<br><br> and the leading monomials are: ";
   for (int i=0; i<LeadingCoeffs.size; i++)
-    std::cout << LeadingCoeffs[i].ToString() << ", ";*/
+    stOutput << LeadingCoeffs[i].ToString() << ", ";*/
   for (int i=0; i<this->theBasiS.size; i++)
     for (int j=0; j<this->leadingMons.size; j++)
       if (i!=j)
         if (this->leadingMons[i].IsDivisibleBy(this->leadingMons[j]))
-        { /*std::cout << "<br>" << LeadingCoeffs[i].ToString() << " is divisible by "
+        { /*stOutput << "<br>" << LeadingCoeffs[i].ToString() << " is divisible by "
           << LeadingCoeffs[j].ToString();*/
           this->leadingMons.RemoveIndexSwapWithLast(i);
           this->theBasiS.RemoveIndexSwapWithLast(i);
           i--;
           break;
         } //else
-        //{ std::cout << "<br>" << LeadingCoeffs[i].ToString() << " is NOT divisible by "
+        //{ stOutput << "<br>" << LeadingCoeffs[i].ToString() << " is NOT divisible by "
         //  << LeadingCoeffs[j].ToString();
         //
-/*  std::cout << "<br><br> final leading monomials are: ";
+/*  stOutput << "<br><br> final leading monomials are: ";
   for (int i=0; i<LeadingCoeffs.size; i++)
-    std::cout <<"<br>" << LeadingCoeffs[i].ToString() << " of " << theBasis[i].ToString();
+    stOutput <<"<br>" << LeadingCoeffs[i].ToString() << " of " << theBasis[i].ToString();
 */
 }
 
@@ -273,7 +273,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
         leftBuf.MultiplyBy(leftShift, this->leadingCoeffs[lastPair.Object2]);
         rightBuf.MultiplyBy(rightShift, this->leadingCoeffs[lastPair.Object1]);
         leftBuf-=rightBuf;
-//        std::cout << "<br>testing sopoly: "
+//        stOutput << "<br>testing sopoly: "
 //        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
 //        ;
         this->RemainderDivisionWithRespectToBasis(leftBuf, &outputRemainder, theGlobalVariables);
@@ -282,7 +282,7 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
           out << "Basis size: " << this->theBasiS.size << ".\n<br>Remaining cases current round: " << indexPairs.size;
           reportOuter.Report(out.str());
         }
-//        std::cout << "<br>and sopoly divided by "
+//        stOutput << "<br>and sopoly divided by "
 //        << theBasis.ToString(&theGlobalVariables->theDefaultFormat) << " is "
 //        << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat);
         if (!outputRemainder.IsEqualToZero())
@@ -295,11 +295,11 @@ bool GroebnerBasisComputation<coefficient>::TransformToReducedGroebnerBasisImpro
             indexPairs.AddOnTop(PairInts(i, this->theBasiS.size-1));
         }
       } //else
-        //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+        //stOutput << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
         //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
         //<< " failed the closh criterium";
     //else
-      //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+      //stOutput << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
       //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
       //<< " failed the lcm criterium";
     indexPairs.RemoveIndexSwapWithLast(currentPairIndex);
@@ -361,7 +361,7 @@ std::string GroebnerBasisComputation<coefficient>::GetDivisionString(FormatExpre
   //List<std::string> basisColorStyles;
   //basisColorStyles.SetSize(this->theBasiS.size);
   totalMonCollection.QuickSortDescending(this->thePolynomialOrder.theMonOrder);
-//  std::cout << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
+//  stOutput << "<hr>The monomials in play ordered: " << totalMonCollection.ToString(theFormat);
 //  int numVars=this->GetNumVars();
   out << this->ToStringLetterOrder(theFormat);
   out << "<br>";
@@ -493,27 +493,27 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
           << " out of " << this->theBasiS.size << "\n<br>" << currentRemainder.size() << " monomials in current remainder."
           << "\n<br>" << outputRemainder->size() << " monomials in output remainder.";
           theReport.Report(out.str());
-          //std::cout << out.str();
+          //stOutput << out.str();
         }
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+1000)
-        { std::cout << "<br>Dividing "
+        { stOutput << "<br>Dividing "
           << currentRemainder.ToString()
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
           << this->bufPoly.ToString() ;
           Polynomial<Rational> currentRemainder1;
           currentRemainder1=currentRemainder;
           currentRemainder1-=this->bufPoly;
-          std::cout << " I must get: " << currentRemainder1.ToString();
+          stOutput << " I must get: " << currentRemainder1.ToString();
         }*/
-        //std::cout << " <hr>Subtracting " << this->bufPoly.ToString()
+        //stOutput << " <hr>Subtracting " << this->bufPoly.ToString()
         //<< " from " << currentRemainder.ToString();
         currentRemainder-=this->bufPoly;
-        //std::cout << " to get " << currentRemainder.ToString();
+        //stOutput << " to get " << currentRemainder.ToString();
         if (this->flagDoLogDivision)
           this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
         divisionOcurred=true;
 /*        if (this->NumberOfComputations>this->MaxNumGBComputations+1000)
-        { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
+        { stOutput << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i+1;
           if(this->NumberOfComputations>this->MaxNumGBComputations+1010)
             crash
@@ -523,7 +523,7 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
             << " something is fishy. "<< crash;
         }*/
         this->NumberGBComputations++;
-        //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+        //stOutput << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
         i++;
     }
@@ -545,11 +545,11 @@ void GroebnerBasisComputation<coefficient>::RemainderDivisionWithRespectToBasis
         out << "Number of intermediate remainders: " << numIntermediateRemainders << "\n<br> Highest mon of current remainder is no longer reducible. "
         << "\n<br>" << currentRemainder.size() << " monomials in current remainder.\n<br>" << outputRemainder->size() << " monomials in output remainder.";
         theReport.Report(out.str());
-          //std::cout << out.str();
+          //stOutput << out.str();
       }
     }
   }
-//  std::cout << " <br>final remainder: "
+//  stOutput << " <br>final remainder: "
 //  << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat)
 //  << "<hr>";
 }
@@ -711,7 +711,7 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
   Polynomial<coefficient> tempP;
   coefficient theCF;
 //  if (theAlgebraicClosure!=0)
-//  { std::cout << "running with non-zero algebraic closure";
+//  { stOutput << "running with non-zero algebraic closure";
 //  }
   for (int i=0; i<inputSystem.size; i++)
   { tempP=inputSystem[i];
@@ -736,17 +736,17 @@ bool GroebnerBasisComputation<coefficient>::HasImpliedSubstitutions
       theCF*=-1;
       outputSub[j]/=theCF;
 //      coefficient theConst;
-//      std::cout << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
+//      stOutput << "<hr>Output sub is: x_{" << j+1 << "}=" << outputSub[j].ToString();
 //      if (outputSub[j].IsAConstant(&theConst))
 //        this->SetSerreLikeSolutionIndex(j, theConst);
-      //std::cout << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
+      //stOutput << "<br>Current solution candidate is: " << this->systemSolution.GetElement().ToString();
       return true;
     }
     int oneVarIndex;
     if (tempP.IsOneVariableNonConstPoly(&oneVarIndex))
       if (theAlgebraicClosure!=0)
         if (this->GetOneVarPolySolution(tempP, theCF, *theAlgebraicClosure, theGlobalVariables))
-        { //std::cout << "<br>adjoining root of " << tempP.ToString();
+        { //stOutput << "<br>adjoining root of " << tempP.ToString();
           outputSub.MakeIdSubstitution(numVars);
           outputSub[oneVarIndex].MakeConst(theCF);
           //check our work:
@@ -799,7 +799,7 @@ void GroebnerBasisComputation<coefficient>::BackSubstituteIntoSinglePoly(Polynom
   tempP.MakeMonomiaL(theIndex, 1, 1);
   if (thePoly==tempP)
     return;
-  //std::cout << "<hr> Back substituting in x_{" << theIndex+1 << "}:=" << thePoly.ToString();
+  //stOutput << "<hr> Back substituting in x_{" << theIndex+1 << "}:=" << thePoly.ToString();
   thePoly.Substitution(theFinalSub);
   bool changed=false;
   for (int i=0; i<thePoly.size(); i++)
@@ -874,9 +874,9 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     out << "<br>Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem;
     theReport1.Report(out.str());
   }
-//  std::cout << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
+//  stOutput << "<hr><hr>Recursion depth: " << this->RecursionCounterSerreLikeSystem << "<br>Solving the system\n<br>\n";
 //  for (int i=0; i<inputSystem.size; i++)
-//    std::cout << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+//    stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
   bool changed=true;
   PolynomialSubstitution<coefficient> theSub;
   List<PolynomialSubstitution<coefficient> > theImpliedSubs;
@@ -885,15 +885,15 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   int startingMaxNumSerreSystemComputations=this->MaxNumSerreSystemComputations;
   while (changed)
   { this->NumberGBComputations=0;
-    //std::cout << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
+    //stOutput << "<br>Transforming to reduced groebner basis: " << inputSystem.ToString();
     bool success=this->TransformToReducedGroebnerBasis(inputSystem, theGlobalVariables);
     this->NumberSerreSystemComputations+=this->NumberGBComputations;
     //if (!success)
-    //  std::cout << "<br>Failed to reduce system!";
+    //  stOutput << "<br>Failed to reduce system!";
     if (success)
-    { //std::cout << "<hr>System groebner reduced successfully, output:";
+    { //stOutput << "<hr>System groebner reduced successfully, output:";
       //for (int i=0; i <inputSystem.size; i++)
-        //std::cout << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+        //stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
       if (this->IsContradictoryReducedSystem(inputSystem))
       { this->flagSystemProvenToHaveNoSolution=true;
         this->flagSystemSolvedOverBaseField=false;
@@ -912,18 +912,18 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     changed = this->HasImpliedSubstitutions(inputSystem, theSub, theAlgebraicClosure, theGlobalVariables);
     if (changed)
     { theImpliedSubs.AddOnTop(theSub);
-      //std::cout << "<hr>Carrying out IMPLIED sub: " << CGI::GetMathSpanPure(theImpliedSubs.ToString()) << " in the system ";
+      //stOutput << "<hr>Carrying out IMPLIED sub: " << CGI::GetMathSpanPure(theImpliedSubs.ToString()) << " in the system ";
       //for (int i=0; i<inputSystem.size; i++)
-      //  std::cout << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+      //  stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
       for (int i=0; i<inputSystem.size; i++)
         inputSystem[i].Substitution(theSub);
-      //std::cout << " ... to get: ";
+      //stOutput << " ... to get: ";
       //for (int i=0; i<inputSystem.size; i++)
-      //  std::cout << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
+      //  stOutput << "<br>" << CGI::GetMathSpanPure(inputSystem[i].ToString());
       this->MaxNumSerreSystemComputations+=startingMaxNumSerreSystemComputations;
     }
   }
-  //std::cout << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
+  //stOutput << "<br>System has no more implied subs. At the moment, the system is: " << inputSystem.ToString();
   List<Polynomial<coefficient> > systemBeforeHeuristics=inputSystem;
   int numVariablesToSolveForAfterReduction=this->GetNumVarsToSolveFor(inputSystem);
   List<int> twoSolutionsToTry;
@@ -950,7 +950,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
     << this->GetCalculatorInputFromSystem(inputSystem) << "<br>" << crash;
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=twoSolutionsToTry[0];
-  //std::cout << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
+  //stOutput << "<br>Setting x_{" << theVarIndex+1 << "}:=0";
   if (theGlobalVariables!=0)
   { std::stringstream out;
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
@@ -960,15 +960,15 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   }
 
   computationFirstTry.SetSerreLikeSolutionIndex(theVarIndex, twoSolutionsToTry[0]);
-  //std::cout << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
+  //stOutput << "<br>Input system before sub first recursive call. " << inputSystem.ToString();
   for (int i=0; i<inputSystem.size; i++)
     inputSystem[i].Substitution(theSub);
-//  std::cout << "<hr>Input system after sub first recursive call. " << inputSystem.ToString();
+//  stOutput << "<hr>Input system after sub first recursive call. " << inputSystem.ToString();
 
   computationFirstTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
   this->NumberSerreSystemComputations+=computationFirstTry.NumberSerreSystemComputations;
   if (computationFirstTry.flagSystemSolvedOverBaseField)
-  { //std::cout << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
+  { //stOutput << "<hr>System solved after first recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
     computationFirstTry.NumberSerreSystemComputations=this->NumberSerreSystemComputations;
     *this=computationFirstTry;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -990,15 +990,15 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
 
   theSub.MakeIdSubstitution(this->systemSolution.GetElement().size);
   theSub[theVarIndex]=twoSolutionsToTry[1];
-  //std::cout << "<hr>Setting x_{" << theVarIndex+1 << "}:=1";
+  //stOutput << "<hr>Setting x_{" << theVarIndex+1 << "}:=1";
   computationSecondTry.SetSerreLikeSolutionIndex(theVarIndex, twoSolutionsToTry[1]);
 
-  //std::cout << "<hr>Input system before second recursive call. " << inputSystem.ToString();
-  //std::cout << "<br>Solution before second recursive call. "
+  //stOutput << "<hr>Input system before second recursive call. " << inputSystem.ToString();
+  //stOutput << "<br>Solution before second recursive call. "
   //<< newComputation.systemSolution.GetElement().ToString();
   for (int i=0; i<inputSystem.size; i++)
     inputSystem[i].Substitution(theSub);
-  //std::cout << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
+  //stOutput << "<br>Input system after sub second recursive call. " << inputSystem.ToString();
   if (theGlobalVariables!=0)
   { std::stringstream out;
     out << "Solving Serre-like polynomial system, recursion depth: " << this->RecursionCounterSerreLikeSystem << ". Managed to reduce "
@@ -1009,7 +1009,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystemRecursively
   computationSecondTry.SolveSerreLikeSystemRecursively(inputSystem, theAlgebraicClosure, theGlobalVariables);
   this->NumberSerreSystemComputations+=computationSecondTry.NumberSerreSystemComputations;
   if (computationSecondTry.flagSystemSolvedOverBaseField)
-  { //std::cout << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
+  { //stOutput << "<hr>System solved after second recursive call. The input system before back sub: " << CGI::GetMathSpanPure(inputSystem.ToString());
     computationSecondTry.NumberSerreSystemComputations=this->NumberSerreSystemComputations;
     *this=computationSecondTry;
     this->BackSubstituteIntoPolySystem(theImpliedSubs, theGlobalVariables);
@@ -1040,7 +1040,7 @@ void GroebnerBasisComputation<coefficient>::SolveSerreLikeSystem(List<Polynomial
   this->flagSystemProvenToHaveSolution=false;
   this->RecursionCounterSerreLikeSystem=0;
   int numVars=0;
-//  std::cout << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
+//  stOutput << "<hr>" << this->GetCalculatorInputFromSystem(inputSystem) << "<hr>";
   List<Polynomial<coefficient> > workingSystem=inputSystem;
   for (int i=0; i<workingSystem.size; i++)
     numVars=MathRoutines::Maximum(numVars, workingSystem[i].GetMinNumVars());

@@ -2229,14 +2229,14 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
   allMons.QuickSortAscending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
-//  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
+//  stOutput << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
 //  << allMons.ToString(&tempFormat);
   tempFormat.flagUseLatex=true;
   if (IvemadeARowSwitch!=0)
     *IvemadeARowSwitch=false;
-//  std::cout << "<br><b>starting list:</b> ";
+//  stOutput << "<br><b>starting list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetMathSpanPure
+//    stOutput << //"<br>" << CGI::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
   coefficient tempCF, tempCF2;
@@ -2275,7 +2275,7 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
         int otherColIndex=currentOther.theMonomials.GetIndex(currentMon);
         if (otherColIndex!=-1)
         { tempCF=currentOther.theCoeffs[otherColIndex];
-          //std::cout << "<br>subtracting " << CGI::GetMathSpanPure(currentPivot.ToString())
+          //stOutput << "<br>subtracting " << CGI::GetMathSpanPure(currentPivot.ToString())
             //<< " times " << tempCF.ToString() << " from "
             //<< CGI::GetMathSpanPure(currentOther.ToString());
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
@@ -2286,14 +2286,14 @@ void MonomialCollection<templateMonomial, coefficient>::GaussianEliminationByRow
             tempCF2*=-1;
             carbonCopyMatrix->AddTwoRows(currentRowIndex, j, 0, tempCF2);
           }
-          //std::cout << "<br>to get " << CGI::GetMathSpanPure(currentOther.ToString());
+          //stOutput << "<br>to get " << CGI::GetMathSpanPure(currentOther.ToString());
         }
       }
     currentRowIndex++;
   }
-//    std::cout << "<br><b>final list:</b> ";
+//    stOutput << "<br><b>final list:</b> ";
 //  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetMathSpanPure
+//    stOutput << //"<br>" << CGI::GetMathSpanPure
 //    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
@@ -2970,9 +2970,6 @@ public:
 
   MemorySaving<GroebnerBasisComputation<Rational> > theGroebnerBasisComputation;
 
-  MemorySaving<Cone> coneBuffer1NewSplit;
-  MemorySaving<Cone> coneBuffer2NewSplit;
-
   GlobalVariables();
   void SetTimerFunction(double (*timerFunction)())
   { this->getElapsedTimePrivate=timerFunction;
@@ -3027,7 +3024,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
   coefficient tempElt;
   int row=0;
   while(row<this->NumRows && col<this->NumCols)
-  { //std::cout << "<br>****************row: " << row << " status: " << this->ToString(true, false);
+  { //stOutput << "<br>****************row: " << row << " status: " << this->ToString(true, false);
     int foundPivotRow=-1;
     for (int i=row; i<this->NumRows; i++)
       if(!this->elements[i][col].IsEqualToZero())
@@ -3051,7 +3048,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
       if (this->elements[row][col].IsNegative())
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       int ExploringRow= row+1;
-//      std::cout << "<br>before second while: " << this->ToString(true, false);
+//      stOutput << "<br>before second while: " << this->ToString(true, false);
       while (ExploringRow<this->NumRows)
       { if (theGlobalVariables!=0)
         { std::stringstream out;
@@ -3080,15 +3077,15 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
           ExploringRow++;
         else
           this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
-//        std::cout << "<br>second while cycle end: " << this->ToString(true, false);
+//        stOutput << "<br>second while cycle end: " << this->ToString(true, false);
       }
       coefficient& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
       { tempElt =this->elements[i][col];
         tempElt/=PivotElt;
-//        std::cout << " the floor of " << tempElt.ToString();
+//        stOutput << " the floor of " << tempElt.ToString();
         tempElt.AssignFloor();
-//        std::cout << " is " << tempElt.ToString();
+//        stOutput << " is " << tempElt.ToString();
         this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
         if (this->elements[i][col].IsNegative())
           this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
@@ -3096,7 +3093,7 @@ void Matrix<coefficient>::GaussianEliminationEuclideanDomain
       row++;
     }
     col++;
-//    std::cout << "end of cycle status: " << this->ToString(true, false) << "<br>****************";
+//    stOutput << "end of cycle status: " << this->ToString(true, false) << "<br>****************";
   }
 }
 
@@ -5668,7 +5665,7 @@ void MatrixTensor<coefficient>::Invert()
 { MatrixTensor<coefficient> theId;
   theId.MakeId(this->GetMinNumColsNumRows());
   MatrixTensor<coefficient> result=theId;
-//  std::cout << "<hr>Inverting: " << this->ToStringMatForm();
+//  stOutput << "<hr>Inverting: " << this->ToStringMatForm();
   this->GaussianEliminationByRowsMatrix(&result);
   if (*this!=theId)
     crash << "This is a programming error: attempting to invert a non-invertable matrix tensor. After Gaussian elimination, the matrix equals "
@@ -5731,7 +5728,7 @@ class MonomialGeneralizedVerma
   bool IsHWV()const
   { if (!this->theMonCoeffOne.IsEqualToOne())
       return false;
-//    std::cout << "<br>hi, my name is: " << this->ToString() << " and my index is: " << this->indexFDVector
+//    stOutput << "<br>hi, my name is: " << this->ToString() << " and my index is: " << this->indexFDVector
 //    << " and this->GetOwner().GetDim()-1 is " << this->GetOwner().GetDim()-1;
     return this->GetOwner().GetDim()-1==this->indexFDVector;
   }
@@ -6026,9 +6023,9 @@ std::string MonomialTensorGeneralizedVermas<coefficient>::ToString(FormatExpress
     }
   else
     out << this->theMons[0].ToString(theFormat, includeV);
-//  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
+//  stOutput << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
 //  for (int i=0; i<this->theMons.size; i++)
-//    std::cout << this->theMons[i].HashFunction() << ", ";
+//    stOutput << this->theMons[i].HashFunction() << ", ";
   return out.str();
 }
 
@@ -6058,7 +6055,7 @@ std::string MonomialGeneralizedVerma<coefficient>::ToString(FormatExpressions* t
     out << "\\cdot ";
   if (includeV)
     out << theMod.ElementToStringHWV(theFormat);
-//  std::cout << "<br>MonomialP " << out.str() << " has indexInOwner " << this->indexInOwner;
+//  stOutput << "<br>MonomialP " << out.str() << " has indexInOwner " << this->indexInOwner;
   return out.str();
 }
 
@@ -6122,16 +6119,16 @@ void PolynomialSubstitution<coefficient>::MakeLinearSubConstTermsLastRow(Matrix<
 
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::Substitution(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<coefficient> >& theMods)
-{ //std::cout << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ToString();
+{ //stOutput << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ToString();
   this->theMonCoeffOne.Substitution(theSub);
-  //std::cout << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ToString();
+  //stOutput << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ToString();
   ModuleSSalgebra<coefficient> newOwner;
   newOwner=*this->owneR;
   newOwner.Substitution(theSub);
-  //std::cout << "<br>old index in owner: " << this->indexInOwner;
+  //stOutput << "<br>old index in owner: " << this->indexInOwner;
   int newModIndex=theMods.AddNoRepetitionOrReturnIndexFirst(newOwner);
   this->owneR=&theMods[newModIndex];
-  //std::cout << "<br>new index in owner: " << this->indexInOwner;
+  //stOutput << "<br>new index in owner: " << this->indexInOwner;
 }
 
 template <class coefficient>
@@ -6152,27 +6149,27 @@ GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coeff
   ProgressReport theReport(&theGlobalVariables);
   for (int j=0; j<theUE.size(); j++)
   { currentMon.theMonCoeffOne=theUE[j];
-//    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
+//    stOutput << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
     currentMon.theMonCoeffOne*=this->theMonCoeffOne;
-//    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
+//    stOutput << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
     currentMon.owneR=this->owneR;
     currentMon.indexFDVector=this->indexFDVector;
     currentMon.owneR=this->owneR;
-//    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString() << " times " << theUE[j].ToString() << " on " << this->ToString();
+//    stOutput << "<hr>Applying " <<theUE.theCoeffs[j].ToString() << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
-//    std::cout << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
+//    stOutput << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size() << "...";
     theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
     reportStream << " done.";
-//    std::cout << " done.";
+//    stOutput << " done.";
     theReport.Report(reportStream.str());
-//    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
+//    stOutput << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
-//    std::cout << " equals: " << buffer.ToString();
+//    stOutput << " equals: " << buffer.ToString();
   }
-//  std::cout << "<br>result: " << this->ToString();
+//  stOutput << "<br>result: " << this->ToString();
 }
 
 template <class coefficient>
@@ -6181,25 +6178,25 @@ void ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft
    const coefficient& theRingUnit, const coefficient& theRingZero)
 { MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<coefficient>::MultiplyMeByUEEltOnTheLeft");
   ElementSumGeneralizedVermas<coefficient> buffer, Accum;
-//std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
+//stOutput << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
   Accum.MakeZero();
   for (int i=0; i<this->size(); i++)
-  {// std::cout << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
+  {// stOutput << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
     (*this)[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
-    //std::cout << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
+    //stOutput << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
     buffer*=this->theCoeffs[i];
-//    std::cout << "<br>to obtain " << buffer.ToString();
+//    stOutput << "<br>to obtain " << buffer.ToString();
     Accum+=buffer;
-//    std::cout << " <br> to accummulate to " << Accum.ToString();
+//    stOutput << " <br> to accummulate to " << Accum.ToString();
   }
   *this=Accum;
-//  std::cout << "<br>To get in the damned end: " << this->ToString();
+//  stOutput << "<br>To get in the damned end: " << this->ToString();
 }
 
 template <class coefficient>
 void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas<coefficient>& output, GlobalVariables& theGlobalVariables, const coefficient& theRingUnit, const coefficient& theRingZero)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
-  //std::cout << "<hr><hr>Reducing  " << this->ToString();
+  //stOutput << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebra<coefficient>& theMod=*this->owneR;
   output.MakeZero();
   MonomialUniversalEnveloping<coefficient> tempMon;
@@ -6211,36 +6208,36 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
     basisMon.MakeConst(*this->owneR);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, theRingUnit);
-//    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
-//    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
+//    stOutput << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
+//    stOutput << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
 //    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
     return;
   }
-//  std::cout << "<br>Not a monomial basis of fd part";
+//  stOutput << "<br>Not a monomial basis of fd part";
 //  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-//  std::cout << "<br>";
+//  stOutput << "<br>";
 //  for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
-//  { std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
+//  { stOutput << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
 //  }
   ElementUniversalEnveloping<coefficient> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().owneR);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
-//  std::cout << " <br>the monomial:" << this->ToString();
+//  stOutput << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(&theGlobalVariables, theRingUnit, theRingZero);
-//  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
+//  stOutput << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<coefficient> currentMon;
   MonomialGeneralizedVerma<coefficient> newMon;
   MatrixTensor<coefficient> tempMat1, tempMat2;
-  //std::cout << theMod.ToString();
-  //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
+  //stOutput << theMod.ToString();
+  //stOutput << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
   ProgressReport theReport(&theGlobalVariables);
   coefficient theCF;
   for (int l=0; l<theUEelt.size(); l++)
   { currentMon=theUEelt[l];
-    //std::cout << "<br> Processing monomial " << currentMon.ToString();
+    //stOutput << "<br> Processing monomial " << currentMon.ToString();
     tempMat1.MakeIdSpecial();
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { std::stringstream reportStream;
@@ -6263,7 +6260,7 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
       reportStream << "done!";
       theReport.Report(reportStream.str());
     }
-//    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
+//    stOutput << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
     for (int i=0; i<tempMat1.size(); i++)
     { int otherIndex=-1;
@@ -6276,31 +6273,31 @@ void MonomialGeneralizedVerma<coefficient>::ReduceMe(ElementSumGeneralizedVermas
         newMon.indexFDVector=otherIndex;
         theCF=theUEelt.theCoeffs[l];
         theCF*=tempMat1.theCoeffs[i];
-        //std::cout << "<br>adding to " << output.ToString()
+        //stOutput << "<br>adding to " << output.ToString()
         //<< " the monomial " << newMon.ToString() << " with coefficient "
         //<< theCF.ToString() << " to obtain ";
         output.AddMonomial(newMon, theCF);
-        //std::cout << output.ToString();
+        //stOutput << output.ToString();
       }
     }
   }
-//  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
-//  std::cout << "<br> Final output: " << output.ToString();
+//  stOutput << "<br>Matrix of the action: " << tempMat1.ToString();
+//  stOutput << "<br> Final output: " << output.ToString();
   theMod.GetOwner().OrderSSLieAlgebraStandard();
 }
 
 template<class coefficient>
 void Vectors<coefficient>::IntersectTwoLinSpaces
 (const List<Vector<coefficient> >& firstSpace, const List<Vector<coefficient> >& secondSpace, List<Vector<coefficient> >& output, GlobalVariables* theGlobalVariables)
-{ //std::cout << "<br>*****Debugging Intersection linear spaces: ";
-  //std::cout << "<br>input first space: " << firstSpace.ToString();
-  //std::cout << "<br>input second space: " << secondSpace.ToString();
+{ //stOutput << "<br>*****Debugging Intersection linear spaces: ";
+  //stOutput << "<br>input first space: " << firstSpace.ToString();
+  //stOutput << "<br>input second space: " << secondSpace.ToString();
   Vectors<coefficient> firstReduced, secondReduced;
   Selection tempSel;
   Vectors<coefficient>::SelectABasisInSubspace(firstSpace, firstReduced, tempSel, theGlobalVariables);
   Vectors<coefficient>::SelectABasisInSubspace(secondSpace, secondReduced, tempSel, theGlobalVariables);
-//  std::cout << "<br>first selected basis: " << firstReduced.ToString();
-//  std::cout << "<br>second selected basis: " << secondReduced.ToString();
+//  stOutput << "<br>first selected basis: " << firstReduced.ToString();
+//  stOutput << "<br>second selected basis: " << secondReduced.ToString();
   if (firstReduced.size==0 || secondReduced.size==0)
   { output.size=0;
     return;
@@ -6316,15 +6313,15 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
       theMat(i,firstReduced.size+j)-=secondReduced[j][i];
     }
   }
-//  std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
+//  stOutput << "<br>The matrix before the gaussian elimination:" << theMat.ToString();
   theMat.GaussianEliminationByRows(0, &tempSel);
-//  std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
+//  stOutput << "<br>The matrix after the gaussian elimination:" << theMat.ToString();
   output.ReservE(tempSel.CardinalitySelection);
   output.size=0;
   Vector<coefficient> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)
   { int currentIndex=tempSel.elements[i];
-//    std::cout << "<br>current pivot index : " << currentIndex;
+//    stOutput << "<br>current pivot index : " << currentIndex;
     if(currentIndex<firstReduced.size)
       crash << crash;
     nextIntersection.MakeZero(theDim);
@@ -6333,8 +6330,8 @@ void Vectors<coefficient>::IntersectTwoLinSpaces
         nextIntersection+=firstReduced[j]*theMat.elements[j][currentIndex];
     output.AddOnTop(nextIntersection);
   }
-//  std::cout << "<br> final output: " << output.ToString();
-//  std::cout << "<br>******************End of debugging linear space intersections";
+//  stOutput << "<br> final output: " << output.ToString();
+//  stOutput << "<br>******************End of debugging linear space intersections";
 }
 
 template <class coefficient>

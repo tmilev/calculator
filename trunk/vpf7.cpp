@@ -122,27 +122,27 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
       break;
   }
   Rational s2= this->owner->RootScalarCartanRoot(this->Waypoints[precedingIndex], alphaScaled);
-//  std::cout << "<hr>Starting path: " << this->ToString();
+//  stOutput << "<hr>Starting path: " << this->ToString();
   if (!this->MinimaAreIntegral())
-    std::cout << "<br>WTF, starting path is BAD!";
-//  std::cout << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
-//  std::cout << " with minimum: " << theMin.ToString();
+    stOutput << "<br>WTF, starting path is BAD!";
+//  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
+//  stOutput << " with minimum: " << theMin.ToString();
   if (s2>theMin+1)
   { this->Waypoints.SetSize(this->Waypoints.size+1);
     for (int i=this->Waypoints.size-1; i>=precedingIndex+2; i--)
       this->Waypoints[i]=this->Waypoints[i-1];
     precedingIndex++;
     minIndex++;
-//    std::cout << "<br>fake waypoint added: " << this->ToString();
+//    stOutput << "<br>fake waypoint added: " << this->ToString();
     Rational scalarNext=theWeyl.RootScalarCartanRoot(this->Waypoints[precedingIndex],alphaScaled);
     Vector<Rational>& r1=this->Waypoints[precedingIndex];
     Vector<Rational>& r2=this->Waypoints[precedingIndex-1];
     Rational s1=theWeyl.RootScalarCartanRoot(r1, alphaScaled);
     Rational x= (theMin+1-s2)/(s1-s2);
     this->Waypoints[precedingIndex]= (r1-r2)*x+ r2;
-//    std::cout << "<br> fake waypoint corrected: " << this->ToString();
+//    stOutput << "<br> fake waypoint corrected: " << this->ToString();
   }
-//  std::cout << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
+//  stOutput << "<br>Min waypoint:" << this->Waypoints[minIndex].ToString();
   Vectors<Rational> differences;
   differences.SetSize(minIndex-precedingIndex);
   Rational currentDist=0;
@@ -159,9 +159,9 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
     this->Waypoints[i+precedingIndex+1]=this->Waypoints[i+precedingIndex]+differences[i];
   for (int i=minIndex+1; i<this->Waypoints.size; i++)
     this->Waypoints[i]+=alpha;
-//  std::cout << "<br> result before simplification: " << this->ToString();
+//  stOutput << "<br> result before simplification: " << this->ToString();
   this->Simplify();
-//  std::cout << "<br> final: " << this->ToString();
+//  stOutput << "<br> final: " << this->ToString();
 }
 
 void LittelmannPath::ActByFalpha(int indexAlpha)
@@ -259,7 +259,7 @@ void LittelmannPath::Simplify()
 /*  if (leftIndex+1<this->Waypoints.size)
   { this->Waypoints.SetSize(leftIndex+1);
     tempStream << " reduced to " << this->ToString();
-    std::cout << tempStream.str();
+    stOutput << tempStream.str();
   }*/
   this->Waypoints.SetSize(leftIndex+1);
 }
@@ -330,7 +330,7 @@ bool LittelmannPath::GenerateOrbit
   }
   else
     parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
-  //std::cout << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
+  //stOutput << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
   for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
     if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
     { result=false;
@@ -352,8 +352,8 @@ bool LittelmannPath::GenerateOrbit
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
-              { std::cout << "<hr>Found a bad path:<br> ";
-                std::cout << " = " << currentPath.ToString();
+              { stOutput << "<hr>Found a bad path:<br> ";
+                stOutput << " = " << currentPath.ToString();
               }
             }
         }
@@ -369,8 +369,8 @@ bool LittelmannPath::GenerateOrbit
               currentSequence.AddOnTop(-theIndex-1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
-              { std::cout << "<hr>Found a bad path:<br> ";
-                std::cout << " = " << currentPath.ToString();
+              { stOutput << "<hr>Found a bad path:<br> ";
+                stOutput << " = " << currentPath.ToString();
               }
             }
         }
@@ -416,14 +416,14 @@ bool MonomialUniversalEnvelopingOrdered<coefficient>::ModOutFDRelationsExperimen
       return false;
     int rootIndex= this->owner->theOwner.GetRootIndexFromGenerator(currentElt[0].theGeneratorIndex);
     Vector<Rational>& currentRoot=theWeyl.RootSystem[rootIndex];
-//    std::cout << "<hr>The power: " << thePower;
+//    stOutput << "<hr>The power: " << thePower;
     for (int j=0; j<thePower; j++)
     { currentWeight+=currentRoot;
-//      std::cout << "<br>current weight is: " << currentWeight.ToString();
+//      stOutput << "<br>current weight is: " << currentWeight.ToString();
       testWeight=currentWeight;
       theWeyl.RaiseToDominantWeight(testWeight);
-//      std::cout << "; raised to highest: " << testWeight.ToString();
-//      std::cout << "<br>theHWsimpleCoordsTrue-currentWeight raised to highest = "
+//      stOutput << "; raised to highest: " << testWeight.ToString();
+//      stOutput << "<br>theHWsimpleCoordsTrue-currentWeight raised to highest = "
 //      << (theHWsimpleCoordsTrue-testWeight).ToString();
       if (!(theHWsimpleCoordsTrue-testWeight).IsPositiveOrZero())
       { this->MakeZero(theRingZero, *this->owner);
@@ -870,7 +870,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       this->indicesNilradicalSmall.AddOnTop(i);
     }
   }
-//  std::cout << "<br>call stack look who is callng me: "
+//  stOutput << "<br>call stack look who is callng me: "
 //  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   this->NilModPreNil=this->nilradicalLarge;
   this->weightsNilModPreNil=this->weightsNilradicalLarge;
@@ -899,12 +899,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       << " is wrong. The question is, which is the more desirable case... The bad apple is element " << this->nilradicalSmall[i].ToString() << " of weight "
       << this->weightsNilradicalSmall[i].ToString() << ". " << crash;
   }
-/*  std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
-  std::cout  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
-  std::cout << "<br>small nilradical: " << this->nilradicalSmall.ToString();
-  std::cout  << "<br>small nilradical weights: " << this->weightsNilradicalSmall.ToString();
-  std::cout << "<br>Nil mod pre-nil (Lemma 3.3): " << this->NilModPreNil.ToString();
-  std::cout  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();*/
+/*  stOutput << "<br>large nilradical: " << this->nilradicalLarge.ToString();
+  stOutput  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
+  stOutput << "<br>small nilradical: " << this->nilradicalSmall.ToString();
+  stOutput  << "<br>small nilradical weights: " << this->weightsNilradicalSmall.ToString();
+  stOutput << "<br>Nil mod pre-nil (Lemma 3.3): " << this->NilModPreNil.ToString();
+  stOutput  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();*/
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
@@ -913,7 +913,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariable
   this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots(this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
   this->WeylFD.MakeParabolicFromSelectionSimpleRoots(this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
 
-  //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
+  //  stOutput << "Splitting parabolic selection: " << splittingParSel.ToString();
   //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
   this->WeylFD.ComputeRootSubsystem();
   this->WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
@@ -944,9 +944,9 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
 bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
 { LittelmannPath tempPath=*this;
   LittelmannPath tempPath2;
-//  std::cout << "<hr>";
+//  stOutput << "<hr>";
   for (int i=0; i<theString.generatorsIndices.size; i++)
-  { //std::cout << "e_" << -theString.generatorsIndices[i] << "^"
+  { //stOutput << "e_" << -theString.generatorsIndices[i] << "^"
     //<< theString.Powers[i] << "(" << tempPath.ToString() << ") =";
     for (int k=0; k<theString.Powers[i]; k++)
       tempPath.ActByEalpha(-theString.generatorsIndices[i]-1);
@@ -954,11 +954,11 @@ bool LittelmannPath::IsAdaptedString(MonomialTensor<int, MathRoutines::IntUnsign
       return false;
     tempPath2=tempPath;
     tempPath2.ActByEalpha(-theString.generatorsIndices[i]-1);
-    //std::cout << tempPath.ToString();
+    //stOutput << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
     //if (i!=theString.generatorsIndices.size-1)
-    //  std::cout << "<br>";
+    //  stOutput << "<br>";
   }
   return true;
 }

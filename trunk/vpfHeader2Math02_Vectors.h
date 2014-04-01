@@ -956,10 +956,10 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   bufferVectors.ReservE(inputBasis.size+1);
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
-//  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
+//  stOutput << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
   if(!bufferVectors.GetLinearDependence(bufferMat))
     return false;
-  //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
+  //stOutput << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
   coefficient tempCF=bufferMat(bufferMat.NumRows-1,0);
@@ -969,7 +969,7 @@ bool Vector<coefficient>::GetCoordsInBasiS(const Vectors<coefficient>& inputBasi
   { bufferMat(i,0).Minus();
     output[i]=(bufferMat(i,0));
   }
-//  std::cout << "outpuf final: " << output.ToString();
+//  stOutput << "outpuf final: " << output.ToString();
   return true;
 }
 
@@ -993,7 +993,7 @@ bool Vectors<coefficient>::GetLinearDependence(Matrix<coefficient>& outputTheLin
 { Matrix<coefficient> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
-  //std::cout << tempMat.ToString(true, false);
+  //stOutput << tempMat.ToString(true, false);
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
 //  outputTheLinearCombination.ComputeDebugString();
@@ -1063,16 +1063,16 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
     for (int j=0; j<theDim; j++)
       bufferMatGaussianElimination.elements[i][j]=inputBasis[i][j];
   bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
-  //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
+  //stOutput << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
-  //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
+  //stOutput << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   Vector<coefficient> tempRoot, theCombination;
   if(this==&output)
     crash << crash;
   output.MakeZero(inputBasis.size);
   theCombination=*this;
   int col=0;
-//  std::cout << "<br>vector whose coords we wanna find: " << this->ToString();
+//  stOutput << "<br>vector whose coords we wanna find: " << this->ToString();
   for (int i=0; i<inputBasis.size; i++)
   { for (; col<theDim; col++)
       if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero())
@@ -1087,9 +1087,9 @@ bool Vector<coefficient>::GetIntegralCoordsInBasisIfTheyExist
   }
   if (!theCombination.IsEqualToZero())
     return false;
-//  std::cout << "<br>" << bufferMatGaussianEliminationCC.ToString(true, false) << " acting on " << output.ToString();
+//  stOutput << "<br>" << bufferMatGaussianEliminationCC.ToString(true, false) << " acting on " << output.ToString();
   bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output, theRingZero);
-//  std::cout << " gives " << output.ToString();
+//  stOutput << " gives " << output.ToString();
   return true;
 }
 

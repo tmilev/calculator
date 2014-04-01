@@ -83,8 +83,8 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   }
   if (!functionNameNode.IsAtom())
     return false;
-//  std::cout << "<br>Evaluating: " << input.ToString();
-//  std::cout.flush();
+//  stOutput << "<br>Evaluating: " << input.ToString();
+//  stOutput.flush();
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
@@ -100,10 +100,10 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       //if (functionNameNode.ToString()=="+")
       //{ bool tempbool=true;
-      //   std::cout << "<br>Here i am!";
+      //   stOutput << "<br>Here i am!";
       //}
       if (input.children.size>2)
-      { //std::cout << "more than 2 children: " << input.Lispify();
+      { //stOutput << "more than 2 children: " << input.Lispify();
         if (innerFun.inputFitsMyInnerType(input))
           if (innerFun.theFunction(theCommands, input, output))
           { output.CheckConsistency();
@@ -139,11 +139,11 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
 //  if (input.ToString()=="f{}((a)):=a+5")
 //    printLocalDebugInfo=true;
   //ExpressionMatchesPatternDebugCounter++;
-//  std::cout << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
+//  stOutput << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
   if (printLocalDebugInfo)
-  { std::cout << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
-    std::cout << "<br> current matched expressions: " << matchedExpressions.ToString();
+  { stOutput << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
+    stOutput << "<br> current matched expressions: " << matchedExpressions.ToString();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
@@ -166,7 +166,7 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
     if (matchedExpressions.variableImages[indexLeft]!=input)
       return false;
     if (printLocalDebugInfo)
-      std::cout << "<br><b>Match!</b>";
+      stOutput << "<br><b>Match!</b>";
     return true;
   }
   if (thePattern.theData!=input.theData || thePattern.children.size!=input.children.size )
@@ -175,7 +175,7 @@ bool Calculator::ExpressionMatchesPattern(const Expression& thePattern, const Ex
     if (!(this->ExpressionMatchesPattern(thePattern[i], input[i], matchedExpressions, theLog)))
       return false;
   if (printLocalDebugInfo)
-    std::cout << "<br><b>Match!</b>";
+    stOutput << "<br><b>Match!</b>";
   return true;
 }
 
@@ -186,9 +186,9 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   { this->Comments << "<br>";
     for (int i=0; i<this->RecursionDeptH; i++)
       this->Comments << "&nbsp&nbsp&nbsp&nbsp";
-      //std::cout << "&nbsp&nbsp&nbsp&nbsp";
+      //stOutput << "&nbsp&nbsp&nbsp&nbsp";
     this->Comments << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
-//    std::cout << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
+//    stOutput << "Evaluating " << input.Lispify() << " with rule stack of size " << this->RuleStack.size; // << this->RuleStack.ToString();
   }
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
@@ -206,7 +206,7 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     return true;
   }
   //////////////////////////////
-  //  std::cout << "temporary check comment me out";
+  //  stOutput << "temporary check comment me out";
   //  this->ExpressionStack.GrandMasterConsistencyCheck();
   //  input.CheckConsistency();
   //  input.HashFunction();
@@ -241,17 +241,17 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
   Expression tempE;
   tempE.reset(*this);
   Expression beforePatternMatch;
-  //std::cout << "<br>";
+  //stOutput << "<br>";
   //for (int i=0; i<this->RecursionDeptH; i++)
-    //std::cout << "&nbsp;";
-  //std::cout << "Evaluating " << input.ToString();
-  //std::cout.flush();
+    //stOutput << "&nbsp;";
+  //stOutput << "Evaluating " << input.ToString();
+  //stOutput.flush();
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { StackMaintainerRules theRuleStackMaintainer(this);
     ReductionOcurred=false;
     counterNumTransformations++;
-//    std::cout << "<hr>transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
-//    std::cout.flush();
+//    stOutput << "<hr>transforming " << output.ToString() << " at recursion depth " << this->RecursionDeptH;
+//    stOutput.flush();
 
     //if (this->flagLogEvaluation && counterNumTransformations>1 )
     //{ this->Comments << "<br>input: " << input.ToString() << "->"
@@ -263,7 +263,7 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
       { if (!this->flagTimeLimitErrorDetected)
-          std::cout << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
+          stOutput << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
           << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
         this->flagAbortComputationASAP=true;
@@ -298,23 +298,23 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
           break;
         }
   /*      if (this->RecursionDeptH==1)
-        { std::cout << "<hr>Considering whether "
+        { stOutput << "<hr>Considering whether "
           << output[i].Lispify() << " is rule-stack-worthy.";
           if (output.ToString()=="a:=b")
-            std::cout << "<hr>a:=b is here<hr>";
+            stOutput << "<hr>a:=b is here<hr>";
         }*/
         if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
           if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) || output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
           { this->RuleStack.AddOnTop(output[i]);
             this->RuleContextIdentifier++;
-           // std::cout << ".. added !!!!";
+           // stOutput << ".. added !!!!";
           }
       }
     if (this->flagAbortComputationASAP)
       break;
     //->/////-------Default operation handling-------
-      //std::cout << "<br>got to standard functions";
-    //std::cout.flush();
+      //stOutput << "<br>got to standard functions";
+    //stOutput.flush();
     if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       if (this->flagLogEvaluatioN)
@@ -328,15 +328,15 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
       //break;
 /////-------Evaluating children end-------
 /////-------User-defined pattern matching------
-      //std::cout << "<br>got to custom rules";
-    //std::cout.flush();
+      //stOutput << "<br>got to custom rules";
+    //stOutput.flush();
     for (int i=0; i<this->RuleStack.size && !this->flagAbortComputationASAP; i++)
     { Expression& currentPattern=this->RuleStack[i];
       this->TotalNumPatternMatchedPerformed++;
       bufferPairs.reset();
-      //std::cout << "<br>Checking whether "
+      //stOutput << "<br>Checking whether "
       //<< output.ToString() << " matches " << currentPattern.ToString();
-    //std::cout.flush();
+    //stOutput.flush();
 
       if (this->flagLogEvaluatioN)
         beforePatternMatch=output;
@@ -374,7 +374,7 @@ Expression* Calculator::PatternMatch
     return 0;
   }
 //  if (theExpression.ToString()=="f{}((a)):=a+5")
-//  { std::cout << "!here";
+//  { stOutput << "!here";
 //  }
   thePattern.CheckInitialization();
   theExpression.CheckInitialization();
@@ -491,11 +491,11 @@ void Calculator::EvaluateCommands()
     out << this->syntaxErrors;
     out << "<hr>";
   }
-//  std::cout
+//  stOutput
 //  << "Starting expression: " << this->theProgramExpression.ToString()
 //  << "<hr>";
   Expression StartingExpression=this->theProgramExpression;
-//  std::cout << "comment me out when done with debugging";
+//  stOutput << "comment me out when done with debugging";
 //  StartingExpression.HashFunction();
   this->flagAbortComputationASAP=false;
   bool tempBool;

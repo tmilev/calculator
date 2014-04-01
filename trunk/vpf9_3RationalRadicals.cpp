@@ -109,7 +109,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   }
   radicalsNew.QuickSortAscending();
   if (radicalsNew.size>16)
-  { std::cout << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
+  { stOutput << "Computing with fields whose dimension over the rationals is greater than 2^16 is not allowed. "
     << "Such computations are too large for the current implementation of algberaic extensions of the rationals. "
     << Crasher::GetStackTraceEtcErrorMessage();
     return (false);
@@ -132,7 +132,7 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
           if (this->theQuadraticRadicals[j]%radicalsNew[k]==0 && radicalsNew[k]!=-1)
             largerFieldSel.AddSelectionAppendNewIndex(k);
       }
-//        std::cout << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
+//        stOutput << "<hr>smaller field sel: " << smallerFieldSel.ToString() << " larger field sel: " << largerFieldSel.ToString();
     currentInjection.AddMonomial(MonomialMatrix(this->GetIndexFromRadicalSelection(largerFieldSel), this->GetIndexFromRadicalSelection(smallerFieldSel)), 1);
   }while (smallerFieldSel.IncrementReturnFalseIfPastLast());
   this->theQuadraticRadicals=radicalsNew;
@@ -140,10 +140,10 @@ bool AlgebraicClosureRationals::MergeRadicals(const List<LargeInt>& theRadicals)
   do
     this->GetMultiplicativeOperatorFromRadicalSelection(largerFieldSel, this->theBasisMultiplicative[this->GetIndexFromRadicalSelection(largerFieldSel)]);
   while(largerFieldSel.IncrementReturnFalseIfPastLast());
-//  std::cout << "<hr>Computing display strings";
+//  stOutput << "<hr>Computing display strings";
   this->RegisterNewBasis(currentInjection);
   this->ComputeDisplayStringsFromRadicals();
-//  std::cout << this->ToString();
+//  stOutput << this->ToString();
   return true;
 }
 
@@ -166,7 +166,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
   theSel.init(DimOverRationals);
   this->theGeneratingElementPowersBasis.SetSize(0);
   Vector<Rational> currentVect;
-//  std::cout << "Dim over rationals: " << this->DimOverRationals;
+//  stOutput << "Dim over rationals: " << this->DimOverRationals;
 //  int counter =0;
   this->GeneratingElemenT.owner=this;
   this->GeneratingElemenT.basisIndex=this->theBasesAdditive.size-1;
@@ -177,11 +177,11 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
       tempV.MakeEi(i);
       this->GeneratingElemenT.theElT.AddMonomial(tempV, theSel.theInts[i]);
     }
-//    std::cout << "<br>selection: " << theSel.ToString() << ", generator: " << this->GeneratingElemenT.theElt.ToString();
+//    stOutput << "<br>selection: " << theSel.ToString() << ", generator: " << this->GeneratingElemenT.theElt.ToString();
     this->GetMultiplicationBy(this->GeneratingElemenT, this->GeneratingElementTensorForm);
-//    std::cout << ", current generator= " << this->GeneratingElementTensorForm.ToStringMatForm();
+//    stOutput << ", current generator= " << this->GeneratingElementTensorForm.ToStringMatForm();
     this->GeneratingElementTensorForm.GetMatrix(this->GeneratingElementMatForm, DimOverRationals);
-//    std::cout << ", in mat form= " << this->GeneratingElementMatForm.ToString();
+//    stOutput << ", in mat form= " << this->GeneratingElementMatForm.ToString();
     this->theGeneratingElementPowersBasis.SetSize(0);
     currentVect.MakeEi(DimOverRationals, 0);
     this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
@@ -191,7 +191,7 @@ void AlgebraicClosureRationals::ChooseGeneratingElement()
       //  crash << crash;
       this->GeneratingElementMatForm.ActOnVectorColumn(currentVect);
       this->theGeneratingElementPowersBasis.AddOnTop(currentVect);
-      //std::cout << "<br>The basis: " << this->theGeneratingElementPowersBasis.ToString()
+      //stOutput << "<br>The basis: " << this->theGeneratingElementPowersBasis.ToString()
       //<< " has rank: " << this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements();
       if (this->theGeneratingElementPowersBasis.size>this->theGeneratingElementPowersBasis.GetRankOfSpanOfElements())
       { this->theGeneratingElementPowersBasis.SetSize(this->theGeneratingElementPowersBasis.size-1);
@@ -212,23 +212,23 @@ bool AlgebraicClosureRationals::ReduceMe()
   this->ChooseGeneratingElement();
 //  if (this->owner!=0)
 //    if (this->owner->theGlobalVariables!=0)
-//      std::cout << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
-//  std::cout << "Reducing: " << this->ToString();
+//      stOutput << "<hr> Time needed to chose generating element: " << this->owner->theGlobalVariables->GetElapsedSeconds()-timeStart;
+//  stOutput << "Reducing: " << this->ToString();
   if (this->flagIsQuadraticRadicalExtensionRationals)
     return true;
   Polynomial<Rational> theMinPoly, smallestFactor;
   theMinPoly.AssignMinPoly(this->GeneratingElementMatForm);
   int theDim=this->theBasisMultiplicative.size;
-//  std::cout << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
+//  stOutput << "<hr><br>Factoring: " << theMinPoly.ToString() << "</b></hr>";
   List<Polynomial<Rational> > theFactors;
   bool mustBeTrue=theMinPoly.FactorMe(theFactors, 0);
   if (!mustBeTrue)
     crash << "This is a programming error: failed to factor polynomial " << theMinPoly.ToString() << crash;
   smallestFactor=theFactors[0];
-//  std::cout << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
+//  stOutput << "<br>After factoring, min poly=" << theMinPoly.ToString() << " factor= " << smallestFactor.ToString();
   if (smallestFactor.TotalDegreeInt()==theDim)
     return true;
-//  std::cout << "<br>Min poly factors.";
+//  stOutput << "<br>Min poly factors.";
   MatrixTensor<Rational> theBasisChangeMat, theBasisChangeMatInverse;
   theBasisChangeMat.AssignVectorsToColumns(this->theGeneratingElementPowersBasis);
   theBasisChangeMatInverse=theBasisChangeMat;
@@ -295,7 +295,7 @@ void AlgebraicClosureRationals::GetAdditionTo(const AlgebraicNumber& input, Vect
     return;
   }
   if (input.basisIndex<0 || input.basisIndex>=this->theBasesAdditive.size)
-  { std::cout << "This is a programming error: element has basis index " << input.basisIndex << ". "
+  { stOutput << "This is a programming error: element has basis index " << input.basisIndex << ". "
     << Crasher::GetStackTraceEtcErrorMessage();
   }
   if (input.basisIndex==this->theBasesAdditive.size-1)
@@ -356,9 +356,9 @@ bool AlgebraicNumber::AssignCosRationalTimesPi(const Rational& input, AlgebraicC
   Rational halfFracPart=input-halfIntegerPart;
   Rational half(1,2);
   halfIntegerPartTimesTwo%=4;
-  std::cout << "input is: " << input.ToString();
-  std::cout << "Here be I: halfFracPart is: " << halfFracPart.ToString();
-  std::cout << "Here be I: halfIntegerPartTimesTwo is: " << halfIntegerPartTimesTwo.ToString();
+  stOutput << "input is: " << input.ToString();
+  stOutput << "Here be I: halfFracPart is: " << halfFracPart.ToString();
+  stOutput << "Here be I: halfIntegerPartTimesTwo is: " << halfIntegerPartTimesTwo.ToString();
   int sign=1;
   if (halfIntegerPartTimesTwo==1)
   { sign =-1;
@@ -493,10 +493,10 @@ bool AlgebraicClosureRationals::AdjoinRootQuadraticPolyToQuadraticRadicalExtensi
   minPoly.GetConstantTerm(theConstTermShifted);
   theConstTermShifted-=theLinearTermCFdividedByTwo*theLinearTermCFdividedByTwo;
   theConstTermShifted*=-1;
-//  std::cout << "<hr>Adjoining radical of: " << theConstTermShifted;
+//  stOutput << "<hr>Adjoining radical of: " << theConstTermShifted;
   if (!outputRoot.AssignRationalQuadraticRadical(theConstTermShifted, *this))
     return false;
-//  std::cout << " ... to get: " << outputRoot.ToString();
+//  stOutput << " ... to get: " << outputRoot.ToString();
   outputRoot-=theLinearTermCFdividedByTwo;
   //Check our work:
   PolynomialSubstitution<AlgebraicNumber> checkSub;
@@ -523,9 +523,9 @@ void AlgebraicClosureRationals::ConvertPolyDependingOneVariableToPolyDependingOn
   theSub.MakeIdSubstitution(indexVar+1);
   theSub[indexVar].MakeMonomiaL(0, 1, 1);
   output=input;
-//  std::cout << "<hr>" << output.ToString() << "<br>";
+//  stOutput << "<hr>" << output.ToString() << "<br>";
   output.Substitution(theSub);
-//  std::cout << "<hr>" << output.ToString() << "<br>";
+//  stOutput << "<hr>" << output.ToString() << "<br>";
 }
 
 bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumber>& thePoly, AlgebraicNumber& outputRoot, GlobalVariables* theGlobalVariables)
@@ -543,7 +543,7 @@ bool AlgebraicClosureRationals::AdjoinRootMinPoly(const Polynomial<AlgebraicNumb
   int degreeMinPoly=minPoly.TotalDegreeInt();
   int startingDim=this->theBasisMultiplicative.size;
   if (degreeMinPoly*startingDim> 10000 || startingDim>10000 || degreeMinPoly>10000)
-  { std::cout << "<hr>Adjoining root of minimial polynomial failed: the current field extension dimension over the rationals is "
+  { stOutput << "<hr>Adjoining root of minimial polynomial failed: the current field extension dimension over the rationals is "
     << startingDim << ", the degree of the minimial polynomial is " << degreeMinPoly << ", yielding expected final dimension "
     << startingDim << "*" << degreeMinPoly << " = " << startingDim*degreeMinPoly << " over the rationals. The calculator is hard-coded "
     << " to accept dimension over the rationals no larger than 10000 (multiplication in such a field corresponds to a "
@@ -646,7 +646,7 @@ void AlgebraicNumber::operator/=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator/=");
   AlgebraicNumber otherCopy=other;
   otherCopy.Invert();
-//  std::cout << "<hr>other: " << other.theElt.ToString() << " inverted: " << otherCopy.ToString();
+//  stOutput << "<hr>other: " << other.theElt.ToString() << " inverted: " << otherCopy.ToString();
   *this*=otherCopy;
 }
 
@@ -686,7 +686,7 @@ void AlgebraicNumber::operator-=(const AlgebraicNumber& other)
 
 void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
 { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
-  //std::cout << "Adding " << this->ToString() << " to " << other.ToString();
+  //stOutput << "Adding " << this->ToString() << " to " << other.ToString();
   this->CheckCommonOwner(other);
   if (this->basisIndex==other.basisIndex)
   { this->theElT+=other.theElT;
@@ -703,7 +703,7 @@ void AlgebraicNumber::operator+=(const AlgebraicNumber& other)
   this->owner=theOwner;
   this->basisIndex=theOwner->theBasesAdditive.size-1;
   this->theElT+=AdditiveFormOther;
-//  std::cout << " ... to get: " << this->ToString();
+//  stOutput << " ... to get: " << this->ToString();
 }
 
 bool AlgebraicNumber::CheckConsistency()const
@@ -733,25 +733,25 @@ void AlgebraicNumber::operator*=(const AlgebraicNumber& other)
   }
   this->CheckCommonOwner(other);
   AlgebraicNumber otherCopy=other;
-//  std::cout << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
+//  stOutput << "Converting <hr>" << CGI::GetMathSpanPure(this->ToString()) << " and <br><br>\n\n\n\n<br><br>"
 //  << CGI::GetMathSpanPure(otherCopy.ToString());
-//  std::cout << " <br><br>To get: " << CGI::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
+//  stOutput << " <br><br>To get: " << CGI::GetMathSpanPure(this->ToString()) << "<br>\n\n and  <br><br>\n\n\n\n<br><br> \n"
 //  << CGI::GetMathSpanPure(otherCopy.ToString()) ;
-  //std::cout << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
+  //stOutput << " <hr>multiplying " << this->theElt.ToString() << " by " << other.theElt.ToString() << " ";
   MatrixTensor<Rational> leftMat, rightMat;
   FormatExpressions tempformat;
   tempformat.flagUseLatex=true;
   tempformat.flagUseHTML=false;
   this->owner->GetMultiplicationBy(*this, leftMat);
   this->owner->GetMultiplicationBy(otherCopy,rightMat);
-//  std::cout << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
+//  stOutput << "<br><br>\n\n\n\n<br><br> in matrix form: " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat)) << " by "
 //  << CGI::GetMathSpanPure(rightMat.ToStringMatForm(&tempformat));
   leftMat*=rightMat;
   this->basisIndex=this->owner->theBasesAdditive.size-1;
   this->theElT.MaKeEi(0);
-  //std::cout << "matrix " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));
+  //stOutput << "matrix " << CGI::GetMathSpanPure(leftMat.ToStringMatForm(&tempformat));
   leftMat.ActOnVectorColumn(this->theElT);
-  //std::cout << this->theElt.ToString();
+  //stOutput << this->theElt.ToString();
 }
 
 void AlgebraicNumber::SqrtMeDefault()
@@ -773,7 +773,7 @@ void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRati
 
 bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner)
 { MacroRegisterFunctionWithName("AlgebraicNumber::AssignRationalRadical");
-  //std::cout << "<hr>Assigning rational radical of  " << inpuT.ToString();
+  //stOutput << "<hr>Assigning rational radical of  " << inpuT.ToString();
   if (inpuT==0)
     return false;
   if (!inputOwner.flagIsQuadraticRadicalExtensionRationals)
@@ -814,7 +814,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   }
   if(!inputOwner.MergeRadicals(theFactors))
     return false;
-//  std::cout << "After merging radicals, the field is: " << inputOwner.ToString();
+//  stOutput << "After merging radicals, the field is: " << inputOwner.ToString();
   Selection FactorSel;
   FactorSel.init(inputOwner.theQuadraticRadicals.size);
   for (int i=0; i<theFactors.size; i++)
@@ -831,7 +831,7 @@ bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, Alge
   this->theElT*=squareRootRationalPart;
 //  VectorSparse<Rational> commentMeOut;
 //  this->owner->GetAdditionTo(*this, commentMeOut);
-//  std::cout << "<hr>radical additive form: " << commentMeOut.ToString() << "<br>radical final value: " << this->ToString() << "<br>";
+//  stOutput << "<hr>radical additive form: " << commentMeOut.ToString() << "<br>radical final value: " << this->ToString() << "<br>";
   return true;
 }
 

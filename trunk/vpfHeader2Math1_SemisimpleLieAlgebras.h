@@ -129,8 +129,8 @@ public:
   { return theIndex+this->theWeyl.RootsOfBorel.size;
   }
   int GetDisplayIndexFromGenerator(int theIndex)const
-  { //std::cout << "<br>num pos roots: " <<  this->GetNumPosRoots();
-   // std::cout << " rank: "<< this->GetRank();
+  { //stOutput << "<br>num pos roots: " <<  this->GetNumPosRoots();
+   // stOutput << " rank: "<< this->GetRank();
     if (theIndex<this->GetNumPosRoots())
       return theIndex-this->GetNumPosRoots();
     if (theIndex>=this->GetNumPosRoots()+this->GetRank())

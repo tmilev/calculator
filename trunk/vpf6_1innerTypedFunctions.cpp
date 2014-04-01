@@ -22,24 +22,24 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
   MacroRegisterFunctionWithName("Calculator::outerExtractBaseMultiplication");
  // bool hereBeTrouble = input.ToString()=="e^{-2 x} -2";
 //  if (hereBeTrouble)
-//    std::cout << "<hr>Here be trouble";
+//    stOutput << "<hr>Here be trouble";
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   bool result=false;
-  //  std::cout << "<br>handling base extraction of: " << input.ToString();
+  //  stOutput << "<br>handling base extraction of: " << input.ToString();
   //handle Anything*Rational:=Rational*Anything
   output=input;
 //  if (hereBeTrouble)
-//    std::cout << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
+//    stOutput << "handling: " << input.ToString() << ", semilisp: " << input.ToStringSemiFull() << ", lisp: " << input.ToStringFull();
   if (output[2].IsOfType<Rational>())
   { output.children.SwapTwoIndices(1, 2);
     result=true;
-//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
+//    stOutput << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
   if (output[2].IsOfType<double>() && !output[1].IsOfType<Rational>())
   { output.children.SwapTwoIndices(1, 2);
     result=true;
-//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
+//    stOutput << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
 //  Expression leftE=output[1];
 //  Expression rightE=output[2];
@@ -54,7 +54,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
       tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
       output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
       result=true;
-//      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
+//      stOutput << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
     }
     //<- handle a*(b*anything)
     //on condition that a*b has an inner handler
@@ -73,7 +73,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
 
 bool CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltZmodPorRatToEltZmodPorRat");
-  //std::cout << "<hr>here i am ";
+  //stOutput << "<hr>here i am ";
   if (!input.IsListNElements(3))
     return false;
   const Expression* leftE;
@@ -217,15 +217,15 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt");
   if (!input.IsListNElements(3))
     return false;
-  //std::cout << "<br>Here i am!";
-  //std::cout << "Multiplying: " << input[1].ToString() << " by " << input[2].ToString();
+  //stOutput << "<br>Here i am!";
+  //stOutput << "Multiplying: " << input[1].ToString() << " by " << input[2].ToString();
   ElementWeylGroup<WeylGroup> leftR, rightR;
   if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
-  //std::cout << "<br>leftR= " << leftR.ToString();
-  //std::cout << "<br>rightR=" << rightR.ToString();
+  //stOutput << "<br>leftR= " << leftR.ToString();
+  //stOutput << "<br>rightR=" << rightR.ToString();
   //for (int i=0; i<theCommands.theObjectContainer.theCoxeterElements.size; i++)
-  //{ std::cout << "<br>Coxeter element " << i+1 << ": "
+  //{ stOutput << "<br>Coxeter element " << i+1 << ": "
   //  << theCommands.theObjectContainer.theCoxeterElements[i].ToString();
   //}
   if (leftR.owner!=rightR.owner)
@@ -233,7 +233,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCoxeterEltByCoxeterElt(Calculato
     return false;
   }
   leftR*=rightR;
-  //std::cout << "<br>final output: " << leftR.ToString();
+  //stOutput << "<br>final output: " << leftR.ToString();
   return output.AssignValue(leftR, theCommands);
 }
 
@@ -277,7 +277,7 @@ bool CalculatorFunctionsBinaryOps::innerTensorEltTensorByEltTensor(Calculator& t
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "<br>Attempting to tensor " << input[1].ToString() << " and " << input[2].ToString();
+//  stOutput << "<br>Attempting to tensor " << input[1].ToString() << " and " << input[2].ToString();
   Expression inputConverted;
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(inputConverted))
     return false;
@@ -294,11 +294,11 @@ bool CalculatorFunctionsBinaryOps::innerAddWeightToWeight(Calculator& theCommand
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
-  { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
+  { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
   }
   Expression inputConverted;
@@ -320,11 +320,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByWeightPoly(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
-  { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
+  { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
   }
   Expression inputConverted;
@@ -348,11 +348,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyWeylGroupEltByWeightPoly(Calcula
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   //std:: cout << "grrrrrrrrrrr!!!!!!!!!!!!1";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
-  { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
+  { //stOutput << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
   }
   Expression inputConverted;
@@ -360,12 +360,12 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
     return false;
   if (!inputConverted[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
     return false;
-//  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
-//  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
-//  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
+//  stOutput << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+//  stOutput << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+//  stOutput << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
   SemisimpleLieAlgebra& theSSalg=inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().GetOwnerSS();
   Expression leftE;
-//  std::cout << "<hr>Got where i needa be";
+//  stOutput << "<hr>Got where i needa be";
   inputConverted[1].CheckConsistency();
   input[1].CheckConsistency();
   input[2].CheckConsistency();
@@ -373,17 +373,17 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByEltTensor(Calculator& theCo
   { //theCommands.Comments << "<hr>Failed to convert " << inputConverted[1].ToString() << " to element of Universal enveloping algebra. ";
     return false;
   }
-//  std::cout << " ... and got my ue out!";
+//  stOutput << " ... and got my ue out!";
   static bool theGhostHasAppeared=false;
   if (!theGhostHasAppeared)
-  { std::cout << "Ere I am J.H. ... The ghost in the machine...<br>";
+  { stOutput << "Ere I am J.H. ... The ghost in the machine...<br>";
     theGhostHasAppeared=true;
   }
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
-  //std::cout << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
+  //stOutput << "<br>Multiplying " << leftUE->ToString() << " * " << output.ToString();
   if (!inputConverted[2].GetValue<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
       (leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), outputElt, theSSalg, *theCommands.theGlobalVariableS, 1, 0))
-  { //std::cout << "<br>failed to multiply on the left";
+  { //stOutput << "<br>failed to multiply on the left";
     return false;
   }
   return output.AssignValueWithContext(outputElt, inputConverted[2].GetContext(), theCommands);
@@ -394,17 +394,17 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrEWAByRatOrPolyOrEWA(C
   if (input.children.size!=3)
     return false;
   Expression inputContextsMerged;
-//  std::cout << "<hr>Merging contexts: " << input.ToString();
+//  stOutput << "<hr>Merging contexts: " << input.ToString();
   if (!input.MergeContextsMyArumentsAndConvertThem<ElementWeylAlgebra<Rational> >(inputContextsMerged))
     return false;
-//  std::cout << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
+//  stOutput << "<hr>Merged contexts, ready for multiplication: " << inputContextsMerged.ToString();
   if (inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation() ||
       inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().HasNonSmallPositiveIntegerDerivation())
   { theCommands.Comments << "<hr> Failed to multiply " << inputContextsMerged[1].ToString() << " by " << inputContextsMerged[2].ToString() << ": "
     << " one of the two differential operators has differential operator exponent that is not a small integer. ";
     return false;
   }
-//  std::cout << "<hr>Multiplying " << inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().ToString()
+//  stOutput << "<hr>Multiplying " << inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >().ToString()
 //  << " by " << inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >().ToString();
   ElementWeylAlgebra<Rational> result=inputContextsMerged[1].GetValue<ElementWeylAlgebra<Rational> >();
   result*=inputContextsMerged[2].GetValue<ElementWeylAlgebra<Rational> >();
@@ -433,19 +433,19 @@ bool CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyByRatOrPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<Rational> >(theCommands, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAlgNumPolyByAlgNumPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyAlgNumPolyByAlgNumPoly");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   return CalculatorFunctionsBinaryOps::innerMultiplyTypeByType<Polynomial<AlgebraicNumber> >(theCommands, input, output);
 }
 
 bool CalculatorFunctionsBinaryOps::innerAddUEToAny(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddUEToAny");
-  //std::cout << "<br>adding ue to any";
+  //stOutput << "<br>adding ue to any";
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementUniversalEnveloping<RationalFunctionOld> >(theCommands, input, output);
 }
 
@@ -459,14 +459,14 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyByUE(Calculator& theCommands,
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> result=inputContextsMerged[1].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
   result*=inputContextsMerged[2].GetValue<ElementUniversalEnveloping<RationalFunctionOld> >();
-  //std::cout << "before simplification: " << result.ToString() << " and after: " << result.ToString();
+  //stOutput << "before simplification: " << result.ToString() << " and after: " << result.ToString();
   result.Simplify(theCommands.theGlobalVariableS);
   return output.AssignValueWithContext(result, inputContextsMerged[1].GetContext(), theCommands);
 }
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -491,7 +491,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLRO(Calculator& theCommands
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -519,7 +519,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyLRObyLSPath(Calculator& theComma
 
 bool CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddEltTensorToEltTensor");
-//  std::cout << "<hr>HERE I am!";
+//  stOutput << "<hr>HERE I am!";
   return CalculatorFunctionsBinaryOps::innerAddTypeToType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >(theCommands, input, output);
 }
 
@@ -535,7 +535,7 @@ bool CalculatorFunctionsBinaryOps::innerAddAlgNumPolyToAlgNumPoly(Calculator& th
 
 bool CalculatorFunctionsBinaryOps::innerAddPlotToPlot(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerAddPlotToPlot");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  //stOutput << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
@@ -607,10 +607,10 @@ bool CalculatorFunctionsBinaryOps::innerPowerMatRatBySmallInteger(Calculator& th
 bool CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerAlgNumPolyBySmallInteger");
   theCommands.CheckInputNotSameAsOutput(input, output);
-//  std::cout << "evaluating ..." << input.ToString();
+//  stOutput << "evaluating ..." << input.ToString();
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "evaluating ..." << input.ToString();
+//  stOutput << "evaluating ..." << input.ToString();
   Polynomial<AlgebraicNumber> base;
   int thePower=0;
   if (!input[1].IsOfType(&base)|| !input[2].IsSmallInteger(&thePower))
@@ -645,7 +645,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerEWABySmallInteger(Calculator& theCo
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "raising " << input[1].ToString() << " to power " << input[2].ToString();
+//  stOutput << "raising " << input[1].ToString() << " to power " << input[2].ToString();
   ElementWeylAlgebra<Rational> base;
   int thePower=0;
   if(!input[1].IsOfType(&base))
@@ -691,7 +691,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "raising " << input[1].ToString() << " to power " << input[2].ToString();
+//  stOutput << "raising " << input[1].ToString() << " to power " << input[2].ToString();
   Rational base, exp;
   if(!input[1].IsOfType(&base))
     return false;
@@ -779,7 +779,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   if (!input[1].IsSequenceNElementS())
     return false;
   Matrix<Rational> theMatRat;
-  std::cout << "raising " << input[1].ToString() << " to " << input[2].ToString();
+  stOutput << "raising " << input[1].ToString() << " to " << input[2].ToString();
   if (theCommands.GetMatrix<Rational>(input[1], theMatRat))
   { Expression inputCopy, baseRatMat, outputMatRat;
     baseRatMat.AssignValue(theMatRat, theCommands);
@@ -823,7 +823,7 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "<br>attempting to exponentiate: " << input.ToString();
+//  stOutput << "<br>attempting to exponentiate: " << input.ToString();
   Rational base, exp;
   double baseDouble, expDouble;
   if(input[1].IsOfType(&base))
@@ -875,7 +875,7 @@ bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(Calculator& 
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  std::cout << "Adding " << input[1].ToString() << " 'n " << input[2].ToString();
+//  stOutput << "Adding " << input[1].ToString() << " 'n " << input[2].ToString();
   Rational leftR, rightR;
   double leftD, rightD;
   if(input[1].IsOfType(&leftR))
@@ -914,13 +914,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyCharSSLieAlgByCharSSLieAlg(Calcu
 
 bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
-  //std::cout << "<br>trouble be double!";
+  //stOutput << "<br>trouble be double!";
   if (!input[1].IsBuiltInScalar())
     return false;
-  //std::cout << "<br>trouble be triple!";
+  //stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
   output.reset(theCommands);
@@ -936,7 +936,7 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyAnyScalarBySequence(Calculator& 
 
 bool CalculatorFunctionsBinaryOps::innerMultiplySequenceMatrixBySequenceMatrix(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
   Matrix<Expression> leftMat, rightMat;
@@ -1050,9 +1050,9 @@ bool CalculatorFunctionsBinaryOps::innerLieBracketRatOrUEWithRatOrUE(Calculator&
   if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() && rightE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() )
   { ElementUniversalEnveloping<RationalFunctionOld> result;
     leftE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >().LieBracketOnTheRight(rightE.GetValue<ElementUniversalEnveloping<RationalFunctionOld> >(), result);
-    //std::cout << "before simplification: " << result.ToString();
+    //stOutput << "before simplification: " << result.ToString();
     result.Simplify(theCommands.theGlobalVariableS);
-    //std::cout << " after: " << result.ToString();
+    //stOutput << " after: " << result.ToString();
     return output.AssignValueWithContext(result, leftE.GetContext(), theCommands);
   }
   return false;
@@ -1116,7 +1116,7 @@ bool CalculatorFunctionsBinaryOps::innerAddMatrixTensorToMatrixTensor(Calculator
 
 bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
   Expression tempE=input;
@@ -1126,13 +1126,13 @@ bool CalculatorFunctionsBinaryOps::innerMultiplySequenceByAnyScalar(Calculator& 
 
 bool CalculatorFunctionsBinaryOps::innerAddSequenceToSequence(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerMultiplyRationalBySequence");
-  //std::cout << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
+  //stOutput << "<br>here be trouble! input is a sequence of " << input.children.size << " elmeents.";
   if (!input.IsListNElements(3))
     return false;
-  //std::cout << "<br>trouble be double!";
+  //stOutput << "<br>trouble be double!";
   if (!input[1].IsSequenceNElementS())
     return false;
-  //std::cout << "<br>trouble be triple!";
+  //stOutput << "<br>trouble be triple!";
   if (!input[2].IsSequenceNElementS())
     return false;
   if (input[2].children.size!=input[1].children.size)
@@ -1163,7 +1163,7 @@ bool CalculatorFunctionsBinaryOps::innerNChooseK(Calculator& theCommands, const 
   int K;
   if (!input[1].IsOfType<Rational>(&N) || !input[2].IsSmallInteger(&K))
     return false;
-//  std::cout << N.ToString();
+//  stOutput << N.ToString();
   if (K<0)
     return output.AssignValue(0, theCommands);
   Rational result= result.NChooseK(N, K);

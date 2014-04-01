@@ -77,7 +77,7 @@ GlobalVariables::GlobalVariables()
   this->callSystem=0;
   this->flagGaussianEliminationProgressReport=false;
   this->getElapsedTimePrivate=0;
-//  std::cout << "Global variables created!";
+//  stOutput << "Global variables created!";
 }
 
 void ProgressReport::Report(const std::string& theReport)
@@ -238,22 +238,22 @@ void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 }
 
 void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
-{ std::cout << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
-  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array("
+{ stOutput << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
+  stOutput << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array("
   << numberLines << "); " << "  \tvar clr" << lineTypeName << "= new Array("  << numberLines << "); ";
 }
 
 void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
 { std::string tempS;
-  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2["
+  stOutput  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2["
   << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
   { CGI::outputStream >> tempS;
-    std::cout << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
+    stOutput << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
     CGI::outputStream >> tempS;
-    std::cout << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
+    stOutput << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
   }
-  std::cout << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
+  stOutput << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
   lineCounter++;
 }
 
@@ -367,8 +367,8 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
   int positionInOpenTag=0;
   int positionInCloseTag=0;
   int numTags=0;
-  //std::cout << "open tag with symbols: " << theOpenTagWithSymbols << ", close tag: " << theCloseTagWithSymbols;
-//  std::cout << "lengths are :" << lengthOpenTag << " and "<< lengthCloseTag;
+  //stOutput << "open tag with symbols: " << theOpenTagWithSymbols << ", close tag: " << theCloseTagWithSymbols;
+//  stOutput << "lengths are :" << lengthOpenTag << " and "<< lengthCloseTag;
   std::stringstream out;
   if (this->positionInString<0)
     this->positionInString=0;
@@ -383,10 +383,10 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
       if (positionInOpenTag>=lengthOpenTag)
       { charReader="";
         numTags++;
-//        std::cout << "<br>numTags: " << numTags;
+//        stOutput << "<br>numTags: " << numTags;
         positionInOpenTag=0;
       }
-      //std::cout << "<br>found " << charReader << " from " << theOpenTagWithSymbols;
+      //stOutput << "<br>found " << charReader << " from " << theOpenTagWithSymbols;
       tagStarted=true;
     } else
       positionInOpenTag=0;
@@ -396,7 +396,7 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
       { positionInCloseTag=0;
         charReader= "";
         numTags--;
-//        std::cout << "<br>numTags: " << numTags;
+//        stOutput << "<br>numTags: " << numTags;
         if (numTags<0)
           return false;
         if (numTags==0)
@@ -405,7 +405,7 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
           break;
         }
       }
-      //std::cout << "<br>found " << charReader << " from " << theCloseTagWithSymbols;
+      //stOutput << "<br>found " << charReader << " from " << theCloseTagWithSymbols;
       tagStarted=true;
     } else
       positionInCloseTag=0;
@@ -416,8 +416,8 @@ bool XML::GetStringEnclosedIn(const std::string& theTagName, std::string& output
     charReader="";
   }
   if (!tagWasClosed)
-  { //std::cout << "tag wasn't closed. Read so far: " << out.str();
-    //std::cout << "num chars read: " << numCharRead;
+  { //stOutput << "tag wasn't closed. Read so far: " << out.str();
+    //stOutput << "num chars read: " << numCharRead;
     return false;
   }
   outputString=out.str();
@@ -1273,10 +1273,10 @@ Rational Rational::NChooseK(const Rational &n, int k)
 { Rational result;
   result.MakeOne();
   for (int i=0; i<k; i++)
-  { //std::cout << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i+1;
+  { //stOutput << "<br>" << result.ToString() << " * " << (n-i).ToString() << "/" << i+1;
     result*=n-i;
     result.DivideByInteger(i+1);
-    //std::cout << "=" << result.ToString();
+    //stOutput << "=" << result.ToString();
   }
   return result;
 }
@@ -2538,8 +2538,8 @@ void PartFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
       crash << "<b>This is a programmign error. The checksum of the partial fractions failed. " << crash;
     else
-    { //std::cout<< "Checksum successful";
-      //std::cout.flush();
+    { //stOutput<< "Checksum successful";
+      //stOutput.flush();
     }
   }
 }
@@ -3870,20 +3870,20 @@ bool DynkinType::CanBeExtendedParabolicallyOrIsEqualTo(const DynkinType& other)c
 
 bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
 { MacroRegisterFunctionWithName("DynkinType::CanBeExtendedParabolicallyTo");
-  //std::cout << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
+  //stOutput << "<br>computing whether  " << this->ToString() << " can be extended parabolically to "
   //<< other.ToString();
   if (other.IsEqualToZero())
-  { //std::cout << "... it can't";
+  { //stOutput << "... it can't";
     return false;
   }
   if (this->IsEqualToZero())
-  { //std::cout << "... it can";
+  { //stOutput << "... it can";
     return true;
   }
   DynkinSimpleType targetType, currentType;
   targetType=other[0];
   DynkinType remainderThis, remainderOther;
-  //std::cout << "<hr>Testing whether " << this->ToString() << " fits in " << other.ToString();
+  //stOutput << "<hr>Testing whether " << this->ToString() << " fits in " << other.ToString();
   for (int i=0; i< this->size(); i++)
   { currentType=(*this)[i];
     if (currentType.CanBeExtendedParabolicallyTo(targetType) || currentType==targetType)
@@ -3893,17 +3893,17 @@ bool DynkinType::CanBeExtendedParabolicallyTo(const DynkinType& other)const
       remainderOther.SubtractMonomial(targetType, 1);
       if (currentType==targetType)
       { if (remainderThis.CanBeExtendedParabolicallyTo(remainderOther))
-        { //std::cout << " it can";
+        { //stOutput << " it can";
           return true;
         }
       } else
         if (remainderThis.CanBeExtendedParabolicallyOrIsEqualTo(remainderOther))
-        { //std::cout << " it can";
+        { //stOutput << " it can";
           return true;
         }
     }
   }
-  //std::cout << "...it cant";
+  //stOutput << "...it cant";
   return false;
 }
 
@@ -3911,7 +3911,7 @@ bool DynkinType::Grow
 (const List<Rational>& allowedInverseScales, int AmbientWeylDim, List<DynkinType>& output, List<List<int> >* outputPermutationRoots)const
 { MacroRegisterFunctionWithName("DynkinType::Grow");
   //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
-    //std::cout << "<br>Here be I!!!!" << this->ToString();
+    //stOutput << "<br>Here be I!!!!" << this->ToString();
   output.SetSize(0);
   if (outputPermutationRoots!=0)
     outputPermutationRoots->SetSize(0);
@@ -3975,7 +3975,7 @@ bool DynkinType::Grow
       }
     }
   //if (this->ToString()=="2A^{1}_1[A^{1}_1]")
-    //std::cout << "<br>output be: " << output.ToString();
+    //stOutput << "<br>output be: " << output.ToString();
   return true;
 }
 
@@ -4475,7 +4475,7 @@ void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
 
 bool DynkinSimpleType::CanBeExtendedParabolicallyTo(const DynkinSimpleType& other)const
 { MacroRegisterFunctionWithName("DynkinSimpleType::CanBeExtendedParabolicallyTo");
-  //std::cout << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
+  //stOutput << "<br>checking whether " << this->ToString() << " can be extended to " << other.ToString();
   if (this->CartanSymmetricInverseScale!=other.CartanSymmetricInverseScale)
     return false;
   if (other.theRank<=this->theRank)
@@ -4825,7 +4825,7 @@ void SubgroupWeylGroup::GetSignCharacter(Vector<Rational>& out)
   out.SetSize(ConjugacyClassCount());
   for(int i=0; i<this->ConjugacyClassCount(); i++)
     out[i] = this->conjugacyClasseS[i].representative.Sign();
-//  std::cout << "<br>Sign character is: " << out.ToString();
+//  stOutput << "<br>Sign character is: " << out.ToString();
 }
 
 void WeylGroup::GetTrivialRepresentation(WeylGroupRepresentation<Rational>& output)
@@ -4859,9 +4859,9 @@ void WeylGroup::GetStandardRepresentation(WeylGroupRepresentation<Rational>& out
   output.basis.MakeEiBasis(this->GetDim());
   for(int i=0; i<this->GetDim(); i++)
     this->GetSimpleReflectionMatrix(i, output.generatorS[i]);
-//  std::cout << output.ToString();
+//  stOutput << output.ToString();
   output.GetCharacter();
-//  std::cout << "The char: " << output.theCharacteR.ToString();
+//  stOutput << "The char: " << output.theCharacteR.ToString();
 }
 
 void WeylGroup::GetStandardRepresentationMatrix(int g, Matrix<Rational>& output) const
@@ -4988,9 +4988,9 @@ void WeylGroup::GenerateRootSystem()
   HashedList<Vector<Rational> > theRootsFinder;
   startRoots.MakeEiBasis(this->GetDim());
   int estimatedNumRoots=this->theDynkinType.GetRootSystemSize();
-//  std::cout << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
+//  stOutput << "<hr><hr>Generating root system, startroots: " << startRoots.ToString();
   this->GenerateOrbit(startRoots, false, theRootsFinder, false, estimatedNumRoots);
-//  std::cout << " final roots: " << theRootsFinder.ToString() << "<hr>";
+//  stOutput << " final roots: " << theRootsFinder.ToString() << "<hr>";
   this->RootSystem.Clear();
   this->RootSystem.SetExpectedSize(theRootsFinder.size);
   this->RootsOfBorel.SetSize(0);
@@ -5292,8 +5292,8 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, Lis
     //basisChange.ComputeDebugString();
   }
   simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
-//  std::cout << "<br>simple basis: " << simpleBasis.ToString();
-//  std::cout << "<br>to be converted: " << input.ToString();
+//  stOutput << "<br>simple basis: " << simpleBasis.ToString();
+//  stOutput << "<br>to be converted: " << input.ToString();
   coordsInNewBasis.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);
@@ -5346,7 +5346,7 @@ void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
   }
   output.basisRationalForm.Transpose();
   output.basisRationalForm.Invert();
-//  std::cout << output.basisRationalForm.ToString(true, false);
+//  stOutput << output.basisRationalForm.ToString(true, false);
   output.MakeFromMat(output.basisRationalForm);
   output.Reduce();
 }
@@ -5365,7 +5365,7 @@ Rational WeylGroup::GetKillingDivTraceRatio()
 void WeylGroup::GetLongestWeylElt(ElementWeylGroup<WeylGroup>& outputWeylElt)
 { this->ComputeRho(false);
   Vector<Rational> lowest=this->rho;
-//  std::cout << "rho: " << this->rho.ToString() << "<hr>";
+//  stOutput << "rho: " << this->rho.ToString() << "<hr>";
   Vectors<Rational> tempRoots;
   tempRoots.MakeEiBasis(this->GetDim());
   this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
@@ -5375,9 +5375,9 @@ void WeylGroup::GetLongestWeylElt(ElementWeylGroup<WeylGroup>& outputWeylElt)
   //Matrix<Rational>  tempMat;
   //this->GetMatrixOfElement(outputWeylElt, tempMat);
   //out << tempMat.ToString(true, false);
-  //std::cout << out.str();
-  //std::cout << outputWeylElt;
- //std::cout << this->GetMatrixOfElement(
+  //stOutput << out.str();
+  //stOutput << outputWeylElt;
+ //stOutput << this->GetMatrixOfElement(
 }
 
 void WeylGroup::GetExtremeElementInOrbit
@@ -5422,7 +5422,7 @@ void WeylGroup::GetExtremeElementInOrbit
       }
     }
   }
-//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+//  stOutput << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
 WeylGroup::WeylGroup()
@@ -5432,7 +5432,7 @@ WeylGroup::WeylGroup()
 bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& input)
 { MacroRegisterFunctionWithName("WeylGroup::IsElementGroup<WeylGroup>OrOuterAuto");
   this->ComputeOuterAutos();
-//  std::cout << this->theOuterAutos.GetElement().ToString();
+//  stOutput << this->theOuterAutos.GetElement().ToString();
   Vector<Rational> theRhoImage;
   input.ActOnVectorColumn(this->rho, theRhoImage);
   ElementWeylGroup<WeylGroup> theElementCandidate;
@@ -5440,13 +5440,13 @@ bool WeylGroup::IsElementWeylGroupOrOuterAuto(const MatrixTensor<Rational>& inpu
   Matrix<Rational> theCandidateMat;
   MatrixTensor<Rational> theCandidateMatTensorForm, theCandidateMatWithOuterAuto;
   this->GetMatrixStandardRep(theElementCandidate, theCandidateMat);
-//  std::cout << "<br>input: " << input.ToStringMatForm();
-//  std::cout << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
+//  stOutput << "<br>input: " << input.ToStringMatForm();
+//  stOutput << "<br>checking whether input is outer auto acting on: " << theCandidateMat.ToString();
   theCandidateMatTensorForm=theCandidateMat;
   for (int i=0; i<this->theOuterAutos.GetElement().theElements.size; i++)
   { theCandidateMatWithOuterAuto=this->theOuterAutos.GetElement().theElements[i];
     theCandidateMatWithOuterAuto*=theCandidateMatTensorForm;
-//    std::cout << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
+//    stOutput << "Candidate mat with outer auto: " << theCandidateMatWithOuterAuto.ToStringMatForm();
     if (theCandidateMatWithOuterAuto==input)
       return true;
   }
@@ -5476,12 +5476,12 @@ void WeylGroup::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& ou
   this->GetCoxeterElement(tempElt);
   Matrix<Rational>  matCoxeterElt, tempMat;
   this->GetMatrixStandardRep(tempElt, matCoxeterElt);
-//  std::cout << matCoxeterElt.ToString(true, false);
+//  stOutput << matCoxeterElt.ToString(true, false);
   tempMat=matCoxeterElt;
   int coxeterNumber=this->RootSystem.LastObject()->SumCoords().NumShort+1;
   for (int i=0; i<coxeterNumber-1; i++)
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
-//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
+//  stOutput << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ToString(true, false);
   CompleX<double> theEigenValue;
   theEigenValue.Re= FloatingPoint:: cos(2*MathRoutines::Pi()/coxeterNumber);
   theEigenValue.Im= FloatingPoint:: sin(2*MathRoutines::Pi()/coxeterNumber);
@@ -5559,11 +5559,11 @@ void WeylGroup::DrawRootSystem
     predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
   if(theTwoPlane.size!=2)
     crash << crash;
-//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ToString(false, true, false);
+//  stOutput << "<hr><hr>the eigenspace: " << theEigenSpace.ToString(false, true, false);
 //  std::stringstream tempStream;
 //  tempStream << "<hr>the eigen mat:";
 //  tempStream << eigenMat;
-//  std::cout << tempStream.str();
+//  stOutput << tempStream.str();
   Vectors<Rational> RootSystemSorted;
   RootSystemSorted=(this->RootSystem);
   List<double> lengths;
@@ -5590,7 +5590,7 @@ void WeylGroup::DrawRootSystem
     if (minLength> this->RootScalarCartanRoot(differenceRoot, differenceRoot))
       minLength=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
   }
-//  std::cout << "<hr>the min length is: " << minLength.ToString();
+//  stOutput << "<hr>the min length is: " << minLength.ToString();
   Rational tempRat;
   if (bluePoint!=0)
   { output.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
@@ -5778,7 +5778,7 @@ void SubgroupWeylGroupOLD::operator=(const SubgroupWeylGroupOLD& other)
 
 std::string SubgroupWeylGroupOLD::ElementToStringFromLayersAndArrows(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
 { std::stringstream out;
-//  std::cout << this->simpleGenerators.ToString();
+//  stOutput << this->simpleGenerators.ToString();
   List<int> DisplayIndicesSimpleGenerators;
   if (!useAmbientIndices)
   { DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
@@ -6417,7 +6417,7 @@ void KLpolys::ComputeKLxy(int x, int y)
   { this->theKLPolys[x][y].MakeZero();
     return;
   }
-//  std::cout << " <br>Computing KL " << x << ", " << y << "; ";
+//  stOutput << " <br>Computing KL " << x << ", " << y << "; ";
   Accum.MakeZero();
   MonomialP tempM;
   for (int i=0; i<this->size; i++)
@@ -6448,7 +6448,7 @@ void KLpolys::ComputeKLxy(int x, int y)
   this->theKLPolys[x][y].MakeZero();
   Rational lengthDiff= this->TheWeylGroup->theElements[y].generatorsLastAppliedFirst.size-this->TheWeylGroup->theElements[x].generatorsLastAppliedFirst.size;
   lengthDiff/=2;
-//  std::cout << "Accum: " << Accum.ToString();
+//  stOutput << "Accum: " << Accum.ToString();
   for (int i=0; i<Accum.size(); i++)
     if(Accum[i].HasPositiveOrZeroExponents())
     { tempM=Accum[i];
@@ -6618,7 +6618,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 
 void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, const HashedList<Vector<Rational> >& inputRootSystem)
 { MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGenerators");
-  //std::cout << "<br>Transforming to simple basis: " << theGens.ToString();
+  //stOutput << "<br>Transforming to simple basis: " << theGens.ToString();
   for (int i=0; i<theGens.size; i++)
     if (!theGens[i].IsPositiveOrZero())
       theGens[i].Minus();
@@ -6644,7 +6644,7 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens, con
         }
       }
   }
-//  std::cout << "<br><br>Resulting simple basis: " << theGens.ToString();
+//  stOutput << "<br><br>Resulting simple basis: " << theGens.ToString();
 }
 
 template <class coefficient>
@@ -6677,7 +6677,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational
 { if (theGens.size==0)
     return;
   MacroRegisterFunctionWithName("WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords");
-//  std::cout << "<hr>Transforming to simple " << theGens.ToString() << " with root system " << inputRootSystem.ToString();
+//  stOutput << "<hr>Transforming to simple " << theGens.ToString() << " with root system " << inputRootSystem.ToString();
   Vector<Rational> theH;
   theH.MakeZero(theGens[0].size);
   theH.PerturbNoZeroScalarProductWithMe(inputRootSystem);
@@ -6706,7 +6706,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsArbitraryCoords(Vectors<Rational
         }
       }
   }
-//  std::cout << ". Final basis: " << theGens.ToString();
+//  stOutput << ". Final basis: " << theGens.ToString();
 }
 
 void WeylGroup::TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH)

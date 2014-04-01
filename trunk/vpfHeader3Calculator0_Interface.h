@@ -721,6 +721,8 @@ public:
   bool flagDisplayContext;
 
   bool flagDontDistribute;
+
+  bool flagForkingProcessAllowed;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedAtoms;
@@ -1403,9 +1405,9 @@ public:
   (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
   { Expression tempE=input;
     if (tempE.IsLisT())
-    { //std::cout << "<hr>tempE: " << tempE.Lispify();
+    { //stOutput << "<hr>tempE: " << tempE.Lispify();
       tempE.SetChildAtomValue(0, this->opSequence());
-      //std::cout << "<br>tempE after change: " << tempE.Lispify();
+      //stOutput << "<br>tempE after change: " << tempE.Lispify();
     }
     return this->GetVectoR(tempE, output, inputOutputStartingContext, targetDimNonMandatory, conversionFunction);
   }
@@ -1702,7 +1704,7 @@ bool CalculatorSerialization::innerStoreMonCollection
     }
     output.CheckInitialization();
   }
-//  std::cout << " output: " << output.ToString();
+//  stOutput << " output: " << output.ToString();
   output.CheckInitialization();
   return true;
 }
@@ -1733,7 +1735,7 @@ bool CalculatorSerialization::DeSerializeMonCollection(Calculator& theCommands, 
     }
     output.AddMonomial(tempM, theSum.theCoeffs[i]);
 //    if (input.ToString()=="(C)^{2}_{3}+(A)^{2}_{1}")
-//    { std::cout << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get monomial: " << tempM.ToString();
+//    { stOutput << "<br>Loading (C)^{2}_{3}+(A)^{2}_{1} to get monomial: " << tempM.ToString();
 //    }
   }
   return true;
@@ -1821,17 +1823,17 @@ bool Expression::AssignValue(const theType& inputValue, Calculator& owner)
 template <class theType>
 bool Expression::MergeContextsMyArumentsAndConvertThem(Expression& output)const
 { MacroRegisterFunctionWithName("Expression::MergeContextsMyArumentsAndConvertThem");
-//  std::cout << "<hr>Merging context arguments of " << this->ToString();
+//  stOutput << "<hr>Merging context arguments of " << this->ToString();
   this->CheckInitialization();
   Expression mergedContexts;
   if (!this->MergeContextsMyAruments(mergedContexts))
     return false;
-//  std::cout << "<br> continuing to merge " << mergedContexts.ToString();
+//  stOutput << "<br> continuing to merge " << mergedContexts.ToString();
   output.reset(*this->theBoss, this->children.size);
   output.AddChildOnTop((*this)[0]);
   Expression convertedE;
   for (int i=1; i<mergedContexts.children.size; i++)
-  { //std::cout << "<hr>Converting: " << mergedContexts[i].ToString();
+  { //stOutput << "<hr>Converting: " << mergedContexts[i].ToString();
     if (!mergedContexts[i].ConvertToType<theType>(convertedE))
     { this->theBoss->Comments << "<hr>Failed to convert " << mergedContexts[i].ToString() << " to the desired type. ";
       return false;
@@ -1910,7 +1912,7 @@ bool Calculator::GetTypeHighestWeightParabolic
     crash << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName() << " contained object container more than once. " << crash;
   int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
-//  std::cout << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
+//  stOutput << "final context of GetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 #endif

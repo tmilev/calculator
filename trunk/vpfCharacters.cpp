@@ -139,8 +139,8 @@ void MatrixInBasisFast(Matrix<coefficient>& out, const Matrix<coefficient>& in, 
        M.elements[i][k] -= BM.elements[j][k] * out.elements[i][j];
     }
   }
-//  std::cout << "MatrixInBasisFast" << std::endl;
-//  std::cout << in.ToString(&consoleFormat) << '\n' << BM.ToString(&consoleFormat) << '\n' << out.ToString(&consoleFormat) << std::endl;
+//  stOutput << "MatrixInBasisFast" << "\n";
+//  stOutput << in.ToString(&consoleFormat) << '\n' << BM.ToString(&consoleFormat) << '\n' << out.ToString(&consoleFormat) << "\n";
 }
 
 template <typename coefficient>
@@ -190,10 +190,10 @@ void SpaceTree<coefficient>::GetLeaves(List<List<Vector<coefficient> > >& leaves
 
 template <typename coefficient>
 void SpaceTree<coefficient>::DisplayTree() const
-{  std::cout << '[' << space.size << ',';
+{  stOutput << '[' << space.size << ',';
    for(int i=0; i<subspaces.size; i++)
       subspaces[i].DisplayTree();
-   std::cout << ']';
+   stOutput << ']';
 }
 
 template <typename coefficient>
@@ -301,7 +301,7 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   List<Vector<Rational> > splittingMatrixKernel;
   if(GetNumberOfComponents() == 1)
   { if(this->ownerGroup->characterTable.GetIndex(this->theCharacteR) == -1)
-    { std::cout << "new irrep found, have " << this->ownerGroup->characterTable.size << std::endl;
+    { stOutput << "new irrep found, have " << this->ownerGroup->characterTable.size << "\n";
       this->ownerGroup->AddIrreducibleRepresentation(*this);
     }
     out.AddOnTop(*this);
@@ -311,21 +311,21 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
   List<Vector<coefficient> > tempVectors;
   for(int i=0; i<this->ownerGroup->characterTable.size; i++)
     if(this->theCharacteR.InnerProduct(this->ownerGroup->characterTable[i])!=0)
-    { std::cout << "contains irrep " << i << std::endl;
+    { stOutput << "contains irrep " << i << "\n";
       this->ClassFunctionMatrix(this->ownerGroup->characterTable[i], splittingOperatorMatrix);
       splittingOperatorMatrix.GetZeroEigenSpaceModifyMe(splittingMatrixKernel);
       intersection(Vb, splittingMatrixKernel, tempVectors);
       Vb=tempVectors;
     }
   if((Vb.size < this->basis.size) && (Vb.size > 0))
-  { std::cout << "calculating remaining subrep... ";
+  { stOutput << "calculating remaining subrep... ";
     WeylGroupRepresentation<coefficient> V;
     V.ownerGroup = this->ownerGroup;
     V.generatorS = this->generatorS;
     V.basis = Vb;
     V = V.Reduced();
-    std::cout << "done" << std::endl;
-    std::cout << "Decomposing remaining subrep " << V.GetCharacter() << std::endl;
+    stOutput << "done\n";
+    stOutput << "Decomposing remaining subrep " << V.GetCharacter();
     return V.DecomposeThomasVersion();
   }
   if(Vb.size == 0)
@@ -337,41 +337,41 @@ List<WeylGroupRepresentation<coefficient> > WeylGroupRepresentation<coefficient>
       cf.G = G;
       cf.MakeZero();
       cf[cfi] = 1;
-      std::cout << "getting matrix " << cf << std::endl;
+      stOutput << "getting matrix " << cf << "\n";
       Matrix<coefficient> A;
       ClassFunctionMatrix(cf, A);
       List<List<Vector<coefficient> > > es = eigenspaces(A);
-      std::cout << "eigenspaces were ";
+      stOutput << "eigenspaces were ";
       for(int i=0; i<es.size; i++)
-         std::cout << es[i].size << " ";
-      std::cout << std::endl;
+         stOutput << es[i].size << " ";
+      stOutput << "\n";
       for(int i=0; i<es.size; i++)
          st.PlaceInTree(es[i]);
-      std::cout << "tree is ";
+      stOutput << "tree is ";
       st.DisplayTree();
-      std::cout << std::endl;
+      stOutput << "\n";
   }
   List<List<Vector<coefficient> > > leaves;
   st.GetLeaves(leaves);
-  std::cout << "leaves are ";
+  stOutput << "leaves are ";
   for(int i=0; i<leaves.size; i++)
-    std::cout << leaves[i].size << " ";
-  std::cout << std::endl;
+    stOutput << leaves[i].size << " ";
+  stOutput << "\n";
 */
   List<List<Vector<coefficient> > > es;
   for(int cfi=this->ownerGroup->ConjugacyClassCount()-1; cfi>=0; cfi--)
   { ClassFunction<WeylGroup::WeylGroupBase, coefficient> cf;
     cf.MakeZero(*this->ownerGroup);
     cf[cfi] = 1;
-    std::cout << "getting matrix " << cf << std::endl;
+    stOutput << "getting matrix " << cf << "\n";
     Matrix<coefficient> A;
     ClassFunctionMatrix(cf, A);
     es = eigenspaces(A);
     if(es.size > 1)
-    { std::cout << "eigenspaces were ";
+    { stOutput << "eigenspaces were ";
       for(int i=0; i<es.size; i++)
-        std::cout << es[i].size << " ";
-      std::cout << std::endl;
+        stOutput << es[i].size << " ";
+      stOutput << "\n";
       break;
     }
   }
@@ -413,7 +413,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
   this->irreps.SetSize(0);
   WeylGroupRepresentation<Rational> sr;
   this->GetStandardRepresentation(sr);//<-this function adds the standard representation to the list of irreps.
-  std::cout << "<hr>Character standard module: " << sr.GetCharacter() << std::endl;
+  stOutput << "<hr>Character standard module: " << sr.GetCharacter() << "\n";
   List<WeylGroupRepresentation<Rational> > newspaces;
   newspaces.AddOnTop(sr);
   List<WeylGroupRepresentation<Rational> > incompletely_digested;
@@ -427,13 +427,13 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
     }
     WeylGroupRepresentation<Rational> tspace = sr * nspace;
     tspace.flagCharacterIsComputed=false;
-    std::cout << "<hr>Decomposing " << tspace.GetCharacter();
-    std::cout << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << std::endl;
+    stOutput << "<hr>Decomposing " << tspace.GetCharacter();
+    stOutput << " = " << sr.GetCharacter().ToString() << "*" << nspace.ToString() << "\n";
     List<WeylGroupRepresentation<Rational> > spaces = tspace.DecomposeThomasVersion();
-    std::cout << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
+    stOutput << "<hr><hr> to get: " << spaces.ToString() << "<hr><hr>";
 //      tspace = nspace * sr;
 //      tspace.character.data.size = 0;
-//      std::cout << "Decomposing (right tensor)" << tspace.GetCharacter() << std::endl;
+//      stOutput << "Decomposing (right tensor)" << tspace.GetCharacter() << "\n";
 //      spaces.AddListOnTop(tspace.Decomposition());
     for(int spi = 0; spi < spaces.size; spi++)
       if(spaces[spi].GetNumberOfComponents() == 1)
@@ -441,7 +441,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
         { characterTable.AddOnTop(spaces[spi].GetCharacter());
           irreps.AddOnTop(spaces[spi]);
           newspaces.AddOnTop(spaces[spi]);
-          std::cout << "we have " << irreps.size << " irreps" << std::endl;
+          stOutput << "we have " << irreps.size << " irreps" << "\n";
         }
       } else
         incompletely_digested.AddOnTop(spaces[spi]);
@@ -450,7 +450,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
     for(int spi=0; spi<incompletely_digested.size; spi++)
       for(int ci=0; ci<characterTable.size; ci++)
         if(incompletely_digested[spi].GetCharacter().InnerProduct(characterTable[ci]) != 0)
-        { std::cout << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << std::endl;
+        { stOutput << "incompletely digested " << incompletely_digested[spi].GetCharacter() << " will now be further decomposed " << "\n";
           List<WeylGroupRepresentation<Rational> > shards = incompletely_digested[spi].DecomposeThomasVersion();
           incompletely_digested.RemoveIndexShiftDown(spi);
           for(int shi=0; shi<shards.size; shi++)
@@ -459,7 +459,7 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
               { characterTable.AddOnTop(shards[shi].GetCharacter());
                 irreps.AddOnTop(spaces[spi]);
                 newspaces.AddOnTop(spaces[spi]);
-                std::cout << "we have " << irreps.size << " irreps (got from shards)" << std::endl;
+                stOutput << "we have " << irreps.size << " irreps (got from shards)" << "\n";
               }
             } else
               incompletely_digested.AddOnTop(shards[shi]);
@@ -470,14 +470,14 @@ void WeylGroup::ComputeIrreducibleRepresentationsThomasVersion(GlobalVariables* 
   this->flagCharTableIsComputed=true;
   this->flagIrrepsAreComputed=true;
   for(int i=0; i<this->characterTable.size; i++)
-  { std::cout << this->characterTable[i] << '\n';
+  { stOutput << this->characterTable[i] << '\n';
     for(int j=0; j<this->irreps[i].generatorS.size; j++)
-      std::cout << this->irreps[i].generatorS[j].ToString() << '\n';
+      stOutput << this->irreps[i].generatorS[j].ToString() << '\n';
   }
   for(int i=0; i<this->characterTable.size; i++)
-  { std::cout << this->characterTable[i] << '\n';
+  { stOutput << this->characterTable[i] << '\n';
   }
-  std::cout << this->characterTable.size << std::endl;
+  stOutput << this->characterTable.size << "\n";
 }
 
 // trial division is pretty good.  the factors of 2 were cleared earlier
@@ -595,9 +595,9 @@ bool UDPolynomial<coefficient>::operator<(const UDPolynomial<coefficient>& right
 
 template <typename coefficient>
 void UDPolynomial<coefficient>::SquareFree()
-{ std::cout << *this << std::endl;
+{ stOutput << *this << "\n";
   UDPolynomial<coefficient> p = FormalDerivative();
-  std::cout << p << std::endl;
+  stOutput << p << "\n";
   UDPolynomial<coefficient> q = gcd(*this,p);
   if(q.data.size > 1)
     data = (*this/q).data;
@@ -810,7 +810,7 @@ List<List<Vector<Rational> > > eigenspaces(const Matrix<Rational> &M, int checkD
   p.AssignMinPoly(M);
   for(int ii=0; ii<2*n+2; ii++) // lol, this did end up working though
   { int i = ((ii+1)/2) * (2*(ii%2)-1); // 0,1,-1,2,-2,3,-3,...
-//    std::cout << "checking " << i << " found " << found << std::endl;
+//    stOutput << "checking " << i << " found " << found << "\n";
     Rational r = i;
     if(p(r) == 0)
     { Matrix<Rational> M2 = M;
@@ -984,14 +984,14 @@ void SubgroupWeylGroup::ComputeTauSignature(GlobalVariables* theGlobalVariables)
   Vector<Rational> Xs, Xi;
   this->GetSignCharacter(Xs);
   Xi.SetSize(this->ConjugacyClassCount());
-//  std::cout << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
+//  stOutput << "<hr>Computing in group with " << this->size().ToString() << " elements. ";
   this->tauSignature.SetSize(this->parent->ConjugacyClassCount());
   for(int i=0; i<this->parent->ConjugacyClassCount(); i++)
   { ClassFunction<WeylGroup::WeylGroupBase, Rational> Xip = this->parent->characterTable[i];
     for(int j=0; j<Xi.size; j++)
       Xi[j] = Xip[this->ccRepresentativesPreimages[j]];
     this->tauSignature[i]= this->GetHermitianProduct(Xs,Xi);
-//    std::cout << "<br>Hermitian product of " << Xs.ToString() << " and "
+//    stOutput << "<br>Hermitian product of " << Xs.ToString() << " and "
 //    << Xi.ToString() << " = " << this->GetHermitianProduct(Xs, Xi);
     if (!this->tauSignature[i].IsSmallInteger())
       crash << " Tau signature is not integral, impossible! " << crash ;
@@ -1086,18 +1086,18 @@ void SubgroupRootReflections::MakeFromRoots
 template <class elementSomeGroup>
 bool FiniteGroup<elementSomeGroup>::AreConjugate(const elementSomeGroup& left, const elementSomeGroup& right)
 { MacroRegisterFunctionWithName("WeylGroup::AreConjugate");
-//  std::cout << "<hr><hr>Computing whether " << left.ToString() << " is conjugate to "
+//  stOutput << "<hr><hr>Computing whether " << left.ToString() << " is conjugate to "
 //  << right.ToString();
   if (left.HasDifferentConjugacyInvariantsFrom(right))
     return false;
-//  std::cout << "<br>Invariants are the same, computing orbit.";
+//  stOutput << "<br>Invariants are the same, computing orbit.";
   OrbitIteratorWeylGroup theIterator;
   theIterator.init(this->generators, left, ElementWeylGroup<WeylGroup>::Conjugate);
   if (this->generators.size==0)
     crash << "generators not allowed to be 0. " << crash;
   do
   { //if (left.ToString()=="s_{4}")
-    //  std::cout << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
+    //  stOutput << "<br>" << theIterator.GetCurrentElement().ToString() << "=?=" << right.ToString();
     if (theIterator.GetCurrentElement()==right)
       return true;
   } while (theIterator.IncrementReturnFalseIfPastLast());
@@ -1142,15 +1142,15 @@ void WeylGroup::GetSignSignatureParabolics(List<SubgroupRootReflections>& output
   outputSubgroups.SetSize(numCycles);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
-//  std::cout << "<hr>Meself is: " << this->ToString();
+//  stOutput << "<hr>Meself is: " << this->ToString();
   for (int i=0; i<outputSubgroups.size; i++, sel.incrementSelection())
   { SubgroupRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeParabolicSubgroup(*this, sel);
     currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
-//    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
+//    stOutput << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    //std::cout << "<hr>before compute initial irreps";
+    //stOutput << "<hr>before compute initial irreps";
   }
   this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   for(int j=0; j<outputSubgroups.size; j++)
@@ -1201,15 +1201,15 @@ void WeylGroup::GetSignSignatureRootSubgroups
   outputSubgroups.SetSize(rootsGeneratingReflections.size);
   ElementWeylGroup<WeylGroup> g;
   g.owner = this;
-//  std::cout << "<hr>Meself is: " << this->ToString();
+//  stOutput << "<hr>Meself is: " << this->ToString();
   for (int i=0; i<outputSubgroups.size; i++)
   { SubgroupRootReflections& currentParabolic=outputSubgroups[i];
     currentParabolic.MakeFromRoots(*this, rootsGeneratingReflections[i]);
     currentParabolic.ComputeCCSizesRepresentativesPreimages(theGlobalVariables);
-//    std::cout << "<hr>Current parabolic is: " << currentParabolic.ToString();
+//    stOutput << "<hr>Current parabolic is: " << currentParabolic.ToString();
     // ComputeInitialCharacters gets the character of the sign representation
     // as characterTable[1]
-    //std::cout << "<hr>before compute initial irreps";
+    //stOutput << "<hr>before compute initial irreps";
   }
   this->CheckConjugacyClassRepsMatchCCsizes(theGlobalVariables);
   this->CheckOrthogonalityCharTable(theGlobalVariables);

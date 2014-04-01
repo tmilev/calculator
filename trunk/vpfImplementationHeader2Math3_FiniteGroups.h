@@ -168,22 +168,22 @@ void ElementWeylGroup<templateWeylGroup>::MakeFromRhoImage(const Vector<Rational
 { this->owner=&inputWeyl;
   int theRank=this->owner->GetDim();
   this->generatorsLastAppliedFirst.SetSize(0);
-  //std::cout << theVector.ToString();
+  //stOutput << theVector.ToString();
   Vector<Rational> theVector=inputRhoImage;
   while (theVector!=this->owner->rho)
     for (int i=0; i<theRank; i++)
       if (this->owner->GetScalarProdSimpleRoot(theVector, i)<0)
       { this->owner->SimpleReflection(i, theVector);
-        //std::cout << "--"  << i+1 << "-- > " << theVector.ToString() ;
+        //stOutput << "--"  << i+1 << "-- > " << theVector.ToString() ;
         this->generatorsLastAppliedFirst.AddOnTop(i);
         break;
       }
-//  std::cout << ", finally: " << this->ToString();
+//  stOutput << ", finally: " << this->ToString();
 }
 
 template <class templateWeylGroup>
 void ElementWeylGroup<templateWeylGroup>::MakeCanonical()
-{ //std::cout << "making " << this->ToString() << " canonical: ";
+{ //stOutput << "making " << this->ToString() << " canonical: ";
   this->CheckInitialization();
   if (this->owner->rho.size==0)
     this->owner->ComputeRho(false);
@@ -196,25 +196,25 @@ template <class templateWeylGroup>
 bool ElementWeylGroup<templateWeylGroup>::HasDifferentConjugacyInvariantsFrom
 (const ElementWeylGroup<templateWeylGroup>& right)const
 { MacroRegisterFunctionWithName("ElementWeylGroup::HasDifferentConjugacyInvariantsFrom");
-  //std::cout << "<br>Comparing invariants of " << this->ToString() << " and " << right.ToString();
+  //stOutput << "<br>Comparing invariants of " << this->ToString() << " and " << right.ToString();
   if ((this->generatorsLastAppliedFirst.size%2 )!=(right.generatorsLastAppliedFirst.size%2))
     return true;
   if (*this==right) //just in case
     return false;
   this->CheckInitialization();
-  //std::cout << " the sign is the same... ";
+  //stOutput << " the sign is the same... ";
   Polynomial<Rational> leftCharPoly, rightCharPoly;
   this->GetCharacteristicPolyStandardRepresentation(leftCharPoly);
   right.GetCharacteristicPolyStandardRepresentation(rightCharPoly);
   if(leftCharPoly!=rightCharPoly)
     return true;
-  //std::cout << " the char polys are the same... ";
+  //stOutput << " the char polys are the same... ";
   VectorSparse<Rational> leftCycleStructure, rightCycleStructure;
   this->GetCycleStructure(leftCycleStructure);
   right.GetCycleStructure(rightCycleStructure);
   if (leftCycleStructure!=rightCycleStructure)
     return true;
-  //std::cout << " the cycle structures are the same... the elements are POSSIBLY conjugate.";
+  //stOutput << " the cycle structures are the same... the elements are POSSIBLY conjugate.";
   return false;
 }
 
@@ -413,7 +413,7 @@ void Subgroup<somegroup, elementSomeGroup>::ComputeCCRepresentativesPreimages(Gl
       { this->ccRepresentativesPreimages[i] = ci;
         notFound=false;
       } //else
-        //std::cout << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
+        //stOutput << "<hr>" << g.ToString() << " and " << this->parent->conjugacyClasseS[ci].representative.ToString() << " are not conjugate. ";
     if (notFound)
       crash << "Programming error: couldn't find preimage of the subgroup conjugacy class representative "
       << g.ToString() << crash;
@@ -529,7 +529,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
   { inputOutputClass.theElements.SetSize(0);
     inputOutputClass.theElements.AddOnTop(inputOutputClass.representative);
   }
-/*  std::cout << "<br> Generating orbit: <br>Element 1: " << theOrbitIterator.GetCurrentElement().ToString();
+/*  stOutput << "<br> Generating orbit: <br>Element 1: " << theOrbitIterator.GetCurrentElement().ToString();
   Vector<Rational> randomVector, tempV;
   randomVector.AssignString("(23,29,31,37,41,43, 47)");
   HashedList<Vector<Rational> > orbitRV;
@@ -538,7 +538,7 @@ void FiniteGroup<elementSomeGroup>::ComputeCCSizeOrCCFromRepresentative
   orbitRV.AddOnTop(tempV);*/
   while (theOrbitIterator.IncrementReturnFalseIfPastLast())
   { inputOutputClass.size++;
-/*    std::cout << "<br>Element " << inputOutputClass.size.ToString() << ": "
+/*    stOutput << "<br>Element " << inputOutputClass.size.ToString() << ": "
     << theOrbitIterator.GetCurrentElement().ToString();
     tempV=randomVector;
     theOrbitIterator.GetCurrentElement().ActOn(tempV);
@@ -806,7 +806,7 @@ void WeylGroup::RaiseToDominantWeight(Vector<coefficient>& theWeight, int* sign,
   { raisingElt->generatorsLastAppliedFirst.ReverseOrderElements();
     raisingElt->MakeCanonical();
   }
-//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+//  stOutput << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
 template <class coefficient>
@@ -837,7 +837,7 @@ bool WeylGroup::GenerateOrbit
       expectedOrbitSize=-1;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;
-  //std::cout << "<hr>Setting expected orbit size: " << expectedOrbitSize;
+  //stOutput << "<hr>Setting expected orbit size: " << expectedOrbitSize;
   output.SetExpectedSize(expectedOrbitSize);
   if (outputSubset!=0)
   { if (UpperLimitNumElements>0)
@@ -925,16 +925,16 @@ coefficient WeylGroup::WeylDimFormulaSimpleCoords(Vector<coefficient>& theWeight
   Vector<coefficient> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
   rhoOverNewRing=this->rho;//<-type conversion here!
   Result=theRingUnit;
-//  std::cout << "<br>doing the weyl dim formula with: " << theWeightInSimpleCoords.ToString();
-//  std::cout << "<br>rho is:" << rhoOverNewRing.ToString();
-//  std::cout << "<br>rho before conversion: " << this->rho.ToString();
-//  std::cout << "<br>we get: ";
+//  stOutput << "<br>doing the weyl dim formula with: " << theWeightInSimpleCoords.ToString();
+//  stOutput << "<br>rho is:" << rhoOverNewRing.ToString();
+//  stOutput << "<br>rho before conversion: " << this->rho.ToString();
+//  stOutput << "<br>we get: ";
   for (int i=0; i<this->RootsOfBorel.size; i++)
   { rootOfBorelNewRing=this->RootsOfBorel[i]; //<-type conversion here!
     sumWithRho=rhoOverNewRing+theWeightInSimpleCoords;
     buffer=(this->RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
     buffer/=this->RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
-//    std::cout << "(" << buffer.ToString() << ")";
+//    stOutput << "(" << buffer.ToString() << ")";
     Result*=buffer;
   }
   return Result;
@@ -953,7 +953,7 @@ Vector<coefficient> WeylGroup::GetSimpleCoordinatesFromEpsilon(const Vector<coef
 { Vectors<Rational> simpleBasis, simpleBasisEpsCoords;
   simpleBasis.MakeEiBasis(this->GetDim());
   this->GetEpsilonCoords(simpleBasis, simpleBasisEpsCoords);
-  std::cout << "simple basis eps coords: " << simpleBasisEpsCoords.ToString();
+  stOutput << "simple basis eps coords: " << simpleBasisEpsCoords.ToString();
   Vector<coefficient> result;
   result.SetSize(this->GetDim());
   for (int i=0; i<simpleBasisEpsCoords.size; i++)
@@ -974,7 +974,7 @@ Vector<coefficient> WeylGroup::GetSimpleCoordinatesFromFundamental(const Vector<
 { Matrix<Rational>& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
   Vector<coefficient> result;
   result=inputInFundamentalCoords;
-//  std::cout << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
+//  stOutput << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
   tempMat.ActOnVectorColumn(result);
   return result;
 }
@@ -984,7 +984,7 @@ Vectors<coefficient> WeylGroup::GetSimpleCoordinatesFromFundamental(const Vector
 { Matrix<Rational>& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
   Vectors<coefficient> result;
   result=inputInFundamentalCoords;
-//  std::cout << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
+//  stOutput << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
   tempMat.ActOnVectorsColumn(result);
   return result;
 }
@@ -1043,7 +1043,7 @@ bool WeylGroup::FreudenthalEval
   hwPlusRhoSquared=this->RootScalarCartanRoot(convertor, convertor);
   outputMultsSimpleCoords[0]=1;
   Explored[0]=true;
-//  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//  stOutput << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
   coefficient BufferCoeff;
@@ -1065,7 +1065,7 @@ bool WeylGroup::FreudenthalEval
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
-//        std::cout << "<br> summing over weight: " << currentWeight.ToString();
+//        stOutput << "<br> summing over weight: " << currentWeight.ToString();
         if (!Explored[theIndex])
         { if (outputDetails!=0)
           { std::stringstream errorLog;
@@ -1089,20 +1089,20 @@ bool WeylGroup::FreudenthalEval
       << " The highest weight is " << inputHWfundamentalCoords.ToString() << ". The Weyl group details follow. " << this->ToString() << crash;
     currentAccum/=BufferCoeff;
 
-//    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
+//    stOutput << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
  //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
   //  .ToString()
    // ;
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
     theReport.Report(out.str());
-//    std::cout
+//    stOutput
 //    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
-//    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
-//    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
-//    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
+//    stOutput << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//    stOutput << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
+//    stOutput << " of which " << timeSpentRaisingWeights << " used to raise weights";
   }
-//  std::cout << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//  stOutput << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   return true;
 }
 
@@ -1112,7 +1112,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
  int upperBoundDominantWeights, std::string* outputDetails, GlobalVariables* theGlobalVariables)
 { std::stringstream out;
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
-//  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<coefficient> highestWeightTrue;
   highestWeightTrue=highestWeightSimpleCoords;
   this->RaiseToDominantWeight(highestWeightTrue);
@@ -1142,7 +1142,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   int numTotalWeightsFound=0;
   int numPosRoots=this->RootsOfBorel.size;
   Vector<coefficient> currentWeight;
-//  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for(int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords; lowestUnexploredHeightDiff++)
   { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
     if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
@@ -1162,17 +1162,17 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
           }
         }
       }
-//    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
+//    stOutput << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    std::cout << " Size of current level: " << currentHashes.size;
+//    stOutput << " Size of current level: " << currentHashes.size;
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
-//    std::cout << ". Time spent after accounting at height level "
+//    stOutput << ". Time spent after accounting at height level "
 //    << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
-//    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
+//    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
     if (numTotalWeightsFound>upperBoundDominantWeights && upperBoundDominantWeights>0)
     { out << "<hr>The number of weights has exceeded the RAM memory limits, aborting the weight generation. ";
@@ -1372,8 +1372,8 @@ void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
   { if(inputCF[cci] == 0)
       continue;
     if(classFunctionMatrices[cci].NumCols == 0)
-    { //std::cout << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
-      //<< "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << std::endl;
+    { //stOutput << "Generating class function matrix " << cci << " with dimension " << this->generatorS[0].NumCols
+      //<< "(cc has " << this->ownerGroup->conjugacyClasses[cci].size << ")" << "\n";
       classFunctionMatrices[cci].MakeZeroMatrix(this->generatorS[0].NumCols);
       for(int icci=0; icci<this->ownerGroup->conjugacyClasseS[cci].size; icci++)
       { //Matrix<coefficient> Mi;
@@ -1391,7 +1391,7 @@ void WeylGroupRepresentation<coefficient>::ClassFunctionMatrix
       for(int j=0; j<outputMat.NumCols; j++)
         outputMat.elements[i][j]+= classFunctionMatrices[cci].elements[i][j] * inputCF[cci];
   }
-//  std::cout << outputMat.ToString(&consoleFormat) << std::endl;
+//  stOutput << outputMat.ToString(&consoleFormat) << "\n";
 
 }
 
@@ -1482,15 +1482,15 @@ coefficient SubgroupWeylGroupOLD::WeylDimFormulaSimpleCoords(const Vector<coeffi
   rho/=2;
   rhoOverNewRing=rho;//<-type conversion here!
   Result=theRingUnit;
-//  std::cout << "<br>doing the weyl dim formula with: " << theWeightInSimpleCoords.ToString();
-//  std::cout << "<br>rho is:" << rhoOverNewRing.ToString();
-//  std::cout << "<br>we get: ";
+//  stOutput << "<br>doing the weyl dim formula with: " << theWeightInSimpleCoords.ToString();
+//  stOutput << "<br>rho is:" << rhoOverNewRing.ToString();
+//  stOutput << "<br>we get: ";
   for (int i=0; i<this->RootsOfBorel.size; i++)
   { rootOfBorelNewRing=this->RootsOfBorel[i]; //<-type conversion here!
     sumWithRho=rhoOverNewRing+theWeightInSimpleCoords;
     buffer=(this->AmbientWeyl.RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
     buffer/=this->AmbientWeyl.RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
-//    std::cout << "(" << buffer.ToString() << ")";
+//    stOutput << "(" << buffer.ToString() << ")";
     Result*=buffer;
   }
   return Result;
@@ -1504,7 +1504,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
   std::stringstream out;
   this->ComputeRootSubsystem();
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
-//  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<coefficient> highestWeightTrue=highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
   int theDim=this->AmbientWeyl.GetDim();
@@ -1526,7 +1526,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
   outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
   int numTotalWeightsFound=0;
   Vector<coefficient> currentWeight, currentWeightRaisedToDominant;
-//  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
   lowestUnexploredHeightDiff++)
   { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
@@ -1547,16 +1547,16 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
           }
         }
       }
-//    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
+//    stOutput << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    std::cout << " Size of current level: " << currentHashes.size;
+//    stOutput << " Size of current level: " << currentHashes.size;
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
-//    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
+//    stOutput << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
-//    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
+//    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
   }
   out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
@@ -1564,7 +1564,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
     out << "<hr>This message is generated either because the number of weights has exceeded the hard-coded RAM memory limits, or because "
     << " a priori bound for the number of weights is WRONG. If the latter is the case, make sure to send an angry email to the author(s).";
   outputDetails=out.str();
-  //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
+  //stOutput << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
@@ -1591,7 +1591,7 @@ void SubgroupWeylGroupOLD::RaiseToDominantWeight(Vector<coefficient>& theWeight,
           *stabilizerFound=true;
     }
   }
-//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+//  stOutput << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
 template <class coefficient>
@@ -1609,9 +1609,9 @@ bool SubgroupWeylGroupOLD::GenerateOrbitReturnFalseIfTruncated(const Vector<coef
 //      std::string debugString=tempRoot.ToString() ;
       theOrbit.AddOnTopNoRepetition(tempRoot);
 //      if (oldsize<theOrbit.size)
-//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
+//        stOutput << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
 //      else
-//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " NOT added, ";
+//        stOutput << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " NOT added, ";
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { ExternalAutosOverAmbientField.GetElement()=this->ExternalAutomorphisms[j];
@@ -1652,8 +1652,8 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
   }
   hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
   hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
-//  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
-//  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
+//  stOutput << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
+//  stOutput << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
   ///////////////////////////
   HashedList<Vector<coefficient> > outputDomWeightsSimpleCoordsLeviPart;
 
@@ -1664,25 +1664,25 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
     outputDetails=errorLog.str();
     return false;
   }
-//  std::cout << "Highest weight: " << hwSimpleCoords.ToString() << "<br>Dominant weights wrt. levi part("
+//  stOutput << "Highest weight: " << hwSimpleCoords.ToString() << "<br>Dominant weights wrt. levi part("
 //  << outputDomWeightsSimpleCoordsLeviPart.size << "):<br> ";
 //  for (int i=0; i<outputDomWeightsSimpleCoordsLeviPart.size; i++)
-//    std::cout << "<br>" << outputDomWeightsSimpleCoordsLeviPart[i].ToString();
+//    stOutput << "<br>" << outputDomWeightsSimpleCoordsLeviPart[i].ToString();
   Explored.initFillInObject(outputDomWeightsSimpleCoordsLeviPart.size, false);
   outputMultsSimpleCoords.SetSize(outputDomWeightsSimpleCoordsLeviPart.size);
   Vector<coefficient> currentWeight, currentDominantRepresentative;
   Vector<coefficient> Rho;
   Rho=this->GetRho();//<-implicit type conversion here!
-//  std::cout << "<br> Rho equals: " << Rho.ToString();
+//  stOutput << "<br> Rho equals: " << Rho.ToString();
   //out << "<br> Rho equals: " << Rho.ToString();
   coefficient hwPlusRhoSquared;
   hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoordsLeviPart+Rho, hwSimpleCoordsLeviPart+Rho);
   Explored[0]=true;
   outputMultsSimpleCoords[0]=1;
-//  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//  stOutput << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
-//std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ToString();
+//stOutput << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ToString();
   Vector<coefficient> convertor;
   coefficient bufferCoeff;
   ProgressReport theReport(&theGlobalVariables);
@@ -1698,13 +1698,13 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
         currentDominantRepresentative=currentWeight;
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
-//        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ToString();
+//        stOutput << "<br>currentDominant representative: " << currentDominantRepresentative.ToString();
         int theIndex=outputDomWeightsSimpleCoordsLeviPart.GetIndex(currentDominantRepresentative);
-//        std::cout << "<br>index of currentDomain rep: " << theIndex;
+//        stOutput << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
-//        std::cout << "<br> summing over weight: " << currentWeight.ToString();
+//        stOutput << "<br> summing over weight: " << currentWeight.ToString();
         if (!Explored[theIndex])
         { std::stringstream errorLog;
           errorLog << "This is an internal error check. If you see it, that means "
@@ -1719,34 +1719,34 @@ bool SubgroupWeylGroupOLD::FreudenthalEvalIrrepIsWRTLeviPart
         bufferCoeff=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff*=outputMultsSimpleCoords[theIndex];
         currentAccum+=bufferCoeff;
-//        std::cout << "<hr>current weight: " << currentWeight.ToString();
-//        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ToString();
+//        stOutput << "<hr>current weight: " << currentWeight.ToString();
+//        stOutput << "<br>current dominant representative " << currentDominantRepresentative.ToString();
       }
     currentAccum*=2;
-   // std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ToString();
+   // stOutput << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ToString();
     bufferCoeff=hwPlusRhoSquared;
     bufferCoeff-=this->AmbientWeyl.RootScalarCartanRoot(outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     if(bufferCoeff.IsEqualToZero())
       crash << crash;
     currentAccum/=bufferCoeff;
-//    std::cout << "<br>Coeff we divide by: " << bufferCoeff.ToString()
+//    stOutput << "<br>Coeff we divide by: " << bufferCoeff.ToString()
  //   ;
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
     theReport.Report(out.str());
-//    std::cout
+//    stOutput
   //  << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
  //   theGlobalVariables.MakeStatusReport(out.str());
-//    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
-//    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
-//    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
+//    stOutput << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//    stOutput << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
+//    stOutput << " of which " << timeSpentRaisingWeights << " used to raise weights";
   }
   outputDominantWeightsSimpleCoordS.Clear();
   outputDominantWeightsSimpleCoordS.SetExpectedSize(outputDomWeightsSimpleCoordsLeviPart.size);
   for (int i=0; i<outputDomWeightsSimpleCoordsLeviPart.size; i++)
     outputDominantWeightsSimpleCoordS.AddOnTop(outputDomWeightsSimpleCoordsLeviPart[i]+hwSimpleCoordsNilPart);
-//  std::cout << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//  stOutput << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   return true;
 }
 

@@ -87,5 +87,25 @@ class Crasher
   Crasher& operator<<(const Crasher& dummyCrasherSignalsActualCrash);
 };
 
+class StdoutClass
+{
+public:
+  template <typename anyType>
+  StdoutClass& operator<<(const anyType& toBePiped)
+  { if (this->theOutputFunction==0)
+      std::cout << toBePiped;
+    else
+    { std::stringstream out;
+      out << toBePiped;
+      this->theOutputFunction(out.str());
+    }
+    return *this;
+  }
+  void (*theOutputFunction)(const std::string& stringToOutput);
+  StdoutClass(): theOutputFunction(0){}
+  void OutputCurrentString();
+};
+
 extern Crasher crash;
+extern StdoutClass stOutput;
 #endif

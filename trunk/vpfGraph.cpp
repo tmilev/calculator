@@ -25,7 +25,7 @@ void GraphOLD::AddDiEdge(int v1, int v2){
             return;
         }
     }
-    std::cout << "attempting to add an edge beyond max_edges" << std::endl;
+    stOutput << "attempting to add an edge beyond max_edges" << "\n";
 }
 
 // methods that can only be called once can have long names
@@ -70,7 +70,7 @@ void Graph::AddEdge(int i, int j)
 
 void Graph::AddEdge(int i, int j, const std::string& inputLabel)
 { GraphEdge theEdge(i,j, inputLabel);
-//  std::cout << " adding edge: " << theEdge.ToString();
+//  stOutput << " adding edge: " << theEdge.ToString();
   this->theEdges.AddMonomial(theEdge, 1);
 }
 

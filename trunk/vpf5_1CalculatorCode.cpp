@@ -31,8 +31,8 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
     if(matb.elements[j][0].IsNegative())
       crash << crash;
   }
-//  std::cout << "<hr>Starting matrix A: " << matA.ToString();
-//  std::cout << "<hr>Starting matrix b: " << matb.ToString();
+//  stOutput << "<hr>Starting matrix A: " << matA.ToString();
+//  stOutput << "<hr>Starting matrix b: " << matb.ToString();
   if (GlobalGoal.IsEqualToZero())
     return false;
   int NumTrueVariables=matA.NumCols;
@@ -223,14 +223,14 @@ bool Calculator::innerGCDOrLCM(Calculator& theCommands, const Expression& input,
 { MacroRegisterFunctionWithName("Calculator::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-//  std::cout << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
-//  std::cout << "<br>Input lispified: " << input.Lispify();
+//  stOutput << "<br>Time elapsed before calling innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+//  stOutput << "<br>Input lispified: " << input.Lispify();
   if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, CalculatorSerialization::innerPolynomial<Rational>))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
-//  std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
+//  stOutput << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: " << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   Polynomial<Rational> outputP;
-//  std::cout << "<br>context: " << theContext.ToString();
-//  std::cout << "<br>The polys: " << thePolys.ToString();
+//  stOutput << "<br>context: " << theContext.ToString();
+//  stOutput << "<br>The polys: " << thePolys.ToString();
   if (doGCD)
     RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
   else
@@ -250,7 +250,7 @@ bool Calculator::GetListPolysVariableLabelsInLex(const Expression& input, Vector
   for (int i=0; i<numVars; i++)
     theVars.AddOnTop(theContextStart.ContextGetContextVariable(i));
   theVars.QuickSortAscending();
-//  std::cout << "<hr>the vars: " << theVars.ToString();
+//  stOutput << "<hr>the vars: " << theVars.ToString();
   PolynomialSubstitution<Rational> theSub;
   theSub.SetSize(numVars);
   for (int i=0; i<theSub.size; i++)
@@ -283,7 +283,7 @@ bool Calculator::innerPolynomialDivisionRemainder(Calculator& theCommands, const
       return output.SetError("Division by zero.", theCommands);
     theGB.theBasiS[i-1]=thePolys[i];
   }
-//  std::cout << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+//  stOutput << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
 //  << theGB.theBasiS.ToString() << "<hr>";
   Polynomial<Rational> outputRemainder;
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
@@ -327,7 +327,7 @@ bool Calculator::innerPolynomialDivisionVerbose(Calculator& theCommands, const E
   theGB.RemainderDivisionWithRespectToBasis(thePolys[0], &theGB.remainderDivision, theCommands.theGlobalVariableS, -1);
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-//  std::cout << "context vars: " << theFormat.polyAlphabeT;
+//  stOutput << "context vars: " << theFormat.polyAlphabeT;
   theFormat.flagUseLatex=true;
   return output.AssignValue(theGB.GetDivisionString(&theFormat), theCommands);
 }
@@ -564,8 +564,8 @@ bool Calculator::innerAttemptExtendingEtoHEFwithHinCartan(Calculator& theCommand
   theE=theErational;
   std::stringstream out, logStream;
   bool success=ownerSS->AttemptExtendingEtoHEFwithHinCartan(theE, theH, theF, &logStream, theCommands.theGlobalVariableS);
-//  std::cout << "<br>The elts: " <<  theOperators.ToString();
-//  std::cout << "<br> The common ad: " << commonAd.ToString();
+//  stOutput << "<br>The elts: " <<  theOperators.ToString();
+//  stOutput << "<br> The common ad: " << commonAd.ToString();
   if (success)
     out << CGI::GetMathSpanPure("F:="+theF.ToString() + ";") << "<br>" << CGI::GetMathSpanPure("H:="+theH.ToString() + ";") << "<br>"
     << CGI::GetMathSpanPure("E:="+theE.ToString() + ";") << "<br><br>The log stream of the computation follows. " << logStream.str();
@@ -590,8 +590,8 @@ bool Calculator::innerAdCommonEigenSpaces(Calculator& theCommands, const Express
     theOperators.AddOnTop(tempElt);
   }
   ownerSS->GetCommonCentralizer(theOperators, outputElts);
-//  std::cout << "<br>The elts: " <<  theOperators.ToString();
-//  std::cout << "<br> The common ad: " << commonAd.ToString();
+//  stOutput << "<br>The elts: " <<  theOperators.ToString();
+//  stOutput << "<br> The common ad: " << commonAd.ToString();
   std::stringstream out;
   out << "<br>EigenSpace basis (" << outputElts.size << " elements total): ";
   for (int i=0; i<outputElts.size; i++)
@@ -636,7 +636,7 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
-//  std::cout << "context vars: " << theFormat.polyAlphabeT;
+//  stOutput << "context vars: " << theFormat.polyAlphabeT;
 
   theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
   if (useModZp)
@@ -656,7 +656,7 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
   List<Polynomial<AlgebraicNumber> > outputGroebner, outputGroebner2;
   outputGroebner=inputVector;
   outputGroebner2=inputVector;
-//  std::cout << outputGroebner.ToString(&theFormat);
+//  stOutput << outputGroebner.ToString(&theFormat);
 
 
   GroebnerBasisComputation<AlgebraicNumber> theGroebnerComputation;
@@ -741,7 +741,7 @@ bool Calculator::innerDeterminantPolynomial(Calculator& theCommands, const Expre
 
 bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerMatrixRational");
-//  std::cout << "ere i am, jh";
+//  stOutput << "ere i am, jh";
   Matrix<Rational> outputMat;
   if (input.IsOfType<Matrix<Rational> >())
   { output=input;
@@ -755,12 +755,12 @@ bool Calculator::innerMatrixRational(Calculator& theCommands, const Expression& 
 }
 
 bool Calculator::innerTranspose(Calculator& theCommands, const Expression& input, Expression& output)
-{ //std::cout << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
+{ //stOutput << "here i am, input is: " << input.ToString() << ", in full detail: " << input.ToStringFull();
   Matrix<Expression> theMat;
   output=input;
   output.SetChildAtomValue(0, theCommands.opSequence());
   theCommands.GetMatrixExpressions(output, theMat);
-  //std::cout << "<br>" << theMat.ToString();
+  //stOutput << "<br>" << theMat.ToString();
   theMat.Transpose();
   return output.AssignMatrixExpressions(theMat, theCommands);
 }
@@ -881,7 +881,7 @@ void Expression::Substitute(const Expression& toBeSubbed, Expression& toBeSubbed
 bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerSuffixNotationForPostScript");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-//  std::cout << "<hr>Converting: " << input.ToString();
+//  stOutput << "<hr>Converting: " << input.ToString();
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
     return output.AssignValue((std::string) "...", theCommands);
   std::string currentString;
@@ -933,7 +933,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   Expression currentE;
   bool useUsualOrder=!input[0].IsAtomGivenData(theCommands.opDivide()) && !input[0].IsAtomGivenData(theCommands.opThePower());
 //  if (input[0].IsAtoM(theCommands.opDivide()))
-//    std::cout << input.Lispify();
+//    stOutput << input.Lispify();
   if (useUsualOrder)
     for (int i=input.children.size-1; i>=1; i--)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
@@ -1081,7 +1081,7 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
   theComputation.MaxNumGBComputations=2001;
   theComputation.MaxNumSerreSystemComputations=2001;
   theCommands.theGlobalVariableS->theDefaultFormat=theFormat;
-//  std::cout << "<br>The context vars:<br>" << theContext.ToString();
+//  stOutput << "<br>The context vars:<br>" << theContext.ToString();
   theComputation.SolveSerreLikeSystem(thePolysAlgebraic, &theCommands.theObjectContainer.theAlgebraicClosure, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "<br>The context vars:<br>" << theContext.ToString();
@@ -1110,18 +1110,18 @@ coefficient ElementUniversalEnveloping<coefficient>::GetKillingFormProduct(const
   SemisimpleLieAlgebra* theOwner;
   theOwner=&this->GetOwner();
   MonomialUniversalEnveloping<coefficient> baseGen;
-  std::cout << "<hr>";
+  stOutput << "<hr>";
   for (int i=0; i<theOwner->GetNumGenerators(); i++)
   { baseGen.MakeGenerator(i, *theOwner);
     adadAppliedToMon.MakeZero(*theOwner);
     adadAppliedToMon.AddMonomial(baseGen,1);
     right.AdjointRepresentationAction(adadAppliedToMon, tempElt);
     tempElt.Simplify();
-    std::cout << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString() << " to get " << tempElt.ToString();
+    stOutput << "<br>acting by " << right.ToString() << " on " << adadAppliedToMon.ToString() << " to get " << tempElt.ToString();
     this->AdjointRepresentationAction(tempElt, adadAppliedToMon);
     adadAppliedToMon.Simplify();
-    std::cout << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get " << adadAppliedToMon.ToString();
-    std::cout << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
+    stOutput << " acting by " << this->ToString() << " on " << tempElt.ToString() << " to get " << adadAppliedToMon.ToString();
+    stOutput << "; coeff of " << baseGen.ToString() << " = " << adadAppliedToMon.GetMonomialCoefficient(baseGen).ToString();
     result+=adadAppliedToMon.GetMonomialCoefficient(baseGen);
   }
   return result;

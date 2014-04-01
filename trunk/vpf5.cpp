@@ -79,7 +79,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
-//  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
   Vectors<Rational> basisEi;
   int theDim=this->AmbientWeyl.GetDim();
@@ -104,7 +104,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   int numTotalWeightsFound=0;
   int numPosRoots=this->AmbientWeyl.RootsOfBorel.size;
   Vector<Rational> currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
-//  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+//  stOutput << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
   lowestUnexploredHeightDiff++)
   { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
@@ -130,16 +130,16 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
           }
         }
       }
-//    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
+//    stOutput << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
-//    std::cout << " Size of current level: " << currentHashes.size;
+//    stOutput << " Size of current level: " << currentHashes.size;
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
-//    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
+//    stOutput << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
     currentHashes.Clear();
-//    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
+//    stOutput << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
   }
   out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
@@ -147,7 +147,7 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
     out << "<hr>This message is generated either because the number of weights has exceeded the hard-coded RAM memory limits, or because "
     << " a priori bound for the number of weights is WRONG. If the latter is the case, make sure to send an angry email to the author(s).";
   outputDetails=out.str();
-  //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
+  //stOutput << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
@@ -164,7 +164,7 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
     return output.SetError("Failed to convert the argument of the function to a highest weight vector", theCommands);
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
-  //std::cout << "The fundamental coords: " << theWeight.ToString();
+  //stOutput << "The fundamental coords: " << theWeight.ToString();
   theCommands.Comments << "<br>Function fAnimateLittelmannPaths: your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
@@ -301,7 +301,7 @@ bool Calculator::innerEmbedG2inB3(Calculator& theCommands, const Expression& inp
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
     return output.SetError("Failed to apply homomorphism for unspecified reason", theCommands);
-//  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
+//  stOutput << theHmm.ToString(*theCommands.theGlobalVariableS);
   outputUE.Simplify(theCommands.theGlobalVariableS);
   Expression contextE;
   contextE.MakeContextSSLieAlg(theCommands, theHmm.theRange());
@@ -445,7 +445,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   << this->theChaR[0].weightFundamentalCoordS.ToString();
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(tempStream1.str());
-//  std::cout << "<br>Parabolic selection: " << LeviInSmall.ToString();
+//  stOutput << "<br>Parabolic selection: " << LeviInSmall.ToString();
   List<List<Vector<coefficient> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
   InvertedLeviInSmall=LeviInSmall;
@@ -461,11 +461,11 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   for (int i=0; i<InvertedLeviInSmall.CardinalitySelection; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentElt=
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
-    //std::cout << "<br>current element is: " << currentElt.ToString();
+    //stOutput << "<br>current element is: " << currentElt.ToString();
     MatrixTensor<coefficient> currentOp, tempMat;
     currentOp.MakeZero();
     for (int j=0; j<currentElt.size(); j++)
-    { //std::cout << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
+    { //stOutput << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
       tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
       tempMat*=currentElt.theCoeffs[j];
       currentOp+=tempMat;
@@ -543,7 +543,7 @@ void ModuleSSalgebra<coefficient>::SplitFDpartOverFKLeviRedSubalg
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
 //  if (outputEigenSpace!=0)
-//  { std::cout << "<br> outputEigenSpace->size=" << outputEigenSpace->size << "; outputEigenVectors->size=" << outputEigenVectors->size;
+//  { stOutput << "<br> outputEigenSpace->size=" << outputEigenSpace->size << "; outputEigenVectors->size=" << outputEigenVectors->size;
 //  }
   theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
   if (comments!=0)
@@ -568,10 +568,10 @@ void Calculator::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   g_m1plusg_m3.MakeGenerator(6, output.theRange());
   tempElt.MakeGenerator     (8, output.theRange());
   g_m1plusg_m3+=tempElt;
-//  std::cout << "<hr>g_2: " << g_2.ToString();
-//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
-//  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
-//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
+//  stOutput << "<hr>g_2: " << g_2.ToString();
+//  stOutput << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
+//  stOutput << "<hr>g_{-2}: " << g_m2.ToString();
+//  stOutput << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
   output.imagesSimpleChevalleyGenerators.SetSize(4);
   output.imagesSimpleChevalleyGenerators[0]=g_1plusg_3;
   output.imagesSimpleChevalleyGenerators[1]=g_2;
@@ -616,7 +616,7 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
     << "\\endhead \n<br>";
   }
-//  std::cout << theContext.ToString();
+//  stOutput << theContext.ToString();
   theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
   theG2B3Data.theFormat.flagUseLatex=true;
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
@@ -705,9 +705,9 @@ bool Calculator::fPrintB3G2branchingIntermediate(Calculator& theCommands, const 
             latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter -1 << "} $&";
             Polynomial<Rational> tempP;
             theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
-//            std::cout << "<br>before scaling: " << tempP.ToString();
+//            stOutput << "<br>before scaling: " << tempP.ToString();
             tempP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-//            std::cout << "<br>after scaling: " << tempP.ToString();
+//            stOutput << "<br>after scaling: " << tempP.ToString();
             latexTable2 << "$\\begin{array}{l}" << tempP.ToString(&theG2B3Data.theFormat) << "\\end{array}$ & ";
             if (tempP.FindOneVarRatRoots(tempList))
             { tempList2.AddOnTopNoRepetition(tempList);
@@ -761,7 +761,7 @@ bool Calculator::fPrintB3G2branchingTable(Calculator& theCommands, const Express
     return false;
   if (output.IsError())
     return true;
-//  std::cout << " <br>the highest weights: " << theHWs.ToString();
+//  stOutput << " <br>the highest weights: " << theHWs.ToString();
   return theCommands.fPrintB3G2branchingIntermediate(theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
@@ -913,7 +913,7 @@ bool ElementSumGeneralizedVermas<coefficient>::ExtractElementUE(ElementUniversal
 bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingData& theG2B3Data, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
-//  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
+//  stOutput << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebra<RationalFunctionOld> theModCopy;
   theModCopy.MakeFromHW(theG2B3Data.theHmm.theRange(), theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
   std::string report;
@@ -941,7 +941,7 @@ bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingDat
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
-  //std::cout << "theG2B3Data.outputWeightsFundCoordS: " << theG2B3Data.outputWeightsFundCoordS.ToString() << "<br>";
+  //stOutput << "theG2B3Data.outputWeightsFundCoordS: " << theG2B3Data.outputWeightsFundCoordS.ToString() << "<br>";
   theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
   invertedG2cartanMat=theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
@@ -1008,10 +1008,10 @@ bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingDat
     ElementSumGeneralizedVermas<RationalFunctionOld>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
     ElementUniversalEnveloping<RationalFunctionOld>& currentUEelt=theG2B3Data.theUEelts[k];
     currentTensorEltLevi=theHWV;
-    //std::cout << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
+    //stOutput << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
     currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS, 1, 0);
     currentTensorEltEigen=currentTensorEltLevi;
-    //std::cout << "<br> to obtain " << currentTensorElt.ToString();
+    //stOutput << "<br> to obtain " << currentTensorElt.ToString();
     if (theG2B3Data.selInducing.CardinalitySelection>0)
       for (int j=0; j<theG2B3Data.g2Weights.size; j++)
       { weightDifference=theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
@@ -1020,13 +1020,13 @@ bool Calculator::fSplitFDpartB3overG2inner(Calculator& theCommands, branchingDat
           tempElt.MakeConst(theG2B3Data.theChars[j], theG2B3Data.theHmm.theRange());
           theG2CasimirCopy-=tempElt;
           theG2CasimirCopy*=12;
-          //std::cout << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
+          //stOutput << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
           currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft
           (theG2CasimirCopy, *theCommands.theGlobalVariableS, 1, 0);
           charDiff=theG2B3Data.theChars[j];
           charDiff-=*theG2B3Data.theChars.LastObject();
           theG2B3Data.theCharacterDifferences.AddOnTopNoRepetition(charDiff);
-          //std::cout << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
+          //stOutput << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
         }
       }
     theG2B3Data.additionalMultipliers[k]= currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
@@ -1050,10 +1050,10 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
   SemisimpleLieAlgebra& theSmallAlgebra= inputData.theHmm.theDomain();
   Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
 
-//  std::cout << "the ambient Weyl of levi of parabolic: <br>" << inputData.WeylFD.ToString();
-//  std::cout << "the small subgroup embedded: <br>" << WeylFDSmallAsSubInLarge.ToString();
-//  std::cout << "the small subgroup: <br>" << WeylFDSmall.ToString();
-//  std::cout << "<br>starting char: " << this->ToString();
+//  stOutput << "the ambient Weyl of levi of parabolic: <br>" << inputData.WeylFD.ToString();
+//  stOutput << "the small subgroup embedded: <br>" << WeylFDSmallAsSubInLarge.ToString();
+//  stOutput << "the small subgroup: <br>" << WeylFDSmall.ToString();
+//  stOutput << "<br>starting char: " << this->ToString();
   charSSAlgMod charAmbientFDWeyl, remainingCharProjected, remainingCharDominantLevI;
 
   Weight<coefficient> tempMon, localHighest;
@@ -1067,7 +1067,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         *Report=tempS;
       return false;
     }
-//    std::cout << "<hr>FreudenthalEval on " << currentMon.ToString() << " generated the following report: "
+//    stOutput << "<hr>FreudenthalEval on " << currentMon.ToString() << " generated the following report: "
 //    << tempS << "<hr>";
     for (int j=0; j<tempHashedRoots.size; j++)
     { bufferCoeff=this->theCoeffs[i];
@@ -1077,42 +1077,42 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
     }
   }
-//  std::cout << "<hr>" << tempS;
-//  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
+//  stOutput << "<hr>" << tempS;
+//  stOutput << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
   Vectors<coefficient> orbitDom;
   for (int i=0; i<charAmbientFDWeyl.size(); i++)
   { orbitDom.SetSize(0);
     if (!inputData.WeylFD.GenerateOrbitReturnFalseIfTruncated(theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS), orbitDom, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoordS).ToString();
-//      std::cout << "failed to generate the complement-sub-Weyl-orbit of weight "
+//      stOutput << "failed to generate the complement-sub-Weyl-orbit of weight "
 //      << theWeyL.GetSimpleCoordinatesFromFundamental
 //      (charAmbientFDWeyl[i].weightFundamentalCoords).ToString();
       if (Report!=0)
         *Report=out.str();
       return false;
     }
-//    std::cout << "<hr>the orbit with highest weight "
+//    stOutput << "<hr>the orbit with highest weight "
 //    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ToString()
 //    << " is: ";
 //    for (int l=0; l<orbitDom.size; l++)
-//      std::cout <<"<br>" << orbitDom[l].ToString();
-//    std::cout << "<hr>of them dominant are: <br>";
+//      stOutput <<"<br>" << orbitDom[l].ToString();
+//    stOutput << "<hr>of them dominant are: <br>";
     tempMon.owner=this->GetOwner();
     for (int k=0; k<orbitDom.size; k++)
       if (WeylFDSmallAsSubInLarge.IsDominantWeight(orbitDom[k]))
       { tempMon.weightFundamentalCoordS=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevI.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
-        //std::cout << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
+        //stOutput << "<br>" << orbitDom[k].ToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ToString();
       }// else
-       //std::cout << "<br>" << orbitDom[k].ToString() << " is not dominant ";
+       //stOutput << "<br>" << orbitDom[k].ToString() << " is not dominant ";
   }
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.CustomPlusSign="\\oplus ";
   theFormat.fundamentalWeightLetter="\\omega";
   out << "<br>Character w.r.t Levi part of the parabolic of the larger algebra: " << CGI::GetMathSpanPure(remainingCharDominantLevI.ToString(&theFormat));
-  //std::cout << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+  //stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
   //(remainingCharDominantLevI.ToString());
   remainingCharProjected.MakeZero();
   Vector<coefficient> fundCoordsSmaller, theProjection, inSimpleCoords;
@@ -1123,12 +1123,12 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     { fundCoordsSmaller[j]=theWeyL.RootScalarCartanRoot(inSimpleCoords, embeddingsSimpleEiGoesTo[j]);
       fundCoordsSmaller[j]/=WeylFDSmall.AmbientWeyl.CartanSymmetric.elements[j][j]/2;
     }
-    //std::cout << "<br>insimple coords: " << inSimpleCoords.ToString() << "; fundcoordssmaller: " << fundCoordsSmaller.ToString();
+    //stOutput << "<br>insimple coords: " << inSimpleCoords.ToString() << "; fundcoordssmaller: " << fundCoordsSmaller.ToString();
     tempMon.owner=&theSmallAlgebra;
     tempMon.weightFundamentalCoordS=fundCoordsSmaller;
     remainingCharProjected.AddMonomial(tempMon, remainingCharDominantLevI.theCoeffs[i]);
   }
-//  std::cout << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
+//  stOutput << "<br>Character w.r.t subalgebra: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharProjected.ToString());
   Vector<coefficient> simpleGeneratorBaseField;
   output.MakeZero();
@@ -1140,7 +1140,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       { tempMon=localHighest;
         simpleGeneratorBaseField=WeylFDSmall.RootsOfBorel[i]; // <- implicit type conversion here!
         tempMon.weightFundamentalCoordS+=WeylFDSmall.AmbientWeyl.GetFundamentalCoordinatesFromSimple(simpleGeneratorBaseField);
-//        std::cout << "<br>candidate highest mon found simple & usual coords: "
+//        stOutput << "<br>candidate highest mon found simple & usual coords: "
 //        << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(tempMon.weightFundamentalCoords).ToString()
 //        << " = " << tempMon.ToString();
         if (remainingCharProjected.theMonomials.Contains(tempMon))
@@ -1149,7 +1149,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         }
       }
     }
-//    std::cout << "<br>The highest mon found simple & usual coords: "
+//    stOutput << "<br>The highest mon found simple & usual coords: "
 //    << WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental(localHighest.weightFundamentalCoords).ToString()
 //    << " = " << localHighest.ToString();
     highestCoeff=remainingCharProjected.theCoeffs[remainingCharProjected.theMonomials.GetIndex(localHighest)];
@@ -1160,8 +1160,8 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
         *Report=tempS;
       return false;
     }
-//    std::cout << "<br>Freudenthal eval w.r.t. smaller subalgebra report: " << tempS;
-//    std::cout << "<hr>accounting " << localHighest.ToString() << " with coeff "
+//    stOutput << "<br>Freudenthal eval w.r.t. smaller subalgebra report: " << tempS;
+//    stOutput << "<hr>accounting " << localHighest.ToString() << " with coeff "
 //    << highestCoeff.ToString() << "<br>"
 //    << remainingCharProjected.ToString();
     for (int i=0; i<tempHashedRoots.size; i++)
@@ -1170,13 +1170,13 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
       bufferCoeff=tempMults[i];
       bufferCoeff*=highestCoeff;
       remainingCharProjected.SubtractMonomial(tempMon, bufferCoeff);
-//      std::cout << "<br>-(" << bufferCoeff.ToString() << ")" << tempMon.ToString();
+//      stOutput << "<br>-(" << bufferCoeff.ToString() << ")" << tempMon.ToString();
     }
-//    std::cout << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
+//    stOutput << "<br>remaining character after accounting:<br>" << remainingCharProjected.ToString();
   }
   theFormat.fundamentalWeightLetter="\\psi";
   out << "<br>Character w.r.t the Levi part of the parabolic of the small algebra: " << CGI::GetMathSpanPure(output.ToString(&theFormat));
-//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
+//  stOutput << "<br>Character w.r.t Levi part: " << CGI::GetMathSpanPure
 //  (output.ToString())
 //  ;
 
@@ -1220,7 +1220,7 @@ bool charSSAlgMod<coefficient>::SplitCharOverRedSubalg(std::string* Report, char
     out << "<hr>" << theDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());*/
     *Report=out.str();
   }
-//  std::cout << "<br>time at finish: " << theGlobalVariables.GetElapsedSeconds();
+//  stOutput << "<br>time at finish: " << theGlobalVariables.GetElapsedSeconds();
   return true;
 }
 
@@ -1251,7 +1251,7 @@ bool Calculator::fPrintAllPartitions(Calculator& theCommands, const Expression& 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
   Expression theContext;
   Vector<Rational> theHW;
-//  std::cout << theExpression.ToString() << " rank "
+//  stOutput << theExpression.ToString() << " rank "
 //  << theSSalgebra.GetRank() << " child one : " << input[2].ToString();
   if (!theCommands.GetVectoR<Rational>(input[2], theHW, &theContext, theSSalgebra.GetRank()))
     return output.SetError("Failed to extract weight you want partitioned from "+ input[2].ToString(), theCommands);
@@ -1607,7 +1607,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     return false;
   if (this->IsEqualToZero())
     crash << "This is a programming error: it was requested that I factor 0, which is forbidden." << crash;
-  //std::cout << "Factoring: " << this->ToString();
+  //stOutput << "Factoring: " << this->ToString();
   unsigned int n=this->theDigits[0];
   outputPrimeFactors.SetSize(0);
   outputMultiplicites.SetSize(0);
@@ -1630,7 +1630,7 @@ bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>&
     }
   if (n>1)
     this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
-  //std::cout << " ... and the factors are: " << outputPrimeFactors
+  //stOutput << " ... and the factors are: " << outputPrimeFactors
   //<< " with mults: " << outputMultiplicites;
   return true;
 }
@@ -1682,14 +1682,14 @@ bool Polynomial<coefficient>::FactorMe(List<Polynomial<Rational> >& outputFactor
   Polynomial<Rational> currentFactor, divisor;
   while (factorsToBeProcessed.size>0)
   { currentFactor=factorsToBeProcessed.PopLastObject();
-//    std::cout << "<hr>Factoring " << currentFactor.ToString() << "<br>";
+//    stOutput << "<hr>Factoring " << currentFactor.ToString() << "<br>";
     if(!currentFactor.FactorMeOutputIsADivisor(divisor, comments))
       return false;
     if (currentFactor.IsEqualToOne())
     { outputFactors.AddOnTop(divisor);
       continue;
     }
-//    std::cout << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
+//    stOutput << "<br><b>Smallest divisor: " << divisor.ToString() << ", thepoly: "
 //    << currentFactor.ToString() << "</b>";
     Rational tempRat=divisor.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     currentFactor/=tempRat;
@@ -1721,13 +1721,13 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   AllPointsOfEvaluation.SetSize(degree+1);
   thePrimeFactorsAtPoints.SetSize(degreeLeft+1);
   thePrimeFactorsMults.SetSize(degreeLeft+1);
-//  std::cout << "<br><b>Factoring: " << this->ToString() << "</b>";
-//  std::cout << "<br>Degree left: " << degreeLeft;// << " degree right: " << degreeRight;
-  //std::cout << "<br>Interpolating at: 0,";
+//  stOutput << "<br><b>Factoring: " << this->ToString() << "</b>";
+//  stOutput << "<br>Degree left: " << degreeLeft;// << " degree right: " << degreeRight;
+  //stOutput << "<br>Interpolating at: 0,";
   AllPointsOfEvaluation[0]=0;
   for (int i=1; i<AllPointsOfEvaluation.size; i++)
   { AllPointsOfEvaluation[i]= i%2==1 ? i/2+1 : -(i/2);
-    //std::cout << AllPointsOfEvaluation[i].ToString() << ", ";
+    //stOutput << AllPointsOfEvaluation[i].ToString() << ", ";
   }
   Vector<Rational> theArgument;
   theArgument.SetSize(1);
@@ -1736,16 +1736,16 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   for (int i=0; i<AllPointsOfEvaluation.size; i++)
   { theArgument[0]=AllPointsOfEvaluation[i];
     theValuesAtPoints[i]= thePoly.Evaluate(theArgument);
-//    std::cout << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
+//    stOutput << "<br>" << thePoly.ToString() << " evaluated at " << theArgument[0].ToString()
 //    << " equals: " << theValuesAtPoints[i].ToString();
     if (theValuesAtPoints[i].IsEqualToZero())
     { output.MakeDegreeOne(1, 0, 1, -theArgument[0]);
-      //std::cout << "<hr>Found a divisor, and it is: " << output.ToString();
+      //stOutput << "<hr>Found a divisor, and it is: " << output.ToString();
       *this/=output;
-      //std::cout << "<br>divident: " << this->ToString();
+      //stOutput << "<br>divident: " << this->ToString();
       return true;
     }
-    //std::cout << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
+    //stOutput << "<br>value at " << AllPointsOfEvaluation[i].ToString() << " = " << theValuesAtPoints[i].ToString();
     if (i<degreeLeft+1)
     { theValuesAtPoints[i].IsInteger(&tempLI);
       if(!tempLI.value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
@@ -1753,10 +1753,10 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
           *comments << "<br>Aborting polynomial factorization: failed to factor the integer " << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
         return false;
       }
-/*      std::cout << "=+/- ";
+/*      stOutput << "=+/- ";
       for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
         for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
-          std::cout << thePrimeFactorsAtPoints[i][j] << "*";*/
+          stOutput << thePrimeFactorsAtPoints[i][j] << "*";*/
     }
   }
   Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
@@ -1774,12 +1774,12 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
   valuesLeftInterpolands.SetSize(degreeLeft+1);
   this->GetValuesLagrangeInterpolandsAtConsecutivePoints(PointsOfInterpolationLeft, AllPointsOfEvaluation, valuesLeftInterpolands);
   do do
-  { //std::cout << "<hr>Selection: " << theDivisorSel.ToString() << "<br>Sign selection: " << signSel.ToString();
+  { //stOutput << "<hr>Selection: " << theDivisorSel.ToString() << "<br>Sign selection: " << signSel.ToString();
     //continue;
     theValuesAtPointsLeft.MakeZero(theValuesAtPoints.size);
     Rational firstValue;
     bool isGood=false;//<-we shall first check if the divisor is constant.
-  //  std::cout << "<hr>Values left candidate: ";
+  //  stOutput << "<hr>Values left candidate: ";
     for (int j=0; j<theDivisorSel.theElements.size; j++)
     { currentPointContribution=1;
       for (int k=0; k<theDivisorSel[j].theElements.size; k++)
@@ -1796,21 +1796,21 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
           if (firstValue!=currentPointContribution)
             isGood=true; //<- the divisor has takes two different values, hence is non-constant.
       }
-//      std::cout << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
-//      std::cout << "<br>ValuesAtPointsLeft: " << theValuesAtPointsLeft.ToString();
- //     std::cout << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
+//      stOutput << " at " << AllPointsOfEvaluation[j].ToString() << " -> " << currentPointContribution.ToString();
+//      stOutput << "<br>ValuesAtPointsLeft: " << theValuesAtPointsLeft.ToString();
+ //     stOutput << "<br>adding " << (valuesLeftInterpolands[j]*currentPointContribution).ToString()
  //     << " to " << theValuesAtPointsLeft.ToString();
- //     std::cout.flush();
+ //     stOutput.flush();
       theValuesAtPointsLeft+= valuesLeftInterpolands[j]*currentPointContribution;
-//      std::cout << " to get " << theValuesAtPointsLeft.ToString();
+//      stOutput << " to get " << theValuesAtPointsLeft.ToString();
     }
-    //std::cout << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
+    //stOutput << (isGood ? " is good, " : " NO GOOD, ") << " final values at points left: " << theValuesAtPointsLeft.ToString();
 /*    if (true)
     { //debugging code here! turn off when done debugging!
       output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
-      std::cout << "<hr>Trying divisor: " << output.ToString();
+      stOutput << "<hr>Trying divisor: " << output.ToString();
       if (!isGood)
-        std::cout << "<br>aint no good 'cause is constant";
+        stOutput << "<br>aint no good 'cause is constant";
     }*/
     if (!isGood)
       continue;
@@ -1825,15 +1825,15 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
         break;
       }
     }
-    //std::cout << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
+    //stOutput << (isGood ? "<br>Right is good, " : "Right is NO GOOD, ") << "values at points right: " << theValuesAtPointsRight.ToString();
 //    if (!isGood)
-//      std::cout << "<br>aint no good 'cause of crappy divisibility.";
+//      stOutput << "<br>aint no good 'cause of crappy divisibility.";
     if (!isGood)
       continue;
     output.Interpolate((Vector<Rational>) PointsOfInterpolationLeft, (Vector<Rational>) theValuesAtPointsLeft);
     this->DivideBy(output, quotient, remainder);
     if (!remainder.IsEqualToZero())
-    { //std::cout << "<br>ain't no good cause left times right aint right.";
+    { //stOutput << "<br>ain't no good cause left times right aint right.";
       continue;
     }
     *this=quotient;
@@ -1848,10 +1848,10 @@ FactorMeOutputIsADivisor(Polynomial<Rational>& output, std::stringstream* commen
 bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerFactorPoly");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "here I am .";
+  //stOutput << "here I am .";
   if (!theCommands.CallCalculatorFunction(CalculatorSerialization::innerPolynomial<Rational>, input, output))
     return false;
-  //std::cout << "here I am .";
+  //stOutput << "here I am .";
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValue<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
@@ -1867,7 +1867,7 @@ bool Calculator::innerFactorPoly(Calculator& theCommands, const Expression& inpu
     output.AddChildOnTop(tempE);
   }
   output.format=output.formatMatrix;
-  //std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
+  //stOutput << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }
 
@@ -1901,7 +1901,7 @@ bool Calculator::innerSqrt(Calculator& theCommands, const Expression& input, Exp
   if (!input[1].IsSmallInteger(&thePower))
     return false;
   if (!input[2].IsConstantNumber())
-  { //std::cout << "input is: " << input[2].ToString();
+  { //stOutput << "input is: " << input[2].ToString();
     theCommands.CheckInputNotSameAsOutput(input, output);
     Expression theExponent;
     Rational thePowerRat(1, thePower);
@@ -2061,7 +2061,7 @@ bool Calculator::ReadTestStrings(HashedList<std::string, MathRoutines::hashStrin
   while (theFileReader.positionInString<(signed) theFileReader.theString.size())
   { if(!theFileReader.GetStringEnclosedIn("input", buffer))
       break;
-//    std::cout << "<br>adding on top " << buffer;
+//    stOutput << "<br>adding on top " << buffer;
     outputCommands.AddOnTop(buffer);
     if (!theFileReader.GetStringEnclosedIn("output", buffer))
     { this->Comments << "<hr>Failed to read result string number " << outputResults.size+1 << ": is the test file corrupt?";
@@ -2120,13 +2120,13 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   std::stringstream errorTableStream;
   int numInconsistencies=0;
   List<std::string> newCommands;
-//  std::cout << knownCommands.size << " known commands must be " << commandStrings.size;
+//  stOutput << knownCommands.size << " known commands must be " << commandStrings.size;
 //  for (int i=0; i< knownCommands.size; i++)
-//    std::cout << "<br>known command " << i+1 << ":" << knownCommands[i] << ", known result: " << i+1 << ":" << knownResults[i];
+//    stOutput << "<br>known command " << i+1 << ":" << knownCommands[i] << ", known result: " << i+1 << ":" << knownResults[i];
   for (int i=0; i<commandStrings.size; i++)
   { if (!knownCommands.Contains(commandStrings[i]))
     { newCommands.AddOnTop(commandStrings[i]);
-      //std::cout << "<br>Command <span style=\"color:#FF0000\">" << commandStrings[i] << "</span> not present in test file: <span style=\"color:#FF0000\">"
+      //stOutput << "<br>Command <span style=\"color:#FF0000\">" << commandStrings[i] << "</span> not present in test file: <span style=\"color:#FF0000\">"
       //<< knownCommands[i] << "</span> sits there instead. ";
       if (knownCommands[i]==commandStrings[i])
         crash << crash;

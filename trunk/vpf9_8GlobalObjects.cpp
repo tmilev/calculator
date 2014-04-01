@@ -10,15 +10,14 @@ Calculator theParser;
 FormatExpressions consoleFormat;
 
 void InitializeGlobalObjects()
-{ //std::cout << "Content-Type: text/html\n\n";
+{ //stOutput << "Content-Type: text/html\n\n";
   InitializeTimer();
   onePredefinedCopyOfGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
   onePredefinedCopyOfGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
   onePredefinedCopyOfGlobalVariables.SetCallSystem(&CallSystemWrapper);
-
   crash.theGlobalVariables=&onePredefinedCopyOfGlobalVariables;
-  //std::cout << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
+  //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
   //Change the below line to modify the computation time of the calculator.
   consoleFormat.flagUseHTML = false;
   consoleFormat.flagUseLatex = false;
@@ -39,7 +38,7 @@ void CGI::MakeReportIndicatorFile(const std::string& input)
 }
 
 void CGI::MakeStdCoutReport(const std::string& input)
-{ std::cout << input;
+{ stOutput << input;
   CGI::MakeReportIndicatorFile(input);
 }
 

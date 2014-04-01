@@ -3646,7 +3646,7 @@ bool ConeComplex::DrawMeProjective
       tempMat.GetZeroEigenSpace(tempRoots);
       for (int i=0; i<2; i++)
         for (int j=0; j<this->GetDim(); j++)
-          theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j]=tempRoots[i][j].DoubleValue();
+          theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j]=tempRoots[i][j].GetDoubleValue();
     }
   }
   for (int i=0; i<this->size; i++)
@@ -4275,7 +4275,7 @@ class ImpreciseDouble
       this->theValue-=other.theValue;
   }
   void operator=(const Rational& other)
-  { this->theValue=other.DoubleValue();
+  { this->theValue=other.GetDoubleValue();
   }
   bool IsEqualToZero()const
   { if (this->theValue<0)

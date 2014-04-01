@@ -166,7 +166,7 @@ public:
   { return other<*this;
   }
   //must be rewritten:
-  double GetDoubleValue();
+  double GetDoubleValue()const;
   void FitSize();
 };
 
@@ -271,7 +271,7 @@ public:
   int GetIntValueTruncated()
   {return this->sign* this->value.GetUnsignedIntValueTruncated();
   }
-  double GetDoubleValue();
+  double GetDoubleValue()const;
   int operator %(int x);
   inline void AssignFloor(){}
   void operator=(const Rational& x);
@@ -751,7 +751,7 @@ ParallelComputing::GlobalPointerCounter++;
     else
       this->Extended->num.sign*=-1;
   }
-  double DoubleValue()const;
+  double GetDoubleValue()const;
   int floorIfSmall()
   { if (this->Extended==0)
     { if (NumShort<0)

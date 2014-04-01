@@ -389,12 +389,12 @@ class Expression
   bool IsSmallInteger(int* whichInteger=0)const;
   bool IsInteger(LargeInt* whichInteger=0)const;
   bool IsConstantNumber()const;
-  bool EvaluatesToRealDoubleInRange
+  bool EvaluatesToDoubleInRange
   (const std::string& varName, double lowBound, double highBound, int numPoints,
    double* outputYmin=0, double* outputYmax=0)const
    ;
-  bool EvaluatesToRealDouble(double* whichDouble=0)const;
-bool EvaluatesToRealDoubleUnderSubstitutions
+  bool EvaluatesToDouble(double* whichDouble=0)const;
+bool EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble=0)const
   ;
 

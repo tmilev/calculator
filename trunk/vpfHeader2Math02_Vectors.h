@@ -95,7 +95,7 @@ public:
   { Vector<double> result;
     result.SetSize(this->size);
     for (int i=0; i<this->size; i++)
-      result[i]=this->TheObjects[i].DoubleValue();
+      result[i]=this->TheObjects[i].GetDoubleValue();
     return result;
   }
   bool IsIntegral()

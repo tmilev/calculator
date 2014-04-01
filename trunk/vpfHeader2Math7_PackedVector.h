@@ -662,14 +662,14 @@ void ExportCharTable(const somegroup& G, JSData &data)
   data.obj[1].value.list.SetSize(G.ConjugacyClassCount());
   for(int i=0; i<G.ConjugacyClassCount(); i++)
   { data.obj[1].value.list[i].type = JSNUM;
-    data.obj[1].value.list[i].number = ((Rational) G.conjugacyClasseS[i].size).DoubleValue();
+    data.obj[1].value.list[i].number = ((Rational) G.conjugacyClasseS[i].size).GetDoubleValue();
   }
 
   data.obj[2].value.type = JSLIST;
   data.obj[2].value.list.SetSize(G.characterTable.size);
   for(int i=0; i<G.characterTable.size; i++)
   { for(int j=0; j<G.characterTable[i].data.size; j++)
-    { data["characters"][i][j] = G.characterTable[i][j].DoubleValue();
+    { data["characters"][i][j] = G.characterTable[i][j].GetDoubleValue();
     }
   }
 }

@@ -61,7 +61,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)
     for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].GetDoubleValue();
       if (i==j)
         eigenMat.elements[i][i]-=theEigenValue;
     }
@@ -74,7 +74,7 @@ void rootSubalgebra::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       tempDO.theBilinearForm.elements[i][j]=
-      this->GetAmbientWeyl().CartanSymmetric.elements[i][j].DoubleValue();
+      this->GetAmbientWeyl().CartanSymmetric.elements[i][j].GetDoubleValue();
   Vector<double> tempRoot;
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);

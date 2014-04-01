@@ -152,7 +152,7 @@ bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Express
   double theArgument;
   if (input.IsEqualToZero())
     return output.SetError("Logarithm of zero is undefined.", theCommands);
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue((Rational) 1, theCommands);
     return false;
@@ -183,7 +183,7 @@ bool CalculatorFunctionsGeneral::innerFactorial(Calculator& theCommands, const E
 bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArctan");
   double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::arctan(theArgument), theCommands);
 }
@@ -191,7 +191,7 @@ bool CalculatorFunctionsGeneral::innerArctan(Calculator& theCommands, const Expr
 bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArccos");
   double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::arccos(theArgument), theCommands);
 }
@@ -199,7 +199,7 @@ bool CalculatorFunctionsGeneral::innerArccos(Calculator& theCommands, const Expr
 bool CalculatorFunctionsGeneral::innerArcsin(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerArcsin");
   double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::arcsin(theArgument), theCommands);
 }
@@ -222,7 +222,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
       }
 
   double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::sin(theArgument), theCommands);
 }
@@ -245,7 +245,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
         }
       }
   double theArgument;
-  if (!input.EvaluatesToRealDouble(&theArgument))
+  if (!input.EvaluatesToDouble(&theArgument))
     return false;
   return output.AssignValue(FloatingPoint::cos(theArgument), theCommands );
 }
@@ -1707,15 +1707,15 @@ bool CalculatorFunctionsGeneral::innerPlotWedge(Calculator& theCommands, const E
     return false;
   }
   std::stringstream out;
-  double x1wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(startAngle.DoubleValue()));
-  double y1wedge= MathRoutines::ReducePrecision(yCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::sin(startAngle.DoubleValue()));
-  double x2wedge= MathRoutines::ReducePrecision(xCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::cos(endAngle.DoubleValue()));
-  double y2wedge= MathRoutines::ReducePrecision(yCoord.DoubleValue()+ radius.DoubleValue() *FloatingPoint::sin(endAngle.DoubleValue()));
-  double xCoordDouble=MathRoutines::ReducePrecision(xCoord.DoubleValue());
-  double yCoordDouble=MathRoutines::ReducePrecision(yCoord.DoubleValue());
-  double startAngleDouble=MathRoutines::ReducePrecision(startAngle.DoubleValue());
-  double radiusDouble=MathRoutines::ReducePrecision(radius.DoubleValue());
-  double endAngleDouble=MathRoutines::ReducePrecision(endAngle.DoubleValue());
+  double x1wedge= MathRoutines::ReducePrecision(xCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::cos(startAngle.GetDoubleValue()));
+  double y1wedge= MathRoutines::ReducePrecision(yCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::sin(startAngle.GetDoubleValue()));
+  double x2wedge= MathRoutines::ReducePrecision(xCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::cos(endAngle.GetDoubleValue()));
+  double y2wedge= MathRoutines::ReducePrecision(yCoord.GetDoubleValue()+ radius.GetDoubleValue() *FloatingPoint::sin(endAngle.GetDoubleValue()));
+  double xCoordDouble=MathRoutines::ReducePrecision(xCoord.GetDoubleValue());
+  double yCoordDouble=MathRoutines::ReducePrecision(yCoord.GetDoubleValue());
+  double startAngleDouble=MathRoutines::ReducePrecision(startAngle.GetDoubleValue());
+  double radiusDouble=MathRoutines::ReducePrecision(radius.GetDoubleValue());
+  double endAngleDouble=MathRoutines::ReducePrecision(endAngle.GetDoubleValue());
   out << "\\pscustom*[linecolor=cyan]{ \\psparametricplot[algebraic,linecolor=\\psColorGraph]{" << startAngleDouble << "}{" << endAngleDouble
   << "}{" << xCoordDouble << "+" << radiusDouble << "*cos(t)| " << yCoordDouble << "+" << radiusDouble << "*sin(t)} \\psline("
   << x2wedge << ", " << y2wedge << ")(" << xCoordDouble << ", " << yCoordDouble << ")" << "(" << x1wedge << ", " << y1wedge << ")}";
@@ -1742,7 +1742,7 @@ bool CalculatorFunctionsGeneral::innerPlotIntegralOf(Calculator& theCommands, co
   const Expression& upperE=input[3];
   Expression functionE;
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToRealDouble(&upperBound) || !upperE.EvaluatesToRealDouble(&lowerBound))
+  if (!lowerE.EvaluatesToDouble(&upperBound) || !upperE.EvaluatesToDouble(&lowerBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -1780,7 +1780,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   }
   double xInitial, yInitial, leftEndpoint, rightEndpoint;
   int numPoints;
-  if (!input[2].EvaluatesToRealDouble(&xInitial) || !input[3].EvaluatesToRealDouble(&yInitial))
+  if (!input[2].EvaluatesToDouble(&xInitial) || !input[3].EvaluatesToDouble(&yInitial))
   { theCommands.Comments << "Failed to extract initial x,y values from " << input.ToString();
     return false;
   }
@@ -1789,7 +1789,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
   { theCommands.Comments << "Failed to extract number of points from " << input.ToString();
     return false;
   }
-  if (!input[5].EvaluatesToRealDouble(&leftEndpoint) || !input[6].EvaluatesToRealDouble(&rightEndpoint))
+  if (!input[5].EvaluatesToDouble(&leftEndpoint) || !input[6].EvaluatesToDouble(&rightEndpoint))
   { theCommands.Comments << "Failed to extract left and right endpoints from " << input.ToString();
     return false;
   }
@@ -1870,7 +1870,7 @@ bool CalculatorFunctionsGeneral::innerDFQsEulersMethod(Calculator& theCommands, 
       bool isGood=true;
       for (int counter=0; ; counter++)
       { knownValues[knownValues.size-1]=YValues[i];
-        if (!functionE.EvaluatesToRealDoubleUnderSubstitutions(knownConsts, knownValues, &currentYprimeApprox))
+        if (!functionE.EvaluatesToDoubleUnderSubstitutions(knownConsts, knownValues, &currentYprimeApprox))
         { theCommands.Comments << "Failed to evaluate yPrime approximation at x=" << XValues[i];
           return false;
         }
@@ -1940,7 +1940,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   const Expression& upperE=input[3];
   Expression functionE;
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToRealDouble(&lowerBound) || !upperE.EvaluatesToRealDouble(&upperBound))
+  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -1951,7 +1951,7 @@ bool CalculatorFunctionsGeneral::innerPlot2D(Calculator& theCommands, const Expr
   }
   Plot thePlot;
   double yLow, yHigh;
-  if (!input[1].EvaluatesToRealDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh))
+  if (!input[1].EvaluatesToDoubleInRange("x", lowerBound, upperBound, 500, &yLow, &yHigh))
   { theCommands.Comments << "<hr>I failed to evaluate the input function, something is wrong!";
     return false;
   }
@@ -1985,7 +1985,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   const Expression& upperE=input[4];
   const Expression& deltaE=input[5];
   double theDeltaNoSign, theDeltaWithSign;
-  if (!deltaE.EvaluatesToRealDouble(&theDeltaWithSign))
+  if (!deltaE.EvaluatesToDouble(&theDeltaWithSign))
     return false;
   theDeltaNoSign=theDeltaWithSign;
   if (theDeltaNoSign<0)
@@ -1993,7 +1993,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   if (theDeltaNoSign==0)
     theDeltaNoSign=1;
   double upperBound, lowerBound;
-  if (!lowerE.EvaluatesToRealDouble(&lowerBound) || !upperE.EvaluatesToRealDouble(&upperBound))
+  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -2035,7 +2035,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
         return false;
   //    stOutput << "and after evaluation: " << theFunValueFinal.ToString();
       double finalResultDouble;
-      if (!theFunValueFinal.EvaluatesToRealDouble(&finalResultDouble))
+      if (!theFunValueFinal.EvaluatesToDouble(&finalResultDouble))
       { theCommands.Comments << "<hr>Failed to evaluate your function at point " << i << ", instead " << "I evaluated to " << theFunValueFinal.ToString();
         return false;
       }
@@ -2080,7 +2080,7 @@ bool CalculatorFunctionsGeneral::innerPlot2DWithBars(Calculator& theCommands, co
   outHtml << "<br>";
   for (int i=0; i<rValues.size; i++)
   { std::stringstream tempStream;
-    tempStream << "\\rput[t](" << std::fixed << rValues[i].DoubleValue() << ",-0.03)" << "{$";
+    tempStream << "\\rput[t](" << std::fixed << rValues[i].GetDoubleValue() << ",-0.03)" << "{$";
     if (rValues[i].IsInteger())
       tempStream << rValues[i].ToString();
     else
@@ -2114,7 +2114,7 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   Expression functionE;
   double lowerBound=0, upperBound=0;
   PlotObject thePlotCartesian;
-  if (!lowerE.EvaluatesToRealDouble(&lowerBound) || !upperE.EvaluatesToRealDouble(&upperBound))
+  if (!lowerE.EvaluatesToDouble(&lowerBound) || !upperE.EvaluatesToDouble(&upperBound))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
@@ -2127,9 +2127,9 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionTheta(Calculator& theCom
   sintE.AddChildAtomOnTop("t");
   xCoordE.MakeProducT(theCommands, input[1], costE);
   yCoordE.MakeProducT(theCommands, input[1], sintE);
-  if (!xCoordE.EvaluatesToRealDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh))
+  if (!xCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.xLow, &thePlotCartesian.xHigh))
     return false;
-  if (!yCoordE.EvaluatesToRealDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh))
+  if (!yCoordE.EvaluatesToDoubleInRange("t", lowerBound, upperBound, 500, &thePlotCartesian.yLow, &thePlotCartesian.yHigh))
     return false;
   std::stringstream outCartesianLatex, outCartesianHtml;
   outCartesianLatex << "%Calculator command: " << input.ToString() << "\n";
@@ -2155,7 +2155,7 @@ bool CalculatorFunctionsGeneral::innerPlotPolarRfunctionThetaExtended(Calculator
   const Expression& upperE=input[3];
   Expression functionE;
   PlotObject thePlotPolar;
-  if (!lowerE.EvaluatesToRealDouble(&thePlotPolar.xLow) || !upperE.EvaluatesToRealDouble(&thePlotPolar.xHigh))
+  if (!lowerE.EvaluatesToDouble(&thePlotPolar.xLow) || !upperE.EvaluatesToDouble(&thePlotPolar.xHigh))
     return output.SetError("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (thePlotPolar.xHigh<thePlotPolar.xLow)
     MathRoutines::swap(thePlotPolar.xHigh, thePlotPolar.xLow);
@@ -2202,8 +2202,8 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
       return false;
     }
   double leftEndPoint, rightEndPoint;
-  if (!input[input.children.size-2].EvaluatesToRealDouble(&leftEndPoint) ||
-      !input[input.children.size-1].EvaluatesToRealDouble(&rightEndPoint))
+  if (!input[input.children.size-2].EvaluatesToDouble(&leftEndPoint) ||
+      !input[input.children.size-1].EvaluatesToDouble(&rightEndPoint))
   { theCommands.Comments << "Failed to convert " << input[input.children.size-2].ToString() << " and "
     << input[input.children.size-1].ToString() << " to left and right endpoint of parameter interval. ";
     return false;
@@ -2215,11 +2215,11 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   << "<br>\\parametricplot[linecolor=\\psColorGraph, plotpoints=1000]{" << leftEndPoint << "}{" << rightEndPoint << "}{"
   << theConvertedExpressions[0].GetValue<std::string>() << theConvertedExpressions[1].GetValue<std::string>() << "}";
   PlotObject thePlot;
-  if (!input[1].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh))
+  if (!input[1].EvaluatesToDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.xLow, &thePlot.xHigh))
   { theCommands.Comments << "<hr>Failed to evaluate curve function. ";
     return false;
   }
-  if (!input[2].EvaluatesToRealDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
+  if (!input[2].EvaluatesToDoubleInRange("t", leftEndPoint, rightEndPoint, 1000, &thePlot.yLow, &thePlot.yHigh))
   { theCommands.Comments << "<hr>Failed to evaluate curve function. ";
     return false;
   }
@@ -2236,7 +2236,7 @@ bool CalculatorFunctionsGeneral::innerPlotConeUsualProjection(Calculator& theCom
     return false;
   }
   double radius, height, distance, viewPointHeight;
-  if (!input[1].EvaluatesToRealDouble(&radius) || !input[2].EvaluatesToRealDouble(&height) || !input[3].EvaluatesToRealDouble(&distance) || !input[4].EvaluatesToRealDouble(&viewPointHeight) )
+  if (!input[1].EvaluatesToDouble(&radius) || !input[2].EvaluatesToDouble(&height) || !input[3].EvaluatesToDouble(&distance) || !input[4].EvaluatesToDouble(&viewPointHeight) )
   { theCommands.Comments << "<hr> failed to extract radius, height, distance, viewpoint height from " << input.ToString();
     return false;
   }
@@ -2366,7 +2366,7 @@ bool CalculatorFunctionsGeneral::innerGetCentralizerChainsSemisimpleSubalgebras(
 bool CalculatorFunctionsGeneral::innerEvaluateToDouble(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Expression::innerEvaluateToDouble");
   double theValue=0;
-  if (!input.EvaluatesToRealDouble(&theValue))
+  if (!input.EvaluatesToDouble(&theValue))
     return false;
   return output.AssignValue(theValue, theCommands);
 }
@@ -3297,10 +3297,10 @@ bool Calculator::fSplitFDpartB3overG2old(Calculator& theCommands, const Expressi
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool Expression::EvaluatesToRealDoubleInRange
+bool Expression::EvaluatesToDoubleInRange
   (const std::string& varName, double lowBound, double highBound, int numIntervals,
    double* outputYmin, double* outputYmax)const
-{ MacroRegisterFunctionWithName("Expression::EvaluatesToRealDoubleInRange");
+{ MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleInRange");
   if (numIntervals<1 || this->theBoss==0)
     return false;
   HashedList<Expression> knownEs= this->theBoss->knownDoubleConstants;
@@ -3318,7 +3318,7 @@ bool Expression::EvaluatesToRealDoubleInRange
   *knownValues.LastObject()=lowBound;
   double currentValue=0;
   for (int i=0; i<numIntervals; i++)
-  { if (!this->EvaluatesToRealDoubleUnderSubstitutions(knownEs, knownValues, & currentValue))
+  { if (!this->EvaluatesToDoubleUnderSubstitutions(knownEs, knownValues, & currentValue))
     { this->theBoss->Comments << "<hr>Failed to evaluate " << this->ToString() << " at " << varName << "="
       << *knownValues.LastObject() << ". ";
       return false;
@@ -3340,14 +3340,14 @@ bool Expression::EvaluatesToRealDoubleInRange
   return true;
 }
 
-bool Expression::EvaluatesToRealDouble(double* whichDouble)const
-{ return this->EvaluatesToRealDoubleUnderSubstitutions
+bool Expression::EvaluatesToDouble(double* whichDouble)const
+{ return this->EvaluatesToDoubleUnderSubstitutions
   (this->theBoss->knownDoubleConstants, this->theBoss->knownDoubleConstantValues, whichDouble);
 }
 
-bool Expression::EvaluatesToRealDoubleUnderSubstitutions
+bool Expression::EvaluatesToDoubleUnderSubstitutions
 (const HashedList<Expression>& knownEs, const List<double>& valuesKnownEs, double* whichDouble)const
-{ MacroRegisterFunctionWithName("Expression::EvaluatesToRealDoubleUnderSubstitutions");
+{ MacroRegisterFunctionWithName("Expression::EvaluatesToDoubleUnderSubstitutions");
   if (this->theBoss==0)
     return false;
 //  stOutput << "<br>Evaluating to double: " << this->ToString();
@@ -3358,9 +3358,12 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
     return true;
   if (this->IsOfType<Rational>())
   { if (whichDouble!=0)
-      *whichDouble=this->GetValue<Rational>().DoubleValue();
+      *whichDouble=this->GetValue<Rational>().GetDoubleValue();
     return true;
   }
+  if (this->IsOfType<AlgebraicNumber>())
+    if (this->GetValue<AlgebraicNumber>().EvaluatesToDouble(whichDouble))
+      return true;
   RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
   if (this->theBoss->RecursionDeptH >this->theBoss->MaxRecursionDeptH)
   { this->theBoss->Comments << "<hr>Recursion depth exceeded while evaluating innerEvaluateToDouble. This may be a programming error. ";
@@ -3390,8 +3393,8 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
   //  stOutput << "Starting with sqrt: " << input.ToStringFull();
   if (isArithmeticOperationTwoArguments)
   { double leftD, rightD;
-    if (!(*this)[1].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &leftD) ||
-        !(*this)[2].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &rightD))
+    if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &leftD) ||
+        !(*this)[2].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &rightD))
       return false;
     if ((*this).IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
     { if (whichDouble!=0)
@@ -3430,7 +3433,7 @@ bool Expression::EvaluatesToRealDoubleUnderSubstitutions
 
   if(isKnownFunctionOneArgument)
   { double argumentD;
-    if (!(*this)[1].EvaluatesToRealDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
+    if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
       return false;
     if (this->IsListNElementsStartingWithAtom(theCommands.opSqrt()))
     { if (argumentD<0)

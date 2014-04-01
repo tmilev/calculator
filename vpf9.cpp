@@ -428,8 +428,8 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, Vector<Rationa
 { x=TDV.theBuffer.centerX[0];
   y=TDV.theBuffer.centerY[0];
   for (int k=0; k<r.size; k++)
-  { x+=(r[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][0]);
-    y-=(r[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][1]);
+  { x+=(r[k].GetDoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][0]);
+    y-=(r[k].GetDoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][1]);
   }
 }
 
@@ -1303,7 +1303,7 @@ bool Rational::IsInteger(LargeInt* whichInteger)const
   return result;
 }
 
-double Rational::DoubleValue()const
+double Rational::GetDoubleValue()const
 { if (this->Extended==0)
     return (double)this->NumShort/(double)this->DenShort;
   else
@@ -1561,7 +1561,7 @@ bool LargeInt::CheckForConsistensy()
   return true;
 }
 
-double LargeInt::GetDoubleValue()
+double LargeInt::GetDoubleValue()const
 { return this->sign* this->value.GetDoubleValue();
 }
 
@@ -1644,7 +1644,7 @@ int LargeIntUnsigned::GetUnsignedIntValueTruncated()
 { return (int) this->theDigits[0];
 }
 
-double LargeIntUnsigned::GetDoubleValue()
+double LargeIntUnsigned::GetDoubleValue()const
 { double result=0;
   for (int i=this->theDigits.size-1; i>=0; i--)
     result=result*LargeIntUnsigned::CarryOverBound+this->theDigits[i];
@@ -5489,7 +5489,7 @@ void WeylGroup::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& ou
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)
     for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].GetDoubleValue();
       if (i==j)
         eigenMat.elements[i][i]-=theEigenValue;
     }
@@ -5505,7 +5505,7 @@ void WeylGroup::GetCoxeterPlane(Vector<double>& outputBasis1, Vector<double>& ou
   theEigenSpace.operator=(theEigenSpaceList);
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
-      tempDO.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
+      tempDO.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].GetDoubleValue();
 
   if (theEigenSpace.size>0)
   { if (coxeterNumber>2)
@@ -5549,7 +5549,7 @@ void WeylGroup::DrawRootSystem
   output.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
-      output.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
+      output.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].GetDoubleValue();
   Vector<double> tempRoot;
   output.SelectedPlane=0;
   Vectors<double>& theTwoPlane= output.BasisProjectionPlane[0];
@@ -5571,7 +5571,7 @@ void WeylGroup::DrawRootSystem
   for (int i=0; i<this->RootSystem.size; i++)
   { tempRoot.SetSize(theDimension);
     for (int j=0; j<theDimension; j++)
-      tempRoot[j]=this->RootSystem[i][j].DoubleValue();
+      tempRoot[j]=this->RootSystem[i][j].GetDoubleValue();
     double Length1 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][0]);
     double Length2 = this->RootScalarCartanRoot(tempRoot, output.BasisProjectionPlane[0][1]);
     lengths[i]=FloatingPoint::sqrt(Length1*Length1+Length2*Length2);
@@ -5655,7 +5655,7 @@ void WeylGroup::DrawRootSystem
 std::string WeylGroup::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
-  double upperBoundDouble=100000/((Rational)this->GetGroupSizeByFormula()).DoubleValue();
+  double upperBoundDouble=100000/((Rational)this->GetGroupSizeByFormula()).GetDoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
@@ -5676,7 +5676,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int)
-  ( ((Rational)this->GetGroupSizeByFormula()).DoubleValue()*theDominantWeights.size);
+  ( ((Rational)this->GetGroupSizeByFormula()).GetDoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);

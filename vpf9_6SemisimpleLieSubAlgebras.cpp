@@ -3518,7 +3518,7 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   theDV.theBuffer.theBilinearForm.init(thePrimalRank, thePrimalRank);
   for (int i=0; i<thePrimalRank; i++)
     for (int j=0; j<thePrimalRank; j++)
-      theDV.theBuffer.theBilinearForm(i,j)=this->BilinearFormFundPrimal(i,j).DoubleValue();
+      theDV.theBuffer.theBilinearForm(i,j)=this->BilinearFormFundPrimal(i,j).GetDoubleValue();
   Vector<Rational> zeroVector;
   zeroVector.MakeZero(thePrimalRank);
   BasisToDrawCirclesAt.MakeEiBasis(thePrimalRank);
@@ -3585,12 +3585,12 @@ std::string CandidateSSSubalgebra::ToStringDrawWeights(FormatExpressions* theFor
   for(int i=0; i<theDV.theBuffer.BasisToDrawCirclesAt.size; i++)
   { theDV.theBuffer.BasisToDrawCirclesAt[i].SetSize(thePrimalRank);
     for (int j=0; j<thePrimalRank; j++)
-      theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].DoubleValue();
+      theDV.theBuffer.BasisToDrawCirclesAt[i][j]=BasisToDrawCirclesAt[i][j].GetDoubleValue();
     theDV.drawCircleAtVectorBuffer(BasisToDrawCirclesAt[i], 4, theDV.PenStyleNormal, CGI::RedGreenBlue(250, 0,0));
     //theDV.drawTextAtVectorBuffer
     //(BasisToDrawCirclesAt[i], BasisToDrawCirclesAt[i].ToString(), CGI::RedGreenBlue(0, 0,0), theDV.TextStyleNormal, 0);
   }
-//  theDV.theBuffer.GraphicsUnit[0]/=sqrt(this->theWeylNonEmbeddeD.CartanSymmetric(0,0).DoubleValue());
+//  theDV.theBuffer.GraphicsUnit[0]/=sqrt(this->theWeylNonEmbeddeD.CartanSymmetric(0,0).GetDoubleValue());
   out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(thePrimalRank);
   return out.str();
 }

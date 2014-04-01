@@ -37,6 +37,8 @@ class AlgebraicNumber
   AlgebraicNumber(const AlgebraicNumber& other):owner(0), basisIndex(0), flagDeallocated(false)
   { this->operator=(other);
   }
+  bool IsExpressedViaLatestBasis()const;
+  void ExpressViaLatestBasis();
   bool AssignCosRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner);
   bool AssignSinRationalTimesPi(const Rational& input, AlgebraicClosureRationals& inputOwner)
   { Rational rHalf(1,2);
@@ -102,6 +104,7 @@ class AlgebraicNumber
   }
   void RadicalMeDefault(int theRad);
   void Invert();
+  bool EvaluatesToDouble(double* outputWhichDouble)const;
   void operator/=(const AlgebraicNumber& other);
   bool operator==(const AlgebraicNumber& other)const;
   bool operator==(const Rational& other)const;
@@ -189,6 +192,8 @@ public:
   void ChooseGeneratingElement();
   bool ReduceMe();
   void ComputeDisplayStringsFromRadicals();
+  bool GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel);
+
   static int GetIndexFromRadicalSelection(const Selection& theSel);
   void GetMultiplicativeOperatorFromRadicalSelection(const Selection& theSel, MatrixTensor<Rational>& outputOp);
   void GetMultiplicationBy(const AlgebraicNumber& input, MatrixTensor<Rational>& output);

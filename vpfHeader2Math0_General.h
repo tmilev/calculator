@@ -2498,8 +2498,8 @@ public:
     this->v1.SetSize(theDimension);
     this->v2.SetSize(theDimension);
     for (int i=0; i<theDimension; i++)
-    { this->v1[i]=input1.TheObjects[i].DoubleValue();
-      this->v2[i]=input2.TheObjects[i].DoubleValue();
+    { this->v1[i]=input1.TheObjects[i].GetDoubleValue();
+      this->v2[i]=input2.TheObjects[i].GetDoubleValue();
     }
     this->thePenStyle=PenStyle;
     this->ColorIndex=colorIndex;
@@ -2528,7 +2528,7 @@ public:
   void init(const Vector<Rational> & input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
   { this->theVector.SetSize(input.size);
     for (int i=0; i<input.size; i++)
-      this->theVector[i]=input.TheObjects[i].DoubleValue();
+      this->theVector[i]=input.TheObjects[i].GetDoubleValue();
     this->ColorIndex=colorIndex;
     this->theText=inputText;
     this->fontSize=theFontSize;
@@ -2557,7 +2557,7 @@ public:
   void init(const Vector<Rational> & input, double theRadius, unsigned long thePenStylE, int colorIndex)
   { this->theVector.SetSize(input.size);
     for (int i=0; i<input.size; i++)
-      this->theVector[i]=input.TheObjects[i].DoubleValue();
+      this->theVector[i]=input.TheObjects[i].GetDoubleValue();
     this->ColorIndex=colorIndex;
     this->thePenStyle=thePenStylE;
     this->radius=theRadius;
@@ -2624,7 +2624,7 @@ public:
     tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i=0; i<bilinearForm.NumRows; i++)
       for (int j=0; j<bilinearForm.NumCols; j++)
-        tempMat.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
+        tempMat.elements[i][j]=bilinearForm.elements[i][j].GetDoubleValue();
     this->initDimensions(tempMat, draggableBasis, startingPlane, NumAnimationFrames);
   }
   void initDimensions(int theDim, int numAnimationFrames);

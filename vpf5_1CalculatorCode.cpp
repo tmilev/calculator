@@ -617,7 +617,7 @@ bool Calculator::innerGroebner(Calculator& theCommands, const Expression& input,
     return output.SetError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
-  int upperBoundComputations=(int) upperBound.DoubleValue();
+  int upperBoundComputations=(int) upperBound.GetDoubleValue();
   output.reset(theCommands);
   for (int i=1; i<input.children.size; i++)
     output.children.AddOnTop(input.children[i]);
@@ -923,7 +923,7 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   std::stringstream out;
   out.precision(7);
   if (input.IsOfType<Rational>())
-  { out << " " << FloatingPoint::DoubleToString(input.GetValue<Rational>().DoubleValue());
+  { out << " " << FloatingPoint::DoubleToString(input.GetValue<Rational>().GetDoubleValue());
     return output.AssignValue(out.str(), theCommands);
   }
   if (input.IsOfType<double>())

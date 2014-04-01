@@ -60,6 +60,20 @@ void AlgebraicClosureRationals::ComputeDisplayStringsFromRadicals()
   } while (theSel.IncrementReturnFalseIfPastLast());
 }
 
+bool AlgebraicClosureRationals::GetRadicalSelectionFromIndex(int inputIndex, Selection& theSel)
+{ if (!this->flagIsQuadraticRadicalExtensionRationals)
+    return false;
+  theSel.init(this->theQuadraticRadicals.size);
+  int counter=0;
+  while (inputIndex>0)
+  { if (inputIndex%2==1)
+      theSel.AddSelectionAppendNewIndex(counter);
+    inputIndex/=2;
+    counter++;
+  }
+  return true;
+}
+
 int AlgebraicClosureRationals::GetIndexFromRadicalSelection(const Selection& theSel)
 { if (theSel.MaxSize>30)
   { crash << "This is a programming error: the algebraic extension is too large to be handled by the current data structures. "
@@ -769,6 +783,61 @@ bool AlgebraicNumber::operator>(const AlgebraicNumber& other)const
 void AlgebraicNumber::AssignRational(const Rational& input, AlgebraicClosureRationals& inputOwner)
 { this->owner=0;
   this->theElT.MaKeEi(0, input);
+}
+
+bool AlgebraicNumber::IsExpressedViaLatestBasis()const
+{ if (this->owner==0)
+    return true;
+  return this->basisIndex==this->owner->theBasesAdditive.size-1;
+}
+
+void AlgebraicNumber::ExpressViaLatestBasis()
+{ if (this->owner==0)
+    return;
+  if (this->basisIndex==this->owner->theBasesAdditive.size-1)
+    return;
+  this->owner->GetAdditionTo(*this, this->theElT);
+  this->basisIndex=this->owner->theBasesAdditive.size-1;
+}
+
+bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
+{ MacroRegisterFunctionWithName("AlgebraicNumber::EvaluatesToDouble");
+  if (!this->IsExpressedViaLatestBasis())
+  { AlgebraicNumber thisCopy=*this;
+    thisCopy.ExpressViaLatestBasis();
+    return thisCopy.EvaluatesToDouble(outputWhichDouble);
+  }
+  Rational ratValue;
+  if (this->IsRational(&ratValue))
+  { if (outputWhichDouble!=0)
+      *outputWhichDouble=ratValue.GetDoubleValue();
+    return true;
+  }
+  if (this->owner==0)
+    crash << "Owner is zero but algebraic number is not rational." << crash;
+  if (!this->owner->flagIsQuadraticRadicalExtensionRationals)
+    return false;
+  if (outputWhichDouble!=0)
+    *outputWhichDouble=0;
+  Selection currentRadicalSelection;
+  double currentMultiplicand;
+  stOutput << "<br>Radicals: " << this->owner->theQuadraticRadicals.ToString();
+  for (int i=0; i<this->theElT.size(); i++)
+  { this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
+    stOutput << "<br>Current rad sel: " << currentRadicalSelection.ToString() << " index: "
+    << this->theElT[i].theIndex << " coeff: " << this->theElT.theCoeffs[i];
+    if (outputWhichDouble!=0)
+      currentMultiplicand=this->theElT.theCoeffs[i].GetDoubleValue();
+    for (int j=0; j<currentRadicalSelection.CardinalitySelection; j++)
+      if (this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]]<0)
+        return false;
+      else
+        currentMultiplicand*=
+        FloatingPoint::sqrt(this->owner->theQuadraticRadicals[currentRadicalSelection.elements[j]].GetDoubleValue());
+    if (outputWhichDouble!=0)
+      *outputWhichDouble+=currentMultiplicand;
+  }
+  return true;
 }
 
 bool AlgebraicNumber::AssignRationalQuadraticRadical(const Rational& inpuT, AlgebraicClosureRationals& inputOwner)

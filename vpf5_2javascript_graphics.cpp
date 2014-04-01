@@ -174,7 +174,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       textEbasisNamesUserInput[i][j]=tmpStream.str();
       out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j] << "\">";
       if (this->flagFillUserDefinedProjection)
-        out << this->FillUserDefinedProjection[i][j].DoubleValue();
+        out << this->FillUserDefinedProjection[i][j].GetDoubleValue();
       out << "</textarea>\n";
     }
     out << "<br>";

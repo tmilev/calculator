@@ -88,8 +88,8 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebr
   Vector<Rational> highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger())
     return false;
-  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoords().DoubleValue()+1;
-//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().DoubleValue();
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoords().GetDoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().GetDoubleValue();
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<Vector<Rational> > > outputWeightsByHeight;

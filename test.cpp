@@ -196,7 +196,7 @@ void PrintCharTable(const somegroup& G, const char* filename)
   data.obj[2].value.list.SetSize(G.characterTable.size);
   for(int i=0; i<G.characterTable.size; i++)
   { for(int j=0; j<G.characterTable[i].size; j++)
-    { data["characters"][i][j] = G.characterTable[i][j].DoubleValue();
+    { data["characters"][i][j] = G.characterTable[i][j].GetDoubleValue();
     }
   }
   if(filename)

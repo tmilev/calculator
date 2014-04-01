@@ -259,13 +259,13 @@ bool CalculatorFunctionsBinaryOps::innerDivideDoubleByDouble(Calculator& theComm
   { if (!input[1].IsOfType(&leftR))
       return false;
     else
-      leftD=leftR.DoubleValue();
+      leftD=leftR.GetDoubleValue();
   }
   if (!input[2].IsOfType(&rightD))
   { if (!input[2].IsOfType(&rightR))
       return false;
     else
-      rightD=rightR.DoubleValue();
+      rightD=rightR.GetDoubleValue();
   }
   if (rightD==0)
     return output.SetError("Division by zero.", theCommands);
@@ -827,11 +827,11 @@ bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator
   Rational base, exp;
   double baseDouble, expDouble;
   if(input[1].IsOfType(&base))
-    baseDouble=base.DoubleValue();
+    baseDouble=base.GetDoubleValue();
   else if (!input[1].IsOfType(&baseDouble))
     return false;
   if(input[2].IsOfType(&exp))
-    expDouble=exp.DoubleValue();
+    expDouble=exp.GetDoubleValue();
   else if (!input[2].IsOfType(&expDouble))
     return false;
   if (baseDouble<0)
@@ -860,11 +860,11 @@ bool CalculatorFunctionsBinaryOps::innerMultiplyDoubleOrRatByDoubleOrRat(Calcula
   Rational leftR, rightR;
   double leftD, rightD;
   if(input[1].IsOfType(&leftR))
-    leftD=leftR.DoubleValue();
+    leftD=leftR.GetDoubleValue();
   else if (!input[1].IsOfType(&leftD))
     return false;
   if(input[2].IsOfType(&rightR))
-    rightD=rightR.DoubleValue();
+    rightD=rightR.GetDoubleValue();
   else if (!input[2].IsOfType(&rightD))
     return false;
   return output.AssignValue(leftD*rightD, theCommands);
@@ -879,11 +879,11 @@ bool CalculatorFunctionsBinaryOps::innerAddDoubleOrRatToDoubleOrRat(Calculator& 
   Rational leftR, rightR;
   double leftD, rightD;
   if(input[1].IsOfType(&leftR))
-    leftD=leftR.DoubleValue();
+    leftD=leftR.GetDoubleValue();
   else if (!input[1].IsOfType(&leftD))
     return false;
   if(input[2].IsOfType(&rightR))
-    rightD=rightR.DoubleValue();
+    rightD=rightR.GetDoubleValue();
   else if (!input[2].IsOfType(&rightD))
     return false;
   return output.AssignValue(leftD+rightD, theCommands);

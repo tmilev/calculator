@@ -653,7 +653,7 @@ public:
     double result=0;
     for (int i=0; i<this->GetDim(); i++)
       for (int j=0; j<this->GetDim(); j++)
-        result+=this->CartanSymmetric.elements[i][j].DoubleValue()*r1[i]*r2[j];
+        result+=this->CartanSymmetric.elements[i][j].GetDoubleValue()*r1[i]*r2[j];
     return result;
   }
   template <class leftType, class rightType>

@@ -1125,8 +1125,8 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
     }
     return false;
   }
-  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.GetVectorRational().SumCoords().DoubleValue()+1;
-//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().DoubleValue();
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().GetDoubleValue();
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;
@@ -1511,8 +1511,8 @@ bool SubgroupWeylGroupOLD::GetAlLDominantWeightsHWFDIM
   basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeight(highestWeightTrue);
   Vector<coefficient> highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
-  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.GetVectorRational().SumCoords().DoubleValue()+1;
-//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().DoubleValue();
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.GetVectorRational().SumCoords().GetDoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoords().GetDoubleValue();
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<Vector<coefficient> > > outputWeightsByHeight;

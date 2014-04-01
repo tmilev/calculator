@@ -2926,8 +2926,8 @@ public:
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
 
-
-  std::string inputPatH;
+  std::string executablePath;
+  std::string executableName;
   std::string inputDisplayPath;
   std::string IPAdressCaller;
 

@@ -75,7 +75,8 @@ void CallSystemWrapper(const std::string& theCommand)
 }
 
 void getPath(char* path, std::string& output)
-{ if (path==0) return;
+{ if (path==0)
+    return;
   int length=0;
   output= path;
   while (output[length]!=0 && length<150)

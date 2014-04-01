@@ -35,6 +35,27 @@ int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
   InitializeGlobalObjects();
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
+  //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
+  onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
+  if (argc>=1)
+  { getPath(argv[0], onePredefinedCopyOfGlobalVariables.executablePath);
+  //    stOutput << "input path: " << inputPatH << "\n\n";
+    bool found=false;
+    for (int j=onePredefinedCopyOfGlobalVariables.executablePath.size()-2; j>=0; j--)
+    { if (onePredefinedCopyOfGlobalVariables.executablePath[j]=='/')
+      { if (found)
+          break;
+        onePredefinedCopyOfGlobalVariables.inputDisplayPath="";
+        found=true;
+      }
+      if (found)
+        onePredefinedCopyOfGlobalVariables.inputDisplayPath.push_back(onePredefinedCopyOfGlobalVariables.executablePath[j]);
+    }
+    if (found)
+      for (unsigned j=0; j<onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()/2; j++)
+        MathRoutines::swap(onePredefinedCopyOfGlobalVariables.inputDisplayPath[j], onePredefinedCopyOfGlobalVariables.inputDisplayPath[onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()-1-j]);
+  }
   if (argc==2)
   { std::string tempArgument=argv[1];
     if (tempArgument=="server")
@@ -43,33 +64,7 @@ int main(int argc, char **argv)
         return 0;
       }
   }
-
   stOutput << "Content-Type: text/html\n\n";
-  //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
-  onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
-  if (argc>=1)
-  { getPath(argv[0], onePredefinedCopyOfGlobalVariables.inputPatH);
-  //    stOutput << "input path: " << inputPatH << "\n\n";
-    bool found=false;
-    for (int j=onePredefinedCopyOfGlobalVariables.inputPatH.size()-2; j>=0; j--)
-    { if (onePredefinedCopyOfGlobalVariables.inputPatH[j]=='/')
-      { if (found)
-          break;
-        onePredefinedCopyOfGlobalVariables.inputDisplayPath="";
-        found=true;
-      }
-      if (found)
-        onePredefinedCopyOfGlobalVariables.inputDisplayPath.push_back(onePredefinedCopyOfGlobalVariables.inputPatH[j]);
-    }
-    if (found)
-      for (unsigned j=0; j<onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()/2; j++)
-        MathRoutines::swap(onePredefinedCopyOfGlobalVariables.inputDisplayPath[j], onePredefinedCopyOfGlobalVariables.inputDisplayPath[onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()-1-j]);
-  //    stOutput << "<br>input display path: " << inputDisplayPath;
-    std::string::size_type foundExperimental=onePredefinedCopyOfGlobalVariables.inputDisplayPath.find("experimental");
-    if (foundExperimental!=std::string::npos)
-      stOutput << "<b>This is an entirely experimental version of the calculator. </b>\n";
-  }
   //  stOutput << "input path: " << inputDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1)

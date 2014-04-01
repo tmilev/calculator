@@ -821,11 +821,11 @@ bool AlgebraicNumber::EvaluatesToDouble(double* outputWhichDouble)const
     *outputWhichDouble=0;
   Selection currentRadicalSelection;
   double currentMultiplicand;
-  stOutput << "<br>Radicals: " << this->owner->theQuadraticRadicals.ToString();
+//  stOutput << "<br>Radicals: " << this->owner->theQuadraticRadicals.ToString();
   for (int i=0; i<this->theElT.size(); i++)
   { this->owner->GetRadicalSelectionFromIndex(this->theElT[i].theIndex, currentRadicalSelection);
-    stOutput << "<br>Current rad sel: " << currentRadicalSelection.ToString() << " index: "
-    << this->theElT[i].theIndex << " coeff: " << this->theElT.theCoeffs[i];
+  //  stOutput << "<br>Current rad sel: " << currentRadicalSelection.ToString() << " index: "
+  //  << this->theElT[i].theIndex << " coeff: " << this->theElT.theCoeffs[i];
     if (outputWhichDouble!=0)
       currentMultiplicand=this->theElT.theCoeffs[i].GetDoubleValue();
     for (int j=0; j<currentRadicalSelection.CardinalitySelection; j++)

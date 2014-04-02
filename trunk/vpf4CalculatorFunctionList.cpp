@@ -22,6 +22,14 @@ void Calculator::initPredefinedInnerFunctions()
   ("LispifyFull", CalculatorFunctionsGeneral::innerLispifyFull, "",
    "Shows the complete internal tree structure of an expression (replacing the expression with a string).",
    "LispifyFull( e^x)");
+  this->AddOperationInnerHandler
+  ("ToString", CalculatorFunctionsGeneral::innerQuoteToString, "",
+   "Transforms an arbitrary expression to its string representation.",
+   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
+  this->AddOperationInnerHandler
+  ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
+   "Same as ToString function, but cannot be executed directly because of the special quotes syntax.",
+   "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
 
   this->AddOperationInnerHandler
   ("MakeMakefile", CalculatorFunctionsGeneral::innerMakeMakeFile, "",

@@ -9,6 +9,8 @@ static ProjectInformationInstance ProjectInfoVpf6_2Header(__FILE__, "Heder, calc
 class CalculatorFunctionsGeneral
 {
 public:
+  static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCasimirWRTlevi(Calculator& theCommands, const Expression& input, Expression& output);

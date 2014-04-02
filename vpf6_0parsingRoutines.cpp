@@ -176,6 +176,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("Integer");
   this->controlSequences.AddOnTop(",");
   this->controlSequences.AddOnTop(".");
+  this->controlSequences.AddOnTop("\"");
   this->controlSequences.AddOnTop("if");
   this->controlSequences.AddOnTop("\\frac");
   this->controlSequences.AddOnTop("\\cdot");
@@ -514,12 +515,16 @@ void Calculator::ParseFillDictionary(const std::string& input)
   char LookAheadChar;
   SyntacticElement currentElement;
   int currentDigit;
+  bool inQuotes=false;
   for (unsigned i=0; i<input.size(); i++)
   { current.push_back(input[i]);
     if (i+1<input.size())
       LookAheadChar=input[i+1];
     else
-      LookAheadChar=' ';
+    { LookAheadChar=' ';
+      if (inQuotes)
+        LookAheadChar='"';
+    }
     if (current=="\n")
       current=" ";
     if (current=="~")
@@ -528,23 +533,31 @@ void Calculator::ParseFillDictionary(const std::string& input)
     if (MathRoutines::isADigit(LookAheadChar))
       if (current[current.size()-1]=='\\')
         shouldSplit=true;
-    if (shouldSplit)
-    { if (this->controlSequences.Contains(current))
-      { currentElement.controlIndex=this->controlSequences.GetIndex(current);
-        currentElement.theData.reset(*this);
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else if (MathRoutines::isADigit(current, &currentDigit))
-      { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
-        currentElement.controlIndex=this->conInteger();
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else
-      { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
-        currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
-        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-       // stOutput << "<br>Adding syntactic element " << currentElement.ToString(*this);
-      }
-      current="";
+    if (inQuotes)
+      shouldSplit=(LookAheadChar=='"');
+    if (current=="\"")
+    { inQuotes=!inQuotes;
+      shouldSplit=true;
     }
+    //stOutput << "<br>in quotes: "<< inQuotes << " current: " << current << " shouldsplit: " << shouldSplit;
+
+    if (!shouldSplit)
+      continue;
+    if (this->controlSequences.Contains(current))
+    { currentElement.controlIndex=this->controlSequences.GetIndex(current);
+      currentElement.theData.reset(*this);
+      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+    } else if (MathRoutines::isADigit(current, &currentDigit))
+    { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
+      currentElement.controlIndex=this->conInteger();
+      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+    } else
+    { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
+      currentElement.theData.MakeAtom(this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
+      (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+    // stOutput << "<br>Adding syntactic element " << currentElement.ToString(*this);
+    }
+    current="";
   }
   currentElement.theData.reset(*this);
   currentElement.controlIndex=this->conEndProgram();

@@ -2225,6 +2225,8 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
     out << (*this)[1].ToString(theFormat) << ":=:" << (*this)[2].ToString(theFormat);
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opQuote(),2))
+    out << "\"" << (*this)[1].ToString(theFormat) << "\"";
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))

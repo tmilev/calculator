@@ -7,6 +7,7 @@
 #include "vpfImplementationHeader2Math15_UniversalEnveloping.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 #include "vpfImplementationHeader2Math6_ModulesSSLieAlgebras.h"
+#include "vpfHeader5Crypto.h"
 
 ProjectInformationInstance ProjectInfoVpf6_3cpp(__FILE__, "Calculator built-in functions. ");
 
@@ -108,7 +109,34 @@ bool CalculatorFunctionsGeneral::innerGenerateVectorSpaceClosedWRTLieBracket(Cal
         out << CGI::GetMathSpanPure(theOps[i].ToString(&theFormat));
     }
   }
+  return output.AssignValue(out.str(), theCommands);
+}
 
+bool CalculatorFunctionsGeneral::innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCharToBase64");
+  if (!input.IsOfType<std::string>())
+    return false;
+  List<unsigned char> theBitStream;
+  const std::string& inputString=input.GetValue<std::string>();
+  theBitStream.SetSize(inputString.size());
+  for (unsigned i =0; i<inputString.size(); i++)
+    theBitStream[i]=inputString[i];
+  return output.AssignValue(Crypto::CharsToBase64String(theBitStream), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerBase64ToCharSequence");
+  if (!input.IsOfType<std::string>())
+    return false;
+  List<unsigned char> theBitStream;
+  if (!Crypto::StringBase64ToBitStream(input.GetValue<std::string>(), theBitStream))
+  { theCommands.Comments << "Failed to convert " << input.GetValue<std::string>() << " to base 64";
+    return false;
+  }
+  std::stringstream out;
+  out << "Original string, converted to bitstream and back: " << Crypto::CharsToBase64String(theBitStream);
+  if (out.str()!=input.GetValue<std::string>())
+    out << "<br><b>Oh no, the input is not the same as the output!</b>";
   return output.AssignValue(out.str(), theCommands);
 }
 

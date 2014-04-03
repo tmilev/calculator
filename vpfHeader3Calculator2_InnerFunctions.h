@@ -10,6 +10,8 @@ class CalculatorFunctionsGeneral
 {
 public:
   static bool innerQuoteToString(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerBase64ToCharToBase64Test(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCharToBase64(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerGenerateVectorSpaceClosedWRTLieBracket(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerFourierTransformEWA(Calculator& theCommands, const Expression& input, Expression& output);

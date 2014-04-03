@@ -96,6 +96,7 @@
 		<Unit filename="vpfHeader3Calculator2_InnerFunctions.h" />
 		<Unit filename="vpfHeader3Calculator3_WeylGroupCharacters.h" />
 		<Unit filename="vpfHeader4SystemFunctionsGlobalObjects.h" />
+		<Unit filename="vpfHeader5Crypto.h" />
 		<Unit filename="vpfImplementationHeader2Math051_PolynomialComputations_Basic.h" />
 		<Unit filename="vpfImplementationHeader2Math052_PolynomialComputations_Advanced.h" />
 		<Unit filename="vpfImplementationHeader2Math15_UniversalEnveloping.h" />

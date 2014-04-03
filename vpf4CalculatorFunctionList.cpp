@@ -30,6 +30,22 @@ void Calculator::initPredefinedInnerFunctions()
   ("\"", CalculatorFunctionsGeneral::innerQuoteToString, "",
    "Same as ToString function, but cannot be executed directly because of the special quotes syntax.",
    "ToString( e^x); \n \"e^x\";\"The quick brown fox jumps over the lazy dog.\"");
+  this->AddOperationInnerHandler
+  ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
+   "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
+   "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")");
+  this->AddOperationInnerHandler
+  ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
+   "Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be \
+   system/compiler dependent. I believe that the character to bit stream conversion should be standard for the standard letters in the alphabet.\
+   Fancy UTF8 will probably be not read correctly from the CGI input, and furthermore will not be converted in a standard fashion to bit stream.\
+   The examples below are taken from Wikipedia. ",
+   "CharToBitStreamToBase64(\"pleasure.\");\
+    CharToBitStreamToBase64(\"leasure.\");\
+    CharToBitStreamToBase64(\"easure.\");\
+    CharToBitStreamToBase64(\"asure.\");\
+    CharToBitStreamToBase64(\"sure.\");\
+   ");
 
   this->AddOperationInnerHandler
   ("MakeMakefile", CalculatorFunctionsGeneral::innerMakeMakeFile, "",

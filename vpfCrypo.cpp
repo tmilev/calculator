@@ -194,7 +194,7 @@ std::string Crypto::CharsToBase64String(const List<unsigned char>& input)
   for (int i =0; i<input.size; i++)
   { theStack*=256;
     theStack+=input[i];
-    numBitsInTheStack++;
+    numBitsInTheStack+=8;
     if (numBitsInTheStack==8)
     { result.push_back(Crypto::GetCharFrom6bit(theStack/4));
       numBitsInTheStack=2;

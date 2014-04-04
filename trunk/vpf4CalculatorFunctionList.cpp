@@ -40,11 +40,11 @@ void Calculator::initPredefinedInnerFunctions()
    system/compiler dependent. I believe that the character to bit stream conversion should be standard for the standard letters in the alphabet.\
    Fancy UTF8 will probably be not read correctly from the CGI input, and furthermore will not be converted in a standard fashion to bit stream.\
    The examples below are taken from Wikipedia. ",
-   "CharToBitStreamToBase64(\"pleasure.\");\
-    CharToBitStreamToBase64(\"leasure.\");\
-    CharToBitStreamToBase64(\"easure.\");\
-    CharToBitStreamToBase64(\"asure.\");\
-    CharToBitStreamToBase64(\"sure.\");\
+   "CharToBase64(\"pleasure.\");\
+    CharToBase64(\"leasure.\");\
+    CharToBase64(\"easure.\");\
+    CharToBase64(\"asure.\");\
+    CharToBase64(\"sure.\");\
    ");
 
   this->AddOperationInnerHandler

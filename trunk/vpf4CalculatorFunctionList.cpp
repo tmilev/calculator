@@ -33,7 +33,8 @@ void Calculator::initPredefinedInnerFunctions()
   this->AddOperationInnerHandler
   ("TestBase64", CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test, "",
    "Test function: converts a base64 string to bitstream and back to base64. Output must be identical to input. ",
-   "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")");
+   "TestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog=\");\
+   \nTestBase64(\"TheQuickBrownFoxJumpsOverTheLazyDog\")");
   this->AddOperationInnerHandler
   ("CharToBase64", CalculatorFunctionsGeneral::innerCharToBase64, "",
    "Converts characters to bit stream and the bitstream to base64. The character to bit stream conversion is not fixed at the moment and may be \

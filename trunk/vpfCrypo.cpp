@@ -145,7 +145,7 @@ bool Crypto::Get6bitFromChar(char input, uint32_t& output)
   return false;
 }
 
-bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned char>& output)
+bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned char>& output, std::stringstream* comments)
 { MacroRegisterFunctionWithName("Crypto::StringBase64ToBitStream");
   output.ReservE((3*input.size())/4+1);
   output.SetSize(0);
@@ -154,14 +154,18 @@ bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned cha
   for (unsigned i=0; i<input.size(); i++)
   { if (!Crypto::Get6bitFromChar(input[i], sixBitDigit))
     { if (input[i]!='=')
-      { stOutput << "Error: input " << input << " had characters outside of base64";
+      { if (comments!=0)
+          *comments << "<hr>Error: the input string: <br>\n" << input << "\n<br>had characters outside of base64";
         return false;
       }
-    } else
-    { theStack*=64;
-      theStack+=sixBitDigit;
+      theStack=0;
       numBitsInStack+=6;
+      numBitsInStack%=8;
+      continue;
     }
+    theStack*=64;
+    theStack+=sixBitDigit;
+    numBitsInStack+=6;
     if (numBitsInStack==12)
     { output.AddOnTop(theStack/16);
       numBitsInStack=4;
@@ -178,9 +182,10 @@ bool Crypto::StringBase64ToBitStream(const std::string& input, List<unsigned cha
       theStack=theStack%4;
     }
   }
-  if (numBitsInStack!=0)
-  { stOutput << "Error: input " << input << " corresponds modulo 8 to " << numBitsInStack << " bits. ";
-    return false;
+//  stOutput << "<br>output is: " << output << ", Converted back: " << Crypto::CharsToBase64String(output);
+  if (comments!=0 && numBitsInStack!=0)
+  { *comments << "<br>Input " << input << " corresponds modulo 8 to " << numBitsInStack
+    << " bits. Perhaps the input was not padded correctly with = signs.";
   }
   return true;
 }

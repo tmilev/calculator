@@ -129,14 +129,14 @@ bool CalculatorFunctionsGeneral::innerBase64ToCharToBase64Test(Calculator& theCo
   if (!input.IsOfType<std::string>())
     return false;
   List<unsigned char> theBitStream;
-  if (!Crypto::StringBase64ToBitStream(input.GetValue<std::string>(), theBitStream))
-  { theCommands.Comments << "Failed to convert " << input.GetValue<std::string>() << " to base 64";
+  if (!Crypto::StringBase64ToBitStream(input.GetValue<std::string>(), theBitStream, &theCommands.Comments))
     return false;
-  }
   std::stringstream out;
-  out << "Original string, converted to bitstream and back: " << Crypto::CharsToBase64String(theBitStream);
-  if (out.str()!=input.GetValue<std::string>())
-    out << "<br><b>Oh no, the input is not the same as the output!</b>";
+  std::string theConvertedBack=Crypto::CharsToBase64String(theBitStream);
+  out << "Original string: " << input.GetValue<std::string>()
+  << "<br>Converted to bitstream and back: " << theConvertedBack;
+  if (theConvertedBack!=input.GetValue<std::string>())
+    out << "<br><b>The input is not the same as the output!</b>";
   return output.AssignValue(out.str(), theCommands);
 }
 

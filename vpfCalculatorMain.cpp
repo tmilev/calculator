@@ -1,35 +1,18 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
+#include "vpfHeader6WebServer.h"
 
 ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculator web interface.");
 
 extern void static_html4(std::stringstream& output);
 extern void static_html3(std::stringstream& output);
-extern int serverMain();
+extern int main_HttpServer();
+int main_apache_client();
+int main_command_input(int argc, char **argv);
+int main_client();
+int main_standardOutputApacheAndClient();
 
-int main_command_input(int argc, char **argv)
-{ MacroRegisterFunctionWithName("main_command_input");
-  std::stringstream theInputStream;
-  theParser.theGlobalVariableS->SetStandardStringOutput(&CGI::MakeStdCoutReport);
-  for (int i=1; i<argc; i++)
-  { theInputStream << argv[i];
-    if (i<argc-1)
-      theInputStream << " ";
-  }
-  //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
-  //  return 0;
-  theParser.inputStringRawestOfTheRaw =theInputStream.str();
-  PredefinedStrings(theParser.inputStringRawestOfTheRaw);
-  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
-  std::fstream outputFile;
-  XML::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
-  stOutput << theParser.outputString;
-  outputFile << theParser.outputString;
-  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
-  return 0;
-}
 
 int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
@@ -56,37 +39,72 @@ int main(int argc, char **argv)
       for (unsigned j=0; j<onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()/2; j++)
         MathRoutines::swap(onePredefinedCopyOfGlobalVariables.inputDisplayPath[j], onePredefinedCopyOfGlobalVariables.inputDisplayPath[onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()-1-j]);
   }
+  bool IwasstartedAsServer=false;
   if (argc==2)
   { std::string tempArgument=argv[1];
-    if (tempArgument=="server")
-      if (!serverMain())
+    IwasstartedAsServer=(tempArgument=="server");
+    if (IwasstartedAsServer)
+      if (!main_HttpServer())
       { stOutput << "Server exit normal. ";
         return 0;
       }
   }
-  stOutput << "Content-Type: text/html\n\n";
   //  stOutput << "input path: " << inputDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
-	if (argc>1)
+	if (argc>1 && !IwasstartedAsServer)
     return main_command_input(argc, argv);
-  else
-    std::cin >> theParser.inputStringRawestOfTheRaw;
-  ComputationComplete=false;
+  if (argc==1 && !IwasstartedAsServer)
+    return main_apache_client();
+  return main_client();
+}
+
+extern Socket ClientSocket;
+int main_client()
+{ MacroRegisterFunctionWithName("main_client");
+  stOutput << "HTTP/1.1 200 OK\n";
+  stOutput << "Content-Type: text/html\n\n";
+  stOutput << "Original message: " << ClientSocket.lastMessageReceived.ToString();
+  return main_standardOutputApacheAndClient();
+}
+
+int main_command_input(int argc, char **argv)
+{ MacroRegisterFunctionWithName("main_command_input");
+  std::stringstream theInputStream;
+  theParser.theGlobalVariableS->SetStandardStringOutput(&CGI::MakeStdCoutReport);
+  for (int i=1; i<argc; i++)
+  { theInputStream << argv[i];
+    if (i<argc-1)
+      theInputStream << " ";
+  }
+  //  stOutput << "\n\n\n" << theParser.DisplayPathServerBase << "\n\n";
+  //  return 0;
+  theParser.inputStringRawestOfTheRaw =theInputStream.str();
+  PredefinedStrings(theParser.inputStringRawestOfTheRaw);
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::fstream outputFile;
+  XML::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
+  stOutput << theParser.outputString;
+  outputFile << theParser.outputString;
+  stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";
+  return 0;
+}
+
+int main_apache_client()
+{ MacroRegisterFunctionWithName("main_apache_client");
+  stOutput << "Content-Type: text/html\n\n";
+  std::cin >> theParser.inputStringRawestOfTheRaw;
 	if (theParser.inputStringRawestOfTheRaw=="")
-	{
-#ifdef WIN32
-    char buffer[2000];
-		size_t tempI=1500;
-		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
-		theParser.inputStringRawestOfTheRaw=buffer;
-#else
-		theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
-  //		inputString=::getenv("QUERY_STRING");
-#endif
+	{ theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
     IPAdressCaller=getenv("REMOTE_ADDR");
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
+  return main_standardOutputApacheAndClient();
+}
+
+int main_standardOutputApacheAndClient()
+{ MacroRegisterFunctionWithName("main_standardOutputApacheAndClient");
+  ComputationComplete=false;
   stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
   stOutput << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie();\">\n";

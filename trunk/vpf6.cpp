@@ -2103,7 +2103,9 @@ bool Expression::ToStringData(std::string& output, FormatExpressions* theFormat)
     //stOutput << " converting to string : " << this->GetValue<double>();
     result=true;
   } else if (this->IsOfType<AlgebraicNumber>())
-  { out << this->GetValue<AlgebraicNumber>().ToString();
+  { if (this->theBoss->flagUseFracInRationalLaTeX)
+      contextFormat.GetElement().flagUseFrac=true;
+    out << this->GetValue<AlgebraicNumber>().ToString(&contextFormat.GetElement());
     result=true;
   } else if (this->IsOfType<LittelmannPath>())
   { out << this->GetValue<LittelmannPath>().ToString();

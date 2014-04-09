@@ -64,6 +64,12 @@ int main_client()
   stOutput << "HTTP/1.1 200 OK\n";
   stOutput << "Content-Type: text/html\n\n";
   stOutput << "Original message: " << ClientSocket.lastMessageReceived.ToString();
+  if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeGet ||
+      ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypePost
+      )
+    theParser.inputStringRawestOfTheRaw=ClientSocket.lastMessageReceived.mainArgument;
+//  if (ClientSocket.lastMessageReceived.requestType==ClientMessage::requestTypeGet)
+//    asd;
   return main_standardOutputApacheAndClient();
 }
 
@@ -111,6 +117,7 @@ int main_standardOutputApacheAndClient()
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  stOutput << "<hr>Raw raw raw input: <br>" << theParser.inputStringRawestOfTheRaw ;
   std::string civilizedInput;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];

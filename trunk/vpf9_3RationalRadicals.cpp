@@ -993,11 +993,13 @@ std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
 { if (this->owner==0)
   { if (this->theElT.IsEqualToZero())
       return "0";
-    return this->theElT.theCoeffs[0].ToString();
+    return this->theElT.theCoeffs[0].ToString(theFormat);
   }
   std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.vectorSpaceEiBasisNames=this->owner->DisplayNamesBasisElements;
+  if (theFormat!=0)
+    tempFormat.flagUseFrac= theFormat->flagUseFrac;
   VectorSparse<Rational> theAdditiveVector;
   this->owner->GetAdditionTo(*this, theAdditiveVector);
   out << theAdditiveVector.ToString(&tempFormat); //<< "~ in~ the~ field~ " << this->owner->ToString();

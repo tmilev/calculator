@@ -77,11 +77,8 @@ void CallSystemWrapper(const std::string& theCommand)
 void getPath(char* path, std::string& output)
 { if (path==0)
     return;
-  int length=0;
   output= path;
-  while (output[length]!=0 && length<150)
-    length++;
-  for (int i=length-1; i>=0; i--)
+  for (int i=output.size()-1; i>=0; i--)
   {
 #ifdef WIN32
 	if (output[i]=='\\' )

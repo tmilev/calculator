@@ -25,6 +25,7 @@ public:
   enum{ requestTypeNone, requestTypeGet, requestTypePost};
   std::string ToString()const;
   void ParseMessage();
+  void ExtractArgumentFromAddress();
   void resetEverythingExceptMessageString();
 };
 

@@ -45,6 +45,13 @@ void ClientMessage::resetEverythingExceptMessageString()
   this->requestType=this->requestTypeNone;
 }
 
+void ClientMessage::ExtractArgumentFromAddress()
+{ MacroRegisterFunctionWithName("ClientMessage::ExtractArgumentFromAddress");
+//  std::string messageFirstPart=  messageFirstPart.substr(0, );
+crash << crash;
+//  for (int i=0; i<this->theMessage)
+}
+
 void ClientMessage::ParseMessage()
 { MacroRegisterFunctionWithName("ClientMessage::ParseMessage");
   this->resetEverythingExceptMessageString();
@@ -66,15 +73,17 @@ void ClientMessage::ParseMessage()
     { this->requestType=this->requestTypeGet;
       i++;
       if (i<this->theStrings.size)
-        this->mainAddress=this->theStrings[i];
+      { this->mainAddress=this->theStrings[i];
+        this->ExtractArgumentFromAddress();
+      }
     } else if (this->theStrings[i]=="POST")
     { this->requestType=this->requestTypePost;
       i++;
       if (i<this->theStrings.size)
-        this->mainAddress=this->theStrings[i];
+      { this->mainAddress=this->theStrings[i];
+        this->mainArgument=*this->theStrings.LastObject();
+      }
     }
-  if (this->requestType==this->requestTypePost)
-    this->mainArgument=*this->theStrings.LastObject();
 }
 
 void SendStringToSocket(const std::string& stringToOutput)

@@ -22,9 +22,12 @@ void *get_in_addr(struct sockaddr *sa)
 
 std::string ClientMessage::ToString()const
 { std::stringstream out;
+  out << "<br>\n";
   if (requestType==this->requestTypeGet)
-    out << "<br>\nGET  " << this->mainArgument;
-
+    out << "GET " << this->mainAddress;
+  if (requestType==this->requestTypePost)
+    out << "POST " << this->mainAddress;
+  out << "<br>Main argument: " << this->mainArgument;
   if (this->theStrings.size>0)
   { out << "<br>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -37,6 +40,7 @@ std::string ClientMessage::ToString()const
 
 void ClientMessage::resetEverythingExceptMessageString()
 { this->mainArgument="";
+  this->mainAddress="";
   this->theStrings.SetSize(0);
   this->requestType=this->requestTypeNone;
 }
@@ -48,9 +52,11 @@ void ClientMessage::ParseMessage()
   buffer.reserve(this->theMessage.size());
   this->theStrings.SetExpectedSize(20);
   for (unsigned i =0; i<this->theMessage.size(); i++)
-    if (theMessage[i]!=' ' && theMessage[i]!='\n')
-      buffer.push_back(this->theMessage[i]);
-    else
+    if (theMessage[i]!=' ' && theMessage[i]!='\n' && theMessage[i]!='\r')
+    { buffer.push_back(this->theMessage[i]);
+      if (i==this->theMessage.size()-1)
+        this->theStrings.AddOnTop(buffer);
+    } else
       if (buffer!="")
       { this->theStrings.AddOnTop(buffer);
         buffer="";
@@ -60,13 +66,15 @@ void ClientMessage::ParseMessage()
     { this->requestType=this->requestTypeGet;
       i++;
       if (i<this->theStrings.size)
-        this->mainArgument=this->theStrings[i];
+        this->mainAddress=this->theStrings[i];
     } else if (this->theStrings[i]=="POST")
     { this->requestType=this->requestTypePost;
       i++;
       if (i<this->theStrings.size)
-        this->mainArgument=this->theStrings[i];
+        this->mainAddress=this->theStrings[i];
     }
+  if (this->requestType==this->requestTypePost)
+    this->mainArgument=*this->theStrings.LastObject();
 }
 
 void SendStringToSocket(const std::string& stringToOutput)
@@ -101,10 +109,6 @@ bool Socket::Receive()
   } else
     this->lastMessageReceived.theMessage="";
   this->lastMessageReceived.ParseMessage();
-  if (this->lastMessageReceived.requestType==this->lastMessageReceived.requestTypePost)
-  {
-
-  }
 //  std::cout << "\nReceived from client: " << this->lastMessageReceived.ToString() << "\n";
   return true;
 }
@@ -143,14 +147,10 @@ int main_HttpServer()
     break;
   }
   if (p == NULL)
-  { std::cout << "Failed to bind to port " << PORT << "\n";
-    return 2;
-  }
+    crash << "Failed to bind to port " << PORT << "\n" << crash;
   freeaddrinfo(servinfo); // all done with this structure
   if (listen(sockfd, BACKLOG) == -1)
-  { std::cout << "Listen function failed.";
-    return 1;
-  }
+    crash << "Listen function failed." << crash;
   sa.sa_handler = sigchld_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;

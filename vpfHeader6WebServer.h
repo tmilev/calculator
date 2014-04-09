@@ -16,7 +16,9 @@ class ClientMessage
 public:
   std::string theMessage;
   std::string mainArgument;
+  std::string mainAddress;
   List<std::string> theStrings;
+
 
   int requestType;
   ClientMessage():requestType(ClientMessage::requestTypeNone){}

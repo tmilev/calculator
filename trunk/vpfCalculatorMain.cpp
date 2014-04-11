@@ -20,25 +20,8 @@ int main(int argc, char **argv)
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
   //	stOutput <<  "<br>" << (int) &theGlobalVariables.callSystem ;
   ParallelComputing::cgiLimitRAMuseNumPointersInList=4000000000;
-  onePredefinedCopyOfGlobalVariables.inputDisplayPath="trunk/";
   if (argc>=1)
-  { getPath(argv[0], onePredefinedCopyOfGlobalVariables.executablePath);
-  //    stOutput << "input path: " << inputPatH << "\n\n";
-    bool found=false;
-    for (int j=onePredefinedCopyOfGlobalVariables.executablePath.size()-2; j>=0; j--)
-    { if (onePredefinedCopyOfGlobalVariables.executablePath[j]=='/')
-      { if (found)
-          break;
-        onePredefinedCopyOfGlobalVariables.inputDisplayPath="";
-        found=true;
-      }
-      if (found)
-        onePredefinedCopyOfGlobalVariables.inputDisplayPath.push_back(onePredefinedCopyOfGlobalVariables.executablePath[j]);
-    }
-    if (found)
-      for (unsigned j=0; j<onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()/2; j++)
-        MathRoutines::swap(onePredefinedCopyOfGlobalVariables.inputDisplayPath[j], onePredefinedCopyOfGlobalVariables.inputDisplayPath[onePredefinedCopyOfGlobalVariables.inputDisplayPath.size()-1-j]);
-  }
+    onePredefinedCopyOfGlobalVariables.initDefaultFolderAndFileNames(argv[0], "");
   bool IwasstartedAsServer=false;
   if (argc==2)
   { std::string tempArgument=argv[1];
@@ -49,7 +32,7 @@ int main(int argc, char **argv)
         return 0;
       }
   }
-  //  stOutput << "input path: " << inputDisplayPath << "\n\n";
+  //  stOutput << "input path: " << pathDisplayPath << "\n\n";
   theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1 && !IwasstartedAsServer)
     return main_command_input(argc, argv);
@@ -117,7 +100,12 @@ int main_standardOutputApacheAndClient()
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
   CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  stOutput << "<hr>Raw raw raw input: <br>" << theParser.inputStringRawestOfTheRaw ;
+//  for (int i=0; i<argc; i++)
+//    stOutput << "<br>argv[" << i << "]: " << argc[i];
+  stOutput << "<hr>Raw raw raw input: <br>" << theParser.inputStringRawestOfTheRaw;
+  stOutput << "<br> physical path server base: " << onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase;
+  stOutput << "<br> physical path exe: " << onePredefinedCopyOfGlobalVariables.PhysicalPathExecutable;
+
   std::string civilizedInput;
   if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
@@ -149,7 +137,7 @@ int main_standardOutputApacheAndClient()
 
   stOutput << tempStreamXX.str();
   stOutput << "<table>\n <tr valign=\"top\">\n <td>";
-  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
+  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
@@ -160,7 +148,7 @@ int main_standardOutputApacheAndClient()
   stOutput << "</textarea>\n<br>\n";
   stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
-    stOutput << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+    stOutput << "<a href=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
   stOutput << "\n</FORM>";
   stOutput << theParser.javaScriptDisplayingIndicator;
   //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;

@@ -22,12 +22,12 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   std::stringstream fileName;
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
 
-  fileName << this->PhysicalNameDefaultOutput << this->numOutputFiles;
+  fileName << this->theGlobalVariableS->PhysicalNameDefaultOutputWithPath << this->numOutputFiles;
   XML::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
   theFile << fileContent;
   theFile.flush();
   theFile.close();
-  systemCommand1 << " latex -output-directory=" << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
+  systemCommand1 << " latex -output-directory=" << this->theGlobalVariableS->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
   //stOutput << "<br>system command:<br>" << systemCommand1.str();
   this->SystemCommands.AddOnTop(systemCommand1.str());
   if (useLatexDviPSpsTopdf)
@@ -39,8 +39,9 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
-  out << "<img src=\"" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\"></img><a href=\"" << this->DisplayNameDefaultOutput
-  << this->numOutputFiles << ".png\">" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png</a>";
+  out << "<img src=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath
+  << this->numOutputFiles << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath
+  << this->numOutputFiles << ".png\">" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath << this->numOutputFiles << ".png</a>";
   this->numOutputFiles++;
   return out.str();
 }
@@ -2874,7 +2875,7 @@ std::string Function::GetString(Calculator& theBoss)
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
     if (this->theExample!="")
-      out2 << "<a href=\"" << theBoss.DisplayNameCalculator  << "? textType=Calculator&textDim=1&textInput="
+      out2 << "<a href=\"" << theBoss.theGlobalVariableS->DisplayNameExecutableWithPath  << "? textType=Calculator&textDim=1&textInput="
       << CGI::UnCivilizeStringCGI(this->theExample) << "\"> " << " Example" << "</a>" ;
   } else
     out2 << "<b>Experimental, please don't use.</b>";
@@ -3259,25 +3260,6 @@ void Calculator::InitJavaScriptDisplayIndicator()
   output << " \n";
   output << " \n";
   this->javaScriptDisplayingIndicator=output.str();
-}
-
-void Calculator::initDefaultFolderAndFileNames(const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
-{ this->PhysicalPathServerBase = inputPathBinaryBaseIsFolderBelow + "../";
-  this->DisplayPathServerBase = "/" + inputDisplayPathBase;
-
-  this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
-  this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
-
-  this->userLabel=scrambledIP;
-
-  this->PhysicalNameDefaultOutput = this->PhysicalPathOutputFolder + "default" + this->userLabel + "output";
-  this->DisplayNameDefaultOutputNoPath = "default" + this->userLabel + "output";
-  this->DisplayNameDefaultOutput = this->DisplayPathOutputFolder + this->DisplayNameDefaultOutputNoPath;
-
-  this->indicatorFileNamE = this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
-  this->indicatorFileNameDisplaY = this->DisplayPathOutputFolder + "indicator" + this->userLabel + ".html" ;
-  this->DisplayNameCalculator = this->DisplayPathServerBase +"cgi-bin/calculator";
-
 }
 
 bool Calculator::innerWriteGenVermaModAsDiffOperators(Calculator& theCommands, const Expression& input, Expression& output, bool AllGenerators)

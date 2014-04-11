@@ -2926,11 +2926,26 @@ public:
   FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
 
-  std::string executablePath;
-  std::string executableName;
-  std::string inputDisplayPath;
-  std::string IPAdressCaller;
+  std::string PhysicalPathServerBase;
+  std::string PhysicalPathExecutable;
+  std::string PhysicalPathOutputFolder;
+  std::string PhysicalNameDefaultOutputNoPatH;
+  std::string PhysicalNameDefaultOutputWithPath;
+  std::string PhysicalPathIndicatorWithPath;
 
+  std::string DisplayPathServerBase;
+  std::string DisplayPathExecutable;
+  std::string DisplayPathOutputFolder;
+  std::string DisplayNameDefaultOutputNoPath;
+  std::string DisplayNameDefaultOutputWithPath;
+  std::string DisplayNameExecutableNoPath;
+  std::string DisplayNameExecutableWithPath;
+  std::string DisplayIndicatorWithPath;
+  std::string DisplayNameCalculatorWithPath;
+
+
+  std::string IPAdressCaller;
+  std::string defaultUserLabel;
   //buffers:
   MemorySaving<Selection> selWallSelection;
   MemorySaving<Selection> selComputeNormalExcludingIndex;
@@ -2979,6 +2994,9 @@ public:
       return this->getElapsedTimePrivate();
     return -1;
   }
+  void initDefaultFolderAndFileNames
+(const std::string& inputPathExecutableServerBaseIsFolderBelow, const std::string& scrambledIP);
+
   void operator=(const GlobalVariables& other)
   { this->StandardStringOutputFunction=other.StandardStringOutputFunction;
     this->theDrawingVariables=other.theDrawingVariables;

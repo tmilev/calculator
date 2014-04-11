@@ -73,23 +73,3 @@ void* RunTimerVoidPtr(void* ptr)
 void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
-
-void getPath(char* path, std::string& output)
-{ if (path==0)
-    return;
-  output= path;
-  for (int i=output.size()-1; i>=0; i--)
-  {
-#ifdef WIN32
-	if (output[i]=='\\' )
-    { output.resize(i+1);
-      return;
-    }
-#else
-    if (output[i]=='/')
-    { output.resize(i+1);
-      return;
-    }
-#endif
-  }
-}

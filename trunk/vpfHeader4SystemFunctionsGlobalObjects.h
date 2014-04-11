@@ -23,7 +23,6 @@ extern void CallSystemWrapper(const std::string& theCommand);
 extern bool ComputationComplete;
 extern std::string GetSelectHTMLStringTEmp(List<std::string>& optionsType, List<std::string>& optionsRank, std::string& selectedType, std::string& selectedRank, bool usePreamble);
 extern void PredefinedStrings(std::string& inputOutputCivilizedString);
-extern void getPath(char* path, std::string& output);
 extern void ignoreUserAbortSignal();
 extern bool ForkWrapper(int&);
 

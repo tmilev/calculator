@@ -32,7 +32,6 @@ std::string ClientMessage::ToString()const
   { out << "<br>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
       out << "<br>" << this->theStrings[i];
-
   }
   out << "\n<br>\nFull client message:\n" << this->theMessage;
   return out.str();
@@ -47,9 +46,14 @@ void ClientMessage::resetEverythingExceptMessageString()
 
 void ClientMessage::ExtractArgumentFromAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractArgumentFromAddress");
-//  std::string messageFirstPart=  messageFirstPart.substr(0, );
-crash << crash;
-//  for (int i=0; i<this->theMessage)
+/*  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.pathDisplayPath.size())
+    return;
+  if (this->mainAddress[onePredefinedCopyOfGlobalVariables.pathDisplayPath.size()]=='?')
+    stOutput << "the question mark is where it should be.";
+  else
+    stOutput << "the question mark is not in the right place!";
+  this->mainArgument =
+  this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.pathDisplayPath.size()+1, std::string::npos);*/
 }
 
 void ClientMessage::ParseMessage()

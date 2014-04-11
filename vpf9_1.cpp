@@ -70,6 +70,29 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   return out.str();
 }
 
+void GlobalVariables::initDefaultFolderAndFileNames
+(const std::string& inputPathExecutableServerBaseIsFolderBelow,
+ const std::string& scrambledIP)
+{ this->PhysicalPathServerBase = inputPathExecutableServerBaseIsFolderBelow + "../";
+  std::string inputDisplayPathBase;
+  this->DisplayPathServerBase = "/" + inputDisplayPathBase;
+
+  this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
+  this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
+
+  this->defaultUserLabel=scrambledIP;
+  this->PhysicalNameDefaultOutputNoPatH="default" + this->defaultUserLabel + "output";
+  this->PhysicalNameDefaultOutputWithPath = this->PhysicalPathOutputFolder + this->PhysicalNameDefaultOutputNoPatH ;
+  this->DisplayNameDefaultOutputNoPath = "default" + this->defaultUserLabel + "output";
+  this->DisplayNameDefaultOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameDefaultOutputNoPath;
+
+  this->PhysicalPathIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
+  this->DisplayIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
+  this->DisplayNameCalculatorWithPath = this->DisplayPathServerBase +"cgi-bin/calculator";
+
+}
+
+
 template<>
 typename List<Weight<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<Weight<RationalFunctionOld> >()

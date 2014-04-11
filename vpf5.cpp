@@ -173,17 +173,19 @@ bool Calculator::fAnimateLittelmannPaths(Calculator& theCommands, const Expressi
 
 void Calculator::GetOutputFolders(const DynkinType& theType, std::string& outputFolderPhysical, std::string& outputFolderDisplay, FormatExpressions& outputFormat)
 { std::stringstream outMainPath, outMainDisplayPath;
-  outMainPath << this->PhysicalPathOutputFolder << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
+  outMainPath << this->theGlobalVariableS->PhysicalPathOutputFolder
+  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   outputFolderPhysical=outMainPath.str();
-  outMainDisplayPath << this->DisplayPathOutputFolder <<  CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
+  outMainDisplayPath << this->theGlobalVariableS->DisplayPathOutputFolder
+  << CGI::CleanUpForFileNameUse(theType.ToString()) << "/";
   outputFolderDisplay=outMainDisplayPath.str();
   outputFormat.flagUseHTML=true;
   outputFormat.flagUseLatex=false;
   outputFormat.flagUsePNG=true;
-  outputFormat.PathDisplayNameCalculator=this->DisplayNameCalculator;
+  outputFormat.PathDisplayNameCalculator=this->theGlobalVariableS->DisplayNameExecutableNoPath;
   outputFormat.PathPhysicalOutputFolder=outputFolderPhysical;
   outputFormat.PathDisplayOutputFolder=outputFolderDisplay;
-  outputFormat.PathDisplayServerBaseFolder=this->DisplayPathServerBase;
+  outputFormat.PathDisplayServerBaseFolder=this->theGlobalVariableS->DisplayPathServerBase;
 }
 
 bool Calculator::innerCasimir(Calculator& theCommands, const Expression& input, Expression& output)
@@ -2088,7 +2090,7 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
-  theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
+  theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
   if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
   double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -2102,7 +2104,7 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
 { MacroRegisterFunctionWithName("Calculator::innerAutomatedTest");
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theCommands.theTestFileName=theCommands.PhysicalPathOutputFolder+"automatedTest.txt";
+  theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
   if (!XML::FileExists(theCommands.theTestFileName))
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
   if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))

@@ -756,7 +756,6 @@ public:
   std::string inputString;
   std::string outputString;
   std::string outputCommentsString;
-  std::string DisplayNameCalculator;
   std::string parsingLog;
   GlobalVariables* theGlobalVariableS;
   ObjectContainer theObjectContainer;
@@ -767,14 +766,7 @@ public:
   std::string javaScriptDisplayingIndicator;
   std::fstream theTestFile;
   std::string theTestFileName;
-  std::string DisplayPathServerBase;
-  std::string PhysicalPathServerBase;
   int numOutputFiles;
-  std::string DisplayPathOutputFolder;
-  std::string PhysicalPathOutputFolder;
-  std::string DisplayNameDefaultOutput;
-  std::string DisplayNameDefaultOutputNoPath;
-  std::string PhysicalNameDefaultOutput;
   std::string indicatorFileNamE;
   std::string indicatorFileNameDisplaY;
   std::string userLabel;
@@ -835,7 +827,7 @@ public:
   std::string ElementToStringSyntactic(bool usePolishForm=false);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsTopdf=false);
   std::string GetCalculatorLink(const std::string& input)
-  { return CGI::GetCalculatorLink(this->DisplayNameCalculator, input);
+  { return CGI::GetCalculatorLink(this->theGlobalVariableS->DisplayNameExecutableNoPath, input);
   }
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
@@ -1582,8 +1574,6 @@ public:
   bool isLeftSeparator(char c);
   bool isRightSeparator(char c);
   void ParseFillDictionary(const std::string& input);
-  void initDefaultFolderAndFileNames
-  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP);
   void InitJavaScriptDisplayIndicator();
 };
 

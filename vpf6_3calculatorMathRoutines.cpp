@@ -960,7 +960,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  XML::OpenFileCreateIfNotPresent(theFileStream, theCommands.PhysicalPathOutputFolder+"makefile", false, true, false);
+  XML::OpenFileCreateIfNotPresent(theFileStream, theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: Debug\n";
@@ -974,7 +974,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
   theFileStream << "-o ./Debug/calculator\n\n";
   for (int i=0; i<cppFilesNoExtension.size; i++)
     theFileStream << cppFilesNoExtension[i] << ".o: " << cppFilesNoExtension[i] << ".cpp\n\tg++ -std=c++0x -pthread -c " << cppFilesNoExtension[i] << ".cpp\n\n";
-  outHtml << "<a href=\" " << theCommands.DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
+  outHtml << "<a href=\" " << theCommands.theGlobalVariableS->DisplayPathOutputFolder << "makefile" << "\"> makefile </a>";
   return output.AssignValue(outHtml.str(), theCommands);
 }
 
@@ -2358,7 +2358,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   output=input;
   std::fstream theFile;
   std::string theFileName;
-  theFileName=theCommands.PhysicalPathOutputFolder + "FKFTcomputation.html";
+  theFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder + "FKFTcomputation.html";
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
   tempFormat.flagUseLatex=true;
@@ -2367,7 +2367,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
-  out << "<a href=\"" << theCommands.DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
+  out << "<a href=\"" << theCommands.theGlobalVariableS->DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
   return output.AssignValue(out.str(), theCommands);
 }
 
@@ -2581,8 +2581,8 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   std::stringstream out;
   std::fstream outputFile, outputFile2;
   std::string fileName, filename2;
-  fileName=theCommands.PhysicalNameDefaultOutput+"1";
-  filename2=theCommands.PhysicalNameDefaultOutput+"2";
+  fileName=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"1";
+  filename2=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"2";
   XML::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   XML::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
@@ -2608,19 +2608,19 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
     outputFile2 << "\n\\end{document}";
     out << "<hr>"
     << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
-    << theCommands.DisplayNameDefaultOutput << "1.tex\"> "
-    << theCommands.DisplayNameDefaultOutput << "1.tex</a>";
-    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
+    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.tex\"> "
+    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.tex</a>";
+    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
     << "1.png\" width=\"800\" height=\"600\">"
-    << theCommands.DisplayNameDefaultOutput << "1.png</iframe>";
+    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "1.png</iframe>";
     out << "<hr> The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
     << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
     << "<a href=\""
-    << theCommands.DisplayNameDefaultOutput
-    << "2.tex\"> " <<  theCommands.DisplayNameDefaultOutput << "2.tex</a>";
-    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
+    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
+    << "2.tex\"> " <<  theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.tex</a>";
+    out << ", <iframe src=\"" << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath
     << "2.png\" width=\"800\" height=\"600\"> "
-    << theCommands.DisplayNameDefaultOutput << "2.png</iframe>";
+    << theCommands.theGlobalVariableS->DisplayNameDefaultOutputNoPath << "2.png</iframe>";
     out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
     << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
@@ -2653,9 +2653,9 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   outputFile.close();
   outputFile2.close();
   stOutput << "<!--";
-  std::string command1="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + fileName + ".tex";
+  std::string command1="latex  -output-directory=" + theCommands.theGlobalVariableS->PhysicalPathOutputFolder + " " + fileName + ".tex";
   std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
-  std::string command3="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + filename2 + ".tex";
+  std::string command3="latex  -output-directory=" + theCommands.theGlobalVariableS->PhysicalPathOutputFolder + " " + filename2 + ".tex";
   std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
 //  stOutput << "<br>" << command1;
 //  stOutput << "<br>" << command2;

@@ -2929,18 +2929,19 @@ public:
   std::string PhysicalPathServerBase;
   std::string PhysicalPathExecutable;
   std::string PhysicalPathOutputFolder;
+  std::string PhysicalNameIndicatorWithPath;
   std::string PhysicalNameDefaultOutputNoPatH;
   std::string PhysicalNameDefaultOutputWithPath;
-  std::string PhysicalPathIndicatorWithPath;
+  std::string PhysicalNameFolderBelowExecutable;
+  std::string PhysicalNameExecutableNoPath;
 
   std::string DisplayPathServerBase;
   std::string DisplayPathExecutable;
   std::string DisplayPathOutputFolder;
   std::string DisplayNameDefaultOutputNoPath;
   std::string DisplayNameDefaultOutputWithPath;
-  std::string DisplayNameExecutableNoPath;
   std::string DisplayNameExecutableWithPath;
-  std::string DisplayIndicatorWithPath;
+  std::string DisplayNameIndicatorWithPath;
   std::string DisplayNameCalculatorWithPath;
 
 
@@ -2995,7 +2996,8 @@ public:
     return -1;
   }
   void initDefaultFolderAndFileNames
-(const std::string& inputPathExecutableServerBaseIsFolderBelow, const std::string& scrambledIP);
+(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
+ const std::string& scrambledIP);
 
   void operator=(const GlobalVariables& other)
   { this->StandardStringOutputFunction=other.StandardStringOutputFunction;
@@ -3018,6 +3020,7 @@ public:
   { if (this->callSystem!=0)
       this->callSystem(systemCommand);
   }
+  std::string ToStringFolderInfo()const;
   void MakeReport()
   { if (this->StandardStringOutputFunction==0)
       return;

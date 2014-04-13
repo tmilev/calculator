@@ -826,9 +826,7 @@ public:
   std::string ElementToStringSyntacticStack();
   std::string ElementToStringSyntactic(bool usePolishForm=false);
   std::string WriteDefaultLatexFileReturnHtmlLink(const std::string& fileContent, bool useLatexDviPSpsTopdf=false);
-  std::string GetCalculatorLink(const std::string& input)
-  { return CGI::GetCalculatorLink(this->theGlobalVariableS->DisplayNameExecutableNoPath, input);
-  }
+  std::string GetCalculatorLink(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);

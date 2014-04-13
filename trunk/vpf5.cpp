@@ -182,7 +182,7 @@ void Calculator::GetOutputFolders(const DynkinType& theType, std::string& output
   outputFormat.flagUseHTML=true;
   outputFormat.flagUseLatex=false;
   outputFormat.flagUsePNG=true;
-  outputFormat.PathDisplayNameCalculator=this->theGlobalVariableS->DisplayNameExecutableNoPath;
+  outputFormat.PathDisplayNameCalculator=this->theGlobalVariableS->DisplayNameCalculatorWithPath;
   outputFormat.PathPhysicalOutputFolder=outputFolderPhysical;
   outputFormat.PathDisplayOutputFolder=outputFolderDisplay;
   outputFormat.PathDisplayServerBaseFolder=this->theGlobalVariableS->DisplayPathServerBase;

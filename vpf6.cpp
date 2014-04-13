@@ -16,6 +16,10 @@ Calculator::Calculator()
   this->flagHideLHS=false;
 }
 
+std::string Calculator::GetCalculatorLink(const std::string& input)
+{ return CGI::GetCalculatorLink(this->theGlobalVariableS->DisplayNameCalculatorWithPath, input);
+}
+
 std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
 (const std::string& fileContent, bool useLatexDviPSpsTopdf)
 { std::fstream theFile;

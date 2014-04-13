@@ -22,7 +22,7 @@ public:
 
   int requestType;
   ClientMessage():requestType(ClientMessage::requestTypeNone){}
-  enum{ requestTypeNone, requestTypeGet, requestTypePost};
+  enum{requestTypeNone, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
   std::string ToString()const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
@@ -34,6 +34,7 @@ class Socket
 public:
   int socketID;
   ClientMessage lastMessageReceived;
+  int ProcessGetRequestNonCalculator();
   Socket(): socketID(-1){}
   ~Socket()
   { close(this->socketID);

@@ -23,11 +23,20 @@ void *get_in_addr(struct sockaddr *sa)
 std::string ClientMessage::ToString()const
 { std::stringstream out;
   out << "<br>\n";
-  if (requestType==this->requestTypeGet)
-    out << "GET " << this->mainAddress;
-  if (requestType==this->requestTypePost)
-    out << "POST " << this->mainAddress;
+  if (this->requestType==this->requestTypeGetCalculator)
+    out << "<br>GET " << "(from calculator)";
+  else if (this->requestType==this->requestTypePostCalculator)
+    out << "<br>POST " << "(from calculator)";
+  else if (this->requestType==this->requestTypeGetNotCalculator)
+    out << "<br>GET " << "(NOT from calculator)";
+  else
+    out << "<br>Request type undefined.";
+  out << "<br>Main address: " << this->mainAddress;
   out << "<br>Main argument: " << this->mainArgument;
+  if (requestType==this->requestTypeGetCalculator || requestType==this->requestTypeGetNotCalculator)
+    out << "GET " << this->mainAddress;
+  if (requestType==this->requestTypePostCalculator)
+    out << "POST " << this->mainAddress;
   if (this->theStrings.size>0)
   { out << "<br>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -46,14 +55,23 @@ void ClientMessage::resetEverythingExceptMessageString()
 
 void ClientMessage::ExtractArgumentFromAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractArgumentFromAddress");
-/*  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.pathDisplayPath.size())
+  std::cout << "\nmain address:" << this->mainAddress << "=?="
+  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
+  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
+  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
+
+  if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
     return;
-  if (this->mainAddress[onePredefinedCopyOfGlobalVariables.pathDisplayPath.size()]=='?')
-    stOutput << "the question mark is where it should be.";
-  else
-    stOutput << "the question mark is not in the right place!";
-  this->mainArgument =
-  this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.pathDisplayPath.size()+1, std::string::npos);*/
+  std::string theAddressNoCalculator=
+  this->mainAddress.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
+  std::cout << "\nthe address no calculator:" << theAddressNoCalculator;
+  if (theAddressNoCalculator!=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath)
+    return;
+  this->requestType=this->requestTypeGetCalculator;
+  if (this->mainAddress.size()==onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
+    return;
+  this->mainArgument = this->mainAddress.substr
+  (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1, std::string::npos);
 }
 
 void ClientMessage::ParseMessage()
@@ -74,14 +92,14 @@ void ClientMessage::ParseMessage()
       }
   for (int i=0; i<this->theStrings.size; i++)
     if (this->theStrings[i]=="GET")
-    { this->requestType=this->requestTypeGet;
+    { this->requestType=this->requestTypeGetNotCalculator;
       i++;
       if (i<this->theStrings.size)
       { this->mainAddress=this->theStrings[i];
         this->ExtractArgumentFromAddress();
       }
     } else if (this->theStrings[i]=="POST")
-    { this->requestType=this->requestTypePost;
+    { this->requestType=this->requestTypePostCalculator;
       i++;
       if (i<this->theStrings.size)
       { this->mainAddress=this->theStrings[i];
@@ -124,6 +142,15 @@ bool Socket::Receive()
   this->lastMessageReceived.ParseMessage();
 //  std::cout << "\nReceived from client: " << this->lastMessageReceived.ToString() << "\n";
   return true;
+}
+
+int Socket::ProcessGetRequestNonCalculator()
+{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
+  stOutput << "HTTP/1.1 200 OK\n";
+  stOutput << "Content-Type: text/html\n\n";
+  stOutput << "<b>NOT IMPLEMENTED</b>. Original message: " << this->lastMessageReceived.ToString();
+
+  return 0;
 }
 
 int main_HttpServer()

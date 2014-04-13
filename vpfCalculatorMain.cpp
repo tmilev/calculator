@@ -44,15 +44,15 @@ int main(int argc, char **argv)
 extern Socket ClientSocket;
 int main_client()
 { MacroRegisterFunctionWithName("main_client");
-  stOutput << "HTTP/1.1 200 OK\n";
-  stOutput << "Content-Type: text/html\n\n";
-  stOutput << "Original message: " << ClientSocket.lastMessageReceived.ToString();
-  if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeGet ||
-      ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypePost
-      )
+  if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeGetCalculator ||
+      ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypePostCalculator)
+  { stOutput << "HTTP/1.1 200 OK\n";
+    stOutput << "Content-Type: text/html\n\n";
+    stOutput << "Original message: " << ClientSocket.lastMessageReceived.ToString();
     theParser.inputStringRawestOfTheRaw=ClientSocket.lastMessageReceived.mainArgument;
-//  if (ClientSocket.lastMessageReceived.requestType==ClientMessage::requestTypeGet)
-//    asd;
+  }
+  if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeGetNotCalculator)
+    return ClientSocket.ProcessGetRequestNonCalculator();
   return main_standardOutputApacheAndClient();
 }
 
@@ -103,8 +103,7 @@ int main_standardOutputApacheAndClient()
 //  for (int i=0; i<argc; i++)
 //    stOutput << "<br>argv[" << i << "]: " << argc[i];
   stOutput << "<hr>Raw raw raw input: <br>" << theParser.inputStringRawestOfTheRaw;
-  stOutput << "<br> physical path server base: " << onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase;
-  stOutput << "<br> physical path exe: " << onePredefinedCopyOfGlobalVariables.PhysicalPathExecutable;
+  stOutput << onePredefinedCopyOfGlobalVariables.ToStringFolderInfo();
 
   std::string civilizedInput;
   if (inputStringNames.Contains("textInput"))
@@ -137,7 +136,8 @@ int main_standardOutputApacheAndClient()
 
   stOutput << tempStreamXX.str();
   stOutput << "<table>\n <tr valign=\"top\">\n <td>";
-  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
+  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
+  << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "

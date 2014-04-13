@@ -70,13 +70,37 @@ std::string Crasher::GetStackTraceEtcErrorMessage()
   return out.str();
 }
 
-void GlobalVariables::initDefaultFolderAndFileNames
-(const std::string& inputPathExecutableServerBaseIsFolderBelow,
- const std::string& scrambledIP)
-{ this->PhysicalPathServerBase = inputPathExecutableServerBaseIsFolderBelow + "../";
-  std::string inputDisplayPathBase;
-  this->DisplayPathServerBase = "/" + inputDisplayPathBase;
+std::string GlobalVariables::ToStringFolderInfo()const
+{ std::stringstream out;
+  out << "<br>Physical path server base: " << this->PhysicalPathServerBase;
+  out << "<br>Display name calculator with path: " << this->DisplayNameCalculatorWithPath;
+  out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
+  out << "<br>Display path server base: " << this->DisplayPathServerBase;
+  out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
+  return out.str();
+}
 
+void GlobalVariables::initDefaultFolderAndFileNames
+(const std::string& inputPhysicalExecutableWithPathServerBaseIsFolderBelow,
+ const std::string& scrambledIP)
+{ this->PhysicalNameFolderBelowExecutable="";
+  this->PhysicalNameExecutableNoPath="";
+  this->PhysicalPathServerBase="";
+  this->DisplayPathServerBase="";
+  for (unsigned i=0; i<inputPhysicalExecutableWithPathServerBaseIsFolderBelow.size(); i++)
+  { this->PhysicalNameExecutableNoPath.push_back(inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]);
+    if (inputPhysicalExecutableWithPathServerBaseIsFolderBelow[i]=='/')
+    { this->PhysicalPathServerBase+=this->PhysicalNameFolderBelowExecutable;
+      this->DisplayPathServerBase=this->PhysicalNameFolderBelowExecutable;
+      this->PhysicalNameFolderBelowExecutable=this->PhysicalNameExecutableNoPath;
+      this->PhysicalNameExecutableNoPath="";
+    }
+  }
+  if (this->PhysicalPathServerBase=="")
+  { this->PhysicalPathServerBase="./../../";
+    this->DisplayPathServerBase="trunk/";
+  }
+  this->DisplayPathServerBase="/"+this->DisplayPathServerBase;
   this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
   this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
 
@@ -86,9 +110,10 @@ void GlobalVariables::initDefaultFolderAndFileNames
   this->DisplayNameDefaultOutputNoPath = "default" + this->defaultUserLabel + "output";
   this->DisplayNameDefaultOutputWithPath = this->DisplayPathOutputFolder + this->DisplayNameDefaultOutputNoPath;
 
-  this->PhysicalPathIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
-  this->DisplayNameCalculatorWithPath = this->DisplayPathServerBase +"cgi-bin/calculator";
+  this->PhysicalNameIndicatorWithPath = this->PhysicalPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
+  this->DisplayNameIndicatorWithPath = this->DisplayPathOutputFolder + "indicator" + this->defaultUserLabel + ".html" ;
+  this->DisplayNameCalculatorWithPath =
+  this->DisplayPathServerBase +"cgi-bin/calculator";
 
 }
 

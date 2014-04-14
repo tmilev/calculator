@@ -960,7 +960,7 @@ bool CalculatorFunctionsGeneral::innerMakeMakeFile(Calculator& theCommands, cons
     cppFilesNoExtension.AddOnTop(theFileNameNoPathNoExtension);
   }
   std::fstream theFileStream;
-  XML::OpenFileCreateIfNotPresent(theFileStream, theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"makefile", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFileStream, theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"makefile", false, true, false);
   std::stringstream outHtml;
   theFileStream << "all: directories calculator\n\n";
   theFileStream << "directories: Debug\n";
@@ -2364,7 +2364,7 @@ bool CalculatorFunctionsGeneral::innerComputePairingTablesAndFKFTsubalgebras(Cal
   tempFormat.flagUseLatex=true;
   tempFormat.flagUseHTML=true;
   tempFormat.flagCandidateSubalgebraShortReportOnly=false;
-  XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   theFile << theSAs.ToString(&tempFormat);
   std::stringstream out;
   out << "<a href=\"" << theCommands.theGlobalVariableS->DisplayPathOutputFolder << "FKFTcomputation.html\">FKFTcomputation.html</a>";
@@ -2583,8 +2583,8 @@ bool CalculatorFunctionsGeneral::innerParabolicWeylGroupsBruhatGraph(Calculator&
   std::string fileName, filename2;
   fileName=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"1";
   filename2=theCommands.theGlobalVariableS->PhysicalNameDefaultOutputWithPath+"2";
-  XML::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  XML::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
     return output.SetError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
@@ -3513,7 +3513,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   theCommands.GetOutputFolders(ownerSS->theWeyl.theDynkinType, outMainPatH, outMainDisplayPatH, theFormat);
   outSltwoPath << outMainPatH << "sl2s/";
   outSltwoDisplayPath << outMainDisplayPatH << "sl2s/";
-  bool NeedToCreateFolders=(!XML::FileExists(outMainPatH) || !XML::FileExists(outSltwoPath.str()));
+  bool NeedToCreateFolders=(!FileOperations::FileExists(outMainPatH) || !FileOperations::FileExists(outSltwoPath.str()));
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << outMainPatH;
@@ -3527,7 +3527,7 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   outRootHtmlFileName << outMainPatH << "rootSubalgebras.html";
   outRootHtmlDisplayName << outMainDisplayPatH << "rootSubalgebras.html";
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
-  if (!XML::FileExists(outSltwoMainFile.str()) || !XML::FileExists(outRootHtmlFileName.str()))
+  if (!FileOperations::FileExists(outSltwoMainFile.str()) || !FileOperations::FileExists(outRootHtmlFileName.str()))
     MustRecompute=true;
   std::stringstream out;
   if (MustRecompute)

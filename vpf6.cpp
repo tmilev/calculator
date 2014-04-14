@@ -27,7 +27,7 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
   std::stringstream systemCommand1, systemCommand2, systemCommand3;
 
   fileName << this->theGlobalVariableS->PhysicalNameDefaultOutputWithPath << this->numOutputFiles;
-  XML::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
   theFile << fileContent;
   theFile.flush();
   theFile.close();
@@ -43,9 +43,10 @@ std::string Calculator::WriteDefaultLatexFileReturnHtmlLink
     this->SystemCommands.AddOnTop(systemCommand3.str());
   }
   std::stringstream out;
-  out << "<img src=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath
-  << this->numOutputFiles << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath
-  << this->numOutputFiles << ".png\">" << this->theGlobalVariableS->DisplayNameDefaultOutputNoPath << this->numOutputFiles << ".png</a>";
+  out << "<img src=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputWithPath
+  << this->numOutputFiles << ".png\"></img><a href=\"" << this->theGlobalVariableS->DisplayNameDefaultOutputWithPath
+  << this->numOutputFiles << ".png\">" << this->theGlobalVariableS->DisplayNameDefaultOutputWithPath
+  << this->numOutputFiles << ".png</a>";
   this->numOutputFiles++;
   return out.str();
 }

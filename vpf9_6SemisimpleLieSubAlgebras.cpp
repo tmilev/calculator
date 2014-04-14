@@ -378,7 +378,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
     for (int i=0; i<this->theSubalgebraCandidates.size; i++)
       if (!this->theSubalgebraCandidates[i].flagSystemProvedToHaveNoSolution)
       { std::fstream outputFileSubalgebra;
-        if (!XML::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, &theFormatCopy), false, true, false))
+        if (!FileOperations::OpenFileCreateIfNotPresent(outputFileSubalgebra, this->GetPhysicalFileNameSubalgebra(i, &theFormatCopy), false, true, false))
         { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i << " and display index "
           << this->GetDisplayIndexFromActual(i) << ", I requested to create file " << this->GetPhysicalFileNameSubalgebra(i, &theFormatCopy)
           << " for output. However, the file failed to create. Possible explanations: 1. Programming error. "
@@ -389,7 +389,7 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
         << this->GetDisplayIndexFromActual(i) << ".<br>" << this->theSubalgebraCandidates[i].ToString(&theFormatCopy);
         if (this->flagComputeNilradicals)
         { std::fstream outputFileFKFTnilradicals;
-          if (!XML::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, &theFormatCopy), false, true, false))
+          if (!FileOperations::OpenFileCreateIfNotPresent(outputFileFKFTnilradicals, this->GetPhysicalFileNameFKFTNilradicals(i, &theFormatCopy), false, true, false))
           { crash << "<br>This may or may not be a programming error. While processing subalgebra of actual index " << i
             << " and display index " << this->GetDisplayIndexFromActual(i) << ", I requested to create file "
             << this->GetPhysicalFileNameFKFTNilradicals(i, &theFormatCopy) << " for output. However, the file failed to create. "
@@ -2931,7 +2931,7 @@ void slTwoSubalgebra::ToHTML(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
-  XML::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
 void SltwoSubalgebras::reset(SemisimpleLieAlgebra& inputOwner)
@@ -3365,7 +3365,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   if(usePNG)
   { fileName= physicalPathSl2s;
     fileName.append("sl2s.html");
-    XML::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
+    FileOperations::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<HMTL><title>sl(2)-subalgebras of "
     << this->theRootSAs.theSubalgebras[0].theDynkinDiagram.ToStringRelativeToAmbientType(this->owner->theWeyl.theDynkinType[0]) << "</title>";
@@ -3387,7 +3387,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   theFormat->flagUsePNG=false;
   tempS = this->ToString(theFormat);
   theFormat->flagUsePNG=tempB;
-  XML::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServerSl2s << "sl2s.html\"> .png rich html for your viewing pleasure</a><br>\n"
   << tempS << "</HTML></BODY>";
   theFile.close();
@@ -3395,7 +3395,7 @@ void SltwoSubalgebras::ToHTML(FormatExpressions* theFormat, GlobalVariables* the
   { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { XML::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
+    { FileOperations::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
       tempStreamLatex << "latex " << " -output-directory=" << physicalPathSl2s << " " << this->texFileNamesForPNG[i];

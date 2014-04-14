@@ -17,15 +17,17 @@ public:
   std::string theMessage;
   std::string mainArgument;
   std::string mainAddress;
+  std::string PhysicalFileName;
   List<std::string> theStrings;
 
 
   int requestType;
-  ClientMessage():requestType(ClientMessage::requestTypeNone){}
-  enum{requestTypeNone, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
+  ClientMessage():requestType(ClientMessage::requestTypeUnknown){}
+  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
   std::string ToString()const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
+  void ExtractPhysicalAddressFromMainAddress();
   void resetEverythingExceptMessageString();
 };
 
@@ -34,10 +36,16 @@ class Socket
 public:
   int socketID;
   ClientMessage lastMessageReceived;
+  std::string remainsToBeSent;
   int ProcessGetRequestNonCalculator();
+  int ProcessGetRequestFolder();
+  int ProcessRequestTypeUnknown();
+  void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
+  void SendAll();
   Socket(): socketID(-1){}
   ~Socket()
-  { close(this->socketID);
+  { this->SendAll();
+    close(this->socketID);
     this->socketID=-1;
   }
   bool Receive();

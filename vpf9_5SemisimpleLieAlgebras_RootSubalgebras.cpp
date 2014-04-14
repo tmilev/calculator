@@ -1086,7 +1086,7 @@ void rootSubalgebra::ToHTML(int index, FormatExpressions* theFormat, SltwoSubalg
   if (theFormat!=0)
     myPath << theFormat->PathPhysicalOutputFolder;
   myPath << "rootSubalgebra_" << index+1 << ".html";
-  XML::OpenFileCreateIfNotPresent(output, myPath.str(), false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(output, myPath.str(), false, true, false);
   output << "<html><title>" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName() << " root subalgebra of type "
   << this->theDynkinDiagram.ToStringRelativeToAmbientType(this->GetAmbientWeyl().theDynkinType[0]) << "</title>";
   output << "<meta name=\"keywords\" content=\"" << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
@@ -2606,8 +2606,8 @@ void rootSubalgebras::ToHTML(FormatExpressions* theFormat, SltwoSubalgebras* Sl2
   std::string physicalPathSAs= theFormat==0 ? "": theFormat->PathPhysicalOutputFolder;
   std::string MyPathPhysical=physicalPathSAs+"rootSubalgebras.html";
   std::fstream output;
-  XML::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
-  if (!XML::FileExists(MyPathPhysical))
+  FileOperations::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
+  if (!FileOperations::FileExists(MyPathPhysical))
   { crash << "This may or may not be a programming error. Failed to create file " << MyPathPhysical
     << ". Possible explanations. 1. File permissions - can I write in that folder? 2. Programming error (less likely). "
     << crash;
@@ -2631,7 +2631,7 @@ std::string rootSubalgebras::ToString(FormatExpressions* theFormat, SltwoSubalge
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  if (XML::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
+  if (FileOperations::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
@@ -2641,7 +2641,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* t
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  XML::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 

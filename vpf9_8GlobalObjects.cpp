@@ -29,7 +29,7 @@ void CGI::MakeReportIndicatorFile(const std::string& input)
   //  if (counter%10!=0)
   //    return;
   std::fstream theFile;
-  XML::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
   theFile << input;

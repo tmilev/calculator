@@ -53,6 +53,9 @@ int main_client()
   }
   if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeGetNotCalculator)
     return ClientSocket.ProcessGetRequestNonCalculator();
+  if (ClientSocket.lastMessageReceived.requestType==ClientSocket.lastMessageReceived.requestTypeUnknown)
+    return ClientSocket.ProcessRequestTypeUnknown();
+
   return main_standardOutputApacheAndClient();
 }
 
@@ -71,7 +74,7 @@ int main_command_input(int argc, char **argv)
   PredefinedStrings(theParser.inputStringRawestOfTheRaw);
   theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
   std::fstream outputFile;
-  XML::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(outputFile, "./outputFileCommandLine.html", false, true, false);
   stOutput << theParser.outputString;
   outputFile << theParser.outputString;
   stOutput << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds. \nOutput written in file ./outputFileCommandLine.html\n";

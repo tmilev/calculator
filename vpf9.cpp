@@ -266,7 +266,7 @@ void CGI::ElementToStringTooltip(const std::string& input, const std::string& in
 
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  XML::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
+  FileOperations::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
   if(!fileIn.is_open())
     crash << crash;
   fileIn.clear(std::ios::goodbit);
@@ -277,7 +277,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(buffer, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::XML::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
+  ::FileOperations::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
     switch(buffer[i])
@@ -298,7 +298,69 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-bool XML::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+#include <dirent.h>
+bool FileOperations::IsFolder(const std::string& theFolderName)
+{ MacroRegisterFunctionWithName("FileOperations::IsFolder");
+  DIR *pDir;
+  pDir = opendir(theFolderName.c_str());
+  if (pDir != NULL)
+  { closedir(pDir);
+    return true;
+  }
+  return false;
+}
+
+std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
+{ for (unsigned i=theFileName.size()-1; i>=0; i--)
+    if (theFileName[i]=='.')
+      return theFileName.substr(i, std::string::npos);
+  return "";
+}
+
+bool FileOperations::GetFolderFileNames
+(const std::string& theFolderName, List<std::string>& outputFileNames, List<std::string>* outputFileTypes)
+{ MacroRegisterFunctionWithName("FileOperations::GetFolderFileNames");
+  DIR *theDirectory = opendir(theFolderName.c_str());
+  if (theDirectory==NULL)
+    return false;
+  outputFileNames.ReservE(1000);
+  for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
+    outputFileNames.AddOnTop(fileOrFolder->d_name);
+  if (outputFileTypes!=0)
+    outputFileTypes->SetSize(outputFileNames.size);
+  closedir (theDirectory);
+  return true;
+}
+
+bool FileOperations::FileExists(const std::string& theFileName)
+{ std::fstream theFile;
+  theFile.open(theFileName.c_str(), std::fstream::in);
+  if(theFile.is_open())
+    return true;
+  else
+    return false;
+}
+
+bool FileOperations::OpenFile(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+{ if (OpenInAppendMode)
+  { if (openAsBinary)
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
+    else
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app);
+  } else
+  { if (openAsBinary)
+      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::binary);
+    else
+    { if (truncate)
+        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::trunc);
+      else
+        theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
+    }
+  }
+  return theFile.is_open();
+}
+
+bool FileOperations::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -342,15 +404,6 @@ bool XML::ReadFromFile(std::fstream& inputFile)
   this->theString=memblock;
   delete[] memblock;
   return true;
-}
-
-bool XML::FileExists(const std::string& theFileName)
-{ std::fstream theFile;
-  theFile.open(theFileName.c_str(), std::fstream::in);
-  if(theFile.is_open())
-    return true;
-  else
-    return false;
 }
 
 XML::XML()

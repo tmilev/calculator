@@ -47,9 +47,9 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   std::fstream theFile;
   std::string theFileName="../output/crashdump.txt";
   bool succeededToDump=true;
-  if (!XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false))
   { theFileName="../output/crashdump2.txt";
-    succeededToDump=XML::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
+    succeededToDump=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
   if (succeededToDump)
     stOutput << "<hr>Crash dumped in file " << theFileName;
@@ -77,6 +77,8 @@ std::string GlobalVariables::ToStringFolderInfo()const
   out << "<br>Physical name folder below executable: " << this->PhysicalNameFolderBelowExecutable;
   out << "<br>Display path server base: " << this->DisplayPathServerBase;
   out << "<br>Display name calculator with path: " << this->DisplayNameExecutableWithPath;
+  out << "<br>Physical path output folder: " << this->PhysicalPathOutputFolder;
+  out << "<br>Display path output folder: " << this->DisplayPathOutputFolder;
   return out.str();
 }
 
@@ -97,7 +99,7 @@ void GlobalVariables::initDefaultFolderAndFileNames
     }
   }
   if (this->PhysicalPathServerBase=="")
-  { this->PhysicalPathServerBase="./../../";
+  { this->PhysicalPathServerBase="./../";
     this->DisplayPathServerBase="trunk/";
   }
   this->DisplayPathServerBase="/"+this->DisplayPathServerBase;
@@ -1103,7 +1105,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex(GlobalVariab
 { std::stringstream out;
   FormatExpressions theFormat;
   Vector<Rational> tempRoot;
-  XML::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -1919,18 +1921,18 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase(std::fstre
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  if (!XML::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
+  if (!FileOperations::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  XML::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
+  FileOperations::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  XML::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  FileOperations::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 

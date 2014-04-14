@@ -2091,7 +2091,7 @@ bool Calculator::innerAutomatedTestSetKnownGoodCopy(Calculator& theCommands, con
   List<std::string> inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit;
   std::stringstream out;
   theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
-  if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
+  if (!FileOperations::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, true, false))
     crash << "This is a programming error or worse: file " << theCommands.theTestFileName << " does not exist but cannot be created. Something is very wrong. " << crash;
   double startTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.AutomatedTestRun(inputStringsTest, outputStringsTestWithInit, outputStringsTestNoInit);
@@ -2105,9 +2105,9 @@ bool Calculator::innerAutomatedTest(Calculator& theCommands, const Expression& i
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   double startingTime=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theCommands.theTestFileName=theCommands.theGlobalVariableS->PhysicalPathOutputFolder+"automatedTest.txt";
-  if (!XML::FileExists(theCommands.theTestFileName))
+  if (!FileOperations::FileExists(theCommands.theTestFileName))
     return theCommands.innerAutomatedTestSetKnownGoodCopy(theCommands, input, output);
-  if (!XML::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
+  if (!FileOperations::OpenFileCreateIfNotPresent(theCommands.theTestFile, theCommands.theTestFileName, false, false, false))
     crash << "This is a programming error or worse: failed to open an existing file: " << theCommands.theTestFileName << ". Something is very wrong. " << crash;
   List<std::string> knownResults;
   HashedList<std::string, MathRoutines::hashString> knownCommands;

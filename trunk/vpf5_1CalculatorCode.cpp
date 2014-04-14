@@ -491,7 +491,7 @@ bool Calculator::innerPrintSSsubalgebras
   //<< displayFolder << theTitlePageFileNameNoPath
   //<< "\">"
   ;
-  if (!XML::FileExists(theTitlePageFileNameSlowLoad)|| doForceRecompute)
+  if (!FileOperations::FileExists(theTitlePageFileNameSlowLoad)|| doForceRecompute)
   { SemisimpleSubalgebras tempSSsas
     (ownerSS, &theCommands.theObjectContainer.theAlgebraicClosure, &theCommands.theObjectContainer.theLieAlgebras,
      &theCommands.theObjectContainer.theSltwoSAs, theCommands.theGlobalVariableS);
@@ -506,12 +506,12 @@ bool Calculator::innerPrintSSsubalgebras
     theSSsubalgebras.flagAttemptToAdjustCentralizers=doAdjustCentralizers;
     std::fstream theFileSlowLoad, theFileFastLoad;
     theCommands.theGlobalVariableS->System("mkdir " +physicalFolder);
-    if(!XML::OpenFileCreateIfNotPresent(theFileSlowLoad, theTitlePageFileNameSlowLoad, false, true, false))
+    if(!FileOperations::OpenFileCreateIfNotPresent(theFileSlowLoad, theTitlePageFileNameSlowLoad, false, true, false))
     { crash << "<br>This may or may not be a programming error. I requested to create file " << theTitlePageFileNameSlowLoad
       << " for output. However, the file failed to create. Possible explanations: 1. Programming error. 2. The calculator has no write permission to the"
       << " folder in which the file is located. 3. The folder does not exist for some reason lying outside of the calculator. " << crash;
     }
-    XML::OpenFileCreateIfNotPresent(theFileFastLoad, theTitlePageFileNameFastLoad, false, true, false);
+    FileOperations::OpenFileCreateIfNotPresent(theFileFastLoad, theTitlePageFileNameFastLoad, false, true, false);
 
     if (!isAlreadySubalgebrasObject)
     { theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=500000;

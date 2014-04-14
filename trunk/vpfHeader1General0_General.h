@@ -511,8 +511,6 @@ private:
   int positionInString;
   XML();
   bool ReadFromFile(std::fstream& inputFile);
-  static bool FileExists(const std::string& theFileName);
-  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters)
   { std::string result=" <";
     result.append(tagNameNoSpacesNoForbiddenCharacters);
@@ -1120,6 +1118,28 @@ public:
   }
 };
 
+struct FileOperations
+{
+public:
+  static std::string RemovePathFromFileName(const std::string& fileName)
+  { unsigned startNameWithoutFolderInfo=0;
+    for (unsigned i=0; i<fileName.size(); i++)
+      if (fileName[i]=='/' || fileName[i]=='\\')
+        startNameWithoutFolderInfo=i+1;
+    std::stringstream nameWithoutFolderInfo;
+    for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
+      nameWithoutFolderInfo << fileName[i];
+    return nameWithoutFolderInfo.str();
+  }
+  static std::string GetFileExtensionWithDot(const std::string& theFileName);
+  static bool FileExists(const std::string& theFileName);
+  static bool IsFolder(const std::string& theFolderName);
+  static bool GetFolderFileNames
+  (const std::string& theFolderName, List<std::string>& outputFileNames, List<std::string>* outputFileTypes=0);
+  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFile(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+};
+
 struct CGI
 {
 public:
@@ -1141,16 +1161,6 @@ public:
   static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static std::string RemovePathFromFileName(const std::string& fileName)
-  { unsigned startNameWithoutFolderInfo=0;
-    for (unsigned i=0; i<fileName.size(); i++)
-      if (fileName[i]=='/' || fileName[i]=='\\')
-        startNameWithoutFolderInfo=i+1;
-    std::stringstream nameWithoutFolderInfo;
-    for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
-      nameWithoutFolderInfo << fileName[i];
-    return nameWithoutFolderInfo.str();
-  }
   inline static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName)
   { return CGI::GetHtmlLinkFromProjectFileName(fileName, "");
   }

@@ -42,6 +42,8 @@ public:
   int ProcessRequestTypeUnknown();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
   void SendAll();
+  std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
+  bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   Socket(): socketID(-1){}
   ~Socket()
   { this->SendAll();

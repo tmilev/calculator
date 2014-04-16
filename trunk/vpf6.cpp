@@ -1783,7 +1783,8 @@ bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Ex
 }
 
 void Expression::operator+=(const Expression& other)
-{ if (this->theBoss==0 && other.theBoss==0)
+{ MacroRegisterFunctionWithName("Expression::operator+=");
+  if (this->theBoss==0 && other.theBoss==0)
   { this->theData+=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to add non-initialized expressions" << crash;
@@ -1804,8 +1805,32 @@ void Expression::operator+=(const Expression& other)
   *this=resultE;
 }
 
+void Expression::operator/=(const Expression& other)
+{ MacroRegisterFunctionWithName("Expression::operator/=");
+  if (this->theBoss==0 && other.theBoss==0)
+  { this->theData+=other.theData;
+    if (this->theData!=1 && this->theData!=0)
+      crash << "Attempting to add non-initialized expressions" << crash;
+    return;
+  }
+  if (other.theBoss==0)
+  { Expression otherCopy;
+    otherCopy.AssignValue(other.theData, *this->theBoss);
+    (*this)+=otherCopy;
+    return;
+  }
+  if (this->theBoss==0)
+    this->AssignValue(this->theData, *other.theBoss);
+  if (this->theBoss!=other.theBoss)
+    crash << "Error: adding expressions with different owners. " << crash;
+  Expression resultE;
+  resultE.MakeXOX(*this->theBoss, this->theBoss->opDivide(), *this, other);
+  *this=resultE;
+}
+
 void Expression::operator*=(const Expression& other)
-{ if (this->theBoss==0 && other.theBoss==0)
+{ MacroRegisterFunctionWithName("Expression::operator*=");
+  if (this->theBoss==0 && other.theBoss==0)
   { this->theData*=other.theData;
     if (this->theData!=1 && this->theData!=0)
       crash << "Attempting to add non-initialized expressions" << crash;
@@ -2287,7 +2312,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << "(" << firstE << ")";
       else
         out << firstE;
-      if (this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="")
+      bool mustHaveTimes=this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="";
+      if (firstE!="")
+        if (MathRoutines::isADigit(firstE[firstE.size()-1]) && MathRoutines::isADigit(secondE[0]) )
+          mustHaveTimes=true;
+      if (mustHaveTimes)
         out << "*";
       else
         out << " ";
@@ -2656,6 +2685,17 @@ bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny)const
   if (desiredDataUseMinusOneForAny==-1)
     return true;
   return this->theData==desiredDataUseMinusOneForAny;
+}
+
+bool Expression::IsArithmeticOperation(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  std::string operationName;
+  if (outputWhichOperation==0)
+    outputWhichOperation=&operationName;
+  if (!this->IsBuiltInAtom(outputWhichOperation))
+    return false;
+  return this->theBoss->arithmeticOperations.Contains(operationName);
 }
 
 bool Expression::IsBuiltInAtom(std::string* outputWhichOperation)const

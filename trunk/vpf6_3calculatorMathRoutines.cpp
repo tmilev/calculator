@@ -1351,6 +1351,42 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate(Calculato
   return output.MakeXOX(theCommands, theCommands.opTimes(), leftMultiplicand, input[2][2]);
 }
 
+bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument
+(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument");
+  if (input.children.size!=2)
+    return false;
+  if (input[0].children.size!=3)
+    return false;
+  if (!input[0][0].IsArithmeticOperation())
+    return false;
+  Expression leftE(theCommands);
+  Expression rightE(theCommands);
+  leftE.AddChildOnTop(input[0][1]);
+  leftE.AddChildOnTop(input[1]);
+  rightE.AddChildOnTop(input[0][2]);
+  rightE.AddChildOnTop(input[1]);
+  return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
+}
+
+bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateSqrt");
+  std::cout << "Here be i with input: " << input.ToString();
+  if (input.children.size!=3)
+    return false;
+  if (!input[1].IsAtom())
+    theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
+  const Expression& theArgument=input[2];
+  if (!theArgument.IsAtomGivenData(theCommands.opSqrt()))
+    return false;
+  Expression twoE(theCommands);
+  Expression oneOverSqrtE(theCommands);
+  twoE= Rational(1,2);
+  oneOverSqrtE=1;
+  oneOverSqrtE/=theArgument;
+  return output.MakeXOX(theCommands, theCommands.opTimes(), twoE, oneOverSqrtE);
+}
+
 bool CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
@@ -1431,6 +1467,8 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
   Expression denominatorBase, denominatorExponent;
   input[2].GetBaseExponentForm(denominatorBase, denominatorExponent);
   if (!denominatorBase.IsAtom())
+    return false;
+  if (denominatorBase.IsBuiltInAtom())
     return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);

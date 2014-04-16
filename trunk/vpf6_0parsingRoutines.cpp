@@ -62,6 +62,7 @@ void Calculator::reset()
   this->atomsNotInterprettedAsFunctions.Clear();
   this->atomsNotAllowingChainRule.Clear();
   this->atomsWhoseExponentsAreInterprettedAsFunctions.Clear();
+  this->arithmeticOperations.Clear();
   this->knownDoubleConstants.Clear();
   this->knownDoubleConstantValues.SetSize(0);
   this->FunctionHandlers.SetSize(0);
@@ -252,6 +253,7 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->initAtomsNotGoodForChainRule();
   this->initBuiltInAtomsNotInterprettedAsFunctions();
   this->initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
+  this->initArithmeticOperations();
 
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
@@ -1191,7 +1193,7 @@ bool Calculator::ApplyOneRule()
   if (lastS=="sec")
     return this->ReplaceXByEusingO(this->opSec());
   if (lastS=="sqrt")
-    return this->ReplaceXByEusingO(this->opSqrt());
+    return this->ReplaceXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\sqrt"));
   //end of some synonyms
   if (fourthToLastS=="Expression" && thirdToLastS=="\\cup" && secondToLastS== "Expression" && this->AllowsTimesInPreceding(lastS))
     return this->ReplaceEOEXByEX();

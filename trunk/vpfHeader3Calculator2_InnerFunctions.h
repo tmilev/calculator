@@ -29,6 +29,8 @@ public:
   static bool innerArcsin(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArccos(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);
@@ -77,6 +79,7 @@ public:
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCanBeExtendedParabolicallyTo(Calculator& theCommands, const Expression& input, Expression& output);

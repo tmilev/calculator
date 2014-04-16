@@ -31,11 +31,11 @@ std::string ClientMessage::ToString()const
     out << "<br>GET " << "(NOT from calculator)";
   else
     out << "<br>Request type undefined.";
-  out << "<br>Main address: " << this->mainAddress;
+  out << "<hr>Main address: " << this->mainAddress;
   out << "<br>Main argument: " << this->mainArgument;
   out << "<br>Physical file address referred to by main address: " << this->PhysicalFileName;
 
-  out << "<br>";
+  out << "<hr>";
   if (requestType==this->requestTypeGetCalculator || requestType==this->requestTypeGetNotCalculator)
     out << "GET " << this->mainAddress;
   if (requestType==this->requestTypePostCalculator)
@@ -59,16 +59,16 @@ void ClientMessage::resetEverythingExceptMessageString()
 
 void ClientMessage::ExtractArgumentFromAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractArgumentFromAddress");
-  std::cout << "\nmain address:" << this->mainAddress << "=?="
-  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
-  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
-  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
+//  std::cout << "\nmain address:" << this->mainAddress << "=?="
+//  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
+//  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
+//  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
 
   if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
     return;
   std::string theAddressNoCalculator=
   this->mainAddress.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
-  std::cout << "\nthe address no calculator:" << theAddressNoCalculator;
+//  std::cout << "\nthe address no calculator:" << theAddressNoCalculator;
   if (theAddressNoCalculator!=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath)
     return;
   this->requestType=this->requestTypeGetCalculator;
@@ -172,7 +172,8 @@ int Socket::ProcessGetRequestFolder()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestFolder");
   std::stringstream out;
   out << "HTTP/1.1 200 OK\n" << "Content-Type: text/html\n\n"
-  << "<html><body>";
+  << "<html><body>" << this->lastMessageReceived.ToString();
+
   List<std::string> theFileNames;
   if (!FileOperations::GetFolderFileNames(this->lastMessageReceived.PhysicalFileName, theFileNames))
   { out << "<b>Failed to open directory with physical address " << this->lastMessageReceived.PhysicalFileName
@@ -189,6 +190,29 @@ int Socket::ProcessGetRequestFolder()
   return 0;
 }
 
+bool Socket::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
+{
+
+return false;
+}
+
+std::string Socket::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
+{ MacroRegisterFunctionWithName("Socket::GetMIMEtypeFromFileExtension");
+  if (fileExtension==".html")
+    return "Content-Type: text/html\n\n";
+  if (fileExtension==".txt")
+    return "Content-Type: text/plain\n\n";
+  if (fileExtension==".png")
+  { std::cout << "\nGET-ing .png!";
+    return "Content-Type: image/png\n\n";
+  }
+  if (fileExtension==".js")
+  { std::cout << "\bGET-ing .js!";
+    return "Content-Type: text/script-javascript";
+  }
+  return "Content-Type: application/octet-stream\n\n";
+}
+
 int Socket::ProcessGetRequestNonCalculator()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
   this->lastMessageReceived.ExtractPhysicalAddressFromMainAddress();
@@ -197,30 +221,25 @@ int Socket::ProcessGetRequestNonCalculator()
   if (!FileOperations::FileExists(this->lastMessageReceived.PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\n";
     stOutput << "Content-Type: text/html\n\n";
+    stOutput << this->lastMessageReceived.ToString();
     stOutput << "<html><body>File does not exist.<br> File display name: "
     << this->lastMessageReceived.mainAddress << "<br>File physical name: "
     << this->lastMessageReceived.PhysicalFileName << "</body></html>";
   }
+  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->lastMessageReceived.PhysicalFileName);
+  bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
-  if (!FileOperations::OpenFile(theFile, this->lastMessageReceived.PhysicalFileName, false, false, false))
+  if (!FileOperations::OpenFile(theFile, this->lastMessageReceived.PhysicalFileName, false, false, !isBinary))
   { stOutput << "HTTP/1.1 200 OK\n"
-    << "Content-Type: text/html\n\n"
-    << "<html><body><b>Error: failed to open file. "
+    << "Content-Type: text/html\n\n";
+    stOutput << "Content-Type: text/html\n\n";
+    stOutput << "<html><body><b>Error: failed to open file. "
     << "<br> File display name: "
     << this->lastMessageReceived.mainAddress << "<br>File physical name: "
     << this->lastMessageReceived.PhysicalFileName << "</body></html>";
     return 0;
   }
-  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->lastMessageReceived.PhysicalFileName);
-  stOutput << "HTTP/1.1 200 OK\n";
-  if (fileExtension==".html")
-    stOutput << "Content-Type: text/html\n\n";
-  else if (fileExtension==".txt")
-    stOutput << "Content-Type: text/plain\n\n";
-  else if (fileExtension==".png")
-    stOutput << "Content-Type: image/png\n\n";
-  else
-    stOutput << "Content-Type: application/octet-stream\n\n";
+  stOutput << "HTTP/1.1 200 OK\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
   const unsigned int bufferSize=64*1024;
   char buffer[bufferSize];
   theFile.read(&buffer[0], bufferSize);
@@ -286,7 +305,7 @@ int main_HttpServer()
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     std::cout << "sigaction returned -1";
-  std::cout << "server: waiting for connections...\n";
+  std::cout << "\nServer: waiting for connections...";
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -296,7 +315,7 @@ int main_HttpServer()
       continue;
     }
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
-    std::cout << "Server: got connection from " << userAddress;
+    std::cout << "\n\rServer: got connection from " << userAddress;
     if (!fork()) //creates an almost identical copy of this process, the original process is the parent, the almost identical copy is the child.
     { // this is the child process
       InitializeTimer();

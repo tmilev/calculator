@@ -96,6 +96,10 @@ void Calculator::initPredefinedInnerFunctions()
   ("GrowDynkinType", CalculatorFunctionsGeneral::innerGrowDynkinType, "",
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
+  this->AddOperationInnerHandler
+  ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
+   "Differentiation - square root function.  ",
+   "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
@@ -2084,7 +2088,18 @@ void Calculator::initPredefinedOperationsComposite()
   ("RationalFunction", CalculatorFunctionsGeneral::innerRationalFunctionSubstitution, "",
    "If x is a constant, replaces x{}({{anything}}):=x; ",
    "0{}3;2{}y;(\\sqrt{}2){}x;", true);
-
+  this->AddOperationComposite
+  ("+", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
+   "Equivalent to (a+b){}x:=(a{}x)+(b{}x) ",
+   "(a+b){}x;", true);
+  this->AddOperationComposite
+  ("*", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
+   "Equivalent to (a*b){}x:=(a{}x)*(b{}x) ",
+   "(a*b){}x;", true);
+  this->AddOperationComposite
+  ("/", CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArgument, "",
+   "Equivalent to (a/b){}x:=(a{}x)/(b{}x) ",
+   "(a/b){}x;", true);
   this->AddOperationComposite
   ("AlgebraicNumber", CalculatorFunctionsGeneral::innerConstantFunction, "",
    "If x is a constant, replaces x{}({{anything}}):=x; ",
@@ -2144,6 +2159,15 @@ void Calculator::initAtomsThatAllowCommutingOfArguments()
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\sin");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\cos");
   this->atomsThatAllowCommutingOfCompositesStartingWithThem.AddOnTopNoRepetitionMustBeNewCrashIfNot("\\log");
+}
+
+void Calculator::initArithmeticOperations()
+{ MacroRegisterFunctionWithName("Calculator::initArithmeticOperations");
+  this->arithmeticOperations.AddOnTop("+");
+  this->arithmeticOperations.AddOnTop("-");
+  this->arithmeticOperations.AddOnTop("*");
+  this->arithmeticOperations.AddOnTop("/");
+  this->arithmeticOperations.AddOnTop("^");
 }
 
 void Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()

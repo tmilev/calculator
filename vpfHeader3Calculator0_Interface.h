@@ -116,6 +116,20 @@ class Expression
   bool flagDeallocated;
   typedef bool (*FunctionAddress) (Calculator& theCommands, const Expression& input, Expression& output);
 //////
+  void operator=(const Expression& other)
+  { this->theData=other.theData;
+    this->children=other.children;
+    this->theBoss=other.theBoss;
+    this->format=other.format;
+  }
+  void operator=(const Rational& other)
+  { this->CheckInitialization();
+    this->AssignValue(other, *this->theBoss);
+  }
+  void operator=(int other)
+  { this->CheckInitialization();
+    this->AssignValue(other, *this->theBoss);
+  }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow, formatUseFrac
@@ -196,6 +210,7 @@ class Expression
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
 
+  bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(int* outputWhichType)const;
@@ -403,6 +418,7 @@ bool EvaluatesToDoubleUnderSubstitutions
   bool AreEqualExcludingChildren(const Expression& other) const
   { return this->theBoss==other.theBoss && this->theData==other.theData && this->children.size==other.children.size;
   }
+  void operator/=(const Expression& other);
   void operator+=(const Expression& other);
   void operator*=(const Expression& other);
 //  Rational GetConstantTerm() const;
@@ -632,6 +648,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsThatAllowCommutingOfCompositesStartingWithThem;
   HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
+  HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterprettedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsNotInterprettedAsFunctions;
@@ -1557,6 +1574,7 @@ public:
   void reset();
   void initAtomsThatFreezeArguments();
   void initAtomsThatAllowCommutingOfArguments();
+  void initArithmeticOperations();
   void initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
   void initBuiltInAtomsNotInterprettedAsFunctions();
   void initAtomsNotGoodForChainRule();

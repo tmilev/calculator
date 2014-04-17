@@ -57,6 +57,7 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
     stOutput << "<hr>Failed to dump crash: check if folder exists and the executable has file permissions for file " << theFileName << ".";
   theFile << this->theCrashReport.str();
   theFile.close();
+  stOutput.Flush();
   assert(false);
   return *this;
 }

@@ -6,7 +6,7 @@ ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server im
 
 Socket ClientSocket;
 
-const char* PORT ="80";  // the port users will be connecting to
+const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
 void sigchld_handler(int s)
@@ -120,6 +120,10 @@ void ClientMessage::ParseMessage()
         this->mainArgument=*this->theStrings.LastObject();
       }
     }
+}
+
+void FlushSocket()
+{ ClientSocket.SendAllBytes();
 }
 
 void SendStringToSocket(const std::string& theString)
@@ -358,6 +362,7 @@ int main_HttpServer()
 
       ClientSocket.Receive();
       stOutput.theOutputFunction=SendStringToSocket;
+      stOutput.flushOutputFunction=FlushSocket;
       return 1;
     }
     close(ClientSocket.socketID);  // parent doesn't need this

@@ -20,20 +20,30 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  bool useHtml=theFormat==0 ? false: theFormat->flagUseHTML;
+  std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
+  out << lineBreak;
+  if (this->requestType==this->requestTypeGetCalculator)
+    out << "GET " << "(from calculator)";
+  else if (this->requestType==this->requestTypePostCalculator)
+    out << "POST " << "(from calculator)";
+  else if (this->requestType==this->requestTypeGetNotCalculator)
+    out << "GET " << "(NOT from calculator)";
+  else
+    out << "Request type undefined.";
+  out << lineBreak << "<hr>Main address: " << this->mainAddress;
+  out << lineBreak << "Main argument: " << this->mainArgument;
+  out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
+  return out.str();
+}
+
 std::string ClientMessage::ToString()const
 { std::stringstream out;
-  out << "<br>\n";
-  if (this->requestType==this->requestTypeGetCalculator)
-    out << "<br>GET " << "(from calculator)";
-  else if (this->requestType==this->requestTypePostCalculator)
-    out << "<br>POST " << "(from calculator)";
-  else if (this->requestType==this->requestTypeGetNotCalculator)
-    out << "<br>GET " << "(NOT from calculator)";
-  else
-    out << "<br>Request type undefined.";
-  out << "<hr>Main address: " << this->mainAddress;
-  out << "<br>Main argument: " << this->mainArgument;
-  out << "<br>Physical file address referred to by main address: " << this->PhysicalFileName;
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML=true;
+  out << this->ToStringShort(&tempFormat);
 
   out << "<hr>";
   if (requestType==this->requestTypeGetCalculator || requestType==this->requestTypeGetNotCalculator)
@@ -116,32 +126,42 @@ void SendStringToSocket(const std::string& theString)
 { ClientSocket.QueueStringForSending(theString, false);
 }
 
-void Socket::QueueStringForSending(const std::string& stringToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("Socket::SendStringToSocket");
-  this->remainsToBeSent+=stringToSend;
-  if (this->remainsToBeSent.size()>=1024*512 || MustSendAll)
-    this->SendAll();
+void Socket::QueueBytesForSending
+  (const List<char>& bytesToSend, bool MustSendAll)
+{ MacroRegisterFunctionWithName("Socket::QueueBytesForSending");
+  this->remainingBytesToSend.AddListOnTop(bytesToSend);
+  if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
+    this->SendAllBytes();
 }
 
-void Socket::SendAll()
-{ if (this->remainsToBeSent.size()==0)
+void Socket::QueueStringForSending(const std::string& stringToSend, bool MustSendAll)
+{ MacroRegisterFunctionWithName("Socket::SendStringToSocket");
+  int oldSize=this->remainingBytesToSend.size;
+  this->remainingBytesToSend.SetSize(this->remainingBytesToSend.size+stringToSend.size());
+  for (unsigned i=0; i<stringToSend.size(); i++)
+    this->remainingBytesToSend[i+oldSize]=stringToSend[i];
+//  if (stringToSend.size()>0)
+//    if (stringToSend[stringToSend.size()-1]=='\0')
+//      std::cout << "WARNING: string is null terminated!\r\n";
+//    std::cout << "Last character string: " << *this->remainingBytesToSend.LastObject() << "\r\n";
+  if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
+    this->SendAllBytes();
+}
+
+void Socket::SendAllBytes()
+{ if (this->remainingBytesToSend.size==0)
     return;
-  MacroRegisterFunctionWithName("Socket::SendAll");
+  MacroRegisterFunctionWithName("Socket::SendAllBytes");
   if (this->socketID==-1)
-    crash << "SocketID with id -1 was requested to send string " << this->remainsToBeSent
-    << ", this shouldn't happen." << crash;
-  std::cout << "\nSending " << this->remainsToBeSent.size() << " bytes in chunks of: ";
-  int numBytesToSend=this->remainsToBeSent.size();
-  int numBytesSent=0;
-  while (numBytesSent<numBytesToSend)
-  { numBytesSent+=send(ClientSocket.socketID, this->remainsToBeSent.c_str(), this->remainsToBeSent.size(),0);
+    crash << "SocketID with id -1 was requested to send bytes, this shouldn't happen." << crash;
+  std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
+  while (this->remainingBytesToSend.size>0)
+  { int numBytesSent=send(ClientSocket.socketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     std::cout << numBytesSent;
-    if (numBytesSent<numBytesToSend)
-    { std::cout << ", ";
-      this->remainsToBeSent=this->remainsToBeSent.substr(numBytesSent, std::string::npos);
-    }
+    this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
+    if (this->remainingBytesToSend.size>0)
+      std::cout << ", ";
   }
-  this->remainsToBeSent="";
 }
 
 bool Socket::Receive()
@@ -156,7 +176,6 @@ bool Socket::Receive()
   } else
     this->lastMessageReceived.theMessage="";
   this->lastMessageReceived.ParseMessage();
-//  std::cout << "\nReceived from client: " << this->lastMessageReceived.ToString() << "\n";
   return true;
 }
 
@@ -171,7 +190,8 @@ void ClientMessage::ExtractPhysicalAddressFromMainAddress()
 int Socket::ProcessGetRequestFolder()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestFolder");
   std::stringstream out;
-  out << "HTTP/1.1 200 OK\n" << "Content-Type: text/html\n\n"
+  out << "HTTP/1.1 200 OK\r\n"
+  << "Content-Type: text/html\r\n"
   << "<html><body>" << this->lastMessageReceived.ToString();
 
   List<std::string> theFileNames;
@@ -184,43 +204,42 @@ int Socket::ProcessGetRequestFolder()
   out << "Browsing folder: " << this->lastMessageReceived.mainAddress
   << "<br>Physical address: " << this->lastMessageReceived.PhysicalFileName << "<hr>";
   for (int i=0; i<theFileNames.size; i++)
-    out << "<a href=\"" << theFileNames[i] << "\">" << theFileNames[i] << "</a><br>";
+    out << "<a href=\"" << this->lastMessageReceived.mainAddress << theFileNames[i] << "\">"
+    << theFileNames[i] << "</a><br>";
   out << "</body></html>";
   stOutput << out.str();
   return 0;
 }
 
 bool Socket::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
-{
+{ if (fileExtension==".png")
+    return true;
 
-return false;
+  return false;
 }
 
 std::string Socket::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
 { MacroRegisterFunctionWithName("Socket::GetMIMEtypeFromFileExtension");
   if (fileExtension==".html")
-    return "Content-Type: text/html\n\n";
+    return "Content-Type: text/html\r\n";
   if (fileExtension==".txt")
-    return "Content-Type: text/plain\n\n";
+    return "Content-Type: text/plain\r\n";
   if (fileExtension==".png")
-  { std::cout << "\nGET-ing .png!";
-    return "Content-Type: image/png\n\n";
-  }
+    return "Content-Type: image/png\r\n";
   if (fileExtension==".js")
-  { std::cout << "\bGET-ing .js!";
-    return "Content-Type: text/script-javascript";
-  }
-  return "Content-Type: application/octet-stream\n\n";
+    return "Content-Type: text/javascript\r\n";
+  return "Content-Type: application/octet-stream\r\n";
 }
 
 int Socket::ProcessGetRequestNonCalculator()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
   this->lastMessageReceived.ExtractPhysicalAddressFromMainAddress();
+  std::cout << this->lastMessageReceived.ToStringShort() << "\r\n";
   if (FileOperations::IsFolder(this->lastMessageReceived.PhysicalFileName))
     return this->ProcessGetRequestFolder();
   if (!FileOperations::FileExists(this->lastMessageReceived.PhysicalFileName))
-  { stOutput << "HTTP/1.1 404 Object not found\n";
-    stOutput << "Content-Type: text/html\n\n";
+  { stOutput << "HTTP/1.1 404 Object not found\r\n";
+    stOutput << "Content-Type: text/html\r\n";
     stOutput << this->lastMessageReceived.ToString();
     stOutput << "<html><body>File does not exist.<br> File display name: "
     << this->lastMessageReceived.mainAddress << "<br>File physical name: "
@@ -230,32 +249,46 @@ int Socket::ProcessGetRequestNonCalculator()
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFile(theFile, this->lastMessageReceived.PhysicalFileName, false, false, !isBinary))
-  { stOutput << "HTTP/1.1 200 OK\n"
-    << "Content-Type: text/html\n\n";
-    stOutput << "Content-Type: text/html\n\n";
+  { stOutput << "HTTP/1.1 200 OK\r\n"
+    << "Content-Type: text/html\r\n";
+    stOutput << "Content-Type: text/html\r\n";
     stOutput << "<html><body><b>Error: failed to open file. "
     << "<br> File display name: "
     << this->lastMessageReceived.mainAddress << "<br>File physical name: "
     << this->lastMessageReceived.PhysicalFileName << "</body></html>";
     return 0;
   }
-  stOutput << "HTTP/1.1 200 OK\n" << this->GetMIMEtypeFromFileExtension(fileExtension);
-  const unsigned int bufferSize=64*1024;
-  char buffer[bufferSize];
-  theFile.read(&buffer[0], bufferSize);
+  theFile.seekp(0, std::ifstream::end);
+  unsigned int fileSize=theFile.tellp();
+  std::cout << "Serving file: " << this->lastMessageReceived.PhysicalFileName << " with file extension " << fileExtension
+  << ", file size: " << fileSize << "\r\n";
+  std::stringstream theHeader;
+  theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
+  << "Content-length: " << fileSize << "\r\n\r\n"
+;
+  std::cout << "Message: " << theHeader.str();
+  this->QueueStringForSending(theHeader.str());
+  const int bufferSize=64*1024;
+  this->bufferFileIO.SetSize(bufferSize);
+  theFile.seekg(0);
+  theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   int numBytesRead=theFile.gcount();
+  std::cout << "Sending file ...  ";
   while (numBytesRead!=0)
-  { stOutput << (buffer);
-    theFile.read(buffer, bufferSize);
+  { this->bufferFileIO.SetSize(numBytesRead);
+    this->QueueBytesForSending(this->bufferFileIO);
+    this->bufferFileIO.SetSize(bufferSize);
+    theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
     numBytesRead=theFile.gcount();
   }
+  this->SendAllBytes();
   return 0;
 }
 
 int Socket::ProcessRequestTypeUnknown()
-{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
-  stOutput << "HTTP/1.0 501 Method Not Implemented\n";
-  stOutput << "Content-Type: text/html\n\n";
+{ MacroRegisterFunctionWithName("Socket::ProcessRequestTypeUnknown");
+  stOutput << "HTTP/1.0 501 Method Not Implemented\r\n";
+  stOutput << "Content-Type: text/html\r\n";
   stOutput << "<b>Requested method is not implemented. <b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->lastMessageReceived.ToString();
 
@@ -306,6 +339,7 @@ int main_HttpServer()
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     std::cout << "sigaction returned -1";
   std::cout << "\nServer: waiting for connections...";
+  std::cout.flush();
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -315,7 +349,8 @@ int main_HttpServer()
       continue;
     }
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
-    std::cout << "\n\rServer: got connection from " << userAddress;
+    std::cout << "\r\n\r\nServer: got connection from " << userAddress;
+    std::cout.flush();
     if (!fork()) //creates an almost identical copy of this process, the original process is the parent, the almost identical copy is the child.
     { // this is the child process
       InitializeTimer();

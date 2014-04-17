@@ -3285,9 +3285,9 @@ void Calculator::InitJavaScriptDisplayIndicator()
 //  output << "  el.contentWindow.location.reload();";
   output << "  timeOutCounter++;\n";
   output << "  var oRequest = new XMLHttpRequest();\n";
-  output << "  var sURL  = \"" << this->indicatorFileNameDisplaY << "\";\n";
+  output << "  var sURL  = \"" << this->theGlobalVariableS->DisplayNameIndicatorWithPath << "\";\n";
   output << "  oRequest.open(\"GET\",sURL,false);\n";
-  output << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
+//  output << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
   output << "  oRequest.send(null)\n";
   output << "  if (oRequest.status==200)\n";
   output << "  { newReportString= oRequest.responseText;\n";

@@ -102,8 +102,15 @@ public:
     return *this;
   }
   void (*theOutputFunction)(const std::string& stringToOutput);
-  StdoutClass(): theOutputFunction(0){}
-  void OutputCurrentString();
+  void (*flushOutputFunction)();
+  StdoutClass(): theOutputFunction(0), flushOutputFunction(0){}
+  void Flush()
+  { if (this->flushOutputFunction==0)
+    { std::cout.flush();
+      return;
+    }
+    this->flushOutputFunction();
+  }
 };
 
 extern Crasher crash;

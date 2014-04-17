@@ -784,8 +784,6 @@ public:
   std::fstream theTestFile;
   std::string theTestFileName;
   int numOutputFiles;
-  std::string indicatorFileNamE;
-  std::string indicatorFileNameDisplaY;
   std::string userLabel;
   std::stringstream Comments;
   FormatExpressions formatVisibleStrings;

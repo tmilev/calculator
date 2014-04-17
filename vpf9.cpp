@@ -318,16 +318,16 @@ std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileNa
 }
 
 bool FileOperations::GetFolderFileNames
-(const std::string& theFolderName, List<std::string>& outputFileNames, List<std::string>* outputFileTypes)
+(const std::string& theFolderName, List<std::string>& outputFileNamesNoPath, List<std::string>* outputFileTypes)
 { MacroRegisterFunctionWithName("FileOperations::GetFolderFileNames");
   DIR *theDirectory = opendir(theFolderName.c_str());
   if (theDirectory==NULL)
     return false;
-  outputFileNames.ReservE(1000);
+  outputFileNamesNoPath.ReservE(1000);
   for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
-    outputFileNames.AddOnTop(fileOrFolder->d_name);
+    outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
   if (outputFileTypes!=0)
-    outputFileTypes->SetSize(outputFileNames.size);
+    outputFileTypes->SetSize(outputFileNamesNoPath.size);
   closedir (theDirectory);
   return true;
 }

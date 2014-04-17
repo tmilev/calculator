@@ -25,6 +25,7 @@ public:
   ClientMessage():requestType(ClientMessage::requestTypeUnknown){}
   enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
   std::string ToString()const;
+  std::string ToStringShort(FormatExpressions* theFormat=0)const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
   void ExtractPhysicalAddressFromMainAddress();
@@ -36,17 +37,21 @@ class Socket
 public:
   int socketID;
   ClientMessage lastMessageReceived;
-  std::string remainsToBeSent;
+  List<char> remainingBytesToSend;
+  List<char> bufferFileIO;
   int ProcessGetRequestNonCalculator();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
-  void SendAll();
+  void QueueBytesForSending
+  (const List<char>& bytesToSend, bool MustSendAll=false)
+  ;
+  void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
   Socket(): socketID(-1){}
   ~Socket()
-  { this->SendAll();
+  { this->SendAllBytes();
     close(this->socketID);
     this->socketID=-1;
   }

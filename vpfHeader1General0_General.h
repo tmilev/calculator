@@ -1102,6 +1102,7 @@ public:
   bool operator>(const List<Object>& other)const;
   bool operator<(const List<Object>& other)const;
   void ShiftUpExpandOnTop(int StartingIndex);
+  void Slice(int StartingIndex, int SizeOfSlice);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
   List();//<-newly constructed lists start with size=0; This default is used in critical places in HashedList and other classes, do not change!
@@ -1135,7 +1136,9 @@ public:
   static bool FileExists(const std::string& theFileName);
   static bool IsFolder(const std::string& theFolderName);
   static bool GetFolderFileNames
-  (const std::string& theFolderName, List<std::string>& outputFileNames, List<std::string>* outputFileTypes=0);
+  (const std::string& theFolderName, List<std::string>& outputFileNamesNoPath,
+   List<std::string>* outputFileTypes=0)
+   ;
   static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static bool OpenFile(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
 };
@@ -2995,6 +2998,19 @@ void List<Object>::ShiftUpExpandOnTop(int StartingIndex)
 { this->SetSize(this->size+1);
   for (int i=this->size-1; i>StartingIndex; i--)
     this->TheObjects[i]= this->TheObjects[i-1];
+}
+
+template <class Object>
+void List<Object>::Slice(int StartingIndex, int SizeOfSlice)
+{ if (StartingIndex<0)
+    StartingIndex=0;
+  if (SizeOfSlice<0)
+    SizeOfSlice=0;
+  if (SizeOfSlice+StartingIndex>this->size)
+    SizeOfSlice=this->size-StartingIndex;
+  for (int i=0; i<SizeOfSlice; i++)
+    this->TheObjects[i]= this->TheObjects[i+StartingIndex];
+  this->SetSize(SizeOfSlice);
 }
 
 template <class Object>

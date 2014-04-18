@@ -2268,7 +2268,7 @@ bool CalculatorFunctionsGeneral::innerPlotParametricCurve(Calculator& theCommand
   List<Expression> theConvertedExpressions;
   theConvertedExpressions.SetSize(input.children.size-3);
   for (int i=1; i<input.children.size-2; i++)
-    if (!Calculator::innerSuffixNotationForPostScript(theCommands, input[i], theConvertedExpressions[i-1]))
+    if (!theCommands.CallCalculatorFunction(Calculator::innerSuffixNotationForPostScript, input[i], theConvertedExpressions[i-1]))
     { theCommands.Comments << "Failed to extract suffix notation from argument " << input[i].ToString();
       return false;
     }

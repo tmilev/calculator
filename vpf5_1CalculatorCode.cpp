@@ -922,12 +922,20 @@ bool Calculator::innerSuffixNotationForPostScript(Calculator& theCommands, const
   }
   std::stringstream out;
   out.precision(7);
+  bool hasDoubleValue=false;;
+  double theDoubleValue=-1;
   if (input.IsOfType<Rational>())
-  { out << " " << FloatingPoint::DoubleToString(input.GetValue<Rational>().GetDoubleValue());
-    return output.AssignValue(out.str(), theCommands);
+  { hasDoubleValue=true;
+    theDoubleValue=input.GetValue<Rational>().GetDoubleValue();
   }
+  if (input.IsOfType<AlgebraicNumber>())
+    hasDoubleValue=input.GetValue<AlgebraicNumber>().EvaluatesToDouble(&theDoubleValue);
   if (input.IsOfType<double>())
-  { out << " " << FloatingPoint::DoubleToString(input.GetValue<double>());
+  { hasDoubleValue=true;
+    theDoubleValue=input.GetValue<double>();
+  }
+  if (hasDoubleValue)
+  { out << " " << FloatingPoint::DoubleToString(theDoubleValue);
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;

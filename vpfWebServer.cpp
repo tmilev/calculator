@@ -74,7 +74,7 @@ void ClientMessage::ExtractArgumentFromAddress()
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
 
-  if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
+  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()|| this->mainAddress.size()==0)
     return;
   std::string theAddressNoCalculator=
   this->mainAddress.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
@@ -82,7 +82,7 @@ void ClientMessage::ExtractArgumentFromAddress()
   if (theAddressNoCalculator!=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath)
     return;
   this->requestType=this->requestTypeGetCalculator;
-  if (this->mainAddress.size()==onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
+  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
     return;
   this->mainArgument = this->mainAddress.substr
   (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1, std::string::npos);
@@ -92,12 +92,12 @@ void ClientMessage::ParseMessage()
 { MacroRegisterFunctionWithName("ClientMessage::ParseMessage");
   this->resetEverythingExceptMessageString();
   std::string buffer;
-  buffer.reserve(this->theMessage.size());
+  buffer.reserve(this->theMessage.size);
   this->theStrings.SetExpectedSize(20);
-  for (unsigned i =0; i<this->theMessage.size(); i++)
+  for (int i =0; i<this->theMessage.size; i++)
     if (theMessage[i]!=' ' && theMessage[i]!='\n' && theMessage[i]!='\r')
     { buffer.push_back(this->theMessage[i]);
-      if (i==this->theMessage.size()-1)
+      if (i==this->theMessage.size-1)
         this->theStrings.AddOnTop(buffer);
     } else
       if (buffer!="")
@@ -173,20 +173,24 @@ bool Socket::Receive()
   int numBytesReceived=-1;
   char buffer[4096*2];
   numBytesReceived= recv(this->socketID, &buffer, 4096*2-1, 0);
+  this->lastMessageReceived.theMessage.SetSize(0);
   if (numBytesReceived>0)
-  { numBytesReceived++;
-    buffer[numBytesReceived]='\0';//null termination ensured
-    this->lastMessageReceived.theMessage=buffer;
-  } else
-    this->lastMessageReceived.theMessage="";
+  { int oldSize=this->lastMessageReceived.theMessage.size;
+    this->lastMessageReceived.theMessage.SetSize(this->lastMessageReceived.theMessage.size+numBytesReceived);
+    for (int i=0; i<numBytesReceived; i++)
+      this->lastMessageReceived.theMessage[i+oldSize]=buffer[i];
+  }
   this->lastMessageReceived.ParseMessage();
   return true;
 }
 
 void ClientMessage::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractPhysicalAddressFromMainAddress");
-  if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
+  std::cout << Crasher::GetStackTraceEtcErrorMessage();
+  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
+  { this->PhysicalFileName="";
     return;
+  }
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
   this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
 }
@@ -208,7 +212,7 @@ int Socket::ProcessGetRequestFolder()
   out << "Browsing folder: " << this->lastMessageReceived.mainAddress
   << "<br>Physical address: " << this->lastMessageReceived.PhysicalFileName << "<hr>";
   for (int i=0; i<theFileNames.size; i++)
-    out << "<a href=\"" << this->lastMessageReceived.mainAddress << theFileNames[i] << "\">"
+    out << "<a href=\"" << this->lastMessageReceived.mainAddress << "/" << theFileNames[i] << "\">"
     << theFileNames[i] << "</a><br>";
   out << "</body></html>";
   stOutput << out.str();

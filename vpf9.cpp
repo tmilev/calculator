@@ -311,7 +311,9 @@ bool FileOperations::IsFolder(const std::string& theFolderName)
 }
 
 std::string FileOperations::GetFileExtensionWithDot(const std::string& theFileName)
-{ for (unsigned i=theFileName.size()-1; i>=0; i--)
+{ if (theFileName=="")
+    return "";
+  for (unsigned i=theFileName.size()-1; i>=0; i--)
     if (theFileName[i]=='.')
       return theFileName.substr(i, std::string::npos);
   return "";
@@ -324,10 +326,19 @@ bool FileOperations::GetFolderFileNames
   if (theDirectory==NULL)
     return false;
   outputFileNamesNoPath.ReservE(1000);
-  for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
-    outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
   if (outputFileTypes!=0)
-    outputFileTypes->SetSize(outputFileNamesNoPath.size);
+    outputFileTypes->ReservE(1000);
+  std::string fullName;
+  for (dirent *fileOrFolder=readdir(theDirectory); fileOrFolder!=0; fileOrFolder= readdir (theDirectory))
+  { outputFileNamesNoPath.AddOnTop(fileOrFolder->d_name);
+    if (outputFileTypes!=0)
+    { fullName=theFolderName + fileOrFolder->d_name;
+      if (FileOperations::IsFolder(fullName))
+        outputFileTypes->AddOnTop(".d");
+      else
+        outputFileTypes->AddOnTop("");
+    }
+  }
   closedir (theDirectory);
   return true;
 }

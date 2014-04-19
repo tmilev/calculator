@@ -14,9 +14,10 @@ static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "
 class ClientMessage
 {
 public:
-  List<char> theMessage;
+  std::string theMessage;
   std::string mainArgument;
-  std::string mainAddress;
+  std::string mainAddressRAW;
+  std::string mainAddresS;
   std::string PhysicalFileName;
   List<std::string> theStrings;
 

@@ -33,7 +33,7 @@ std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
     out << "GET " << "(NOT from calculator)";
   else
     out << "Request type undefined.";
-  out << lineBreak << "<hr>Main address: " << this->mainAddress;
+  out << lineBreak << "<hr>Main address: " << this->mainAddresS;
   out << lineBreak << "Main argument: " << this->mainArgument;
   out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
   return out.str();
@@ -46,10 +46,11 @@ std::string ClientMessage::ToString()const
   out << this->ToStringShort(&tempFormat);
 
   out << "<hr>";
+  out << "Main address RAW: " << this->mainAddressRAW << "<br>";
   if (requestType==this->requestTypeGetCalculator || requestType==this->requestTypeGetNotCalculator)
-    out << "GET " << this->mainAddress;
+    out << "GET " << this->mainAddressRAW;
   if (requestType==this->requestTypePostCalculator)
-    out << "POST " << this->mainAddress;
+    out << "POST " << this->mainAddressRAW;
   if (this->theStrings.size>0)
   { out << "<br>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -61,7 +62,8 @@ std::string ClientMessage::ToString()const
 
 void ClientMessage::resetEverythingExceptMessageString()
 { this->mainArgument="";
-  this->mainAddress="";
+  this->mainAddresS="";
+  this->mainAddressRAW="";
   this->PhysicalFileName="";
   this->theStrings.SetSize(0);
   this->requestType=this->requestTypeUnknown;
@@ -73,31 +75,34 @@ void ClientMessage::ExtractArgumentFromAddress()
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
-
-  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()|| this->mainAddress.size()==0)
+  CGI::CivilizedStringTranslationFromCGI(this->mainAddressRAW, this->mainAddresS);
+  this->mainArgument ="";
+  if (this->mainAddresS.size()<onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
+    return;
+  if (this->mainAddresS.size()==0)
     return;
   std::string theAddressNoCalculator=
-  this->mainAddress.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
+  this->mainAddresS.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
 //  std::cout << "\nthe address no calculator:" << theAddressNoCalculator;
   if (theAddressNoCalculator!=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath)
     return;
   this->requestType=this->requestTypeGetCalculator;
-  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
+  if (this->mainAddresS.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
     return;
-  this->mainArgument = this->mainAddress.substr
-  (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1, std::string::npos);
+  this->mainArgument = this->mainAddresS.substr
+  (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(), std::string::npos);
 }
 
 void ClientMessage::ParseMessage()
 { MacroRegisterFunctionWithName("ClientMessage::ParseMessage");
   this->resetEverythingExceptMessageString();
   std::string buffer;
-  buffer.reserve(this->theMessage.size);
+  buffer.reserve(this->theMessage.size());
   this->theStrings.SetExpectedSize(20);
-  for (int i =0; i<this->theMessage.size; i++)
+  for (unsigned i =0; i<this->theMessage.size(); i++)
     if (theMessage[i]!=' ' && theMessage[i]!='\n' && theMessage[i]!='\r')
     { buffer.push_back(this->theMessage[i]);
-      if (i==this->theMessage.size-1)
+      if (i==this->theMessage.size()-1)
         this->theStrings.AddOnTop(buffer);
     } else
       if (buffer!="")
@@ -109,14 +114,14 @@ void ClientMessage::ParseMessage()
     { this->requestType=this->requestTypeGetNotCalculator;
       i++;
       if (i<this->theStrings.size)
-      { this->mainAddress=this->theStrings[i];
+      { this->mainAddressRAW=this->theStrings[i];
         this->ExtractArgumentFromAddress();
       }
     } else if (this->theStrings[i]=="POST")
     { this->requestType=this->requestTypePostCalculator;
       i++;
       if (i<this->theStrings.size)
-      { this->mainAddress=this->theStrings[i];
+      { this->mainAddressRAW=this->theStrings[i];
         this->mainArgument=*this->theStrings.LastObject();
       }
     }
@@ -173,47 +178,50 @@ bool Socket::Receive()
   int numBytesReceived=-1;
   char buffer[4096*2];
   numBytesReceived= recv(this->socketID, &buffer, 4096*2-1, 0);
-  this->lastMessageReceived.theMessage.SetSize(0);
   if (numBytesReceived>0)
-  { int oldSize=this->lastMessageReceived.theMessage.size;
-    this->lastMessageReceived.theMessage.SetSize(this->lastMessageReceived.theMessage.size+numBytesReceived);
-    for (int i=0; i<numBytesReceived; i++)
-      this->lastMessageReceived.theMessage[i+oldSize]=buffer[i];
-  }
+  { numBytesReceived++;
+    buffer[numBytesReceived]='\0';//null termination ensured
+    this->lastMessageReceived.theMessage=buffer;
+  } else
+    this->lastMessageReceived.theMessage="";
   this->lastMessageReceived.ParseMessage();
   return true;
 }
 
 void ClientMessage::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractPhysicalAddressFromMainAddress");
-  std::cout << Crasher::GetStackTraceEtcErrorMessage();
-  if (this->mainAddress.size()<=onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
-  { this->PhysicalFileName="";
+  if (this->mainAddresS.size()<onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
     return;
-  }
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
-  this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
+  this->mainAddresS.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
 }
 
 int Socket::ProcessGetRequestFolder()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestFolder");
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\n"
-  << "Content-Type: text/html\r\n"
-  << "<html><body>" << this->lastMessageReceived.ToString();
-
-  List<std::string> theFileNames;
-  if (!FileOperations::GetFolderFileNames(this->lastMessageReceived.PhysicalFileName, theFileNames))
+  << "Content-Type: text/html\r\n" << "\r\n"
+  << "<html><body>";
+  //out << this->lastMessageReceived.ToString();
+  List<std::string> theFileNames, theFileTypes;
+  if (!FileOperations::GetFolderFileNames(this->lastMessageReceived.PhysicalFileName, theFileNames, &theFileTypes))
   { out << "<b>Failed to open directory with physical address " << this->lastMessageReceived.PhysicalFileName
     << " </b></body></html>";
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->lastMessageReceived.mainAddress
+  out << "Browsing folder: " << this->lastMessageReceived.mainAddresS
   << "<br>Physical address: " << this->lastMessageReceived.PhysicalFileName << "<hr>";
   for (int i=0; i<theFileNames.size; i++)
-    out << "<a href=\"" << this->lastMessageReceived.mainAddress << "/" << theFileNames[i] << "\">"
-    << theFileNames[i] << "</a><br>";
+  { bool isDir= theFileTypes[i]==".d";
+    out << "<a href=\"" << this->lastMessageReceived.mainAddresS << theFileNames[i];
+    if (isDir)
+      out << "/";
+    out << "\">" << theFileNames[i];
+    if (isDir)
+      out << "/";
+    out << "</a><br>";
+  }
   out << "</body></html>";
   stOutput << out.str();
   return 0;
@@ -248,21 +256,24 @@ int Socket::ProcessGetRequestNonCalculator()
   if (!FileOperations::FileExists(this->lastMessageReceived.PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\n";
     stOutput << "Content-Type: text/html\r\n";
-    stOutput << this->lastMessageReceived.ToString();
-    stOutput << "<html><body>File does not exist.<br> File display name: "
-    << this->lastMessageReceived.mainAddress << "<br>File physical name: "
-    << this->lastMessageReceived.PhysicalFileName << "</body></html>";
+    stOutput << "\r\n";
+    stOutput << "<html><body>";
+    stOutput << "<b>File does not exist.</b><br><b> File display name:</b> "
+    << this->lastMessageReceived.mainAddresS << "<br><b>File physical name:</b> "
+    << this->lastMessageReceived.PhysicalFileName;
+    stOutput << "<hr><hr><hr>Message details:<br>" <<  this->lastMessageReceived.ToString();
+    stOutput << "</body></html>";
+    return 0;
   }
   std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->lastMessageReceived.PhysicalFileName);
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
   if (!FileOperations::OpenFile(theFile, this->lastMessageReceived.PhysicalFileName, false, false, !isBinary))
-  { stOutput << "HTTP/1.1 200 OK\r\n"
-    << "Content-Type: text/html\r\n";
-    stOutput << "Content-Type: text/html\r\n";
-    stOutput << "<html><body><b>Error: failed to open file. "
-    << "<br> File display name: "
-    << this->lastMessageReceived.mainAddress << "<br>File physical name: "
+  { stOutput << "HTTP/1.1 200 OK\r\n" << "Content-Type: text/html\r\n";
+    stOutput << "\r\n"
+    << "<html><body><b>Error: file appears to exist but I could not open it.</b> "
+    << "<br><b> File display name: </b>"
+    << this->lastMessageReceived.mainAddresS << "<br><b>File physical name: </b>"
     << this->lastMessageReceived.PhysicalFileName << "</body></html>";
     return 0;
   }
@@ -297,7 +308,8 @@ int Socket::ProcessRequestTypeUnknown()
 { MacroRegisterFunctionWithName("Socket::ProcessRequestTypeUnknown");
   stOutput << "HTTP/1.0 501 Method Not Implemented\r\n";
   stOutput << "Content-Type: text/html\r\n";
-  stOutput << "<b>Requested method is not implemented. <b> <hr>The original message received from the server follows."
+  stOutput << "\r\n"
+  << "<b>Requested method is not implemented. <b> <hr>The original message received from the server follows."
   << "<hr>\n" << this->lastMessageReceived.ToString();
 
   return 0;

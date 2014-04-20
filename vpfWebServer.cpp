@@ -39,6 +39,17 @@ std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
   return out.str();
 }
 
+std::string ClientMessage::ToStringFull()const
+{ std::stringstream out;
+  out << this->ToString();
+  if (this->theStrings.size>0)
+  { out << "<hr>\nStrings extracted from message: ";
+    for (int i =0; i<this->theStrings.size; i++)
+      out << "<br>" << this->theStrings[i];
+  }
+  return out.str();
+}
+
 std::string ClientMessage::ToString()const
 { std::stringstream out;
   FormatExpressions tempFormat;
@@ -51,11 +62,6 @@ std::string ClientMessage::ToString()const
     out << "GET " << this->mainAddressRAW;
   if (requestType==this->requestTypePostCalculator)
     out << "POST " << this->mainAddressRAW;
-  if (this->theStrings.size>0)
-  { out << "<br>\nStrings extracted from message: ";
-    for (int i =0; i<this->theStrings.size; i++)
-      out << "<br>" << this->theStrings[i];
-  }
   out << "\n<br>\nFull client message:\n" << this->theMessage;
   return out.str();
 }
@@ -67,6 +73,7 @@ void ClientMessage::resetEverythingExceptMessageString()
   this->PhysicalFileName="";
   this->theStrings.SetSize(0);
   this->requestType=this->requestTypeUnknown;
+  this->ContentLength=-1;
 }
 
 void ClientMessage::ExtractArgumentFromAddress()
@@ -105,10 +112,14 @@ void ClientMessage::ParseMessage()
       if (i==this->theMessage.size()-1)
         this->theStrings.AddOnTop(buffer);
     } else
-      if (buffer!="")
+    { if (buffer!="")
       { this->theStrings.AddOnTop(buffer);
         buffer="";
       }
+      if (i>0)
+        if (theMessage[i]=='\n' && theMessage[i-1]=='\r')
+          this->theStrings.AddOnTop("!CRLF!");
+    }
   for (int i=0; i<this->theStrings.size; i++)
     if (this->theStrings[i]=="GET")
     { this->requestType=this->requestTypeGetNotCalculator;
@@ -122,7 +133,19 @@ void ClientMessage::ParseMessage()
       i++;
       if (i<this->theStrings.size)
       { this->mainAddressRAW=this->theStrings[i];
-        this->mainArgument=*this->theStrings.LastObject();
+        if (*this->theStrings.LastObject()!="!CRLF!")
+          this->mainArgument=*this->theStrings.LastObject();
+        else
+          this->mainArgument="";
+      }
+    } else if ((this->theStrings[i]=="Content-Length:" || this->theStrings[i]=="Content-length:" ||
+                this->theStrings[i]=="content-length:")
+               && i+1<this->theStrings.size)
+    { if (this->theStrings[i+1].size()<10000)
+      { LargeIntUnsigned theLI;
+        if (theLI.AssignStringFailureAllowed(this->theStrings[i+1], true))
+          if (!theLI.IsSmallEnoughToFitInInt(&this->ContentLength))
+            this->ContentLength=-1;
       }
     }
 }
@@ -163,6 +186,7 @@ void Socket::SendAllBytes()
   MacroRegisterFunctionWithName("Socket::SendAllBytes");
   if (this->socketID==-1)
     crash << "SocketID with id -1 was requested to send bytes, this shouldn't happen." << crash;
+  std::cout << "\r\nIn response to: " << this->lastMessageReceived.theMessage;
   std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   while (this->remainingBytesToSend.size>0)
   { int numBytesSent=send(ClientSocket.socketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
@@ -173,20 +197,57 @@ void Socket::SendAllBytes()
   }
 }
 
-bool Socket::Receive()
-{ MacroRegisterFunctionWithName("Socket::Receive");
-  int numBytesReceived=-1;
-  char buffer[4096*2];
-  numBytesReceived= recv(this->socketID, &buffer, 4096*2-1, 0);
-  if (numBytesReceived>0)
-  { numBytesReceived++;
-    buffer[numBytesReceived]='\0';//null termination ensured
-    this->lastMessageReceived.theMessage=buffer;
-  } else
-    this->lastMessageReceived.theMessage="";
+bool Socket::ReceiveAll()
+{ MacroRegisterFunctionWithName("Socket::ReceiveAll");
+  unsigned const int bufferSize=60000;
+  char buffer[bufferSize];
+  int numBytesInBuffer= recv(this->socketID, &buffer, bufferSize-1, 0);
+  this->lastMessageReceived.theMessage.assign(buffer, numBytesInBuffer);
+  std::cout << "\r\nConnection " << this->connectionID << ": received " << numBytesInBuffer << " bytes. ";
   this->lastMessageReceived.ParseMessage();
+  std::cout << "\r\nContent length computed to be: " << this->lastMessageReceived.ContentLength;
+  if (this->lastMessageReceived.ContentLength==-1)
+    return true;
+  if (this->lastMessageReceived.mainArgument.size()==(unsigned) this->lastMessageReceived.ContentLength)
+    return true;
+  std::cout << "\r\nContent-length parsed to be: " << this->lastMessageReceived.ContentLength
+  << "\r\nHowever the size of mainArgument is: " << this->lastMessageReceived.mainArgument.size();
+  if (this->lastMessageReceived.ContentLength>10000000)
+  { error="\r\nContent-length parsed to be more than 10 million bytes, aborting.";
+    std::cout << this->error;
+    return false;
+  }
+  if (this->lastMessageReceived.mainArgument!="")
+  { error= "\r\nContent-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
+    std::cout << this->error;
+    return false;
+  }
+  this->remainingBytesToSend="HTTP/1.1 100 Continue\r\n";
+  this->SendAllBytes();
+  this->remainingBytesToSend.SetSize(0);
+  this->lastMessageReceived.mainArgument="";
+  std::string bufferString;
+  while ((signed) this->lastMessageReceived.mainArgument.size()<this->lastMessageReceived.ContentLength)
+  { numBytesInBuffer= recv(this->socketID, &buffer, bufferSize-1, 0);
+    if (numBytesInBuffer<=0)
+    { this->error= "\r\nWhile trying to fetch message-body, got an error or received 0 bytes. ";
+      std::cout << this->error;
+      return false;
+    }
+    bufferString.assign(buffer, numBytesInBuffer);
+    this->lastMessageReceived.mainArgument+=bufferString;
+  }
+  if ((signed) this->lastMessageReceived.mainArgument.size()!=this->lastMessageReceived.ContentLength)
+  { std::stringstream out;
+    out << "\r\nThe message-body received by me had length " << this->lastMessageReceived.mainArgument.size()
+    << " yet I expected a message of length " << this->lastMessageReceived.ContentLength << ".";
+    this->error=out.str();
+    std::cout << this->error;
+    return false;
+  }
   return true;
 }
+
 
 void ClientMessage::ExtractPhysicalAddressFromMainAddress()
 { MacroRegisterFunctionWithName("ClientMessage::ExtractPhysicalAddressFromMainAddress");
@@ -279,20 +340,21 @@ int Socket::ProcessGetRequestNonCalculator()
   }
   theFile.seekp(0, std::ifstream::end);
   unsigned int fileSize=theFile.tellp();
-  std::cout << "Serving file: " << this->lastMessageReceived.PhysicalFileName << " with file extension " << fileExtension
-  << ", file size: " << fileSize << "\r\n";
   std::stringstream theHeader;
   theHeader << "HTTP/1.1 200 OK\r\n" << this->GetMIMEtypeFromFileExtension(fileExtension)
-  << "Content-length: " << fileSize << "\r\n\r\n"
-;
-  std::cout << "Message: " << theHeader.str();
+  << "Content-length: " << fileSize << "\r\n\r\n";
   this->QueueStringForSending(theHeader.str());
   const int bufferSize=64*1024;
   this->bufferFileIO.SetSize(bufferSize);
   theFile.seekg(0);
   theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   int numBytesRead=theFile.gcount();
-  std::cout << "Sending file ...  ";
+  ///////////////////
+  std::cout << "*****Message summary begin\r\n" << theHeader.str();
+  std::cout << "Sending file  " << this->lastMessageReceived.PhysicalFileName << " with file extension " << fileExtension
+  << ", file size: " << fileSize;
+  std::cout << "\r\n*****Message summary end\r\n";
+  ///////////////////
   while (numBytesRead!=0)
   { this->bufferFileIO.SetSize(numBytesRead);
     this->QueueBytesForSending(this->bufferFileIO);
@@ -306,7 +368,7 @@ int Socket::ProcessGetRequestNonCalculator()
 
 int Socket::ProcessRequestTypeUnknown()
 { MacroRegisterFunctionWithName("Socket::ProcessRequestTypeUnknown");
-  stOutput << "HTTP/1.0 501 Method Not Implemented\r\n";
+  stOutput << "HTTP/1.1 501 Method Not Implemented\r\n";
   stOutput << "Content-Type: text/html\r\n";
   stOutput << "\r\n"
   << "<b>Requested method is not implemented. <b> <hr>The original message received from the server follows."
@@ -358,8 +420,9 @@ int main_HttpServer()
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     std::cout << "sigaction returned -1";
-  std::cout << "\nServer: waiting for connections...";
+  std::cout << "\nServer: waiting for connections...\r\n";
   std::cout.flush();
+  unsigned int connectionsSoFar=0;
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
@@ -369,16 +432,21 @@ int main_HttpServer()
       continue;
     }
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
-    std::cout << "\r\n\r\nServer: got connection from " << userAddress;
+    connectionsSoFar++;
+    std::cout << "\r\nConnection " << connectionsSoFar
+    << ": got connection from " << userAddress;
     std::cout.flush();
     if (!fork()) //creates an almost identical copy of this process, the original process is the parent, the almost identical copy is the child.
     { // this is the child process
       InitializeTimer();
       close(sockfd); // child doesn't need the listener
-
-      ClientSocket.Receive();
+      ClientSocket.connectionID=connectionsSoFar;
       stOutput.theOutputFunction=SendStringToSocket;
       stOutput.flushOutputFunction=FlushSocket;
+      if (!ClientSocket.ReceiveAll())
+      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << ClientSocket.error;
+        return 0;
+      }
       return 1;
     }
     close(ClientSocket.socketID);  // parent doesn't need this

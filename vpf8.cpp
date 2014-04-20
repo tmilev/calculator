@@ -27,6 +27,28 @@ void LargeIntUnsigned::AssignString(const std::string& input)
   }
 }
 
+bool LargeIntUnsigned::AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits)
+{ MacroRegisterFunctionWithName("LargeIntUnsigned::AssignStringFailureAllowed");
+  if (input.size()>10000000) //<- sorry folks, no more than 10 million digits.
+    return false;
+  if (input.size()<10)
+  { unsigned int x=std::atoi(input.c_str());
+    this->AssignShiftedUInt(x, 0);
+    return true;
+  }
+  this->MakeZero();
+  for (unsigned int i=0; i<input.size(); i++)
+  { this->operator*=(10);
+    int whichDigit=input[i]-'0';
+    if (whichDigit>9 || whichDigit<0)
+    { if (!ignoreNonDigits)
+        return false;
+    } else
+      this->operator+=((unsigned) whichDigit);
+  }
+  return true;
+}
+
 void Rational::AssignString(const std::string& input)
 { this->MakeZero();
   if (input=="0")

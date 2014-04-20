@@ -4,7 +4,7 @@
 
 ProjectInformationInstance projectInfoInstanceWebServer(__FILE__, "Web server implementation.");
 
-Socket ClientSocket;
+WebServer theWebServer;
 
 const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
@@ -151,11 +151,11 @@ void ClientMessage::ParseMessage()
 }
 
 void FlushSocket()
-{ ClientSocket.SendAllBytes();
+{ theWebServer.theSocket.SendAllBytes();
 }
 
 void SendStringToSocket(const std::string& theString)
-{ ClientSocket.QueueStringForSending(theString, false);
+{ theWebServer.theSocket.QueueStringForSending(theString, false);
 }
 
 void Socket::QueueBytesForSending
@@ -189,7 +189,7 @@ void Socket::SendAllBytes()
   std::cout << "\r\nIn response to: " << this->lastMessageReceived.theMessage;
   std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   while (this->remainingBytesToSend.size>0)
-  { int numBytesSent=send(ClientSocket.socketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
+  { int numBytesSent=send(this->socketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     std::cout << numBytesSent;
     this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
     if (this->remainingBytesToSend.size>0)
@@ -377,8 +377,13 @@ int Socket::ProcessRequestTypeUnknown()
   return 0;
 }
 
-int main_HttpServer()
-{ MacroRegisterFunctionWithName("main_HttpServer");
+WebServer::WebServer()
+{ this->flagUsingBuiltInServer=false;
+  this->flagIsChildProcess=false;
+}
+
+int WebServer::Run()
+{ MacroRegisterFunctionWithName("WebServer::Run");
   int sockfd;  // listen on sock_fd, new connection on new_fd
   addrinfo hints, *servinfo, *p;
   sockaddr_storage their_addr; // connector's address information
@@ -423,11 +428,12 @@ int main_HttpServer()
   std::cout << "\nServer: waiting for connections...\r\n";
   std::cout.flush();
   unsigned int connectionsSoFar=0;
+  this->flagIsChildProcess=false;
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
-    ClientSocket.socketID = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-    if (ClientSocket.socketID == -1)
+    this->theSocket.socketID = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+    if (this->theSocket.socketID == -1)
     { std::cout << "Accept failed.";
       continue;
     }
@@ -439,17 +445,18 @@ int main_HttpServer()
     if (!fork()) //creates an almost identical copy of this process, the original process is the parent, the almost identical copy is the child.
     { // this is the child process
       InitializeTimer();
+      this->flagIsChildProcess=true;
       close(sockfd); // child doesn't need the listener
-      ClientSocket.connectionID=connectionsSoFar;
+      this->theSocket.connectionID=connectionsSoFar;
       stOutput.theOutputFunction=SendStringToSocket;
       stOutput.flushOutputFunction=FlushSocket;
-      if (!ClientSocket.ReceiveAll())
-      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << ClientSocket.error;
+      if (!this->theSocket.ReceiveAll())
+      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->theSocket.error;
         return 0;
       }
       return 1;
     }
-    close(ClientSocket.socketID);  // parent doesn't need this
+    close(this->theSocket.socketID);  // parent doesn't need this
   }
   return 0;
 }

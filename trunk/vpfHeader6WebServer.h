@@ -63,4 +63,14 @@ public:
   bool ReceiveOnce();
   bool ReceiveAll();
 };
+
+class WebServer
+{
+public:
+  Socket theSocket;
+  bool flagUsingBuiltInServer;
+  bool flagIsChildProcess;
+  WebServer();
+  int Run();
+};
 #endif

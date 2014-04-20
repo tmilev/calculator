@@ -1105,6 +1105,13 @@ public:
   void Slice(int StartingIndex, int SizeOfSlice);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
+  template <unsigned int a>
+  List(const Object (&other)[a])
+  { this->initConstructorCallOnly();
+    this->SetSize(a);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]=other[i];
+  }
   List();//<-newly constructed lists start with size=0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();
   void AssignListList(const List<List<Object> >& input)

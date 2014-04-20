@@ -20,13 +20,14 @@ public:
   std::string mainAddresS;
   std::string PhysicalFileName;
   List<std::string> theStrings;
-
+  int ContentLength;
 
   int requestType;
   ClientMessage():requestType(ClientMessage::requestTypeUnknown){}
   enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
   std::string ToString()const;
   std::string ToStringShort(FormatExpressions* theFormat=0)const;
+  std::string ToStringFull()const;
   void ParseMessage();
   void ExtractArgumentFromAddress();
   void ExtractPhysicalAddressFromMainAddress();
@@ -37,9 +38,11 @@ class Socket
 {
 public:
   int socketID;
+  int connectionID;
   ClientMessage lastMessageReceived;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
+  std::string error;
   int ProcessGetRequestNonCalculator();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
@@ -55,7 +58,9 @@ public:
   { this->SendAllBytes();
     close(this->socketID);
     this->socketID=-1;
+    this->connectionID=-1;
   }
-  bool Receive();
+  bool ReceiveOnce();
+  bool ReceiveAll();
 };
 #endif

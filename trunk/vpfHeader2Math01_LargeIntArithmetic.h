@@ -112,6 +112,7 @@ public:
   }
   bool Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites);
   void AssignString(const std::string& input);
+  bool AssignStringFailureAllowed(const std::string& input, bool ignoreNonDigits);
   int GetUnsignedIntValueTruncated();
   LargeIntUnsigned operator%(const LargeIntUnsigned& other)const
   { LargeIntUnsigned result, temp;

@@ -129,6 +129,7 @@ public:
   static bool innerExpressionFromBuiltInType(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExpressionFromRF(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerRootSAsAndSltwos(Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute);
   static bool innerPrintRootSAs(Calculator& theCommands, const Expression& input, Expression& output)
   { return CalculatorFunctionsGeneral::innerRootSAsAndSltwos(theCommands, input, output, false, false);

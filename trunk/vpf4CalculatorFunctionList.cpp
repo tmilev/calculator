@@ -1257,6 +1257,11 @@ void Calculator::initPredefinedInnerFunctions()
    "TestMouseHover(x^2)", true, false)
    ;
    this->AddOperationInnerHandler
+  ("TestCalculatorIndicator", CalculatorFunctionsGeneral::innerTestIndicator, "",
+   "(This is not a mathematical function). Tests the calculator indicator mechanism.",
+   "TestCalculatorIndicator(0)", true, false)
+   ;
+   this->AddOperationInnerHandler
   ("CoefficientOf", CalculatorFunctionsGeneral::innerCoefficientOf, "",
    "Gets the coefficient of the first argument in the second. ",
    "CoefficientOf(y, x*x*y+x*z*y*z+x*y*x)", true)

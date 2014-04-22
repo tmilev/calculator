@@ -15,6 +15,7 @@ void InitializeGlobalObjects()
   onePredefinedCopyOfGlobalVariables.SetStandardStringOutput(&CGI::MakeReportIndicatorFile);
   onePredefinedCopyOfGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=-1;
+  onePredefinedCopyOfGlobalVariables.sleepFunction=SleepFunction;
   onePredefinedCopyOfGlobalVariables.SetCallSystem(&CallSystemWrapper);
   crash.theGlobalVariables=&onePredefinedCopyOfGlobalVariables;
   //stOutput << "address of get elapsed seconds: " << (int) &GetElapsedTimeInSeconds;
@@ -42,7 +43,4 @@ void CGI::MakeStdCoutReport(const std::string& input)
   CGI::MakeReportIndicatorFile(input);
 }
 
-bool ComputationComplete;
-
-std::string IPAdressCaller;
 

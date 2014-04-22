@@ -44,19 +44,23 @@ void CreateTimerThread()
 #endif
 }
 
+void SleepFunction(int nanoseconds)
+{ usleep(100);
+}
+
 #ifndef WIN32
 void* RunTimerVoidPtr(void* ptr)
 { double elapsedtime=-1;
   for (; ;)
-  { usleep(100);
+  { SleepFunction(100);
     elapsedtime=GetElapsedTimeInSeconds();
-    if (ComputationComplete)
+    if (onePredefinedCopyOfGlobalVariables.flagComputationComplete)
       break;
     if (elapsedtime >=onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit && !
         (onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0))
       break;
   }
-  if (!ComputationComplete)
+  if (!onePredefinedCopyOfGlobalVariables.flagComputationComplete)
   { stOutput << "</div><br><br><br>Your computation has taken " << elapsedtime << " seconds so far.";
     stOutput << "<br>The maximum allowed run time for " << " the entire system is  " << onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
     << " seconds (twice the amount of time allowed for calculator interpretation). <br>This safety limit is hard coded in this particular server. "

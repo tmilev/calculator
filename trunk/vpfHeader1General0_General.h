@@ -307,7 +307,6 @@ public:
 typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
-typedef void (*FunctionStandardStringOutput)(const std::string& input);
 typedef void (*drawClearScreenFunction)();
 
 class MathRoutines

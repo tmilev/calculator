@@ -2915,11 +2915,19 @@ private:
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
 public:
-  FunctionStandardStringOutput StandardStringOutputFunction;
+  void (*StandardStringOutputFunction)(const std::string& input);
+  void (*ReturnIndicator)();
+  void (*sleepFunction)(int nanoseconds);
+
+  void FallAsleep(int nanoseconds)
+  { if (this->sleepFunction!=0)
+      this->sleepFunction(nanoseconds);
+  }
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   FormatExpressions theDefaultFormat;
 //progress report flags:
   bool flagGaussianEliminationProgressReport;
+  bool flagComputationComplete;
 
   List<std::string> ProgressReportStringS;
   DrawingVariables theDrawingVariables;
@@ -3006,8 +3014,8 @@ public:
   inline void DrawBufferNoIniT()
   { this->theDrawingVariables.drawBufferNoIniT();
   }
-  inline void SetStandardStringOutput(FunctionStandardStringOutput input)
-  { this->StandardStringOutputFunction=input;
+  inline void SetStandardStringOutput(void (*inputFunction)(const std::string& ))
+  { this->StandardStringOutputFunction=inputFunction;
   }
   inline void StandardStringOutput(const std::string& input)
   { if (this->StandardStringOutputFunction!=0)

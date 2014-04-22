@@ -3536,6 +3536,19 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
   return false;
 }
 
+bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
+  theCommands.theGlobalVariableS->ReturnIndicator();
+  ProgressReport theReport(theCommands.theGlobalVariableS);
+  for (int i=0; i<10000; i++)
+  { theCommands.theGlobalVariableS->FallAsleep(100000);
+    std::stringstream reportStream;
+    reportStream << " Running indicator test, " << i+1 << " out of 10000.";
+    theReport.Report(reportStream.str());
+  }
+  return output.AssignValue((std::string)"Indicator test executed. ", theCommands);
+}
+
 bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
 (Calculator& theCommands, const Expression& input, Expression& output, bool showSLtwos, bool MustRecompute)
 { MacroRegisterFunctionWithName("Calculator::innerRootSAsAndSltwos");

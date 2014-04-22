@@ -16,8 +16,8 @@ class ClientMessage
 public:
   std::string theMessage;
   std::string mainArgument;
-  std::string mainAddressRAW;
-  std::string mainAddresS;
+  std::string mainAddresSRAW;
+  std::string mainAddress;
   std::string PhysicalFileName;
   List<std::string> theStrings;
   int ContentLength;
@@ -37,7 +37,7 @@ public:
 class Socket
 {
 public:
-  int socketID;
+  int connectedSocketID;
   int connectionID;
   ClientMessage lastMessageReceived;
   List<char> remainingBytesToSend;
@@ -53,11 +53,11 @@ public:
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
-  Socket(): socketID(-1){}
+  Socket(): connectedSocketID(-1){}
   ~Socket()
   { this->SendAllBytes();
-    close(this->socketID);
-    this->socketID=-1;
+    close(this->connectedSocketID);
+    this->connectedSocketID=-1;
     this->connectionID=-1;
   }
   bool ReceiveOnce();
@@ -67,10 +67,15 @@ public:
 class WebServer
 {
 public:
+  int listeningSocketID;
   Socket theSocket;
   bool flagUsingBuiltInServer;
   bool flagIsChildProcess;
   WebServer();
   int Run();
+  int StandardOutput();
+  void StandardOutputPart1BeforeComputation();
+  void StandardOutputPart2AfterComputation();
+  void StandardOutputReturnIndicatorWaitForComputation();
 };
 #endif

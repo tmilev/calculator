@@ -75,6 +75,8 @@ GlobalVariables::GlobalVariables()
 { this->StandardStringOutputFunction=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->callSystem=0;
+  this->ReturnIndicator=0;
+  this->sleepFunction=0;
   this->flagGaussianEliminationProgressReport=false;
   this->getElapsedTimePrivate=0;
 //  stOutput << "Global variables created!";

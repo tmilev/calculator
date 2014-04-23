@@ -8,8 +8,6 @@ ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculato
 extern WebServer theWebServer;
 int main_apache_client();
 int main_command_input(int argc, char **argv);
-int main_client();
-
 
 int main(int argc, char **argv)
 { MacroRegisterFunctionWithName("main");
@@ -35,23 +33,7 @@ int main(int argc, char **argv)
     return main_command_input(argc, argv);
   if (argc==1 && !theWebServer.flagUsingBuiltInServer)
     return main_apache_client();
-  return main_client();
-}
-
-int main_client()
-{ MacroRegisterFunctionWithName("main_client");
-  ClientMessage& theMessage=theWebServer.theSocket.lastMessageReceived;
-  if (theMessage.requestType==theMessage.requestTypeGetCalculator ||
-      theMessage.requestType==theMessage.requestTypePostCalculator)
-  { stOutput << "HTTP/1.1 200 OK\n";
-    stOutput << "Content-Type: text/html\r\n\r\n";
-    theParser.inputStringRawestOfTheRaw=theMessage.mainArgument;
-  }
-  if (theMessage.requestType==theMessage.requestTypeGetNotCalculator)
-    return theWebServer.theSocket.ProcessGetRequestNonCalculator();
-  if (theMessage.requestType==theMessage.requestTypeUnknown)
-    return theWebServer.theSocket.ProcessRequestTypeUnknown();
-  return theWebServer.StandardOutput();
+  return theWebServer.ServeClient();
 }
 
 int main_command_input(int argc, char **argv)

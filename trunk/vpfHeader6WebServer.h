@@ -7,6 +7,7 @@
 #include <netdb.h> //<-addrinfo and related data structures defined here
 #include <arpa/inet.h> // <- inet_ntop declared here (ntop= network to presentation)
 #include <sys/wait.h>
+#include <fcntl.h> //<- setting of flags for pipes and the like (example: making a pipe non-blocking).
 #include "vpfHeader4SystemFunctionsGlobalObjects.h"
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
@@ -24,7 +25,8 @@ public:
 
   int requestType;
   ClientMessage():requestType(ClientMessage::requestTypeUnknown){}
-  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator};
+  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator,
+  requestTypeGetIndicator};
   std::string ToString()const;
   std::string ToStringShort(FormatExpressions* theFormat=0)const;
   std::string ToStringFull()const;
@@ -34,15 +36,18 @@ public:
   void resetEverythingExceptMessageString();
 };
 
+class WebServer;
 class Socket
 {
 public:
+  WebServer* parent;
   int connectedSocketID;
   int connectionID;
   ClientMessage lastMessageReceived;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
   std::string error;
+  int ProcessGetRequestIndicator();
   int ProcessGetRequestNonCalculator();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
@@ -53,7 +58,7 @@ public:
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
-  Socket(): connectedSocketID(-1){}
+  Socket();
   ~Socket()
   { this->SendAllBytes();
     close(this->connectedSocketID);
@@ -70,12 +75,26 @@ public:
   int listeningSocketID;
   Socket theSocket;
   bool flagUsingBuiltInServer;
-  bool flagIsChildProcess;
+  int myPipeIndex;
+  int childPID;
+  List<List<int> > pipeChildToParent;
+  List<List<int> > pipeParentToChild;
+  List<bool> pipeInUse;
   WebServer();
+  ~WebServer();
+  List<char> lastPipeReadResult;
+  List<char> pipeBuffer;
+  void ReadFromPipe(List<int>& inputPipe, bool doNotBlock);
+  void SendThroughPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
+  void getNewPipe();
+  void ReleaseMyPipe();
   int Run();
   int StandardOutput();
+  int ServeClient();
   void StandardOutputPart1BeforeComputation();
   void StandardOutputPart2AfterComputation();
   void StandardOutputReturnIndicatorWaitForComputation();
+  std::string GetLastErrorDescription();
+  std::string GetStatus();
 };
 #endif

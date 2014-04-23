@@ -13,7 +13,9 @@ const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
 void sigchld_handler(int s)
-{ while(waitpid(-1, NULL, WNOHANG) > 0);
+{ while(waitpid(-1, NULL, WNOHANG) > 0)
+  { std::cout << "\r\nReaping processes input: " << s << "; childID: " << theWebServer.childPID;
+  }
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -34,6 +36,8 @@ std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
     out << "POST " << "(from calculator)";
   else if (this->requestType==this->requestTypeGetNotCalculator)
     out << "GET " << "(NOT from calculator)";
+  else if (this->requestType==this->requestTypeGetIndicator)
+    out << "GET (indicator)";
   else
     out << "Request type undefined.";
   out << lineBreak << "<hr>Main address raw: " << this->mainAddresSRAW;
@@ -62,7 +66,9 @@ std::string ClientMessage::ToString()const
 
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
-  if (requestType==this->requestTypeGetCalculator || requestType==this->requestTypeGetNotCalculator)
+  if (this->requestType==this->requestTypeGetCalculator ||
+      this->requestType==this->requestTypeGetNotCalculator ||
+      this->requestType==this->requestTypeGetIndicator)
     out << "GET " << this->mainAddresSRAW;
   if (requestType==this->requestTypePostCalculator)
     out << "POST " << this->mainAddresSRAW;
@@ -102,6 +108,10 @@ void ClientMessage::ExtractArgumentFromAddress()
     return;
   this->mainArgument = this->mainAddresSRAW.substr
   (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1, std::string::npos);
+  if (this->mainArgument.size()<=9)
+    return;
+  if (this->mainArgument.substr(0, 9)=="indicator")
+    this->requestType=this->requestTypeGetIndicator;
 }
 
 void ClientMessage::ParseMessage()
@@ -193,11 +203,15 @@ void Socket::SendAllBytes()
     return;
   MacroRegisterFunctionWithName("Socket::SendAllBytes");
   if (this->connectedSocketID==-1)
-    crash << "connectedSocketID with id -1 was requested to send bytes, this shouldn't happen." << crash;
-  std::cout << "\r\nIn response to: " << this->lastMessageReceived.theMessage;
+    crash << "\r\nSocket::SendAllBytes  called with connectedSocketID=-1, this shouldn't happen." << crash;
+//  std::cout << "\r\nIn response to: " << this->lastMessageReceived.theMessage;
   std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   while (this->remainingBytesToSend.size>0)
   { int numBytesSent=send(this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
+    if (numBytesSent<0)
+    { std::cout << "\r\n Socket::SendAllBytes failed. Error: " << this->parent->GetLastErrorDescription();
+      return;
+    }
     std::cout << numBytesSent;
     this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
     if (this->remainingBytesToSend.size>0)
@@ -209,17 +223,23 @@ bool Socket::ReceiveAll()
 { MacroRegisterFunctionWithName("Socket::ReceiveAll");
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
+  if (this->connectedSocketID==-1)
+    crash << "\r\nAttempting to receive on a socket with ID equal to -1. " << crash;
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
+  if (numBytesInBuffer<0)
+  { std::cout << "\r\nSocket::ReceiveAll failed. Error: " << this->parent->GetLastErrorDescription();
+    return false;
+  }
   this->lastMessageReceived.theMessage.assign(buffer, numBytesInBuffer);
-  std::cout << "\r\nConnection " << this->connectionID << ": received " << numBytesInBuffer << " bytes. ";
+  std::cout << "\r\n" << this->parent->GetStatus() << ": received " << numBytesInBuffer << " bytes. ";
   this->lastMessageReceived.ParseMessage();
-  std::cout << "\r\nContent length computed to be: " << this->lastMessageReceived.ContentLength;
-  if (this->lastMessageReceived.ContentLength==-1)
+//  std::cout << "\r\nContent length computed to be: " << this->lastMessageReceived.ContentLength;
+  if (this->lastMessageReceived.ContentLength<=0)
     return true;
   if (this->lastMessageReceived.mainArgument.size()==(unsigned) this->lastMessageReceived.ContentLength)
     return true;
-  std::cout << "\r\nContent-length parsed to be: " << this->lastMessageReceived.ContentLength
-  << "\r\nHowever the size of mainArgument is: " << this->lastMessageReceived.mainArgument.size();
+//  std::cout << "\r\nContent-length parsed to be: " << this->lastMessageReceived.ContentLength
+//  << "\r\nHowever the size of mainArgument is: " << this->lastMessageReceived.mainArgument.size();
   if (this->lastMessageReceived.ContentLength>10000000)
   { error="\r\nContent-length parsed to be more than 10 million bytes, aborting.";
     std::cout << this->error;
@@ -237,9 +257,12 @@ bool Socket::ReceiveAll()
   std::string bufferString;
   while ((signed) this->lastMessageReceived.mainArgument.size()<this->lastMessageReceived.ContentLength)
   { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
-    if (numBytesInBuffer<=0)
-    { this->error= "\r\nWhile trying to fetch message-body, got an error or received 0 bytes. ";
-      std::cout << this->error;
+    if (numBytesInBuffer==0)
+    { this->error= "\r\nWhile trying to fetch message-body, received 0 bytes. " + this->parent->GetLastErrorDescription();
+      return false;
+    }
+    if (numBytesInBuffer<0)
+    { std::cout << "\r\nError fetching message body: " << this->parent->GetLastErrorDescription();
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
@@ -262,6 +285,34 @@ void ClientMessage::ExtractPhysicalAddressFromMainAddress()
     return;
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
   this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
+}
+
+int Socket::ProcessGetRequestIndicator()
+{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestIndicator");
+  if (this->lastMessageReceived.mainArgument.size()<=9)
+  { stOutput << "HTTP/1.1 200 OK\r\n"
+    << "Content-Type: text/html\r\n" << "\r\n"
+    << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
+    return 0;
+  }
+  int inputChildID= atoi(this->lastMessageReceived.mainAddress.substr(9, std::string::npos).c_str());
+  bool isGood=false;
+  if (inputChildID<1 || inputChildID>this->parent->pipeInUse.size)
+    isGood=false;
+  if (!this->parent->pipeInUse[inputChildID-1])
+    isGood=false;
+  if (!isGood)
+  { stOutput << "HTTP/1.1 200 OK\r\n"
+    << "Content-Type: text/html\r\n" << "\r\n"
+    << "<b>Indicator requested child number " << inputChildID << " (out of " << this->parent->pipeInUse.size
+    << ") but the id is either not in use or out of range. </b>";
+    return 0;
+  }
+  stOutput << "HTTP/1.1 200 OK\r\n"
+  << "Content-Type: text/html\r\n" << "\r\n"
+  << "<b>Not implemented: request for indicator " << inputChildID << " out of " << this->parent->pipeInUse.size << ".</b>";
+
+  return 0;
 }
 
 int Socket::ProcessGetRequestFolder()
@@ -295,6 +346,13 @@ int Socket::ProcessGetRequestFolder()
   return 0;
 }
 
+Socket::Socket()
+{ this->connectedSocketID=-1;
+  this->connectionID=-1;
+  this->parent=0;
+
+}
+
 bool Socket::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 { if (fileExtension==".png")
     return true;
@@ -318,7 +376,7 @@ std::string Socket::GetMIMEtypeFromFileExtension(const std::string& fileExtensio
 int Socket::ProcessGetRequestNonCalculator()
 { MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
   this->lastMessageReceived.ExtractPhysicalAddressFromMainAddress();
-  std::cout << this->lastMessageReceived.ToStringShort() << "\r\n";
+  //std::cout << this->lastMessageReceived.ToStringShort() << "\r\n";
   if (FileOperations::IsFolder(this->lastMessageReceived.PhysicalFileName))
     return this->ProcessGetRequestFolder();
   if (!FileOperations::FileExists(this->lastMessageReceived.PhysicalFileName))
@@ -356,10 +414,10 @@ int Socket::ProcessGetRequestNonCalculator()
   theFile.read(&this->bufferFileIO[0], this->bufferFileIO.size);
   int numBytesRead=theFile.gcount();
   ///////////////////
-  std::cout << "*****Message summary begin\r\n" << theHeader.str();
-  std::cout << "Sending file  " << this->lastMessageReceived.PhysicalFileName << " with file extension " << fileExtension
-  << ", file size: " << fileSize;
-  std::cout << "\r\n*****Message summary end\r\n";
+//  std::cout << "*****Message summary begin\r\n" << theHeader.str();
+//  std::cout << "Sending file  " << this->lastMessageReceived.PhysicalFileName; << " with file extension " << fileExtension
+//  << ", file size: " << fileSize;
+//  std::cout << "\r\n*****Message summary end\r\n";
   ///////////////////
   while (numBytesRead!=0)
   { this->bufferFileIO.SetSize(numBytesRead);
@@ -383,9 +441,82 @@ int Socket::ProcessRequestTypeUnknown()
   return 0;
 }
 
+WebServer::~WebServer()
+{ this->ReleaseMyPipe();
+  close(this->listeningSocketID);
+}
+
 WebServer::WebServer()
 { this->flagUsingBuiltInServer=false;
-  this->flagIsChildProcess=false;
+  this->myPipeIndex=-1;
+  this->theSocket.parent=this;
+  this->childPID=0;
+}
+
+void WebServer::ReleaseMyPipe()
+{ //this->
+}
+
+void WebServer::getNewPipe()
+{ MacroRegisterFunctionWithName("WebServer::getNewPipe");
+  if (this->myPipeIndex!=-1)
+  { crash << "Calling getNewPipe requres my pipe index to be -1." << crash;
+    return;
+  }
+  for (int i=0; i<this->pipeInUse.size; i++)
+    if (!this->pipeInUse[i])
+    { this->myPipeIndex=i;
+      break;
+    }
+  if (this->myPipeIndex==-1)
+  { this->myPipeIndex=this->pipeInUse.size;
+    this->pipeInUse.SetSize(this->pipeInUse.size+1);
+    this->pipeChildToParent.SetSize(this->pipeInUse.size);
+    this->pipeParentToChild.SetSize(this->pipeInUse.size);
+    this->pipeChildToParent[this->myPipeIndex].ReservE(2);
+    this->pipeParentToChild[this->myPipeIndex].ReservE(2);
+    this->pipeChildToParent[this->myPipeIndex].size=(2);
+    this->pipeParentToChild[this->myPipeIndex].size=(2);
+
+//    this->pipeChildToParent[this->myPipeIndex].SetSize(2);
+//    this->pipeParentToChild[this->myPipeIndex].SetSize(2);
+  }
+  this->pipeInUse[this->myPipeIndex]=true;
+  if (pipe(this->pipeChildToParent[this->myPipeIndex].TheObjects)<0)
+    crash << "Failed to open pipe from child to parent. " << crash;
+  if (pipe(this->pipeChildToParent[this->myPipeIndex].TheObjects)<0)
+    crash << "Failed to open pipe from parent to child. " << crash;
+}
+
+void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
+{ MacroRegisterFunctionWithName("WebServer::ReadFromPipe");
+  //std::cout << "\r\n\r\nReading from pipe: " << inputPipe[0];
+  if (doNotBlock)
+    fcntl(inputPipe[0], F_SETFL, O_NONBLOCK);
+  else
+    fcntl(inputPipe[0], F_SETFL, 0);
+  for (;;)
+  { this->pipeBuffer.SetSize(4096); // <-once the buffer is resized, this operation does no memory allocation and is fast.
+    int numReadBytes =read(inputPipe[0], this->pipeBuffer.TheObjects, 4096);
+    if (numReadBytes<0)
+      break;
+//    std::cout << " " << numReadBytes << "read, ";
+    this->pipeBuffer.SetSize(numReadBytes);
+    this->lastPipeReadResult.AddListOnTop(this->pipeBuffer);
+  }
+}
+
+std::string WebServer::GetLastErrorDescription()
+{ std::stringstream out;
+  out << this->GetStatus() << (strerror(errno)) << ". ";
+  return out.str();
+}
+
+std::string WebServer::GetStatus()
+{ std::stringstream out;
+  out << "\r\nConnection: " << this->theSocket.connectionID
+  << ", ChildPID: " << this->childPID << ", connectedSocketID: " << this->theSocket.connectedSocketID << ". ";
+  return out.str();
 }
 
 int WebServer::Run()
@@ -393,7 +524,6 @@ int WebServer::Run()
   addrinfo hints, *servinfo, *p;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
-  struct sigaction sa;
   int yes=1;
   char userAddress[INET6_ADDRSTRLEN];
   int rv;
@@ -407,7 +537,8 @@ int WebServer::Run()
   }
   // loop through all the results and bind to the first we can
   for(p = servinfo; p != NULL; p = p->ai_next)
-  { if ((this->listeningSocketID = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+  { this->listeningSocketID= socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+    if (this->listeningSocketID == -1)
     { stOutput << "Error: socket failed\n";
       continue;
     }
@@ -415,7 +546,7 @@ int WebServer::Run()
       crash << "Error: setsockopt failed.\n" << crash;
     if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
     { close(this->listeningSocketID);
-      std::cout << "Error: bind failed. \n";
+      std::cout << "Error: bind failed. " << this->GetLastErrorDescription();
       continue;
     }
     break;
@@ -425,6 +556,7 @@ int WebServer::Run()
   freeaddrinfo(servinfo); // all done with this structure
   if (listen(this->listeningSocketID, BACKLOG) == -1)
     crash << "Listen function failed." << crash;
+  struct sigaction sa;
   sa.sa_handler = sigchld_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
@@ -433,38 +565,71 @@ int WebServer::Run()
   std::cout << "\nServer: waiting for connections...\r\n";
   std::cout.flush();
   unsigned int connectionsSoFar=0;
-  this->flagIsChildProcess=false;
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
     this->theSocket.connectedSocketID = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
-    if (this->theSocket.connectedSocketID == -1)
-    { std::cout << "Accept failed.";
+    if (this->theSocket.connectedSocketID <0)
+    { std::cout << "Accept failed. Error: " << this->GetLastErrorDescription();
       continue;
     }
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
     connectionsSoFar++;
-    std::cout << "\r\nConnection " << connectionsSoFar << ": got connection from " << userAddress;
     std::cout.flush();
-    if (!fork()) //creates an almost identical copy of this process, the original process is the parent, the almost identical copy is the child.
+    this->getNewPipe();
+    this->childPID=fork(); //creates an almost identical copy of this process.
+    //The original process is the parent, the almost identical copy is the child.
+    //std::cout << "\r\nChildPID: " << this->childPID;
+    if (this->childPID!=0)
     { // this is the child process
+      close(this->pipeChildToParent[this->myPipeIndex][0]);
+      close(this->pipeParentToChild[this->myPipeIndex][1]);
+      close(this->listeningSocketID); //child does not need the listener
       InitializeTimer();
-      this->flagIsChildProcess=true;
-      //close(sockfd); child does need the listener
       this->theSocket.connectionID=connectionsSoFar;
       stOutput.theOutputFunction=SendStringToSocket;
       stOutput.flushOutputFunction=FlushSocket;
       onePredefinedCopyOfGlobalVariables.ReturnIndicator=ReturnIndicatorAlthoughComputationIsNotDone;
+      std::cout << "\r\n" << this->GetStatus() << " User address: " << userAddress;
       if (!this->theSocket.ReceiveAll())
       { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->theSocket.error;
         return 0;
       }
       return 1;
     }
+    close(this->pipeChildToParent[this->myPipeIndex][1]);
+    close(this->pipeParentToChild[this->myPipeIndex][0]);
+    this->myPipeIndex=-1;
+
+/*    for (int i=0; i<this->pipeInUse.size; i++)
+      if (this->pipeInUse[i])
+      { this->ReadFromPipe(this->pipeChildToParent[i], true);
+        if (this->lastPipeReadResult=="close")
+          this->pipeInUse[i]=false;
+      }*/
     close(this->theSocket.connectedSocketID);  // parent doesn't need this
   }
   return 0;
 }
+
+int WebServer::ServeClient()
+{ MacroRegisterFunctionWithName("main_client");
+  ClientMessage& theMessage=this->theSocket.lastMessageReceived;
+  if (theMessage.requestType==ClientMessage::requestTypeGetCalculator ||
+      theMessage.requestType==ClientMessage::requestTypePostCalculator)
+  { stOutput << "HTTP/1.1 200 OK\n";
+    stOutput << "Content-Type: text/html\r\n\r\n";
+    theParser.inputStringRawestOfTheRaw=theMessage.mainArgument;
+  }
+  if (theMessage.requestType==theMessage.requestTypeGetNotCalculator)
+    return theWebServer.theSocket.ProcessGetRequestNonCalculator();
+  if (theMessage.requestType==theMessage.requestTypeGetIndicator)
+    return theWebServer.theSocket.ProcessGetRequestIndicator();
+  if (theMessage.requestType==theMessage.requestTypeUnknown)
+    return theWebServer.theSocket.ProcessRequestTypeUnknown();
+  return theWebServer.StandardOutput();
+}
+
 
 int WebServer::StandardOutput()
 { MacroRegisterFunctionWithName("WebServer::StandardOutput");

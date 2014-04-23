@@ -3540,8 +3540,8 @@ bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, con
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
   theCommands.theGlobalVariableS->ReturnIndicator();
   ProgressReport theReport(theCommands.theGlobalVariableS);
-  for (int i=0; i<10000; i++)
-  { theCommands.theGlobalVariableS->FallAsleep(100000);
+  for (int i=0; i<100000; i++)
+  { theCommands.theGlobalVariableS->FallAsleep(1000000);
     std::stringstream reportStream;
     reportStream << " Running indicator test, " << i+1 << " out of 10000.";
     theReport.Report(reportStream.str());

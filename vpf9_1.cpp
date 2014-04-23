@@ -51,6 +51,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   { theFileName="../output/crashdump2.txt";
     succeededToDump=FileOperations::OpenFileCreateIfNotPresent(theFile, theFileName, false, true, false);
   }
+  if (stOutput.theOutputFunction!=0)
+    std::cout << this->theCrashReport.str();
   if (succeededToDump)
     stOutput << "<hr>Crash dumped in file " << theFileName;
   else

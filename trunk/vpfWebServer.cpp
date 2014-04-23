@@ -473,18 +473,15 @@ void WebServer::getNewPipe()
     this->pipeInUse.SetSize(this->pipeInUse.size+1);
     this->pipeChildToParent.SetSize(this->pipeInUse.size);
     this->pipeParentToChild.SetSize(this->pipeInUse.size);
-    this->pipeChildToParent[this->myPipeIndex].ReservE(2);
-    this->pipeParentToChild[this->myPipeIndex].ReservE(2);
-    this->pipeChildToParent[this->myPipeIndex].size=(2);
-    this->pipeParentToChild[this->myPipeIndex].size=(2);
-
+    this->pipeChildToParent[this->myPipeIndex].initFillInObject(2, -1);
+    this->pipeParentToChild[this->myPipeIndex].initFillInObject(2, -1);
 //    this->pipeChildToParent[this->myPipeIndex].SetSize(2);
 //    this->pipeParentToChild[this->myPipeIndex].SetSize(2);
   }
   this->pipeInUse[this->myPipeIndex]=true;
   if (pipe(this->pipeChildToParent[this->myPipeIndex].TheObjects)<0)
     crash << "Failed to open pipe from child to parent. " << crash;
-  if (pipe(this->pipeChildToParent[this->myPipeIndex].TheObjects)<0)
+  if (pipe(this->pipeParentToChild[this->myPipeIndex].TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
 }
 

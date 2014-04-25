@@ -3538,7 +3538,8 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
 
 bool CalculatorFunctionsGeneral::innerTestIndicator(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerTestIndicator");
-  theCommands.theGlobalVariableS->ReturnIndicator();
+  if (theCommands.theGlobalVariableS->ReturnIndicator!=0)
+    theCommands.theGlobalVariableS->ReturnIndicator();
   ProgressReport theReport(theCommands.theGlobalVariableS);
   for (int i=0; i<100000; i++)
   { theCommands.theGlobalVariableS->FallAsleep(1000000);
@@ -3556,7 +3557,6 @@ bool CalculatorFunctionsGeneral::innerRootSAsAndSltwos
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully(CalculatorSerialization::innerSSLieAlgebra, input, ownerSS))
     return output.SetError("Error extracting Lie algebra.", theCommands);
-  CGI::SetCGIServerIgnoreUserAbort();
   std::string outMainDisplayPatH, outMainPatH;
   std::stringstream outSltwoPath, outSltwoDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;

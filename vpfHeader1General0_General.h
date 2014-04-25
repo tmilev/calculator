@@ -1225,11 +1225,6 @@ public:
   static void MakeStdCoutReport(const std::string& input);
   static void MakeReportIndicatorFile(const std::string& input);
   static void FormatCPPSourceCode(const std::string& FileName);
-  static void(*functionCGIServerIgnoreUserAbort)(void);
-  static void SetCGIServerIgnoreUserAbort()
-  { if (CGI::functionCGIServerIgnoreUserAbort!=0)
-      CGI::functionCGIServerIgnoreUserAbort();
-  }
 };
 
 template <class ObjectType1, class ObjectType2, unsigned int hashFunction1(const ObjectType1&),unsigned int hashFunction2(const ObjectType2&)>

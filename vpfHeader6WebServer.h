@@ -12,9 +12,14 @@
 
 static ProjectInformationInstance projectInfoInstanceWebServerHeader(__FILE__, "Web server classes declarations.");
 
-class ClientMessage
+class WebServer;
+class WebWorker
 {
 public:
+  WebServer* parent;
+  bool flagInUse;
+  int indexInParent;
+  int ProcessPID;
   std::string theMessage;
   std::string mainArgument;
   std::string mainAddresSRAW;
@@ -22,79 +27,78 @@ public:
   std::string PhysicalFileName;
   List<std::string> theStrings;
   int ContentLength;
-
   int requestType;
-  ClientMessage():requestType(ClientMessage::requestTypeUnknown){}
-  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator,
-  requestTypeGetIndicator};
-  std::string ToString()const;
-  std::string ToStringShort(FormatExpressions* theFormat=0)const;
-  std::string ToStringFull()const;
-  void ParseMessage();
-  void ExtractArgumentFromAddress();
-  void ExtractPhysicalAddressFromMainAddress();
-  void resetEverythingExceptMessageString();
-};
-
-class WebServer;
-class Socket
-{
-public:
-  WebServer* parent;
   int connectedSocketID;
   int connectionID;
-  ClientMessage lastMessageReceived;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
+  List<int> pipeServerToWorker;
+  List<int> pipeWorkerToServer;
+
   std::string error;
+  void DisplayIndicator(const std::string& input);
+
   int ProcessGetRequestIndicator();
   int ProcessGetRequestNonCalculator();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
+  int ServeClient();
   void QueueStringForSending(const std::string& stringToSend, bool MustSendAll=false);
+  static int StandardOutput();
+  void StandardOutputReturnIndicatorWaitForComputation();
+  bool CheckConsistency();
+  static void StandardOutputPart1BeforeComputation();
+  static void StandardOutputPart2AfterComputation();
+
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
+  void ReleaseResources();
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
-  Socket();
-  ~Socket()
-  { this->SendAllBytes();
-    close(this->connectedSocketID);
-    this->connectedSocketID=-1;
-    this->connectionID=-1;
-  }
+  WebWorker();
+  ~WebWorker();
+  bool IamActive();
   bool ReceiveOnce();
   bool ReceiveAll();
+  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator,
+  requestTypeGetIndicator};
+  std::string ToStringStatus()const;
+  std::string ToStringMessage()const;
+  std::string ToStringMessageShort(FormatExpressions* theFormat=0)const;
+  std::string ToStringMessageFull()const;
+  void ParseMessage();
+  void ExtractArgumentFromAddress();
+  void ExtractPhysicalAddressFromMainAddress();
+  void reset();
+  void resetEverythingExceptMessageString();
 };
 
 class WebServer
 {
 public:
   int listeningSocketID;
-  Socket theSocket;
   bool flagUsingBuiltInServer;
-  int myPipeIndex;
-  int childPID;
-  List<List<int> > pipeChildToParent;
-  List<List<int> > pipeParentToChild;
-  List<bool> pipeInUse;
-  WebServer();
-  ~WebServer();
+  List<WebWorker> theWorkers;
+  int activeWorker;
   List<char> lastPipeReadResult;
   List<char> pipeBuffer;
+  WebServer();
+  ~WebServer();
   void ReadFromPipe(List<int>& inputPipe, bool doNotBlock);
   void SendThroughPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
-  void getNewPipe();
-  void ReleaseMyPipe();
+  void ReleaseActiveWorker();
+  void CreateNewActiveWorker();
   int Run();
-  int StandardOutput();
-  int ServeClient();
-  void StandardOutputPart1BeforeComputation();
-  void StandardOutputPart2AfterComputation();
-  void StandardOutputReturnIndicatorWaitForComputation();
-  std::string GetLastErrorDescription();
-  std::string GetStatus();
+  WebWorker& GetActiveWorker();
+  static void Release(int& theDescriptor);
+  static void FlushActiveWorker();
+  static void DisplayActiveIndicator(const std::string& input);
+  static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
+  static void SendStringThroughActiveWorker(const std::string& input);
+
+  std::string ToStringLastErrorDescription();
+  std::string ToStringStatus();
 };
 #endif

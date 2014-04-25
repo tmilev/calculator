@@ -18,8 +18,6 @@ bool ParallelComputing::flagUngracefulExitInitiated=false;
 long long ParallelComputing::GlobalPointerCounter=0;
 long long ParallelComputing::PointerCounterPeakRamUse=0;
 
-void (*CGI::functionCGIServerIgnoreUserAbort) (void)=0;
-
 //CombinatorialChamberContainer GlobalCollectorChambers;
 //FacetPointers GlobalCollectorFacets;
 

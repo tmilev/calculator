@@ -31,9 +31,9 @@ int main(int argc, char **argv)
   theParser.init(onePredefinedCopyOfGlobalVariables);
 	if (argc>1 && !theWebServer.flagUsingBuiltInServer)
     return main_command_input(argc, argv);
-  if (argc==1 && !theWebServer.flagUsingBuiltInServer)
+  if (argc<=1 && !theWebServer.flagUsingBuiltInServer)
     return main_apache_client();
-  return theWebServer.ServeClient();
+  return theWebServer.GetActiveWorker().ServeClient();
 }
 
 int main_command_input(int argc, char **argv)
@@ -69,5 +69,5 @@ int main_apache_client()
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-  return theWebServer.StandardOutput();
+  return WebWorker::StandardOutput();
 }

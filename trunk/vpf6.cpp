@@ -7,7 +7,6 @@
 #include "vpfImplementationHeader2Math1_SemisimpleLieAlgebras.h"
 #include "vpfImplementationHeader2Math3_FiniteGroups.h"
 
-
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Calculator parser, implementation. ");
 
 Calculator::Calculator()

@@ -14,7 +14,7 @@ const int BACKLOG =10;     // how many pending connections queue will hold
 
 void sigchld_handler(int s)
 { while(waitpid(-1, NULL, WNOHANG) > 0)
-  { std::cout << "\r\nReaping processes input: " << s << "; childID: " << theWebServer.childPID;
+  { std::cout << "\r\nReaping processes input: " << s << ".";
   }
 }
 
@@ -25,7 +25,7 @@ void *get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
+std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
 { std::stringstream out;
   bool useHtml=theFormat==0 ? false: theFormat->flagUseHTML;
   std::string lineBreak= useHtml ? "<br>\n" : "\r\n";
@@ -47,9 +47,9 @@ std::string ClientMessage::ToStringShort(FormatExpressions* theFormat)const
   return out.str();
 }
 
-std::string ClientMessage::ToStringFull()const
+std::string WebWorker::ToStringMessageFull()const
 { std::stringstream out;
-  out << this->ToString();
+  out << this->ToStringMessage();
   if (this->theStrings.size>0)
   { out << "<hr>\nStrings extracted from message: ";
     for (int i =0; i<this->theStrings.size; i++)
@@ -58,11 +58,11 @@ std::string ClientMessage::ToStringFull()const
   return out.str();
 }
 
-std::string ClientMessage::ToString()const
+std::string WebWorker::ToStringMessage()const
 { std::stringstream out;
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
-  out << this->ToStringShort(&tempFormat);
+  out << this->ToStringMessageShort(&tempFormat);
 
   out << "<hr>";
   out << "Main address RAW: " << this->mainAddresSRAW << "<br>";
@@ -76,7 +76,7 @@ std::string ClientMessage::ToString()const
   return out.str();
 }
 
-void ClientMessage::resetEverythingExceptMessageString()
+void WebWorker::resetEverythingExceptMessageString()
 { this->mainArgument="";
   this->mainAddress="";
   this->mainAddresSRAW="";
@@ -86,8 +86,95 @@ void ClientMessage::resetEverythingExceptMessageString()
   this->ContentLength=-1;
 }
 
-void ClientMessage::ExtractArgumentFromAddress()
-{ MacroRegisterFunctionWithName("ClientMessage::ExtractArgumentFromAddress");
+void WebWorker::StandardOutputPart1BeforeComputation()
+{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart1BeforeComputation");
+  onePredefinedCopyOfGlobalVariables.flagComputationComplete=false;
+
+  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
+  stOutput << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie();\">\n";
+  List<std::string> inputStrings, inputStringNames;
+  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
+  std::string& civilizedInput=theParser.inputString;
+  if (inputStringNames.Contains("textInput"))
+    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
+  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
+  PredefinedStrings(civilizedInput);
+
+  crash.userInputStringIfAvailable=civilizedInput;
+
+  std::stringstream tempStreamXX;
+  static_html4(tempStreamXX);
+
+  stOutput << tempStreamXX.str();
+  stOutput << "<table>\n <tr valign=\"top\">\n <td>";
+  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
+  << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
+  std::string civilizedInputSafish;
+  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
+    stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
+    << " modified due to a javascript hijack issue. <br>";
+  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
+  << " this.form.submit(); return false;}\" >";
+  stOutput << civilizedInputSafish;
+  stOutput << "</textarea>\n<br>\n";
+  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
+  if (civilizedInput!="")
+    stOutput << "<a href=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
+  stOutput << "\n</FORM>";
+  stOutput << theParser.javaScriptDisplayingIndicator;
+  //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
+}
+
+void WebWorker::StandardOutputPart2AfterComputation()
+{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart2AfterComputation");
+  if (theParser.inputString!="")
+  { if (theParser.flagProduceLatexLink)
+      stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
+      << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, theParser.inputString);
+    stOutput << theParser.outputString;
+    if (theParser.parsingLog!="")
+      stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
+  }
+  stOutput << "\n\n</td>\n\n";
+  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
+  //displayClientMessage=false;
+  if (theParser.outputCommentsString!="" || displayClientMessage)
+  { stOutput << "<td valign=\"top\">";
+    if (displayClientMessage)
+      stOutput << "<b>Message from client: </b>" << theWebServer.GetActiveWorker().ToStringMessageFull() << "<hr>";
+    //if (theParser.outputCommentsString.size()<10000)
+    stOutput << theParser.outputCommentsString;
+    //else
+    //stOutput << "The comments generated by your computation are a bit too long. If you want to see them click the show/hide button below.<br>"
+    //<< CGI::GetHtmlSpanHidableStartsHiddeN(theParser.outputCommentsString);
+    stOutput << "</td>";
+  }
+  stOutput << "<td valign=\"top\">";
+  ProjectInformation::GetMainProjectInfo().theFiles.QuickSortAscending();
+  stOutput << ProjectInformation::GetMainProjectInfo().ToString();
+  stOutput << "<hr><b>Calculator status. </b><br>";
+  stOutput << theParser.ToString();
+
+  stOutput << "</td></tr></table>";
+  std::stringstream tempStream3;
+  stOutput << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
+  stOutput << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
+  stOutput << "</body></html>";
+  stOutput << "<!--";
+  ProgressReport theReport(theParser.theGlobalVariableS);
+  for(int i=0; i<theParser.SystemCommands.size; i++)
+  { std::stringstream out;
+    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
+    theReport.Report(out.str());
+    system(theParser.SystemCommands[i].c_str());
+  }
+  stOutput << "-->";
+  //close()
+}
+
+void WebWorker::ExtractArgumentFromAddress()
+{ MacroRegisterFunctionWithName("WebWorker::ExtractArgumentFromAddress");
 //  std::cout << "\nmain address:" << this->mainAddress << "=?="
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "\nmainaddress.size: "
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
@@ -114,8 +201,8 @@ void ClientMessage::ExtractArgumentFromAddress()
     this->requestType=this->requestTypeGetIndicator;
 }
 
-void ClientMessage::ParseMessage()
-{ MacroRegisterFunctionWithName("ClientMessage::ParseMessage");
+void WebWorker::ParseMessage()
+{ MacroRegisterFunctionWithName("WebWorker::ParseMessage");
   this->resetEverythingExceptMessageString();
   std::string buffer;
   buffer.reserve(this->theMessage.size());
@@ -164,28 +251,16 @@ void ClientMessage::ParseMessage()
     }
 }
 
-void ReturnIndicatorAlthoughComputationIsNotDone()
-{ theWebServer.StandardOutputReturnIndicatorWaitForComputation();
-}
-
-void FlushSocket()
-{ theWebServer.theSocket.SendAllBytes();
-}
-
-void SendStringToSocket(const std::string& theString)
-{ theWebServer.theSocket.QueueStringForSending(theString, false);
-}
-
-void Socket::QueueBytesForSending
+void WebWorker::QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("Socket::QueueBytesForSending");
+{ MacroRegisterFunctionWithName("WebWorker::QueueBytesForSending");
   this->remainingBytesToSend.AddListOnTop(bytesToSend);
   if (this->remainingBytesToSend.size>=1024*512 || MustSendAll)
     this->SendAllBytes();
 }
 
-void Socket::QueueStringForSending(const std::string& stringToSend, bool MustSendAll)
-{ MacroRegisterFunctionWithName("Socket::SendStringToSocket");
+void WebWorker::QueueStringForSending(const std::string& stringToSend, bool MustSendAll)
+{ MacroRegisterFunctionWithName("WebWorker::SendStringToSocket");
   int oldSize=this->remainingBytesToSend.size;
   this->remainingBytesToSend.SetSize(this->remainingBytesToSend.size+stringToSend.size());
   for (unsigned i=0; i<stringToSend.size(); i++)
@@ -198,18 +273,18 @@ void Socket::QueueStringForSending(const std::string& stringToSend, bool MustSen
     this->SendAllBytes();
 }
 
-void Socket::SendAllBytes()
+void WebWorker::SendAllBytes()
 { if (this->remainingBytesToSend.size==0)
     return;
-  MacroRegisterFunctionWithName("Socket::SendAllBytes");
+  MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
   if (this->connectedSocketID==-1)
     crash << "\r\nSocket::SendAllBytes  called with connectedSocketID=-1, this shouldn't happen." << crash;
-//  std::cout << "\r\nIn response to: " << this->lastMessageReceived.theMessage;
+//  std::cout << "\r\nIn response to: " << this->theMessage;
   std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
   while (this->remainingBytesToSend.size>0)
   { int numBytesSent=send(this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
-    { std::cout << "\r\n Socket::SendAllBytes failed. Error: " << this->parent->GetLastErrorDescription();
+    { std::cout << "\r\n WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription();
       return;
     }
     std::cout << numBytesSent;
@@ -219,33 +294,46 @@ void Socket::SendAllBytes()
   }
 }
 
-bool Socket::ReceiveAll()
-{ MacroRegisterFunctionWithName("Socket::ReceiveAll");
+bool WebWorker::CheckConsistency()
+{ stOutput.theOutputFunction=0;
+  if (this->parent==0)
+    crash << "Parent of web worker is not initialized." << crash;
+  if (this->indexInParent==-1)
+    crash << "Index in parent is bad. " << crash;
+  if (this->connectionID==-1)
+    crash << "Connection id is bad. " << crash;
+  stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
+  return true;
+}
+
+bool WebWorker::ReceiveAll()
+{ MacroRegisterFunctionWithName("WebWorker::ReceiveAll");
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
   if (this->connectedSocketID==-1)
     crash << "\r\nAttempting to receive on a socket with ID equal to -1. " << crash;
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   if (numBytesInBuffer<0)
-  { std::cout << "\r\nSocket::ReceiveAll failed. Error: " << this->parent->GetLastErrorDescription();
+  { std::cout << "\r\nSocket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
+    << this->parent->ToStringLastErrorDescription();
     return false;
   }
-  this->lastMessageReceived.theMessage.assign(buffer, numBytesInBuffer);
-  std::cout << "\r\n" << this->parent->GetStatus() << ": received " << numBytesInBuffer << " bytes. ";
-  this->lastMessageReceived.ParseMessage();
-//  std::cout << "\r\nContent length computed to be: " << this->lastMessageReceived.ContentLength;
-  if (this->lastMessageReceived.ContentLength<=0)
+  this->theMessage.assign(buffer, numBytesInBuffer);
+  std::cout << "\r\n" << this->parent->ToStringStatus() << ": received " << numBytesInBuffer << " bytes. ";
+  this->ParseMessage();
+//  std::cout << "\r\nContent length computed to be: " << this->ContentLength;
+  if (this->ContentLength<=0)
     return true;
-  if (this->lastMessageReceived.mainArgument.size()==(unsigned) this->lastMessageReceived.ContentLength)
+  if (this->mainArgument.size()==(unsigned) this->ContentLength)
     return true;
-//  std::cout << "\r\nContent-length parsed to be: " << this->lastMessageReceived.ContentLength
-//  << "\r\nHowever the size of mainArgument is: " << this->lastMessageReceived.mainArgument.size();
-  if (this->lastMessageReceived.ContentLength>10000000)
+//  std::cout << "\r\nContent-length parsed to be: " << this->ContentLength
+//  << "\r\nHowever the size of mainArgument is: " << this->mainArgument.size();
+  if (this->ContentLength>10000000)
   { error="\r\nContent-length parsed to be more than 10 million bytes, aborting.";
     std::cout << this->error;
     return false;
   }
-  if (this->lastMessageReceived.mainArgument!="")
+  if (this->mainArgument!="")
   { error= "\r\nContent-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
     std::cout << this->error;
     return false;
@@ -253,25 +341,26 @@ bool Socket::ReceiveAll()
   this->remainingBytesToSend="HTTP/1.1 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
-  this->lastMessageReceived.mainArgument="";
+  this->mainArgument="";
   std::string bufferString;
-  while ((signed) this->lastMessageReceived.mainArgument.size()<this->lastMessageReceived.ContentLength)
+  while ((signed) this->mainArgument.size()<this->ContentLength)
   { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
     if (numBytesInBuffer==0)
-    { this->error= "\r\nWhile trying to fetch message-body, received 0 bytes. " + this->parent->GetLastErrorDescription();
+    { this->error= "\r\nWhile trying to fetch message-body, received 0 bytes. " +
+      this->parent->ToStringLastErrorDescription();
       return false;
     }
     if (numBytesInBuffer<0)
-    { std::cout << "\r\nError fetching message body: " << this->parent->GetLastErrorDescription();
+    { std::cout << "\r\nError fetching message body: " << this->parent->ToStringLastErrorDescription();
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
-    this->lastMessageReceived.mainArgument+=bufferString;
+    this->mainArgument+=bufferString;
   }
-  if ((signed) this->lastMessageReceived.mainArgument.size()!=this->lastMessageReceived.ContentLength)
+  if ((signed) this->mainArgument.size()!=this->ContentLength)
   { std::stringstream out;
-    out << "\r\nThe message-body received by me had length " << this->lastMessageReceived.mainArgument.size()
-    << " yet I expected a message of length " << this->lastMessageReceived.ContentLength << ".";
+    out << "\r\nThe message-body received by me had length " << this->mainArgument.size()
+    << " yet I expected a message of length " << this->ContentLength << ".";
     this->error=out.str();
     std::cout << this->error;
     return false;
@@ -279,61 +368,64 @@ bool Socket::ReceiveAll()
   return true;
 }
 
-void ClientMessage::ExtractPhysicalAddressFromMainAddress()
-{ MacroRegisterFunctionWithName("ClientMessage::ExtractPhysicalAddressFromMainAddress");
+void WebWorker::ExtractPhysicalAddressFromMainAddress()
+{ MacroRegisterFunctionWithName("WebWorker::ExtractPhysicalAddressFromMainAddress");
   if (this->mainAddress.size()<onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size())
     return;
   this->PhysicalFileName=onePredefinedCopyOfGlobalVariables.PhysicalPathServerBase+
   this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
 }
 
-int Socket::ProcessGetRequestIndicator()
-{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestIndicator");
-  if (this->lastMessageReceived.mainArgument.size()<=9)
-  { stOutput << "HTTP/1.1 200 OK\r\n"
-    << "Content-Type: text/html\r\n" << "\r\n"
-    << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
+int WebWorker::ProcessGetRequestIndicator()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestIndicator");
+  std::cout << "\r\nProcessing get request indicator.";
+  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  if (this->mainArgument.size()<=9)
+  { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
     return 0;
   }
-  int inputChildID= atoi(this->lastMessageReceived.mainAddress.substr(9, std::string::npos).c_str());
+  int inputWebWorkerID= atoi(this->mainAddress.substr(9, std::string::npos).c_str());
   bool isGood=false;
-  if (inputChildID<1 || inputChildID>this->parent->pipeInUse.size)
+  if (inputWebWorkerID<1 || inputWebWorkerID>this->parent->theWorkers.size)
     isGood=false;
-  if (!this->parent->pipeInUse[inputChildID-1])
-    isGood=false;
+  if (isGood)
+    if (!this->parent->theWorkers[inputWebWorkerID-1].flagInUse)
+      isGood=false;
   if (!isGood)
-  { stOutput << "HTTP/1.1 200 OK\r\n"
-    << "Content-Type: text/html\r\n" << "\r\n"
-    << "<b>Indicator requested child number " << inputChildID << " (out of " << this->parent->pipeInUse.size
+  { stOutput << "<b>Indicator requested child number " << inputWebWorkerID << " (out of "
+    << this->parent->theWorkers.size
     << ") but the id is either not in use or out of range. </b>";
     return 0;
   }
-  stOutput << "HTTP/1.1 200 OK\r\n"
-  << "Content-Type: text/html\r\n" << "\r\n"
-  << "<b>Not implemented: request for indicator " << inputChildID << " out of " << this->parent->pipeInUse.size << ".</b>";
-
+  stOutput << "<b>Not implemented: request for indicator " << inputWebWorkerID << " out of "
+  << this->parent->theWorkers.size << ".</b>";
   return 0;
 }
 
-int Socket::ProcessGetRequestFolder()
-{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestFolder");
+void WebWorker::DisplayIndicator(const std::string& input)
+{
+
+}
+
+int WebWorker::ProcessGetRequestFolder()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestFolder");
   std::stringstream out;
   out << "HTTP/1.1 200 OK\r\n"
-  << "Content-Type: text/html\r\n" << "\r\n"
+  << "Content-Type: text/html\r\n\r\n"
   << "<html><body>";
-  //out << this->lastMessageReceived.ToString();
+  //out << this->ToString();
   List<std::string> theFileNames, theFileTypes;
-  if (!FileOperations::GetFolderFileNames(this->lastMessageReceived.PhysicalFileName, theFileNames, &theFileTypes))
-  { out << "<b>Failed to open directory with physical address " << this->lastMessageReceived.PhysicalFileName
+  if (!FileOperations::GetFolderFileNames(this->PhysicalFileName, theFileNames, &theFileTypes))
+  { out << "<b>Failed to open directory with physical address " << this->PhysicalFileName
     << " </b></body></html>";
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->lastMessageReceived.mainAddress
-  << "<br>Physical address: " << this->lastMessageReceived.PhysicalFileName << "<hr>";
+  out << "Browsing folder: " << this->mainAddress
+  << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
   for (int i=0; i<theFileNames.size; i++)
   { bool isDir= theFileTypes[i]==".d";
-    out << "<a href=\"" << this->lastMessageReceived.mainAddress << theFileNames[i];
+    out << "<a href=\"" << this->mainAddress << theFileNames[i];
     if (isDir)
       out << "/";
     out << "\">" << theFileNames[i];
@@ -346,22 +438,41 @@ int Socket::ProcessGetRequestFolder()
   return 0;
 }
 
-Socket::Socket()
+void WebWorker::reset()
 { this->connectedSocketID=-1;
   this->connectionID=-1;
+  this->indexInParent=-1;
   this->parent=0;
-
+  this->requestType=this->requestTypeUnknown;
+  this->pipeServerToWorker.initFillInObject(2, -1);
+  this->pipeWorkerToServer.initFillInObject(2, -1);
 }
 
-bool Socket::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
+WebWorker::WebWorker()
+{ this->reset();
+}
+
+bool WebWorker::IamActive()
+{ if (this->parent==0)
+    return false;
+  if (this->indexInParent==-1)
+    return false;
+  return this->parent->activeWorker==this->indexInParent;
+}
+
+bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
 { if (fileExtension==".png")
     return true;
 
   return false;
 }
 
-std::string Socket::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
-{ MacroRegisterFunctionWithName("Socket::GetMIMEtypeFromFileExtension");
+WebWorker::~WebWorker()
+{ this->ReleaseResources();
+}
+
+std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
+{ MacroRegisterFunctionWithName("WebWorker::GetMIMEtypeFromFileExtension");
   if (fileExtension==".html")
     return "Content-Type: text/html\r\n";
   if (fileExtension==".txt")
@@ -373,33 +484,33 @@ std::string Socket::GetMIMEtypeFromFileExtension(const std::string& fileExtensio
   return "Content-Type: application/octet-stream\r\n";
 }
 
-int Socket::ProcessGetRequestNonCalculator()
-{ MacroRegisterFunctionWithName("Socket::ProcessGetRequestNonCalculator");
-  this->lastMessageReceived.ExtractPhysicalAddressFromMainAddress();
-  //std::cout << this->lastMessageReceived.ToStringShort() << "\r\n";
-  if (FileOperations::IsFolder(this->lastMessageReceived.PhysicalFileName))
+int WebWorker::ProcessGetRequestNonCalculator()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestNonCalculator");
+  this->ExtractPhysicalAddressFromMainAddress();
+  //std::cout << this->ToStringShort() << "\r\n";
+  if (FileOperations::IsFolder(this->PhysicalFileName))
     return this->ProcessGetRequestFolder();
-  if (!FileOperations::FileExists(this->lastMessageReceived.PhysicalFileName))
+  if (!FileOperations::FileExists(this->PhysicalFileName))
   { stOutput << "HTTP/1.1 404 Object not found\r\n";
     stOutput << "Content-Type: text/html\r\n";
     stOutput << "\r\n";
     stOutput << "<html><body>";
-    stOutput << "<b>File does not exist.</b><br><b> File display name:</b> " << this->lastMessageReceived.mainAddress
-    << "<br><b>File physical name:</b> " << this->lastMessageReceived.PhysicalFileName;
-    stOutput << "<hr><hr><hr>Message details:<br>" <<  this->lastMessageReceived.ToString();
+    stOutput << "<b>File does not exist.</b><br><b> File display name:</b> " << this->mainAddress
+    << "<br><b>File physical name:</b> " << this->PhysicalFileName;
+    stOutput << "<hr><hr><hr>Message details:<br>" <<  this->ToStringMessage();
     stOutput << "</body></html>";
     return 0;
   }
-  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->lastMessageReceived.PhysicalFileName);
+  std::string fileExtension=FileOperations::GetFileExtensionWithDot(this->PhysicalFileName);
   bool isBinary=this->IsFileExtensionOfBinaryFile(fileExtension);
   std::fstream theFile;
-  if (!FileOperations::OpenFile(theFile, this->lastMessageReceived.PhysicalFileName, false, false, !isBinary))
+  if (!FileOperations::OpenFile(theFile, this->PhysicalFileName, false, false, !isBinary))
   { stOutput << "HTTP/1.1 200 OK\r\n" << "Content-Type: text/html\r\n";
     stOutput << "\r\n"
     << "<html><body><b>Error: file appears to exist but I could not open it.</b> "
     << "<br><b> File display name: </b>"
-    << this->lastMessageReceived.mainAddress << "<br><b>File physical name: </b>"
-    << this->lastMessageReceived.PhysicalFileName << "</body></html>";
+    << this->mainAddress << "<br><b>File physical name: </b>"
+    << this->PhysicalFileName << "</body></html>";
     return 0;
   }
   theFile.seekp(0, std::ifstream::end);
@@ -415,7 +526,7 @@ int Socket::ProcessGetRequestNonCalculator()
   int numBytesRead=theFile.gcount();
   ///////////////////
 //  std::cout << "*****Message summary begin\r\n" << theHeader.str();
-//  std::cout << "Sending file  " << this->lastMessageReceived.PhysicalFileName; << " with file extension " << fileExtension
+//  std::cout << "Sending file  " << this->PhysicalFileName; << " with file extension " << fileExtension
 //  << ", file size: " << fileSize;
 //  std::cout << "\r\n*****Message summary end\r\n";
   ///////////////////
@@ -430,59 +541,176 @@ int Socket::ProcessGetRequestNonCalculator()
   return 0;
 }
 
-int Socket::ProcessRequestTypeUnknown()
-{ MacroRegisterFunctionWithName("Socket::ProcessRequestTypeUnknown");
+int WebWorker::ProcessRequestTypeUnknown()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessRequestTypeUnknown");
   stOutput << "HTTP/1.1 501 Method Not Implemented\r\n";
   stOutput << "Content-Type: text/html\r\n";
   stOutput << "\r\n"
   << "<b>Requested method is not implemented. </b> <hr>The original message received from the server follows."
-  << "<hr>\n" << this->lastMessageReceived.ToString();
-
+  << "<hr>\n" << this->ToStringMessage();
   return 0;
 }
 
+int WebWorker::StandardOutput()
+{ MacroRegisterFunctionWithName("WebServer::StandardOutput");
+  WebWorker::StandardOutputPart1BeforeComputation();
+  if (theParser.inputString!="")
+  { theParser.Evaluate(theParser.inputString);
+    onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
+  }
+  WebWorker::StandardOutputPart2AfterComputation();
+  return 0;
+}
+
+int WebWorker::ServeClient()
+{ MacroRegisterFunctionWithName("WebServer::ServeClient");
+  if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypePostCalculator)
+  { stOutput << "HTTP/1.1 200 OK\n";
+    stOutput << "Content-Type: text/html\r\n\r\n";
+    theParser.inputStringRawestOfTheRaw=this->mainArgument;
+  }
+  if (this->requestType==this->requestTypeGetNotCalculator)
+    return this->ProcessGetRequestNonCalculator();
+  if (this->requestType==this->requestTypeGetIndicator)
+    return this->ProcessGetRequestIndicator();
+  if (this->requestType==this->requestTypeUnknown)
+    return this->ProcessRequestTypeUnknown();
+  return this->StandardOutput();
+}
+
+void WebWorker::ReleaseResources()
+{ MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
+  if (this->IamActive())
+    this->SendAllBytes();
+//  std::cout << "Releasing resources: " << this->ToStringStatus();
+  WebServer::Release(this->pipeServerToWorker[0]);
+  WebServer::Release(this->pipeServerToWorker[1]);
+  WebServer::Release(this->pipeWorkerToServer[0]);
+  WebServer::Release(this->pipeWorkerToServer[1]);
+  WebServer::Release(this->connectedSocketID);
+  this->flagInUse=false;
+}
+
+void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
+{ MacroRegisterFunctionWithName("WebServer::StandardOutputReturnIndicatorWaitForComputation");
+  std::stringstream out;
+  out << " <!>\n";
+  out << " <script type=\"text/javascript\"> \n";
+  out << " var timeOutCounter=0;\n";
+//  out << " var newReportString=\"\";\n";
+  out << " var showProgress=false;";
+  out << " function progressReport()\n";
+  out << "{ var el = document.getElementById(\"idProgressReport\");	\n";
+  out << "  if (!showProgress) \n";
+  out << "  { el.style.display = 'none';\n";
+  out << "    return;";
+  out << "  }\n";
+  out << "  el.style.display = '';\n";
+//  out << "  el.contentWindow.location.reload();";
+  out << "  timeOutCounter++;\n";
+  out << "  var oRequest = new XMLHttpRequest();\n";
+  out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath << "?indicator"
+  << this->indexInParent+1 << "\";\n";
+  out << "  oRequest.open(\"GET\",sURL,false);\n";
+//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
+  out << "  oRequest.send(null)\n";
+  out << "  if (oRequest.status==200)\n";
+  out << "  { newReportString= oRequest.responseText;\n";
+  out << "    el.innerHTML= \"<hr>Refreshing each second. Client time: ~\"+ timeOutCounter+\" second(s)<br>\" +newReportString+\"<hr>\";\n";
+  out << "  }\n";
+  out << "   window.setTimeout(\"progressReport()\",1000);\n";
+  out << " }\n";
+  out << " </script>\n";
+  out << "<br><div id=\"idProgressReport\">\n";
+  out << " </div>\n";
+  out << " \n";
+  out << " \n";
+  //////////////////
+  out << "</td></tr></table></body></html>";
+  stOutput << out.str();
+  this->SendAllBytes();
+  WebServer::Release(this->connectedSocketID);
+}
+
+std::string WebWorker::ToStringStatus()const
+{ std::stringstream out;
+  out << "Worker " << this->indexInParent+1 << ", connection " << this->connectionID
+  << ", process ID: " << this->ProcessPID << ", socketID: " << this->connectedSocketID << ". ";
+  return out.str();
+}
+
+void WebServer::DisplayActiveIndicator(const std::string& input)
+{ return theWebServer.GetActiveWorker().DisplayIndicator(input);
+}
+
 WebServer::~WebServer()
-{ this->ReleaseMyPipe();
+{ if (this->activeWorker!=-1)
+    this->ReleaseActiveWorker();
   close(this->listeningSocketID);
+}
+
+void WebServer::ReturnActiveIndicatorAlthoughComputationIsNotDone()
+{ theWebServer.GetActiveWorker().StandardOutputReturnIndicatorWaitForComputation();
+}
+
+void WebServer::FlushActiveWorker()
+{ theWebServer.GetActiveWorker().SendAllBytes();
+}
+
+void WebServer::SendStringThroughActiveWorker(const std::string& theString)
+{ theWebServer.GetActiveWorker().QueueStringForSending(theString, false);
 }
 
 WebServer::WebServer()
 { this->flagUsingBuiltInServer=false;
-  this->myPipeIndex=-1;
-  this->theSocket.parent=this;
-  this->childPID=0;
+  this->activeWorker=-1;
 }
 
-void WebServer::ReleaseMyPipe()
-{ //this->
+WebWorker& WebServer::GetActiveWorker()
+{ MacroRegisterFunctionWithName("WebServer::GetActiveWorker");
+  stOutput.theOutputFunction=0; //<- We are checking if the web server is in order.
+  //Before that we prevent the crashing mechanism from trying to use (the eventually corrput) web server
+  //to report the error over the internet.
+  if (this->activeWorker<0 || this->activeWorker>=this->theWorkers.size)
+    crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
+    << " workers. " << crash;
+  if (!this->theWorkers[this->activeWorker].flagInUse)
+    crash << "Active worker with index " << this->activeWorker << " is marked as not in use." << crash;
+  stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;//<-the web server is in order,
+  //therefore we restore the ability to report crashes over the internet.
+  return this->theWorkers[this->activeWorker];
 }
 
-void WebServer::getNewPipe()
-{ MacroRegisterFunctionWithName("WebServer::getNewPipe");
-  if (this->myPipeIndex!=-1)
-  { crash << "Calling getNewPipe requres my pipe index to be -1." << crash;
+void WebServer::ReleaseActiveWorker()
+{ MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
+  if (this->activeWorker==-1)
+    return;
+  this->GetActiveWorker().ReleaseResources();
+  this->activeWorker=-1;
+}
+
+void WebServer::CreateNewActiveWorker()
+{ MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
+  if (this->activeWorker!=-1)
+  { crash << "Calling CreateNewActiveWorker requres the active worker index to be -1." << crash;
     return;
   }
-  for (int i=0; i<this->pipeInUse.size; i++)
-    if (!this->pipeInUse[i])
-    { this->myPipeIndex=i;
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (!this->theWorkers[i].flagInUse)
+    { this->activeWorker=i;
       break;
     }
-  if (this->myPipeIndex==-1)
-  { this->myPipeIndex=this->pipeInUse.size;
-    this->pipeInUse.SetSize(this->pipeInUse.size+1);
-    this->pipeChildToParent.SetSize(this->pipeInUse.size);
-    this->pipeParentToChild.SetSize(this->pipeInUse.size);
-    this->pipeChildToParent[this->myPipeIndex].initFillInObject(2, -1);
-    this->pipeParentToChild[this->myPipeIndex].initFillInObject(2, -1);
-//    this->pipeChildToParent[this->myPipeIndex].SetSize(2);
-//    this->pipeParentToChild[this->myPipeIndex].SetSize(2);
+  if (this->activeWorker==-1)
+  { this->activeWorker=this->theWorkers.size;
+    this->theWorkers.SetSize(this->theWorkers.size+1);
   }
-  this->pipeInUse[this->myPipeIndex]=true;
-  if (pipe(this->pipeChildToParent[this->myPipeIndex].TheObjects)<0)
+  this->theWorkers[this->activeWorker].flagInUse=true;
+  if (pipe(this->GetActiveWorker().pipeServerToWorker.TheObjects)<0)
     crash << "Failed to open pipe from child to parent. " << crash;
-  if (pipe(this->pipeParentToChild[this->myPipeIndex].TheObjects)<0)
+  if (pipe(this->GetActiveWorker().pipeWorkerToServer.TheObjects)<0)
     crash << "Failed to open pipe from parent to child. " << crash;
+  this->GetActiveWorker().indexInParent=this->activeWorker;
+  this->GetActiveWorker().parent=this;
 }
 
 void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
@@ -503,16 +731,20 @@ void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
   }
 }
 
-std::string WebServer::GetLastErrorDescription()
+std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << this->GetStatus() << (strerror(errno)) << ". ";
+  out << this->ToStringStatus() << (strerror(errno)) << ". ";
   return out.str();
 }
 
-std::string WebServer::GetStatus()
-{ std::stringstream out;
-  out << "\r\nConnection: " << this->theSocket.connectionID
-  << ", ChildPID: " << this->childPID << ", connectedSocketID: " << this->theSocket.connectedSocketID << ". ";
+std::string WebServer::ToStringStatus()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatus");
+  if (this->activeWorker==-1)
+    return "Server.";
+  std::stringstream out;
+  if (this->activeWorker!=this->GetActiveWorker().indexInParent)
+    crash << "Bad index in parent!" << crash;
+  out << "\r\n" << this->GetActiveWorker().ToStringStatus();
   return out.str();
 }
 
@@ -543,7 +775,7 @@ int WebServer::Run()
       crash << "Error: setsockopt failed.\n" << crash;
     if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
     { close(this->listeningSocketID);
-      std::cout << "Error: bind failed. " << this->GetLastErrorDescription();
+      std::cout << "Error: bind failed. " << this->ToStringLastErrorDescription();
       continue;
     }
     break;
@@ -565,202 +797,53 @@ int WebServer::Run()
   while(1)
   { // main accept() loop
     sin_size = sizeof their_addr;
-    this->theSocket.connectedSocketID = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
-    if (this->theSocket.connectedSocketID <0)
-    { std::cout << "Accept failed. Error: " << this->GetLastErrorDescription();
+    int newConnectedSocket = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
+    if (newConnectedSocket <0)
+    { std::cout << "Accept failed. Error: " << this->ToStringLastErrorDescription();
       continue;
     }
     inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
     connectionsSoFar++;
     std::cout.flush();
-    this->getNewPipe();
-    this->childPID=fork(); //creates an almost identical copy of this process.
+    this->CreateNewActiveWorker();
+    this->GetActiveWorker().connectedSocketID=newConnectedSocket;
+//    std::cout << this->ToStringStatus();
+    this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
     //std::cout << "\r\nChildPID: " << this->childPID;
-    if (this->childPID!=0)
+    if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child process
-      close(this->pipeChildToParent[this->myPipeIndex][0]);
-      close(this->pipeParentToChild[this->myPipeIndex][1]);
-      close(this->listeningSocketID); //child does not need the listener
+      this->Release(this->GetActiveWorker().pipeWorkerToServer[0]); //child does not need the read end
+      this->Release(this->GetActiveWorker().pipeServerToWorker[1]); //child does not need the write end
+      this->Release(this->listeningSocketID); //child does not need the listener
       InitializeTimer();
-      this->theSocket.connectionID=connectionsSoFar;
-      stOutput.theOutputFunction=SendStringToSocket;
-      stOutput.flushOutputFunction=FlushSocket;
-      onePredefinedCopyOfGlobalVariables.ReturnIndicator=ReturnIndicatorAlthoughComputationIsNotDone;
-      std::cout << "\r\n" << this->GetStatus() << " User address: " << userAddress;
-      if (!this->theSocket.ReceiveAll())
-      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->theSocket.error;
+      this->GetActiveWorker().connectionID=connectionsSoFar;
+      stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
+      stOutput.flushOutputFunction=this->FlushActiveWorker;
+      onePredefinedCopyOfGlobalVariables.ReturnIndicator=this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
+      std::cout << "\r\n" << this->ToStringStatus() << " User address: " << userAddress;
+      this->GetActiveWorker().CheckConsistency();
+      if (!this->GetActiveWorker().ReceiveAll())
+      { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->GetActiveWorker().error;
         return 0;
       }
       return 1;
     }
-    close(this->pipeChildToParent[this->myPipeIndex][1]);
-    close(this->pipeParentToChild[this->myPipeIndex][0]);
-    this->myPipeIndex=-1;
-
+    this->Release(this->GetActiveWorker().pipeWorkerToServer[1]);//parent does not need the write end
+    this->Release(this->GetActiveWorker().pipeServerToWorker[0]);//parent does nto need the read end
+    this->Release(this->GetActiveWorker().connectedSocketID);  // parent doesn't need this
+    this->activeWorker=-1; //Active worker is needed only in the child process.
 /*    for (int i=0; i<this->pipeInUse.size; i++)
       if (this->pipeInUse[i])
       { this->ReadFromPipe(this->pipeChildToParent[i], true);
         if (this->lastPipeReadResult=="close")
           this->pipeInUse[i]=false;
       }*/
-    close(this->theSocket.connectedSocketID);  // parent doesn't need this
   }
   return 0;
 }
 
-int WebServer::ServeClient()
-{ MacroRegisterFunctionWithName("main_client");
-  ClientMessage& theMessage=this->theSocket.lastMessageReceived;
-  if (theMessage.requestType==ClientMessage::requestTypeGetCalculator ||
-      theMessage.requestType==ClientMessage::requestTypePostCalculator)
-  { stOutput << "HTTP/1.1 200 OK\n";
-    stOutput << "Content-Type: text/html\r\n\r\n";
-    theParser.inputStringRawestOfTheRaw=theMessage.mainArgument;
-  }
-  if (theMessage.requestType==theMessage.requestTypeGetNotCalculator)
-    return theWebServer.theSocket.ProcessGetRequestNonCalculator();
-  if (theMessage.requestType==theMessage.requestTypeGetIndicator)
-    return theWebServer.theSocket.ProcessGetRequestIndicator();
-  if (theMessage.requestType==theMessage.requestTypeUnknown)
-    return theWebServer.theSocket.ProcessRequestTypeUnknown();
-  return theWebServer.StandardOutput();
-}
-
-
-int WebServer::StandardOutput()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutput");
-  this->StandardOutputPart1BeforeComputation();
-  if (theParser.inputString!="")
-  { theParser.Evaluate(theParser.inputString);
-    onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
-  }
-  this->StandardOutputPart2AfterComputation();
-  return 0;
-}
-
-void WebServer::StandardOutputPart1BeforeComputation()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart1BeforeComputation");
-  onePredefinedCopyOfGlobalVariables.flagComputationComplete=false;
-  CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
-
-  stOutput << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>calculator version  " << __DATE__ << ", " << __TIME__ << "</title>";
-  stOutput << "<script src=\"../jsmath/easy/load.js\"></script>\n</head>\n<body onload=\"checkCookie();\">\n";
-  List<std::string> inputStrings, inputStringNames;
-  CGI::ChopCGIInputStringToMultipleStrings(theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
-  std::string& civilizedInput=theParser.inputString;
-  if (inputStringNames.Contains("textInput"))
-    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
-  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
-  PredefinedStrings(civilizedInput);
-
-  crash.userInputStringIfAvailable=civilizedInput;
-
-  std::stringstream tempStreamXX;
-  static_html4(tempStreamXX);
-
-  stOutput << tempStreamXX.str();
-  stOutput << "<table>\n <tr valign=\"top\">\n <td>";
-  stOutput << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
-  << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "\">\n" ;
-  std::string civilizedInputSafish;
-  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
-    stOutput << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are "
-    << " modified due to a javascript hijack issue. <br>";
-  stOutput << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
-  << " this.form.submit(); return false;}\" >";
-  stOutput << civilizedInputSafish;
-  stOutput << "</textarea>\n<br>\n";
-  stOutput << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
-  if (civilizedInput!="")
-    stOutput << "<a href=\"" << theParser.theGlobalVariableS->DisplayNameCalculatorWithPath << "?" << theParser.inputStringRawestOfTheRaw << "\">Link to your input.</a>";
-  stOutput << "\n</FORM>";
-  stOutput << theParser.javaScriptDisplayingIndicator;
-  //  stOutput << "<br>Number of lists created before evaluation: " << NumListsCreated;
-}
-
-void WebServer::StandardOutputReturnIndicatorWaitForComputation()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputReturnIndicatorWaitForComputation");
-  std::stringstream out;
-  out << " <!>\n";
-  out << " <script type=\"text/javascript\"> \n";
-  out << " var timeOutCounter=0;\n";
-//  out << " var newReportString=\"\";\n";
-  out << " var showProgress=false;";
-  out << " function progressReport()\n";
-  out << "{ var el = document.getElementById(\"idProgressReport\");	\n";
-  out << "  if (!showProgress) \n";
-  out << "  { el.style.display = 'none';\n";
-  out << "    return;";
-  out << "  }\n";
-  out << "  el.style.display = '';\n";
-//  out << "  el.contentWindow.location.reload();";
-  out << "  timeOutCounter++;\n";
-  out << "  var oRequest = new XMLHttpRequest();\n";
-  out << "  var sURL  = \"" << onePredefinedCopyOfGlobalVariables.DisplayNameIndicatorWithPath << "\";\n";
-  out << "  oRequest.open(\"GET\",sURL,false);\n";
-//  out << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
-  out << "  oRequest.send(null)\n";
-  out << "  if (oRequest.status==200)\n";
-  out << "  { newReportString= oRequest.responseText;\n";
-  out << "    el.innerHTML= \"<hr>Refreshing each second. Client time: ~\"+ timeOutCounter+\" second(s)<br>\" +newReportString+\"<hr>\";\n";
-  out << "  }\n";
-  out << "   window.setTimeout(\"progressReport()\",1000);\n";
-  out << " }\n";
-  out << " </script>\n";
-  out << "<br><div id=\"idProgressReport\">\n";
-  out << " </div>\n";
-  out << " \n";
-  out << " \n";
-  //////////////////
-  out << "</td></tr></table></body></html>";
-  stOutput << out.str();
-}
-
-void WebServer::StandardOutputPart2AfterComputation()
-{ MacroRegisterFunctionWithName("WebServer::StandardOutputPart2AfterComputation");
-  if (theParser.inputString!="")
-  { if (theParser.flagProduceLatexLink)
-      stOutput << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
-      << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw, theParser.inputString);
-    stOutput << theParser.outputString;
-    if (theParser.parsingLog!="")
-      stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
-  }
-  stOutput << "\n\n</td>\n\n";
-  bool displayClientMessage=theWebServer.flagUsingBuiltInServer;
-  //displayClientMessage=false;
-  if (theParser.outputCommentsString!="" || displayClientMessage)
-  { stOutput << "<td valign=\"top\">";
-    if (displayClientMessage)
-      stOutput << "<b>Message from client: </b>" << theWebServer.theSocket.lastMessageReceived.ToStringFull() << "<hr>";
-    //if (theParser.outputCommentsString.size()<10000)
-    stOutput << theParser.outputCommentsString;
-    //else
-    //stOutput << "The comments generated by your computation are a bit too long. If you want to see them click the show/hide button below.<br>"
-    //<< CGI::GetHtmlSpanHidableStartsHiddeN(theParser.outputCommentsString);
-    stOutput << "</td>";
-  }
-  stOutput << "<td valign=\"top\">";
-  ProjectInformation::GetMainProjectInfo().theFiles.QuickSortAscending();
-  stOutput << ProjectInformation::GetMainProjectInfo().ToString();
-  stOutput << "<hr><b>Calculator status. </b><br>";
-  stOutput << theParser.ToString();
-
-  stOutput << "</td></tr></table>";
-  std::stringstream tempStream3;
-  stOutput << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
-  stOutput << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
-  stOutput << "</body></html>";
-  stOutput << "<!--";
-  ProgressReport theReport(theParser.theGlobalVariableS);
-  for(int i=0; i<theParser.SystemCommands.size; i++)
-  { std::stringstream out;
-    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
-    theReport.Report(out.str());
-    system(theParser.SystemCommands[i].c_str());
-  }
-  stOutput << "-->";
-  //close()
+void WebServer::Release(int& theDescriptor)
+{ close(theDescriptor);
+  theDescriptor=-1;
 }

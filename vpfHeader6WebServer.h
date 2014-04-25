@@ -20,8 +20,9 @@ public:
   bool flagInUse;
   int indexInParent;
   int ProcessPID;
+  std::string userAddress;
   std::string theMessage;
-  std::string mainArgument;
+  std::string mainArgumentRAW;
   std::string mainAddresSRAW;
   std::string mainAddress;
   std::string PhysicalFileName;
@@ -29,6 +30,7 @@ public:
   int ContentLength;
   int requestType;
   int connectedSocketID;
+  int connectedSocketIDLastValueBeforeRelease;
   int connectionID;
   List<char> remainingBytesToSend;
   List<char> bufferFileIO;
@@ -40,6 +42,7 @@ public:
 
   int ProcessGetRequestIndicator();
   int ProcessGetRequestNonCalculator();
+  int ProcessGetStatus();
   int ProcessGetRequestFolder();
   int ProcessRequestTypeUnknown();
   int ServeClient();
@@ -62,7 +65,7 @@ public:
   bool IamActive();
   bool ReceiveOnce();
   bool ReceiveAll();
-  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator,
+  enum{requestTypeUnknown, requestTypeGetCalculator, requestTypePostCalculator, requestTypeGetNotCalculator, requestTypeGetServerStatus,
   requestTypeGetIndicator};
   std::string ToStringStatus()const;
   std::string ToStringMessage()const;
@@ -72,7 +75,7 @@ public:
   void ExtractArgumentFromAddress();
   void ExtractPhysicalAddressFromMainAddress();
   void reset();
-  void resetEverythingExceptMessageString();
+  void resetMessageComponenetsExceptRawMessage();
 };
 
 class WebServer
@@ -99,6 +102,7 @@ public:
   static void SendStringThroughActiveWorker(const std::string& input);
 
   std::string ToStringLastErrorDescription();
-  std::string ToStringStatus();
+  std::string ToStringStatusActive();
+  std::string ToStringStatusAll();
 };
 #endif

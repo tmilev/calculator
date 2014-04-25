@@ -42,7 +42,7 @@ std::string WebWorker::ToStringMessageShort(FormatExpressions* theFormat)const
     out << "Request type undefined.";
   out << lineBreak << "<hr>Main address raw: " << this->mainAddresSRAW;
   out << lineBreak << "<br>Main address: " << this->mainAddress;
-  out << lineBreak << "Main argument: " << this->mainArgument;
+  out << lineBreak << "Main argument: " << this->mainArgumentRAW;
   out << lineBreak << "Physical file address referred to by main address: " << this->PhysicalFileName;
   return out.str();
 }
@@ -76,8 +76,8 @@ std::string WebWorker::ToStringMessage()const
   return out.str();
 }
 
-void WebWorker::resetEverythingExceptMessageString()
-{ this->mainArgument="";
+void WebWorker::resetMessageComponenetsExceptRawMessage()
+{ this->mainArgumentRAW="";
   this->mainAddress="";
   this->mainAddresSRAW="";
   this->PhysicalFileName="";
@@ -180,30 +180,21 @@ void WebWorker::ExtractArgumentFromAddress()
 //  << this->mainAddress.size() << "\nonePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size(): "
 //  << onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size();
   CGI::CivilizedStringTranslationFromCGI(this->mainAddresSRAW, this->mainAddress);
-  this->mainArgument ="";
-  if (this->mainAddresSRAW.size()<onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size())
-    return;
-  if (this->mainAddresSRAW.size()==0)
-    return;
-  std::string theAddressNoCalculator=
-  this->mainAddresSRAW.substr(0, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size());
-//  std::cout << "\nthe address no calculator:" << theAddressNoCalculator;
-  if (theAddressNoCalculator!=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath)
+  this->mainArgumentRAW="";
+  std::string calculatorArgumentRawWithQuestionMark, tempS;
+  if (!MathRoutines::StringBeginsWith(this->mainAddresSRAW, onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath, &calculatorArgumentRawWithQuestionMark))
     return;
   this->requestType=this->requestTypeGetCalculator;
-  if (this->mainAddresSRAW.size()<=onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1)
-    return;
-  this->mainArgument = this->mainAddresSRAW.substr
-  (onePredefinedCopyOfGlobalVariables.DisplayNameCalculatorWithPath.size()+1, std::string::npos);
-  if (this->mainArgument.size()<=9)
-    return;
-  if (this->mainArgument.substr(0, 9)=="indicator")
+  MathRoutines::SplitStringInTwo(calculatorArgumentRawWithQuestionMark, 1, tempS, this->mainArgumentRAW);
+  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "indicator"))
     this->requestType=this->requestTypeGetIndicator;
+  if (MathRoutines::StringBeginsWith(this->mainArgumentRAW, "status"))
+    this->requestType=this->requestTypeGetServerStatus;
 }
 
 void WebWorker::ParseMessage()
 { MacroRegisterFunctionWithName("WebWorker::ParseMessage");
-  this->resetEverythingExceptMessageString();
+  this->resetMessageComponenetsExceptRawMessage();
   std::string buffer;
   buffer.reserve(this->theMessage.size());
   this->theStrings.SetExpectedSize(20);
@@ -235,9 +226,9 @@ void WebWorker::ParseMessage()
       if (i<this->theStrings.size)
       { this->mainAddresSRAW=this->theStrings[i];
         if (*this->theStrings.LastObject()!="!CRLF!")
-          this->mainArgument=*this->theStrings.LastObject();
+          this->mainArgumentRAW=*this->theStrings.LastObject();
         else
-          this->mainArgument="";
+          this->mainArgumentRAW="";
       }
     } else if ((this->theStrings[i]=="Content-Length:" || this->theStrings[i]=="Content-length:" ||
                 this->theStrings[i]=="content-length:")
@@ -319,21 +310,21 @@ bool WebWorker::ReceiveAll()
     return false;
   }
   this->theMessage.assign(buffer, numBytesInBuffer);
-  std::cout << "\r\n" << this->parent->ToStringStatus() << ": received " << numBytesInBuffer << " bytes. ";
+  std::cout << "\r\n" << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. ";
   this->ParseMessage();
 //  std::cout << "\r\nContent length computed to be: " << this->ContentLength;
   if (this->ContentLength<=0)
     return true;
-  if (this->mainArgument.size()==(unsigned) this->ContentLength)
+  if (this->mainArgumentRAW.size()==(unsigned) this->ContentLength)
     return true;
 //  std::cout << "\r\nContent-length parsed to be: " << this->ContentLength
-//  << "\r\nHowever the size of mainArgument is: " << this->mainArgument.size();
+//  << "\r\nHowever the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength>10000000)
   { error="\r\nContent-length parsed to be more than 10 million bytes, aborting.";
     std::cout << this->error;
     return false;
   }
-  if (this->mainArgument!="")
+  if (this->mainArgumentRAW!="")
   { error= "\r\nContent-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
     std::cout << this->error;
     return false;
@@ -341,9 +332,9 @@ bool WebWorker::ReceiveAll()
   this->remainingBytesToSend="HTTP/1.1 100 Continue\r\n";
   this->SendAllBytes();
   this->remainingBytesToSend.SetSize(0);
-  this->mainArgument="";
+  this->mainArgumentRAW="";
   std::string bufferString;
-  while ((signed) this->mainArgument.size()<this->ContentLength)
+  while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
     if (numBytesInBuffer==0)
     { this->error= "\r\nWhile trying to fetch message-body, received 0 bytes. " +
@@ -355,11 +346,11 @@ bool WebWorker::ReceiveAll()
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
-    this->mainArgument+=bufferString;
+    this->mainArgumentRAW+=bufferString;
   }
-  if ((signed) this->mainArgument.size()!=this->ContentLength)
+  if ((signed) this->mainArgumentRAW.size()!=this->ContentLength)
   { std::stringstream out;
-    out << "\r\nThe message-body received by me had length " << this->mainArgument.size()
+    out << "\r\nThe message-body received by me had length " << this->mainArgumentRAW.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
     this->error=out.str();
     std::cout << this->error;
@@ -376,11 +367,18 @@ void WebWorker::ExtractPhysicalAddressFromMainAddress()
   this->mainAddress.substr(onePredefinedCopyOfGlobalVariables.DisplayPathServerBase.size(), std::string::npos);
 }
 
+int WebWorker::ProcessGetStatus()
+{ MacroRegisterFunctionWithName("WebWorker::ProcessGetStatus");
+  stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+  stOutput << "<html><body> " << this->parent->ToStringStatusAll() << "</body></html>";
+  return 0;
+}
+
 int WebWorker::ProcessGetRequestIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestIndicator");
   std::cout << "\r\nProcessing get request indicator.";
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-  if (this->mainArgument.size()<=9)
+  if (this->mainArgumentRAW.size()<=9)
   { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
     return 0;
   }
@@ -440,6 +438,7 @@ int WebWorker::ProcessGetRequestFolder()
 
 void WebWorker::reset()
 { this->connectedSocketID=-1;
+  this->connectedSocketIDLastValueBeforeRelease=-1;
   this->connectionID=-1;
   this->indexInParent=-1;
   this->parent=0;
@@ -567,12 +566,14 @@ int WebWorker::ServeClient()
   if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypePostCalculator)
   { stOutput << "HTTP/1.1 200 OK\n";
     stOutput << "Content-Type: text/html\r\n\r\n";
-    theParser.inputStringRawestOfTheRaw=this->mainArgument;
+    theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
   }
   if (this->requestType==this->requestTypeGetNotCalculator)
     return this->ProcessGetRequestNonCalculator();
   if (this->requestType==this->requestTypeGetIndicator)
     return this->ProcessGetRequestIndicator();
+  if (this->requestType==this->requestTypeGetServerStatus)
+    return this->ProcessGetStatus();
   if (this->requestType==this->requestTypeUnknown)
     return this->ProcessRequestTypeUnknown();
   return this->StandardOutput();
@@ -634,8 +635,17 @@ void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "Worker " << this->indexInParent+1 << ", connection " << this->connectionID
-  << ", process ID: " << this->ProcessPID << ", socketID: " << this->connectedSocketID << ". ";
+  out << "Worker " << this->indexInParent+1 << ", connection " << this->connectionID << ", process ID: ";
+  if (this->ProcessPID!=0)
+    out << this->ProcessPID;
+  else
+    out << "(n/a)";
+  out << ", socketID: ";
+  if (this->connectedSocketID==-1)
+    out << "released, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
+  else
+    out << this->connectedSocketID;
+  out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
 
@@ -682,7 +692,7 @@ WebWorker& WebServer::GetActiveWorker()
 }
 
 void WebServer::ReleaseActiveWorker()
-{ MacroRegisterFunctionWithName("WebServer::CreateNewActiveWorker");
+{ MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
   if (this->activeWorker==-1)
     return;
   this->GetActiveWorker().ReleaseResources();
@@ -733,12 +743,12 @@ void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
 
 std::string WebServer::ToStringLastErrorDescription()
 { std::stringstream out;
-  out << this->ToStringStatus() << (strerror(errno)) << ". ";
+  out << this->ToStringStatusActive() << (strerror(errno)) << ". ";
   return out.str();
 }
 
-std::string WebServer::ToStringStatus()
-{ MacroRegisterFunctionWithName("WebServer::ToStringStatus");
+std::string WebServer::ToStringStatusActive()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusActive");
   if (this->activeWorker==-1)
     return "Server.";
   std::stringstream out;
@@ -748,13 +758,28 @@ std::string WebServer::ToStringStatus()
   return out.str();
 }
 
+std::string WebServer::ToStringStatusAll()
+{ MacroRegisterFunctionWithName("WebServer::ToStringStatusFull");
+  std::stringstream out;
+  if (this->activeWorker==-1)
+    out << "The process is functioning as a server.";
+  else
+  { out << "The process is functioning as a worker. The active worker is number " << this->activeWorker+1 << ".";
+    out << "<br>" << this->ToStringStatusActive();
+  }
+  out << "<hr>Total workers: " << this->theWorkers.size;
+  for (int i=0; i<this->theWorkers.size; i++)
+    out << "<br>" << this->theWorkers[i].ToStringStatus();
+  return out.str();
+}
+
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   addrinfo hints, *servinfo, *p;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;
   int yes=1;
-  char userAddress[INET6_ADDRSTRLEN];
+  char userAddressBuffer[INET6_ADDRSTRLEN];
   int rv;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
@@ -802,11 +827,14 @@ int WebServer::Run()
     { std::cout << "Accept failed. Error: " << this->ToStringLastErrorDescription();
       continue;
     }
-    inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddress, sizeof userAddress);
-    connectionsSoFar++;
-    std::cout.flush();
     this->CreateNewActiveWorker();
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
+    this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
+    connectionsSoFar++;
+    this->GetActiveWorker().connectionID=connectionsSoFar;
+    inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), userAddressBuffer, sizeof userAddressBuffer);
+    this->GetActiveWorker().userAddress=userAddressBuffer;
+    std::cout.flush();
 //    std::cout << this->ToStringStatus();
     this->GetActiveWorker().ProcessPID=fork(); //creates an almost identical copy of this process.
     //The original process is the parent, the almost identical copy is the child.
@@ -817,11 +845,10 @@ int WebServer::Run()
       this->Release(this->GetActiveWorker().pipeServerToWorker[1]); //child does not need the write end
       this->Release(this->listeningSocketID); //child does not need the listener
       InitializeTimer();
-      this->GetActiveWorker().connectionID=connectionsSoFar;
       stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
       stOutput.flushOutputFunction=this->FlushActiveWorker;
       onePredefinedCopyOfGlobalVariables.ReturnIndicator=this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
-      std::cout << "\r\n" << this->ToStringStatus() << " User address: " << userAddress;
+      std::cout << "\r\n" << this->ToStringStatusActive();
       this->GetActiveWorker().CheckConsistency();
       if (!this->GetActiveWorker().ReceiveAll())
       { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->GetActiveWorker().error;

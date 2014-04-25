@@ -2333,6 +2333,24 @@ bool Cone::IsInCone(const Vector<Rational>& point) const
   return true;
 }
 
+void MathRoutines::SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond)
+{ if (&outputFirst==&inputString || &outputSecond==&inputString)
+  { std::string inputCopy=inputString;
+    MathRoutines::SplitStringInTwo(inputCopy, firstStringSize, outputFirst, outputSecond);
+    return;
+  }
+  if (firstStringSize<0)
+    firstStringSize=0;
+  if (firstStringSize>(signed) inputString.size())
+    firstStringSize=inputString.size();
+  outputFirst="";
+  outputFirst=inputString.substr(0, firstStringSize);
+  outputSecond="";
+  int secondStringSize=inputString.size()-firstStringSize;
+  if (secondStringSize>0)
+    outputSecond= inputString.substr(firstStringSize, secondStringSize);
+}
+
 void MathRoutines::NChooseK(int n, int k, LargeInt& result)
 { result=1;
   for (int i=0; i<k; i++)

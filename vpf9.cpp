@@ -540,14 +540,14 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   Rational tempRat2, tempRat, tempRat3;
   normal.MakeZero(input.size);
   for (int i=0; i<input.size; i++)
-  { if (input.TheObjects[i].IsPositiveOrZero())
-      normal.TheObjects[i]+=1;
+  { if (input[i].IsPositiveOrZero())
+      normal[i]+=1;
     else
-      normal.TheObjects[i]+=-1;
+      normal[i]+=-1;
   }
   basepoint.MakeZero(input.size);
-  basepoint.TheObjects[0].AssignInteger(1);
-  if (input.TheObjects[0].IsNegative())
+  basepoint[0].AssignInteger(1);
+  if (input[0].IsNegative())
     basepoint.Minus();
 //////////////////////////////////////////////////
   output.ScalarEuclidean(normal, tempRat2);
@@ -556,8 +556,7 @@ void DrawingVariables::ProjectOnToHyperPlaneGraphics(Vector<Rational>& input, Ve
   { tempRat3=tempRat;
     tempRat3.DivideBy(tempRat2);
     output*=tempRat3;
-  }
-  else
+  } else
     output.MakeZero(input.size);
 }
 
@@ -590,14 +589,14 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
   Vector<Rational> tempRoot;
   Rational tempRat;
   for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
-  { Vector<Rational>& currentRoot = theSet.TheObjects[indexFirstNonZeroRoot];
+  { Vector<Rational>& currentRoot = theSet[indexFirstNonZeroRoot];
     tempRat= this->RootScalarCartanRoot(input, currentRoot)/this->RootScalarCartanRoot(currentRoot, currentRoot);
     if (tempRat.IsPositive())
       if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
        { theNewSet.size=0;
          for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
-           if (this->IsStronglyPerpendicularTo(currentRoot, theSet.TheObjects[i]))
-             theNewSet.AddOnTop(theSet.TheObjects[i]);
+           if (this->IsStronglyPerpendicularTo(currentRoot, theSet[i]))
+             theNewSet.AddOnTop(theSet[i]);
          outputCoeffs.AddOnTop(tempRat);
          output.AddOnTop(currentRoot);
          tempRoot = input-currentRoot*tempRat;

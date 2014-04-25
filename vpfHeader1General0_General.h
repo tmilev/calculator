@@ -387,6 +387,14 @@ public:
   (List<theType>& inputOutputElts, int upperDimensionBound, void (*theBinaryOperation)(const theType& left, const theType& right, theType& output),
    GlobalVariables* theGlobalVariables=0);
 //  static void NChooseK(int n, int k, LargeInt& output);//
+  static bool StringBeginsWith(const std::string& theString, const std::string& desiredBeginning, std::string* outputStringEnd=0)
+  { std::string actualBeginning, tempS;
+    if (outputStringEnd==0)
+      outputStringEnd=&tempS;
+    MathRoutines::SplitStringInTwo(theString, desiredBeginning.size(), actualBeginning, *outputStringEnd);
+    return actualBeginning==desiredBeginning;
+  }
+  static void SplitStringInTwo(const std::string& inputString, int firstStringSize, std::string& outputFirst, std::string& outputSecond);
   static void NChooseK(int n, int k, LargeInt& result);
   static int NChooseK(int n, int k)
   { int result=1;

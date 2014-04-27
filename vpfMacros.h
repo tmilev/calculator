@@ -78,8 +78,9 @@ class Crasher
   GlobalVariables* theGlobalVariables;
   std::string userInputStringIfAvailable;
   std::stringstream theCrashReport;
+  void (*CleanUpFunction)();
   bool flagFirstRun; //<-we crash only once, and we do not resume execution after a crash
-  Crasher():theGlobalVariables(0), flagFirstRun(true){}
+  Crasher();
   void FirstRun();
   static std::string GetStackTraceEtcErrorMessage();
   Crasher& operator<<(const std::string& input);

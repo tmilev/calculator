@@ -52,7 +52,7 @@ void SleepFunction(int nanoseconds)
 void* RunTimerVoidPtr(void* ptr)
 { double elapsedtime=-1;
   for (; ;)
-  { SleepFunction(100);
+  { SleepFunction(100000);
     elapsedtime=GetElapsedTimeInSeconds();
     if (onePredefinedCopyOfGlobalVariables.flagComputationComplete)
       break;

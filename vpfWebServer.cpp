@@ -9,13 +9,32 @@ extern void static_html3(std::stringstream& output);
 
 WebServer theWebServer;
 
+std::string consoleBlue(const std::string& input)
+{ std::stringstream out ;
+  out << "\e[1;34m" << input << "\e[0m";
+  return out.str();
+}
+
+std::string consoleRed(const std::string& input)
+{ std::stringstream out ;
+  out << "\e[1;31m" << input << "\e[0m";
+  return out.str();
+}
+
 const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
-void sigchld_handler(int s)
+void Signal_SIGINT_handler(int s)
 { while(waitpid(-1, NULL, WNOHANG) > 0)
-  { std::cout << "\r\nReaping processes input: " << s << ".";
-  }
+  { }
+//  exit(0);
+}
+
+void Signal_SIGCHLD_handler(int s)
+{ std::cout << "Signal child handler called with input: " << s << "." << std::endl;
+//  std::cout.flush();
+//  while(waitpid(-1, NULL, WNOHANG) > 0)
+//  { }
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -269,19 +288,20 @@ void WebWorker::SendAllBytes()
     return;
   MacroRegisterFunctionWithName("WebWorker::SendAllBytes");
   if (this->connectedSocketID==-1)
-    crash << "\r\nSocket::SendAllBytes  called with connectedSocketID=-1, this shouldn't happen." << crash;
+    crash << "Socket::SendAllBytes  called with connectedSocketID=-1, this shouldn't happen." << crash;
 //  std::cout << "\r\nIn response to: " << this->theMessage;
-  std::cout << "\r\nSending " << this->remainingBytesToSend.size << " bytes in chunks of: ";
+  std::cout << "Sending " << this->remainingBytesToSend.size << " bytes in chunks of: " << std::endl;
   while (this->remainingBytesToSend.size>0)
   { int numBytesSent=send(this->connectedSocketID, &this->remainingBytesToSend[0], this->remainingBytesToSend.size,0);
     if (numBytesSent<0)
-    { std::cout << "\r\n WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription();
+    { std::cout << "WebWorker::SendAllBytes failed. Error: " << this->parent->ToStringLastErrorDescription() << std::endl;
       return;
     }
     std::cout << numBytesSent;
     this->remainingBytesToSend.Slice(numBytesSent, this->remainingBytesToSend.size-numBytesSent);
     if (this->remainingBytesToSend.size>0)
       std::cout << ", ";
+    std::cout << std::endl;
   }
 }
 
@@ -302,31 +322,31 @@ bool WebWorker::ReceiveAll()
   unsigned const int bufferSize=60000;
   char buffer[bufferSize];
   if (this->connectedSocketID==-1)
-    crash << "\r\nAttempting to receive on a socket with ID equal to -1. " << crash;
+    crash << "Attempting to receive on a socket with ID equal to -1. " << crash;
   int numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
   if (numBytesInBuffer<0)
-  { std::cout << "\r\nSocket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
-    << this->parent->ToStringLastErrorDescription();
+  { std::cout << "Socket::ReceiveAll on socket " << this->connectedSocketID << " failed. Error: "
+    << this->parent->ToStringLastErrorDescription() << std::endl;
     return false;
   }
   this->theMessage.assign(buffer, numBytesInBuffer);
-  std::cout << "\r\n" << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. ";
+  std::cout << this->parent->ToStringStatusActive() << ": received " << numBytesInBuffer << " bytes. " << std::endl;
   this->ParseMessage();
-//  std::cout << "\r\nContent length computed to be: " << this->ContentLength;
+//  std::cout << "Content length computed to be: " << this->ContentLength;
   if (this->ContentLength<=0)
     return true;
   if (this->mainArgumentRAW.size()==(unsigned) this->ContentLength)
     return true;
-//  std::cout << "\r\nContent-length parsed to be: " << this->ContentLength
-//  << "\r\nHowever the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
+//  std::cout << "Content-length parsed to be: " << this->ContentLength
+//  << "However the size of mainArgumentRAW is: " << this->mainArgumentRAW.size();
   if (this->ContentLength>10000000)
-  { error="\r\nContent-length parsed to be more than 10 million bytes, aborting.";
-    std::cout << this->error;
+  { error="Content-length parsed to be more than 10 million bytes, aborting.";
+    std::cout << this->error << std::endl;
     return false;
   }
   if (this->mainArgumentRAW!="")
-  { error= "\r\nContent-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
-    std::cout << this->error;
+  { error= "Content-length does not coincide with the size of the message-body, yet the message-body is non-empty. Aborting.";
+    std::cout << this->error << std::endl;
     return false;
   }
   this->remainingBytesToSend="HTTP/1.1 100 Continue\r\n";
@@ -337,12 +357,12 @@ bool WebWorker::ReceiveAll()
   while ((signed) this->mainArgumentRAW.size()<this->ContentLength)
   { numBytesInBuffer= recv(this->connectedSocketID, &buffer, bufferSize-1, 0);
     if (numBytesInBuffer==0)
-    { this->error= "\r\nWhile trying to fetch message-body, received 0 bytes. " +
+    { this->error= "While trying to fetch message-body, received 0 bytes. " +
       this->parent->ToStringLastErrorDescription();
       return false;
     }
     if (numBytesInBuffer<0)
-    { std::cout << "\r\nError fetching message body: " << this->parent->ToStringLastErrorDescription();
+    { std::cout << "Error fetching message body: " << this->parent->ToStringLastErrorDescription() << std::endl;
       return false;
     }
     bufferString.assign(buffer, numBytesInBuffer);
@@ -350,10 +370,10 @@ bool WebWorker::ReceiveAll()
   }
   if ((signed) this->mainArgumentRAW.size()!=this->ContentLength)
   { std::stringstream out;
-    out << "\r\nThe message-body received by me had length " << this->mainArgumentRAW.size()
+    out << "The message-body received by me had length " << this->mainArgumentRAW.size()
     << " yet I expected a message of length " << this->ContentLength << ".";
     this->error=out.str();
-    std::cout << this->error;
+    std::cout << this->error << std::endl;
     return false;
   }
   return true;
@@ -376,7 +396,7 @@ int WebWorker::ProcessGetStatus()
 
 int WebWorker::ProcessGetRequestIndicator()
 { MacroRegisterFunctionWithName("WebWorker::ProcessGetRequestIndicator");
-  std::cout << "\r\nProcessing get request indicator.";
+  std::cout << "Processing get request indicator." << std::endl;
   stOutput << "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
   if (this->mainArgumentRAW.size()<=9)
   { stOutput << "<b>Indicator takes as argument the id of the child process that is running the computation.</b>";
@@ -391,8 +411,7 @@ int WebWorker::ProcessGetRequestIndicator()
       isGood=false;
   if (!isGood)
   { stOutput << "<b>Indicator requested child number " << inputWebWorkerID << " (out of "
-    << this->parent->theWorkers.size
-    << ") but the id is either not in use or out of range. </b>";
+    << this->parent->theWorkers.size << ") but the id is either not in use or out of range. </b>";
     return 0;
   }
   stOutput << "<b>Not implemented: request for indicator " << inputWebWorkerID << " out of "
@@ -419,8 +438,7 @@ int WebWorker::ProcessGetRequestFolder()
     stOutput << out.str();
     return 0;
   }
-  out << "Browsing folder: " << this->mainAddress
-  << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
+  out << "Browsing folder: " << this->mainAddress << "<br>Physical address: " << this->PhysicalFileName << "<hr>";
   for (int i=0; i<theFileNames.size; i++)
   { bool isDir= theFileTypes[i]==".d";
     out << "<a href=\"" << this->mainAddress << theFileNames[i];
@@ -452,9 +470,7 @@ WebWorker::WebWorker()
 }
 
 bool WebWorker::IamActive()
-{ if (this->parent==0)
-    return false;
-  if (this->indexInParent==-1)
+{ if (this->parent==0 || this->indexInParent==-1)
     return false;
   return this->parent->activeWorker==this->indexInParent;
 }
@@ -466,8 +482,18 @@ bool WebWorker::IsFileExtensionOfBinaryFile(const std::string& fileExtension)
   return false;
 }
 
+void WebWorker::SignalIamDoneReleaseEverything()
+{ MacroRegisterFunctionWithName("WebWorker::SignalIamDoneReleaseEverything");
+  if (!this->IamActive())
+    return;
+  std::cout << consoleRed("Worker: ") << this->indexInParent+1  << consoleRed(" is done with the work. ") << std::endl;
+  this->parent->SendThroughPipe("close", this->pipeWorkerToServer, false);
+  std::cout << consoleRed("Notification dispatched.") << std::endl;
+  this->ReleaseResourcesMarkNotInUse();
+}
+
 WebWorker::~WebWorker()
-{ this->ReleaseResources();
+{
 }
 
 std::string WebWorker::GetMIMEtypeFromFileExtension(const std::string& fileExtension)
@@ -558,6 +584,7 @@ int WebWorker::StandardOutput()
     onePredefinedCopyOfGlobalVariables.flagComputationComplete=true;
   }
   WebWorker::StandardOutputPart2AfterComputation();
+  //exit(0);
   return 0;
 }
 
@@ -567,19 +594,20 @@ int WebWorker::ServeClient()
   { stOutput << "HTTP/1.1 200 OK\n";
     stOutput << "Content-Type: text/html\r\n\r\n";
     theParser.inputStringRawestOfTheRaw=this->mainArgumentRAW;
-  }
-  if (this->requestType==this->requestTypeGetNotCalculator)
-    return this->ProcessGetRequestNonCalculator();
-  if (this->requestType==this->requestTypeGetIndicator)
-    return this->ProcessGetRequestIndicator();
-  if (this->requestType==this->requestTypeGetServerStatus)
-    return this->ProcessGetStatus();
-  if (this->requestType==this->requestTypeUnknown)
-    return this->ProcessRequestTypeUnknown();
-  return this->StandardOutput();
+    this->StandardOutput();
+  } else if (this->requestType==this->requestTypeGetNotCalculator)
+    this->ProcessGetRequestNonCalculator();
+  else if (this->requestType==this->requestTypeGetIndicator)
+    this->ProcessGetRequestIndicator();
+  else if (this->requestType==this->requestTypeGetServerStatus)
+    this->ProcessGetStatus();
+  else if (this->requestType==this->requestTypeUnknown)
+    this->ProcessRequestTypeUnknown();
+  this->SignalIamDoneReleaseEverything();
+  return 0;
 }
 
-void WebWorker::ReleaseResources()
+void WebWorker::ReleaseResourcesKeepUseStatus()
 { MacroRegisterFunctionWithName("WebServer::ReleaseMyPipe");
   if (this->IamActive())
     this->SendAllBytes();
@@ -589,6 +617,10 @@ void WebWorker::ReleaseResources()
   WebServer::Release(this->pipeWorkerToServer[0]);
   WebServer::Release(this->pipeWorkerToServer[1]);
   WebServer::Release(this->connectedSocketID);
+}
+
+void WebWorker::ReleaseResourcesMarkNotInUse()
+{ this->ReleaseResourcesKeepUseStatus();
   this->flagInUse=false;
 }
 
@@ -635,14 +667,19 @@ void WebWorker::StandardOutputReturnIndicatorWaitForComputation()
 
 std::string WebWorker::ToStringStatus()const
 { std::stringstream out;
-  out << "Worker " << this->indexInParent+1 << ", connection " << this->connectionID << ", process ID: ";
+  out << "Worker " << this->indexInParent+1;
+  if (this->flagInUse)
+    out << ", in use";
+  else
+    out << ", not in use";
+  out << ", connection " << this->connectionID << ", process ID: ";
   if (this->ProcessPID!=0)
     out << this->ProcessPID;
   else
-    out << "(n/a)";
+    out << "(not accessible)";
   out << ", socketID: ";
   if (this->connectedSocketID==-1)
-    out << "released, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
+    out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
   out << ", user address: " << this->userAddress << ".";
@@ -684,19 +721,32 @@ WebWorker& WebServer::GetActiveWorker()
   if (this->activeWorker<0 || this->activeWorker>=this->theWorkers.size)
     crash << "Active worker index is " << this->activeWorker << " however I have " << this->theWorkers.size
     << " workers. " << crash;
-  if (!this->theWorkers[this->activeWorker].flagInUse)
-    crash << "Active worker with index " << this->activeWorker << " is marked as not in use." << crash;
   stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;//<-the web server is in order,
   //therefore we restore the ability to report crashes over the internet.
   return this->theWorkers[this->activeWorker];
+}
+
+void WebServer::SignalActiveWorkerDoneReleaseEverything()
+{ MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
+  if (theWebServer.activeWorker==-1)
+    return;
+  theWebServer.GetActiveWorker().SignalIamDoneReleaseEverything();
+  theWebServer.activeWorker=-1;
 }
 
 void WebServer::ReleaseActiveWorker()
 { MacroRegisterFunctionWithName("WebServer::ReleaseActiveWorker");
   if (this->activeWorker==-1)
     return;
-  this->GetActiveWorker().ReleaseResources();
+  this->GetActiveWorker().ReleaseResourcesMarkNotInUse();
   this->activeWorker=-1;
+}
+
+void WebServer::ReleaseNonActiveWorkers()
+{ MacroRegisterFunctionWithName("WebServer::ReleaseNonActiveWorkers");
+  for (int i=0; i<this->theWorkers.size; i++)
+    if (i!=this->activeWorker)
+      this->theWorkers[i].ReleaseResourcesKeepUseStatus();
 }
 
 void WebServer::CreateNewActiveWorker()
@@ -723,17 +773,47 @@ void WebServer::CreateNewActiveWorker()
   this->GetActiveWorker().parent=this;
 }
 
+void WebServer::SendThroughPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock)
+{ MacroRegisterFunctionWithName("WebServer::SendThroughPipe");
+  std::cout << consoleRed("Sending ") << toBeSent.size()
+  << consoleRed(" bytes through pipe ") << outputPipe[1] << std::endl;
+  if (outputPipe[1]==-1)
+    return;
+/*  if (doNotBlock)
+    std::cout << ", NON-blocking." << std::endl;
+  else
+    std::cout << ", BLOCKING." << std::endl;*/
+  if (doNotBlock)
+    fcntl(outputPipe[1], F_SETFL, O_NONBLOCK);
+  else
+    fcntl(outputPipe[1], F_SETFL, 0);
+  std::string toBeSentCopy=toBeSent;
+  for (;;)
+  { this->pipeBuffer.SetSize(4096); // <-once the buffer is resized, this operation does no memory allocation and is fast.
+    int numBytesRemaining=toBeSentCopy.size();
+    int numBytesWritten=write(outputPipe[1], toBeSentCopy.c_str(), toBeSentCopy.size());
+    numBytesRemaining-=numBytesWritten;
+    if (numBytesWritten<=0)
+      return;
+    if (numBytesRemaining<=0)
+      return;
+    toBeSentCopy= toBeSentCopy.substr(numBytesWritten, numBytesRemaining);
+  }
+}
+
+
 void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
 { MacroRegisterFunctionWithName("WebServer::ReadFromPipe");
-  //std::cout << "\r\n\r\nReading from pipe: " << inputPipe[0];
+  std::cout << consoleBlue("Reading from pipe: ") << inputPipe[0] << std::endl;
   if (doNotBlock)
     fcntl(inputPipe[0], F_SETFL, O_NONBLOCK);
   else
     fcntl(inputPipe[0], F_SETFL, 0);
+  this->lastPipeReadResult.SetSize(0);
   for (;;)
   { this->pipeBuffer.SetSize(4096); // <-once the buffer is resized, this operation does no memory allocation and is fast.
     int numReadBytes =read(inputPipe[0], this->pipeBuffer.TheObjects, 4096);
-    if (numReadBytes<0)
+    if (numReadBytes<=0)
       break;
 //    std::cout << " " << numReadBytes << "read, ";
     this->pipeBuffer.SetSize(numReadBytes);
@@ -754,7 +834,7 @@ std::string WebServer::ToStringStatusActive()
   std::stringstream out;
   if (this->activeWorker!=this->GetActiveWorker().indexInParent)
     crash << "Bad index in parent!" << crash;
-  out << "\r\n" << this->GetActiveWorker().ToStringStatus();
+  out << this->GetActiveWorker().ToStringStatus();
   return out.str();
 }
 
@@ -786,7 +866,7 @@ int WebServer::Run()
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE; // use my IP
   if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
-  { std::cout << "getaddrinfo: " << gai_strerror(rv);
+  { std::cout << "getaddrinfo: " << gai_strerror(rv) << std::endl;
     return 1;
   }
   // loop through all the results and bind to the first we can
@@ -800,7 +880,7 @@ int WebServer::Run()
       crash << "Error: setsockopt failed.\n" << crash;
     if (bind(this->listeningSocketID, p->ai_addr, p->ai_addrlen) == -1)
     { close(this->listeningSocketID);
-      std::cout << "Error: bind failed. " << this->ToStringLastErrorDescription();
+      std::cout << "Error: bind failed. " << this->ToStringLastErrorDescription() << std::endl;
       continue;
     }
     break;
@@ -811,22 +891,40 @@ int WebServer::Run()
   if (listen(this->listeningSocketID, BACKLOG) == -1)
     crash << "Listen function failed." << crash;
   struct sigaction sa;
-  sa.sa_handler = sigchld_handler; // reap all dead processes
+  sa.sa_handler = &Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
-    std::cout << "sigaction returned -1";
-  std::cout << "\nServer: waiting for connections...\r\n";
-  std::cout.flush();
+    std::cout << "sigaction returned -1" << std::endl;
+  sa.sa_handler=&Signal_SIGINT_handler;
+  if (sigaction(SIGINT, &sa, NULL) == -1)
+    std::cout << "sigaction returned -1" << std::endl;
+  std::cout << "Server: waiting for connections...\r\n" << std::endl;
   unsigned int connectionsSoFar=0;
-  while(1)
+  while(true)
   { // main accept() loop
     sin_size = sizeof their_addr;
     int newConnectedSocket = accept(this->listeningSocketID, (struct sockaddr *)&their_addr, &sin_size);
     if (newConnectedSocket <0)
-    { std::cout << "Accept failed. Error: " << this->ToStringLastErrorDescription();
+    { std::cout << "Accept failed. Error: " << this->ToStringLastErrorDescription() << std::endl;
       continue;
     }
+    //Listen for children who have exited properly.
+    //This might need to be rewritten: I wasn't able to make this work with any
+    //mechanism other than pipes. This probably due to my lack of skill or UNIX's
+    //crappy design (and is most likely due to both).
+    for (int i=0; i<this->theWorkers.size; i++)
+      if (this->theWorkers[i].flagInUse)
+      { std::cout << "Reading from server: worker: " << i+1 << std::endl;
+        this->ReadFromPipe(this->theWorkers[i].pipeWorkerToServer, true);
+        std::string tempS;
+        tempS.assign(this->lastPipeReadResult.TheObjects, this->lastPipeReadResult.size);
+        std::cout << "String read: " << tempS << std::endl;
+        if (tempS=="close" && this->lastPipeReadResult!= (std::string) "close")
+          crash << "bad darned list" << crash;
+        if (this->lastPipeReadResult==(std::string) "close")
+          this->theWorkers[i].flagInUse=false;
+      }
     this->CreateNewActiveWorker();
     this->GetActiveWorker().connectedSocketID=newConnectedSocket;
     this->GetActiveWorker().connectedSocketIDLastValueBeforeRelease=newConnectedSocket;
@@ -840,15 +938,20 @@ int WebServer::Run()
     //The original process is the parent, the almost identical copy is the child.
     //std::cout << "\r\nChildPID: " << this->childPID;
     if (this->GetActiveWorker().ProcessPID!=0)
-    { // this is the child process
-      this->Release(this->GetActiveWorker().pipeWorkerToServer[0]); //child does not need the read end
-      this->Release(this->GetActiveWorker().pipeServerToWorker[1]); //child does not need the write end
-      this->Release(this->listeningSocketID); //child does not need the listener
+    { // this is the child (worker) process
+      //releasing all resources worker does not need:
+      this->ReleaseNonActiveWorkers(); //worker has no access to the resources of the other workers
+      this->Release(this->GetActiveWorker().pipeWorkerToServer[0]); //no access to read end
+      this->Release(this->GetActiveWorker().pipeServerToWorker[1]); //no access to write end
+      this->Release(this->listeningSocketID); //release socket listener
       InitializeTimer();
+      CreateTimerThread();
+      onePredefinedCopyOfGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=5000;
+      crash.CleanUpFunction=WebServer::SignalActiveWorkerDoneReleaseEverything;
       stOutput.theOutputFunction=WebServer::SendStringThroughActiveWorker;
       stOutput.flushOutputFunction=this->FlushActiveWorker;
       onePredefinedCopyOfGlobalVariables.ReturnIndicator=this->ReturnActiveIndicatorAlthoughComputationIsNotDone;
-      std::cout << "\r\n" << this->ToStringStatusActive();
+      std::cout << this->ToStringStatusActive() << std::endl;
       this->GetActiveWorker().CheckConsistency();
       if (!this->GetActiveWorker().ReceiveAll())
       { stOutput << "HTTP/1.1 400 Bad Request\r\nContent-type: text/html\r\n\r\n" << this->GetActiveWorker().error;
@@ -856,16 +959,11 @@ int WebServer::Run()
       }
       return 1;
     }
-    this->Release(this->GetActiveWorker().pipeWorkerToServer[1]);//parent does not need the write end
-    this->Release(this->GetActiveWorker().pipeServerToWorker[0]);//parent does nto need the read end
-    this->Release(this->GetActiveWorker().connectedSocketID);  // parent doesn't need this
-    this->activeWorker=-1; //Active worker is needed only in the child process.
-/*    for (int i=0; i<this->pipeInUse.size; i++)
-      if (this->pipeInUse[i])
-      { this->ReadFromPipe(this->pipeChildToParent[i], true);
-        if (this->lastPipeReadResult=="close")
-          this->pipeInUse[i]=false;
-      }*/
+    this->Release(this->GetActiveWorker().pipeWorkerToServer[1]);//release write end
+    this->Release(this->GetActiveWorker().pipeServerToWorker[0]);//release read end
+    this->Release(this->GetActiveWorker().connectedSocketID);  //release socket:
+    //the communication is handled by the worker
+    this->activeWorker=-1; //The active worker is needed only in the child process.
   }
   return 0;
 }

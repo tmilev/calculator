@@ -56,7 +56,9 @@ public:
   void QueueBytesForSending
   (const List<char>& bytesToSend, bool MustSendAll=false)
   ;
-  void ReleaseResources();
+  void SignalIamDoneReleaseEverything();
+  void ReleaseResourcesMarkNotInUse();
+  void ReleaseResourcesKeepUseStatus();
   void SendAllBytes();
   std::string GetMIMEtypeFromFileExtension(const std::string& fileExtension);
   bool IsFileExtensionOfBinaryFile(const std::string& fileExtension);
@@ -92,10 +94,12 @@ public:
   void ReadFromPipe(List<int>& inputPipe, bool doNotBlock);
   void SendThroughPipe(const std::string& toBeSent, List<int>& outputPipe, bool doNotBlock);
   void ReleaseActiveWorker();
+  void ReleaseNonActiveWorkers();
   void CreateNewActiveWorker();
   int Run();
   WebWorker& GetActiveWorker();
   static void Release(int& theDescriptor);
+  static void SignalActiveWorkerDoneReleaseEverything();
   static void FlushActiveWorker();
   static void DisplayActiveIndicator(const std::string& input);
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();

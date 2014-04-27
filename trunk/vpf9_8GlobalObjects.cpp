@@ -9,6 +9,7 @@ GlobalVariables onePredefinedCopyOfGlobalVariables;
 Calculator theParser;
 FormatExpressions consoleFormat;
 
+
 void InitializeGlobalObjects()
 { //stOutput << "Content-Type: text/html\n\n";
   InitializeTimer();

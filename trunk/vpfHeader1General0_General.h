@@ -291,9 +291,10 @@ public:
       }
       ParallelComputing::flagUngracefulExitInitiated=true;
       tempMutex.UnlockMe();
-      stOutput << "<b>Error:</b> Number of pointers allocated exceeded allowed <b>limit of " <<
-      ParallelComputing::cgiLimitRAMuseNumPointersInList << ".</b>\n<br><b>Signalling ungraceful exit...</b>";
-      std::exit(0);
+      crash << "This may or may not be an error: the number of pointers "
+      << "allocated by the program exceeded the allowed <b>limit of "
+      << ParallelComputing::cgiLimitRAMuseNumPointersInList
+      << ".</b>" << crash;
     }
     if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
       ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
@@ -1104,18 +1105,30 @@ public:
     this->CheckConsistency();
     return this->TheObjects[i];
   }
-  inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
-  inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
+  inline bool operator!=(const List<Object>& other)const
+  { return !this->IsEqualTo(other);
+  }
+  inline bool operator==(const List<Object>& other)const
+  { return this->IsEqualTo(other);
+  }
   bool operator>(const List<Object>& other)const;
   bool operator<(const List<Object>& other)const;
   void ShiftUpExpandOnTop(int StartingIndex);
   void Slice(int StartingIndex, int SizeOfSlice);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
+  List(const std::string& input)
+  { this->initConstructorCallOnly();
+    this->SetSize((signed) input.size());
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]=input[i];
+  }
   template <unsigned int a>
   List(const Object (&other)[a])
   { this->initConstructorCallOnly();
     this->SetSize(a);
+//    std::cout << std::endl << "list constructor input is: " << other << "(total " << this->size
+//    << " elements)" << std::endl;
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]=other[i];
   }

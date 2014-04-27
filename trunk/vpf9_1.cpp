@@ -9,6 +9,12 @@ ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Math routines impleme
 Crasher crash;
 StdoutClass stOutput;
 
+Crasher::Crasher()
+{ this->theGlobalVariables=0;
+  this->flagFirstRun=true;
+  this->CleanUpFunction=0;
+}
+
 void Crasher::FirstRun()
 { if (this->flagFirstRun)
     this->theCrashReport << "\n<hr>\n\n";
@@ -60,6 +66,8 @@ Crasher& Crasher::operator<<(const Crasher& dummyCrasherSignalsActualCrash)
   theFile << this->theCrashReport.str();
   theFile.close();
   stOutput.Flush();
+  if (this->CleanUpFunction!=0)
+    this->CleanUpFunction();
   assert(false);
   return *this;
 }

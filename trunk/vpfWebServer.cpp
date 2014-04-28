@@ -590,6 +590,9 @@ int WebWorker::StandardOutput()
 
 int WebWorker::ServeClient()
 { MacroRegisterFunctionWithName("WebServer::ServeClient");
+  if (this->requestType==this->requestTypeGetIndicator)
+    this->parent->ReleaseNonActiveWorkers();
+    //unless the worker is an indicator, it has no access to communication channels of the other workers
   if (this->requestType==this->requestTypeGetCalculator || this->requestType==this->requestTypePostCalculator)
   { stOutput << "HTTP/1.1 200 OK\n";
     stOutput << "Content-Type: text/html\r\n\r\n";
@@ -598,8 +601,9 @@ int WebWorker::ServeClient()
   } else if (this->requestType==this->requestTypeGetNotCalculator)
     this->ProcessGetRequestNonCalculator();
   else if (this->requestType==this->requestTypeGetIndicator)
-    this->ProcessGetRequestIndicator();
-  else if (this->requestType==this->requestTypeGetServerStatus)
+  { this->ProcessGetRequestIndicator();
+    this->parent->ReleaseNonActiveWorkers();
+  } else if (this->requestType==this->requestTypeGetServerStatus)
     this->ProcessGetStatus();
   else if (this->requestType==this->requestTypeUnknown)
     this->ProcessRequestTypeUnknown();
@@ -764,6 +768,7 @@ void WebServer::CreateNewActiveWorker()
   { this->activeWorker=this->theWorkers.size;
     this->theWorkers.SetSize(this->theWorkers.size+1);
   }
+  this->GetActiveWorker().ReleaseResourcesMarkNotInUse();
   this->theWorkers[this->activeWorker].flagInUse=true;
   if (pipe(this->GetActiveWorker().pipeServerToWorker.TheObjects)<0)
     crash << "Failed to open pipe from child to parent. " << crash;
@@ -940,7 +945,6 @@ int WebServer::Run()
     if (this->GetActiveWorker().ProcessPID!=0)
     { // this is the child (worker) process
       //releasing all resources worker does not need:
-      this->ReleaseNonActiveWorkers(); //worker has no access to the resources of the other workers
       this->Release(this->GetActiveWorker().pipeWorkerToServer[0]); //no access to read end
       this->Release(this->GetActiveWorker().pipeServerToWorker[1]); //no access to write end
       this->Release(this->listeningSocketID); //release socket listener

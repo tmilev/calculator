@@ -646,6 +646,11 @@ struct ExpressionTripleCrunchers
 
 class Calculator
 {
+  template<typename anyType>
+  friend Calculator& operator << (Calculator& output, const anyType& any)
+  { output.Comments << any;
+    return output;
+  }
 public:
   //Operations parametrize the expression elements.
   //Operations are the labels of the atom nodes of the expression tree.
@@ -1148,6 +1153,9 @@ public:
   }
   int opDifferentiate()
   { return this->theAtoms.GetIndexIMustContainTheObject("Differentiate");
+  }
+  int opDifferential()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
   }
   int opMatRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");

@@ -100,13 +100,13 @@ void Calculator::initPredefinedInnerFunctions()
   ("IsDifferentialOneFormOneVariable", CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
    "Tests whether the expression is a differential form in one variable.  ",
    "IsDifferentialOneFormOneVariable(\\diff x ); IsDifferentialOneFormOneVariable(x\\diff y ); \
-   IsDifferentialOneFormOneVariable(\frac{\\diff y}{y} );\
+   IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\
    IsDifferentialOneFormOneVariable(1/(\\diff y) );");
 
   this->AddOperationInnerHandler
-  ("Integrate", CalculatorFunctionsGeneral::innerIntegrate, "",
-   "Differentiation - square root function.  ",
-   "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrate, "",
+   "Attempts to integrate a differential form.  ",
+   "\\int ");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
@@ -1807,8 +1807,12 @@ void Calculator::initPredefinedStandardOperations()
     " 7 mod 3", true);
 
   this->AddOperationOuterHandler
-  ("/", CalculatorFunctionsGeneral::innerDdivDxToDifferentiation, "",
-   "Replaces d/dx by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
+  ("/", CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation, "",
+   "Replaces \\diff /\\diff {}x by Differentiate{}(x). Note that the variable of differentiation is expected to be the string following the d letter. ",
+   "\\diff /\\diff {}x x", true);
+  this->AddOperationOuterHandler
+  ("/", CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx, "",
+   "Replaces d/dx by \\diff /\\diff{}x. Note that the variable of differentiation is expected to be the string following the d letter. ",
    "d/dx x", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes

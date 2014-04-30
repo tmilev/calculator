@@ -79,6 +79,8 @@ public:
   static bool outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);
 

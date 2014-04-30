@@ -230,19 +230,8 @@ void Calculator::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("HideLHS");
   this->controlSequences.AddOnTop("DontDistribute");
   this->controlSequences.AddOnTop("EndProgram");
-  //additional operations treated like function names but otherwise not parsed as syntactic elements.
 
-
-  this->AddOperationNoRepetitionAllowed("MonomialCollection");
-  this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Serialization");
-  this->AddOperationNoRepetitionAllowed("Melt");
-  this->AddOperationNoRepetitionAllowed("Bind");
-  this->AddOperationNoRepetitionAllowed("\\log");
-  //additional operations with the same status as user-input expressions.
-  this->AddOperationNoRepetitionAllowed("\\pi");
-  this->AddOperationNoRepetitionAllowed("e");
-  this->AddOperationNoRepetitionAllowed("\\arctan");
+  this->initPredefinedStandardOperationsWithoutHandler();
 
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();

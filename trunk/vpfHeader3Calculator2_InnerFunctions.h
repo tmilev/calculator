@@ -51,7 +51,8 @@ public:
   static bool innerCompositeDifferentiateLog(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerDdivDxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerTestMathMouseHover(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output);
@@ -80,6 +81,7 @@ public:
   static bool outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);

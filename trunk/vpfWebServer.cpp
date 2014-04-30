@@ -156,12 +156,12 @@ void WebWorker::StandardOutputPart2AfterComputation()
       stOutput << "<b> As requested, here is a calculator parsing log</b><br>" << theParser.parsingLog;
   }
   stOutput << "\n\n</td>\n\n";
-  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
+//  bool displayClientMessage=theWebServer.flagUsingBuiltInServer && theWebServer.activeWorker!=-1;
   //displayClientMessage=false;
-  if (theParser.outputCommentsString!="" || displayClientMessage)
+  if (theParser.outputCommentsString!="")
   { stOutput << "<td valign=\"top\">";
-    if (displayClientMessage)
-      stOutput << "<b>Message from client: </b>" << theWebServer.GetActiveWorker().ToStringMessageFull() << "<hr>";
+//    if (displayClientMessage)
+//      stOutput << "<b>Message from client: </b>" << theWebServer.GetActiveWorker().ToStringMessageFull() << "<hr>";
     //if (theParser.outputCommentsString.size()<10000)
     stOutput << theParser.outputCommentsString;
     //else
@@ -686,6 +686,7 @@ std::string WebWorker::ToStringStatus()const
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
+  out << ", pipes: worker to server: " << this->pipeWorkerToServer[1] << ", server to worker: " << this->pipeServerToWorker[0];
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }

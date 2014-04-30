@@ -1395,6 +1395,14 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
       return false;
     return !(*this)[2].IsDifferentialOneFormOneVariable();
   }
+  std::string theDiff;
+  if (this->IsAtom(&theDiff))
+    if (theDiff.size()>1)
+      if (theDiff[0]=='d')
+      { if (outputDifferentialOfWhat!=0)
+          outputDifferentialOfWhat->MakeAtom(theDiff.substr(1, std::string::npos), *this->theBoss);
+        return true;
+      }
   if (!this->IsListNElements(2))
     return false;
   if ((*this)[0]!="\\diff")
@@ -1404,6 +1412,11 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
   return true;
 }
 
+bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable");
+
+}
+
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable");
   return output.AssignValue((int) input.IsDifferentialOneFormOneVariable(), theCommands);
@@ -1411,7 +1424,13 @@ bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculato
 
 bool CalculatorFunctionsGeneral::innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrate");
-
+  Expression theVariable;
+  if (!input.IsDifferentialOneFormOneVariable(&theVariable))
+  { theCommands << "<hr>Failed to extract one variable one-form from " << input.ToString();
+    return false;
+  }
+  theCommands << "Extracted differential of: " << theVariable.ToString();
+  return false;
 }
 
 bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1445,7 +1464,22 @@ bool CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny(Calculator& theC
   return output.AddChildOnTop(input[2]);
 }
 
-bool CalculatorFunctionsGeneral::innerDdivDxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+    return false;
+  if (input[1]!="\\diff")
+    return false;
+  if (input[2].children.size!=2)
+    return false;
+  if (input[2][0]!="\\diff")
+    return false;
+  output.reset(theCommands, 2);
+  output.AddChildAtomOnTop(theCommands.opDifferentiate());
+  return output.AddChildOnTop(input[2][1]);
+}
+
+bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDdivDxToDifferentiation");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
@@ -1463,9 +1497,12 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDifferentiation(Calculator& theCom
   for (int i=0; i<((signed) denominatorString.size())-1; i++)
     denominatorString[i]=denominatorString[i+1];
   denominatorString.resize(denominatorString.size()-1);
-  output.reset(theCommands, 2);
-  output.AddChildAtomOnTop(theCommands.opDifferentiate());
-  return output.AddChildAtomOnTop(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(denominatorString));
+  Expression numeratorE, denominatorE(theCommands), rightDenE;
+  numeratorE.MakeAtom(theCommands.opDifferential(), theCommands);
+  rightDenE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(denominatorString), theCommands);
+  denominatorE.AddChildOnTop(numeratorE);
+  denominatorE.AddChildOnTop(rightDenE);
+  return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
 bool CalculatorFunctionsGeneral::outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)

@@ -97,9 +97,28 @@ void Calculator::initPredefinedInnerFunctions()
    "This is a calculator testing function. Grows a dynkin type inside an ambient Dynkin type. ",
    "GrowDynkinType(A^30_1+d^30_4, e_6); GrowDynkinType(g^35_2+B^30_2, e_6);");//, false);
   this->AddOperationInnerHandler
+  ("IsDifferentialOneFormOneVariable", CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable, "",
+   "Tests whether the expression is a differential form in one variable.  ",
+   "IsDifferentialOneFormOneVariable(\\diff x ); IsDifferentialOneFormOneVariable(x\\diff y ); \
+   IsDifferentialOneFormOneVariable(\frac{\\diff y}{y} );\
+   IsDifferentialOneFormOneVariable(1/(\\diff y) );");
+
+  this->AddOperationInnerHandler
+  ("Integrate", CalculatorFunctionsGeneral::innerIntegrate, "",
+   "Differentiation - square root function.  ",
+   "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
+
+  this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
    "Differentiation - square root function.  ",
    "d/dx(sqrt(x)); Differentiate(x, \\sqrt)");
+
+
+/*  this->AddOperationInnerHandler
+  ("\\diff", CalculatorFunctionsGeneral::innerDifferential, "",
+   "Differential.  ",
+   "\\diff x;");
+*/
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateTrigAndInverseTrig, "",
@@ -2147,6 +2166,24 @@ void Calculator::initPredefinedOperationsComposite()
   //("Differentiate", CalculatorFunctionsGeneral::innerDdivDxToDifferentiation, "",
   // " ",
 //  .. "", true);
+}
+
+void Calculator::initPredefinedStandardOperationsWithoutHandler()
+{ MacroRegisterFunctionWithName("Calculator::initPredefinedStandardOperationsWithoutHandler");
+  //additional operations treated like function names but otherwise not parsed as syntactic elements.
+
+
+  this->AddOperationNoRepetitionAllowed("MonomialCollection");
+  this->AddOperationNoRepetitionAllowed("MonomialPoly");
+  this->AddOperationNoRepetitionAllowed("Serialization");
+  this->AddOperationNoRepetitionAllowed("Melt");
+  this->AddOperationNoRepetitionAllowed("Bind");
+  this->AddOperationNoRepetitionAllowed("\\log");
+  //additional operations with the same status as user-input expressions.
+  this->AddOperationNoRepetitionAllowed("\\pi");
+  this->AddOperationNoRepetitionAllowed("e");
+  this->AddOperationNoRepetitionAllowed("\\arctan");
+  this->AddOperationNoRepetitionAllowed("\\diff");
 }
 
 void Calculator::initAtomsNotGoodForChainRule()

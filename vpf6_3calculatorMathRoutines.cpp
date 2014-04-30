@@ -1369,6 +1369,51 @@ bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArg
   return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
 }
 
+bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat)const
+{ MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
+  if (this->theBoss==0)
+    return false;
+  Expression leftDiff, rightDiff;
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus(), 3))
+  { if (!(*this)[1].IsDifferentialOneFormOneVariable(&leftDiff))
+      return false;
+    if (!(*this)[2].IsDifferentialOneFormOneVariable(&rightDiff))
+      return false;
+    if (leftDiff!=rightDiff)
+      return false;
+    if (outputDifferentialOfWhat!=0)
+      *outputDifferentialOfWhat=leftDiff;
+    return true;
+  }
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
+      return (*this)[2].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat);
+    return !(*this)[2].IsDifferentialOneFormOneVariable();
+  }
+  if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
+  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
+      return false;
+    return !(*this)[2].IsDifferentialOneFormOneVariable();
+  }
+  if (!this->IsListNElements(2))
+    return false;
+  if ((*this)[0]!="\\diff")
+    return false;
+  if (outputDifferentialOfWhat!=0)
+    *outputDifferentialOfWhat=(*this)[1];
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable");
+  return output.AssignValue((int) input.IsDifferentialOneFormOneVariable(), theCommands);
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrate");
+
+}
+
 bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDifferentiateSqrt");
   std::cout << "Here be i with input: " << input.ToString();

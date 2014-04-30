@@ -210,6 +210,7 @@ class Expression
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
 
+  bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
@@ -424,6 +425,10 @@ bool EvaluatesToDoubleUnderSubstitutions
 //  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
   bool operator==(const std::string& other)const;
+  bool operator!=(const std::string& other)const
+  { return !this->operator==(other);
+  }
+
   bool operator!=(const Expression& other)const
   { return ! (*this==other);
   }
@@ -1577,6 +1582,7 @@ public:
   void initBuiltInAtomsNotInterprettedAsFunctions();
   void initAtomsNotGoodForChainRule();
   void initPredefinedStandardOperations();
+  void initPredefinedStandardOperationsWithoutHandler();
   void initPredefinedInnerFunctions();
   void initPredefinedOperationsComposite();
   bool ExtractExpressions(Expression& outputExpression, std::string* outputErrors);

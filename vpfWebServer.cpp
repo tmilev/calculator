@@ -25,14 +25,14 @@ const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
 void Signal_SIGINT_handler(int s)
-{ while(waitpid(-1, NULL, WNOHANG) > 0)
+{ std::cout << "Signal interrupt handler called with input: " << s << "." << std::endl;
+  while(waitpid(-1, NULL, WNOHANG) > 0)
   { }
-//  exit(0);
+  exit(0);
 }
 
 void Signal_SIGCHLD_handler(int s)
 { std::cout << "Signal child handler called with input: " << s << "." << std::endl;
-//  std::cout.flush();
 //  while(waitpid(-1, NULL, WNOHANG) > 0)
 //  { }
 }

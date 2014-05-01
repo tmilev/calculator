@@ -104,7 +104,8 @@ public:
   static void DisplayActiveIndicator(const std::string& input);
   static void ReturnActiveIndicatorAlthoughComputationIsNotDone();
   static void SendStringThroughActiveWorker(const std::string& input);
-
+  static void Signal_SIGINT_handler(int s);
+  static void Signal_SIGCHLD_handler(int s);
   std::string ToStringLastErrorDescription();
   std::string ToStringStatusActive();
   std::string ToStringStatusAll();

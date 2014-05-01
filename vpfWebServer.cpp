@@ -24,17 +24,21 @@ std::string consoleRed(const std::string& input)
 const char* PORT ="8080";  // the port users will be connecting to
 const int BACKLOG =10;     // how many pending connections queue will hold
 
-void Signal_SIGINT_handler(int s)
-{ std::cout << "Signal interrupt handler called with input: " << s << "." << std::endl;
-  while(waitpid(-1, NULL, WNOHANG) > 0)
-  { }
+void WebServer::Signal_SIGINT_handler(int s)
+{ std::cout << "Signal interrupt handler called with input: " << s;
+//  << ". Waiting for children to exit... " << std::endl;
+  theWebServer.ReleaseActiveWorker();
+  theWebServer.ReleaseNonActiveWorkers();
+//  while(waitpid(-1, NULL, WNOHANG) > 0)
+//  { }
+//  std::cout << "All children have exited. " << std::endl;
   exit(0);
 }
 
-void Signal_SIGCHLD_handler(int s)
+void WebServer::Signal_SIGCHLD_handler(int s)
 { std::cout << "Signal child handler called with input: " << s << "." << std::endl;
-//  while(waitpid(-1, NULL, WNOHANG) > 0)
-//  { }
+  while(waitpid(-1, NULL, WNOHANG) > 0)
+  { }
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -686,7 +690,7 @@ std::string WebWorker::ToStringStatus()const
     out << "released in current process, value before release: " << this->connectedSocketIDLastValueBeforeRelease;
   else
     out << this->connectedSocketID;
-  out << ", pipes: worker to server: " << this->pipeWorkerToServer[1] << ", server to worker: " << this->pipeServerToWorker[0];
+  out << ", pipe indices (those shouldn't grow too large, else we have resource leak): worker to server: " << this->pipeWorkerToServer[1] << ", server to worker: " << this->pipeServerToWorker[0];
   out << ", user address: " << this->userAddress << ".";
   return out.str();
 }
@@ -897,12 +901,12 @@ int WebServer::Run()
   if (listen(this->listeningSocketID, BACKLOG) == -1)
     crash << "Listen function failed." << crash;
   struct sigaction sa;
-  sa.sa_handler = &Signal_SIGCHLD_handler; // reap all dead processes
+  sa.sa_handler = &WebServer::Signal_SIGCHLD_handler; // reap all dead processes
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = SA_RESTART;
   if (sigaction(SIGCHLD, &sa, NULL) == -1)
     std::cout << "sigaction returned -1" << std::endl;
-  sa.sa_handler=&Signal_SIGINT_handler;
+  sa.sa_handler=&WebServer::Signal_SIGINT_handler;
   if (sigaction(SIGINT, &sa, NULL) == -1)
     std::cout << "sigaction returned -1" << std::endl;
   std::cout << "Server: waiting for connections...\r\n" << std::endl;

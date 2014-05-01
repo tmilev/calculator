@@ -719,6 +719,7 @@ void WebServer::SendStringThroughActiveWorker(const std::string& theString)
 
 WebServer::WebServer()
 { this->flagUsingBuiltInServer=false;
+  this->flagTryToKillOlderProcesses=true;
   this->activeWorker=-1;
 }
 
@@ -865,6 +866,10 @@ std::string WebServer::ToStringStatusAll()
 
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
+  if (this->flagTryToKillOlderProcesses)
+  { std::cout << "Killing previous all copies of the calculator and restarting..." << std::endl;
+    system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
+  }
   addrinfo hints, *servinfo, *p;
   sockaddr_storage their_addr; // connector's address information
   socklen_t sin_size;

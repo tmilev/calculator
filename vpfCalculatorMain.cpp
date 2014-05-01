@@ -18,9 +18,13 @@ int main(int argc, char **argv)
   if (argc>=1)
     onePredefinedCopyOfGlobalVariables.initDefaultFolderAndFileNames(argv[0], "");
   theWebServer.flagUsingBuiltInServer=false;
-  if (argc==2)
+  if (argc>=2)
   { std::string tempArgument=argv[1];
     theWebServer.flagUsingBuiltInServer=(tempArgument=="server");
+    if (argc>2)
+    { tempArgument=argv[2];
+      theWebServer.flagTryToKillOlderProcesses=!(tempArgument=="nokill");
+    }
     if (theWebServer.flagUsingBuiltInServer)
       if (theWebServer.Run()==0)
       { stOutput << "Server exit normal. ";

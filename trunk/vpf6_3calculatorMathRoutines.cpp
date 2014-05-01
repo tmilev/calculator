@@ -1369,7 +1369,7 @@ bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArg
   return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
 }
 
-bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat)const
+bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const
 { MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
   if (this->theBoss==0)
     return false;
@@ -1387,12 +1387,22 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
   }
   if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
   { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
+    { if (outputCoeffInFrontOfDifferential!=0)
+        *outputCoeffInFrontOfDifferential=(*this)[1];
       return (*this)[2].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat);
+    }
+    if (outputCoeffInFrontOfDifferential!=0)
+      *outputCoeffInFrontOfDifferential=(*this)[2];
     return !(*this)[2].IsDifferentialOneFormOneVariable();
   }
   if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
       return false;
+    if (outputCoeffInFrontOfDifferential!=0)
+    { outputCoeffInFrontOfDifferential->reset(*this->theBoss);
+      *outputCoeffInFrontOfDifferential=1;
+      *outputCoeffInFrontOfDifferential/=(*this)[2];
+    }
     return !(*this)[2].IsDifferentialOneFormOneVariable();
   }
   std::string theDiff;
@@ -1401,20 +1411,34 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
       if (theDiff[0]=='d')
       { if (outputDifferentialOfWhat!=0)
           outputDifferentialOfWhat->MakeAtom(theDiff.substr(1, std::string::npos), *this->theBoss);
+        if (outputCoeffInFrontOfDifferential!=0)
+          outputCoeffInFrontOfDifferential->AssignValue(1, *this->theBoss);
+//        stOutput << "theDiff string: " << theDiff;
         return true;
       }
+//  stOutput << "theDiff string: " << theDiff;
   if (!this->IsListNElements(2))
     return false;
   if ((*this)[0]!="\\diff")
     return false;
   if (outputDifferentialOfWhat!=0)
     *outputDifferentialOfWhat=(*this)[1];
+  if (outputCoeffInFrontOfDifferential!=0)
+    outputCoeffInFrontOfDifferential->AssignValue(1, *this->theBoss);
   return true;
 }
 
-bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
+bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable
+(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable");
-
+  Expression theVariableE;
+  if (!input.IsDifferentialOneFormOneVariable(&theVariableE, &output))
+    return false;
+  Expression theVarDiffFormE(theCommands);
+  theVarDiffFormE.AddChildAtomOnTop("\\diff");
+  theVarDiffFormE.AddChildOnTop(theVariableE);
+  output*=theVarDiffFormE;
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1422,14 +1446,33 @@ bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculato
   return output.AssignValue((int) input.IsDifferentialOneFormOneVariable(), theCommands);
 }
 
+bool CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
+  stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opIntegral(), 2))
+    return false;
+  if (!input[2].IsDifferentialOneFormOneVariable())
+    return false;
+  Expression dxPartE;
+  if (!CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(theCommands, input[2], dxPartE))
+    return false;
+  stOutput << "ExtractedDifferential form: " << dxPartE.ToString();
+  Expression theDifferentialForm=input[1][1]* dxPartE;
+  output.reset(theCommands, 2);
+  output.AddChildAtomOnTop(theCommands.opIntegral());
+  return output.AddChildOnTop(theDifferentialForm);
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrate");
-  Expression theVariable;
-  if (!input.IsDifferentialOneFormOneVariable(&theVariable))
+  Expression theVariable, theVariableCoefficient;
+  if (!input.IsDifferentialOneFormOneVariable(&theVariable, &theVariableCoefficient))
   { theCommands << "<hr>Failed to extract one variable one-form from " << input.ToString();
     return false;
   }
-  theCommands << "Extracted differential of: " << theVariable.ToString();
+  theCommands << "Extracted differential of: " << theVariable.ToString() << " times " << theVariableCoefficient.ToString();
   return false;
 }
 

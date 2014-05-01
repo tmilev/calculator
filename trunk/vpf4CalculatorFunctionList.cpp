@@ -105,8 +105,8 @@ void Calculator::initPredefinedInnerFunctions()
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrate, "",
-   "Attempts to integrate a differential form.  ",
-   "\\int ");
+   "Attempts to compute the indefinite integral of a differential one variable one-form.  ",
+   "\\int x dx ");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",
@@ -1526,6 +1526,11 @@ void Calculator::initPredefinedStandardOperations()
   ("*", this->outerTimesToFunctionApplication, "",
    "On condition that F is a built-int function name or built-in operation, replaces F*x with F{}x.",
    "plot2D(\\sin{}x+cos{}x, 0, 5) ", true);
+  this->AddOperationInnerHandler
+  ("*", CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx, "",
+   "Transformation: (\\int{} f) dx:= \\int{}(f dx)",
+   "(\\int x)dx", true);
+
   this->AddOperationOuterHandler
   ("*", CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny, "",
    "Replaces Differentiate{}(x)*a by  Differentiate{}(x,a).",

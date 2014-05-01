@@ -210,7 +210,7 @@ class Expression
   bool IsBuiltInAtom(std::string* outputWhichOperation=0)const;
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
 
-  bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0)const;
+  bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
@@ -1156,6 +1156,9 @@ public:
   }
   int opDifferential()
   { return this->theAtoms.GetIndexIMustContainTheObject("\\diff");
+  }
+  int opIntegral()
+  { return this->theAtoms.GetIndexIMustContainTheObject("\\int");
   }
   int opMatRat()
   { return this->theAtoms.GetIndexIMustContainTheObject("Matrix_Rational");

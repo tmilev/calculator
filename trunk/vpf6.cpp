@@ -1316,7 +1316,7 @@ bool Calculator::outerTensor(Calculator& theCommands, const Expression& input, E
 
 bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::innerCollectMultiplicands");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
 //  stOutput << "<hr>Collecting multiplicands. input: " << input.ToString();
   Expression constPower, thePower;
@@ -1329,13 +1329,13 @@ bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expres
     return true;
   }
   for (int i=0; i<2; i++, MathRoutines::swap(left, right))
-    if (left->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+    if (left->StartsWith(theCommands.opThePower(), 3))
     { if ((*left)[1]==(*right))
       { constPower.AssignValue(1, theCommands);
         thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], constPower);
         return output.MakeXOX(theCommands, theCommands.opThePower(), *right, thePower);
       }
-      if (right->IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+      if (right->StartsWith(theCommands.opThePower(), 3))
         if ((*left)[1]==(*right)[1])
         { thePower.MakeXOX(theCommands, theCommands.opPlus(), (*left)[2], (*right)[2]);
           output.MakeXOX(theCommands, theCommands.opThePower(), (*left)[1], thePower);
@@ -1347,14 +1347,14 @@ bool Calculator::innerCollectMultiplicands(Calculator& theCommands, const Expres
 }
 
 bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+{ if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
   const Expression* quotientE=0;
   const Expression* summandE=0;
-  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (input[1].StartsWith(theCommands.opDivide(), 3))
   { quotientE=&input[1];
     summandE=&input[2];
-  } else if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  } else if (input[2].StartsWith(theCommands.opDivide(), 3))
   { quotientE=&input[2];
     summandE=& input[1];
   } else
@@ -1368,7 +1368,7 @@ bool Calculator::outerCombineFractions(Calculator& theCommands, const Expression
 }
 
 bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDefine(), 3))
+{ if (!input.StartsWith(theCommands.opDefine(), 3))
     return false;
   if (input[1]!=input[2])
     return false;
@@ -1378,7 +1378,7 @@ bool Calculator::outerCheckRule(Calculator& theCommands, const Expression& input
 }
 
 bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+{ if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
   if (input[1].IsEqualToZero())
     if (!input[2].IsEqualToZero())
@@ -1387,9 +1387,9 @@ bool Calculator::innerSubZeroDivAnythingWithZero(Calculator& theCommands, const 
 }
 
 bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+{ if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input[1].StartsWith(theCommands.opDivide(), 3))
     return false;
   if (input[1][2]==input[2])
   { output=input[1][1];
@@ -1399,9 +1399,9 @@ bool Calculator::innerCancelMultiplicativeInverse(Calculator& theCommands, const
 }
 
 bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+{ if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input[2].StartsWith(theCommands.opDivide(), 3))
     return false;
   Expression newLeftE;
   newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][1]);
@@ -1410,10 +1410,10 @@ bool Calculator::outerAssociateTimesDivision(Calculator& theCommands, const Expr
 }
 
 bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
+{ if (!input.StartsWith(-1, 3))
     return false;
   int theOperation=input[0].theData;
-  if (!input[1].IsListNElementsStartingWithAtom(theOperation, 3))
+  if (!input[1].StartsWith(theOperation, 3))
     return false;
   Expression newRight;
   newRight.MakeXOX(theCommands, theOperation, input[1][2], input[2]);
@@ -1424,7 +1424,7 @@ bool Calculator::outerAssociate(Calculator& theCommands, const Expression& input
 bool Calculator::StandardIsDenotedBy(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
+  if (!input.StartsWith(theCommands.opIsDenotedBy(), 3))
     return false;
   const Expression& withNotation=input[2];
   const Expression& theNotation=input[1];
@@ -1455,14 +1455,14 @@ bool Calculator::innerMultiplyByOne(Calculator& theCommands, const Expression& i
 
 bool Calculator::outerTimesToFunctionApplication(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerTimesToFunctionApplication");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
+  if (!input.StartsWith(theCommands.opTimes()))
     return false;
   if (input.children.size<2)
     return false;
   const Expression& firstElt=input[1];
 //  stOutput << " <hr>outer times to function ";
   if (!firstElt.IsBuiltInAtom())
-  { if (!firstElt.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  { if (!firstElt.StartsWith(theCommands.opThePower(), 3))
       return false;
     if (!firstElt[1].IsAtomWhoseExponentsAreInterprettedAsFunction())
       return false;
@@ -1488,11 +1488,11 @@ bool Calculator::outerDistribute(Calculator& theCommands, const Expression& inpu
 }
 
 bool Calculator::outerLeftDistributeBracketIsOnTheLeft(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
+{ if (!input.StartsWith(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
   int theMultiplicativeOP=input[0].theData;
-  if (!input[1].IsListNElementsStartingWithAtom(theAdditiveOp,3))
+  if (!input[1].StartsWith(theAdditiveOp,3))
     return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
@@ -1502,11 +1502,11 @@ bool Calculator::outerLeftDistributeBracketIsOnTheLeft(Calculator& theCommands, 
 }
 
 bool Calculator::outerRightDistributeBracketIsOnTheRight(Calculator& theCommands, const Expression& input, Expression& output, int AdditiveOp, int multiplicativeOp)
-{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
+{ if (!input.StartsWith(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
   int theMultiplicativeOP=input[0].theData;
-  if (!input[2].IsListNElementsStartingWithAtom(theAdditiveOp, 3))
+  if (!input[2].StartsWith(theAdditiveOp, 3))
     return false;
 //  int theFormat=input.format;
   Expression leftE, rightE;
@@ -1519,7 +1519,7 @@ bool Calculator::CollectOpands(const Expression& input, int theOp, List<Expressi
 { MacroRegisterFunctionWithName("Calculator::CollectOpands");
   const Expression* currentE=&input;
   outputOpands.SetSize(0);
-  while (currentE->IsListNElementsStartingWithAtom(theOp, 3))
+  while (currentE->StartsWith(theOp, 3))
   { outputOpands.AddOnTop((*currentE)[1]);
     currentE=&(*currentE)[2];
   }
@@ -1558,9 +1558,9 @@ bool Calculator::CollectSummands(Calculator& theCommands, const Expression& inpu
 
 bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output)
 { int opPower=theCommands.opThePower();
-  if (!input.IsListNElementsStartingWithAtom(opPower, 3))
+  if (!input.StartsWith(opPower, 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(opPower, 3))
+  if (!input[1].StartsWith(opPower, 3))
     return false;
   Expression tempE;
   tempE.MakeProducT(theCommands, input[1][2], input[2]);
@@ -1568,7 +1568,7 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
 }
 
 bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+{ if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (input[2].IsEqualToOne())
   { std::string tempS;
@@ -1640,7 +1640,7 @@ bool Expression::MakeSum(Calculator& theCommands, const MonomialCollection<Expre
 bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("Calculator::outerPlus");
 //  theCommands.Comments << "<hr><hr>processing outer plus with input: " << input.Lispify();
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
+  if (!input.StartsWith(theCommands.opPlus()))
     return false;
   MonomialCollection<Expression, Rational> theSum;
   theCommands.CollectSummands(theCommands, input, theSum);
@@ -1648,7 +1648,7 @@ bool Calculator::outerPlus(Calculator& theCommands, const Expression& input, Exp
 }
 
 bool Calculator::EvaluateIf(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opDefineConditional(), 4))
+{ if (!input.StartsWith(theCommands.opDefineConditional(), 4))
     return output.SetError("Error: operation :if := takes three arguments.", theCommands);
   Rational conditionRat;
   if (!input[1].IsOfType<Rational>(&conditionRat))
@@ -1704,7 +1704,7 @@ bool Calculator::outerEqualEqual(Calculator& theCommands, const Expression& inpu
 }
 
 bool Calculator::outerUnion(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(theCommands.opUnion()))
+{ if (!input.StartsWith(theCommands.opUnion()))
     return false;
   int numElts=1;
   for (int i=1; i<input.children.size; i++)
@@ -1751,7 +1751,7 @@ bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, E
 { MacroRegisterFunctionWithName("Calculator::outerDivide");
 //  stOutput << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
 //  << input.Lispify() ;
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
 //  stOutput << "<br>Now I'm here! 2";
   Rational tempRat;
@@ -1768,7 +1768,7 @@ bool Calculator::outerDivide(Calculator& theCommands, const Expression& input, E
 }
 
 bool Calculator::outerMinus(Calculator& theCommands, const Expression& input, Expression& output)
-{ if (!(input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 3) || input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 2)) )
+{ if (!(input.StartsWith(theCommands.opMinus(), 3) || input.StartsWith(theCommands.opMinus(), 2)) )
     return false;
   Expression tempE, minusOne;
   minusOne.AssignValue(-1, theCommands);
@@ -1871,14 +1871,14 @@ int Expression::ContextGetIndexAmbientSSalg()const
     return -1;
 //  stOutput << ". I have " << this->children.size << " children. ";
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 3))
+    if ((*this)[i].StartsWith(this->theBoss->opSSLieAlg(), 3))
       return (*this)[i][2].theData;
   return -1;
 }
 
 void Expression::GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const
 { this->CheckInitialization();
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(), 3))
+  if (this->StartsWith(this->theBoss->opThePower(), 3))
   { outputBase=(*this)[1];
     outputExponent=(*this)[2];
     return;
@@ -1914,9 +1914,22 @@ int Expression::GetNumCols()const
   return theMax;
 }
 
+void Expression::GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const
+{ MacroRegisterFunctionWithName("Expression::GetCoefficientMultiplicandForm");
+  this->CheckInitialization();
+  if (this->StartsWith(this->theBoss->opTimes(), 3))
+    if ((*this)[1].IsConstantNumber())
+    { outputNoCoeff=(*this)[2];
+      outputCoeff=(*this)[1];
+      return;
+    }
+  outputCoeff.AssignValue(1, *this->theBoss);
+  outputNoCoeff=*this;
+}
+
 void Expression::GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const
 { this->CheckInitialization();
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+  if (this->StartsWith(this->theBoss->opTimes(), 3))
     if ((*this)[1].IsOfType(&outputCoeff))
     { outputNoCoeff=(*this)[2];
       return;
@@ -2198,11 +2211,11 @@ std::string Expression::ToStringFull()const
 bool Expression::NeedsParenthesisForBaseOfExponent()const
 { if (this->theBoss==0)
     return false;
-  if (this->IsListNElementsStartingWithAtom())
+  if (this->StartsWith())
     return true;
-//  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()) ||
-//      this->IsListNElementsStartingWithAtom(this->theBoss->opTimes()) || this->IsListNElementsStartingWithAtom(this->theBoss->opDivide()) ||
-//      this->IsListNElementsStartingWithAtom(this->theBoss->opThePower()))
+//  if (this->StartsWith(this->theBoss->opPlus()) || this->StartsWith(this->theBoss->opMinus()) ||
+//      this->StartsWith(this->theBoss->opTimes()) || this->StartsWith(this->theBoss->opDivide()) ||
+//      this->StartsWith(this->theBoss->opThePower()))
 //    return true;
   return false;
 }
@@ -2210,7 +2223,7 @@ bool Expression::NeedsParenthesisForBaseOfExponent()const
 bool Expression::NeedsParenthesisForMultiplication()const
 { if (this->theBoss==0)
     return false;
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus()) || this->IsListNElementsStartingWithAtom(this->theBoss->opMinus()))
+  if (this->StartsWith(this->theBoss->opPlus()) || this->StartsWith(this->theBoss->opMinus()))
     return true;
   return false;
 }
@@ -2243,7 +2256,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
   std::string tempS;
   if (this->ToStringData(tempS, theFormat))
     out << tempS;
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
+  else if (this->StartsWith(this->theBoss->opDefine(), 3))
   { std::string firstE=(*this)[1].ToString(theFormat);
     std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].IsListStartingWithAtom(this->theBoss->opDefine()))
@@ -2257,11 +2270,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
     out << (*this)[1].ToString(theFormat) << ":=:" << (*this)[2].ToString(theFormat);
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opQuote(),2))
+  else if (this->StartsWith(this->theBoss->opQuote(),2))
     out << "\"" << (*this)[1].ToString(theFormat) << "\"";
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
     out << (*this)[1].ToString(theFormat) << " :if " << (*this)[2].ToString(theFormat) << ":=" << (*this)[3].ToString(theFormat);
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
+  else if (this->StartsWith(this->theBoss->opDivide(), 3))
   { bool doUseFrac= this->formatUseFrac || this->theBoss->flagUseFracInRationalLaTeX;
     if(!doUseFrac)
     { std::string firstE= (*this)[1].ToString(theFormat);
@@ -2289,11 +2302,11 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (theFormat!=0)
         theFormat->flagExpressionNewLineAllowed=oldAllowNewLine;
     }
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
+  } else if (this->StartsWith(this->theBoss->opTensor(),3) )
     out << (*this)[1].ToString(theFormat) << "\\otimes " << (*this)[2].ToString(theFormat);
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opChoose(),3) )
+  else if (this->StartsWith(this->theBoss->opChoose(),3) )
     out << (*this)[1].ToString(theFormat) << "\\choose " << (*this)[2].ToString(theFormat);
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+  else if (this->StartsWith(this->theBoss->opTimes(), 3))
   { std::string secondE=(*this)[2].ToString(theFormat);
     if ((*this)[1].IsAtomGivenData(this->theBoss->opSqrt()))
       out << "\\sqrt{" << secondE << "}";
@@ -2324,7 +2337,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       else
         out << secondE;
     }
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opSqrt(), 3))
+  } else if (this->StartsWith(this->theBoss->opSqrt(), 3))
   { int thePower=0;
     bool hasPowerTwo=(*this)[1].IsSmallInteger(&thePower);
     if (hasPowerTwo)
@@ -2335,10 +2348,10 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       out << "\\sqrt[" << (*this)[1].ToString() << "]{" << (*this)[2].ToString() << "}";
   } else if (this->IsListStartingWithAtom(this->theBoss->opFactorial()))
     out << (*this)[1].ToString(theFormat) << "!";
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(),3))
+  else if (this->StartsWith(this->theBoss->opThePower(),3))
   { bool involvesExponentsInterprettedAsFunctions=false;
     const Expression& firstE=(*this)[1];
-    if (firstE.IsListNElementsStartingWithAtom(-1, 2))
+    if (firstE.StartsWith(-1, 2))
       if (firstE[0].IsAtomWhoseExponentsAreInterprettedAsFunction())
       { involvesExponentsInterprettedAsFunctions=true;
         Expression newE, newFunE;
@@ -2357,7 +2370,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       std::string firstEstr=(*this)[1].ToString(theFormat);
       if ((*this)[1].NeedsParenthesisForBaseOfExponent())
       { bool useBigParenthesis=false;
-        if ((*this)[1].IsListNElementsStartingWithAtom(this->theBoss->opDivide()))
+        if ((*this)[1].StartsWith(this->theBoss->opDivide()))
           useBigParenthesis=true;
         if (useBigParenthesis)
           out << "\\left(";
@@ -2388,15 +2401,15 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
       if (tempS[0]!='-')
         out << "+";
     out << tempS;
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 2))
+  } else if (this->StartsWith(this->theBoss->opMinus(), 2))
     out << "-" << (*this)[1].ToString(theFormat);
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opSqrt(), 2))
+  else if (this->StartsWith(this->theBoss->opSqrt(), 2))
     out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
+  else if (this->StartsWith(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
       crash << "This is a programming error: the minus function expects 1 or 2 arguments, instead there are " << this->children.size-1 << ". " << crash;
     out << (*this)[1].ToString(theFormat) << "-" << (*this)[2].ToString(theFormat);
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
+  } else if (this->StartsWith(this->theBoss->opBind(), 2))
     out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { if (this->children.size<2)
@@ -2518,7 +2531,7 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
     }
     if (startingExpression==0)
       out << "</table>";
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
+  } else if (this->StartsWith(this->theBoss->opError(), 2))
   { this->theBoss->NumErrors++;
     out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
     this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors << ". " << (*this)[1].ToString(theFormat);
@@ -2612,7 +2625,7 @@ bool Expression::IsLisT()const
 
 bool Expression::IsFrozen()const
 { std::string atomName;
-  if (!this->IsListNElementsStartingWithAtom())
+  if (!this->StartsWith())
     return false;
   return (*this)[0].IsAtomThatFreezesArguments();
 }
@@ -2632,7 +2645,7 @@ bool Expression::IsAtomThatFreezesArguments(std::string* outputWhichAtom)const
 bool Expression::IsPowerOfAtomWhoseExponentsAreInterprettedAsFunction()const
 { if (this->theBoss==0)
     return false;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opThePower(), 3))
+  if (!this->StartsWith(this->theBoss->opThePower(), 3))
     return false;
   return (*this)[1].IsAtomWhoseExponentsAreInterprettedAsFunction();
 }
@@ -2746,7 +2759,7 @@ bool Expression::HasContext()const
 bool Expression::HasNonEmptyContext()const
 { if (!this->HasContext())
     return false;
-  return !this->GetContext().IsListNElementsStartingWithAtom(this->theBoss->opContexT(), 1);
+  return !this->GetContext().StartsWith(this->theBoss->opContexT(), 1);
 }
 
 bool Expression::IsBuiltInScalar()const
@@ -2756,7 +2769,7 @@ bool Expression::IsBuiltInScalar()const
 
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
 { std::string tempS;
-  if (!this->IsListNElementsStartingWithAtom())
+  if (!this->StartsWith())
     return false;
 //  if (this->children.size<2 || !(*this)[this->children.size-1].IsAtoM())
 //    return false;
@@ -3086,7 +3099,7 @@ bool Calculator::ReplaceEXdotsXbySsXdotsX(int numDots)
 bool Calculator::ReplaceSsSsXdotsXbySsXdotsX(int numDots)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numDots-1];
-  if (!left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
+  if (!left.theData.StartsWith(this->opEndStatement()))
     crash << "This is a programming error: ReplaceSsSsXdotsXbySsXdotsX called but left expression is not EndStatement." << crash;
   left.theData.children.ReservE(left.theData.children.size+ right.theData.children.size-1);
   for (int i=1; i<right.theData.children.size; i++)
@@ -3388,10 +3401,10 @@ bool Calculator::innerFreudenthalEval(Calculator& theCommands, const Expression&
 
 bool Expression::IsMeltable(int* numResultingChildren)const
 { this->CheckInitialization();
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opMelt(), 2))
+  if (!this->StartsWith(this->theBoss->opMelt(), 2))
     return false;
   if (numResultingChildren!=0)
-  { if (!(*this)[1].IsListNElementsStartingWithAtom(this->theBoss->opEndStatement()))
+  { if (!(*this)[1].StartsWith(this->theBoss->opEndStatement()))
       *numResultingChildren=1;
     else
       *numResultingChildren=(*this)[1].children.size-1;
@@ -3483,7 +3496,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
 { MacroRegisterFunctionWithName("Calculator::outerMeltBrackets");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   //stOutput << "outerMeltBrackets meldet sich!";
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
+  if (!input.StartsWith(theCommands.opEndStatement()))
     return false;
   //stOutput << "<br>outerMeltBrackets meldet sich!";
   int tempInt;
@@ -3511,7 +3524,7 @@ bool Calculator::outerMeltBrackets(Calculator& theCommands, const Expression& in
       continue;
     }
 //    stOutput << "<br>shift:" << shift;
-    if (!currentChild[1].IsListNElementsStartingWithAtom(theCommands.opEndStatement()))
+    if (!currentChild[1].StartsWith(theCommands.opEndStatement()))
     { //output.SetChild(i+shift, currentChild.children[1]);
       output.AddChildOnTop(currentChild[1]);
       continue;

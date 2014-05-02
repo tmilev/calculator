@@ -104,8 +104,8 @@ void Calculator::initPredefinedInnerFunctions()
    IsDifferentialOneFormOneVariable(1/(\\diff y) );");
 
   this->AddOperationInnerHandler
-  ("\\int", CalculatorFunctionsGeneral::innerIntegrate, "",
-   "Attempts to compute the indefinite integral of a differential one variable one-form.  ",
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
+   "Integrates x^n dx.  ",
    "\\int x dx ");
 
   this->AddOperationInnerHandler

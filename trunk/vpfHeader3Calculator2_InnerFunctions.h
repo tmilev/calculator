@@ -83,6 +83,8 @@ public:
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output);

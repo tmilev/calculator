@@ -23,7 +23,7 @@ bool Calculator::outerExtractBaseMultiplication(Calculator& theCommands, const E
  // bool hereBeTrouble = input.ToString()=="e^{-2 x} -2";
 //  if (hereBeTrouble)
 //    stOutput << "<hr>Here be trouble";
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
   bool result=false;
   //  stOutput << "<br>handling base extraction of: " << input.ToString();

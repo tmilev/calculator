@@ -70,7 +70,7 @@ bool Calculator::outerStandardFunction(Calculator& theCommands, const Expression
   if (!input.IsLisT())
     return false;
   const Expression& functionNameNode =input[0];
-  if (functionNameNode.IsListNElementsStartingWithAtom())
+  if (functionNameNode.StartsWith())
   { const List<Function>* theHandlers=theCommands.GetOperationCompositeHandlers(functionNameNode[0].theData);
     if (theHandlers!=0)
       for (int i=0; i<theHandlers->size; i++)
@@ -303,8 +303,8 @@ bool Calculator::EvaluateExpression(const Expression& input, Expression& output,
           if (output.ToString()=="a:=b")
             stOutput << "<hr>a:=b is here<hr>";
         }*/
-        if (output.IsListNElementsStartingWithAtom(this->opEndStatement()))
-          if (output[i].IsListNElementsStartingWithAtom(this->opDefine()) || output[i].IsListNElementsStartingWithAtom(this->opDefineConditional()))
+        if (output.StartsWith(this->opEndStatement()))
+          if (output[i].StartsWith(this->opDefine()) || output[i].StartsWith(this->opDefineConditional()))
           { this->RuleStack.AddOnTop(output[i]);
             this->RuleContextIdentifier++;
            // stOutput << ".. added !!!!";
@@ -427,7 +427,7 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
 (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* theLog, bool logAttempts)
 { MacroRegisterFunctionWithName("Calculator::ProcessOneExpressionOnePatternOneSub");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (!thePattern.IsListNElementsStartingWithAtom(this->opDefine(), 3) && !thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4))
+  if (!thePattern.StartsWith(this->opDefine(), 3) && !thePattern.StartsWith(this->opDefineConditional(), 4))
     return false;
   if (theLog!=0 && logAttempts)
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
@@ -437,7 +437,7 @@ bool Calculator::ProcessOneExpressionOnePatternOneSub
   const Expression& currentPattern=thePattern[1];
   const Expression* theCondition=0;
   bool isConditionalDefine=
-  thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4);
+  thePattern.StartsWith(this->opDefineConditional(), 4);
   if (isConditionalDefine)
     theCondition=&thePattern[2];
   Expression* toBeSubbed=this->PatternMatch

@@ -178,13 +178,13 @@ bool CalculatorSerialization::DeSerializeMon<DynkinSimpleType>(Calculator& theCo
   if (input.children.size==2)
   { rankE=input[1];
     typeLetterE=input[0];
-    if (typeLetterE.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+    if (typeLetterE.StartsWith(theCommands.opThePower(),3))
     { scaleE=typeLetterE[2];
       typeLetterE=typeLetterE[1];
     } else
       scaleE.AssignValue(1, theCommands);
   } else if (input.children.size==3)
-  { if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+  { if (!input.StartsWith(theCommands.opThePower(),3))
     { theCommands.Comments << "<hr>Failed to extract rank, type, first co-root length - input has 3 children but was not exponent."
       << " Input is " << input.ToString() << ".";
       return false;
@@ -1016,9 +1016,9 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
 { MacroRegisterFunctionWithName("CalculatorSerialization::innerRationalFunction");
   //stOutput << "converting to rf: " << input.ToString();
   Expression intermediate(theCommands);
-  if (input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3) ||
-      input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
-      input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+  if (input.StartsWith(theCommands.opPlus(), 3) ||
+      input.StartsWith(theCommands.opTimes(),3) ||
+      input.StartsWith(theCommands.opDivide(),3))
   { Expression leftE, rightE;
     if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE) ||
         !CalculatorSerialization::innerRationalFunction(theCommands, input[2], rightE) )
@@ -1033,16 +1033,16 @@ bool CalculatorSerialization::innerRationalFunction(Calculator& theCommands, con
     intermediate.AddChildOnTop(input[0]);
     intermediate.AddChildOnTop(leftE);
     intermediate.AddChildOnTop(rightE);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
+    if (input.StartsWith(theCommands.opPlus()))
       return CalculatorFunctionsBinaryOps::innerAddRatOrPolyOrRFToRatOrPolyOrRF(theCommands, intermediate, output);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opTimes()))
+    if (input.StartsWith(theCommands.opTimes()))
       return CalculatorFunctionsBinaryOps::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF(theCommands, intermediate, output);
-    if (input.IsListNElementsStartingWithAtom(theCommands.opDivide()))
+    if (input.StartsWith(theCommands.opDivide()))
       return CalculatorFunctionsBinaryOps::innerDivideRFOrPolyOrRatByRFOrPoly(theCommands, intermediate, output);
     crash << "This line of code should never be reached, something has gone wrong." << crash;
   }
   int theSmallPower=-1;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3) )
+  if (input.StartsWith(theCommands.opThePower(), 3) )
   { if (input[2].IsSmallInteger(&theSmallPower))
     { Expression leftE;
       if (!CalculatorSerialization::innerRationalFunction(theCommands, input[1], leftE))

@@ -1074,7 +1074,7 @@ bool Calculator::innerSolveSerreLikeSystem(Calculator& theCommands, const Expres
 { MacroRegisterFunctionWithName("Calculator::innerSolveSerreLikeSystem");
   Vector<Polynomial<Rational> > thePolysRational;
   Expression theContext(theCommands);
-  if (input.IsListNElementsStartingWithAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
+  if (input.StartsWith(theCommands.GetOperations().GetIndexIMustContainTheObject("FindOneSolutionSerreLikePolynomialSystem")))
   { if (!theCommands.GetVectorFromFunctionArguments(input, thePolysRational, &theContext, 0, CalculatorSerialization::innerPolynomial<Rational>))
       return output.SetError("Failed to extract list of polynomials. ", theCommands);
   } else

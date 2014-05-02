@@ -819,17 +819,17 @@ bool Expression::CheckConsistency()const
       << "children: type, context, and index in Calculator. The expression is " << this->ToStringFull()
       << crash;
     const Expression& mustBeTheContext=(*this)[1];
-    if (!mustBeTheContext.IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
+    if (!mustBeTheContext.StartsWith(this->theBoss->opContexT()))
       crash << "This is a programming error. At the moment of writing, the second child of a built-in type must be a context. It is instead "
       << mustBeTheContext.ToStringFull() << crash;
     for (int i=1; i<mustBeTheContext.children.size; i++)
     { bool isGood=false;
       const Expression& currentE=mustBeTheContext[i];
-      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+      if (currentE.StartsWith(this->theBoss->opPolynomialVariables()))
         isGood=true;
-      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg()))
+      if (currentE.StartsWith(this->theBoss->opSSLieAlg()))
         isGood=true;
-      if (currentE.IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
+      if (currentE.StartsWith(this->theBoss->opWeylAlgebraVariables()))
         isGood=true;
       if (!isGood)
         crash << "This is a programming error. The context " << mustBeTheContext.ToStringFull() << " has an entry which I do not recognize, namely, "
@@ -876,7 +876,7 @@ bool Expression::AddChildAtomOnTop(const std::string& theOperationString)
   (this->theBoss->AddOperationNoRepetitionOrReturnIndexFirst(theOperationString));
 }
 
-bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
+bool Expression::StartsWith(int theOp, int N)const
 { if (N!=-1)
   { if (this->children.size!=N)
       return false;
@@ -893,10 +893,10 @@ bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
 int Expression::ContextGetNumContextVariables()const
 { if (this->theBoss==0)
     return 0;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
+  if (!this->StartsWith(this->theBoss->opContexT()))
     return 0;
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+    if ((*this)[i].StartsWith(this->theBoss->opPolynomialVariables()))
       return (*this)[i].children.size-1;
   return 0;
 }
@@ -1052,10 +1052,10 @@ bool Expression::ContextSetDiffOperatorVar(const Expression& thePolyVar, const E
   bool foundDiffVarsE=false;
   bool foundPolyVarsE=false;
   for (int i=0; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opWeylAlgebraVariables()))
+    if ((*this)[i].StartsWith(this->theBoss->opWeylAlgebraVariables()))
     { this->SetChilD(i, diffVarsE);
       foundDiffVarsE=true;
-    } else if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+    } else if ((*this)[i].StartsWith(this->theBoss->opPolynomialVariables()))
     { this->SetChilD(i, polyVarsE);
       foundPolyVarsE=true;
     }
@@ -1085,7 +1085,7 @@ Expression Expression::ContextGetContextType(int theType)const
     //<< crash;
   }
   for (int i=1; i<this->children.size; i++)
-    if ((*this)[i].IsListNElementsStartingWithAtom(theType))
+    if ((*this)[i].StartsWith(theType))
       return (*this)[i];
   Expression output;
   output.reset(*this->theBoss, 1);
@@ -1198,7 +1198,7 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
   output.polyDefaultLetter="x";
   if (this->theBoss==0)
     return;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContexT()))
+  if (!this->StartsWith(this->theBoss->opContexT()))
     return;
   Expression thePolyE=this->ContextGetPolynomialVariables();
   output.polyAlphabeT.SetSize(thePolyE.children.size-1);
@@ -1213,13 +1213,13 @@ void Expression::ContextGetFormatExpressions(FormatExpressions& output)const
 bool Expression::IsContext()const
 { if (this->theBoss==0)
     return false;
-  return this->IsListNElementsStartingWithAtom(this->theBoss->opContexT());
+  return this->StartsWith(this->theBoss->opContexT());
 }
 
 bool Expression::IsError(std::string* outputErrorMessage)const
 { if (this->theBoss==0)
     return false;
-  if (!this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
+  if (!this->StartsWith(this->theBoss->opError(), 2))
     return false;
   return (*this)[1].IsOfType<std::string>(outputErrorMessage);
 }
@@ -1227,13 +1227,22 @@ bool Expression::IsError(std::string* outputErrorMessage)const
 bool Expression::IsSequenceNElementS(int N)const
 { if (this->theBoss==0)
     return false;
-  return this->IsListNElementsStartingWithAtom(this->theBoss->opSequence(), N+1);
+  return this->StartsWith(this->theBoss->opSequence(), N+1);
 }
 
 bool Expression::IsEqualToOne()const
 { int theInt;
   if (this->IsSmallInteger(&theInt))
     return theInt==1;
+  return false;
+}
+
+bool Expression::IsEqualToMOne()const
+{ MacroRegisterFunctionWithName("Expression::IsEqualToMOne");
+  if (!this->IsConstantNumber())
+    return false;
+  if (this->IsOfType<Rational>())
+    return this->GetValue<Rational>()==-1;
   return false;
 }
 

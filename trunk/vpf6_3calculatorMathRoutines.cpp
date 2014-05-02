@@ -242,7 +242,7 @@ bool CalculatorFunctionsGeneral::innerSin(Calculator& theCommands, const Express
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(0, theCommands);
   Rational piProportion;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (input.StartsWith(theCommands.opTimes(), 3))
     if (input[2].IsAtomGivenData(theCommands.opPi()))
       if (input[1].IsOfType<Rational>(&piProportion))
       { AlgebraicNumber algOutput;
@@ -265,7 +265,7 @@ bool CalculatorFunctionsGeneral::innerCos(Calculator& theCommands, const Express
   if (input.IsAtomGivenData(theCommands.opPi()))
     return output.AssignValue(-1, theCommands);
   Rational piProportion;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (input.StartsWith(theCommands.opTimes(), 3))
     if (input[2].IsAtomGivenData(theCommands.opPi()))
       if (input[1].IsOfType<Rational>(&piProportion))
       { stOutput << " here be i!";
@@ -335,7 +335,7 @@ bool CalculatorFunctionsGeneral::innerCoefficientOf(Calculator& theCommands, con
   List<List<Expression> > theSummands;
   List<Expression> currentListMultiplicands, survivingSummands;
   Expression currentMultiplicand;
-  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide()))
+  if (input[2].StartsWith(theCommands.opDivide()))
   { Expression coefficientNumerator=input;
     coefficientNumerator.SetChilD(2, input[2][1]);
     if (!CalculatorFunctionsGeneral::innerCoefficientOf(theCommands, coefficientNumerator, output))
@@ -412,7 +412,7 @@ bool CalculatorFunctionsGeneral::innerCompositeApowerBevaluatedAtC(Calculator& t
   if (!input.IsListNElements())
     return false;
   const Expression& firstE=input[0];
-  if (!firstE.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (!firstE.StartsWith(theCommands.opThePower(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   Expression finalBase;
@@ -501,12 +501,12 @@ bool CalculatorFunctionsGeneral::innerExpressionFromPoly(Calculator& theCommands
 
 bool CalculatorFunctionsGeneral::outerCombineFractionsCommutative(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCombineFractionsCommutative");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+  if (!input.StartsWith(theCommands.opPlus(), 3))
     return false;
   const Expression& leftE=input[1];
   const Expression& rightE=input[2];
-  if (!leftE.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3) ||
-      !rightE.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!leftE.StartsWith(theCommands.opDivide(), 3) ||
+      !rightE.StartsWith(theCommands.opDivide(), 3))
     return false;
   output=(leftE[1]*rightE[2]+rightE[1]*leftE[2])/(leftE[2]*rightE[2]);
   return true;
@@ -892,7 +892,7 @@ bool CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn(Calculator& th
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeConstTimesAnyActOn");
   if (!input.IsListNElements())
     return false;
-  if (!input[0].IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input[0].StartsWith(theCommands.opTimes(), 3))
     return false;
   if (!input[0][1].IsConstantNumber())
     return false;
@@ -989,7 +989,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateConstPower(Calculator& theCom
   const Expression& theDOvar=input[1];
   const Expression& theArgument=input[2];
   //////////////////////
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (!theArgument.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!theArgument[2].IsConstantNumber())
     return false;
@@ -1014,7 +1014,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAPowerB(Calculator& theComman
   const Expression& theArgument=input[2];
   //////////////////////
   //d/dx a^b= d/dx(e^{b\\ln a}) = a^b d/dx(b\\log a)
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (!theArgument.StartsWith(theCommands.opThePower(), 3))
     return false;
   Expression logBase, exponentTimesLogBase, derivativeExponentTimesLogBase;
   logBase.reset(theCommands, 2);
@@ -1093,7 +1093,7 @@ bool CalculatorFunctionsGeneral::innerCompositeDifferentiateLog(Calculator& theC
 //  stOutput << "<hr>input composite: " << input.ToString();
   if (input.children.size!=2)
     return false;
-  if (!input[0].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 3))
+  if (!input[0].StartsWith(theCommands.opDifferentiate(), 3))
     return false;
   if (!input[0][2].IsAtomGivenData(theCommands.opLog()))
     return false;
@@ -1106,11 +1106,11 @@ bool CalculatorFunctionsGeneral::innerCompositeDifferentiateLog(Calculator& theC
 
 bool CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (!input[2].StartsWith(theCommands.opThePower(), 3))
     return false;
-  if (!input[2][1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input[2][1].StartsWith(theCommands.opDivide(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   Expression numeratorE, numeratorLeftE, denominatorE;
@@ -1123,11 +1123,11 @@ bool CalculatorFunctionsGeneral::outerAssociateAdivBdivCpowerD(Calculator& theCo
 
 bool CalculatorFunctionsGeneral::outerDivCancellations(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerDivCancellations");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input[1].StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input[2].StartsWith(theCommands.opDivide(), 3))
     return false;
   if (input[1][2]==input[2][2])
     return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], input[2][1]);
@@ -1138,14 +1138,14 @@ bool CalculatorFunctionsGeneral::outerDivCancellations(Calculator& theCommands, 
 
 bool CalculatorFunctionsGeneral::outerAssociateDivisionDivision(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerAssociateDivisionDivision");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
-  if (input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (input[1].StartsWith(theCommands.opDivide(), 3))
   { Expression newRightE;
     newRightE.MakeXOX(theCommands, theCommands.opTimes(), input[2], input[1][2]);
     return output.MakeXOX(theCommands, theCommands.opDivide(), input[1][1], newRightE);
   }
-  if (input[2].IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (input[2].StartsWith(theCommands.opDivide(), 3))
   { Expression newLeftE;
     newLeftE.MakeXOX(theCommands, theCommands.opTimes(), input[1], input[2][2]);
     return output.MakeXOX(theCommands, theCommands.opDivide(), newLeftE, input[2][1]);
@@ -1166,7 +1166,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateChainRule(Calculator& theComm
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
 //  stOutput << "ere be chain rule! Argument be: " << theArgument.ToString() << " Argument[0] be: " << theArgument[0].ToString();
-  if (!theArgument.IsListNElementsStartingWithAtom(-1, 2))
+  if (!theArgument.StartsWith(-1, 2))
     return false;
 //  stOutput << " continues to rule! The argument be: " << theArgument.ToString() << " theArgument.IsGoodForChainRuleFunction()= "
 //  << theArgument.IsGoodForChainRuleFunction() << " theArgument[0].IsGoodForChainRuleFunction()="
@@ -1194,7 +1194,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAplusB(Calculator& theCommand
     theCommands.Comments << "<hr>Warning: differentiating with respect to the non-atomic expression" << input[1].ToString() << " - possible user typo?";
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
+  if (!theArgument.StartsWith(theCommands.opPlus(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
@@ -1214,7 +1214,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAtimesB(Calculator& theComman
     << " - possible user typo?";
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!theArgument.StartsWith(theCommands.opTimes(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
@@ -1228,7 +1228,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAtimesB(Calculator& theComman
 
 bool CalculatorFunctionsGeneral::innerPowerAnyToZero(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPowerAnyToZero");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;
   if (!input[2].IsEqualToZero())
     return false;
@@ -1249,7 +1249,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
   //Quotient rule (commutative): (a/b^n)':=(a'b-n a b')/b^{n+1}
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
@@ -1257,7 +1257,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBCommutative(Calculato
   leftSummand, rightSummand, theDenominatorFinal, numerator;
   eOne.AssignValue(1, theCommands);
   bool denBaseFound=false;
-  if (theArgument[2].IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (theArgument[2].StartsWith(theCommands.opThePower(), 3))
     if (theArgument[2][2].IsConstantNumber())
     { denBaseFound=true;
       theDenominatorBase=theArgument[2][1];
@@ -1290,7 +1290,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
   const Expression& theDOvar=input[1], theArgument=input[2];
   //////////////////////
   //Quotient rule (non-commutative): (a/b)'=(ab^{-1})'=a' b - a b^{-1} b' b^{-1}
-  if (!theArgument.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!theArgument.StartsWith(theCommands.opDivide(), 3))
     return false;
   theCommands.CheckInputNotSameAsOutput(input, output);
   output.reset(theCommands);
@@ -1309,7 +1309,7 @@ bool CalculatorFunctionsGeneral::innerDifferentiateAdivideBNONCommutative(Calcul
 
 bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
   if (input[1].IsConstantNumber())
     return false;
@@ -1328,12 +1328,12 @@ bool CalculatorFunctionsGeneral::outerCommuteAtimesBifUnivariate(Calculator& the
 
 bool CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteAtimesBtimesCifUnivariate");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+  if (!input.StartsWith(theCommands.opTimes(),3))
     return false;
   const Expression& leftE=input[1];
   if (leftE.IsConstantNumber())
     return false;
-  if (!input[2].IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+  if (!input[2].StartsWith(theCommands.opTimes(),3))
     return false;
   const Expression& rightE=input[2][1];
   HashedListSpecialized<Expression> theList;
@@ -1373,7 +1373,7 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
 { MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
   if (this->theBoss==0)
     return false;
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opPlus(), 3))
+  if (this->StartsWith(this->theBoss->opPlus(), 3))
   { Expression leftDiff, rightDiff, leftCoeff, rightCoeff;
     if (!(*this)[1].IsDifferentialOneFormOneVariable(&leftDiff, &leftCoeff))
       return false;
@@ -1387,7 +1387,7 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
       *outputCoeffInFrontOfDifferential=leftCoeff+rightCoeff;
     return true;
   }
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+  if (this->StartsWith(this->theBoss->opTimes(), 3))
   { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
     { if (outputCoeffInFrontOfDifferential!=0)
         *outputCoeffInFrontOfDifferential=(*this)[1];
@@ -1397,7 +1397,7 @@ bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferential
       *outputCoeffInFrontOfDifferential=(*this)[2];
     return !(*this)[2].IsDifferentialOneFormOneVariable();
   }
-  if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
+  if (this->StartsWith(this->theBoss->opDivide(), 3))
   { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
       return false;
     if (outputCoeffInFrontOfDifferential!=0)
@@ -1451,9 +1451,9 @@ bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculato
 bool CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx");
   //stOutput << "called innerCompositeMultiplyIntegralFbyDx with input: " << input.ToString();
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opIntegral(), 2))
+  if (!input[1].StartsWith(theCommands.opIntegral(), 2))
     return false;
   if (!input[2].IsDifferentialOneFormOneVariable())
     return false;
@@ -1467,17 +1467,52 @@ bool CalculatorFunctionsGeneral::innerCompositeMultiplyIntegralFbyDx(Calculator&
   return output.AddChildOnTop(theDifferentialForm);
 }
 
-bool CalculatorFunctionsGeneral::innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrate");
-  Expression theVariable, theVariableCoefficient;
-  if (!input.IsDifferentialOneFormOneVariable(&theVariable, &theVariableCoefficient))
-  { theCommands << "<hr>Failed to extract one variable one-form from " << input.ToString();
+bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression& outputFunction, Expression& outputVariable)
+{ MacroRegisterFunctionWithName("Calculator::GetFunctionFromDiffOneForm");
+  Expression theFormE;
+  if (!CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable(*this, input, theFormE))
+  { *this << "<hr>Failed to extract one variable one-form from " << input.ToString();
     return false;
   }
-  theCommands << "Extracted differential of: " << theVariable.ToString() << " times "
-  << theVariableCoefficient.ToString();
+  outputFunction=theFormE[1];
+  outputVariable=theFormE[2][1];
+  *this << "Extracted differential: " << theFormE.ToString() << "(Variable: " << outputVariable.ToString()
+  << ", function: " << outputFunction.ToString() << ").";
+  return true;
+}
 
-  return false;
+bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateXnDiffX");
+  Expression theFunctionE, theVariableE;
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+  stOutput << "Integrating function " << theFunctionE.ToString();
+  Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;
+  theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
+  if (theFunNoCoeff==theVariableE)
+  { output=theFunCoeff*theVariableE*theVariableE;
+    output/=2;
+    return true;
+  }
+  if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  if (theFunNoCoeff[1]!=theVariableE)
+    return false;
+  if (!theFunNoCoeff[2].IsConstantNumber())
+    return false;
+  if (theFunNoCoeff[2].IsEqualToMOne())
+  { outputNoCoeff.reset(theCommands, 2);
+    outputNoCoeff.AddChildAtomOnTop(theCommands.opLog());
+    outputNoCoeff.AddChildOnTop(theVariableE);
+    output=theFunCoeff*outputNoCoeff;
+    return true;
+  }
+  Expression outputPower=theFunNoCoeff[2];
+  outputPower+=1;
+  outputNoCoeff.MakeXOX(theCommands, theCommands.opThePower(), theVariableE, outputPower);
+  outputNoCoeff/=outputPower;
+  output=theFunCoeff*outputNoCoeff;
+  return true;
 }
 
 bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1500,9 +1535,9 @@ bool CalculatorFunctionsGeneral::innerDifferentiateSqrt(Calculator& theCommands,
 
 bool CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDifferentiate(), 2))
+  if (!input[1].StartsWith(theCommands.opDifferentiate(), 2))
     return false;
   if (input[2].IsBuiltInAtom())
     return false;
@@ -1513,7 +1548,7 @@ bool CalculatorFunctionsGeneral::outerDifferentiateWRTxTimesAny(Calculator& theC
 
 bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
   if (input[1]!="\\diff")
     return false;
@@ -1528,7 +1563,7 @@ bool CalculatorFunctionsGeneral::innerDiffdivDiffxToDifferentiation(Calculator& 
 
 bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerDdivDxToDifferentiation");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+  if (!input.StartsWith(theCommands.opDivide(), 3))
     return false;
   std::string denominatorString,numeratorString;
   if (!input[1].IsAtom(&numeratorString))
@@ -1554,9 +1589,9 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
 
 bool CalculatorFunctionsGeneral::outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::outerAdivBpowerItimesBpowerJ");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
+  if (!input.StartsWith(theCommands.opTimes(), 3))
     return false;
-  if (!input[1].IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+  if (!input[1].StartsWith(theCommands.opDivide(),3))
     return false;
   Expression denominatorBase, denominatorExponent;
   Expression numeratorBase, numeratorExponent;
@@ -1590,7 +1625,7 @@ bool Expression::SplitProduct(int numDesiredMultiplicandsLeft, Expression& outpu
 
 bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::outerAtimesBpowerJplusEtcDivBpowerI");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+  if (!input.StartsWith(theCommands.opDivide(),3))
     return false;
 //  stOutput << "ere be i!";
   Expression denominatorBase, denominatorExponent;
@@ -3582,41 +3617,41 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     return output.AssignValue(MathRoutines::Pi(), theCommands);
   }*/
   bool isArithmeticOperationTwoArguments=
-  this->IsListNElementsStartingWithAtom(theCommands.opTimes(),3) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opPlus(),3) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opThePower(),3) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opDivide(),3) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opSqrt(),3)
+  this->StartsWith(theCommands.opTimes(),3) ||
+  this->StartsWith(theCommands.opPlus(),3) ||
+  this->StartsWith(theCommands.opThePower(),3) ||
+  this->StartsWith(theCommands.opDivide(),3) ||
+  this->StartsWith(theCommands.opSqrt(),3)
   ;
   //stOutput << " is arithmetic operation two arguments! ";
-  //if (input.IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+  //if (input.StartsWith(theCommands.opSqrt()))
   //  stOutput << "Starting with sqrt: " << input.ToStringFull();
   if (isArithmeticOperationTwoArguments)
   { double leftD, rightD;
     if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &leftD) ||
         !(*this)[2].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &rightD))
       return false;
-    if ((*this).IsListNElementsStartingWithAtom(theCommands.opTimes(),3))
+    if ((*this).StartsWith(theCommands.opTimes(),3))
     { if (whichDouble!=0)
         *whichDouble=leftD*rightD;
       return true;
     }
-    if ((*this).IsListNElementsStartingWithAtom(theCommands.opPlus(),3))
+    if ((*this).StartsWith(theCommands.opPlus(),3))
     { if (whichDouble!=0)
         *whichDouble=leftD+rightD;
       return true;
     }
-    if ((*this).IsListNElementsStartingWithAtom(theCommands.opThePower(),3))
+    if ((*this).StartsWith(theCommands.opThePower(),3))
     { if (whichDouble!=0)
         *whichDouble=FloatingPoint::power(leftD, rightD);
       return true;
     }
-    if ((*this).IsListNElementsStartingWithAtom(theCommands.opSqrt(),3))
+    if ((*this).StartsWith(theCommands.opSqrt(),3))
     { if (whichDouble!=0)
         *whichDouble=FloatingPoint::power(rightD,1/leftD);
       return true;
     }
-    if ((*this).IsListNElementsStartingWithAtom(theCommands.opDivide(),3))
+    if ((*this).StartsWith(theCommands.opDivide(),3))
     { if (whichDouble!=0)
         *whichDouble=leftD/rightD;
       return true;
@@ -3624,36 +3659,36 @@ bool Expression::EvaluatesToDoubleUnderSubstitutions
     crash << "This is a piece of code which should never be reached. " << crash;
   }
   bool isKnownFunctionOneArgument=
-  this->IsListNElementsStartingWithAtom(theCommands.opSin(),2) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opCos(),2) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opArcTan(),2) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opArcCos(),2) ||
-  this->IsListNElementsStartingWithAtom(theCommands.opSqrt(),2)
+  this->StartsWith(theCommands.opSin(),2) ||
+  this->StartsWith(theCommands.opCos(),2) ||
+  this->StartsWith(theCommands.opArcTan(),2) ||
+  this->StartsWith(theCommands.opArcCos(),2) ||
+  this->StartsWith(theCommands.opSqrt(),2)
   ;
 
   if(isKnownFunctionOneArgument)
   { double argumentD;
     if (!(*this)[1].EvaluatesToDoubleUnderSubstitutions(knownEs, valuesKnownEs, &argumentD))
       return false;
-    if (this->IsListNElementsStartingWithAtom(theCommands.opSqrt()))
+    if (this->StartsWith(theCommands.opSqrt()))
     { if (argumentD<0)
         return false;
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::sqrt(argumentD);
     }
-    if (this->IsListNElementsStartingWithAtom(theCommands.opArcCos()))
+    if (this->StartsWith(theCommands.opArcCos()))
     { if (argumentD>1 ||argumentD<-1)
         return false;
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::arccos(argumentD);
     }
-    if (this->IsListNElementsStartingWithAtom(theCommands.opSin()))
+    if (this->StartsWith(theCommands.opSin()))
       if (whichDouble!=0)
         *whichDouble= FloatingPoint::sin(argumentD);
-    if (this->IsListNElementsStartingWithAtom(theCommands.opCos()))
+    if (this->StartsWith(theCommands.opCos()))
       if (whichDouble!=0)
         *whichDouble=FloatingPoint::cos(argumentD);
-    if (this->IsListNElementsStartingWithAtom(theCommands.opArcTan()))
+    if (this->StartsWith(theCommands.opArcTan()))
       if (whichDouble!=0)
         *whichDouble=FloatingPoint::arctan(argumentD);
     return true;

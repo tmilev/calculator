@@ -182,6 +182,7 @@ class Expression
       return true;
     return this->children.size==N;
   }
+  bool StartsWithArithmeticOperation()const;
   bool StartsWith(int theOp=-1, int N=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())

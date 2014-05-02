@@ -876,6 +876,15 @@ bool Expression::AddChildAtomOnTop(const std::string& theOperationString)
   (this->theBoss->AddOperationNoRepetitionOrReturnIndexFirst(theOperationString));
 }
 
+bool Expression::StartsWithArithmeticOperation()const
+{ if (this->theBoss==0)
+    return false;
+  for (int i=0; i<this->theBoss->arithmeticOperations.size; i++)
+    if (this->StartsWith(this->theBoss->theAtoms.GetIndex(this->theBoss->arithmeticOperations[i])))
+      return true;
+  return false;
+}
+
 bool Expression::StartsWith(int theOp, int N)const
 { if (N!=-1)
   { if (this->children.size!=N)
@@ -1278,12 +1287,19 @@ bool Expression::IsSmallInteger(int* whichInteger)const
 }
 
 bool Expression::IsConstantNumber()const
-{ if (this->theBoss==0)
+{ stOutput << "<br>Testing whether " << this->ToString() << " is constant.";
+  if (this->theBoss==0)
     return false;
   if (this->IsAtomGivenData(this->theBoss->opPi()))
     return true;
   if (this->IsAtomGivenData(this->theBoss->opE()))
     return true;
+  if (this->IsBuiltInAtom())
+  { for (int i=1; i<this->children.size; i++)
+      if (!(*this)[i].IsConstantNumber())
+        return false;
+    return true;
+  }
 //  stOutput << "testing for constant: " << this->ToString();
 //  stOutput << " i am of type: " << this->theBoss->GetOperations()[(*this)[0].theData];
   return this->IsOfType<Rational>() || this->IsOfType<AlgebraicNumber>() || this->IsOfType<double>();

@@ -161,6 +161,7 @@ class Expression
   void GetBlocksOfCommutativity(HashedListSpecialized<Expression>& inputOutputList)const;
   bool SplitProduct(int numDesiredMultiplicandsLeft, Expression& outputLeftMultiplicand, Expression& outputRightMultiplicand)const;
   void GetBaseExponentForm(Expression& outputBase, Expression& outputExponent)const;
+  void GetCoefficientMultiplicandForm(Expression& outputCoeff, Expression& outputNoCoeff)const;
   void GetCoefficientMultiplicandForm(Rational& outputCoeff, Expression& outputNoCoeff)const;
   bool SetChildAtomValue(int childIndex, int TheAtomValue);
   bool SetChilD(int childIndexInMe, const Expression& inputChild);
@@ -181,7 +182,7 @@ class Expression
       return true;
     return this->children.size==N;
   }
-  bool IsListNElementsStartingWithAtom(int theOp=-1, int N=-1)const;
+  bool StartsWith(int theOp=-1, int N=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;
@@ -231,7 +232,7 @@ class Expression
   { MacroRegisterFunctionWithName("Expression::IsOfType");
     if (this->theBoss==0)
       return false;
-    if (!this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()))
+    if (!this->StartsWith(this->GetTypeOperation<theType>()))
       return false;
     if(this->children.size<2 || !this->GetLastChild().IsAtom())
       return false;
@@ -311,6 +312,7 @@ class Expression
   bool IsEqualToZero()const;
   bool IsMonEqualToZero()const;
   bool IsEqualToOne()const;
+  bool IsEqualToMOne()const;
   bool MakeIdMatrixExpressions(int theDim, Calculator& inputBoss);
   void MakeMonomialGenVerma(const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, Calculator& newBoss);
   void MakeElementTensorsGeneralizedVermas(const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, Calculator& newBoss);
@@ -1456,6 +1458,8 @@ public:
   static bool fGCD(Calculator& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
+  bool GetFunctionFromDiffOneForm
+  (const Expression& input, Expression& outputFunction, Expression& outputVariable);
   bool GetListPolysVariableLabelsInLex(const Expression& input, Vector<Polynomial<Rational> >& output, Expression& outputContext);
   static bool innerPolynomialDivisionRemainder(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerPolynomialDivisionVerbose

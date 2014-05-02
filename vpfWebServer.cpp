@@ -124,6 +124,7 @@ void WebWorker::StandardOutputPart1BeforeComputation()
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   PredefinedStrings(civilizedInput);
 
+//  civilizedInput="\\int( 1/x dx)";
   crash.userInputStringIfAvailable=civilizedInput;
 
   std::stringstream tempStreamXX;
@@ -811,7 +812,6 @@ void WebServer::SendThroughPipe(const std::string& toBeSent, List<int>& outputPi
     toBeSentCopy= toBeSentCopy.substr(numBytesWritten, numBytesRemaining);
   }
 }
-
 
 void WebServer::ReadFromPipe(List<int>& inputPipe, bool doNotBlock)
 { MacroRegisterFunctionWithName("WebServer::ReadFromPipe");

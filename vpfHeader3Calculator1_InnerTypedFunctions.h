@@ -157,7 +157,7 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
       return CalculatorFunctionsBinaryOps::innerAddRatOrPolyToRatOrPoly(theCommands, theComputed, output);
     crash << "Error, this line of code should never be reached. " << crash;
   }
-  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
+  if (input.StartsWith(theCommands.opThePower(), 3))
   { if(!CalculatorSerialization::innerPolynomial<coefficient>(theCommands, input[1], theConverted))
     { theCommands.Comments << "<hr>Failed to extract polynomial from " << input[1].ToString() << ".";
       return false;

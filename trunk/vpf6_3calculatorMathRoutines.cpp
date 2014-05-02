@@ -1488,6 +1488,10 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
     return false;
   stOutput << "Integrating function " << theFunctionE.ToString();
   Expression theFunCoeff, theFunNoCoeff, outputNoCoeff;
+  if (theFunctionE.IsConstantNumber())
+  { output=theFunctionE*theVariableE;
+    return true;
+  }
   theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (theFunNoCoeff==theVariableE)
   { output=theFunCoeff*theVariableE*theVariableE;

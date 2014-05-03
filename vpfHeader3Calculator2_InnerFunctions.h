@@ -82,7 +82,7 @@ public:
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
-  static bool innerIntegrate(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
 
   static bool innerCompositeMultiplyIntegralFbyDx(Calculator& theCommands, const Expression& input, Expression& output);
@@ -130,6 +130,7 @@ public:
   (Calculator& theCommands, const Expression& input, Expression& output, branchingData& theG2B3data, int& desiredHeight, Expression& outputContext);
   static bool innerSplitFDpartB3overG2(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateRF(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerGaussianEliminationMatrix(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSplitToPartialFractionsOverAlgebraicReals(Calculator& theCommands, const Expression& input, Expression& output);

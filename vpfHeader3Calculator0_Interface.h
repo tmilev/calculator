@@ -182,6 +182,7 @@ class Expression
       return true;
     return this->children.size==N;
   }
+  bool StartsWithBuiltInAtom()const;
   bool StartsWithArithmeticOperation()const;
   bool StartsWith(int theOp=-1, int N=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
@@ -283,6 +284,11 @@ class Expression
   bool MergeContextsMyAruments(Expression& output)const;
   template <class theType>
   bool MergeContextsMyArumentsAndConvertThem(Expression& output)const;
+
+  bool ContainsAsSubExpression
+  (const Expression& input)const;
+  bool ContainsAsSubExpression
+  (int inputAtom)const;
 
   Expression ContextGetContextVariable(int variableIndex) const;
   int ContextGetIndexAmbientSSalg()const;
@@ -870,6 +876,8 @@ public:
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
+  bool RecursionDepthExceededHandleRoughly(const std::string& additionalErrorInfo="");
+
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead);
   bool AllowsPlusInPreceding(const std::string& lookAhead);
   bool AllowsTimesInPreceding(const std::string& lookAhead);

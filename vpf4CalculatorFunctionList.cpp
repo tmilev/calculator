@@ -102,11 +102,20 @@ void Calculator::initPredefinedInnerFunctions()
    "IsDifferentialOneFormOneVariable(\\diff x ); IsDifferentialOneFormOneVariable(x\\diff y ); \
    IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\
    IsDifferentialOneFormOneVariable(1/(\\diff y) );");
+  this->AddOperationInnerHandler
+  ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
+   "Tests whether the expression is a constant.  ",
+   "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);IsConstant(e^{\\sin(\\pi^2+e+\\sqrt{2}+3)}  ); ");
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
    "Integrates x^n dx.  ",
    "\\int x dx ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegrateSum, "",
+   "If the integral is of the form \\int (A+B )dx, tries recursively to integrate A and B. \
+   If successful, integrates the sum in the obvious way.",
+   "\\int (x+1+\\sqrt{}2) dx ");
 
   this->AddOperationInnerHandler
   ("Differentiate", CalculatorFunctionsGeneral::innerDifferentiateSqrt, "",

@@ -1369,67 +1369,6 @@ bool CalculatorFunctionsGeneral::innerCompositeArithmeticOperationEvaluatedOnArg
   return output.MakeXOX(theCommands, input[0][0].theData, leftE, rightE);
 }
 
-bool Expression::IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat, Expression* outputCoeffInFrontOfDifferential)const
-{ MacroRegisterFunctionWithName("Expression::IsDifferentialOneFormOneVariable");
-  if (this->theBoss==0)
-    return false;
-  if (this->StartsWith(this->theBoss->opPlus(), 3))
-  { Expression leftDiff, rightDiff, leftCoeff, rightCoeff;
-    if (!(*this)[1].IsDifferentialOneFormOneVariable(&leftDiff, &leftCoeff))
-      return false;
-    if (!(*this)[2].IsDifferentialOneFormOneVariable(&rightDiff, &rightCoeff))
-      return false;
-    if (leftDiff!=rightDiff)
-      return false;
-    if (outputDifferentialOfWhat!=0)
-      *outputDifferentialOfWhat=leftDiff;
-    if (outputCoeffInFrontOfDifferential!=0)
-      *outputCoeffInFrontOfDifferential=leftCoeff+rightCoeff;
-    return true;
-  }
-  if (this->StartsWith(this->theBoss->opTimes(), 3))
-  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
-    { if (outputCoeffInFrontOfDifferential!=0)
-        *outputCoeffInFrontOfDifferential=(*this)[1];
-      return (*this)[2].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat);
-    }
-    if (outputCoeffInFrontOfDifferential!=0)
-      *outputCoeffInFrontOfDifferential=(*this)[2];
-    return !(*this)[2].IsDifferentialOneFormOneVariable();
-  }
-  if (this->StartsWith(this->theBoss->opDivide(), 3))
-  { if (!(*this)[1].IsDifferentialOneFormOneVariable(outputDifferentialOfWhat))
-      return false;
-    if (outputCoeffInFrontOfDifferential!=0)
-    { outputCoeffInFrontOfDifferential->reset(*this->theBoss);
-      *outputCoeffInFrontOfDifferential=1;
-      *outputCoeffInFrontOfDifferential/=(*this)[2];
-    }
-    return !(*this)[2].IsDifferentialOneFormOneVariable();
-  }
-  std::string theDiff;
-  if (this->IsAtom(&theDiff))
-    if (theDiff.size()>1)
-      if (theDiff[0]=='d')
-      { if (outputDifferentialOfWhat!=0)
-          outputDifferentialOfWhat->MakeAtom(theDiff.substr(1, std::string::npos), *this->theBoss);
-        if (outputCoeffInFrontOfDifferential!=0)
-          outputCoeffInFrontOfDifferential->AssignValue(1, *this->theBoss);
-//        stOutput << "theDiff string: " << theDiff;
-        return true;
-      }
-//  stOutput << "theDiff string: " << theDiff;
-  if (!this->IsListNElements(2))
-    return false;
-  if ((*this)[0]!="\\diff")
-    return false;
-  if (outputDifferentialOfWhat!=0)
-    *outputDifferentialOfWhat=(*this)[1];
-  if (outputCoeffInFrontOfDifferential!=0)
-    outputCoeffInFrontOfDifferential->AssignValue(1, *this->theBoss);
-  return true;
-}
-
 bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable
 (Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable");
@@ -1441,6 +1380,13 @@ bool CalculatorFunctionsGeneral::innerExtractDifferentialOneFormOneVariable
   theVarDiffFormE.AddChildOnTop(theVariableE);
   output*=theVarDiffFormE;
   return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIsConstant(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIsConstant");
+  //stOutput << "<br>Evaluating isconstant on: " << input.ToString();
+  int result=(int) input.IsConstantNumber();
+  return output.AssignValue(result, theCommands);
 }
 
 bool CalculatorFunctionsGeneral::innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output)
@@ -1474,10 +1420,49 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
   { *this << "<hr>Failed to extract one variable one-form from " << input.ToString();
     return false;
   }
-  outputFunction=theFormE[1];
+  BoundVariablesSubstitution thebuff;
+  bool thebool;
+  if (!this->EvaluateExpression(theFormE[1], outputFunction, thebuff, thebool))
+  { *this << "Failed to evaluate expression: " << theFormE[1].ToString();
+    return false;
+  }
+//  outputFunction=theFormE[1];
   outputVariable=theFormE[2][1];
   *this << "Extracted differential: " << theFormE.ToString() << "(Variable: " << outputVariable.ToString()
   << ", function: " << outputFunction.ToString() << ").";
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSum");
+  Expression theFunctionE, theVariableE;
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+  stOutput << "Integrating function " << theFunctionE.ToString();
+  if (!theFunctionE.StartsWith(theCommands.opPlus()))
+    return false;
+  List<Expression> integralsOfSummands;
+  integralsOfSummands.SetSize(theFunctionE.children.size-1);
+  Expression newIntegralE, newDiffFormE, newFunctionE, result, newSummand;
+  BoundVariablesSubstitution theSub;
+  bool tempB;
+  for (int i=1; i<theFunctionE.children.size; i++)
+  { newDiffFormE.reset(theCommands);
+    newIntegralE.reset(theCommands);
+    newDiffFormE.AddChildAtomOnTop(theCommands.opDifferential());
+    newDiffFormE.AddChildOnTop(theFunctionE[i]);
+    newIntegralE.AddChildAtomOnTop(theCommands.opIntegral());
+    newIntegralE.AddChildOnTop(newDiffFormE);
+    if (!theCommands.EvaluateExpression(newIntegralE, newSummand, theSub, tempB))
+      return false;
+    if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))
+      return false;
+    if (i==1)
+      result=newSummand;
+    else
+      result+=newSummand;
+  }
+  output=result;
   return true;
 }
 
@@ -1495,7 +1480,9 @@ bool CalculatorFunctionsGeneral::innerIntegrateXnDiffX(Calculator& theCommands, 
   theFunctionE.GetCoefficientMultiplicandForm(theFunCoeff, theFunNoCoeff);
   if (theFunNoCoeff==theVariableE)
   { output=theFunCoeff*theVariableE*theVariableE;
+    stOutput << "<br>output: " << output.ToString();
     output/=2;
+    stOutput << "<br>output: " << output.ToString();
     return true;
   }
   if (!theFunNoCoeff.StartsWith(theCommands.opThePower(), 3))

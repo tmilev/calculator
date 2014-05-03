@@ -867,7 +867,7 @@ std::string WebServer::ToStringStatusAll()
 int WebServer::Run()
 { MacroRegisterFunctionWithName("WebServer::Run");
   if (this->flagTryToKillOlderProcesses)
-  { std::cout << "Killing previous all copies of the calculator and restarting..." << std::endl;
+  { std::cout << "Killing all copies of the calculator and restarting..." << std::endl;
     system("killall calculator \r\n./calculator server nokill"); //kill any other running copies of the calculator.
   }
   addrinfo hints, *servinfo, *p;

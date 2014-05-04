@@ -1443,16 +1443,19 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
     return false;
   List<Expression> integralsOfSummands;
   integralsOfSummands.SetSize(theFunctionE.children.size-1);
-  Expression newIntegralE, newDiffFormE, newFunctionE, result, newSummand;
+  Expression newIntegralE, newDx, newDiffFormE, newFunctionE, result, newSummand;
   BoundVariablesSubstitution theSub;
   bool tempB;
   for (int i=1; i<theFunctionE.children.size; i++)
-  { newDiffFormE.reset(theCommands);
+  { newDx.reset(theCommands);
+    newDx.AddChildAtomOnTop(theCommands.opDifferential());
+    newDx.AddChildOnTop(theVariableE);
+    newDiffFormE=theFunctionE[i];
+    newDiffFormE*=newDx;
     newIntegralE.reset(theCommands);
-    newDiffFormE.AddChildAtomOnTop(theCommands.opDifferential());
-    newDiffFormE.AddChildOnTop(theFunctionE[i]);
     newIntegralE.AddChildAtomOnTop(theCommands.opIntegral());
     newIntegralE.AddChildOnTop(newDiffFormE);
+    std::cout << "New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(newIntegralE, newSummand, theSub, tempB))
       return false;
     if (newSummand.ContainsAsSubExpression(theCommands.opIntegral()))

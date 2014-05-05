@@ -1972,25 +1972,32 @@ std::string Expression::ToString(FormatExpressions* theFormat, Expression* start
         out << newE.ToString(theFormat);
       }
     if (!involvesExponentsInterprettedAsFunctions)
-    { std::string secondEstr=(*this)[2].ToString(theFormat);
-      std::string firstEstr=(*this)[1].ToString(theFormat);
-      if ((*this)[1].NeedsParenthesisForBaseOfExponent())
-      { bool useBigParenthesis=false;
-        if ((*this)[1].StartsWith(this->theBoss->opDivide()))
-          useBigParenthesis=true;
-        if (useBigParenthesis)
-          out << "\\left(";
-        else
-          out << "(";
-        out << firstEstr;
-        if (useBigParenthesis)
-          out << "\\right)";
-        else
-          out << ")";
-      }
+    { bool isSqrt=false;
+      if ((*this)[2].IsOfType<Rational>())
+        if ((*this)[2].GetValue<Rational>().IsEqualTo(Rational(1,2)))
+          isSqrt=true;
+      if (isSqrt)
+        out << "\\sqrt{" << (*this)[1].ToString(theFormat) << "}";
       else
-        out << firstEstr;
-      out << "^{" << secondEstr << "}";
+      { std::string secondEstr=(*this)[2].ToString(theFormat);
+        std::string firstEstr=(*this)[1].ToString(theFormat);
+        if ((*this)[1].NeedsParenthesisForBaseOfExponent())
+        { bool useBigParenthesis=false;
+          if ((*this)[1].StartsWith(this->theBoss->opDivide()))
+            useBigParenthesis=true;
+          if (useBigParenthesis)
+            out << "\\left(";
+          else
+            out << "(";
+          out << firstEstr;
+          if (useBigParenthesis)
+            out << "\\right)";
+          else
+            out << ")";
+        } else
+          out << firstEstr;
+        out << "^{" << secondEstr << "}";
+      }
     }
 //    stOutput << "<br>tostringing: " << out.str() << "   lispified: " << this->ToStringFull();
   } else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))

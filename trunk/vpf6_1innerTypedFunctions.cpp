@@ -691,10 +691,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerRatByRat(Calculator& theCommands, c
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (!input.IsListNElements(3))
     return false;
-//  stOutput << "raising " << input[1].ToString() << " to power " << input[2].ToString();
+//  stOutput << "<br>raising " << input[1].ToString() << " to power " << input[2].ToString();
   Rational base, exp;
   if(!input[1].IsOfType(&base))
     return false;
+  if (base.IsEqualToOne())
+    return output.AssignValue(1, theCommands);
   if(!input[2].IsOfType(&exp))
     return false;
   int thePower;

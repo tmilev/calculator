@@ -31,6 +31,8 @@ public:
   static bool innerArctan(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeArithmeticOperationEvaluatedOnArgument(Calculator& theCommands, const Expression& input, Expression& output);
 
+  static bool outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output);
+
   static bool innerDereferenceOperator(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeEWAactOnPoly(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCompositeConstTimesAnyActOn(Calculator& theCommands, const Expression& input, Expression& output);
@@ -82,6 +84,9 @@ public:
 
   static bool innerIsDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerExtractDifferentialOneFormOneVariable(Calculator& theCommands, const Expression& input, Expression& output);
+
+  static bool innerIntegratePowerByUncoveringParenthesisFirst
+  (Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerIntegrateXnDiffX(Calculator& theCommands, const Expression& input, Expression& output);
 

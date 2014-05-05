@@ -182,9 +182,13 @@ bool CalculatorFunctionsGeneral::innerCasimirWRTlevi(Calculator& theCommands, co
 
 bool CalculatorFunctionsGeneral::innerLog(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerLog");
-  double theArgument;
   if (input.IsEqualToZero())
     return output.SetError("Logarithm of zero is undefined.", theCommands);
+  if (input.IsEqualToOne())
+    return output.AssignValue(0, theCommands);
+  if (theCommands.flagNoApproximations)
+    return false;
+  double theArgument;
   if (!input.EvaluatesToDouble(&theArgument))
   { if (input.IsAtomGivenData(theCommands.opE()))
       return output.AssignValue((Rational) 1, theCommands);
@@ -1433,6 +1437,56 @@ bool Calculator::GetFunctionFromDiffOneForm(const Expression& input, Expression&
   return true;
 }
 
+bool CalculatorFunctionsGeneral::outerPolynomialize(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerPolynomialize");
+  Expression thePolyE;
+  if (!CalculatorSerialization::innerPolynomial<Rational>(theCommands, input, thePolyE))
+    return false;
+  if (!CalculatorFunctionsGeneral::innerExpressionFromBuiltInType(theCommands, thePolyE, output))
+    return false;
+  return true;
+}
+
+bool CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst");
+  Expression newIntegral, theFunctionE, integrandE, newIntegralE, theVariableE;
+  if (!theCommands.GetFunctionFromDiffOneForm(input, theFunctionE, theVariableE))
+    return false;
+  stOutput << "<br>Integrating function " << theFunctionE.ToString();
+  if (!theFunctionE.StartsWith(theCommands.opThePower()))
+    return false;
+  if (!CalculatorFunctionsGeneral::outerPolynomialize(theCommands, theFunctionE, integrandE))
+    return false;
+  stOutput << "<br>integrand polynomialized: " << integrandE.ToString();
+  if (integrandE==theFunctionE)
+    return false;
+  newIntegralE.MakeIntegral(theCommands, integrandE, theVariableE);
+  BoundVariablesSubstitution theSub;
+  bool tempB;
+  if (!theCommands.EvaluateExpression(newIntegralE, output, theSub, tempB))
+    return false;
+  if (output.ContainsAsSubExpression(theCommands.opIntegral()))
+    return false;
+  return true;
+}
+
+bool Expression::MakeIntegral(Calculator& theCommands, const Expression& theFunction, const Expression& theVariable)
+{ MacroRegisterFunctionWithName("Expression::MakeIntegral");
+  if (this==&theFunction || this==&theVariable)
+  { Expression theFunCopy=theFunction;
+    Expression theVarCopy=theVariable;
+    return this->MakeIntegral(theCommands, theFunction, theVariable);
+  }
+  Expression theDx, theDiffForm;
+  theDx.reset(theCommands);
+  theDx.AddChildAtomOnTop(theCommands.opDifferential());
+  theDx.AddChildOnTop(theVariable);
+  theDiffForm=theFunction*theDx;
+  this->reset(theCommands);
+  this->AddChildAtomOnTop(theCommands.opIntegral());
+  return this->AddChildOnTop(theDiffForm);
+}
+
 bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::innerIntegrateSum");
   Expression theFunctionE, theVariableE;
@@ -1447,14 +1501,7 @@ bool CalculatorFunctionsGeneral::innerIntegrateSum(Calculator& theCommands, cons
   BoundVariablesSubstitution theSub;
   bool tempB;
   for (int i=1; i<theFunctionE.children.size; i++)
-  { newDx.reset(theCommands);
-    newDx.AddChildAtomOnTop(theCommands.opDifferential());
-    newDx.AddChildOnTop(theVariableE);
-    newDiffFormE=theFunctionE[i];
-    newDiffFormE*=newDx;
-    newIntegralE.reset(theCommands);
-    newIntegralE.AddChildAtomOnTop(theCommands.opIntegral());
-    newIntegralE.AddChildOnTop(newDiffFormE);
+  { newIntegralE.MakeIntegral(theCommands, theFunctionE[i], theVariableE);
     std::cout << "New integral: " << newIntegralE.ToString();
     if (!theCommands.EvaluateExpression(newIntegralE, newSummand, theSub, tempB))
       return false;
@@ -1624,10 +1671,10 @@ bool CalculatorFunctionsGeneral::outerAtimesBpowerJplusEtcDivBpowerI(Calculator&
 //  stOutput << "ere be i!";
   Expression denominatorBase, denominatorExponent;
   input[2].GetBaseExponentForm(denominatorBase, denominatorExponent);
-  if (!denominatorBase.IsAtom())
-    return false;
-  if (denominatorBase.IsBuiltInAtom())
-    return false;
+  //if (!denominatorBase.IsAtom())
+  //  return false;
+  //if (denominatorBase.IsBuiltInAtom())
+  //  return false;
   MonomialCollection<Expression, Rational> numerators, numeratorsNew;
   theCommands.CollectSummands(theCommands, input[1], numerators);
   numeratorsNew.SetExpectedSize(numerators.size());

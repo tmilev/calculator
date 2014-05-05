@@ -102,10 +102,20 @@ void Calculator::initPredefinedInnerFunctions()
    "IsDifferentialOneFormOneVariable(\\diff x ); IsDifferentialOneFormOneVariable(x\\diff y ); \
    IsDifferentialOneFormOneVariable(\\frac{\\diff y}{y} );\
    IsDifferentialOneFormOneVariable(1/(\\diff y) );");
+
+  this->AddOperationInnerHandler
+  ("Polynomialize", CalculatorFunctionsGeneral::outerPolynomialize, "",
+   "Polynomialize(a) is equivalent to MakeExpression(Polynomial(a)).",
+   "C:= (c a+ a b +b c +1 )^3; A:=Polynomialize(C);B:=MakeExpression(Polynomial(C)); A-B");
+
   this->AddOperationInnerHandler
   ("IsConstant", CalculatorFunctionsGeneral::innerIsConstant, "",
    "Tests whether the expression is a constant.  ",
    "IsConstant(\\pi^2); IsConstant(1);IsConstant(x);IsConstant(e^{\\sin(\\pi^2+e+\\sqrt{2}+3)}  ); ");
+  this->AddOperationInnerHandler
+  ("\\int", CalculatorFunctionsGeneral::innerIntegratePowerByUncoveringParenthesisFirst, "",
+   "Attempts to rearrange into standard polynomial form and then integrate.  ",
+   "\\int  \\left( \\frac{x(x+1) }{ 2} \\right)^2 dx ");
 
   this->AddOperationInnerHandler
   ("\\int", CalculatorFunctionsGeneral::innerIntegrateXnDiffX, "",
@@ -1987,6 +1997,10 @@ void Calculator::initPredefinedStandardOperations()
   ("^", this->innerAssociateExponentExponent, "",
    "Substitutes (a^b)^c with a^{b*c}.",
    "(a^m)^n", true);
+  this->AddOperationOuterHandler
+  ("^", this->innerDistributeExponent, "",
+   "If a is a constant, substitutes (a*b)^c with a^c b^c.",
+   "(a*b)^n; (\\sqrt(2)*b)^2", true);
   this->AddOperationOuterHandler
   ("^", this->outerPowerRaiseToFirst, "",
    "Realizes the tranformation {{anything}}^1:=a. ",

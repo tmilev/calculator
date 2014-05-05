@@ -332,6 +332,7 @@ class Expression
   bool MakeAtom(const std::string& atomName, Calculator& newBoss);
   bool EvaluatesToVariableNonBound()const;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
+  bool MakeIntegral(Calculator& theCommands, const Expression& theFunction, const Expression& theVariable);
   bool MakeSum(Calculator& theCommands, const MonomialCollection<Expression, Rational>& theSum);
   bool MakeSum(Calculator& theCommands, const List<Expression>& theSum);
   bool MakeProducT(Calculator& owner, const List<Expression>& theMultiplicands);
@@ -757,6 +758,7 @@ public:
   bool flagDisplayContext;
 
   bool flagDontDistribute;
+  bool flagNoApproximations;
 
   bool flagForkingProcessAllowed;
   ///////////////////////////////////////////////////////////////////////////
@@ -1407,6 +1409,7 @@ public:
   static bool outerAssociate(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerSubZeroDivAnythingWithZero(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCancelMultiplicativeInverse(Calculator& theCommands, const Expression& input, Expression& output);
+  static bool innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerAssociateExponentExponent(Calculator& theCommands, const Expression& input, Expression& output);
   static bool outerAssociateTimesDivision(Calculator& theCommands, const Expression& input, Expression& output);
   static bool innerCollectMultiplicands(Calculator& theCommands, const Expression& input, Expression& output);

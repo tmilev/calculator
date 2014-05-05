@@ -1577,6 +1577,19 @@ bool Calculator::innerAssociateExponentExponent(Calculator& theCommands, const E
   return output.MakeXOX(theCommands, opPower, input[1][1], tempE);
 }
 
+bool Calculator::innerDistributeExponent(Calculator& theCommands, const Expression& input, Expression& output)
+{ if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  if (!input[1].StartsWith(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1][1].IsConstantNumber())
+    return false;
+  Expression leftE, rightE;
+  leftE.MakeXOX(theCommands, theCommands.opThePower(), input[1][1], input[2]);
+  rightE.MakeXOX(theCommands, theCommands.opThePower(), input[1][2], input[2]);
+  return output.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightE);
+}
+
 bool Calculator::outerPowerRaiseToFirst(Calculator& theCommands, const Expression& input, Expression& output)
 { if (!input.StartsWith(theCommands.opThePower(), 3))
     return false;

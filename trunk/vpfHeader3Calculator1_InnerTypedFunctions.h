@@ -164,7 +164,7 @@ bool CalculatorSerialization::innerPolynomial(Calculator& theCommands, const Exp
     }
     int thePower=-1;
     if (!input[2].IsSmallInteger(&thePower))
-    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input.ToString() << " because the exponenet was not a small integer.";
+    { theCommands.Comments << "<hr>Failed to extract polynomial from " << input.ToString() << " because the exponent was not a small integer.";
       return false;
     }
     Polynomial<coefficient> resultP=theConverted.GetValue<Polynomial<coefficient> >();

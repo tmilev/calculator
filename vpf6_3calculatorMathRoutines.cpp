@@ -1628,6 +1628,17 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
+bool CalculatorFunctionsGeneral::outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteConstants");
+  if (!input.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  if (!input[2].IsConstantNumber())
+    return false;
+  if (input[1].IsConstantNumber())
+    return false;
+  return output.MakeProducT(theCommands, input[2], input[1]);
+}
+
 bool CalculatorFunctionsGeneral::outerAdivBpowerItimesBpowerJ(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::outerAdivBpowerItimesBpowerJ");
   if (!input.StartsWith(theCommands.opTimes(), 3))

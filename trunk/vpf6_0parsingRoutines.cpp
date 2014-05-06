@@ -448,6 +448,7 @@ bool Calculator::isRightSeparator(char c)
     case '(':
     case ')':
     case '.':
+    case '!':
     case '\"':
       return true;
     default:
@@ -493,6 +494,7 @@ bool Calculator::isLeftSeparator(char c)
     case '8':
     case '9':
     case '.':
+    case '!':
     case '\"':
       return true;
     default:

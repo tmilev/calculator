@@ -1702,6 +1702,13 @@ void Calculator::initPredefinedStandardOperations()
   ("*", this->innerMultiplyByOne, "",
    "Rule 1*{{anything}}=anything.",
    "x*1;x*1-x ", true);
+  this->AddOperationHandler
+  ("*", CalculatorFunctionsGeneral::outerCommuteConstants, "",
+   "Rule that commutes constants to the left-most positions.  \
+    Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. ",
+   "x 6^{1/3}; (x 10^{1/2})^{1/3}", true);
+
+
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",

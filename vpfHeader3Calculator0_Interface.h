@@ -183,6 +183,7 @@ class Expression
     return this->children.size==N;
   }
   bool StartsWithBuiltInAtom()const;
+  bool StartsWithFunctionWithComplexRange()const;
   bool StartsWithArithmeticOperation()const;
   bool StartsWith(int theOp=-1, int N=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
@@ -214,6 +215,7 @@ class Expression
   bool IsGoodForChainRuleFunction(std::string* outputWhichOperation=0)const;
 
   bool IsDifferentialOneFormOneVariable(Expression* outputDifferentialOfWhat=0, Expression* outputCoeffInFrontOfDifferential=0)const;
+  bool IsKnownFunctionWithComplexRange(std::string* outputWhichOperation=0)const;
   bool IsArithmeticOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInScalar()const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
@@ -669,6 +671,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> atomsNotAllowingChainRule;
   HashedList<std::string, MathRoutines::hashString> builtInTypes;
   HashedList<std::string, MathRoutines::hashString> arithmeticOperations;
+  HashedList<std::string, MathRoutines::hashString> knownFunctionsWithComplexRange;
   HashedList<std::string, MathRoutines::hashString> atomsThatFreezeArguments;
   HashedList<std::string, MathRoutines::hashString> atomsWhoseExponentsAreInterprettedAsFunctions;
   HashedList<std::string, MathRoutines::hashString> atomsNotInterprettedAsFunctions;
@@ -1604,6 +1607,7 @@ public:
   void reset();
   void initAtomsThatFreezeArguments();
   void initAtomsThatAllowCommutingOfArguments();
+  void initOperationsWhoseDomainsAreTheConstants();
   void initArithmeticOperations();
   void initBuiltInAtomsWhosePowersAreInterprettedAsFunctions();
   void initBuiltInAtomsNotInterprettedAsFunctions();

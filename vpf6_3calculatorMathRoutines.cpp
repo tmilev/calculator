@@ -1628,6 +1628,22 @@ bool CalculatorFunctionsGeneral::innerDdivDxToDiffDivDiffx(Calculator& theComman
   return output.MakeXOX(theCommands, theCommands.opDivide(), numeratorE, denominatorE);
 }
 
+bool CalculatorFunctionsGeneral::outerMergeConstantRadicals(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteConstants");
+  if (!input.StartsWith(theCommands.opTimes(), 3))
+    return false;
+  if (!input[1].StartsWith(theCommands.opThePower(), 3) ||
+      !input[2].StartsWith(theCommands.opThePower(), 3))
+    return false;
+  if (input[1][2]!=input[2][2])
+    return false;
+  if (!input[1][1].IsConstantNumber() || !input[2][1].IsConstantNumber())
+    return false;
+  Expression theProduct;
+  theProduct.MakeProducT(theCommands, input[1][2], input[2][1]);
+  return output.MakeXOX(theCommands, theCommands.opThePower(), theProduct, input[1][2]);
+}
+
 bool CalculatorFunctionsGeneral::outerCommuteConstants(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsGeneral::outerCommuteConstants");
   if (!input.StartsWith(theCommands.opTimes(), 3))

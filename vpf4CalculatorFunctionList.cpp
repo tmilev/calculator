@@ -1707,6 +1707,10 @@ void Calculator::initPredefinedStandardOperations()
    "Rule that commutes constants to the left-most positions.  \
     Provided that a is a constant number (built in) and b is not, replaces b*a by a*b. ",
    "x 6^{1/3}; (x 10^{1/2})^{1/3}", true);
+  this->AddOperationHandler
+  ("*", CalculatorFunctionsGeneral::outerMergeConstantRadicals, "",
+   "If a and b are constants, replaces a^{c}b^c by (a b)^c.",
+   "\\sqrt{}2 \\sqrt{}3", true);
 
 
   this->AddOperationOuterHandler
@@ -1912,6 +1916,10 @@ void Calculator::initPredefinedStandardOperations()
   ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
    "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors, this->opRational(), this->opRational(),
+   "If a rational number is small enough to factor, reduces the rational exponents of the rational number. ",
+   "%UseFrac\n(4/9)^{17/3}; (12/7)^{7/2} ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat, this->opRational(), this->opDouble(),
    "Calls the built-in cpp functions to approximately raise a double to a power,\
@@ -2249,6 +2257,15 @@ void Calculator::initArithmeticOperations()
   this->arithmeticOperations.AddOnTop("*");
   this->arithmeticOperations.AddOnTop("/");
   this->arithmeticOperations.AddOnTop("^");
+}
+
+void Calculator::initOperationsWhoseDomainsAreTheConstants()
+{ MacroRegisterFunctionWithName("Calculator::initOperationsWhoseDomainIsTheConstants");
+  this->knownFunctionsWithComplexRange.AddOnTop("+");
+  this->knownFunctionsWithComplexRange.AddOnTop("-");
+  this->knownFunctionsWithComplexRange.AddOnTop("*");
+  this->knownFunctionsWithComplexRange.AddOnTop("/");
+  this->knownFunctionsWithComplexRange.AddOnTop("^");
 }
 
 void Calculator::initBuiltInAtomsWhosePowersAreInterprettedAsFunctions()

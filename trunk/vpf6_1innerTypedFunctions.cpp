@@ -820,6 +820,12 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
   return output.AssignMatrixExpressions(theMat, theCommands);
 }
 
+bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
+
+//not implemented yet.
+}
+
 bool CalculatorFunctionsBinaryOps::innerPowerDoubleOrRatToDoubleOrRat(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);

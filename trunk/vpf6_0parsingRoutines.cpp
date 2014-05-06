@@ -64,6 +64,7 @@ void Calculator::reset()
   this->atomsNotAllowingChainRule.Clear();
   this->atomsWhoseExponentsAreInterprettedAsFunctions.Clear();
   this->arithmeticOperations.Clear();
+  this->knownFunctionsWithComplexRange.Clear();
   this->knownDoubleConstants.Clear();
   this->knownDoubleConstantValues.SetSize(0);
   this->FunctionHandlers.SetSize(0);

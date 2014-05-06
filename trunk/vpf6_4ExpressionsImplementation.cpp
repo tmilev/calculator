@@ -894,6 +894,14 @@ bool Expression::StartsWithArithmeticOperation()const
   return (*this)[0].IsArithmeticOperation();
 }
 
+bool Expression::StartsWithFunctionWithComplexRange()const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsAtom() || this->children.size<1)
+    return false;
+  return (*this)[0].IsKnownFunctionWithComplexRange();
+}
+
 bool Expression::StartsWith(int theOp, int N)const
 { if (N!=-1)
   { if (this->children.size!=N)
@@ -1400,7 +1408,7 @@ bool Expression::IsConstantNumber()const
     return true;
   if (this->IsAtomGivenData(this->theBoss->opE()))
     return true;
-  if (this->StartsWithBuiltInAtom())
+  if (this->StartsWithFunctionWithComplexRange())
   { for (int i=1; i<this->children.size; i++)
       if (!(*this)[i].IsConstantNumber())
         return false;
@@ -2310,6 +2318,17 @@ bool Expression::IsAtomGivenData(int desiredDataUseMinusOneForAny)const
   if (desiredDataUseMinusOneForAny==-1)
     return true;
   return this->theData==desiredDataUseMinusOneForAny;
+}
+
+bool Expression::IsKnownFunctionWithComplexRange(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  std::string operationName;
+  if (outputWhichOperation==0)
+    outputWhichOperation=&operationName;
+  if (!this->IsBuiltInAtom(outputWhichOperation))
+    return false;
+  return this->theBoss->knownFunctionsWithComplexRange.Contains(operationName);
 }
 
 bool Expression::IsArithmeticOperation(std::string* outputWhichOperation)const

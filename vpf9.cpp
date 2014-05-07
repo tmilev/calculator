@@ -1266,8 +1266,8 @@ bool Rational::GetSquareRootIfRational(Rational& output)const
     return false;
   LargeInt theNum=this->GetNumerator();
   LargeIntUnsigned theDen= this->GetDenominator();
-  List<unsigned int> primeFactorsNum, primeFactorsDen;
-  List<int> multsNum, multsDen;
+  List<LargeInt> primeFactorsNum, primeFactorsDen;
+  List<LargeIntUnsigned> multsNum, multsDen;
   if (!theNum.value.Factor(primeFactorsNum, multsNum))
     return false;
   if (!theDen.Factor(primeFactorsDen, multsDen))
@@ -1278,17 +1278,32 @@ bool Rational::GetSquareRootIfRational(Rational& output)const
   { if (multsNum[i]%2!=0)
       return false;
     tempRat=primeFactorsNum[i];
-    tempRat.RaiseToPower(multsNum[i]/2);
+    int currentMult=-1;
+    if (!multsNum[i].IsSmallEnoughToFitInInt(&currentMult))
+      return false;
+    tempRat.RaiseToPower(currentMult/2);
     output*=tempRat;
   }
   for (int i=0; i<primeFactorsDen.size; i++)
   { if (multsDen[i]%2!=0)
       return false;
     tempRat=primeFactorsDen[i];
-    tempRat.RaiseToPower(multsDen[i]/2);
+    int currentMult=-1;
+    if (!multsDen[i].IsSmallEnoughToFitInInt(&currentMult))
+      return false;
+    tempRat.RaiseToPower(currentMult/2);
     output/=tempRat;
   }
   return true;
+}
+
+bool Rational::GetPrimeFactorsAbsoluteValue
+  (List<LargeInt>& numeratorPrimeFactors, List<LargeIntUnsigned>& numeratorMultiplicities,
+   List<LargeInt>& denominatorPrimeFactors, List<LargeIntUnsigned>& denominatorMultiplicities)
+{ MacroRegisterFunctionWithName("Rational::GetPrimeFactorsAbsoluteValue");
+  if (!this->GetNumerator().value.Factor(numeratorPrimeFactors, numeratorMultiplicities))
+    return false;
+  return this->GetDenominator().Factor(denominatorPrimeFactors, denominatorMultiplicities);
 }
 
 void Rational::AssignInteger(int x)

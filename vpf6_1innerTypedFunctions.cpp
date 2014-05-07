@@ -822,7 +822,68 @@ bool CalculatorFunctionsBinaryOps::innerPowerSequenceMatrixByRat(Calculator& the
 
 bool CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors(Calculator& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CalculatorFunctionsBinaryOps::innerPowerRatByRatReducePrimeFactors");
-
+  if (!input.StartsWith(theCommands.opThePower(), 3))
+    return false;
+  Rational base, exponent;
+  if (!input[0].IsOfType<Rational>(&base))
+    return false;
+  if (!input[1].IsOfType<Rational>(&exponent))
+    return false;
+  if (exponent<0)
+  { exponent*=-1;
+    base.Invert();
+  }
+  LargeInt exponentDenominator=exponent.GetDenominator();
+  LargeInt exponentNumerator=exponent.GetNumerator();
+  List<LargeInt> numFactors, denFactors;
+  List<LargeIntUnsigned> numMults, denMults;
+  if (!base.GetPrimeFactorsAbsoluteValue(numFactors, numMults, denFactors, denMults))
+    return false;
+  Rational outsideOfTheRadical=1, insideTheRadical=1;
+  LargeInt currentMult, currentContribution;
+  int currentPower=-1;
+  for (int i=0; i<numMults.size; i++)
+  { currentMult= numMults[i]*exponentNumerator;
+    if(!(currentMult%exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+      return false;
+    currentContribution=numFactors[i];
+    currentContribution.RaiseToPower(currentPower);
+    insideTheRadical*=currentContribution;
+    if(!(currentMult/exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+      return false;
+    currentContribution=numFactors[i];
+    currentContribution.RaiseToPower(currentPower);
+    outsideOfTheRadical*=currentContribution;
+  }
+  for (int i=0; i<denMults.size; i++)
+  { currentMult= denMults[i]*exponentNumerator;
+    if(!(currentMult%exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+      return false;
+    currentContribution=denFactors[i];
+    currentContribution.RaiseToPower(currentPower);
+    insideTheRadical/=currentContribution;
+    if(!(currentMult/exponentDenominator).IsSmallEnoughToFitInInt(&currentPower))
+      return false;
+    currentContribution=denFactors[i];
+    currentContribution.RaiseToPower(currentPower);
+    outsideOfTheRadical/=currentContribution;
+  }
+  if (base<0)
+  { if (exponentDenominator%2==1)
+      outsideOfTheRadical*=-1;
+    else
+      insideTheRadical*=-1;
+  }
+  Rational exponentFinal=exponentDenominator;
+  exponentFinal.Invert();
+  if (exponentFinal==exponent && outsideOfTheRadical==1)
+    return false;
+  Expression insideTheRadicalE, theRadicalE, theRadicalCFE, exponentE;
+  theRadicalCFE.AssignValue(outsideOfTheRadical, theCommands);
+  insideTheRadicalE.AssignValue(insideTheRadical, theCommands);
+  exponentE.AssignValue(exponentFinal, theCommands);
+  theRadicalE.MakeXOX(theCommands, theCommands.opThePower(), insideTheRadicalE, exponentE);
+  return output.MakeProducT(theCommands, theRadicalCFE, theRadicalE);
 //not implemented yet.
 }
 
